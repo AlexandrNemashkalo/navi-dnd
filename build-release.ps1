@@ -133,10 +133,10 @@ function WriteLegacySums($updates) {
     [IO.File]::WriteAllText("$release/SHA256SUMS.txt", (($lines -join "`n") + "`n"), $utf8)
 }
 function WriteReleaseMetadata($updates) {
-    # Первая ссылка — для людей: «📦 Скачать NaviDnD (все файлы установки)» в группе «Packages» над остальными; дальше — служебные,
+    # Первая ссылка — для людей: «📦 Скачать NaviDnD (все файлы установки)» в группе «Packages» над остальными (архив папки releases/, GitLab собирает его на лету); дальше — служебные,
     # игра ищет их по имени. Название в \u-escape: скрипт без BOM, Windows PowerShell 5.1 читает его как ANSI.
     $links = @(
-        [ordered]@{ name = [regex]::Unescape('\ud83d\udce6 \u0421\u043a\u0430\u0447\u0430\u0442\u044c NaviDnD (\u0432\u0441\u0435 \u0444\u0430\u0439\u043b\u044b \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438)'); url = "https://gitlab.com/navitalevich/navi-dnd/-/tree/v$version/releases"; link_type = 'package' }
+        [ordered]@{ name = [regex]::Unescape('\ud83d\udce6 \u0421\u043a\u0430\u0447\u0430\u0442\u044c NaviDnD (\u0432\u0441\u0435 \u0444\u0430\u0439\u043b\u044b \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438)'); url = "https://gitlab.com/navitalevich/navi-dnd/-/archive/v$version/navi-dnd-v$version-releases.zip?path=releases"; link_type = 'package' }
         [ordered]@{ name = 'SHA256SUMS.txt'; url = (RawUrl "v$version" 'releases/SHA256SUMS.txt') }
         [ordered]@{ name = 'NaviDnD-updates.json'; url = (RawUrl "v$version" 'releases/NaviDnD-updates.json') }
         [ordered]@{ name = $installerName; url = $updates.installer.url }
