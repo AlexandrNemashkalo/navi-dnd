@@ -1,0 +1,86 @@
+{
+    "format":  1,
+    "version":  "1.1.5",
+    "base":  {
+                 "version":  "1.1.4",
+                 "files":  [
+                               {
+                                   "name":  "NaviDnD-payload.001",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.001",
+                                   "sha256":  "373fef3bc3eb9fe0291fc96f5a1bcf22ab835ae1c11ab4ba76fd5786ea0184df",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-payload.002",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.002",
+                                   "sha256":  "ae4559ed11adb269d708c1eaccb00a59e3942caf842659ecd31fa00c8ccf8774",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-payload.003",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.003",
+                                   "sha256":  "dbaa24d04ced5a5c8ed5cd9c174247c7244f88e073b8c75e1269da6f66e717ea",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-payload.004",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.004",
+                                   "sha256":  "29c4bf05054b6567a98b5e2d3c16b3c2e831f0a8a1f1ae8248061d0ed7c272b1",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-payload.005",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.005",
+                                   "sha256":  "f19012ce4903c0dfb12ff04156e8c201f7a858e85e73dd616ae6d6c886d28026",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-payload.006",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.006",
+                                   "sha256":  "4fba9b76f3b9f5d51092faf0ad5d921b2381421703686551fe09bf0098501c9b",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-payload.007",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.007",
+                                   "sha256":  "3f94095a5c4be85f996708fd1da7cebe1abc41c21e3932e7464d885245e7c687",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-payload.008",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.008",
+                                   "sha256":  "9afa001e7f4f1dec3eed3cd2803e391a2c5f8f2b97b3e5ee0bf62a94d5cd1093",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-payload.009",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.009",
+                                   "sha256":  "a29734d5e5f2f39cf1f26429e05bf0aebb2655de8ef50f3daad055d6f1e4a1c1",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-payload.010",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.4/releases/NaviDnD-payload.010",
+                                   "sha256":  "96596ed057a97f38699d00e82029feb7b61114a9acfd918af0c9e66564866e35",
+                                   "size":  16646883
+                               }
+                           ]
+             },
+    "installer":  {
+                      "name":  "NaviDnD-Setup-win-x64.exe",
+                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.5/releases/NaviDnD-Setup-win-x64.exe",
+                      "sha256":  "e8b1e13ddcbdadb10306e7cd5d1dda2916384d39d6f9bd4bad1f7043c1205000",
+                      "size":  50432376,
+                      "source":  "1e917488639f717d233cf9b5879ced562ea328666257dda55134c50426ba6ba0"
+                  },
+    "patches":  [
+                    {
+                        "from":  "1.1.4",
+                        "to":  "1.1.5",
+                        "name":  "NaviDnD-patch-1.1.4-1.1.5.zip",
+                        "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.5/releases/patches/NaviDnD-patch-1.1.4-1.1.5.zip",
+                        "sha256":  "c422b906ce37b1d73cac4b5b93ebe0a4afb7dc568ef27badadc26baab06be884",
+                        "size":  1107284
+                    }
+                ]
+}

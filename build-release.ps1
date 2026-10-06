@@ -90,7 +90,8 @@ function InstallerSource() {
     try { ([BitConverter]::ToString($sha.ComputeHash($utf8.GetBytes(($files -join "`n"))))).Replace('-', '').ToLowerInvariant() } finally { $sha.Dispose() }
 }
 function PublishInstaller() {
-    & dotnet publish "$root/NaviDnD.Installer/NaviDnD.Installer.csproj" -c Release -r win-x64 --self-contained true -o "$work/installer" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false
+    # Вывод сборки — на экран: иначе он попал бы в результат функции вместе с описанием установщика.
+    & dotnet publish "$root/NaviDnD.Installer/NaviDnD.Installer.csproj" -c Release -r win-x64 --self-contained true -o "$work/installer" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'Installer publish failed' }
     Copy-Item "$work/installer/NaviDnD.Installer.exe" "$release/$installerName" -Force
     $file = Get-Item -LiteralPath "$release/$installerName"
@@ -100,7 +101,7 @@ function PublishInstaller() {
 function BuildGame() {
     New-Item -ItemType Directory -Force -Path $payload | Out-Null
     foreach ($project in @('NaviDnD', 'NaviDnD.McpServer')) {
-        & dotnet publish (Join-Path $root "$project/$project.csproj") -c Release -r win-x64 --self-contained true -o $payload -p:DebugType=None -p:DebugSymbols=false
+        & dotnet publish (Join-Path $root "$project/$project.csproj") -c Release -r win-x64 --self-contained true -o $payload -p:DebugType=None -p:DebugSymbols=false | Out-Host
         if ($LASTEXITCODE -ne 0) { throw "Publish failed: $project" }
     }
     # Only public tracked assets: never package Storage, logs, dev mocks or local settings.
