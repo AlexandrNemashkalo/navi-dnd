@@ -1,6 +1,6 @@
 {
     "format":  1,
-    "version":  "2.0.0",
+    "version":  "2.0.1",
     "base":  {
                  "version":  "1.1.4",
                  "files":  [
@@ -97,6 +97,14 @@
                         "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.0/releases/patches/NaviDnD-patch-1.1.6-2.0.0.zip",
                         "sha256":  "1152adb6a17fe90952252161a20bdd6cefe875c905913757b22dd29f58808e49",
                         "size":  1107125
+                    },
+                    {
+                        "from":  "2.0.0",
+                        "to":  "2.0.1",
+                        "name":  "NaviDnD-patch-2.0.0-2.0.1.zip",
+                        "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.1/releases/patches/NaviDnD-patch-2.0.0-2.0.1.zip",
+                        "sha256":  "bb95cf0bf94398b049622bcaef237ddd3c1a279aa1827da5f2824f2f85755a3e",
+                        "size":  1107324
                     }
                 ]
 }
