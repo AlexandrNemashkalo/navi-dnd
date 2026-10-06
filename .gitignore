@@ -1,0 +1,51 @@
+# Build and test output
+**/bin/
+**/obj/
+artifacts/
+TestResults/
+**/TestResults/
+*.nupkg
+*.snupkg
+*.log
+*.tmp
+
+# IDE and machine-specific files
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userprefs
+*.sln.docstates
+*.DotSettings.user
+*.lnk
+
+# Private runtime data and credentials
+**/Storage/
+**/logs/
+.claude/
+.codex/
+.agents/
+.aws/
+.env
+.env.*
+!.env.example
+*auth.db
+*security.local.json
+*security.prod.json
+*security.json
+*.pem
+*.key
+*.pfx
+*.publishsettings
+*.pubxml
+
+# Dependencies and local development snapshots
+node_modules/
+packages/
+.publication-git/
+.publication-check/
+/test.json
+/sound/
+/NaviDnD/Prompts/**/response*.json
+/icons/000000/ffffff/1x1/1navidnd/

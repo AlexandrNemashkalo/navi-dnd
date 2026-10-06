@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ApplicationIcon>dnd.ico</ApplicationIcon>
+  </PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="NAudio" Version="2.2.1" />
+	  <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
+	  <PackageReference Include="Spectre.Console" Version="0.54.0" />
+	  <PackageReference Include="Svg" Version="3.4.7" />
+	  <PackageReference Include="System.Windows.Extensions" Version="10.0.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\NaviDnD.Data\NaviDnD.Data.csproj" />
+	  <ProjectReference Include="..\NaviDnD.MapGen\NaviDnD.MapGen.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="dnd.ico">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\dnd.wav">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\click.wav">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\music\**">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\ambience\**">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\dice-roll.mp3">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+</Project>

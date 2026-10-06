@@ -1,0 +1,16 @@
+{
+  "hero": {
+    "inventory": [
+      {
+        "name": "Элегантный плащ",
+        "description": "Добавлен мок-ответом FixHeroForNewGame.",
+        "quantity": 1,
+        "equipmentedSlot": ["Плащ"],
+        "color": [140, 90, 200]
+      }
+    ]
+  },
+  "history": [
+    { "text": "Ты получаешь элегантный плащ — теперь он в твоём снаряжении." }
+  ]
+}

@@ -1,0 +1,18 @@
+# Generated files and private runtime data
+**/bin/**
+**/obj/**
+**/Storage/**
+**/logs/**
+artifacts/**
+.publication-check/**
+.publication-git/**
+.git/**
+.vs/**
+.idea/**
+.claude/settings.local.json
+.codex/**
+.aws/**
+.env
+.env.*
+*.log
+*.tmp

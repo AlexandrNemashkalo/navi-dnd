@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="NaviDnD.Installer\NaviDnD.Installer.csproj" />
+  <Project Path="NaviDnD.Data\NaviDnD.Data.csproj" />
+  <Project Path="NaviDnD\NaviDnD.csproj" />
+  <Project Path="NaviDnD.MapGen\NaviDnD.MapGen.csproj" />
+  <Project Path="NaviDnD.McpServer\NaviDnD.McpServer.csproj" />
+  <Project Path="NaviDnD.Tests\NaviDnD.Tests.csproj" />
+  <Project Path="NaviDnD.UiTests\NaviDnD.UiTests.csproj" />
+  <Project Path="NaviDnD.PromptTests\NaviDnD.PromptTests.csproj" />
+</Solution>

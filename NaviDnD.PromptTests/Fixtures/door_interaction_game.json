@@ -1,0 +1,38 @@
+{
+  "hero": {
+    "symbol": "HRO",
+    "name": "Тестер",
+    "hp": "10/10",
+    "visionFt": 30,
+    "position": [1, 1],
+    "color": [100, 200, 255],
+    "speedMax": 30,
+    "speedLeft": 30,
+    "equipmentSlots": [],
+    "actions": [
+      { "name": "Действие", "value": 1, "maxValue": 1 },
+      { "name": "Бон. действие", "value": 1, "maxValue": 1 },
+      { "name": "Реакция", "value": 1, "maxValue": 1 }
+    ]
+  },
+  "map": {
+    "cols": 6,
+    "rows": 6,
+    "colors": { "mapBackground": [18, 18, 22], "mapForeground": [200, 190, 160] },
+    "entities": [],
+    "objects": [],
+    "rooms": [
+      {
+        "name": "Зал",
+        "color": [55, 55, 65],
+        "positions": [[1,1],[2,1],[3,1],[4,1],[5,1],[1,2],[2,2],[3,2],[4,2],[5,2],[1,3],[2,3],[3,3],[4,3],[5,3],[1,4],[2,4],[3,4],[4,4],[5,4],[1,5],[2,5],[3,5],[4,5],[5,5]]
+      }
+    ],
+    "doors": [
+      { "from": [3, 3], "to": [4, 3], "isDoor": true, "color": [139, 90, 43], "isDoorOpen": false }
+    ],
+    "area": []
+  },
+  "time": { "totalRounds": 1, "partOfDay": "Утро" },
+  "history": []
+}

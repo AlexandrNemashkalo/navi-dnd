@@ -1,0 +1,23 @@
+{
+  "history": [
+    {
+      "text": "Гоблин скалится и бьёт когтями.",
+      "patch": { "hero": { "hp": "9/10" } }
+    },
+    {
+      "text": "Ход переходит к тебе.",
+      "patch": {
+        "combat": { "currentTurn": "HRO" },
+        "time": { "totalRounds": 2 },
+        "hero": {
+          "actions": [
+            { "id": 0, "value": 1 },
+            { "id": 1, "value": 1 },
+            { "id": 2, "value": 1 }
+          ],
+          "speedLeft": 30
+        }
+      }
+    }
+  ]
+}
