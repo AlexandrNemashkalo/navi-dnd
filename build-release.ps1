@@ -31,6 +31,7 @@ foreach ($asset in @('Prompts', 'sound', 'Fonts', 'GameData', 'icons')) {
 }
 if (Get-ChildItem $payload -Recurse -Directory | Where-Object Name -in @('Storage', 'logs')) { throw 'Private data in payload' }
 Set-Content (Join-Path $payload 'release-version.txt') $version -Encoding ASCII
+Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination (Join-Path $payload 'LICENSE')
 Compress-Archive -Path "$payload/*" -DestinationPath "$work/payload.zip" -Force
 $oldParts = Get-ChildItem -LiteralPath $release -Filter 'NaviDnD-payload.*' -File
 $oldParts | Remove-Item -Force
@@ -69,7 +70,7 @@ $releaseLinks = @(Get-ChildItem $release -File | ForEach-Object {
 New-Item -ItemType Directory -Force -Path (Join-Path $root '.gitlab') | Out-Null
 $releaseMetadata = @{
     name = "NaviDnD $version"; tag_name = "v$version"
-    description = 'Silero speech with five narrator voices, SSML and background warmup. In-game updates with SHA256 checks and rollback. Startup and installer fixes. Saves and settings are preserved.'
+    description = 'Silero speech with five narrator voices, SSML and background warmup. In-game updates with SHA256 checks and rollback. Saves and settings are preserved. Author-owned materials are licensed for non-commercial use; see LICENSE.'
     assets = @{ links = $releaseLinks }
 } | ConvertTo-Json -Depth 6
 [IO.File]::WriteAllText((Join-Path $root '.gitlab/release.json'), $releaseMetadata, (New-Object Text.UTF8Encoding($false)))
