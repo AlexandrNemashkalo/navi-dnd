@@ -8,16 +8,30 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
-        // Automated packaging check: extract the same payload without opening UI.
+        // Автоматические проверки сборки без окна: база из частей рядом с установщиком / цепочка патчей из папки.
         if (args.Length == 2 && args[0] == "--extract")
         {
             Extract(args[1]);
             return;
         }
+        if (args.Length == 3 && args[0] == "--apply-patches")
+        {
+            string root = Path.GetFullPath(args[1]);
+            PatchInstaller.ApplyChain(root, UpdateClient.OrderChain(UpdateClient.InstalledVersion(root),
+                Directory.GetFiles(Path.GetFullPath(args[2]), "NaviDnD-patch-*.zip")));
+            return;
+        }
         ApplicationConfiguration.Initialize();
+        // Обновление из игры ≥1.1.5: в рабочей папке — патчи (и при повреждённой базе — части базы).
+        if (args.Length == 4 && args[0] == "--apply-update" && int.TryParse(args[2], out int gamePid))
+        {
+            RunUpdate(Path.GetFullPath(args[1]), gamePid, Path.GetFullPath(args[3]), legacy: false);
+            return;
+        }
+        // Старый клиент (≤1.1.4) скачал по SHA256SUMS базу и этот установщик: база — рядом, патчи — из релиза.
         if (args.Length == 3 && args[0] == "--update-silent" && int.TryParse(args[2], out int parentPid))
         {
-            RunSilentUpdate(Path.GetFullPath(args[1]), parentPid);
+            RunUpdate(Path.GetFullPath(args[1]), parentPid, AppContext.BaseDirectory, legacy: true);
             return;
         }
         string? destination = args.Length == 3 && args[0] == "--update" ? args[1] : null;
@@ -30,7 +44,33 @@ internal static class Program
         Installation.Apply(destination, AppContext.BaseDirectory);
     }
 
-    private static void RunSilentUpdate(string destination, int parentPid)
+    // После базы: патчи рядом с установщиком (releases/patches), иначе — из последнего релиза; затем помощник
+    // обновления в папку игры. Сообщение — для окна установки.
+    internal static async Task<string> PatchAfterBaseAsync(string root, Action<string>? status = null)
+    {
+        string installed = UpdateClient.InstalledVersion(root);
+        var chain = UpdateClient.LocalPatches(AppContext.BaseDirectory, installed);
+        string? download = null;
+        if (chain.Count == 0)
+        {
+            download = Path.Combine(Path.GetTempPath(), "NaviDnD-patches-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(download);
+        }
+        try
+        {
+            if (download != null) chain = await UpdateClient.DownloadPatchesAsync(installed, download, status);
+            if (chain.Count > 0)
+            {
+                status?.Invoke("Применение обновлений…");
+                installed = PatchInstaller.ApplyChain(root, chain);
+            }
+            UpdateClient.InstallHelper(root);
+            return installed;
+        }
+        finally { if (download != null) try { Directory.Delete(download, true); } catch { } }
+    }
+
+    private static void RunUpdate(string destination, int parentPid, string workDir, bool legacy)
     {
         bool parentExited = false;
         try
@@ -38,7 +78,15 @@ internal static class Program
             try { using var parent = Process.GetProcessById(parentPid); if (!parent.WaitForExit(30000)) throw new IOException("Игра не закрылась за 30 секунд."); }
             catch (ArgumentException) { }
             parentExited = true;
-            Extract(destination);
+            // Части базы есть — полная установка (повреждённая база, версия вне цепочки, переход со старого клиента).
+            if (Directory.GetFiles(workDir, "NaviDnD-payload.*").Length > 0) Installation.Apply(destination, workDir);
+            if (legacy) PatchAfterBaseAsync(destination).GetAwaiter().GetResult();
+            else
+            {
+                var chain = UpdateClient.OrderChain(UpdateClient.InstalledVersion(destination), Directory.GetFiles(workDir, "NaviDnD-patch-*.zip"));
+                if (chain.Count > 0) PatchInstaller.ApplyChain(destination, chain);
+                UpdateClient.InstallHelper(destination);
+            }
         }
         catch (Exception error)
         {
@@ -56,8 +104,10 @@ internal static class Program
         {
             try { File.AppendAllText(Path.Combine(destination, "Storage", "update-error.txt"), "\nНе удалось перезапустить игру: " + error.Message); } catch { }
         }
-        foreach (string file in Directory.GetFiles(AppContext.BaseDirectory, "NaviDnD-payload.*"))
-            try { File.Delete(file); } catch { }
+        // Скачанное — во временной папке игры/старого клиента; сам помощник там занят и удалится позже вместе с Temp.
+        foreach (string pattern in new[] { "NaviDnD-payload.*", "NaviDnD-patch-*.zip" })
+            foreach (string file in Directory.GetFiles(workDir, pattern))
+                try { File.Delete(file); } catch { }
     }
 }
 
@@ -119,9 +169,21 @@ internal sealed class SetupForm : Form
                 }
                 status.Text = "Распаковка игры…";
                 await Task.Run(() => Program.Extract(destination));
+                // База поставлена — до актуальной версии патчами (рядом с установщиком или из релиза).
+                string version;
+                try
+                {
+                    version = await Task.Run(() => Program.PatchAfterBaseAsync(destination, text => BeginInvoke(() => status.Text = text)));
+                }
+                catch (Exception patchError)
+                {
+                    MessageBox.Show(this, $"Установлена базовая версия {UpdateClient.InstalledVersion(destination)}. Обновления не применены: " +
+                        patchError.Message + "\nИгра предложит обновиться при запуске.", "Обновления", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    version = UpdateClient.InstalledVersion(destination);
+                }
                 string executable = Path.Combine(destination, "NaviDnD.exe");
                 if (shortcut.Checked) CreateShortcut(destination, executable);
-                status.Text = "Игра установлена. Настройки и сохранения создаются при запуске.";
+                status.Text = $"Игра {version} установлена. Настройки и сохранения создаются при запуске.";
                 if (launch.Checked)
                 {
                     var start = new ProcessStartInfo(ConsoleHostPath) {

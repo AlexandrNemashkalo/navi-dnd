@@ -17,6 +17,9 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <Compile Include="../NaviDnD.Installer/Installation.cs" Link="Installer/Installation.cs" />
+    <Compile Include="../NaviDnD.Installer/Patch.cs" Link="Installer/Patch.cs" />
+    <Compile Include="../NaviDnD.Installer/UpdateManifest.cs" Link="Installer/UpdateManifest.cs" />
+    <Compile Include="../NaviDnD.Installer/UpdateClient.cs" Link="Installer/UpdateClient.cs" />
   </ItemGroup>
 
   <ItemGroup>

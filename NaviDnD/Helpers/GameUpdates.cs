@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Net;
+using NaviDnD.Installer;
 using NaviDnD.Display;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -85,34 +87,14 @@ internal static class GameUpdates
             Directory.CreateDirectory(directory);
             try
             {
-                var sums = release.Assets.Single(a => a.Name == "SHA256SUMS.txt");
-                string manifest = Path.Combine(directory, sums.Name);
-                view.Set("Получение списка файлов…");
-                await view.RunAsync(DownloadAsync(sums, manifest, cancellation.Token), cancellation);
-                var files = ParseChecksums(await File.ReadAllTextAsync(manifest));
-                if (!files.ContainsKey("NaviDnD-Setup-win-x64.exe") || !files.Keys.Any(n => n.StartsWith("NaviDnD-payload.")))
-                    throw new InvalidDataException("В релизе отсутствуют файлы установщика.");
-                int index = 0;
-                foreach (var file in files)
-                {
-                    index++;
-                    view.Set($"Загрузка {index}/{files.Count}: {file.Key}", 0);
-                    var asset = release.Assets.Single(a => a.Name == file.Key);
-                    string target = Path.Combine(directory, file.Key);
-                    await view.RunAsync(DownloadAsync(asset, target, cancellation.Token, (read, total) =>
-                        view.Set($"Загрузка {index}/{files.Count}: {file.Key}", total > 0 ? (double)read / total : null,
-                            $"{read / 1048576.0:F1} МБ скачано • Esc — отменить")), cancellation);
-                    view.Set("Проверка контрольной суммы: " + file.Key, 1);
-                    await using var input = File.OpenRead(target);
-                    string hash = await view.RunAsync(HashAsync(input, cancellation.Token), cancellation);
-                    if (!hash.Equals(file.Value, StringComparison.OrdinalIgnoreCase))
-                        throw new InvalidDataException("Не совпала контрольная сумма: " + file.Key);
-                }
-                var start = new ProcessStartInfo(Path.Combine(directory, "NaviDnD-Setup-win-x64.exe")) { UseShellExecute = true };
+                // Релиз с описанием обновлений — патчами (и помощником в папке игры); иначе — прежняя полная установка.
+                var updates = release.Assets.FirstOrDefault(a => a.Name == UpdateManifest.FileName);
+                var (program, arguments) = updates != null
+                    ? await PreparePatchesAsync(view, updates, directory, cancellation)
+                    : await PrepareFullAsync(view, release, directory, cancellation);
+                var start = new ProcessStartInfo(program) { UseShellExecute = true };
                 view.Set("Загрузка завершена. Перезапуск игры…", 1, "Сохранения и настройки сохраняются");
-                start.ArgumentList.Add("--update-silent");
-                start.ArgumentList.Add(AppContext.BaseDirectory);
-                start.ArgumentList.Add(Environment.ProcessId.ToString());
+                foreach (string argument in arguments) start.ArgumentList.Add(argument);
                 _ = Process.Start(start) ?? throw new IOException("Не удалось запустить установщик.");
                 return true;
             }
@@ -131,6 +113,91 @@ internal static class GameUpdates
             Log(error.Message);
             await view.ConfirmAsync("Обновление не установлено: " + error.Message, false);
             return false;
+        }
+    }
+
+    // Прежний путь (релиз без NaviDnD-updates.json): установщик и все части полной сборки, установщик — --update-silent.
+    private static async Task<(string, string[])> PrepareFullAsync(UpdateDisplay view, Release release, string directory, CancellationTokenSource cancellation)
+    {
+        var sums = release.Assets.Single(a => a.Name == "SHA256SUMS.txt");
+        string manifest = Path.Combine(directory, sums.Name);
+        view.Set("Получение списка файлов…");
+        await view.RunAsync(DownloadAsync(sums, manifest, cancellation.Token), cancellation);
+        var files = ParseChecksums(await File.ReadAllTextAsync(manifest));
+        if (!files.ContainsKey(UpdateManifest.InstallerName) || !files.Keys.Any(n => n.StartsWith("NaviDnD-payload.")))
+            throw new InvalidDataException("В релизе отсутствуют файлы установщика.");
+        var list = files.Select(f => (release.Assets.Single(a => a.Name == f.Key), f.Value)).ToList();
+        await DownloadVerifiedAsync(view, list, directory, cancellation);
+        return (Path.Combine(directory, UpdateManifest.InstallerName),
+            ["--update-silent", AppContext.BaseDirectory, Environment.ProcessId.ToString()]);
+    }
+
+    // Патчи от установленной версии (небольшие ZIP), проверка базы; повреждённая база или версия вне цепочки — части
+    // полной сборки и все патчи от базы. Применяет помощник: установленный Updater/ (тот же, что в релизе) копируется во
+    // временную папку, иначе скачивается. Игра закрывается, помощник применяет всё с откатом и запускает её снова.
+    private static async Task<(string, string[])> PreparePatchesAsync(UpdateDisplay view, Asset updates, string directory, CancellationTokenSource cancellation)
+    {
+        var token = cancellation.Token;
+        string manifestPath = Path.Combine(directory, updates.Name);
+        view.Set("Получение списка обновлений…");
+        await view.RunAsync(DownloadAsync(updates, manifestPath, token), cancellation);
+        var manifest = UpdateManifest.Parse(await File.ReadAllTextAsync(manifestPath, token));
+        string root = AppContext.BaseDirectory;
+        string installed = (await File.ReadAllTextAsync(Path.Combine(root, "release-version.txt"), token)).Trim();
+        var patches = manifest.PatchesFrom(installed);
+        if (patches is { Length: > 0 })
+        {
+            await DownloadVerifiedAsync(view, patches.Select(p => (new Asset(p.Name, p.Url), p.Sha256)).ToList(), directory, cancellation);
+            string first = Path.Combine(directory, patches[0].Name);
+            try
+            {
+                await view.RunAsync(Task.Run(() =>
+                {
+                    using var archive = ZipFile.OpenRead(first);
+                    Patch.Read(archive).VerifyBase(root, full: true, f => view.Set("Проверка файлов игры…", f, "Esc — отменить"));
+                    return true;
+                }, token), cancellation);
+            }
+            catch (Exception error) when (error is InvalidDataException or IOException)
+            {
+                Log("База не подходит для патча, полная установка: " + error.Message);
+                patches = null;
+            }
+        }
+        if (patches == null)
+        {
+            // Полная сборка: части неизменной базы и вся цепочка патчей от неё.
+            foreach (string patch in Directory.GetFiles(directory, "NaviDnD-patch-*.zip")) File.Delete(patch);
+            var full = manifest.Base.Files.Select(f => (new Asset(f.Name, f.Url), f.Sha256))
+                .Concat(manifest.Patches.Select(p => (new Asset(p.Name, p.Url), p.Sha256))).ToList();
+            await DownloadVerifiedAsync(view, full, directory, cancellation);
+        }
+        string helper = Path.Combine(directory, UpdateManifest.InstallerName);
+        string installedHelper = Path.Combine(root, UpdateManifest.HelperPath.Replace('/', Path.DirectorySeparatorChar));
+        if (File.Exists(installedHelper) && UpdateManifest.Sha256(installedHelper) == manifest.Installer.Sha256.ToLowerInvariant())
+            File.Copy(installedHelper, helper);
+        else
+            await DownloadVerifiedAsync(view, [(new Asset(manifest.Installer.Name, manifest.Installer.Url), manifest.Installer.Sha256)], directory, cancellation);
+        return (helper, ["--apply-update", root, Environment.ProcessId.ToString(), directory]);
+    }
+
+    private static async Task DownloadVerifiedAsync(UpdateDisplay view, List<(Asset Asset, string Sha256)> files, string directory,
+        CancellationTokenSource cancellation)
+    {
+        int index = 0;
+        foreach (var (asset, sha) in files)
+        {
+            index++;
+            string label = $"Загрузка {index}/{files.Count}: {asset.Name}";
+            view.Set(label, 0);
+            string target = Path.Combine(directory, asset.Name);
+            await view.RunAsync(DownloadAsync(asset, target, cancellation.Token, (read, total) =>
+                view.Set(label, total > 0 ? (double)read / total : null, $"{read / 1048576.0:F1} МБ скачано • Esc — отменить")), cancellation);
+            view.Set("Проверка контрольной суммы: " + asset.Name, 1);
+            await using var input = File.OpenRead(target);
+            string hash = await view.RunAsync(HashAsync(input, cancellation.Token), cancellation);
+            if (!hash.Equals(sha, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException("Не совпала контрольная сумма: " + asset.Name);
         }
     }
 
