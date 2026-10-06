@@ -3,6 +3,7 @@ using System.Threading.Channels;
 using System.Xml;
 using System.Xml.Linq;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace NaviDnD.Helpers;
 
@@ -150,15 +151,22 @@ internal static class Speech
                 if (item.Warmup) { status = "Готова"; continue; }
                 using var reader = new WaveFileReader(wav);
                 using var output = new WaveOutEvent();
-                output.Init(reader);
-                output.Volume = Math.Clamp(config!.SpeechVolume / 100f, 0, 1);
-                output.Play();
-                status = "Озвучивание";
-                while (output.PlaybackState == PlaybackState.Playing)
+                // Громкость — в самом потоке: WaveOutEvent.Volume (waveOutSetVolume) меняет громкость всего приложения,
+                // и музыка оставалась на громкости речи.
+                var volume = new VolumeSampleProvider(reader.ToSampleProvider()) { Volume = Math.Clamp(config!.SpeechVolume / 100f, 0, 1) };
+                output.Init(volume);
+                Music.Ducked = true;
+                try
                 {
-                    await Task.Delay(30, token);
-                    output.Volume = Math.Clamp(config.SpeechVolume / 100f, 0, 1);
+                    output.Play();
+                    status = "Озвучивание";
+                    while (output.PlaybackState == PlaybackState.Playing)
+                    {
+                        await Task.Delay(30, token);
+                        volume.Volume = Math.Clamp(config.SpeechVolume / 100f, 0, 1);
+                    }
                 }
+                finally { Music.Ducked = false; }
                 status = "Готова";
             }
             catch (OperationCanceledException) { status = "Остановлена"; }

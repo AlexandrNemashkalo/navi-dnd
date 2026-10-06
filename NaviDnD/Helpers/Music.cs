@@ -17,6 +17,9 @@ internal static class Music
     public static bool Enabled { get; set; } = true;
     public static bool AmbienceEnabled { get; set; } = true;
     public static float Volume { get; set; } = 0.4f;   // «ГРОМКОСТЬ МУЗЫКИ», 0..1
+    // Звучит речь мастера (Speech): музыка и окружение плавно притихают до DuckLevel, после — возвращаются.
+    public static volatile bool Ducked;
+    private const float DuckLevel = 0.3f, DuckDownSec = 0.4f, DuckUpSec = 1.5f;
 
     private static readonly WaveFormat Format = WaveFormat.CreateIeeeFloatWaveFormat(44100, 2);
     private static readonly object _lock = new();
@@ -80,11 +83,32 @@ internal static class Music
         {
             _mixer = new MixingSampleProvider(Format) { ReadFully = true };   // без дорожек — тишина, устройство не закрывается
             _output = new WaveOutEvent { DesiredLatency = 200 };
-            _output.Init(_mixer);
+            _output.Init(new Ducking(_mixer));
             _output.Play();
             return true;
         }
         catch { _output = null; _mixer = null; return false; }
+    }
+
+    // Притихание всего микшера под речь: вниз быстро, обратно — медленно.
+    private sealed class Ducking(ISampleProvider source) : ISampleProvider
+    {
+        private float _gain = 1f;
+        public WaveFormat WaveFormat => source.WaveFormat;
+
+        public int Read(float[] buffer, int offset, int count)
+        {
+            int read = source.Read(buffer, offset, count);
+            bool ducked = Ducked;
+            float target = ducked ? DuckLevel : 1f;
+            float step = (1f - DuckLevel) / ((ducked ? DuckDownSec : DuckUpSec) * Format.SampleRate * Format.Channels);
+            for (int i = 0; i < read; i++)
+            {
+                if (_gain != target) _gain = _gain > target ? MathF.Max(target, _gain - step) : MathF.Min(target, _gain + step);
+                buffer[offset + i] *= _gain;
+            }
+            return read;
+        }
     }
 
     // Дорожка: файл (wav/mp3/ogg), приведённый к формату микшера, × громкость слоя (с затуханием) × общая.
