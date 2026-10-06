@@ -125,15 +125,20 @@ internal sealed class SetupForm : Form
     {
         if (updateDestination != null) { folder.Text = updateDestination; shortcut.Checked = false; install.Text = "Обновить"; }
         Text = "Установка NaviDnD";
-        ClientSize = new Size(550, 265);
+        // Окно по содержимому: при масштабе Windows 150–200% шрифт крупнее, и окно фиксированного размера обрезало кнопку.
+        AutoSize = true;
+        AutoSizeMode = AutoSizeMode.GrowAndShrink;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
-        var panel = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(20),
-            FlowDirection = FlowDirection.TopDown, WrapContents = false };
-        panel.Controls.Add(new Label { AutoSize = true, Text = "NaviDnD для Windows x64 — .NET уже включён." });
-        panel.Controls.Add(new Label { AutoSize = true, Text = "Для ИИ нужен отдельный Codex CLI или Claude Code и вход в аккаунт." });
-        panel.Controls.Add(new Label { AutoSize = true, Text = "Папка установки:" });
+        var textWidth = new Size(LogicalToDeviceUnits(510), 0);   // длинные строки переносятся, а не растягивают окно
+        folder.Width = LogicalToDeviceUnits(390);
+        status.MaximumSize = textWidth;
+        var panel = new FlowLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            Padding = new Padding(LogicalToDeviceUnits(20)), FlowDirection = FlowDirection.TopDown, WrapContents = false };
+        panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = "NaviDnD для Windows x64 — .NET уже включён." });
+        panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = "Для ИИ нужен отдельный Codex CLI или Claude Code и вход в аккаунт." });
+        panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = "Папка установки:" });
         var row = new FlowLayoutPanel { AutoSize = true, WrapContents = false };
         row.Controls.Add(folder);
         var browse = new Button { Text = "Обзор…", AutoSize = true };
