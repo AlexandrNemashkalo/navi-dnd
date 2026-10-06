@@ -1,25 +1,25 @@
 {
-    "name":  "NaviDnD 2.0.1",
-    "tag_name":  "v2.0.1",
-    "description":  "# NaviDnD 2.0.1\n\n- Музыка больше не пропадает, когда мастер говорит: во время реплики музыка и звуки окружения плавно притихают, а после — возвращаются.\n- Озвучка больше не меняет громкость всей игры в микшере Windows.\n\nЕсли после прежних версий игра стала тише, один раз подними громкость NaviDnD в микшере громкости Windows (Параметры → Звук → Микшер громкости) — новая версия её больше не сбивает.\n\n## Как проверить\n\n1. Включи музыку и озвучку в настройках, начни игру и сделай действие.\n2. Пока мастер говорит, музыка звучит тише; после реплики плавно возвращается к прежней громкости.\n",
+    "name":  "NaviDnD 2.0.2",
+    "tag_name":  "v2.0.2",
+    "description":  "# NaviDnD 2.0.2\n\n- Окно установщика подстраивается под масштаб Windows: при 150–200% кнопка «Установить» и флажки больше не обрезаются.\n\nОбновление из игры в этот раз скачивает и новый установщик (около 50 МБ): им обновляется помощник `Updater/`.\n\n## Как проверить\n\n1. Поставь масштаб Windows 150% или больше (Параметры → Система → Дисплей → Масштаб) и запусти `NaviDnD-Setup-win-x64.exe`.\n2. Окно целиком помещается: видны поле папки, оба флажка и кнопка «Установить».\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.1/navi-dnd-v2.0.1-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.2/navi-dnd-v2.0.2-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.1/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.2/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.1/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.2/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.5/releases/NaviDnD-Setup-win-x64.exe"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.2/releases/NaviDnD-Setup-win-x64.exe"
                                  },
                                  {
                                      "name":  "NaviDnD-payload.001",
@@ -76,6 +76,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.0.0-2.0.1.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.1/releases/patches/NaviDnD-patch-2.0.0-2.0.1.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.0.1-2.0.2.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.2/releases/patches/NaviDnD-patch-2.0.1-2.0.2.zip"
                                  }
                              ]
                }
