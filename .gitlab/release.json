@@ -1,16 +1,21 @@
 {
-    "name":  "NaviDnD 1.1.6",
-    "tag_name":  "v1.1.6",
-    "description":  "# NaviDnD 1.1.6\n\nТестовый релиз для проверки обновления патчем.\n\n- Прогресс загрузки обновления показывает общий объём файла («12.3 из 50.0 МБ»), а не только скачанное.\n- Обновление с 1.1.5 приходит патчем — около мегабайта вместо полной сборки.\n\n## Как проверить\n\n1. В установленной 1.1.5 открой «Обновления» и подтверди Enter.\n2. Скачивается только патч 1.1.5→1.1.6 (помощник из `Updater/` уже установлен и заново не скачивается).\n3. Игра закроется, обновится и запустится снова; в «Обновлениях» — версия 1.1.6. Сохранения и настройки на месте.\n",
+    "name":  "NaviDnD 2.0.0",
+    "tag_name":  "v2.0.0",
+    "description":  "# NaviDnD 2.0.0\n\n- В активах релиза первой идёт ссылка «📦 Скачать NaviDnD (все файлы установки)» — один ZIP со всем нужным для установки.\n- Обновление с 1.1.5 и новее приходит патчем — около мегабайта; версии до 1.1.4 обновляются один раз полной сборкой и дальше получают патчи.\n\n## Установка\n\nСкачай ZIP по ссылке «📦 Скачать NaviDnD», распакуй и запусти `releases/NaviDnD-Setup-win-x64.exe`. Установщик поставит базовую сборку и без интернета доведёт её патчами из соседней папки `patches` до 2.0.0.\n\n## Как проверить\n\n1. В установленной игре открой «Обновления» и подтверди Enter.\n2. После загрузки игра закроется, обновится и запустится снова; в «Обновлениях» — версия 2.0.0. Сохранения и настройки на месте.\n",
     "assets":  {
                    "links":  [
                                  {
+                                     "name":  "📦 Скачать NaviDnD (все файлы установки)",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.0/navi-dnd-v2.0.0-releases.zip?path=releases",
+                                     "link_type":  "package"
+                                 },
+                                 {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.6/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.0/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.6/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.0/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
@@ -63,6 +68,10 @@
                                  {
                                      "name":  "NaviDnD-patch-1.1.5-1.1.6.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.6/releases/patches/NaviDnD-patch-1.1.5-1.1.6.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-1.1.6-2.0.0.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.0/releases/patches/NaviDnD-patch-1.1.6-2.0.0.zip"
                                  }
                              ]
                }
