@@ -192,7 +192,7 @@ internal static class GameUpdates
             view.Set(label, 0);
             string target = Path.Combine(directory, asset.Name);
             await view.RunAsync(DownloadAsync(asset, target, cancellation.Token, (read, total) =>
-                view.Set(label, total > 0 ? (double)read / total : null, $"{read / 1048576.0:F1} МБ скачано • Esc — отменить")), cancellation);
+                view.Set(label, total > 0 ? (double)read / total : null, (total > 0 ? $"{read / 1048576.0:F1} из {total / 1048576.0:F1} МБ" : $"{read / 1048576.0:F1} МБ скачано") + " • Esc — отменить")), cancellation);
             view.Set("Проверка контрольной суммы: " + asset.Name, 1);
             await using var input = File.OpenRead(target);
             string hash = await view.RunAsync(HashAsync(input, cancellation.Token), cancellation);
