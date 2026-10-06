@@ -43,6 +43,8 @@ class Program
         // Настройки игрока (экран «НАСТРОЙКИ») — не в UI-тестах: там важны значения по умолчанию.
         if (Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null) config.LoadUserSettings();
         Sound.Enabled = config.SoundEnabled;
+        Speech.Initialize(config);
+        GameUpdates.Initialize();
         Sound.Volume = config.SoundVolume / 100f;
         Sound.TypingEnabled = config.TypingSoundEnabled;
         Music.Enabled = config.MusicEnabled;
@@ -154,6 +156,17 @@ class Program
             }
         }
 
+        if (testStatePath == null && !AiCliDiscovery.IsAvailable("claude", config.ClaudeCliPath)
+            && !AiCliDiscovery.IsAvailable("codex", config.CodexCliPath))
+        {
+            AiSetupNotice.Show();
+            ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
+            borderDrawer.DrawTopBorder();
+            const string setupTitle = " НАСТРОЙКИ: Claude и Codex не найдены   [Esc]МЕНЮ";
+            borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(setupTitle, display));
+            new SettingsDisplay(settings, display, config, storage, setupTitle).Show();
+        }
+
         while (true)
         {
             if (state.PendingStartNewGame)
@@ -205,6 +218,11 @@ class Program
             {
                 display.ActiveTabKey = null;
                 var choice = new MainMenuDisplay(settings, display).Show(hasSave());
+                if (choice == MainMenuDisplay.Choice.Updates)
+                {
+                    if (await GameUpdates.ShowAsync()) return;
+                    continue;
+                }
                 if (choice == MainMenuDisplay.Choice.Settings)
                 {
                     // Настройки — свой экран в рамке с заголовком; выход из них — снова в меню.

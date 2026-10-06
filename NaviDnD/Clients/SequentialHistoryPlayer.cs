@@ -39,8 +39,10 @@ internal sealed class SequentialHistoryPlayer(
         {
             if (entryNode is not JsonObject entry) continue;
 
-            string text = entry["text"]?.GetValue<string>() ?? "";
+            string rawText = entry["text"]?.GetValue<string>() ?? "";
+            string text = Speech.DisplayText(rawText);
             string? author = entry["author"]?.GetValue<string>();
+            string? speechText = Speech.ValidateSsml(rawText);
             string normalizedText = text.Replace("\n", "");
 
             // Промпт запрещает повторять в финальном history[] то, что уже было показано игроку
@@ -54,10 +56,10 @@ internal sealed class SequentialHistoryPlayer(
 
             if (!isDuplicateOfLast)
             {
-                await PlayText(text, author);
+                await PlayText(text, author, speechText);
 
                 if (!string.IsNullOrEmpty(text))
-                    accumulatedHistory.Add(new DialogMessage { Text = normalizedText, Author = author! });
+                    accumulatedHistory.Add(new DialogMessage { Text = normalizedText, Author = author!, SpeechText = speechText });
             }
 
             if (entry["patch"] is JsonObject patch) await AnimateAndApplyPatch(patch);
@@ -96,11 +98,12 @@ internal sealed class SequentialHistoryPlayer(
         return merged;
     }
 
-    private async Task PlayText(string text, string? author)
+    private async Task PlayText(string text, string? author, string? speechText)
     {
         if (string.IsNullOrEmpty(text)) return;
         onNewMessage?.Invoke(author ?? "DM");
         if (onChunk == null) return;
+        Speech.Speak(text, author, speechText);
         foreach (char c in text)
         {
             if (c is '\n' or '\r') continue;

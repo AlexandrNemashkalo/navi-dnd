@@ -39,3 +39,5 @@ Respond ONLY with valid compact JSON (no indentation, no line breaks). No markdo
 ✓ Позиции — клетки комнат блока, не выходы, не заняты?
 ✓ Символы — 3 знака, не из занятых?
 ✓ Враги — `monsterKey`, `spotted`, `darkvisionFt`, `image`?
+
+speechEnabled:false → обычный text; true → один text в SSML <speak>; для реплик NPC по известному полу укажи voice="female" или voice="male" на speak, рассказчик — без voice, не смешивай рассказчика и реплику NPC в одной записи (p/s, break time 200–700ms, prosody rate slow/medium и pitch low/medium, + перед ударной гласной, редкое *выделение*); механику [...] сохраняй в text, отдельный текст озвучки не добавляй.

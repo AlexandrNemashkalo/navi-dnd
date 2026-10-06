@@ -643,9 +643,12 @@ public class DialogDisplay
             if (string.IsNullOrEmpty(entry.Text)) continue;
             entry.Text = entry.Text.Replace("\r", "").Replace("\n", "");
             if (entry.Text.Length == 0) continue;
+            string? speechText = Speech.ValidateSsml(entry.Text);
+            entry.Text = Speech.DisplayText(entry.Text);
+            Speech.Speak(entry.Text, entry.Author, speechText);
 
             _setting.History ??= [];
-            _setting.History.Add(new DialogMessage { Author = entry.Author ?? "DM", Text = "" });
+            _setting.History.Add(new DialogMessage { Author = entry.Author ?? "DM", Text = "", SpeechText = speechText });
             var msg = _setting.History[^1];
             _display.DialogScrollOffset = 0;
 

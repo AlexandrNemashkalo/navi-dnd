@@ -15,32 +15,14 @@ internal static class Program
             return;
         }
         ApplicationConfiguration.Initialize();
-        Application.Run(new SetupForm());
+        string? destination = args.Length == 3 && args[0] == "--update" ? args[1] : null;
+        int waitPid = destination != null && int.TryParse(args[2], out int pid) ? pid : 0;
+        Application.Run(new SetupForm(destination, waitPid));
     }
 
     internal static void Extract(string destination)
     {
-        string root = Path.GetFullPath(destination);
-        Directory.CreateDirectory(root);
-        var parts = Directory.GetFiles(AppContext.BaseDirectory, "NaviDnD-payload.*")
-            .OrderBy(path => path, StringComparer.Ordinal).ToArray();
-        if (parts.Length == 0) throw new FileNotFoundException("Скачайте всю папку releases: рядом с установщиком нужны NaviDnD-payload.*.");
-        using var stream = new FileStream(Path.Combine(Path.GetTempPath(), "NaviDnD-" + Guid.NewGuid() + ".zip"),
-            FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 81920, FileOptions.DeleteOnClose);
-        foreach (var part in parts) { using var input = File.OpenRead(part); input.CopyTo(stream); }
-        stream.Position = 0;
-        using var archive = new ZipArchive(stream);
-        foreach (var entry in archive.Entries)
-        {
-            string target = Path.GetFullPath(Path.Combine(root, entry.FullName));
-            if (!target.StartsWith(root.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar,
-                    StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException("Некорректный путь в архиве.");
-            if (entry.FullName.EndsWith('/') || entry.FullName.EndsWith('\\'))
-            { Directory.CreateDirectory(target); continue; }
-            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-            entry.ExtractToFile(target, overwrite: true);
-        }
+        Installation.Apply(destination, AppContext.BaseDirectory);
     }
 }
 
@@ -54,8 +36,9 @@ internal sealed class SetupForm : Form
     private readonly Label status = new() { AutoSize = true };
     private bool installed;
 
-    internal SetupForm()
+    internal SetupForm(string? updateDestination = null, int waitPid = 0)
     {
+        if (updateDestination != null) { folder.Text = updateDestination; shortcut.Checked = false; install.Text = "Обновить"; }
         Text = "Установка NaviDnD";
         ClientSize = new Size(550, 265);
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -88,13 +71,29 @@ internal sealed class SetupForm : Form
             try
             {
                 string destination = Path.GetFullPath(folder.Text);
+                if (waitPid > 0)
+                {
+                    status.Text = "Ожидание закрытия игры…";
+                    await Task.Run(() => { try { using var process = Process.GetProcessById(waitPid); if (!process.WaitForExit(30000)) throw new IOException("Закройте игру перед обновлением."); } catch (ArgumentException) { } });
+                }
+                foreach (var process in Process.GetProcessesByName("NaviDnD"))
+                {
+                    using (process)
+                    if (string.Equals(process.MainModule?.FileName, Path.Combine(destination, "NaviDnD.exe"), StringComparison.OrdinalIgnoreCase))
+                        throw new IOException("Закройте игру перед обновлением.");
+                }
                 status.Text = "Распаковка игры…";
                 await Task.Run(() => Program.Extract(destination));
                 string executable = Path.Combine(destination, "NaviDnD.exe");
                 if (shortcut.Checked) CreateShortcut(destination, executable);
                 status.Text = "Игра установлена. Настройки и сохранения создаются при запуске.";
-                if (launch.Checked) Process.Start(new ProcessStartInfo(executable) {
-                    UseShellExecute = true, WorkingDirectory = destination });
+                if (launch.Checked)
+                {
+                    var start = new ProcessStartInfo(ConsoleHostPath) {
+                        UseShellExecute = true, WorkingDirectory = destination };
+                    start.ArgumentList.Add(executable);
+                    Process.Start(start);
+                }
                 install.Text = "Закрыть";
                 installed = true;
                 install.Enabled = true;
@@ -108,14 +107,18 @@ internal sealed class SetupForm : Form
             }
             finally { ControlBox = true; }
         };
+        if (updateDestination != null) Shown += (_, _) => install.PerformClick();
     }
+
+    private static string ConsoleHostPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "conhost.exe");
 
     private static void CreateShortcut(string destination, string executable)
     {
         dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell")!)!;
         dynamic link = shell.CreateShortcut(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "NaviDnD.lnk"));
-        link.TargetPath = executable;
+        link.TargetPath = ConsoleHostPath;
+        link.Arguments = "\"" + executable + "\"";
         link.WorkingDirectory = destination;
         link.IconLocation = Path.Combine(destination, "dnd.ico") + ",0";
         link.Save();

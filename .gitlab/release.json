@@ -1,0 +1,29 @@
+{
+    "tag_name":  "v1.1.0",
+    "name":  "NaviDnD 1.1.0",
+    "description":  "Silero speech with five narrator voices, SSML and background warmup. In-game updates with SHA256 checks and rollback. Startup and installer fixes. Saves and settings are preserved.",
+    "assets":  {
+                   "links":  [
+                                 {
+                                     "name":  "NaviDnD-payload.001",
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-payload.001/raw?ref=v1.1.0"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-payload.002",
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-payload.002/raw?ref=v1.1.0"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-payload.003",
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-payload.003/raw?ref=v1.1.0"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-Setup-win-x64.exe",
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-Setup-win-x64.exe/raw?ref=v1.1.0"
+                                 },
+                                 {
+                                     "name":  "SHA256SUMS.txt",
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FSHA256SUMS.txt/raw?ref=v1.1.0"
+                                 }
+                             ]
+               }
+}

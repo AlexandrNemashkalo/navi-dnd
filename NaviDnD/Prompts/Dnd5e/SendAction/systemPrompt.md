@@ -342,3 +342,5 @@ Intents для `calculate_movement`: `{"intent":"approach","target":"hero"|"<SYM
 8. Герой двигался → `speedLeft` обновлён? Координаты на room/area?
 9. Враг ходил → `calculate_movement` вызван? `movePath`=`steps`, `position`=последний элемент?
 10. Ходы врагов: все из «очереди ходов до героя» сходили? На «[новый раунд]» — `advance_round` (`totalRounds+1`, сброс `actions`/`speedLeft`)? Последний entry — ход герою?
+
+speechEnabled:false → обычный text; true → один text в SSML <speak>; для реплик NPC по известному полу укажи voice="female" или voice="male" на speak, рассказчик — без voice, не смешивай рассказчика и реплику NPC в одной записи (p/s, break time 200–700ms, prosody rate slow/medium и pitch low/medium, + перед ударной гласной, редкое *выделение*); механику [...] сохраняй в text, отдельный текст озвучки не добавляй.

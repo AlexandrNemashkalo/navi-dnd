@@ -315,7 +315,10 @@ public static class ConsoleMouseReader
                     continue;
                 }
                 ReadConsoleInput(_inputHandle, buf, 1, out _); // consume KEY_DOWN
-                return (ConsoleKey)buf[0].VirtualKeyCode;
+                var key = (ConsoleKey)buf[0].VirtualKeyCode;
+                if (key == ConsoleKey.F11) { Speech.Stop(); continue; }
+                if (key is ConsoleKey.Escape or ConsoleKey.Enter) Speech.Stop();
+                return key;
             }
             // FOCUS_EVENT, WINDOW_BUFFER_SIZE_EVENT, MENU_EVENT — consume silently
             ReadConsoleInput(_inputHandle, buf, 1, out _);
@@ -340,6 +343,8 @@ public static class ConsoleMouseReader
             ReadConsoleInputW(_inputHandle, buf, 1, out _);
             if (buf[0].EventType != KEY_EVENT_TYPE || buf[0].KeyDownFlag == 0) continue;
             var key = (ConsoleKey)buf[0].VirtualKeyCode;
+            if (key == ConsoleKey.F11) { Speech.Stop(); continue; }
+            if (key is ConsoleKey.Escape or ConsoleKey.Enter) Speech.Stop();
             if (key is (ConsoleKey)16 or (ConsoleKey)17 or (ConsoleKey)18 or (ConsoleKey)20 or (ConsoleKey)144 or (ConsoleKey)145 or (ConsoleKey)91 or (ConsoleKey)92) continue; // Shift/Ctrl/Alt, Caps/Num/Scroll Lock, Win — сами по себе (как Console.ReadKey)
             uint s = buf[0].KeyControlState;
             var info = new ConsoleKeyInfo((char)buf[0].UnicodeChar, key,

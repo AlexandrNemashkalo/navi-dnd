@@ -5,6 +5,7 @@ $temporaryRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
 $work = Join-Path $temporaryRoot ('NaviDnD-release-' + [guid]::NewGuid().ToString('N'))
 $payload = Join-Path $work ('payload-' + [guid]::NewGuid().ToString('N'))
 $release = Join-Path $root 'releases'
+$version = ([xml](Get-Content (Join-Path $root 'Directory.Build.props') -Raw)).Project.PropertyGroup.Version
 try {
 New-Item -ItemType Directory -Force -Path $payload, $release | Out-Null
 foreach ($project in @('NaviDnD', 'NaviDnD.McpServer')) {
@@ -29,6 +30,7 @@ foreach ($asset in @('Prompts', 'sound', 'Fonts', 'GameData', 'icons')) {
     }
 }
 if (Get-ChildItem $payload -Recurse -Directory | Where-Object Name -in @('Storage', 'logs')) { throw 'Private data in payload' }
+Set-Content (Join-Path $payload 'release-version.txt') $version -Encoding ASCII
 Compress-Archive -Path "$payload/*" -DestinationPath "$work/payload.zip" -Force
 $oldParts = Get-ChildItem -LiteralPath $release -Filter 'NaviDnD-payload.*' -File
 $oldParts | Remove-Item -Force
@@ -60,6 +62,17 @@ Get-ChildItem $release -File | ForEach-Object {
 Get-ChildItem $release -File | Where-Object Name -ne 'SHA256SUMS.txt' | Get-FileHash | ForEach-Object {
     "$($_.Hash.ToLowerInvariant())  $(Split-Path $_.Path -Leaf)"
 } | Set-Content "$release/SHA256SUMS.txt" -Encoding ASCII
+$releaseLinks = @(Get-ChildItem $release -File | ForEach-Object {
+    $file = [uri]::EscapeDataString('releases/' + $_.Name)
+    @{ name = $_.Name; url = "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/$file/raw?ref=v$version" }
+})
+New-Item -ItemType Directory -Force -Path (Join-Path $root '.gitlab') | Out-Null
+$releaseMetadata = @{
+    name = "NaviDnD $version"; tag_name = "v$version"
+    description = 'Silero speech with five narrator voices, SSML and background warmup. In-game updates with SHA256 checks and rollback. Startup and installer fixes. Saves and settings are preserved.'
+    assets = @{ links = $releaseLinks }
+} | ConvertTo-Json -Depth 6
+[IO.File]::WriteAllText((Join-Path $root '.gitlab/release.json'), $releaseMetadata, (New-Object Text.UTF8Encoding($false)))
 Write-Host "Release ready: $release"
 } finally {
     $resolvedWork = [IO.Path]::GetFullPath($work)

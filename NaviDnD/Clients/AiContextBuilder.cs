@@ -727,7 +727,7 @@ public class AiContextBuilder
             root["scheduledEvents"] = WithIds(_ws.ScheduledEvents, Filter(filters, "scheduledEvents"), x => x.Name);
 
         if (set.Contains("history"))
-            root["history"] = _ws.History?.TakeLast(MaxHistoryForAi);
+            root["history"] = _ws.History?.TakeLast(MaxHistoryForAi).Select(m => new { m.Author, m.Text });
 
         return JsonSerializer.Serialize(root, _json);
     }

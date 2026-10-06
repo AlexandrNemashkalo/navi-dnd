@@ -25,6 +25,9 @@
 	  <None Update="dnd.ico">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
+	  <None Update="Speech\**">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="sound\dnd.wav">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>

@@ -111,7 +111,7 @@ public class GameAiClient
             string userMessage = $"Имя: {name}\nРаса: {race}\nКласс: {cls}" + (string.IsNullOrWhiteSpace(extra) ? "" : $"\n{extra.Trim()}")
                                  + (string.IsNullOrWhiteSpace(current) ? "" : $"\nТекущее описание (от игрока):\n{current.Trim()}")
                                  + (string.IsNullOrWhiteSpace(request) ? "" : $"\nЗапрос игрока: {request.Trim()}");
-            string response = await _provider.Complete([ReadPrompt(actionPath)], userMessage, actionPath, _appConfig.ClaudeCreateNewGameModel);
+            string response = await CompleteConfigured([ReadPrompt(actionPath)], userMessage, actionPath, _appConfig.ClaudeCreateNewGameModel);
             string? text = JsonNode.Parse(ExtractJson(response))?["description"]?.GetValue<string>();
             return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
         }
@@ -159,7 +159,7 @@ public class GameAiClient
                                  + (string.IsNullOrWhiteSpace(name) ? "" : $"\nНазвание мира задано игроком: «{name.Trim()}» — оставь его (name).")
                                  + (string.IsNullOrWhiteSpace(description) ? "" : $"\nТекущее описание мира (от игрока) — доработай по запросу, сохрани то, что не просят менять:\n{description.Trim()}")
                                  + (string.IsNullOrWhiteSpace(wish) ? "" : $"\nЗапрос игрока: {wish}");
-            string response = await _provider.Complete([ReadPrompt(actionPath)], userMessage, actionPath, _appConfig.ClaudeStartNewGameModel);
+            string response = await CompleteConfigured([ReadPrompt(actionPath)], userMessage, actionPath, _appConfig.ClaudeStartNewGameModel);
             using var doc = JsonDocument.Parse(ExtractJson(response));
             bool ok = GameWorld.ApplyChronicle(world, doc.RootElement);
             if (ok && !string.IsNullOrWhiteSpace(name)) world.Chronicle.Name = name.Trim();
@@ -236,7 +236,7 @@ public class GameAiClient
         string response = "";
         try
         {
-            response = await _provider.Complete([systemPrompt], userMessage, actionPath, _appConfig.ClaudeStartNewGameModel);
+            response = await CompleteConfigured([systemPrompt], userMessage, actionPath, _appConfig.ClaudeStartNewGameModel);
 
             // MCP-инструменты могли дописать черновик — перечитываем, чтобы ничего не потерять.
             _storage.LoadDraft();
@@ -313,6 +313,7 @@ public class GameAiClient
         Action? onRedraw = null)
     {
         var (actionPath, systemBlocks, ctx) = BuildSendActionContext();
+        Helpers.Speech.Stop();
         string response = "";
         try
         {
@@ -546,13 +547,13 @@ public class GameAiClient
         IReadOnlyList<string> systemBlocks, string userMessage, string actionPath, string model, Action? onIdle)
     {
         if (onIdle == null)
-            return await _provider.Complete(systemBlocks, userMessage, actionPath, model);
+            return await CompleteConfigured(systemBlocks, userMessage, actionPath, model);
 
         using var cts = new CancellationTokenSource();
         var spinTask = SpinAsync(onIdle, this, _rollRequestPath, _askPlayerRequestPath, cts.Token);
         try
         {
-            return await _provider.Complete(systemBlocks, userMessage, actionPath, model);
+            return await CompleteConfigured(systemBlocks, userMessage, actionPath, model);
         }
         finally
         {
@@ -749,6 +750,9 @@ public class GameAiClient
 
     private static string ReadPrompt(string actionPath) =>
         File.ReadAllText(Path.Combine(actionPath, "systemPrompt.md"), Encoding.UTF8);
+
+    private Task<string> CompleteConfigured(IReadOnlyList<string> systemBlocks, string userMessage, string actionPath, string model) =>
+        _provider.Complete(systemBlocks, $"speechEnabled:{(_appConfig.SpeechEnabled ? "true" : "false")}\n{userMessage}", actionPath, model);
 
     private static string ExtractJson(string text)
     {

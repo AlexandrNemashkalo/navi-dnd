@@ -1,0 +1,6 @@
+publish-release:
+  image: curlimages/curl:8.12.1
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/'
+  script:
+    - 'curl --fail-with-body --header "JOB-TOKEN: $CI_JOB_TOKEN" --header "Content-Type: application/json" --data @.gitlab/release.json "$CI_API_V4_URL/projects/$CI_PROJECT_ID/releases"'

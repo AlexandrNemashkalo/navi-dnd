@@ -196,3 +196,5 @@ Respond ONLY with valid compact JSON (no indentation, no line breaks). No markdo
 7. `actions` содержит ровно 3 элемента с id 0/1/2, value=1, maxValue=1?
 8. `find_icon` вызван для героя (если `image` не задан игроком) и для каждого предмета инвентаря? `find_item` вызван перед описанием механики каждого предмета?
 9. **Класс Доспеха в `stats` реально пересчитан по формуле брони** (см. её же `description`), а не взят по памяти «типичное КД для класса»? Сверь число: база + мод Ловкости (с учётом ограничения брони) + щит.
+
+speechEnabled:false → обычный text; true → один text в SSML <speak>; для реплик NPC по известному полу укажи voice="female" или voice="male" на speak, рассказчик — без voice, не смешивай рассказчика и реплику NPC в одной записи (p/s, break time 200–700ms, prosody rate slow/medium и pitch low/medium, + перед ударной гласной, редкое *выделение*); механику [...] сохраняй в text, отдельный текст озвучки не добавляй.

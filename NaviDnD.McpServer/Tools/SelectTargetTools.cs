@@ -40,7 +40,7 @@ public sealed class SelectTargetTools(McpServerConfig config)
         Игрок отменил — { "cancelled": true }; не ответил за 50 секунд — { "timedOut": true }: действие не выполняется, опиши это коротко.
         """)]
     public string SelectTarget(
-        [Description("Записи диалога перед выбором. У каждой text, опционально author, опционально patch.")] RequestHistoryEntry[] history,
+        [Description("Записи диалога перед выбором. У каждой text, text может быть SSML <speak> для озвучки; опционально author, patch.")] RequestHistoryEntry[] history,
         [Description("\"creature\" или \"point\".")] string mode,
         [Description("Максимальная дистанция от героя в футах.")] int? rangeFt = null,
         [Description("Сколько целей выбрать.")] int count = 1,

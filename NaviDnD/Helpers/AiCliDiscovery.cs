@@ -2,6 +2,13 @@ namespace NaviDnD.Helpers;
 
 public static class AiCliDiscovery
 {
+    public static bool IsAvailable(string name, string configuredPath)
+    {
+        if (Path.IsPathRooted(configuredPath)) return File.Exists(configuredPath);
+        string command = Path.GetFileNameWithoutExtension(configuredPath);
+        return Find(string.IsNullOrWhiteSpace(command) ? name : command) != null;
+    }
+
     // No CLI invocation or login: discovery only checks known installation directories.
     public static string? Find(string name)
     {

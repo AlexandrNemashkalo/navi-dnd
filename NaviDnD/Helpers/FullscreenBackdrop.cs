@@ -23,6 +23,9 @@ public static class FullscreenBackdrop
             if (on == Active) { if (on) Recenter(); return; }
             var console = GetConsoleWindow();
             if (console == IntPtr.Zero) return;
+            // Windows Terminal supplies a message-only pseudoconsole window. A topmost
+            // backdrop there covers the actual terminal instead of sitting behind the game.
+            if (on && !IsVisibleClassicConsole(console)) return;
             if (on)
             {
                 if (GetWindowRect(console, out var r)) _windowedPos = (r.Left, r.Top);
@@ -145,6 +148,15 @@ public static class FullscreenBackdrop
     }
 
     // ── Win32 ──
+    private static bool IsVisibleClassicConsole(IntPtr window)
+    {
+        var name = new System.Text.StringBuilder(128);
+        return IsWindowVisible(window) && GetClassName(window, name, name.Capacity) > 0
+            && name.ToString() == "ConsoleWindowClass";
+    }
+
+    [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder name, int count);
     private delegate IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
     [StructLayout(LayoutKind.Sequential)] private struct RECT { public int Left, Top, Right, Bottom; }

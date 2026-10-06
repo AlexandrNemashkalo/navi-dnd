@@ -308,6 +308,8 @@ public class Storage
                     var newHistory = JsonSerializer.Deserialize<List<DialogMessage>>(prop.Value.GetRawText(), options);
                     foreach (var h in newHistory)
                     {
+                        h.SpeechText = Helpers.Speech.ValidateSsml(h.Text);
+                        h.Text = Helpers.Speech.DisplayText(h.Text);
                         h.Text = h.Text.Replace("\n", "");
                     }
 

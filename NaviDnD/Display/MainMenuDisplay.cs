@@ -10,7 +10,7 @@ namespace NaviDnD.Display;
 // Строки ввода и горячих клавиш нет: ↑↓ + Enter, мышь (наведение выбирает, клик подтверждает).
 internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display)
 {
-    public enum Choice { Continue, NewGame, Games, Settings, Exit }
+    public enum Choice { Continue, NewGame, Games, Settings, Updates, Exit }
 
     private sealed record Item(string Name, Choice? Action);
 
@@ -47,6 +47,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
             new("НОВАЯ ИГРА", Choice.NewGame),
             new("МОИ ИГРЫ", Choice.Games),
             new("НАСТРОЙКИ", Choice.Settings),
+            new(GameUpdates.MenuLabel, Choice.Updates),
             new("ВЫХОД", Choice.Exit),
         ];
         _selected = hasSave ? 0 : 1;
@@ -57,6 +58,14 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
 
         while (true)
         {
+            string updateLabel = GameUpdates.MenuLabel;
+            if (_items[4].Name != updateLabel)
+            {
+                _items[4] = new(updateLabel, Choice.Updates);
+                DrawAll();
+                RenderItems();
+                foreach (var (row, _, _) in _itemPos) WriteRow(row, positioned: true);
+            }
             var (move, click, _) = ConsoleMouseReader.DrainMouseEvents();
             if (move is { } m)
             {

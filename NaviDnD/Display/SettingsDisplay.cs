@@ -70,8 +70,10 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         border.DrawBottomBorder();
         Redraw();
 
+        string speechStatus = Speech.Status;
         while (true)
         {
+            if (speechStatus != Speech.Status) { speechStatus = Speech.Status; Redraw(); }
             var (move, click, _) = ConsoleMouseReader.DrainMouseEvents();
             if (move is { } m)
             {
@@ -90,6 +92,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
                 // «[Esc]МЕНЮ» в заголовке — как Esc; остальная шапка — перетаскивание окна.
                 if (MouseUiHelper.GetHoveredTabKey(c.x, c.y, _titleTabs) == "Esc")
                 {
+                    Speech.Stop();
                     if (_editing) Commit();
                     Sound.PlayClick();
                     ConsoleMouseReader.SetCursorShape(false);
@@ -211,6 +214,36 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     private void BuildItems()
     {
         _items.Clear();
+        Toggle("ОЗВУЧКА", "Русские голоса, локально без ключа. При первом включении скачиваются движок и выбранный голос. Silero требует Python 3.10–3.12 x64. F11 — остановить речь; Enter/Esc также останавливают её.",
+            () => config.SpeechEnabled, v =>
+            {
+                config.SpeechEnabled = v;
+                Speech.Stop();
+                if (v) Speech.WarmUp();
+                if (v) Speech.Speak("Озвучка включена. Я буду читать рассказ ведущего.");
+            }, group: "ОЗВУЧКА");
+        _items.Add(new Item("ГОЛОС РАССКАЗЧИКА", Kind.Choice, "Айдар и Евгений — мужские голоса; Бая, Ксения и Ксения 2 — женские. При переключении звучит пробная фраза; выбор сохраняется.")
+        {
+            Get = () => config.SileroVoice switch { "aidar" => "Айдар", "baya" => "Бая", "kseniya" => "Ксения", "xenia" => "Ксения 2", _ => "Евгений" },
+            Step = dir =>
+            {
+                string[] voices = ["aidar", "eugene", "baya", "kseniya", "xenia"];
+                Speech.Stop();
+                int index = Array.IndexOf(voices, config.SileroVoice);
+                if (index < 0) index = dir > 0 ? voices.Length - 1 : 0;
+                config.SileroVoice = voices[(index + dir + voices.Length) % voices.Length];
+                Speech.Speak("Вы входите в тёмный лес. У старого дуба вас ждёт незнакомец.");
+            },
+        });
+        Text("ПУТЬ К PYTHON", "Python 3.10–3.12 x64 нужен для первой установки Silero. После установки используется отдельное окружение в Storage/Speech/silero.",
+            () => config.SileroPythonPath, v => config.SileroPythonPath = v);
+        _items.Add(new Item("ГРОМКОСТЬ РЕЧИ", Kind.Choice, "Отдельная громкость речи, независимо от музыки и звуков. Шаг — 10%.")
+        {
+            Get = () => $"{config.SpeechVolume}%",
+            Step = dir => config.SpeechVolume = Math.Clamp(config.SpeechVolume + dir * 10, 0, 100),
+        });
+        _items.Add(new Item("СТАТУС ОЗВУЧКИ", Kind.Info, "Загрузка и ошибки озвучки. Подробности — в logs/speech.log. Чтобы повторить проверку, выключи и включи озвучку.")
+        { Get = () => config.SpeechEnabled ? Speech.Status : "Выключена" });
         Toggle("ЗВУКИ", "Щелчки кнопок, вкладок и стрелок, бросок кубика.",
             () => config.SoundEnabled, v => { config.SoundEnabled = v; Sound.Enabled = v; }, group: "ЗВУК");
         _items.Add(new Item("ГРОМКОСТЬ", Kind.Choice, "Общая громкость всех звуков игры: щелчки, бросок кубика, печать текста. Шаг — 10%.")

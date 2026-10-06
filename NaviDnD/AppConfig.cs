@@ -104,6 +104,10 @@ public class AppConfig
     public bool AmbienceEnabled { get; set; } = true;   // звуки окружения (птицы, камин, капли)
     // Общая громкость звуков, 0–100 % (Sound.Volume).
     public int SoundVolume { get; set; } = 20;
+    public bool SpeechEnabled { get; set; } = false;
+    public int SpeechVolume { get; set; } = 70;
+    public string SileroVoice { get; set; } = "aidar";
+    public string SileroPythonPath { get; set; } = "python";
     // [] = off, ["*"] = all actions, or any subset of:
     // "CreateNewGame", "FixHeroForNewGame", "StartNewGame", "SendAction"
     // Через env var NAVIDND_TEST_MOCKED_ACTIONS (запятая-разделённый список) — для E2E-тестов,
@@ -130,6 +134,10 @@ public class AppConfig
         public bool? SoundEnabled { get; set; }
         public bool? TypingSoundEnabled { get; set; }
         public int? SoundVolume { get; set; }
+        public bool? SpeechEnabled { get; set; }
+        public int? SpeechVolume { get; set; }
+        public string? SileroVoice { get; set; }
+        public string? SileroPythonPath { get; set; }
         public bool? MusicEnabled { get; set; }
         public int? MusicVolume { get; set; }
         public bool? AmbienceEnabled { get; set; }
@@ -164,6 +172,10 @@ public class AppConfig
             SoundEnabled = s.SoundEnabled ?? SoundEnabled;
             TypingSoundEnabled = s.TypingSoundEnabled ?? TypingSoundEnabled;
             SoundVolume = Math.Clamp(s.SoundVolume ?? SoundVolume, 0, 100);
+            SpeechEnabled = s.SpeechEnabled ?? SpeechEnabled;
+            SpeechVolume = Math.Clamp(s.SpeechVolume ?? SpeechVolume, 0, 100);
+            SileroVoice = s.SileroVoice is "eugene" or "aidar" or "baya" or "kseniya" or "xenia" ? s.SileroVoice : SileroVoice;
+            SileroPythonPath = s.SileroPythonPath ?? SileroPythonPath;
             MusicEnabled = s.MusicEnabled ?? MusicEnabled;
             MusicVolume = Math.Clamp(s.MusicVolume ?? MusicVolume, 0, 100);
             AmbienceEnabled = s.AmbienceEnabled ?? AmbienceEnabled;
@@ -199,6 +211,8 @@ public class AppConfig
             var s = new UserSettings
             {
                 SoundEnabled = SoundEnabled, TypingSoundEnabled = TypingSoundEnabled, SoundVolume = SoundVolume,
+                SpeechEnabled = SpeechEnabled, SpeechVolume = SpeechVolume,
+                SileroVoice = SileroVoice, SileroPythonPath = SileroPythonPath,
                 MusicEnabled = MusicEnabled, MusicVolume = MusicVolume, AmbienceEnabled = AmbienceEnabled,
                 ClaudeModel = ClaudeModel, ClaudeCreateNewGameModel = ClaudeCreateNewGameModel,
                 ClaudeStartNewGameModel = ClaudeStartNewGameModel, ClaudeOAuthToken = ClaudeOAuthToken,

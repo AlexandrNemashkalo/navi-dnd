@@ -321,7 +321,10 @@ internal static class ConsoleSetup
     {
         // F11 (полноэкранный режим консоли ломает раскладку) глушим только в окне игры — не в других программах.
         if (nCode >= 0 && Marshal.ReadInt32(lParam) == VK_F11 && GetForegroundWindow() == GetConsoleWindow())
+        {
+            if (wParam == (IntPtr)0x0100 || wParam == (IntPtr)0x0104) _ = Task.Run(Helpers.Speech.Stop);
             return (IntPtr)1;
+        }
         return CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
     }
 
