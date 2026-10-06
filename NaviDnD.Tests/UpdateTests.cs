@@ -7,6 +7,35 @@ namespace NaviDnD.Tests;
 
 public class UpdateTests
 {
+    [Fact]
+    public async Task DownloadProgressCountsRealBytesAndKeepsFileContent()
+    {
+        byte[] data = Enumerable.Range(0, 200000).Select(i => (byte)i).ToArray();
+        using var input = new MemoryStream(data);
+        using var output = new MemoryStream();
+        var counts = new List<long>();
+        var type = typeof(AppConfig).Assembly.GetType("NaviDnD.Helpers.GameUpdates")!;
+        Action<long, long?> progress = (bytes, total) => { Assert.Equal(data.Length, total); counts.Add(bytes); };
+        await (Task)type.GetMethod("CopyWithProgressAsync", BindingFlags.NonPublic | BindingFlags.Static)!
+            .Invoke(null, [input, output, (long?)data.Length, progress, CancellationToken.None])!;
+        Assert.Equal(data, output.ToArray());
+        Assert.True(counts.Count > 1);
+        Assert.Equal(data.Length, counts.Last());
+        Assert.Equal(counts.OrderBy(x => x), counts);
+    }
+
+    [Fact]
+    public async Task CancelledDownloadDoesNotWriteMoreBytes()
+    {
+        using var input = new MemoryStream(new byte[200000]);
+        using var output = new MemoryStream();
+        using var cancellation = new CancellationTokenSource();
+        var type = typeof(AppConfig).Assembly.GetType("NaviDnD.Helpers.GameUpdates")!;
+        Action<long, long?> progress = (_, _) => cancellation.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => (Task)type.GetMethod("CopyWithProgressAsync", BindingFlags.NonPublic | BindingFlags.Static)!
+            .Invoke(null, [input, output, (long?)input.Length, progress, cancellation.Token])!);
+        Assert.InRange(output.Length, 1, input.Length - 1);
+    }
     [Theory]
     [InlineData("../bad.exe")]
     [InlineData("Storage/settings.json")]

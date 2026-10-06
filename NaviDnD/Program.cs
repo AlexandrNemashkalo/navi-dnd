@@ -220,7 +220,7 @@ class Program
                 var choice = new MainMenuDisplay(settings, display).Show(hasSave());
                 if (choice == MainMenuDisplay.Choice.Updates)
                 {
-                    if (await GameUpdates.ShowAsync()) return;
+                    if (await GameUpdates.ShowAsync(new UpdateDisplay(settings, display))) return;
                     continue;
                 }
                 if (choice == MainMenuDisplay.Choice.Settings)

@@ -1,28 +1,28 @@
 {
-    "tag_name":  "v1.1.1",
-    "name":  "NaviDnD 1.1.1",
-    "description":  "Test update from 1.1.0 to 1.1.1. Adds the author non-commercial license to the repository and installed game. Speech and existing features are preserved.",
+    "tag_name":  "v1.1.2",
+    "name":  "NaviDnD 1.1.2",
+    "description":  "In-game update confirmation and download progress in the main menu. Escape cancels downloads. Updates install silently and restart the game. Saves, settings and Silero models are preserved.",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "NaviDnD-payload.001",
-                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-payload.001/raw?ref=v1.1.1"
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-payload.001/raw?ref=v1.1.2"
                                  },
                                  {
                                      "name":  "NaviDnD-payload.002",
-                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-payload.002/raw?ref=v1.1.1"
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-payload.002/raw?ref=v1.1.2"
                                  },
                                  {
                                      "name":  "NaviDnD-payload.003",
-                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-payload.003/raw?ref=v1.1.1"
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-payload.003/raw?ref=v1.1.2"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
-                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-Setup-win-x64.exe/raw?ref=v1.1.1"
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FNaviDnD-Setup-win-x64.exe/raw?ref=v1.1.2"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FSHA256SUMS.txt/raw?ref=v1.1.1"
+                                     "url":  "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/releases%2FSHA256SUMS.txt/raw?ref=v1.1.2"
                                  }
                              ]
                }

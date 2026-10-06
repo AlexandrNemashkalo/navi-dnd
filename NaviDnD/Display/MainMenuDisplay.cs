@@ -39,6 +39,18 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     private List<Item> _items = [];
     private int _selected;
 
+    internal void DrawForUpdate()
+    {
+        _items =
+        [
+            new("ПРОДОЛЖИТЬ", null), new("НОВАЯ ИГРА", null), new("МОИ ИГРЫ", null),
+            new("НАСТРОЙКИ", null), new("ОБНОВЛЕНИЯ", Choice.Updates), new("ВЫХОД", null),
+        ];
+        _selected = 4;
+        Layout();
+        DrawAll();
+    }
+
     public Choice Show(bool hasSave)
     {
         _items =

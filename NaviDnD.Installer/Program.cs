@@ -15,6 +15,11 @@ internal static class Program
             return;
         }
         ApplicationConfiguration.Initialize();
+        if (args.Length == 3 && args[0] == "--update-silent" && int.TryParse(args[2], out int parentPid))
+        {
+            RunSilentUpdate(Path.GetFullPath(args[1]), parentPid);
+            return;
+        }
         string? destination = args.Length == 3 && args[0] == "--update" ? args[1] : null;
         int waitPid = destination != null && int.TryParse(args[2], out int pid) ? pid : 0;
         Application.Run(new SetupForm(destination, waitPid));
@@ -23,6 +28,36 @@ internal static class Program
     internal static void Extract(string destination)
     {
         Installation.Apply(destination, AppContext.BaseDirectory);
+    }
+
+    private static void RunSilentUpdate(string destination, int parentPid)
+    {
+        bool parentExited = false;
+        try
+        {
+            try { using var parent = Process.GetProcessById(parentPid); if (!parent.WaitForExit(30000)) throw new IOException("Игра не закрылась за 30 секунд."); }
+            catch (ArgumentException) { }
+            parentExited = true;
+            Extract(destination);
+        }
+        catch (Exception error)
+        {
+            try { Directory.CreateDirectory(Path.Combine(destination, "Storage")); File.WriteAllText(Path.Combine(destination, "Storage", "update-error.txt"), error.Message); } catch { }
+        }
+        if (!parentExited) return;
+        try
+        {
+            var start = new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "conhost.exe"))
+                { UseShellExecute = true, WorkingDirectory = destination };
+            start.ArgumentList.Add(Path.Combine(destination, "NaviDnD.exe"));
+            Process.Start(start);
+        }
+        catch (Exception error)
+        {
+            try { File.AppendAllText(Path.Combine(destination, "Storage", "update-error.txt"), "\nНе удалось перезапустить игру: " + error.Message); } catch { }
+        }
+        foreach (string file in Directory.GetFiles(AppContext.BaseDirectory, "NaviDnD-payload.*"))
+            try { File.Delete(file); } catch { }
     }
 }
 
