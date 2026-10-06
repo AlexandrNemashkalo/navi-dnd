@@ -9,8 +9,10 @@ internal static class SileroSpeech
 {
     private static Process? worker;
     private static Task<string>? errors;
-    private static string Root => Path.Combine(AppConfig.ProjectRoot, "Storage", "Speech", "silero");
-    private static string Python => Path.Combine(Root, "venv", "Scripts", "python.exe");
+    private static string BundledRoot => Path.Combine(AppConfig.ProjectRoot, "Speech", "silero");
+    private static bool HasBundle => File.Exists(Path.Combine(BundledRoot, ".ready"));
+    private static string Root => HasBundle ? BundledRoot : Path.Combine(AppConfig.ProjectRoot, "Storage", "Speech", "silero");
+    private static string Python => HasBundle ? Path.Combine(Root, "python", "python.exe") : Path.Combine(Root, "venv", "Scripts", "python.exe");
 
     public static async Task SynthesizeAsync(string text, string? ssmlText, string voice, string wav, string python,
         Action<string> status, CancellationToken token)

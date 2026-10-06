@@ -3,7 +3,7 @@ $root = $PSScriptRoot
 $gitRoot = $root.Replace('\', '/')
 $temporaryRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
 $work = Join-Path $temporaryRoot ('NaviDnD-release-' + [guid]::NewGuid().ToString('N'))
-$payload = Join-Path $work ('payload-' + [guid]::NewGuid().ToString('N'))
+$payload = Join-Path $work 'p'
 $release = Join-Path $root 'releases'
 $version = ([xml](Get-Content (Join-Path $root 'Directory.Build.props') -Raw)).Project.PropertyGroup.Version
 try {
@@ -30,6 +30,7 @@ foreach ($asset in @('Prompts', 'sound', 'Fonts', 'GameData', 'icons')) {
     }
 }
 if (Get-ChildItem $payload -Recurse -Directory | Where-Object Name -in @('Storage', 'logs')) { throw 'Private data in payload' }
+& (Join-Path $root 'prepare-silero-bundle.ps1') -Destination (Join-Path $payload 'Speech/silero')
 Set-Content (Join-Path $payload 'release-version.txt') $version -Encoding ASCII
 Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination (Join-Path $payload 'LICENSE')
 Copy-Item -LiteralPath (Join-Path $root 'RELEASE_NOTES.md') -Destination (Join-Path $payload 'RELEASE_NOTES.md')
@@ -65,8 +66,8 @@ Get-ChildItem $release -File | Where-Object Name -ne 'SHA256SUMS.txt' | Get-File
     "$($_.Hash.ToLowerInvariant())  $(Split-Path $_.Path -Leaf)"
 } | Set-Content "$release/SHA256SUMS.txt" -Encoding ASCII
 $releaseLinks = @(Get-ChildItem $release -File | ForEach-Object {
-    $file = [uri]::EscapeDataString('releases/' + $_.Name)
-    @{ name = $_.Name; url = "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/repository/files/$file/raw?ref=v$version" }
+    $file = [uri]::EscapeDataString($_.Name)
+    @{ name = $_.Name; url = "https://gitlab.com/navitalevich/navi-dnd/-/raw/v$version/releases/$file" }
 })
 New-Item -ItemType Directory -Force -Path (Join-Path $root '.gitlab') | Out-Null
 $releaseMetadata = @{

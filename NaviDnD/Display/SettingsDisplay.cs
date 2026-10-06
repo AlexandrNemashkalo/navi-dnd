@@ -214,7 +214,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     private void BuildItems()
     {
         _items.Clear();
-        Toggle("ОЗВУЧКА", "Русские голоса, локально без ключа. При первом включении скачиваются движок и выбранный голос. Silero требует Python 3.10–3.12 x64. F11 — остановить речь; Enter/Esc также останавливают её.",
+        Toggle("ОЗВУЧКА", "Русские голоса, локально без ключа. В готовой сборке Silero, Python и модель уже включены: скачивание не требуется. F11 — остановить речь; Enter/Esc также останавливают её.",
             () => config.SpeechEnabled, v =>
             {
                 config.SpeechEnabled = v;
@@ -235,7 +235,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
                 Speech.Speak("Вы входите в тёмный лес. У старого дуба вас ждёт незнакомец.");
             },
         });
-        Text("ПУТЬ К PYTHON", "Python 3.10–3.12 x64 нужен для первой установки Silero. После установки используется отдельное окружение в Storage/Speech/silero.",
+        Text("ПУТЬ К PYTHON", "Для запуска из исходников без встроенного комплекта нужен Python 3.10–3.12 x64. Готовая сборка использует собственный Python и не требует настройки этого пути.",
             () => config.SileroPythonPath, v => config.SileroPythonPath = v);
         _items.Add(new Item("ГРОМКОСТЬ РЕЧИ", Kind.Choice, "Отдельная громкость речи, независимо от музыки и звуков. Шаг — 10%.")
         {
