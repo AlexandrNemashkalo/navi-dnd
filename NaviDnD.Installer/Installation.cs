@@ -4,7 +4,8 @@ namespace NaviDnD.Installer;
 
 internal static class Installation
 {
-    internal static void Apply(string destination, string partsDirectory)
+    // progress: этап и доля 0..1 всей установки базы (склейка частей ~10%, распаковка ~80%, перенос в папку игры ~10%).
+    internal static void Apply(string destination, string partsDirectory, Action<string, double?>? progress = null)
     {
         string root = Path.GetFullPath(destination);
         Directory.CreateDirectory(root);
@@ -20,15 +21,21 @@ internal static class Installation
             var parts = Directory.GetFiles(partsDirectory, "NaviDnD-payload.*").OrderBy(p => p, StringComparer.Ordinal).ToArray();
             if (parts.Length == 0) throw new FileNotFoundException("Рядом с установщиком нужны все NaviDnD-payload.*.");
             using var stream = new FileStream(Path.Combine(work, "payload.zip"), FileMode.CreateNew, FileAccess.ReadWrite);
+            long total = parts.Sum(p => new FileInfo(p).Length), joined = 0;
             for (int i = 0; i < parts.Length; i++)
             {
                 if (Path.GetFileName(parts[i]) != $"NaviDnD-payload.{i + 1:D3}") throw new InvalidDataException("Отсутствует часть архива.");
                 using var input = File.OpenRead(parts[i]); input.CopyTo(stream);
+                joined += input.Length;
+                progress?.Invoke("Подготовка архива…", 0.1 * joined / Math.Max(1, total));
             }
             stream.Position = 0;
-            using (var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true))
+            using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
+            long size = Math.Max(1, archive.Entries.Sum(e => e.Length)), unpacked = 0;
             foreach (var entry in archive.Entries)
             {
+                unpacked += entry.Length;
+                progress?.Invoke("Распаковка игры…", 0.1 + 0.8 * unpacked / size);
                 string relative = entry.FullName.Replace('\\', '/');
                 string first = relative.Split('/')[0];
                 if (first.Equals("Storage", StringComparison.OrdinalIgnoreCase) || first.Equals("logs", StringComparison.OrdinalIgnoreCase))
@@ -39,8 +46,11 @@ internal static class Installation
                 entry.ExtractToFile(target);
             }
             if (!File.Exists(Path.Combine(staging, "NaviDnD.exe"))) throw new InvalidDataException("Архив не содержит игру.");
-            foreach (string source in Directory.GetFiles(staging, "*", SearchOption.AllDirectories))
+            var files = Directory.GetFiles(staging, "*", SearchOption.AllDirectories);
+            int moved = 0;
+            foreach (string source in files)
             {
+                progress?.Invoke("Установка файлов…", 0.9 + 0.1 * ++moved / files.Length);
                 string relative = Path.GetRelativePath(staging, source);
                 string target = SafePath(root, relative);
                 EnsureNoLinks(root, target);
@@ -53,7 +63,7 @@ internal static class Installation
                     File.Move(target, old);
                 }
                 changed.Add((target, old));
-                File.Copy(source, target);
+                File.Move(source, target);   // распаковка — в папке игры, тот же диск: перенос без копирования 1,5 ГБ
             }
         }
         catch (Exception installError)

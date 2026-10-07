@@ -39,14 +39,14 @@ internal static class Program
         Application.Run(new SetupForm(destination, waitPid));
     }
 
-    internal static void Extract(string destination)
+    internal static void Extract(string destination, Action<string, double?>? progress = null)
     {
-        Installation.Apply(destination, AppContext.BaseDirectory);
+        Installation.Apply(destination, AppContext.BaseDirectory, progress);
     }
 
     // После базы: патчи рядом с установщиком (releases/patches), иначе — из последнего релиза; затем помощник
-    // обновления в папку игры. Сообщение — для окна установки.
-    internal static async Task<string> PatchAfterBaseAsync(string root, Action<string>? status = null)
+    // обновления в папку игры. progress — этап и доля 0..1 (null — без доли) для окна установки.
+    internal static async Task<string> PatchAfterBaseAsync(string root, Action<string, double?>? progress = null)
     {
         string installed = UpdateClient.InstalledVersion(root);
         var chain = UpdateClient.LocalPatches(AppContext.BaseDirectory, installed);
@@ -58,12 +58,9 @@ internal static class Program
         }
         try
         {
-            if (download != null) chain = await UpdateClient.DownloadPatchesAsync(installed, download, status);
-            if (chain.Count > 0)
-            {
-                status?.Invoke("Применение обновлений…");
-                installed = PatchInstaller.ApplyChain(root, chain);
-            }
+            if (download != null) chain = await UpdateClient.DownloadPatchesAsync(installed, download, text => progress?.Invoke(text, null));
+            if (chain.Count > 0) installed = PatchInstaller.ApplyChain(root, chain, progress);
+            progress?.Invoke("Установка помощника обновлений…", null);
             UpdateClient.InstallHelper(root);
             return installed;
         }
@@ -119,7 +116,10 @@ internal sealed class SetupForm : Form
     private readonly CheckBox shortcut = new() { Text = "Ярлык на рабочем столе", Checked = true, AutoSize = true };
     private readonly CheckBox launch = new() { Text = "Запустить после установки", Checked = true, AutoSize = true };
     private readonly Label status = new() { AutoSize = true };
+    private readonly ProgressBar bar = new() { Maximum = 1000, Visible = false };
     private bool installed;
+    private string? shownText;
+    private int shownValue = -2;
 
     internal SetupForm(string? updateDestination = null, int waitPid = 0)
     {
@@ -134,6 +134,7 @@ internal sealed class SetupForm : Form
         var textWidth = new Size(LogicalToDeviceUnits(510), 0);   // длинные строки переносятся, а не растягивают окно
         folder.Width = LogicalToDeviceUnits(390);
         status.MaximumSize = textWidth;
+        bar.Size = new Size(textWidth.Width, LogicalToDeviceUnits(20));
         var panel = new FlowLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
             Padding = new Padding(LogicalToDeviceUnits(20)), FlowDirection = FlowDirection.TopDown, WrapContents = false };
         panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = "NaviDnD для Windows x64 — .NET уже включён." });
@@ -151,6 +152,7 @@ internal sealed class SetupForm : Form
         panel.Controls.Add(shortcut);
         panel.Controls.Add(launch);
         panel.Controls.Add(install);
+        panel.Controls.Add(bar);
         panel.Controls.Add(status);
         Controls.Add(panel);
         install.Click += async (_, _) => {
@@ -172,13 +174,13 @@ internal sealed class SetupForm : Form
                     if (string.Equals(process.MainModule?.FileName, Path.Combine(destination, "NaviDnD.exe"), StringComparison.OrdinalIgnoreCase))
                         throw new IOException("Закройте игру перед обновлением.");
                 }
-                status.Text = "Распаковка игры…";
-                await Task.Run(() => Program.Extract(destination));
+                Report("Подготовка архива…", 0);
+                await Task.Run(() => Program.Extract(destination, Report));
                 // База поставлена — до актуальной версии патчами (рядом с установщиком или из релиза).
                 string version;
                 try
                 {
-                    version = await Task.Run(() => Program.PatchAfterBaseAsync(destination, text => BeginInvoke(() => status.Text = text)));
+                    version = await Task.Run(() => Program.PatchAfterBaseAsync(destination, Report));
                 }
                 catch (Exception patchError)
                 {
@@ -188,7 +190,7 @@ internal sealed class SetupForm : Form
                 }
                 string executable = Path.Combine(destination, "NaviDnD.exe");
                 if (shortcut.Checked) CreateShortcut(destination, executable);
-                status.Text = $"Игра {version} установлена. Настройки и сохранения создаются при запуске.";
+                Report($"Игра {version} установлена. Настройки и сохранения создаются при запуске.", 1);
                 if (launch.Checked)
                 {
                     var start = new ProcessStartInfo(ConsoleHostPath) {
@@ -202,6 +204,7 @@ internal sealed class SetupForm : Form
             }
             catch (Exception error)
             {
+                bar.Visible = false;
                 MessageBox.Show(this, error.Message + "\nЗакройте игру и проверьте доступ к папке.",
                     "Ошибка установки", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 install.Enabled = true;
@@ -210,6 +213,23 @@ internal sealed class SetupForm : Form
             finally { ControlBox = true; }
         };
         if (updateDestination != null) Shown += (_, _) => install.PerformClick();
+    }
+
+    // Этап и доля 0..1 (null — бегущая полоса, когда долю не узнать) из рабочего потока; окно — только при изменении,
+    // распаковка сообщает о каждом из тысяч файлов.
+    private void Report(string text, double? fraction)
+    {
+        int value = fraction is { } f ? (int)(Math.Clamp(f, 0, 1) * bar.Maximum) : -1;
+        if (text == shownText && value == shownValue) return;
+        shownText = text;
+        shownValue = value;
+        BeginInvoke(() =>
+        {
+            status.Text = text;
+            bar.Visible = true;
+            bar.Style = value < 0 ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous;
+            if (value >= 0) bar.Value = value;
+        });
     }
 
     private static string ConsoleHostPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "conhost.exe");
