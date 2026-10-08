@@ -7,9 +7,19 @@ namespace NaviDnD.Tests;
 // смежности. Реальный баг: игрок стоял "через одну клетку" от двери (Chebyshev-дистанция 1 до
 // ближайшего конца From/To) и door_action всё равно её открыл — код разрешал dist<=1, хотя дверь
 // это граница МЕЖДУ From и To, а не отдельная клетка: герой должен стоять ровно в одной из них.
-public class GameActionToolsTests
+public class GameActionToolsTests : IDisposable
 {
-    private static GameActionTools CreateTools(string heroPositionJson, string doorsJson)
+    private readonly List<string> _files = [];
+
+    // Файлы состояния и всё, что инструмент кладёт рядом с ними (navidnd_test_<guid>*), — после каждого теста.
+    public void Dispose()
+    {
+        foreach (string path in _files)
+            foreach (string file in Directory.GetFiles(Path.GetDirectoryName(path)!, Path.GetFileNameWithoutExtension(path) + "*"))
+                try { File.Delete(file); } catch (IOException) { }
+    }
+
+    private GameActionTools CreateTools(string heroPositionJson, string doorsJson)
     {
         string json = """
             {"hero":{"symbol":"HRO","name":"Тестер","hp":"10/10","position":HERO_POSITION},
@@ -18,6 +28,7 @@ public class GameActionToolsTests
             .Replace("HERO_POSITION", heroPositionJson)
             .Replace("DOORS", doorsJson);
         string tempPath = Path.Combine(Path.GetTempPath(), $"navidnd_test_{Guid.NewGuid():N}.json");
+        _files.Add(tempPath);
         File.WriteAllText(tempPath, json);
         return new GameActionTools(new McpServerConfig(tempPath, LogPath: null));
     }

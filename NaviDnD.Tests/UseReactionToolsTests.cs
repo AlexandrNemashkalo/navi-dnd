@@ -7,11 +7,22 @@ namespace NaviDnD.Tests;
 // Реальный лог: use_reaction был вызван с пустой history/вопросом ("" [free-text]) — диалог всё
 // равно открылся бы игроку и ждал 50с ответа ни на что. Проверяем отказ БЕЗ реального ожидания
 // (валидный путь блокируется до 50с/ответа файла — не для юнит-теста).
-public class UseReactionToolsTests
+public class UseReactionToolsTests : IDisposable
 {
-    private static UseReactionTools CreateTools()
+    private readonly List<string> _files = [];
+
+    // Файлы состояния и всё, что инструмент кладёт рядом с ними (navidnd_test_<guid>*), — после каждого теста.
+    public void Dispose()
+    {
+        foreach (string path in _files)
+            foreach (string file in Directory.GetFiles(Path.GetDirectoryName(path)!, Path.GetFileNameWithoutExtension(path) + "*"))
+                try { File.Delete(file); } catch (IOException) { }
+    }
+
+    private UseReactionTools CreateTools()
     {
         string tempPath = Path.Combine(Path.GetTempPath(), $"navidnd_test_{Guid.NewGuid():N}.json");
+        _files.Add(tempPath);
         return new UseReactionTools(new McpServerConfig(tempPath, LogPath: null));
     }
 

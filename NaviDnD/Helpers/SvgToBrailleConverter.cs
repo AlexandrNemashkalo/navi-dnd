@@ -12,7 +12,23 @@ public static class SvgToBrailleConverter
         Path.Combine(AppConfig.AssetDirectory("icons"), "000000", "ffffff", "1x1");
 
     // Cache: imagePath → braille lines
-    private static readonly Dictionary<string, string[]> _cache = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string[]> _cache = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Lazy<Task>> _preparing = new();
+    private static readonly SemaphoreSlim PrepareGate = new(1, 1);
+
+    // Decode first-use pictures off the UI loop. Completed pictures are applied only by UI polling.
+    public static Task PrepareAsync(string? imagePath, int widthChars = 36)
+    {
+        if (string.IsNullOrEmpty(imagePath) || _cache.ContainsKey(imagePath + "|" + widthChars))
+            return Task.CompletedTask;
+        return _preparing.GetOrAdd(imagePath + "|" + widthChars, _ => new Lazy<Task>(() => Task.Run(async () =>
+        {
+            await PrepareGate.WaitAsync();
+            try { Convert(imagePath, "", widthChars); }
+            catch { /* A missing/broken picture keeps the existing fallback. */ }
+            finally { PrepareGate.Release(); }
+        }))).Value;
+    }
 
     /// <summary>
     /// Converts an SVG icon to Braille art lines.

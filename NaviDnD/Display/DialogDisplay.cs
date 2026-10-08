@@ -60,6 +60,10 @@ public class DialogDisplay
     private int _cachedMaxPage;
     private int _dialogBlockStartTop; // Start of title line
     private BorderDrawer _cachedBorderDrawer;
+    private bool _dialogContentDrawn;
+    private readonly ConsoleRegionBuffer _textRegion = new();
+    private readonly ConsoleRegionBuffer _imageRegion = new();
+    private Action? _footerDraw;
 
     // Animation state
     private string[]? _animationRightLines;
@@ -87,8 +91,10 @@ public class DialogDisplay
     private DialogMessage? _streamingMessage;
     private int _charsSinceRerender;
     private const int RerenderEvery = 1;
+    public AnimationLoop Animations { get; } = new();
+    private IDisposable? _spinnerAnimation;
     private int _spinnerFrame = 0;
-    private DateTime _lastSpinnerAdvance = DateTime.MinValue;
+    private bool _spinnerFooterVisible;
     private const int SpinnerIntervalMs = 100;
 
     public DialogDisplay(
@@ -104,6 +110,7 @@ public class DialogDisplay
 
     public string Draw()
     {
+        _dialogContentDrawn = false;
         var borderDrawer = new BorderDrawer(_setting, _display);
         _cachedBorderDrawer = borderDrawer;
 
@@ -141,9 +148,14 @@ public class DialogDisplay
         _streamingMessages.Clear();
         _charsSinceRerender = 0;
         _spinnerFrame = 0;
-        _lastSpinnerAdvance = DateTime.MinValue;
         Console.CursorVisible = false;
         _isStreaming = true;
+        _spinnerAnimation?.Dispose();
+        _spinnerAnimation = Animations.Start([new(TimeSpan.FromMilliseconds(SpinnerIntervalMs), () =>
+        {
+            _spinnerFrame++;
+            RedrawStreamingFooter();
+        })], repeat: true);
         _display.MapHoverEnabled = true;
         _display.StreamingTabTitle = null;
 
@@ -189,7 +201,7 @@ public class DialogDisplay
         if (_cachedBorderDrawer != null)
         {
             PollDuringStreaming();
-            RerenderDialogBlock(DrawSpinner);
+            Animations.Tick();
         }
     }
 
@@ -198,11 +210,11 @@ public class DialogDisplay
     {
         if (_cachedBorderDrawer == null) return;
         PollDuringStreaming();
+        Animations.Tick();
     }
 
     private void PollAndHandleTabSwitch()
     {
-        if (_animationInProgress) return;
         _display.PollAction?.Invoke();
         if (_display.PendingCommand != null)
         {
@@ -215,20 +227,7 @@ public class DialogDisplay
     // Waits for the given duration while polling mouse/tabs at ~16ms intervals.
     private async Task PollingDelay(int ms)
     {
-        var end = DateTime.UtcNow.AddMilliseconds(ms);
-        while (true)
-        {
-            _display.PollAction?.Invoke();
-            if (_display.PendingCommand != null)
-            {
-                var cmd = _display.PendingCommand;
-                _display.PendingCommand = null;
-                SwitchTab(cmd);
-            }
-            var remaining = (end - DateTime.UtcNow).TotalMilliseconds;
-            if (remaining <= 0) break;
-            await Task.Delay((int)Math.Min(16, remaining));
-        }
+        await Animations.DelayAsync(TimeSpan.FromMilliseconds(ms), PollDuringStreaming);
     }
 
     // Как PollingDelay, но до АБСОЛЮТНОГО момента времени, а не на фиксированную длительность —
@@ -246,6 +245,8 @@ public class DialogDisplay
     // Removes all streaming placeholders (real messages come from ApplyUpdateWorldState).
     public void FinalizeStreaming()
     {
+        _spinnerAnimation?.Dispose();
+        _spinnerAnimation = null;
         _isStreaming = false;
         _animationInProgress = false;
         _display.MapHoverEnabled = true;
@@ -389,15 +390,54 @@ public class DialogDisplay
             _cachedBorderDrawer.DrawSeparator();
 
         var rightLines = BuildRightPanelLines();
-        int rowIndex = 0;
-
-        foreach (var line in visibleLines)
-            DrawDialogLine(line, rightLines[rowIndex++]);
-
-        int filledLines = visibleLines.Count;
-        for (int i = filledLines; i < _display.MaxHistoryLines; i++)
-            DrawEmptyDialogLine(rightLines[rowIndex++]);
+        if (!_dialogContentDrawn)
+        {
+            // Establish borders once. Subsequent frames only touch the changed panel interiors.
+            for (int row = 0; row < _display.MaxHistoryLines; row++)
+            {
+                if (row < visibleLines.Count) DrawDialogLine(visibleLines[row], rightLines[row]);
+                else DrawEmptyDialogLine(rightLines[row]);
+            }
+            _textRegion.Invalidate();
+            _imageRegion.Invalidate();
+        }
+        var textRows = Enumerable.Range(0, _display.MaxHistoryLines)
+            .Select(row => CapturePanelContent(() =>
+            {
+                if (row < visibleLines.Count) DrawDialogText(visibleLines[row]);
+            })).ToArray();
+        string patch = _textRegion.Update(DisplayConfig.LeftMargin + 1, _dialogBlockStartTop + 2,
+            DialogTextWidth, textRows, BackgroundAnsi);
+        if (HasSplit) patch += BuildImagePatch(rightLines);
+        if (_dialogContentDrawn && patch.Length > 0) Console.Write(AnsiColorRuns.Compact(patch));
+        _dialogContentDrawn = true;
+        ColorHelper.SetBackgroundColor(_display.MainBackground);
+        ColorHelper.SetForegroundColor(_display.MainForeground);
+        Console.SetCursorPosition(0, _dialogBlockStartTop + 2 + _display.MaxHistoryLines);
     }
+
+    private string BackgroundAnsi => $"\x1b[48;2;{_display.MainBackground[0]};{_display.MainBackground[1]};{_display.MainBackground[2]}m";
+
+    // Panel callbacks only write text/colors; capture does not query or move the console cursor.
+    private string CapturePanelContent(Action draw)
+    {
+        var output = Console.Out;
+        using var buffer = new StringWriter();
+        try
+        {
+            Console.SetOut(buffer);
+            ColorHelper.SetBackgroundColor(_display.MainBackground);
+            ColorHelper.SetForegroundColor(_display.MainForeground);
+            draw();
+            return buffer.ToString();
+        }
+        finally { Console.SetOut(output); }
+    }
+
+    private string BuildImagePatch(Action[] rows) => _imageRegion.Update(
+        DisplayConfig.LeftMargin + 2 + LeftWidth, _dialogBlockStartTop + 2, RightPanelWidth,
+        rows.Select(CapturePanelContent).ToArray(), BackgroundAnsi);
+
 
     private Action[] BuildRightPanelLines()
     {
@@ -539,9 +579,23 @@ public class DialogDisplay
 
     public void RerenderRightPanel()
     {
-        if (_cachedBorderDrawer == null) return;
-        if (_cachedAllLines == null) RebuildCache();
-        RerenderDialogBlock();
+        if (!HasSplit || _cachedBorderDrawer == null || !_dialogContentDrawn || _animationInProgress) return;
+        int left = Console.CursorLeft, top = Console.CursorTop;
+        bool visible = Console.CursorVisible;
+        try
+        {
+            string patch = BuildImagePatch(BuildRightPanelLines());
+            if (patch.Length == 0) return;
+            Console.CursorVisible = false;
+            Console.Write(AnsiColorRuns.Compact(patch));
+        }
+        finally
+        {
+            ColorHelper.SetBackgroundColor(_display.MainBackground);
+            ColorHelper.SetForegroundColor(_display.MainForeground);
+            Console.SetCursorPosition(left, top);
+            Console.CursorVisible = visible;
+        }
     }
 
     /// Screen positions of ▲ and ▼ in the title row, and whether each is currently active.
@@ -652,33 +706,23 @@ public class DialogDisplay
             var msg = _setting.History[^1];
             _display.DialogScrollOffset = 0;
 
-            foreach (char c in entry.Text)
-            {
-                msg.Text += c;
-                Sound.PlayTyping(c);
-                PollAndHandleTabSwitch();
-                RebuildCache();
-                RerenderDialogBlock(DrawSpinner);
-                await Task.Delay(11);
-                PollAndHandleTabSwitch(); // second poll mid-delay for ~11ms hover responsiveness
-                await Task.Delay(11);
-                var pressedKey = ConsoleMouseReader.TryReadKeyDown();
-                if (pressedKey.HasValue)
+            bool skipText = false;
+            await Animations.PlayAsync(entry.Text.Select(c => new AnimationLoop.Frame(
+                TimeSpan.FromMilliseconds(40), () =>
                 {
-                    if      (pressedKey == ConsoleKey.F1) _display.PendingCommand = "F1";
-                    else if (pressedKey == ConsoleKey.F2) _display.PendingCommand = "F2";
-                    else if (pressedKey == ConsoleKey.F3) _display.PendingCommand = "F3";
-                    else if (pressedKey == ConsoleKey.F4) _display.PendingCommand = "F4";
-                    else if (pressedKey == ConsoleKey.F5) _display.PendingCommand = "F5";
-                    else if (pressedKey == ConsoleKey.F6) _display.PendingCommand = "F6";
-                    else if (pressedKey == ConsoleKey.F7) _display.PendingCommand = "F7";
-                    else if (pressedKey == ConsoleKey.F8) _display.PendingCommand = "F8";
-                    else if (pressedKey == ConsoleKey.F9) _display.PendingCommand = "F9";
-                    else if (pressedKey == ConsoleKey.F10 && _display.JournalShown) _display.PendingCommand = "F10";
-                    else if (pressedKey == ConsoleKey.Enter || pressedKey == ConsoleKey.Spacebar) break;
-                    // any other key (incl. Fn spurious codes, media keys) — ignored
-                }
-            }
+                    if (skipText) return;
+                    msg.Text += c;
+                    Sound.PlayTyping(c);
+                    RebuildCache();
+                    RerenderDialogBlock(DrawSpinner);
+                })), () =>
+                {
+                    PollAndHandleTabSwitch();
+                    var key = ConsoleMouseReader.TryReadKeyDown();
+                    if (key is ConsoleKey.Enter or ConsoleKey.Spacebar) skipText = true;
+                    else if (key.HasValue && key.Value >= ConsoleKey.F1 && key.Value <= ConsoleKey.F10)
+                        SwitchTab(key.Value.ToString());
+                }, stop: () => skipText, catchUp: false);
             msg.Text = entry.Text;
             RebuildCache();
             RerenderDialogBlock(DrawSpinner);
@@ -721,7 +765,7 @@ public class DialogDisplay
         var rng = new Random();
 
         await StreamHistoryEntries(request.History);
-        while (Console.KeyAvailable) Console.ReadKey(true);
+        while (ConsoleMouseReader.TryReadKeyDown().HasValue) { }
 
         // Show static dice + start countdown
         _animationRightLines = BuildRollPanel(request,
@@ -777,7 +821,7 @@ public class DialogDisplay
                 }
                 // все остальные клавиши игнорируются
             }
-            await Task.Delay(16);
+            await Animations.DelayAsync(TimeSpan.FromMilliseconds(16));
         }
 
         // Determine rolls. Таймер истёк — бросок за игрока, честный: раньше засчитывалась 1 (критический провал), и
@@ -797,58 +841,9 @@ public class DialogDisplay
                          : usedRoll == 1  ? "critical_failure"
                          : null;
 
-        Sound.PlayDiceRoll();
+        var soundStarted = Sound.PlayDiceRoll();
+        while (!soundStarted.IsCompleted) await PollingDelay(8);
 
-        // Наведение мышью (инвентарь/карта) во время анимации триггерит дорогие перерисовки
-        // (RedrawAll) вперемешку с рендером самой анимации — она начинает тормозить и
-        // расходиться со звуком. Пока кубик реально крутится/докручивается — наводить/кликать/
-        // нажимать клавиши нельзя. PollAction временно заменён на "поглотитель": он ДРЕНИРУЕТ
-        // мышь и клавиатуру (не даёт им просто накопиться в буфере), но ничего не применяет —
-        // иначе клик/нажатие во время броска молча ждали бы своей очереди и сработали бы уже
-        // ПОСЛЕ окончания анимации (переключали вкладку с запозданием — выглядит багом).
-        var savedPollAction = _display.PollAction;
-        _display.PollAction = () =>
-        {
-            ConsoleMouseReader.DrainMouseEvents();
-            while (Console.KeyAvailable) Console.ReadKey(intercept: true);
-        };
-
-        // Затемняем "[Fx]" в заголовке экрана и все вкладки/стрелки текущего экрана (F6/F7/F8,
-        // пагинация инвентаря/способностей, ▲▼ диалога, ◄► записки — тот же ColorHelper.Darker,
-        // что и у остальных неактивных стрелок) — явно показывает, что кнопки сейчас некликабельны,
-        // а не просто молча их игнорировать.
-        void SetTitleDisabled(bool disabled)
-        {
-            _display.InputDisabled = disabled;
-
-            if (_display.TabSwitchProvider != null && _display.ActiveTabKey != null)
-            {
-                var (_, activeTitle) = _display.TabSwitchProvider(_display.ActiveTabKey);
-                if (activeTitle != null)
-                {
-                    int sl = Console.CursorLeft, st = Console.CursorTop;
-                    bool cv = Console.CursorVisible;
-                    Console.CursorVisible = false;
-                    Console.SetCursorPosition(0, 0);
-                    _cachedBorderDrawer.DrawTopBorder();
-                    _cachedBorderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(activeTitle, _display, disabled));
-                    Console.SetCursorPosition(sl, st);
-                    Console.CursorVisible = cv;
-                }
-            }
-
-            // Перерисовать содержимое текущего экрана (карточка героя/карта) — F6/F7/F8 и
-            // стрелки пагинации живут там, не в диалоговом блоке.
-            if (_display.RedrawCurrentContent != null)
-            {
-                int sl2 = Console.CursorLeft, st2 = Console.CursorTop;
-                _display.RedrawCurrentContent();
-                Console.SetCursorPosition(sl2, st2);
-            }
-        }
-        SetTitleDisabled(true);
-
-        //await Task.Delay(1000);
         // Settle animation
         (int delay, float noise)[] frames =
         [
@@ -859,8 +854,10 @@ public class DialogDisplay
             (130, 0.3f), (160, 0.1f), (60, 0.0f),
         ];
 
-        foreach (var (delay, noise) in frames)
+        await Animations.PlayAsync(frames.Select(frame => new AnimationLoop.Frame(
+            TimeSpan.FromMilliseconds(frame.delay), () =>
         {
+            var noise = frame.noise;
             int d1 = noise > 0 ? rng.Next(1, 21) : roll1;
             int d2 = noise > 0 ? rng.Next(1, 21) : roll2;
             _animationRightLines = BuildRollPanel(request,
@@ -869,8 +866,7 @@ public class DialogDisplay
                 rolled: false);
             RebuildCache();
             RerenderDialogBlock(MakeTimerAction(-1));
-            await PollingDelay(delay);
-        }
+        })), PollDuringStreaming, catchUp: false);
 
         // Кубик докрутился — сперва сырое значение без модификаторов. При преимуществе/помехе
         // модификаторы применяются только к ИСПОЛЬЗУЕМОЙ кости (roll1 при equal/обычном броске);
@@ -935,9 +931,6 @@ public class DialogDisplay
         RerenderDialogBlock(DrawSpinner);
         await PollingDelay(1500);
 
-        _display.PollAction = savedPollAction;
-        SetTitleDisabled(false);
-
         // Animation done; keep panel frozen until player selects/hovers something.
         _animationInProgress = false;
         return usedRoll;
@@ -945,6 +938,7 @@ public class DialogDisplay
 
     private Action MakeTimerAction(int secondsLeft) => () =>
     {
+        _spinnerFooterVisible = secondsLeft < 0;
         if (HasSplit)
             _cachedBorderDrawer.DrawSeparatorWith2Parts('┴', LeftWidth, RightPanelWidth);
         else
@@ -952,12 +946,6 @@ public class DialogDisplay
 
         if (secondsLeft < 0)
         {
-            var now = DateTime.UtcNow;
-            if ((now - _lastSpinnerAdvance).TotalMilliseconds >= SpinnerIntervalMs)
-            {
-                _spinnerFrame++;
-                _lastSpinnerAdvance = now;
-            }
             string frame = Spinner.Frames[_spinnerFrame % Spinner.Frames.Length];
             _cachedBorderDrawer.DrawContentLine(() =>
                 ColorHelper.WriteColored($" {frame} Бросок...", _display.SystemCommandHistory));
@@ -1124,16 +1112,18 @@ public class DialogDisplay
         ];
 
         _animationInProgress = true;
-        Sound.PlayDiceRoll();
-        foreach (var (delay, intensity) in frames)
+        var soundStarted = Sound.PlayDiceRoll();
+        while (!soundStarted.IsCompleted) await PollingDelay(8);
+        await Animations.PlayAsync(frames.Select(frame => new AnimationLoop.Frame(
+            TimeSpan.FromMilliseconds(frame.delay), () =>
         {
+            var intensity = frame.intensity;
             int displayNumber = intensity > 0 ? rng.Next(1, diceMax + 1) : result;
             _animationRightLines = intensity > 0
                 ? DiceArt.GetNoisyD20Lines(displayNumber, intensity, rng)
                 : DiceArt.GetD20Lines(result);
             RerenderDialogBlock();
-            await PollingDelay(delay);
-        }
+        })), PollDuringStreaming, catchUp: false);
 
         // Return to normal
         await PollingDelay(2000);
@@ -1142,46 +1132,46 @@ public class DialogDisplay
         RerenderDialogBlock();
     }
 
+    private void DrawDialogText(DisplayLine line)
+    {
+        Console.Write(" ");
+        if (line.IsSystem)
+        {
+            string fullLine = (line.Prefix ?? "") + line.Text;
+            ColorHelper.WriteColored(fullLine, line.PrefixColor ?? _display.SystemCommandHistory);
+        }
+        else
+        {
+            if (!string.IsNullOrEmpty(line.Prefix))
+            {
+                if (line.PrefixColor != null)
+                    ColorHelper.WriteColored(line.Prefix, line.PrefixColor);
+                else
+                    Console.Write(line.Prefix);
+            }
+            if (line.Highlight && _highlighter != null)
+            {
+                int depth = line.BracketDepthAtStart;
+                foreach (var (text, color) in _highlighter.Segments(line.Text, ref depth))
+                {
+                    var fg = color ?? line.BaseColor;
+                    if (fg == null) Console.Write(text);
+                    else ColorHelper.WriteColored(text, fg);
+                }
+            }
+            else if (line.BaseColor != null)
+                ColorHelper.WriteColored(line.Text, line.BaseColor);
+            else
+                Console.Write(line.Text);
+        }
+    }
+
     private void DrawDialogLine(DisplayLine line, Action rightContent)
     {
-        void drawContent()
-        {
-            Console.Write(" ");
-            if (line.IsSystem)
-            {
-                string fullLine = (line.Prefix ?? "") + line.Text;
-                ColorHelper.WriteColored(fullLine, line.PrefixColor ?? _display.SystemCommandHistory);
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(line.Prefix))
-                {
-                    if (line.PrefixColor != null)
-                        ColorHelper.WriteColored(line.Prefix, line.PrefixColor);
-                    else
-                        Console.Write(line.Prefix);
-                }
-                if (line.Highlight && _highlighter != null)
-                {
-                    int depth = line.BracketDepthAtStart;
-                    foreach (var (text, color) in _highlighter.Segments(line.Text, ref depth))
-                    {
-                        var fg = color ?? line.BaseColor;
-                        if (fg == null) Console.Write(text);
-                        else ColorHelper.WriteColored(text, fg);
-                    }
-                }
-                else if (line.BaseColor != null)
-                    ColorHelper.WriteColored(line.Text, line.BaseColor);
-                else
-                    Console.Write(line.Text);
-            }
-        }
-
         if (HasSplit)
-            _cachedBorderDrawer.DrawContentLine2Columns(drawContent, rightContent, LeftWidth, RightPanelWidth);
+            _cachedBorderDrawer.DrawContentLine2Columns(() => DrawDialogText(line), rightContent, LeftWidth, RightPanelWidth);
         else
-            _cachedBorderDrawer.DrawContentLine(drawContent);
+            _cachedBorderDrawer.DrawContentLine(() => DrawDialogText(line));
     }
 
     private void DrawEmptyDialogLine(Action rightContent)
@@ -1195,6 +1185,11 @@ public class DialogDisplay
     private void RerenderDialogBlock(Action? afterDraw = null)
     {
         if (_cachedBorderDrawer == null) return;
+        if (afterDraw != null)
+        {
+            _footerDraw = afterDraw;
+            _spinnerFooterVisible = afterDraw == (Action)DrawSpinner;
+        }
         int savedCursorLeft = Console.CursorLeft;
         int savedCursorTop = Console.CursorTop;
         bool savedCursorVisible = Console.CursorVisible;
@@ -1218,9 +1213,12 @@ public class DialogDisplay
         if (_display.TabSwitchProvider == null) return false;
         var (draw, title) = _display.TabSwitchProvider(tabKey);
         if (draw == null || title == null) return false;
-        _display.MapHoverEnabled = tabKey == "F1";
+        ConsoleMouseReader.CancelDrag();
+        MouseUiHelper.CancelPreparedPicture(_display);
+        _display.MapHoverEnabled = tabKey is "F1" or "F2";
         _display.StreamingTabTitle = title;
-        if (tabKey != "F1") { _display.HoveredCell = null; _display.HoveredDoor = null; }
+        _dialogContentDrawn = false;
+        if (tabKey is not ("F1" or "F2")) { _display.HoveredCell = null; _display.HoveredDoor = null; }
         Console.CursorVisible = false;
         Console.SetCursorPosition(0, 0);
         _cachedBorderDrawer.DrawTopBorder();
@@ -1250,7 +1248,7 @@ public class DialogDisplay
         // Update poll action for the new tab context
         Func<object, Action?>? factory = tabKey switch
         {
-            "F1" => _display.MapPollActionFactory,
+            "F1" or "F2" => _display.MapPollActionFactory,
             "F3" => _display.JournalPollActionFactory,
             "F6" or "F7" or "F8" or "F9" or "F10" when journalSub => _display.JournalPollActionFactory,
             "F4" or "F6" or "F7" or "F8" or "F9" => _display.CharacterPollActionFactory,
@@ -1281,23 +1279,13 @@ public class DialogDisplay
             _display.OnShiftTabKey = null;
         }
 
+        RerenderDialogBlock(_footerDraw);
         return true;
     }
 
     private void PollDuringStreaming()
     {
-        // PollAction always called — MapHoverEnabled inside it guards entity/door redraws.
-        // Skip entirely only when dice animation is active (protect animation image).
-        if (!_animationInProgress)
-        {
-            _display.PollAction?.Invoke();
-            if (_display.PendingCommand != null)
-            {
-                var cmd = _display.PendingCommand;
-                _display.PendingCommand = null;
-                SwitchTab(cmd);
-            }
-        }
+        PollAndHandleTabSwitch();
 
         // Drain keyboard events so they don't block DrainMouseEvents (which stops at the first
         // non-mouse record). KeyAvailable check makes this non-blocking.
@@ -1327,14 +1315,26 @@ public class DialogDisplay
         }
     }
 
+    private void RedrawStreamingFooter()
+    {
+        if (_cachedBorderDrawer == null || !_isStreaming || !_spinnerFooterVisible) return;
+        int left = Console.CursorLeft, top = Console.CursorTop;
+        bool visible = Console.CursorVisible;
+        try
+        {
+            Console.CursorVisible = false;
+            Console.SetCursorPosition(0, _dialogBlockStartTop + 2 + _display.MaxHistoryLines);
+            DrawSpinner();
+        }
+        finally
+        {
+            Console.SetCursorPosition(left, top);
+            Console.CursorVisible = visible;
+        }
+    }
+
     private void DrawSpinner()
     {
-        var now = DateTime.UtcNow;
-        if ((now - _lastSpinnerAdvance).TotalMilliseconds >= SpinnerIntervalMs)
-        {
-            _spinnerFrame++;
-            _lastSpinnerAdvance = now;
-        }
         string frame = Spinner.Frames[_spinnerFrame % Spinner.Frames.Length];
         if (HasSplit)
             _cachedBorderDrawer.DrawSeparatorWith2Parts('┴', LeftWidth, RightPanelWidth);
@@ -1351,7 +1351,7 @@ public class DialogDisplay
         if (_cachedPages == null) RebuildCache();
 
         await StreamHistoryEntries(request.History);
-        while (Console.KeyAvailable) Console.ReadKey(true);
+        while (ConsoleMouseReader.TryReadKeyDown().HasValue) { }
 
         var deadline = DateTime.UtcNow.AddSeconds(50);
 
@@ -1385,7 +1385,7 @@ public class DialogDisplay
         if (_cachedPages == null) RebuildCache();
 
         await StreamHistoryEntries(request.History);
-        while (Console.KeyAvailable) Console.ReadKey(true);
+        while (ConsoleMouseReader.TryReadKeyDown().HasValue) { }
 
         bool onMap = _display.StreamingTabTitle == null ? _display.ActiveTabKey == "F1" : _display.MapHoverEnabled;
         if (!onMap) SwitchTab("F1");
@@ -1505,7 +1505,7 @@ public class DialogDisplay
                 }
             }
 
-            await Task.Delay(16);
+            await Animations.DelayAsync(TimeSpan.FromMilliseconds(16));
         }
 
         _display.TargetSelection = null;
@@ -1624,7 +1624,7 @@ public class DialogDisplay
                 SwitchTab(cmd);
             }
 
-            await Task.Delay(16);
+            await Animations.DelayAsync(TimeSpan.FromMilliseconds(16));
         }
     }
 
@@ -1756,7 +1756,7 @@ public class DialogDisplay
                 }
             }
 
-            await Task.Delay(16);
+            await Animations.DelayAsync(TimeSpan.FromMilliseconds(16));
         }
     }
 

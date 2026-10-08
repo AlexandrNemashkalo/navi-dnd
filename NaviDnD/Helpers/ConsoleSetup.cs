@@ -264,7 +264,9 @@ internal static class ConsoleSetup
             if (!Directory.Exists(dir)) return;
             var files = Directory.GetFiles(dir, "*.ttf");
             foreach (var f in files) AddFontResourceEx(f, 0, IntPtr.Zero);
-            SendMessageTimeout((IntPtr)0xffff, 0x001D /* WM_FONTCHANGE */, IntPtr.Zero, IntPtr.Zero, 2, 1000, out _);
+            // Уведомляем о шрифтах без ожидания остальных приложений: таймаут HWND_BROADCAST
+            // применяется к каждому окну отдельно и может задержать появление меню на секунды.
+            PostMessage((IntPtr)0xffff, 0x001D /* WM_FONTCHANGE */, IntPtr.Zero, IntPtr.Zero);
             AppDomain.CurrentDomain.ProcessExit += (_, _) => { foreach (var f in files) RemoveFontResourceEx(f, 0, IntPtr.Zero); };
         }
         catch { /* не подключились — в списке останутся, консоль подставит свой шрифт */ }
@@ -277,7 +279,7 @@ internal static class ConsoleSetup
     private static extern bool RemoveFontResourceEx(string file, uint flags, IntPtr reserved);
 
     [DllImport("user32.dll")]
-    private static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam, uint flags, uint timeout, out IntPtr result);
+    private static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
     internal static string FontFace = "Consolas";
     internal static int FullscreenFontSize;
     private const short BaseFontSize = 16;

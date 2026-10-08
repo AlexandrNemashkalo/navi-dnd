@@ -1,4 +1,4 @@
-﻿using NaviDnD.Data;
+using NaviDnD.Data;
 using NaviDnD.Data.Models;
 using NaviDnD.Display;
 using NaviDnD.Helpers;
@@ -252,14 +252,14 @@ internal static class MouseUiHelper
         {
             int savedLeft = Console.CursorLeft, savedTop = Console.CursorTop;
             Console.CursorVisible = false;
-            Console.SetCursorPosition(0, drawStartTop);
-            draw();
+            heroDisplay.RefreshSelection();
             dialog.RerenderRightPanel();
             Console.SetCursorPosition(savedLeft, savedTop);
         }
 
         return () =>
         {
+            if (ApplyPreparedPicture(display)) dialog.RerenderRightPanel();
             var activeTitle = display.StreamingTabTitle ?? title;
             var activeTabs  = display.StreamingTabTitle != null ? ComputeTitleTabs(activeTitle) : titleTabs;
 
@@ -470,6 +470,7 @@ internal static class MouseUiHelper
                     }
                     else
                     {
+                        CancelPreparedPicture(display);
                         display.SelectedInventoryIndex = -1;
                         display.SelectedImageLines = null;
                         display.SelectedImageColor = null;
@@ -560,6 +561,7 @@ internal static class MouseUiHelper
         string? hoveredTabKey = null;
         return () =>
         {
+            if (ApplyPreparedPicture(display)) dialog.RerenderRightPanel();
             var activeTitle = display.StreamingTabTitle ?? title;
             var activeTabs  = display.StreamingTabTitle != null ? ComputeTitleTabs(activeTitle) : titleTabs;
             var (mousePos, clickPos, _) = ConsoleMouseReader.DrainMouseEvents();
@@ -592,6 +594,7 @@ internal static class MouseUiHelper
         string? hoveredTabKey = null;
         return () =>
         {
+            if (ApplyPreparedPicture(display)) dialog.RerenderRightPanel();
             var activeTitle = display.StreamingTabTitle ?? title;
             var activeTabs  = display.StreamingTabTitle != null ? ComputeTitleTabs(activeTitle) : titleTabs;
 
@@ -734,8 +737,44 @@ internal static class MouseUiHelper
     // Предмет с читаемым текстом (item.Text): страница 0 — картинка+название (как обычный предмет),
     // страницы 1..N — сам текст, порезанный на страницы под высоту панели. Без текста — тот же
     // SetSelectedImage, что и раньше, NotePageCount=0 (стрелок листания нет).
+    private sealed class PendingPicture
+    {
+        public Task? Ready;
+        public Action? Apply;
+        public string[]? Previous;
+    }
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<DisplayConfig, PendingPicture> PendingPictures = new();
+
+    internal static bool PreparePicture(DisplayConfig display, string? image, Action apply)
+    {
+        var pending = PendingPictures.GetOrCreateValue(display);
+        pending.Apply = null;
+        var ready = SvgToBrailleConverter.PrepareAsync(image);
+        if (ready.IsCompleted) return true;
+        pending.Ready = ready;
+        pending.Previous = display.SelectedImageLines;
+        pending.Apply = apply;
+        return false;
+    }
+
+    internal static bool ApplyPreparedPicture(DisplayConfig display)
+    {
+        if (!PendingPictures.TryGetValue(display, out var pending) || pending.Ready?.IsCompleted != true || pending.Apply == null) return false;
+        var apply = pending.Apply;
+        pending.Apply = null;
+        if (!ReferenceEquals(pending.Previous, display.SelectedImageLines)) return false;
+        apply();
+        return true;
+    }
+
+    internal static void CancelPreparedPicture(DisplayConfig display)
+    {
+        if (PendingPictures.TryGetValue(display, out var pending)) pending.Apply = null;
+    }
+
     internal static void SetSelectedInventoryItem(DisplayConfig display, HeroInventory item, int page)
     {
+        if (!PreparePicture(display, item.Image, () => SetSelectedInventoryItem(display, item, page))) return;
         if (string.IsNullOrEmpty(item.Text))
         {
             SetSelectedImage(display, item.Image, item.Name, item.Color);
@@ -906,6 +945,7 @@ internal static class MouseUiHelper
     // показываем то немногое, что есть у самого героя (имя, круг), без остальных полей.
     internal static void SetSelectedSpell(DisplayConfig display, HeroSpell spell, int page)
     {
+        CancelPreparedPicture(display);
         var info = SpellDatabase.Find(spell.Name);
         int total = display.MaxHistoryLines;
         int textWidth = Math.Max(1, display.DialogRightPanelWidth - 2);

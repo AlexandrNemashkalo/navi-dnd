@@ -1,4 +1,4 @@
-﻿using NaviDnD.Clients;
+using NaviDnD.Clients;
 using NaviDnD.Data;
 using NaviDnD.Data.Models;
 using NaviDnD.Display;
@@ -73,10 +73,14 @@ internal class MapScreenLoop
             if (!jumped) _mapDisplay.FollowHero();
         }
 
+        Dictionary<(int col, int row, bool d), (int cost, (int col, int row, bool d)? parent)>? hoverReachability = null;
+        (int col, int row, bool diagonal)? hoverSearchOrigin = null;
+
         Action redrawAction = () =>
         {
             Console.CursorVisible = false;
             Console.SetCursorPosition(0, mapDrawTop);
+            hoverReachability = null;
             mapObjectsProvider.Refresh();
             FollowHeroIfMoved();
             _mapDisplay.DrawMap(mapObjectsProvider);
@@ -91,6 +95,10 @@ internal class MapScreenLoop
             Console.SetCursorPosition(sl, st);
             Console.CursorVisible = vis;
         };
+        DialogDisplay? hoverDialog = null;
+        Task? pendingImageLoad = null;
+        Action? pendingImageUpdate = null;
+        string[]? imageBeforeLoad = null;
         _display.OnTabKey = () =>
         {
             int total = _legendDisplay.GetSelectableMapItemCount();
@@ -98,7 +106,7 @@ internal class MapScreenLoop
             {
                 _display.SelectedMapItemIndex = _display.SelectedMapItemIndex < 0 ? 0
                     : (_display.SelectedMapItemIndex + 1) % total;
-                MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings);
+                SetMapEntityImage();
             }
         };
         _display.OnShiftTabKey = () =>
@@ -108,10 +116,9 @@ internal class MapScreenLoop
             {
                 _display.SelectedMapItemIndex = _display.SelectedMapItemIndex <= 0 ? total - 1
                     : _display.SelectedMapItemIndex - 1;
-                MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings);
+                SetMapEntityImage();
             }
         };
-        DialogDisplay? hoverDialog = null;
         DateTime? hoverSince = null;
         (int col, int row)? pendingHoverCell = null;
         // Мебель/лестница под курсором, чья картинка сейчас в блоке картинок (наведение на клетку без существа).
@@ -122,8 +129,46 @@ internal class MapScreenLoop
         (int col, int row, bool isHorizontal)? hoveredDoorWall = null;
         var titleTabs = MouseUiHelper.ComputeTitleTabs(title);
         string? hoveredTabKey = null;
+        (short x, short y)? pendingMousePosition = null;
+
+        void ApplyPreparedImage()
+        {
+            if (pendingImageLoad?.IsCompleted != true || pendingImageUpdate == null) return;
+            var apply = pendingImageUpdate;
+            pendingImageLoad = null;
+            pendingImageUpdate = null;
+            // A different screen/card may have replaced this request while the image loaded.
+            if (!ReferenceEquals(imageBeforeLoad, _display.SelectedImageLines)) return;
+            apply();
+            (hoverDialog ?? _aiClient.ActiveDialog)?.RerenderRightPanel();
+        }
+
+        void QueueImage(string? image, Action apply)
+        {
+            imageBeforeLoad = _display.SelectedImageLines;
+            pendingImageUpdate = apply;
+            pendingImageLoad = SvgToBrailleConverter.PrepareAsync(image);
+            ApplyPreparedImage();
+        }
+
+        void SetMapImage(string? image, string? name, List<int>? color = null) =>
+            QueueImage(image, () => MouseUiHelper.SetSelectedImage(_display, image, name, color));
+
+        void SetMapEntityImage(int page = 0)
+        {
+            var (image, _, _) = _legendDisplay.GetSelectedEntityImageAndName();
+            int selected = _display.SelectedMapItemIndex;
+            QueueImage(page == 0 ? image : null, () =>
+            {
+                if (_display.SelectedMapItemIndex == selected)
+                    MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings, page);
+            });
+        }
+
         _display.PollAction = () =>
         {
+            var activeDialog = hoverDialog ?? _aiClient.ActiveDialog;
+            ApplyPreparedImage();
             // During streaming the active title may change (SwitchTab); recompute tabs from it.
             var activeTitle = _display.StreamingTabTitle ?? title;
             var activeTabs = _display.StreamingTabTitle != null
@@ -131,7 +176,8 @@ internal class MapScreenLoop
                 : titleTabs;
 
             var (mousePos, clickPos, _) = ConsoleMouseReader.DrainMouseEvents();
-            MouseUiHelper.HandleDialogArrowClick(clickPos, hoverDialog);
+            if (ConsoleMouseReader.IsDragging) { pendingMousePosition = null; return; }
+            MouseUiHelper.HandleDialogArrowClick(clickPos, activeDialog);
             if (clickPos.HasValue)
             {
                 var clickedTabKey = MouseUiHelper.GetHoveredTabKey(clickPos.Value.x, clickPos.Value.y, activeTabs);
@@ -147,7 +193,7 @@ internal class MapScreenLoop
                     return;
                 }
                 // Карта мира: клик по переключателю фильтра в легенде.
-                if (_display.MapHoverEnabled && hoverDialog != null && _display.MapLevel == MapLevel.World)
+                if (_display.MapHoverEnabled && activeDialog != null && _display.MapLevel == MapLevel.World)
                 {
                     var zones = _mapDisplay.WorldLegendHitZones();
                     int zi = Array.FindIndex(zones, z => clickPos.Value.y == z.row && clickPos.Value.x >= z.x0 && clickPos.Value.x <= z.x1);
@@ -166,39 +212,46 @@ internal class MapScreenLoop
                 }
                 // Карта мира: зажал и тянешь — изображение едет за курсором (как карта в браузере); клик без
                 // сдвига по месту — выбрать его.
-                if (_display.MapHoverEnabled && hoverDialog != null && _display.MapLevel == MapLevel.World
+                if (_display.MapHoverEnabled && activeDialog != null && _display.MapLevel == MapLevel.World
                     && _mapDisplay.IsInMapArea(clickPos.Value))
                 {
                     int clickedPlace = _mapDisplay.WorldHit(clickPos.Value).place;
                     double startX = _display.WorldCenterX, startY = _display.WorldCenterY;
                     bool worldPanned = false;
-                    ConsoleMouseReader.TrackDrag(clickPos.Value, (dx, dy) =>
+                    double lastCenterX = startX, lastCenterY = startY;
+                    ConsoleMouseReader.BeginDrag(clickPos.Value, (dx, dy) =>
                     {
                         worldPanned = true;
                         _mapDisplay.PanWorld(startX, startY, dx, dy);
-                        RedrawWorldKeepCursor();
-                    });
-                    if (!worldPanned)
+                        if (_display.WorldCenterX == lastCenterX && _display.WorldCenterY == lastCenterY) return;
+                        lastCenterX = _display.WorldCenterX;
+                        lastCenterY = _display.WorldCenterY;
+                        RedrawWorldKeepCursor(refreshLegend: false);
+                    }, () =>
                     {
-                        // Клик — цель пути (место или любая клетка, в т.ч. в неизведанное); по месту — ещё и выбрать его.
-                        var hit = _mapDisplay.WorldHit(clickPos.Value);
-                        if (clickedPlace >= 0) _display.SelectedWorldPlace = clickedPlace;
-                        Sound.PlayClick();
-                        if (hit is { } th) SetTravelTarget(clickedPlace >= 0 ? (_mapDisplay.WorldView.World.Places[clickedPlace].X, _mapDisplay.WorldView.World.Places[clickedPlace].Y) : (th.x, th.y));
-                        if (clickedPlace >= 0) ShowWorldPlaceCard(clickedPlace);
-                        RedrawWorldKeepCursor();
-                        RerenderRightPanelKeepCursor();
-                    }
+                        if (worldPanned) RedrawWorldKeepCursor();
+                        if (!worldPanned)
+                        {
+                            // Клик — цель пути (место или любая клетка, в т.ч. в неизведанное); по месту — ещё и выбрать его.
+                            var hit = _mapDisplay.WorldHit(clickPos.Value);
+                            if (clickedPlace >= 0) _display.SelectedWorldPlace = clickedPlace;
+                            Sound.PlayClick();
+                            if (hit is { } th) SetTravelTarget(clickedPlace >= 0 ? (_mapDisplay.WorldView.World.Places[clickedPlace].X, _mapDisplay.WorldView.World.Places[clickedPlace].Y) : (th.x, th.y));
+                            if (clickedPlace >= 0) ShowWorldPlaceCard(clickedPlace);
+                            RedrawWorldKeepCursor();
+                            RerenderRightPanelKeepCursor();
+                        }
+                    });
                     return;
                 }
                 // Локация — поле до 100×100: зажал и тянешь — камера едет. Отпустил, не сдвинув, — обычный клик.
-                if (_display.MapHoverEnabled && hoverDialog != null && _display.MapLevel == MapLevel.Location
+                if (_display.MapHoverEnabled && activeDialog != null && _display.MapLevel == MapLevel.Location
                     && _mapDisplay.IsInMapArea(clickPos.Value))
                 {
                     int startCol = _display.CameraCol, startRow = _display.CameraRow;
                     int lastCol = startCol, lastRow = startRow;
                     bool panned = false;
-                    ConsoleMouseReader.TrackDrag(clickPos.Value, (dx, dy) =>
+                    ConsoleMouseReader.BeginDrag(clickPos.Value, (dx, dy) =>
                     {
                         _mapDisplay.PanCamera(startCol, startRow, dx, dy);
                         // Мышь сдвинулась меньше, чем на клетку, — камера та же, кадр не перерисовываем.
@@ -210,11 +263,19 @@ internal class MapScreenLoop
                         bool vis = Console.CursorVisible;
                         int sl = Console.CursorLeft, st = Console.CursorTop;
                         Console.CursorVisible = false;
-                        _mapDisplay.RedrawLocationViewport(mapObjectsProvider); // только область карты, одной записью
+                        _mapDisplay.RedrawLocationViewport(mapObjectsProvider, refreshLegend: false); // только область карты, одной записью
                         Console.SetCursorPosition(sl, st);
                         Console.CursorVisible = vis;
+                    }, () =>
+                    {
+                        if (!panned) HandleMapClick(clickPos.Value);
+                        else
+                        {
+                            int sl = Console.CursorLeft, st = Console.CursorTop;
+                            _mapDisplay.RefreshLegend();
+                            Console.SetCursorPosition(sl, st);
+                        }
                     });
-                    if (!panned) HandleMapClick(clickPos.Value);
                     return;
                 }
                 if (_display.MapHoverEnabled) HandleMapClick(clickPos.Value);
@@ -223,15 +284,15 @@ internal class MapScreenLoop
             // Карта мира: колесо мыши — приблизить (от себя) / отдалить, относительно точки под курсором.
             // Прокрутку забираем всегда — иначе накопленная на других видах сработала бы позже.
             int wheel = ConsoleMouseReader.TakeWheel(out var wheelPos);
-            if (MouseUiHelper.HandleDialogWheel(hoverDialog, wheel, wheelPos)) { }   // над диалогом — листать историю
-            else if (wheel != 0 && _display.MapHoverEnabled && hoverDialog != null
+            if (MouseUiHelper.HandleDialogWheel(activeDialog, wheel, wheelPos)) { }   // над диалогом — листать историю
+            else if (wheel != 0 && _display.MapHoverEnabled && activeDialog != null
                 && _display.MapLevel == MapLevel.World && _mapDisplay.IsInMapArea(wheelPos))
             {
                 _mapDisplay.ZoomWorld(wheel, wheelPos);
                 RedrawWorldKeepCursor();
             }
             // Местность: колесо над легендой — прокрутка списка (от себя — вверх).
-            else if (wheel != 0 && hoverDialog != null && _display.MapLevel == MapLevel.Location
+            else if (wheel != 0 && activeDialog != null && _display.MapLevel == MapLevel.Location
                 && wheelPos.x >= _mapDisplay.LegendX && wheelPos.y > _display.MapDrawTop
                 && wheelPos.y <= _display.MapDrawTop + _legendDisplay.SeparatorLineIndex)
             {
@@ -261,13 +322,13 @@ internal class MapScreenLoop
                     }
                     else
                     {
-                        var (isOnUp, isOnDown) = MouseUiHelper.DialogArrowHover(mousePos.Value, hoverDialog);
+                        var (isOnUp, isOnDown) = MouseUiHelper.DialogArrowHover(mousePos.Value, activeDialog);
                         // Карту мира можно тянуть — над ней курсор-«рука».
-                        bool overWorld = _display.MapHoverEnabled && hoverDialog != null
+                        bool overWorld = _display.MapHoverEnabled && activeDialog != null
                             && _display.MapLevel == MapLevel.World && _mapDisplay.IsInMapArea(mousePos.Value);
-                        if (_display.MapLevel == MapLevel.World && hoverDialog != null) UpdateWorldHover(overWorld ? mousePos.Value : null);
+                        if (_display.MapLevel == MapLevel.World && activeDialog != null) UpdateWorldHover(overWorld ? mousePos.Value : null);
                         ConsoleMouseReader.SetCursorShape(isOnUp || isOnDown || overWorld);
-                        hoverDialog?.SetArrowHover(isOnUp, isOnDown);
+                        activeDialog?.SetArrowHover(isOnUp, isOnDown);
                     }
                 }
                 return;
@@ -288,19 +349,17 @@ internal class MapScreenLoop
                     _display.SelectedMapItemIndex = commitIdx;
                     if (commitIdx >= 0)
                     {
-                        MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings);
+                        SetMapEntityImage();
                     }
                     else
                     {
-                        MouseUiHelper.SetSelectedImage(_display, null, null, null);
+                        SetMapImage(null, null, null);
                     }
                     bool vis0 = Console.CursorVisible;
                     Console.CursorVisible = false;
                     int sl0 = Console.CursorLeft, st0 = Console.CursorTop;
-                    Console.SetCursorPosition(0, _display.MapDrawTop);
-                    _mapDisplay.DrawMap(mapObjectsProvider);
-                    hoverDialog?.RerenderRightPanel();
-                    ApplyPostRedrawDrain();
+                    _mapDisplay.RefreshLegend();
+                    activeDialog?.RerenderRightPanel();
                     SyncHoverImage();
                     Console.SetCursorPosition(sl0, st0);
                     Console.CursorVisible = vis0;
@@ -318,15 +377,17 @@ internal class MapScreenLoop
                 string doorLabel = committedDoor.IsWorldExit == true ? "Выход на карту мира"
                     : committedDoor.IsWindow == true ? ((committedDoor.IsDoorOpen ?? false) ? "Окно открыто" : "Окно")
                     : (committedDoor.IsDoorOpen ?? false) ? "Дверь открыта" : "Дверь закрыта";
-                MouseUiHelper.SetSelectedImage(_display, MouseUiHelper.DoorImage(committedDoor, _settings.Map), doorLabel, committedDoor.Color);
+                SetMapImage(MouseUiHelper.DoorImage(committedDoor, _settings.Map), doorLabel, committedDoor.Color);
                 bool visDoor = Console.CursorVisible;
                 Console.CursorVisible = false;
                 int slDoor = Console.CursorLeft, stDoor = Console.CursorTop;
-                hoverDialog?.RerenderRightPanel();
+                activeDialog?.RerenderRightPanel();
                 Console.SetCursorPosition(slDoor, stDoor);
                 Console.CursorVisible = visDoor;
             }
 
+            mousePos ??= pendingMousePosition;
+            pendingMousePosition = null;
             if (mousePos == null) return;
 
             // Title tab hover
@@ -348,7 +409,7 @@ internal class MapScreenLoop
             if (wallDoor != null)
             {
                 ConsoleMouseReader.SetCursorShape(true);
-                hoverDialog?.SetArrowHover(false, false);
+                activeDialog?.SetArrowHover(false, false);
 
                 if (wallDoor != _display.HoveredDoor)
                 {
@@ -371,10 +432,13 @@ internal class MapScreenLoop
                         _display.SelectedMapItemIndex = -1;
                         _display.HoveredDoor = wallDoor;
                         hoveredDoorWall = wall;
-                        MouseUiHelper.SetSelectedImage(_display, null, null, null);
-                        Console.SetCursorPosition(0, _display.MapDrawTop);
-                        _mapDisplay.DrawMap(mapObjectsProvider);
-                        hoverDialog?.RerenderRightPanel();
+                        SetMapImage(null, null, null);
+                        if (doorOldCell.HasValue)
+                            _mapDisplay.RedrawCell(doorOldCell.Value.col, doorOldCell.Value.row, mapObjectsProvider);
+                        if (oldDoorWall.HasValue) RedrawDoor(oldDoorWall.Value);
+                        RedrawDoor(wall.Value);
+                        _mapDisplay.RefreshLegend();
+                        activeDialog?.RerenderRightPanel();
                     }
                     else
                     {
@@ -389,8 +453,8 @@ internal class MapScreenLoop
                         _display.HoveredDoor = wallDoor;
                         hoveredDoorWall = wall;
                         RedrawDoor(wall.Value);
-                        MouseUiHelper.SetSelectedImage(_display, null, null, null);
-                        hoverDialog?.RerenderRightPanel();
+                        SetMapImage(null, null, null);
+                        activeDialog?.RerenderRightPanel();
                     }
 
                     pendingHoverDoor = wallDoor;
@@ -421,8 +485,8 @@ internal class MapScreenLoop
                 pendingHoverDoor = null;
                 doorHoverSince = null;
                 shownFurniture = null;
-                MouseUiHelper.SetSelectedImage(_display, null, null, null);
-                hoverDialog?.RerenderRightPanel();
+                SetMapImage(null, null, null);
+                activeDialog?.RerenderRightPanel();
 
                 Console.SetCursorPosition(slC, stC);
                 Console.CursorVisible = visC;
@@ -430,11 +494,11 @@ internal class MapScreenLoop
 
             var cell = KnownCellOrNull(_mapDisplay.ScreenToCell(mousePos.Value.x, mousePos.Value.y));
 
-            var (isOnUpArrow, isOnDownArrow) = MouseUiHelper.DialogArrowHover(mousePos.Value, cell.HasValue ? null : hoverDialog);
-            var (isOnNoteLeft, isOnNoteRight) = MouseUiHelper.NotePageArrowHover(mousePos.Value, cell.HasValue ? null : hoverDialog, _display);
+            var (isOnUpArrow, isOnDownArrow) = MouseUiHelper.DialogArrowHover(mousePos.Value, cell.HasValue ? null : activeDialog);
+            var (isOnNoteLeft, isOnNoteRight) = MouseUiHelper.NotePageArrowHover(mousePos.Value, cell.HasValue ? null : activeDialog, _display);
             ConsoleMouseReader.SetCursorShape(cell.HasValue || isOnUpArrow || isOnDownArrow || isOnNoteLeft || isOnNoteRight);
-            hoverDialog?.SetArrowHover(isOnUpArrow, isOnDownArrow);
-            hoverDialog?.SetNoteArrowHover(isOnNoteLeft, isOnNoteRight);
+            activeDialog?.SetArrowHover(isOnUpArrow, isOnDownArrow);
+            activeDialog?.SetNoteArrowHover(isOnNoteLeft, isOnNoteRight);
 
             if (cell == _display.HoveredCell)
             {
@@ -447,6 +511,7 @@ internal class MapScreenLoop
             if (cell != mouseHoverCandidate)
             {
                 mouseHoverCandidate = cell;
+                pendingMousePosition = mousePos;
                 return;
             }
 
@@ -486,10 +551,9 @@ internal class MapScreenLoop
                 pendingHoverCell = null;
                 hoverSince = null;
                 RestorePinnedOrClear();
-                Console.SetCursorPosition(0, _display.MapDrawTop);
-                _mapDisplay.DrawMap(mapObjectsProvider);
-                hoverDialog?.RerenderRightPanel();
-                ApplyPostRedrawDrain();
+                if (oldCell.HasValue) _mapDisplay.RedrawCell(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
+                if (cell.HasValue) _mapDisplay.RedrawCell(cell.Value.col, cell.Value.row, mapObjectsProvider);
+                activeDialog?.RerenderRightPanel();
             }
 
             SyncHoverImage();
@@ -499,7 +563,6 @@ internal class MapScreenLoop
             Console.CursorVisible = vis;
 
             // Мебель или лестница под курсором (на клетке нет существа/объекта) — картинка и название в блоке картинок.
-            // По фактической клетке под курсором: после полной перерисовки ApplyPostRedrawDrain мог её сдвинуть.
             void SyncHoverImage()
             {
                 var cell = _display.HoveredCell;
@@ -517,28 +580,28 @@ internal class MapScreenLoop
                     {
                         string label = FurnitureCatalog.DisplayName(furnitureHere) + (string.IsNullOrEmpty(furnitureHere.State) ? "" : $" ({furnitureHere.State})");
                         if (FurnitureCatalog.Terrain(furnitureHere) is { } fk && TerrainCatalog.Properties(fk) is { } fprops) label += "\n" + fprops;
-                        MouseUiHelper.SetSelectedImage(_display, furnitureHere.Image ?? FurnitureCatalog.Get(furnitureHere.Kind)?.Image, label,
+                        SetMapImage(furnitureHere.Image ?? FurnitureCatalog.Get(furnitureHere.Kind)?.Image, label,
                             FurnitureCatalog.Terrain(furnitureHere)?.LegendColor);
-                        hoverDialog?.RerenderRightPanel();
+                        activeDialog?.RerenderRightPanel();
                     }
                     else if (stairHere != null)
                     {
                         var (sc, sr) = cell!.Value;
                         string label = _settings.Map.StairTarget(sc, sr) is var (tc, tr)
                             ? $"{stairHere.Name} → {MapConfig.FloorName(_settings.Map.FloorAt(tc, tr))}" : stairHere.Name;
-                        MouseUiHelper.SetSelectedImage(_display, TerrainCatalog.Image(stairHere), label, stairHere.LegendColor);
-                        hoverDialog?.RerenderRightPanel();
+                        SetMapImage(TerrainCatalog.Image(stairHere), label, stairHere.LegendColor);
+                        activeDialog?.RerenderRightPanel();
                     }
                     else if (terrainHere != null)
                     {
                         string label = terrainHere.Name + (TerrainCatalog.Properties(terrainHere) is { } tprops ? "\n" + tprops : "");
-                        MouseUiHelper.SetSelectedImage(_display, TerrainCatalog.Image(terrainHere), label, terrainHere.LegendColor ?? terrainHere.Fg);
-                        hoverDialog?.RerenderRightPanel();
+                        SetMapImage(TerrainCatalog.Image(terrainHere), label, terrainHere.LegendColor ?? terrainHere.Fg);
+                        activeDialog?.RerenderRightPanel();
                     }
                     else if (_display.SelectedMapItemIndex < 0)
                     {
-                        MouseUiHelper.SetSelectedImage(_display, null, null, null);
-                        hoverDialog?.RerenderRightPanel();
+                        SetMapImage(null, null, null);
+                        activeDialog?.RerenderRightPanel();
                     }
                 }
             }
@@ -551,44 +614,6 @@ internal class MapScreenLoop
                     _mapDisplay.RedrawVerticalWall(dw.col, dw.row, mapObjectsProvider);
             }
 
-            void ApplyPostRedrawDrain()
-            {
-                var latest = ConsoleMouseReader.DrainMouseMoves();
-                if (latest == null) return;
-                var latestCell = KnownCellOrNull(_mapDisplay.ScreenToCell(latest.Value.x, latest.Value.y));
-                if (latestCell == _display.HoveredCell) return;
-                var prev = _display.HoveredCell;
-                _display.HoveredCell = latestCell;
-                ConsoleMouseReader.SetCursorShape(latestCell.HasValue);
-                int latestEntityIdx = latestCell.HasValue
-                    ? _legendDisplay.GetSelectableIndexForCell(latestCell.Value.col, latestCell.Value.row)
-                    : -1;
-                int latestDesired = latestCell.HasValue && latestEntityIdx >= 0 ? latestEntityIdx : PinnedIndex();
-                if (latestDesired != _display.SelectedMapItemIndex)
-                {
-                    if (latestCell.HasValue && latestEntityIdx >= 0)
-                    {
-                        // New entity — start pending timer
-                        pendingHoverCell = latestCell;
-                        hoverSince = DateTime.UtcNow;
-                        if (prev.HasValue) _mapDisplay.RedrawCell(prev.Value.col, prev.Value.row, mapObjectsProvider);
-                        _mapDisplay.RedrawCell(latestCell!.Value.col, latestCell.Value.row, mapObjectsProvider);
-                    }
-                    else
-                    {
-                        // Пустая клетка или вне карты — вернуть закреплённое (или снять выбор).
-                        RestorePinnedOrClear();
-                        Console.SetCursorPosition(0, _display.MapDrawTop);
-                        _mapDisplay.DrawMap(mapObjectsProvider);
-                        hoverDialog?.RerenderRightPanel();
-                    }
-                }
-                else
-                {
-                    if (prev.HasValue)       _mapDisplay.RedrawCell(prev.Value.col, prev.Value.row, mapObjectsProvider);
-                    if (latestCell.HasValue) _mapDisplay.RedrawCell(latestCell.Value.col, latestCell.Value.row, mapObjectsProvider);
-                }
-            }
         };
         var capturedMapPollAction = _display.PollAction;
         _display.MapPollActionFactory = _ => capturedMapPollAction;
@@ -640,7 +665,7 @@ internal class MapScreenLoop
                     (title, image, color) = ("Вы здесь", _settings.Hero?.Image ?? image, _settings.Hero?.Color ?? color);
                 }
                 string second = string.Join(" · ", new[] { terrain, land }.Where(t => t.Length > 0));
-                MouseUiHelper.SetSelectedImage(_display, image, title + (second.Length > 0 ? "\n" + second : ""), color);
+                SetMapImage(image, title + (second.Length > 0 ? "\n" + second : ""), color);
             }
             else ShowWorldPlaceCard(_display.SelectedWorldPlace);
             RerenderRightPanelKeepCursor();
@@ -650,10 +675,10 @@ internal class MapScreenLoop
         void ShowWorldPlaceCard(int place)
         {
             var world = _mapDisplay.WorldView.World;
-            if (place < 0 || place >= world.Places.Count) { MouseUiHelper.SetSelectedImage(_display, null, null, null); return; }
+            if (place < 0 || place >= world.Places.Count) { SetMapImage(null, null, null); return; }
             var pl = world.Places[place];
             string kingdom = pl.Kingdom >= 0 && pl.Kingdom < world.Kingdoms.Count ? " · " + world.Kingdoms[pl.Kingdom].Name : "";
-            MouseUiHelper.SetSelectedImage(_display, WorldMapView.PlaceImage(pl.Type), pl.Name + "\n" + WorldPlaceTypes.Label(pl.Type) + kingdom,
+            SetMapImage(WorldMapView.PlaceImage(pl.Type), pl.Name + "\n" + WorldPlaceTypes.Label(pl.Type) + kingdom,
                 _mapDisplay.WorldView.PlaceLabelColor(pl));
         }
 
@@ -688,7 +713,7 @@ internal class MapScreenLoop
             bool heroTile = GameWorld.HeroTile(_settings) == target;
             var plan = heroTile ? null : TravelService.PlanTo(_settings, target);
             if (plan == null && !heroTile && GameWorld.HeroTile(_settings) != null)
-                MouseUiHelper.SetSelectedImage(_display, "lorc/waves", "Пешком не дойти\nвода или горные пики на пути", [110, 150, 200]);
+                SetMapImage("lorc/waves", "Пешком не дойти\nвода или горные пики на пути", [110, 150, 200]);
             _display.WorldTarget = plan != null ? target : null;
             _display.WorldRoute = plan?.Route.Path;
             var w = _mapDisplay.WorldView.World;
@@ -756,17 +781,17 @@ internal class MapScreenLoop
             if (sel >= 0 && sel < world.Places.Count && !_display.WorldFilter.Contains(WorldMapView.Category(world.Places[sel].Type)))
             {
                 _display.SelectedWorldPlace = -1;
-                MouseUiHelper.SetSelectedImage(_display, null, null, null);
+                SetMapImage(null, null, null);
             }
             RedrawWorldKeepCursor();
         }
 
-        void RedrawWorldKeepCursor()
+        void RedrawWorldKeepCursor(bool refreshLegend = true)
         {
             bool vis = Console.CursorVisible;
             int sl = Console.CursorLeft, st = Console.CursorTop;
             Console.CursorVisible = false;
-            _mapDisplay.RedrawWorldViewport();
+            _mapDisplay.RedrawWorldViewport(refreshLegend);
             Console.SetCursorPosition(sl, st);
             Console.CursorVisible = vis;
         }
@@ -788,7 +813,11 @@ internal class MapScreenLoop
             if (_settings.Combat?.Active != true || _settings.Combat.CurrentTurn != _settings.Hero.Symbol)
                 return new HoverPathInfo(distanceFt, false, null, null);
 
-            var reached = MovementCalculator.Dijkstra(_settings, hp[0], hp[1], 1000, -1, _storage.DiagonalUsed > 0, passPeaceful: true);
+            var origin = (hp[0], hp[1], _storage.DiagonalUsed > 0);
+            if (hoverSearchOrigin != origin) hoverReachability = null;
+            hoverSearchOrigin = origin;
+            var reached = hoverReachability ??= MovementCalculator.Dijkstra(
+                _settings, hp[0], hp[1], 1000, -1, origin.Item3, passPeaceful: true);
             int? Cost(int col, int row)
             {
                 if ((col, row) == (hp[0], hp[1])) return 0;
@@ -823,10 +852,10 @@ internal class MapScreenLoop
         void SelectMapItem(int idx)
         {
             _display.SelectedMapItemIndex = idx;
-            if (idx >= 0) MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings);
+            if (idx >= 0) SetMapEntityImage();
             else
             {
-                MouseUiHelper.SetSelectedImage(_display, null, null, null);
+                SetMapImage(null, null, null);
                 _display.NotePage = 0;
                 _display.NotePageCount = 0;
             }
@@ -847,7 +876,7 @@ internal class MapScreenLoop
                 int page = Math.Clamp(_display.NotePage + (click.x == a.leftX ? -1 : 1), 0, _display.NotePageCount - 1);
                 if (page == _display.NotePage) return;
                 Sound.PlayClick();
-                MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings, page);
+                SetMapEntityImage(page);
                 hoverDialog?.RerenderRightPanel();
                 return;
             }
@@ -875,7 +904,7 @@ internal class MapScreenLoop
             if (entity != _display.PinnedMapEntity) Sound.PlayClick(); // уже закреплён — повторный клик ничего не меняет
             _display.PinnedMapEntity = entity;
             if (!selectionChanged) return;
-            MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings);
+            SetMapEntityImage();
             RedrawSelection(true);
         }
 
@@ -887,10 +916,9 @@ internal class MapScreenLoop
             Console.CursorVisible = false;
             if (redrawMap)
             {
-                Console.SetCursorPosition(0, _display.MapDrawTop);
-                _mapDisplay.DrawMap(mapObjectsProvider);
+                _mapDisplay.RefreshLegend();
             }
-            hoverDialog?.RerenderRightPanel();
+            (hoverDialog ?? _aiClient.ActiveDialog)?.RerenderRightPanel();
             Console.SetCursorPosition(sl, st);
             Console.CursorVisible = vis;
         }
@@ -901,6 +929,7 @@ internal class MapScreenLoop
             int sl = Console.CursorLeft, st = Console.CursorTop;
             Console.CursorVisible = false;
             Console.SetCursorPosition(0, mapDrawTop);
+            hoverReachability = null;
             mapObjectsProvider.Refresh();
             _mapDisplay.DrawMap(mapObjectsProvider);
             Console.SetCursorPosition(sl, st);
@@ -917,6 +946,7 @@ internal class MapScreenLoop
             if (!entitySymbols.Contains(_settings.Combat.CurrentTurn)) return;
 
             Console.SetCursorPosition(0, mapDrawTop);
+            hoverReachability = null;
             mapObjectsProvider.Refresh();
             _mapDisplay.DrawMap(mapObjectsProvider);
             var enemyHistory = new DialogDisplay(_settings, _display, _storage);
@@ -1076,6 +1106,7 @@ internal class MapScreenLoop
             // После простого шага кадр уже нарисован быстрым путём (RedrawAfterMove) — второй раз не нужно.
             if (!movedFrameDrawn)
             {
+                hoverReachability = null;
                 _display.HoverPath = ComputeHoverPath(KnownCellOrNull(_display.HoveredCell));
                 mapObjectsProvider.Refresh();
                 FollowHeroIfMoved();
@@ -1209,7 +1240,7 @@ internal class MapScreenLoop
                 if (_display.SelectedMapItemIndex >= 0 && _display.NotePageCount > 1 && page != _display.NotePage)
                 {
                     Sound.PlayClick();
-                    MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings, page);
+                    SetMapEntityImage(page);
                 }
                 continue;
             }
@@ -1225,7 +1256,7 @@ internal class MapScreenLoop
                     else
                         _display.SelectedMapItemIndex = _display.SelectedMapItemIndex <= 0 ? totalCount - 1
                             : _display.SelectedMapItemIndex - 1;
-                    MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings);
+                    SetMapEntityImage();
                 }
                 while (Console.KeyAvailable) Console.ReadKey(intercept: true);
                 continue;
@@ -1295,6 +1326,7 @@ internal class MapScreenLoop
             }
             // Hero moved — show new position before any AI call
             Console.CursorVisible = false;
+            hoverReachability = null;
             _display.HoverPath = ComputeHoverPath(KnownCellOrNull(_display.HoveredCell));
             mapObjectsProvider.Refresh();
             FollowHeroIfMoved();

@@ -683,7 +683,8 @@ public class GameAiClient
         json = await EnsureValidJson(json);
         var player = new SequentialHistoryPlayer(
             _settings, _storage, _serializeOptions, onChunk, onNewMessage, onRedraw,
-            onPoll: ActiveDialog != null ? ActiveDialog.PollOnly : null);
+            onPoll: ActiveDialog != null ? ActiveDialog.PollOnly : null,
+            animations: ActiveDialog?.Animations);
         var history = await player.PlayAsync(json);
         (_settings.History ??= []).AddRange(history);
     }

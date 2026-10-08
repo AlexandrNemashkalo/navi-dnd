@@ -321,16 +321,16 @@ public class MapDisplay
         {
             Console.SetOut(console);
         }
-        Console.Write(frame.ToString());
+        Console.Write(AnsiColorRuns.Compact(frame.ToString()));
         ColorHelper.SetBackgroundColor(_display.MainBackground);
         ColorHelper.SetForegroundColor(_display.MainForeground);
     }
 
-    public void RedrawLocationViewport(MapObjectsProvider provider)
+    public void RedrawLocationViewport(MapObjectsProvider provider, bool refreshLegend = true)
     {
         if (_display.MapLevel != MapLevel.Location) return;
         WriteRowsBatched(BuildLocationRows(provider));
-        RefreshLegend(); // легенда — то, что в окне карты: после сдвига камеры меняется
+        if (refreshLegend) RefreshLegend(); // легенда — то, что в окне карты: после сдвига камеры меняется
     }
 
     // ── Камера ────────────────────────────────────────────────────────────────
@@ -724,10 +724,11 @@ public class MapDisplay
     }
 
     // Только область карты (без легенды и рамок) — на каждый шаг перетаскивания.
-    public void RedrawWorldViewport()
+    public void RedrawWorldViewport(bool refreshLegend = true)
     {
         if (_display.MapLevel != MapLevel.World) return;
         WriteRowsBatched(Enumerable.Range(0, MapAreaHeight).Select(i => (Action)(() => WriteWorldRow(i))).ToList());
+        if (!refreshLegend) return;
         // Легенда мира — места в окне: сдвиг/масштаб/наведение её меняют.
         var lines = _legendDisplay.GetLegendLines();
         for (int i = 0; i < Math.Min(lines.Count, MapAreaHeight); i++) RedrawLegendLine(i, lines);

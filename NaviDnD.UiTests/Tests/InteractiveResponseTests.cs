@@ -59,6 +59,15 @@ public class InteractiveResponseTests
         TestPacing.Step();
 
         GameConsole.SendKey(game.Pid, ConsoleKey.Spacebar);
+        // Navigation must respond while the dice is still settling, before its result.
+        Thread.Sleep(120);
+        GameConsole.SendKey(game.Pid, ConsoleKey.F1);
+        Assert.True(GameConsole.WaitForRowContains(game.Pid, 1, GameConsole.TitleReadWidth,
+            "→ КАРТА ←", 1200), "Map navigation stalled during the dice animation.");
+        GameConsole.SendKey(game.Pid, ConsoleKey.F4);
+        Assert.True(GameConsole.WaitForRowContains(game.Pid, 1, GameConsole.TitleReadWidth,
+            "→ ПЕРСОНАЖ ←", 1200), "Character navigation stalled during the dice animation.");
+
 
         // Исход броска случаен (d20) — ждём любой из 4 возможных вариантов.
         string[] outcomes = ["КРИТИЧЕСКИЙ УСПЕХ!", "КРИТИЧЕСКИЙ ПРОВАЛ!", "УСПЕХ", "ПРОВАЛ"];

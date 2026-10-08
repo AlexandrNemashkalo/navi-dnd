@@ -41,9 +41,10 @@ internal static class Sound
     // бросок. Предзагрузка (чтение всего файла в плоский массив заранее) стабильно портила именно
     // этот сжатый клип; бросок редкий и не такой чувствительный к задержке, как клик, так что
     // открытие устройства каждый раз — приемлемая цена за корректный звук.
-    public static void PlayDiceRoll()
+    public static Task PlayDiceRoll()
     {
-        if (!Enabled || !File.Exists(DiceRollPath)) return;
+        if (!Enabled || !File.Exists(DiceRollPath)) return Task.CompletedTask;
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         Task.Run(() =>
         {
             try
@@ -52,11 +53,14 @@ internal static class Sound
                 using var output = new WaveOutEvent();
                 output.Init(new NAudio.Wave.SampleProviders.VolumeSampleProvider(reader.ToSampleProvider()) { Volume = Volume });
                 output.Play();
+                started.TrySetResult();
                 while (output.PlaybackState == PlaybackState.Playing)
                     Thread.Sleep(50);
             }
             catch { /* звук — не критичная функция */ }
+            finally { started.TrySetResult(); }
         });
+        return started.Task;
     }
 
     // Устройство открывается ОДИН раз на старте игры и играет непрерывно (тишину, когда звук не

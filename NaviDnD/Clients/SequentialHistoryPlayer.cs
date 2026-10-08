@@ -14,9 +14,15 @@ internal sealed class SequentialHistoryPlayer(
     Action<string>? onChunk,
     Action<string>? onNewMessage,
     Action? onRedraw,
-    Action? onPoll = null)
+    Action? onPoll = null,
+    AnimationLoop? animations = null)
 {
-    private const int CharDelayMs = 25;    // ~40 chars/sec
+    public SequentialHistoryPlayer(WorldState settings, Storage storage, JsonSerializerOptions serializeOptions,
+        Action<string>? onChunk, Action<string>? onNewMessage, Action? onRedraw, Action? onPoll)
+        : this(settings, storage, serializeOptions, onChunk, onNewMessage, onRedraw, onPoll, null) { }
+
+    private readonly AnimationLoop _animations = animations ?? new();
+    private const int CharDelayMs = 40;    // readable cadence, independent of rendering cost
     private const int MoveStepDelayMs = 500;
 
     // Returns the history entries that were displayed, stripped of newlines.
@@ -104,15 +110,14 @@ internal sealed class SequentialHistoryPlayer(
         onNewMessage?.Invoke(author ?? "DM");
         if (onChunk == null) return;
         Speech.Speak(text, author, speechText);
-        foreach (char c in text)
-        {
-            if (c is '\n' or '\r') continue;
-            onChunk(c.ToString());
-            Sound.PlayTyping(c);
-            await Task.Delay(CharDelayMs / 2);
-            onPoll?.Invoke();
-            await Task.Delay(CharDelayMs - CharDelayMs / 2);
-        }
+        if (!text.Any(c => c is not ('\n' or '\r'))) return;
+        await _animations.PlayAsync(text.Where(c => c is not ('\n' or '\r')).Select(c =>
+            new AnimationLoop.Frame(TimeSpan.FromMilliseconds(CharDelayMs), () =>
+            {
+                onChunk(c.ToString());
+                Sound.PlayTyping(c);
+            })), onPoll, catchUp: false);
+
     }
 
     private async Task AnimateAndApplyPatch(JsonObject patch)
@@ -143,14 +148,7 @@ internal sealed class SequentialHistoryPlayer(
             {
                 entity.Position = pos;
                 onRedraw?.Invoke();
-                var stepEnd = DateTime.UtcNow.AddMilliseconds(MoveStepDelayMs);
-                while (DateTime.UtcNow < stepEnd)
-                {
-                    onPoll?.Invoke();
-                    var remaining = (stepEnd - DateTime.UtcNow).TotalMilliseconds;
-                    if (remaining <= 0) break;
-                    await Task.Delay((int)Math.Min(16, remaining));
-                }
+                await _animations.DelayAsync(TimeSpan.FromMilliseconds(MoveStepDelayMs), onPoll);
             }
         }
     }

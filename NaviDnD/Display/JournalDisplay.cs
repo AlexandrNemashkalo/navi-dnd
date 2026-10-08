@@ -189,12 +189,17 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
     };
 
     // ── Отрисовка ──
-    public void Draw()
+    private readonly ConsoleRegionBuffer _listRegion = new();
+    private readonly ConsoleRegionBuffer _detailRegion = new();
+
+    public void Draw() => DrawCore(true);
+
+    private void DrawCore(bool rebuild)
     {
         _startTop = Console.CursorTop;
         int inner = display.InnerWidth(display.ViewCols(settings.Map));
         var border = new BorderDrawer(settings, display);
-        _entries = BuildEntries(Current);
+        if (rebuild) { _entries = BuildEntries(Current); _listRegion.Invalidate(); _detailRegion.Invalidate(); }
         _rows = Math.Max(3, display.MaxHigh - 3);
         _pageCount = Math.Max(1, (_entries.Count + PerPage - 1) / PerPage);
         int page = Math.Clamp(_page.GetValueOrDefault(Current), 0, _pageCount - 1);
@@ -221,18 +226,40 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         _detailPage = Math.Clamp(_detailPage, 0, _detailPageCount - 1);
         var details = all.Skip(_detailPage * perPage).Take(perPage).ToList();
 
+        string Capture(Action draw)
+        {
+            var output = Console.Out;
+            using var buffer = new StringWriter();
+            try
+            {
+                Console.SetOut(buffer);
+                ColorHelper.SetBackgroundColor(display.MainBackground);
+                ColorHelper.SetForegroundColor(Fg);
+                draw();
+                return buffer.ToString();
+            }
+            finally { Console.SetOut(output); }
+        }
+        var left = new string[_rows];
+        var right = new string[_rows];
         for (int r = 0; r < _rows; r++)
         {
             int idx = page * PerPage + r, row = r;
-            border.DrawContentLine2Columns(
-                () => WriteListRow(idx, sel, row, page),
-                () =>
-                {
-                    if (_detailPageCount > 1 && row == _rows - 1) WriteDetailArrows();
-                    else if (row < details.Count) { Console.Write("  "); ColorHelper.WriteColored(details[row].text, details[row].color); }
-                },
-                _leftW, _rightW);
+            left[r] = Capture(() => WriteListRow(idx, sel, row, page));
+            right[r] = Capture(() =>
+            {
+                if (_detailPageCount > 1 && row == _rows - 1) WriteDetailArrows();
+                else if (row < details.Count) { Console.Write("  "); ColorHelper.WriteColored(details[row].text, details[row].color); }
+            });
+            if (rebuild) border.DrawContentLine2Columns(() => {}, () => {}, _leftW, _rightW);
         }
+        string bg = $"\x1b[48;2;{display.MainBackground[0]};{display.MainBackground[1]};{display.MainBackground[2]}m";
+        string patch = _listRegion.Update(DisplayConfig.LeftMargin + 1, _listTop, _leftW, left, bg)
+            + _detailRegion.Update(DisplayConfig.LeftMargin + 2 + _leftW, _listTop, _rightW, right, bg);
+        Console.Write(AnsiColorRuns.Compact(patch));
+        ColorHelper.SetBackgroundColor(display.MainBackground);
+        ColorHelper.SetForegroundColor(Fg);
+        Console.SetCursorPosition(0, _listTop + _rows);
         border.DrawSeparatorWith2Parts('─', _leftW, _rightW);
         ShowImage(sel);
     }
@@ -279,10 +306,10 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         int pad = Math.Max(0, (_rightW - len) / 2);
         Console.Write(new string(' ', pad));
         var off = ColorHelper.Darker(Fg, 0.5);
-        _detailLeftX = Console.CursorLeft;
+        _detailLeftX = DisplayConfig.LeftMargin + 2 + _leftW + pad;
         ColorHelper.WriteColored("◄", _detailPage > 0 ? (_hoveredDetailArrow == -1 ? Bright : Fg) : off);
         ColorHelper.WriteColored(pageText, Dim);
-        _detailRightX = Console.CursorLeft;
+        _detailRightX = _detailLeftX + 1 + pageText.Length;
         ColorHelper.WriteColored("►", _detailPage < _detailPageCount - 1 ? (_hoveredDetailArrow == 1 ? Bright : Fg) : off);
     }
 
@@ -330,20 +357,21 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
     {
         display.NotePage = 0;
         display.NotePageCount = 0;
-        if (sel < 0 || sel >= _entries.Count || _entries[sel].Image is not { } image) { display.SelectedImageLines = null; return; }
+        if (sel < 0 || sel >= _entries.Count || _entries[sel].Image is not { } image) { MouseUiHelper.CancelPreparedPicture(display); display.SelectedImageLines = null; return; }
+        if (!MouseUiHelper.PreparePicture(display, image, () => ShowImage(sel))) return;
         MouseUiHelper.SetSelectedImage(display, image, "", _entries[sel].ImageColor);
     }
 
     private static string Fit(string s, int w) => s.Length <= w ? s : s[..Math.Max(0, w - 1)] + "…";
 
-    public void Redraw()
+    public void Redraw(bool rebuild = true)
     {
         if (_startTop < 0) return;
         bool vis = Console.CursorVisible;
         int sl = Console.CursorLeft, st = Console.CursorTop;
         Console.CursorVisible = false;
         Console.SetCursorPosition(0, _startTop);
-        Draw();
+        DrawCore(rebuild);
         Console.SetCursorPosition(sl, st);
         Console.CursorVisible = vis;
     }
@@ -444,7 +472,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
             {
                 Sound.PlayClick();
                 _pinned[Current] = cidx;
-                if (_selected.GetValueOrDefault(Current, -1) != cidx) { _selected[Current] = cidx; _detailPage = 0; Redraw(); return true; }
+                if (_selected.GetValueOrDefault(Current, -1) != cidx) { _selected[Current] = cidx; _detailPage = 0; Redraw(false); return true; }
                 return false;
             }
         }
@@ -456,7 +484,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         if (ht != _hoveredTab || hl != _hoveredListArrow || hd != _hoveredDetailArrow)
         {
             _hoveredTab = ht; _hoveredListArrow = hl; _hoveredDetailArrow = hd;
-            Redraw();
+            Redraw(false);
         }
         // Запись под курсором (левая колонка, кроме стрелок).
         int row = m.y - _listTop, leftX0 = DisplayConfig.LeftMargin + 1;
@@ -469,7 +497,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
             _selected[Current] = want;
             _page[Current] = want / PerPage;
             _detailPage = 0;
-            Redraw();
+            Redraw(false);
             changed = true;
         }
         ConsoleMouseReader.SetCursorShape(ht >= 0 || hl != 0 || hd != 0 || overEntry);

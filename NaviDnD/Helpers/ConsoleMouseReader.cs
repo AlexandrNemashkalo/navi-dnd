@@ -1,6 +1,5 @@
 using NaviDnD.Data;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace NaviDnD.Helpers;
 
@@ -65,14 +64,16 @@ public static class ConsoleMouseReader
         if (!GetCursorPos(out var startCursor)) return;
         if (!GetWindowRect(hwnd, out var startRect)) return;
 
-        while ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0)
+        _windowDrag = () =>
         {
-            if (!GetCursorPos(out var cur)) break;
-            int dx = cur.X - startCursor.X;
-            int dy = cur.Y - startCursor.Y;
-            SetWindowPos(hwnd, 0, startRect.Left + dx, startRect.Top + dy, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-            Thread.Sleep(10);
-        }
+            if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) == 0 || !GetCursorPos(out var cur))
+            {
+                _windowDrag = null;
+                return;
+            }
+            SetWindowPos(hwnd, 0, startRect.Left + cur.X - startCursor.X,
+                startRect.Top + cur.Y - startCursor.Y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+        };
     }
 
     // Перетаскивание содержимого (карта мира, местность): сообщает смещение курсора в символах от точки нажатия,
@@ -80,6 +81,41 @@ public static class ConsoleMouseReader
     // первое событие без кнопки — отпустил. Раньше смотрели только на кнопку «сейчас» (GetAsyncKeyState): быстрый
     // рывок, пока игра ещё рисовала кадр, заканчивался до начала слежения — кнопка уже отпущена, все движения
     // в очереди пропадали, и рывок считался кликом. Накопленные движения — одним сдвигом (один кадр, а не десять).
+    private static Action? _windowDrag;
+    private static (short x, short y)? _dragStart;
+    private static (short x, short y) _dragLast;
+    private static Action<int, int>? _dragDelta;
+    private static Action? _dragCompleted;
+    private static (short x, short y)? _dragPending;
+    private static long _dragNextFrame;
+    public static bool IsDragging => _dragStart.HasValue;
+
+    public static void CancelDrag()
+    {
+        _dragStart = null;
+        _dragDelta = null;
+        _dragCompleted = null;
+        _dragPending = null;
+    }
+
+    // Input polling advances the drag; no nested loop stalls animations.
+    public static void BeginDrag((short x, short y) start, Action<int, int> onDelta, Action onCompleted)
+    {
+        _dragPending = null;
+        _dragNextFrame = 0;
+        _dragStart = start;
+        _dragLast = start;
+        _dragDelta = onDelta;
+        _dragCompleted = onCompleted;
+    }
+
+    private static void CompleteDrag()
+    {
+        var completed = _dragCompleted;
+        CancelDrag();
+        completed?.Invoke();
+    }
+
     public static void TrackDrag((short x, short y) start, Action<int, int> onDelta)
     {
         var last = start;
@@ -175,6 +211,8 @@ public static class ConsoleMouseReader
 
     public static void Disable()
     {
+        CancelDrag();
+        _windowDrag = null;
         if (_enabled)
         {
             SetConsoleMode(_inputHandle, _originalMode);
@@ -196,18 +234,17 @@ public static class ConsoleMouseReader
         }
     }
 
-    /// Drains mouse events from the queue; returns latest move position, latest left-click position,
-    /// and how many left-click-down events were seen (rapid clicks can queue up faster than one poll
-    /// tick drains them — callers doing per-click stepping, e.g. page arrows, should apply this many
-    /// steps instead of always exactly one, or fast clicking silently loses clicks).
-    /// Stops at the first non-mouse event to avoid consuming keyboard input.
+    /// Drains movement up to the first button-down, preserving queued drag events.
+    /// Returns one click at a time; later clicks and keyboard events remain queued.
     public static ((short x, short y)? move, (short x, short y)? click, int clickCount) DrainMouseEvents()
     {
+        _windowDrag?.Invoke();
         if (!_enabled) return (null, null, 0);
 
         (short x, short y)? latestMove  = null;
         (short x, short y)? latestClick = null;
         int clickCount = 0;
+        bool dragReleased = false;
         var buf = new INPUT_RECORD[1];
 
         while (true)
@@ -234,6 +271,17 @@ public static class ConsoleMouseReader
                 AddWheel((short)(buf[0].MouseEvent.dwButtonState >> 16) / 120,
                     (buf[0].MouseEvent.dwMousePosition.X, buf[0].MouseEvent.dwMousePosition.Y));
             }
+            else if (_dragStart is { } dragStart)
+            {
+                var pos = (x: buf[0].MouseEvent.dwMousePosition.X, y: buf[0].MouseEvent.dwMousePosition.Y);
+                _lastMousePos = pos;
+                _dragPending = pos;
+                if ((buf[0].MouseEvent.dwButtonState & LEFT_BUTTON) == 0)
+                {
+                    dragReleased = true;
+                    break;
+                }
+            }
             else if ((buf[0].MouseEvent.dwEventFlags & MOUSE_MOVED) != 0)
             {
                 latestMove = (buf[0].MouseEvent.dwMousePosition.X, buf[0].MouseEvent.dwMousePosition.Y);
@@ -244,8 +292,29 @@ public static class ConsoleMouseReader
             {
                 latestClick = (buf[0].MouseEvent.dwMousePosition.X, buf[0].MouseEvent.dwMousePosition.Y);
                 clickCount++;
+                // Let the caller start a drag before consuming its queued moves/release.
+                break;
             }
         }
+
+        if (_dragStart.HasValue && (GetAsyncKeyState(VK_LBUTTON) & 0x8000) == 0)
+        {
+            // Key events ahead of the release must be handled by the caller first.
+            if (!PeekConsoleInput(_inputHandle, buf, 1, out int pending) || pending == 0)
+                dragReleased = true;
+        }
+        if (_dragStart is { } start && _dragPending is { } moved
+            && (dragReleased || Environment.TickCount64 >= _dragNextFrame))
+        {
+            _dragPending = null;
+            if (moved != _dragLast)
+            {
+                _dragLast = moved;
+                _dragNextFrame = Environment.TickCount64 + 16;
+                _dragDelta?.Invoke(moved.x - start.x, moved.y - start.y);
+            }
+        }
+        if (dragReleased) CompleteDrag();
 
         // When the character position changed — update sub-cell fractions and invalidate cell cache.
         if (latestMove.HasValue && latestMove != _lastCellCharPos)

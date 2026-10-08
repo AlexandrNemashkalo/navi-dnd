@@ -1,4 +1,4 @@
-﻿using NaviDnD.Clients;
+using NaviDnD.Clients;
 using NaviDnD.Display;
 using NaviDnD.Helpers;
 using System.Text;
@@ -45,6 +45,7 @@ class Program
         Sound.Enabled = config.SoundEnabled;
         Speech.Initialize(config);
         GameUpdates.Initialize();
+        TempCleanup.Run();
         Sound.Volume = config.SoundVolume / 100f;
         Sound.TypingEnabled = config.TypingSoundEnabled;
         Music.Enabled = config.MusicEnabled;
@@ -113,6 +114,26 @@ class Program
         // Музыка и звуки окружения по ситуации (MusicDirector, sound/music, sound/ambience). В UI-тестах — тишина.
         if (testStatePath == null) MusicDirector.Start(state, settings);
         var screens = ScreenRegistry.GetScreens(state, storage, hasSave, loadCurrentState, () => GameWorld.HasLocation(settings));
+
+        // Install before the first streaming tab switch, even if these screens were never visited.
+        void ScrollCharacter(int delta)
+        {
+            switch (display.CharacterSubTab)
+            {
+                case CharacterSubTab.Inventory: display.InventoryScrollOffset = Math.Max(0, display.InventoryScrollOffset + delta); break;
+                case CharacterSubTab.Abilities: display.AbilityPageOffset = Math.Max(0, display.AbilityPageOffset + delta); break;
+                case CharacterSubTab.Spells: display.SpellsPageOffset = Math.Max(0, display.SpellsPageOffset + delta); break;
+                default: display.EffectsPageOffset = Math.Max(0, display.EffectsPageOffset + delta); break;
+            }
+        }
+        display.JournalPollActionFactory = dlg => MouseUiHelper.MakeJournalPollAction(
+            (DialogDisplay)dlg, journalDisplay, screens[Screen.Journal].Title, display);
+        display.CharacterPollActionFactory = dlg => MouseUiHelper.MakeCharacterPollAction(
+            (DialogDisplay)dlg, heroDisplay, 2, heroDisplay.DrawHeroCard,
+            () => ScrollCharacter(-1), () => ScrollCharacter(1),
+            screens[Screen.Character].Title, MouseUiHelper.ComputeTitleTabs(screens[Screen.Character].Title), display,
+            (idx, page) => { var items = settings.Hero?.Inventory; if (items != null && idx >= 0 && idx < items.Count) MouseUiHelper.SetSelectedInventoryItem(display, items[idx], page); },
+            (idx, page) => { var spells = settings.Hero == null ? [] : HeroDisplay.SortedSpells(settings.Hero); if (idx >= 0 && idx < spells.Count) MouseUiHelper.SetSelectedSpell(display, spells[idx], page); });
 
         display.TabSwitchProvider = tabKey => tabKey switch
         {

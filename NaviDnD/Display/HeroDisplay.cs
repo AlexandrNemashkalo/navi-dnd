@@ -294,8 +294,36 @@ public class HeroDisplay
         Console.CursorVisible = vis;
     }
 
+    private readonly List<(int y, int[] items, Action draw)> _selectionRows = [];
+    private (int inv, int invPin, int spell, int spellPin) _selectionState;
+
+    public void RefreshSelection()
+    {
+        var next = (_display.SelectedInventoryIndex, _display.PinnedInventoryIndex,
+            _display.SelectedSpellIndex, _display.PinnedSpellIndex);
+        if (next == _selectionState) return;
+        int[] changed = [_selectionState.inv, _selectionState.invPin, _selectionState.spell,
+            _selectionState.spellPin, next.Item1, next.Item2, next.Item3, next.Item4];
+        int x = Console.CursorLeft, y = Console.CursorTop;
+        bool visible = Console.CursorVisible;
+        try
+        {
+            Console.CursorVisible = false;
+            foreach (var row in _selectionRows)
+                if (row.items.Any(i => i >= 0 && changed.Contains(i)))
+                {
+                    Console.SetCursorPosition(0, row.y);
+                    row.draw();
+                }
+            _selectionState = next;
+        }
+        finally { Console.SetCursorPosition(x, y); Console.CursorVisible = visible; }
+    }
+
     public void DrawHeroCard()
     {
+        _selectionRows.Clear();
+        _selectionState = (_display.SelectedInventoryIndex, _display.PinnedInventoryIndex, _display.SelectedSpellIndex, _display.PinnedSpellIndex);
         var settings = _settings;
         var hero = settings.Hero;
         if (hero == null) return;
@@ -648,19 +676,14 @@ public class HeroDisplay
             bool h2 = row < col2.Count;
             var e1 = h1 ? col1[row] : default;
             var e2 = h2 ? col2[row] : default;
-            bool s1 = h1 && e1.ItemIdx == selIdx;
-            bool s2 = h2 && e2.ItemIdx == selIdx;
-            // Пока что-то закреплено, стрелка следует ТОЛЬКО за закреплением — наведение на другой
-            // предмет временно меняет картинку справа (см. MouseUiHelper), но не должно снимать
-            // стрелку с закреплённого, пока по новому предмету явно не кликнули/Tab.
-            bool arrow1 = pinIdx >= 0 ? (h1 && e1.ItemIdx == pinIdx) : s1;
-            bool arrow2 = pinIdx >= 0 ? (h2 && e2.ItemIdx == pinIdx) : s2;
-
-            borderDrawer.DrawContentLine2Columns(
-                () => { if (h1) WriteInvLine(e1, col1W, s1, arrow1); },
-                () => { if (h2) WriteInvLine(e2, col2W, s2, arrow2); },
-                col1W, col2W
-            );
+            void DrawRow() => borderDrawer.DrawContentLine2Columns(
+                () => { if (h1) WriteInvLine(e1, col1W, e1.ItemIdx == _display.SelectedInventoryIndex,
+                    e1.ItemIdx == (_display.PinnedInventoryIndex >= 0 ? _display.PinnedInventoryIndex : _display.SelectedInventoryIndex)); },
+                () => { if (h2) WriteInvLine(e2, col2W, e2.ItemIdx == _display.SelectedInventoryIndex,
+                    e2.ItemIdx == (_display.PinnedInventoryIndex >= 0 ? _display.PinnedInventoryIndex : _display.SelectedInventoryIndex)); },
+                col1W, col2W);
+            _selectionRows.Add((Console.CursorTop, [h1 ? e1.ItemIdx : -1, h2 ? e2.ItemIdx : -1], DrawRow));
+            DrawRow();
         }
 
         int fillerRows = Math.Max(0, preTitleRows - 4 - rows);
@@ -931,17 +954,19 @@ public class HeroDisplay
                 string marker = spell.Prepared == true ? "•" : " ";
                 return new InvLine(visible[c].GlobalStart + r, true, marker, spell.Name, spell.Color, "");
             }
-            bool Selected(int c) => r < visible[c].Items.Count && visible[c].GlobalStart + r == selIdx;
+            bool Selected(int c) => r < visible[c].Items.Count && visible[c].GlobalStart + r == _display.SelectedSpellIndex;
             bool Arrow(int c) => r < visible[c].Items.Count &&
-                (pinIdx >= 0 ? visible[c].GlobalStart + r == pinIdx : Selected(c));
+                (_display.PinnedSpellIndex >= 0 ? visible[c].GlobalStart + r == _display.PinnedSpellIndex : Selected(c));
 
-            borderDrawer.DrawContentLine4Columns(
+            void DrawRow() => borderDrawer.DrawContentLine4Columns(
                 () => { if (r < visible[0].Items.Count) WriteInvLine(Line(0), col1W, Selected(0), Arrow(0)); },
                 () => { if (r < visible[1].Items.Count) WriteInvLine(Line(1), col2W, Selected(1), Arrow(1)); },
                 () => { if (r < visible[2].Items.Count) WriteInvLine(Line(2), col3W, Selected(2), Arrow(2)); },
                 () => { if (r < visible[3].Items.Count) WriteInvLine(Line(3), col4W, Selected(3), Arrow(3)); },
                 col1W, col2W, col3W, col4W
             );
+            _selectionRows.Add((Console.CursorTop, Enumerable.Range(0, 4).Select(c => r < visible[c].Items.Count ? visible[c].GlobalStart + r : -1).ToArray(), DrawRow));
+            DrawRow();
         }
 
         int fillerRows2 = Math.Max(0, preTitleRows - 4 - (itemsPerCol + 2));

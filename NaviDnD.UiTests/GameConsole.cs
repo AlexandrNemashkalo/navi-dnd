@@ -205,6 +205,39 @@ internal static class GameConsole
         });
     }
 
+    public static void SendMouseWheel(int processId, int col, int row, int notches)
+    {
+        WithGameConsole(processId, () =>
+        {
+            using var handle = ConsoleHandles.OpenInput();
+            var record = new INPUT_RECORD { EventType = MOUSE_EVENT_TYPE,
+                MouseX = (short)col, MouseY = (short)row,
+                dwButtonState = unchecked((uint)(notches * 120 << 16)), dwEventFlags = 0x0004 };
+            Assert.True(WriteConsoleInput(handle.DangerousGetHandle(), [record], 1, out _));
+        });
+    }
+
+    // One queued gesture catches bugs where polling consumes movement before starting the drag.
+    public static void SendDrag(int processId, int fromCol, int fromRow, int toCol, int toRow)
+    {
+        WithGameConsole(processId, () =>
+        {
+            var events = new List<INPUT_RECORD>();
+            events.Add(new INPUT_RECORD { EventType = MOUSE_EVENT_TYPE,
+                MouseX = (short)fromCol, MouseY = (short)fromRow, dwButtonState = LEFT_BUTTON });
+            for (int step = 1; step <= 8; step++)
+                events.Add(new INPUT_RECORD { EventType = MOUSE_EVENT_TYPE,
+                    MouseX = (short)(fromCol + (toCol - fromCol) * step / 8),
+                    MouseY = (short)(fromRow + (toRow - fromRow) * step / 8),
+                    dwButtonState = LEFT_BUTTON, dwEventFlags = MOUSE_MOVED });
+            events.Add(new INPUT_RECORD { EventType = MOUSE_EVENT_TYPE,
+                MouseX = (short)toCol, MouseY = (short)toRow, dwButtonState = 0 });
+            using var handle = ConsoleHandles.OpenInput();
+            Assert.True(WriteConsoleInput(handle.DangerousGetHandle(), events.ToArray(), (uint)events.Count, out var written));
+            Assert.Equal((uint)events.Count, written);
+        });
+    }
+
     public static bool WaitForRowContains(int processId, int row, int length, string expected, int timeoutMs)
     {
         var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);

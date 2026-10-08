@@ -20,6 +20,7 @@
     <Compile Include="../NaviDnD.Installer/Patch.cs" Link="Installer/Patch.cs" />
     <Compile Include="../NaviDnD.Installer/UpdateManifest.cs" Link="Installer/UpdateManifest.cs" />
     <Compile Include="../NaviDnD.Installer/UpdateClient.cs" Link="Installer/UpdateClient.cs" />
+    <Compile Include="../NaviDnD/Helpers/TempCleanup.cs" Link="Game/TempCleanup.cs" />
   </ItemGroup>
 
   <ItemGroup>
