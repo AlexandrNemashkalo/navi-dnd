@@ -267,8 +267,8 @@ public static class ConsoleMouseReader
             if (!ReadConsoleInput(_inputHandle, buf, 1, out int read) || read == 0) break;
             if ((buf[0].MouseEvent.dwEventFlags & MOUSE_WHEELED) != 0)
             {
-                // Старшее слово dwButtonState — знаковая прокрутка (кратна 120): > 0 — колесо от себя.
-                AddWheel((short)(buf[0].MouseEvent.dwButtonState >> 16) / 120,
+                // Keep small precision-touchpad deltas until they form a full wheel notch.
+                AddWheelDelta((short)(buf[0].MouseEvent.dwButtonState >> 16),
                     (buf[0].MouseEvent.dwMousePosition.X, buf[0].MouseEvent.dwMousePosition.Y));
             }
             else if (_dragStart is { } dragStart)
@@ -325,7 +325,57 @@ public static class ConsoleMouseReader
             _lastCellResult  = null;
         }
 
+        int width = MouseUiHelper.TitleWidth;
+        int left = DisplayConfig.LeftMargin + 1;
+        if (latestMove is { } hover)
+        {
+            int button = WindowControls.HitTest(hover.x, hover.y, left, width);
+            if (button != _windowButtonHovered)
+            {
+                _windowButtonHovered = button;
+                DrawWindowButtons(button, left, width);
+            }
+            if (button >= 0) { SetCursorShape(true); latestMove = null; }
+        }
+        if (latestClick is { } controlClick)
+        {
+            int button = WindowControls.HitTest(controlClick.x, controlClick.y, left, width);
+            if (button >= 0)
+            {
+                WindowControls.Activate(button);
+                DrawWindowButtons(-1, left, width);
+                _windowButtonHovered = -1;
+                latestClick = null;
+                clickCount = 0;
+            }
+        }
         return (latestMove, latestClick, clickCount);
+    }
+
+    private static int _windowButtonHovered = -1;
+
+    public static void RefreshWindowButtons()
+    {
+        _windowButtonHovered = -1;
+        DrawWindowButtons(-1, DisplayConfig.LeftMargin + 1, MouseUiHelper.TitleWidth);
+    }
+
+    private static void DrawWindowButtons(int hovered, int left, int width)
+    {
+        if (width < WindowControls.Buttons.Length + 3) return;
+        int x = Console.CursorLeft, y = Console.CursorTop;
+        bool visible = Console.CursorVisible;
+        Console.CursorVisible = false;
+        try
+        {
+            Console.SetCursorPosition(left + width - WindowControls.Buttons.Length, 1);
+            WindowControls.Draw(hovered);
+        }
+        finally
+        {
+            Console.SetCursorPosition(x, y);
+            Console.CursorVisible = visible;
+        }
     }
 
     public static (short x, short y)? DrainMouseMoves() => DrainMouseEvents().move;
@@ -335,6 +385,16 @@ public static class ConsoleMouseReader
     private static DateTime _wheelAt;
     private static (short x, short y) _lastMousePos;
     private static readonly object _wheelLock = new();
+    private static readonly WheelDeltaAccumulator _wheelDelta = new();
+
+    public static void AddWheelDelta(int delta, (short x, short y)? pos = null)
+    {
+        lock (_wheelLock)
+        {
+            int notches = _wheelDelta.Add(delta, Environment.TickCount64);
+            if (notches != 0) AddWheel(notches, pos);
+        }
+    }
 
     // Прокрутка из консоли (DrainMouseEvents) или из ConsoleZoomBlocker (Ctrl+колесо/щипок тачпада,
     // перехваченные до консоли — с другого потока, поэтому под замком). pos == null — последняя

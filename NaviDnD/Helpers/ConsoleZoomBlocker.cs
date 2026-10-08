@@ -75,7 +75,7 @@ internal static class ConsoleZoomBlocker
             var info = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
             if (GetAncestor(WindowFromPoint(info.pt), GA_ROOT) == _consoleWindow)
             {
-                ConsoleMouseReader.AddWheel((short)(info.mouseData >> 16) / 120);
+                ConsoleMouseReader.AddWheelDelta((short)(info.mouseData >> 16));
                 return 1; // погасить: conhost не меняет шрифт и размер окна
             }
         }

@@ -361,7 +361,7 @@ public class NewGameDisplay
                 if (_gotoStep is int g)
                 {
                     _gotoStep = null;
-                    if (await Go(g) is int to) return to;
+                    if (await Go(g, sound: false) is int to) return to;
                     Redraw();
                     continue;
                 }
@@ -405,9 +405,9 @@ public class NewGameDisplay
 
     // Перейти на шаг: 1 — мир (заполненное остаётся), 3/4 — дальше: герой создаётся (или переносятся
     // изменения внешности). null — остаёмся (не всё заполнено, ждём подтверждения пересоздания).
-    private async Task<int?> Go(int step)
+    private async Task<int?> Go(int step, bool sound = true)
     {
-        if (step == 1) { Sound.PlayClick(); return 1; }
+        if (step == 1) { if (sound) Sound.PlayClick(); return 1; }
         if (step == 2) return null;
         if (!CanCreate())
         {

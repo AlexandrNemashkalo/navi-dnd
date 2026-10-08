@@ -135,6 +135,28 @@ class Program
         var mapLoop = new MapScreenLoop(settings, display, storage, aiClient, config, mapDisplay, legendDisplay);
 
         var state = new GameState();
+        WindowControls.Start(() =>
+        {
+            config.Fullscreen = !config.Fullscreen;
+            if (!config.Fullscreen) FullscreenBackdrop.Set(false, display.MainBackground);
+            ConsoleSetup.Fullscreen = config.Fullscreen;
+            ConsoleSetup.SetConsoleConfig(settings);
+            if (config.Fullscreen) FullscreenBackdrop.Set(true, display.MainBackground);
+            config.SaveUserSettings();
+        }, () =>
+        {
+            if (state.NewGame != null)
+            {
+                if (state.NewGame.Wizard != null && !state.NewGame.Wizard.ConfirmExit().GetAwaiter().GetResult()) return;
+            }
+            else if (settings.Hero != null)
+            {
+                if (testStatePath == null) storage.Save();
+            }
+            Speech.Stop();
+            FullscreenBackdrop.Set(false, display.MainBackground);
+            ConsoleSetup.CloseConsoleAndExit();
+        });
         // Музыка и звуки окружения по ситуации (MusicDirector, sound/music, sound/ambience). В UI-тестах — тишина.
         if (testStatePath == null) MusicDirector.Start(state, settings);
         var screens = ScreenRegistry.GetScreens(state, storage, hasSave, loadCurrentState, () => GameWorld.HasLocation(settings));

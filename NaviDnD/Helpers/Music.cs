@@ -24,6 +24,19 @@ internal static class Music
     private static readonly WaveFormat Format = WaveFormat.CreateIeeeFloatWaveFormat(44100, 2);
     private static readonly object _lock = new();
     private static WaveOutEvent? _output;
+    private static bool _paused;
+
+    public static void SetPaused(bool paused)
+    {
+        lock (_lock)
+        {
+            if (_paused == paused) return;
+            _paused = paused;
+            if (_output == null) return;
+            if (paused) _output.Pause();
+            else _output.Play();
+        }
+    }
     private static MixingSampleProvider? _mixer;
     private static readonly Dictionary<string, Layer> _layers = [];
 
@@ -84,7 +97,7 @@ internal static class Music
             _mixer = new MixingSampleProvider(Format) { ReadFully = true };   // без дорожек — тишина, устройство не закрывается
             _output = new WaveOutEvent { DesiredLatency = 200 };
             _output.Init(new Ducking(_mixer));
-            _output.Play();
+            if (!_paused) _output.Play();
             return true;
         }
         catch { _output = null; _mixer = null; return false; }

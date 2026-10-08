@@ -94,6 +94,25 @@ internal static class GameConsole
         return result;
     }
 
+    public static string CellShape(int processId, int col, int row)
+    {
+        string shape = "";
+        WithGameConsole(processId, () => ScreenCapture.SampleCellColor(col, row, (0, 0, 0), (bitmap, rect) =>
+        {
+            var levels = new List<int>();
+            for (int y = rect.Top; y < rect.Bottom; y++)
+                for (int x = rect.Left; x < rect.Right; x++)
+                {
+                    var pixel = bitmap.GetPixel(x, y);
+                    levels.Add(pixel.R + pixel.G + pixel.B);
+                }
+            int threshold = (levels.Min() + levels.Max()) / 2;
+            shape = string.Join("\n", levels.Chunk(rect.Width)
+                .Select(line => new string(line.Select(value => value > threshold ? '#' : '.').ToArray())));
+        }));
+        return shape;
+    }
+
     // Реальный отрендеренный цвет (скриншот + сэмплинг пикселя) — в обход легаси-атрибутов,
     // которые не отражают 24-битный ANSI, используемый игрой. Бросает исключение с точной
     // причиной при неудаче (см. ScreenCapture.SampleCellColor).

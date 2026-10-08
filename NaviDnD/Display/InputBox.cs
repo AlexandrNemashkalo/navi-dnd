@@ -83,6 +83,7 @@ public class InputBox
 
         while (true)
         {
+            _fromMouseCommand = false;
             ConsoleKeyInfo key;
             if (_bufferedKey.HasValue) { key = _bufferedKey.Value; _bufferedKey = null; }
             else key = ReadKeyWithPolling();
@@ -214,7 +215,7 @@ public class InputBox
                 case ConsoleKey.PageDown: if (_arrowKeysMovement) return "MoveSouthEast"; break;
 
                 case ConsoleKey.Tab:
-                    Sound.PlayClick();
+                    PlayInputClick();
                     return key.Modifiers.HasFlag(ConsoleModifiers.Shift) ? "ShiftTab" : "Tab";
 
                 case ConsoleKey.Escape:
@@ -222,7 +223,7 @@ public class InputBox
                         Clear(startTop, lines.Count);
                     // Выход в меню — как переключение вкладки: набранное дождётся возвращения в игру.
                     if (_display != null) _display.PendingInputText = string.Join("\n", lines);
-                    Sound.PlayClick();
+                    PlayInputClick();
                     return "Esc";
 
                 // F1-F4 — звук только если реально переключает экран (как у мыши: клик по уже
@@ -232,13 +233,13 @@ public class InputBox
                 case ConsoleKey.F3:
                 case ConsoleKey.F4:
                 case ConsoleKey.F5:
-                    if (_display != null && _display.ActiveTabKey != key.Key.ToString()) Sound.PlayClick();
+                    if (_display != null && _display.ActiveTabKey != key.Key.ToString()) PlayInputClick();
                     if (_display != null) _display.PendingInputText = string.Join("\n", lines);
                     return key.Key.ToString();
 
                 case ConsoleKey.F12: // карта мира — темп пути
                 case ConsoleKey.F10: // карта мира — в путь (на местности — DEBUG)
-                    Sound.PlayClick();
+                    PlayInputClick();
                     if (_display != null) _display.PendingInputText = string.Join("\n", lines);
                     return key.Key.ToString();
 
@@ -246,19 +247,19 @@ public class InputBox
                 // вкладке ничего не меняет и звука не даёт). На карте F6–F8 — подвкладки масштаба
                 // карты, их звук даёт MapScreenLoop.SetMapLevel.
                 case ConsoleKey.F6:
-                    if (_display != null && !_arrowKeysMovement && (_display.JournalShown || _display.CharacterSubTab != CharacterSubTab.Inventory)) Sound.PlayClick();
+                    if (_display != null && !_arrowKeysMovement && (_display.JournalShown || _display.CharacterSubTab != CharacterSubTab.Inventory)) PlayInputClick();
                     if (_display != null) _display.PendingInputText = string.Join("\n", lines);
                     return key.Key.ToString();
                 case ConsoleKey.F7:
-                    if (_display != null && !_arrowKeysMovement && (_display.JournalShown || _display.CharacterSubTab != CharacterSubTab.Abilities)) Sound.PlayClick();
+                    if (_display != null && !_arrowKeysMovement && (_display.JournalShown || _display.CharacterSubTab != CharacterSubTab.Abilities)) PlayInputClick();
                     if (_display != null) _display.PendingInputText = string.Join("\n", lines);
                     return key.Key.ToString();
                 case ConsoleKey.F8:
-                    if (_display != null && !_arrowKeysMovement && (_display.JournalShown || _display.CharacterSubTab != CharacterSubTab.Effects)) Sound.PlayClick();
+                    if (_display != null && !_arrowKeysMovement && (_display.JournalShown || _display.CharacterSubTab != CharacterSubTab.Effects)) PlayInputClick();
                     if (_display != null) _display.PendingInputText = string.Join("\n", lines);
                     return key.Key.ToString();
                 case ConsoleKey.F9:
-                    if (_display != null && _display.CharacterSubTab != CharacterSubTab.Spells) Sound.PlayClick();
+                    if (_display != null && _display.CharacterSubTab != CharacterSubTab.Spells) PlayInputClick();
                     if (_display != null) _display.PendingInputText = string.Join("\n", lines);
                     return key.Key.ToString();
 
@@ -402,6 +403,14 @@ public class InputBox
     // (вода) — снизу появлялась цветная полоса. Пока ждём ввод, текущий фон — основной.
     private long _bgResetAt;
 
+    private bool _fromMouseCommand;
+
+    private void PlayInputClick()
+    {
+        // Mouse handlers already play the click before queuing their command.
+        if (!_fromMouseCommand) Sound.PlayClick();
+    }
+
     private ConsoleKeyInfo ReadKeyWithPolling()
     {
         while (true)
@@ -414,6 +423,7 @@ public class InputBox
             }
             if (_display?.PendingCommand != null)
             {
+                _fromMouseCommand = true;
                 var cmd = _display.PendingCommand;
                 _display.PendingCommand = null;
                 return cmd switch

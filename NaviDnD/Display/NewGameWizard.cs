@@ -384,7 +384,6 @@ public class NewGameWizard
             }
             if (click is { } c)
             {
-                Sound.PlayClick();
                 if (c == "world:-1") CycleWorld(-1);
                 else if (c == "world:1") CycleWorld(1);
                 else if (c.StartsWith("p") && c.Contains(':')) Step(int.Parse(c[1..c.IndexOf(':')]), int.Parse(c[(c.IndexOf(':') + 1)..]));
@@ -392,12 +391,13 @@ public class NewGameWizard
                 else if (c == "ai") { focus = FA; RunAi(); }
                 else if (c.StartsWith("desc:"))
                 {
+                    Sound.PlayClick();
                     // Клик по тексту — курсор в это место.
                     focus = FD;
                     descCur = TextArea.CursorAt(desc, descScroll, descW, int.Parse(c[5..]), _clickCol - (lx0 + LabelCol));
                     descFollow = true;
                 }
-                else if (c.StartsWith("f:")) { focus = int.Parse(c[2..]); if (focus == FD) descCur = desc.Length; }
+                else if (c.StartsWith("f:")) { Sound.PlayClick(); focus = int.Parse(c[2..]); if (focus == FD) descCur = desc.Length; }
                 else if (c == "next" && Proceed() != null) return Leave(2);
                 continue;
             }
@@ -835,7 +835,7 @@ public class NewGameWizard
                     _advCam.ZoomAt(zm.view, int.Parse(parts[0]), int.Parse(cell[0]), int.Parse(cell[1]), mw, mh);
                     continue;
                 }
-                if (c.StartsWith("step:")) { int to = int.Parse(c[5..]); if (to < 4 && CanGo(to)) return Leave(to); continue; }
+                if (c.StartsWith("step:")) { Sound.PlayClick(); int to = int.Parse(c[5..]); if (to < 4 && CanGo(to)) return Leave(to); continue; }
                 Sound.PlayClick();
                 if (c.StartsWith("p") && c.Contains(':'))
                 {
@@ -1010,7 +1010,7 @@ public class NewGameWizard
                     // Заголовок: шаг «[Fn]…» или «[Esc]МЕНЮ»; остальное — перетаскивание окна.
                     if (!_frozen && MouseUiHelper.GetHoveredTabKey(c.x, c.y, MouseUiHelper.ComputeTitleTabs(Title)) is { } tk)
                     {
-                        Sound.PlayClick();
+                        if (tk == "Esc") Sound.PlayClick();
                         return (null, tk == "Esc" ? "esc" : "step:" + tk[1..]);
                     }
                     ConsoleMouseReader.StartWindowDrag();

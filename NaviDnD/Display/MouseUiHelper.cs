@@ -74,12 +74,16 @@ internal static class MouseUiHelper
     // отрисовки, и для зон наведения/клика (ComputeTitleTabs, SetTabHighlight).
     internal static string AlignTitle(string title)
     {
+        if (TitleWidth < WindowControls.Buttons.Length + 3) return title;
+        if (title.EndsWith(WindowControls.Buttons, StringComparison.Ordinal)) return title;
+        int available = TitleWidth - WindowControls.Buttons.Length;
         int e = title.LastIndexOf("[Esc]", StringComparison.Ordinal);
-        if (e < 0 || TitleWidth <= 0) return title;
+        if (e < 0) return title.TrimEnd().PadRight(available)[..available] + WindowControls.Buttons;
         string token = title[e..].TrimEnd();
         string left = title[..e].TrimEnd();
-        int gap = TitleWidth - 1 - left.Length - token.Length;
-        return gap < 3 ? title : left + new string(' ', gap) + token + " ";
+        int gap = available - 1 - left.Length - token.Length;
+        string aligned = gap < 3 ? title.PadRight(available)[..available] : left + new string(' ', gap) + token + " ";
+        return aligned + WindowControls.Buttons;
     }
 
     internal static void WriteColoredTitle(string title, DisplayConfig display, bool disabled = false)
@@ -105,6 +109,12 @@ internal static class MouseUiHelper
         if (stepsStart > 0 && title[stepsStart - 1] == '«') stepsStart--;
         while (i < title.Length)
         {
+            if (title.EndsWith(WindowControls.Buttons, StringComparison.Ordinal)
+                && i == title.Length - WindowControls.Buttons.Length)
+            {
+                WindowControls.Draw(display);
+                break;
+            }
             if (stepsEnd > 0 && i == stepsStart)
             {
                 var stepDim = ColorHelper.Darker(display.MainForeground, 0.45);

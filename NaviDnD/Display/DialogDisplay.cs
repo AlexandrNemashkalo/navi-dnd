@@ -699,7 +699,7 @@ public class DialogDisplay
             if (entry.Text.Length == 0) continue;
             string? speechText = Speech.ValidateSsml(entry.Text);
             entry.Text = Speech.DisplayText(entry.Text);
-            Speech.Speak(entry.Text, entry.Author, speechText);
+            using var speechMessage = Speech.BeginMessage(entry.Text, entry.Author, speechText);
 
             _setting.History ??= [];
             _setting.History.Add(new DialogMessage { Author = entry.Author ?? "DM", Text = "", SpeechText = speechText });
@@ -723,6 +723,7 @@ public class DialogDisplay
                     else if (key.HasValue && key.Value >= ConsoleKey.F1 && key.Value <= ConsoleKey.F10)
                         SwitchTab(key.Value.ToString());
                 }, stop: () => skipText, catchUp: false);
+            speechMessage.Dispose();
             msg.Text = entry.Text;
             RebuildCache();
             RerenderDialogBlock(DrawSpinner);
@@ -1351,6 +1352,7 @@ public class DialogDisplay
         if (_cachedPages == null) RebuildCache();
 
         await StreamHistoryEntries(request.History);
+        WindowControls.NotifyIfMinimized();
         while (ConsoleMouseReader.TryReadKeyDown().HasValue) { }
 
         var deadline = DateTime.UtcNow.AddSeconds(50);
@@ -1385,6 +1387,7 @@ public class DialogDisplay
         if (_cachedPages == null) RebuildCache();
 
         await StreamHistoryEntries(request.History);
+        WindowControls.NotifyIfMinimized();
         while (ConsoleMouseReader.TryReadKeyDown().HasValue) { }
 
         bool onMap = _display.StreamingTabTitle == null ? _display.ActiveTabKey == "F1" : _display.MapHoverEnabled;

@@ -111,7 +111,7 @@ public class AppConfig
     public int SoundVolume { get; set; } = 20;
     public bool SpeechEnabled { get; set; } = false;
     public int SpeechVolume { get; set; } = 70;
-    public string SileroVoice { get; set; } = "aidar";
+    public string SileroVoice { get; set; } = "baya";
     public string SileroPythonPath { get; set; } = "python";
     // [] = off, ["*"] = all actions, or any subset of:
     // "CreateNewGame", "FixHeroForNewGame", "StartNewGame", "SendAction"

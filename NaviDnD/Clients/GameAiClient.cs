@@ -1,4 +1,5 @@
 using NaviDnD.Data.Models;
+using NaviDnD.Helpers;
 using NaviDnD.MapGen.Generators;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -754,8 +755,15 @@ public class GameAiClient
     private static string ReadPrompt(string actionPath) =>
         File.ReadAllText(Path.Combine(actionPath, "systemPrompt.md"), Encoding.UTF8);
 
-    private Task<string> CompleteConfigured(IReadOnlyList<string> systemBlocks, string userMessage, string actionPath, string model) =>
-        _provider.Complete(systemBlocks, $"speechEnabled:{(_appConfig.SpeechEnabled ? "true" : "false")}\n{userMessage}", actionPath, model);
+    private async Task<string> CompleteConfigured(IReadOnlyList<string> systemBlocks, string userMessage, string actionPath, string model)
+    {
+        try
+        {
+            return await _provider.Complete(systemBlocks,
+                $"speechEnabled:{(_appConfig.SpeechEnabled ? "true" : "false")}\n{userMessage}", actionPath, model);
+        }
+        finally { WindowControls.NotifyIfMinimized(); }
+    }
 
     private static string ExtractJson(string text)
     {

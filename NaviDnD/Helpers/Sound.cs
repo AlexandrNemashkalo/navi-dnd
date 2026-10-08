@@ -6,6 +6,7 @@ internal static class Sound
 {
     // Выставляется один раз из AppConfig.SoundEnabled при старте игры (Program.cs).
     public static bool Enabled { get; set; } = true;
+    public static volatile bool Suspended;
 
     // Общая громкость 0..1 (AppConfig.SoundVolume, экран «НАСТРОЙКИ») — множитель для всех звуков.
     public static float Volume { get; set; } = 1f;
@@ -14,7 +15,7 @@ internal static class Sound
 
     public static void PlayClick()
     {
-        if (Enabled) Click.Trigger();
+        if (Enabled && !Suspended) Click.Trigger();
     }
 
     // Выставляется из AppConfig.TypingSoundEnabled (Program.cs).
@@ -28,7 +29,7 @@ internal static class Sound
     // TypingMinIntervalMs — на каждый символ при ~40 симв/с получается трещотка, а не «голос».
     public static void PlayTyping(char c)
     {
-        if (!Enabled || !TypingEnabled || !char.IsLetterOrDigit(c)) return;
+        if (!Enabled || Suspended || !TypingEnabled || !char.IsLetterOrDigit(c)) return;
         var now = DateTime.UtcNow;
         if ((now - _lastTypingBlip).TotalMilliseconds < TypingMinIntervalMs) return;
         _lastTypingBlip = now;
@@ -43,7 +44,7 @@ internal static class Sound
     // открытие устройства каждый раз — приемлемая цена за корректный звук.
     public static Task PlayDiceRoll()
     {
-        if (!Enabled || !File.Exists(DiceRollPath)) return Task.CompletedTask;
+        if (!Enabled || Suspended || !File.Exists(DiceRollPath)) return Task.CompletedTask;
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         Task.Run(() =>
         {
@@ -51,11 +52,16 @@ internal static class Sound
             {
                 using var reader = new Mp3FileReader(DiceRollPath);
                 using var output = new WaveOutEvent();
-                output.Init(new NAudio.Wave.SampleProviders.VolumeSampleProvider(reader.ToSampleProvider()) { Volume = Volume });
+                var volume = new NAudio.Wave.SampleProviders.VolumeSampleProvider(reader.ToSampleProvider())
+                    { Volume = Suspended ? 0 : Volume };
+                output.Init(volume);
                 output.Play();
                 started.TrySetResult();
                 while (output.PlaybackState == PlaybackState.Playing)
+                {
+                    volume.Volume = Suspended ? 0 : Volume;
                     Thread.Sleep(50);
+                }
             }
             catch { /* звук — не критичная функция */ }
             finally { started.TrySetResult(); }
@@ -154,7 +160,7 @@ internal static class Sound
                     double t = (double)_pos / SampleRate;
                     double attack = Math.Min(1.0, t / 0.005);
                     double fadeOut = Math.Min(1.0, (length - _pos) / (SampleRate * 0.01)); // без щелчка в конце
-                    buffer[offset + i] = (float)(Math.Sin(2 * Math.PI * _freq * t) * attack * Math.Exp(-t / DecaySec) * fadeOut * Volume * Sound.Volume);
+                    buffer[offset + i] = Suspended ? 0 : (float)(Math.Sin(2 * Math.PI * _freq * t) * attack * Math.Exp(-t / DecaySec) * fadeOut * Volume * Sound.Volume);
                     _pos++;
                 }
             }
@@ -178,7 +184,7 @@ internal static class Sound
                 for (int i = 0; i < count; i++)
                 {
                     if (_pos >= 0 && _pos < clip.Length)
-                        buffer[offset + i] = clip[_pos++] * Volume;
+                        buffer[offset + i] = clip[_pos++] * (Suspended ? 0 : Volume);
                     else
                     {
                         buffer[offset + i] = 0f;

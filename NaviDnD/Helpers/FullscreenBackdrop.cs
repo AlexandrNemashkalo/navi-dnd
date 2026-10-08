@@ -9,6 +9,26 @@ public static class FullscreenBackdrop
 {
     public static bool Active { get; private set; }
 
+    public static void SetMinimized(bool minimized)
+    {
+        lock (_lock)
+        {
+            if (_backdrop == IntPtr.Zero) return;
+            if (minimized)
+            {
+                ShowWindow(_backdrop, 0);
+                return;
+            }
+            var console = GetConsoleWindow();
+            if (console == IntPtr.Zero || IsIconic(console)) return;
+            // Showing a topmost backdrop by itself puts it above the restored console.
+            // Restore the pair in order, placing the backdrop immediately behind the game.
+            const uint flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE;
+            SetWindowPos(console, HWND_TOPMOST, 0, 0, 0, 0, flags);
+            SetWindowPos(_backdrop, console, 0, 0, 0, 0, flags | SWP_SHOWWINDOW);
+        }
+    }
+
     private static IntPtr _backdrop;
     private static (int x, int y)? _windowedPos;     // где было окно игры до режима — вернуть при выключении
     private static WndProc? _wndProc;                // держим делегат — иначе его соберёт GC
@@ -156,6 +176,8 @@ public static class FullscreenBackdrop
     }
 
     [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll")] private static extern bool IsIconic(IntPtr hWnd);
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int command);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder name, int count);
     private delegate IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 

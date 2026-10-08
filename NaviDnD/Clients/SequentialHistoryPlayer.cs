@@ -109,7 +109,7 @@ internal sealed class SequentialHistoryPlayer(
         if (string.IsNullOrEmpty(text)) return;
         onNewMessage?.Invoke(author ?? "DM");
         if (onChunk == null) return;
-        Speech.Speak(text, author, speechText);
+        using var speechMessage = Speech.BeginMessage(text, author, speechText);
         if (!text.Any(c => c is not ('\n' or '\r'))) return;
         await _animations.PlayAsync(text.Where(c => c is not ('\n' or '\r')).Select(c =>
             new AnimationLoop.Frame(TimeSpan.FromMilliseconds(CharDelayMs), () =>

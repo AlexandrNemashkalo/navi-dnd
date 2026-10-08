@@ -19,6 +19,42 @@ internal static class Speech
     private static AppConfig? config;
     private static string status = "Выключена";
     private static int started;
+    private static volatile bool _windowMinimized;
+    private static IWavePlayer? _activeOutput;
+    private static long _messageId;
+    private static (long Id, string Text, string? Author, string? Ssml)? _printingMessage;
+
+    public static IDisposable BeginMessage(string text, string? author, string? speechText)
+    {
+        lock (Gate)
+        {
+            long id = ++_messageId;
+            _printingMessage = (id, text, author, speechText);
+            Speak(text, author, speechText);
+            return new MessageScope(id);
+        }
+    }
+
+    private sealed class MessageScope(long id) : IDisposable
+    {
+        public void Dispose()
+        {
+            lock (Gate)
+                if (_printingMessage?.Id == id) _printingMessage = null;
+        }
+    }
+
+    public static void SetWindowMinimized(bool minimized)
+    {
+        lock (Gate)
+        {
+            if (_windowMinimized == minimized) return;
+            _windowMinimized = minimized;
+            if (minimized) CancelSession();
+            else if (_printingMessage is { } message)
+                Speak(message.Text, message.Author, message.Ssml);
+        }
+    }
     public static string Status => Volatile.Read(ref status);
 
     public static void Initialize(AppConfig settings)
@@ -35,7 +71,8 @@ internal static class Speech
         if (config?.SpeechEnabled == true)
         {
             Queue.Writer.TryWrite(("Добро пожаловать.", null, config.SileroVoice, true, Lifetime.Token));
-            Queue.Writer.TryWrite(("Добро пожаловать.", null, "baya", true, Lifetime.Token));
+            if (config.SileroVoice != "baya")
+                Queue.Writer.TryWrite(("Добро пожаловать.", null, "baya", true, Lifetime.Token));
         }
     }
 
@@ -43,10 +80,17 @@ internal static class Speech
     {
         lock (Gate)
         {
-            session.Cancel();
-            session.Dispose();
-            session = new CancellationTokenSource();
+            _printingMessage = null;
+            CancelSession();
         }
+    }
+
+    private static void CancelSession()
+    {
+        session.Cancel();
+        _activeOutput?.Stop();
+        session.Dispose();
+        session = new CancellationTokenSource();
     }
 
     public static void Speak(string text, string? author = null, string? speechText = null)
@@ -57,7 +101,8 @@ internal static class Speech
         string? ssml = ValidateSsml(speechText);
         string voice = SelectVoice(author, ssml, config.SileroVoice);
         ssml = ApplyVoiceStyle(text, ssml, author);
-        lock (Gate) Queue.Writer.TryWrite((text, ssml, voice, false, session.Token));
+        lock (Gate)
+            if (!_windowMinimized) Queue.Writer.TryWrite((text, ssml, voice, false, session.Token));
     }
 
     private static bool IsNarrator(string? author) => string.IsNullOrWhiteSpace(author)
@@ -153,20 +198,31 @@ internal static class Speech
                 using var output = new WaveOutEvent();
                 // Громкость — в самом потоке: WaveOutEvent.Volume (waveOutSetVolume) меняет громкость всего приложения,
                 // и музыка оставалась на громкости речи.
-                var volume = new VolumeSampleProvider(reader.ToSampleProvider()) { Volume = Math.Clamp(config!.SpeechVolume / 100f, 0, 1) };
+                var volume = new VolumeSampleProvider(reader.ToSampleProvider())
+                    { Volume = _windowMinimized ? 0 : Math.Clamp(config!.SpeechVolume / 100f, 0, 1) };
                 output.Init(volume);
                 Music.Ducked = true;
                 try
                 {
-                    output.Play();
+                    lock (Gate)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        _activeOutput = output;
+                        output.Play();
+                    }
                     status = "Озвучивание";
                     while (output.PlaybackState == PlaybackState.Playing)
                     {
                         await Task.Delay(30, token);
-                        volume.Volume = Math.Clamp(config.SpeechVolume / 100f, 0, 1);
+                        volume.Volume = _windowMinimized ? 0 : Math.Clamp(config.SpeechVolume / 100f, 0, 1);
                     }
                 }
-                finally { Music.Ducked = false; }
+                finally
+                {
+                    lock (Gate)
+                        if (ReferenceEquals(_activeOutput, output)) _activeOutput = null;
+                    Music.Ducked = false;
+                }
                 status = "Готова";
             }
             catch (OperationCanceledException) { status = "Остановлена"; }

@@ -405,6 +405,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         ConsoleSetup.FullscreenFontSize = config.FullscreenFontSize;
         ConsoleSetup.SetConsoleConfig(settings);
         if (config.Fullscreen) FullscreenBackdrop.Set(true, display.MainBackground);
+        ConsoleMouseReader.RefreshWindowButtons();
     }
 
     // Последний добавленный пункт — только для выбранной нейронки (claude/codex).

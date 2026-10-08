@@ -47,7 +47,8 @@ internal static class ScreenCapture
     // устойчиво к неточному попаданию и небольшому рассогласованию координат/DPI.
     // Бросает исключение с точным описанием, на каком шаге не удалось (а не молча null) —
     // это единственный способ понять причину в среде, которую нельзя увидеть глазами.
-    public static (byte r, byte g, byte b) SampleCellColor(int col, int row, (byte r, byte g, byte b) background)
+    public static (byte r, byte g, byte b) SampleCellColor(int col, int row, (byte r, byte g, byte b) background,
+        Action<Bitmap, Rectangle>? inspect = null)
     {
         IntPtr hwnd = GetConsoleWindow();
         if (hwnd == IntPtr.Zero)
@@ -87,6 +88,7 @@ internal static class ScreenCapture
                 throw new InvalidOperationException($"PrintWindow вернул false (Win32Error={Marshal.GetLastWin32Error()}).");
         }
 
+        inspect?.Invoke(bitmap, new Rectangle(cellLeft, cellTop, cellRight - cellLeft, cellBottom - cellTop));
         Color best = default;
         int bestDist = -1;
         for (int y = cellTop; y < cellBottom; y++)
