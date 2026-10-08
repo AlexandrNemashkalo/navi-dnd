@@ -1,6 +1,6 @@
 # Работа с NaviDnD
 
-Отвечай по-русски. Запуск: [README.md](README.md). Архитектура: [docs/architecture.md](docs/architecture.md). Проверки: [docs/testing.md](docs/testing.md). Открытые задачи: [docs/roadmap.md](docs/roadmap.md).
+Отвечай по-русски. Запуск и релизы: [docs/development.md](docs/development.md). Архитектура: [docs/architecture.md](docs/architecture.md). Проверки: [docs/testing.md](docs/testing.md). Открытые задачи: [docs/roadmap.md](docs/roadmap.md).
 
 - Движок независим от системы правил; D&D задаётся в `NaviDnD/Prompts/Dnd5e`.
 - Claude и Codex используют общий JSON-протокол и игровые MCP-инструменты. Проверяй последствия ответа в состоянии, а не только валидность JSON.
