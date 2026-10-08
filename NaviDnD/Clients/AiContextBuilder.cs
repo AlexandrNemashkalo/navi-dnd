@@ -54,17 +54,16 @@ public class AiContextBuilder
             var speedStr = _ws.Hero.SpeedMax.HasValue
                 ? $" speed:{_ws.Hero.SpeedLeft ?? _ws.Hero.SpeedMax}/{_ws.Hero.SpeedMax}"
                 : "";
-            var acStat = _ws.Hero.Stats?.FirstOrDefault(s =>
-                s.Name?.Contains("Класс Доспеха", StringComparison.OrdinalIgnoreCase) == true);
+            var acStat = _ws.Hero.Stat(StatKeys.ArmorClass);
             var acStr = acStat?.Value != null ? $" ac:{acStat.Value}" : "";
-            var inspStr = _ws.Hero.Inspiration == true ? " inspiration:да" : "";
+            var inspStr = _ws.Hero.Inspiration == true ? " inspiration:true" : "";
             var stealthStr = _ws.Hero.Stealth is int st ? $" stealth:{st}" : "";
-            var noOaStr = (_ws.Hero.NoOpportunityAttacksRound >= _ws.Time.TotalRounds ? " отход:да" : "")
-                          + (_ws.Hero.Dead == true ? " dead:да" : "");
-            var lightStr = _ws.Hero.Light is { On: true } l ? $" light:{l.Ft}фт" : "";
+            var noOaStr = (_ws.Hero.NoOpportunityAttacksRound >= _ws.Time.TotalRounds ? " disengaged:true" : "")
+                          + (_ws.Hero.Dead == true ? " dead:true" : "");
+            var lightStr = _ws.Hero.Light is { On: true } l ? $" light:{l.Ft}ft" : "";
             // Кто герой — имя, раса, класс и заметка о нём: обращаться к нему в верном роде и характере.
-            string Stat(string n) => _ws.Hero.Stats?.FirstOrDefault(s => s.Name == n)?.Value ?? "";
-            string who = string.Join(", ", new[] { Stat("Раса"), Stat("Класс") }.Where(x => x.Length > 0));
+            string who = string.Join(", ", new[] { _ws.Hero.Stat(StatKeys.Race)?.Value, _ws.Hero.Stat(StatKeys.Class)?.Value }
+                .Where(x => !string.IsNullOrEmpty(x)));
             sb.AppendLine($"hero: {_ws.Hero.Name}{(who.Length > 0 ? $" ({who})" : "")}"
                           + (_ws.Hero.AiInfo is { Count: > 0 } note ? $" — {string.Join(" ", note)}" : ""));
             sb.AppendLine($"HP:{_ws.Hero.Hp} symbol:{_ws.Hero.Symbol} position:{pos}{speedStr}{acStr}{inspStr}{stealthStr}{noOaStr}{lightStr}");
@@ -103,7 +102,7 @@ public class AiContextBuilder
         if (_ws.Hero?.Abilities is { Count: > 0 } abl)
             sb.AppendLine($"hero.abilities: {Join(abl.Where(x => x.Deleted != true).Select(x => x.Name))}");
         if (_ws.Hero?.Spells is { Count: > 0 } spl)
-            sb.AppendLine($"hero.spells: {Join(spl.Where(x => x.Deleted != true).Select(x => $"{x.Name} (ур.{x.Level})"))}");
+            sb.AppendLine($"hero.spells: {Join(spl.Where(x => x.Deleted != true).Select(x => $"{x.Name} (lvl {x.Level})"))}");
         if (_ws.Hero?.Resources is { Count: > 0 } res)
             sb.AppendLine($"hero.resources: {Join(res.Where(x => x.Deleted != true).Select(x => x.Name))}");
         if (_ws.Hero?.Effects is { Count: > 0 } eff)
@@ -472,7 +471,7 @@ public class AiContextBuilder
         if (_ws.Hero?.Abilities is { Count: > 0 } abl)
             sb.AppendLine($"hero.abilities: {Join(abl.Where(x => x.Deleted != true).Select(x => x.Name))}");
         if (_ws.Hero?.Spells is { Count: > 0 } spl)
-            sb.AppendLine($"hero.spells: {Join(spl.Where(x => x.Deleted != true).Select(x => $"{x.Name} (ур.{x.Level})"))}");
+            sb.AppendLine($"hero.spells: {Join(spl.Where(x => x.Deleted != true).Select(x => $"{x.Name} (lvl {x.Level})"))}");
 
         return $"## Герой\n{sb}\n## Запрос игрока\n{request}";
     }

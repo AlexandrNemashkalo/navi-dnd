@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Unicode;
 using ModelContextProtocol.Server;
 using NaviDnD;
+using NaviDnD.Data.Models;
 
 namespace NaviDnD.McpServer;
 
@@ -29,7 +30,7 @@ public sealed class GameActionTools(McpServerConfig config)
         WriteIndented = false,
     };
 
-    private static readonly string[] _partsOfDay = ["Ночь", "Утро", "День", "Вечер"];
+    private static readonly string[] _partsOfDay = PartsOfDay.Cycle;
 
     private static readonly object _logLock = new();
 
@@ -83,7 +84,7 @@ public sealed class GameActionTools(McpServerConfig config)
     [McpServerTool]
     [Description("""
         Долгий отдых (вызывай только если уже решил, что он разрешён — нет активного эффекта
-        onRound с уроном): partOfDay+2, day+1 при переходе через Ночь, totalRounds→1, сбрасывает
+        onRound с уроном): partOfDay+2, day+1 при переходе через night, totalRounds→1, сбрасывает
         actions до maxValue и speedLeft до speedMax, удаляет эффекты с expiresAtRound+untilLongRest.
         Возвращает патч ("time"+"hero") — восстановление ХП/ресурсов слей в тот же "hero". НЕ
         вызывай следом advance_round — экономика действий уже сброшена этим тулом.
@@ -93,7 +94,7 @@ public sealed class GameActionTools(McpServerConfig config)
     [McpServerTool]
     [Description("""
         Короткий отдых (вызывай только если уже решил, что он разрешён): partOfDay+1, day+1 при
-        переходе через Ночь, totalRounds→1, сбрасывает actions до maxValue и speedLeft до speedMax,
+        переходе через night, totalRounds→1, сбрасывает actions до maxValue и speedLeft до speedMax,
         удаляет эффекты с expiresAtRound (untilLongRest сохраняются). Возвращает патч
         ("time"+"hero") — восстановление ресурсов слей в тот же "hero". НЕ вызывай следом
         advance_round.
@@ -110,7 +111,7 @@ public sealed class GameActionTools(McpServerConfig config)
             var hero = ws.Hero ?? throw new InvalidOperationException("hero missing");
 
             int steps = isLong ? 2 : 1;
-            int currentIndex = Array.IndexOf(_partsOfDay, ws.Time.PartOfDay);
+            int currentIndex = Array.IndexOf(_partsOfDay, PartsOfDay.Normalize(ws.Time.PartOfDay));
             if (currentIndex < 0) currentIndex = 0;
             int newIndex = (currentIndex + steps) % _partsOfDay.Length;
             int dayIncrement = (currentIndex + steps) / _partsOfDay.Length;

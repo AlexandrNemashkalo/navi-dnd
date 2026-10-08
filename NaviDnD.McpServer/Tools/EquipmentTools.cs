@@ -22,10 +22,10 @@ public sealed class EquipmentTools(McpServerConfig config)
         Ищет снаряжение D&D 5e (обычное И магическое) в справочнике по АНГЛИЙСКОМУ названию — НЕ
         выдумывай механику похожего предмета по памяти, сначала найди точный здесь. query =
         английское название или его часть ("javelin", "flame tongue").
-        Возвращает по одной строке на совпадение (по убыванию релевантности): русское имя — бери
-        БУКВАЛЬНО как inventory[].name — и механика (урон/тип, свойства, КД, вес, цена, для
-        магических — редкость/настройка/эффект). Перепиши механику в короткую русскую строку
-        description сам, как и остальной текст. Пустой результат — предмета нет в справочнике:
+        Возвращает по одной строке на совпадение (по убыванию релевантности): имя на языке игры (lang) —
+        бери БУКВАЛЬНО как inventory[].name — и механика (урон/тип, свойства, КД, вес, цена, для
+        магических — редкость/настройка/эффект). Перепиши механику в короткую строку description
+        на языке игры сам, как и остальной текст. Пустой результат — предмета нет в справочнике:
         тогда придумай сам, ничего не ищи повторно.
         """)]
     public string FindItem(string query)
@@ -85,7 +85,7 @@ public sealed class EquipmentTools(McpServerConfig config)
         if (i.Text.Length > 0) parts.Add(i.Text);
 
         string type = i.TypeAdditions.Length > 0 ? $"{i.Type} {i.TypeAdditions}" : i.Type;
-        return $"{i.Name} ({i.NameEn}) [{i.Category}, {type}]: {string.Join("; ", parts)}";
+        return $"{i.LocalizedName}{(L.WorldIsEnglish ? "" : $" ({i.NameEn})")} [{i.Category}, {type}]: {string.Join("; ", parts)}";
     }
 
     private static string NormalizeForCompare(string s) =>

@@ -100,6 +100,7 @@ public class DungeonGenerator : IMapGenerator
                 rooms.Add(new Room
                 {
                     Name      = "Corridor",
+                    Passage   = true,
                     Color     = [55, 55, 65],
                     Positions = corridorOnly.Select(c => (List<int>)[c.Col, c.Row]).ToList(),
                 });

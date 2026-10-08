@@ -163,8 +163,7 @@ public static class WorldLibrary
     // Новый мир: сгенерировать, сохранить, сделать активным.
     public static WorldMap Create(string size, int seed)
     {
-        var world = WorldGenerator.Generate(new WorldGenerator.Options(seed, size));
-        world.Language = L.Language;
+        var world = WorldGenerator.Generate(new WorldGenerator.Options(seed, size, Language: L.Language));
         try
         {
             Directory.CreateDirectory(Path.Combine(Dir, world.Id));

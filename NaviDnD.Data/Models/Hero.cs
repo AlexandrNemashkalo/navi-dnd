@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace NaviDnD.Data.Models;
 
@@ -41,6 +41,9 @@ public class Hero : LivingEntity
     public List<HeroAction>? Actions { get; set; }
 
     public List<HeroSpell>? Spells { get; set; }
+
+    // Особый стат по ключу (StatKeys) или null.
+    public HeroStat? Stat(string key) => Stats?.FirstOrDefault(s => s.Deleted != true && s.Key == key);
 }
 
 public class HeroInventory : IPatchable
@@ -70,6 +73,10 @@ public class HeroStat : IPatchable
 {
     public bool? Deleted { get; set; }
 
+    // Ключ особого стата (StatKeys: race, class, armorClass…) — по нему его находит код; Storage ставит его по
+    // названию на любом языке. У остальных статов — null.
+    public string? Key { get; set; }
+
     public string Name { get; set; }
 
     [JsonConverter(typeof(LenientStringConverter))]
@@ -96,9 +103,9 @@ public class HeroResource : IPatchable
     [JsonConverter(typeof(LenientStringConverter))]
     public string Value { get; set; }
 
-    // "Способности" или "Заклинания" — какая подвкладка карточки персонажа показывает этот ресурс
-    // (HeroDisplay.DrawHeroCard). Ресурс всегда относится к одной из двух — общих (не привязанных
-    // ни к чему) в 5e практически нет.
+    // ResourceCategories.Abilities или .Spells — какая подвкладка карточки персонажа показывает этот ресурс
+    // (HeroDisplay.DrawHeroCard); слово мастера Storage приводит к ключу. Ресурс всегда относится к одной из
+    // двух — общих (не привязанных ни к чему) в 5e практически нет.
     public string? Category { get; set; }
 }
 

@@ -956,7 +956,7 @@ internal static class MouseUiHelper
     internal static void SetSelectedSpell(DisplayConfig display, HeroSpell spell, int page)
     {
         CancelPreparedPicture(display);
-        var info = SpellDatabase.Find(spell.Name);
+        var info = SpellDatabase.Find(spell.Name)?.Localized;
         int total = display.MaxHistoryLines;
         int textWidth = Math.Max(1, display.DialogRightPanelWidth - 2);
 

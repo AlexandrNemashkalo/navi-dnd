@@ -4,6 +4,10 @@ namespace NaviDnD;
 
 public class WorldState
 {
+    // Версия формата файла (StorageFormat): старые сохранения переписываются при обновлении игры.
+    public int FormatVersion { get; set; } = StorageFormat.Current;
+    // Язык игры (L.Russian/L.English) — язык мира при создании: рассказ, история, названия; L.World при загрузке.
+    public string Language { get; set; } = L.Russian;
     public MapConfig Map { get; set; } = new MapConfig();
     public List<DialogMessage>? History { get; set; } = [];
     public Hero? Hero { get; set; }
@@ -53,19 +57,15 @@ public class GameTime
     // (см. Prompts/Dnd5e/SendAction systemPrompt.md § Время), поэтому не монотонен по всей игре.
     public int TotalRounds { get; set; } = 1;
 
-    // Один из 4 канонических вариантов: Ночь, Утро, День, Вечер (см. Prompts/Dnd5e/SendAction
-    // systemPrompt.md § Время). Не enum намеренно — как и остальные текстовые поля в этой модели,
-    // допустимые значения — соглашение промпта, а не ограничение движка.
-    public string PartOfDay { get; set; } = "Утро";
+    // Ключ PartsOfDay (night/morning/day/evening; см. Prompts/Dnd5e/SendAction systemPrompt.md § Время). Слово мастера
+    // на любом языке Storage приводит к ключу; незнакомое остаётся как есть (днём для света и музыки).
+    public string PartOfDay { get; set; } = PartsOfDay.Morning;
 
-    // Номер игрового дня — ИИ инкрементирует сам при переходе цикла через Ночь (см. промпт).
+    // Номер игрового дня — ИИ инкрементирует сам при переходе цикла через ночь (см. промпт).
     public int Day { get; set; } = 1;
 
-    // Часть суток для экрана: канонические значения — на языке интерфейса, остальное как есть.
-    public static string PartOfDayText(string? value) => value switch
-    {
-        "Ночь" => L.T("Ночь"), "Утро" => L.T("Утро"), "День" => L.T("День"), "Вечер" => L.T("Вечер"), _ => value ?? "",
-    };
+    // Часть суток для экрана — на языке интерфейса; незнакомое значение — как есть.
+    public static string PartOfDayText(string? key) => L.T(PartsOfDay.Russian(key));
 }
 
 public class CombatState

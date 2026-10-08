@@ -739,7 +739,7 @@ internal class MapScreenLoop
                 return;
             }
             var pace = (TravelService.Pace)_display.TravelPace;
-            string dest = plan.TargetPlace ?? (GameWorld.ForMaster(_settings) is { } tw ? NaviDnD.MapGen.Generators.WorldAtlas.TileName(tw, target.x, target.y) : "неизведанное");
+            string dest = plan.TargetPlace ?? (GameWorld.ForMaster(_settings) is { } tw ? NaviDnD.MapGen.Generators.WorldAtlas.TileName(tw, target.x, target.y) : L.W("неизведанное"));
             string report = TravelService.Go(_settings, plan, pace, new Random());
             // Пришёл в место с сохранённой локацией — «всё как было», герой у входа.
             if (plan.TargetPlace != null && _settings.World?.Place == plan.TargetPlace && GameWorld.Geo(_settings) is { } geo
@@ -752,7 +752,7 @@ internal class MapScreenLoop
             _display.WorldRoute = null;
             _display.WorldRouteInfo = null;
             if (GameWorld.HeroTile(_settings) is { } h) { _display.WorldCenterX = h.x + 0.5; _display.WorldCenterY = h.y + 0.5; }
-            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = $"В путь: {dest} (темп {TravelService.PaceName(pace)})." });
+            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = L.WF("В путь: {0} (темп {1}).", dest, L.W(TravelService.PaceName(pace))) });
             _storage.Save();
             _display.DialogScrollOffset = 0;
             _aiClient.ActiveDialog = dialog;
@@ -1087,7 +1087,7 @@ internal class MapScreenLoop
                 && _settings.Map.Entities?.Any(e => e.Deleted != true && e.Symbol == i.Symbol) == true);
             if (next == null) return false;
             _settings.History ??= [];
-            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = "Завершаю ход." });
+            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = L.W("Завершаю ход.") });
             combat.CurrentTurn = next.Symbol;
             _storage.Save();
             return true;
@@ -1143,7 +1143,7 @@ internal class MapScreenLoop
                 && _settings.Hero is { IsDown: true, Dead: not true } && downTurnRound != _settings.Time.TotalRounds)
             {
                 downTurnRound = _settings.Time.TotalRounds;
-                downTurn = $"[{_settings.Hero.Name} без сознания — его ход ведёт мастер]";
+                downTurn = L.WF("[{0} без сознания — его ход ведёт мастер]", _settings.Hero.Name);
             }
             var mapInput = downTurn ?? mapHistory.Draw();
             hoverDialog = null;
@@ -1166,7 +1166,7 @@ internal class MapScreenLoop
                     await RunEnemyTurnAndCheckRoundEnd();
                     break;
                 }
-                mapInput = "Завершаю ход.";
+                mapInput = L.W("Завершаю ход.");
             }
             if (mapInput == "F9" && _display.MapLevel == MapLevel.Location) {
                 var braille = File.ReadAllText(Path.Combine(AppConfig.ProjectRoot, "Storage", "test.txt"));

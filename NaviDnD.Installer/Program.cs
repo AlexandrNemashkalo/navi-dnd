@@ -40,20 +40,19 @@ internal static class Program
         Application.Run(new SetupForm(destination, waitPid));
     }
 
-    // Язык окна и сообщений: как в установленной игре (Storage/settings.json), иначе — язык Windows.
+    // Язык окна и сообщений: как в установленной игре (Storage/settings.json; без поля Language — версия до выбора
+    // языка, русская); новая установка — английский, как и игра по умолчанию.
     private static void ChooseLanguage(string? root)
     {
-        string? language = null;
+        string language = L.English;
         try
         {
             string path = Path.Combine(root ?? "", "Storage", "settings.json");
-            if (root != null && File.Exists(path)
-                && System.Text.Json.JsonDocument.Parse(File.ReadAllText(path)).RootElement.TryGetProperty("Language", out var value))
-                language = value.GetString();
+            if (root != null && File.Exists(path))
+                language = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path)).RootElement.TryGetProperty("Language", out var value)
+                    ? value.GetString() ?? L.Russian : L.Russian;
         }
         catch { }
-        language ??= System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName is "ru" or "uk" or "be" or "kk"
-            ? L.Russian : L.English;
         L.SetLanguage(language);
     }
 
@@ -85,6 +84,37 @@ internal static class Program
         finally { if (download != null) try { Directory.Delete(download, true); } catch { } }
     }
 
+    // Сохранения — к формату новой версии: сама игра без окна («NaviDnD.exe --migrate»; код миграций — в ней, помощник
+    // не пересобирается ради каждой миграции). Только если поставлена версия не старше этого помощника: прежние игры
+    // команды не знают и просто запустились бы. Сбой не отменяет обновление — игра переведёт файлы при старте, ошибку
+    // покажет в «Обновлениях» (update-error.txt пишет сама миграция; здесь — если она не отработала вовсе).
+    internal static void MigrateSaves(string root)
+    {
+        try
+        {
+            string exe = Path.Combine(root, "NaviDnD.exe");
+            if (!File.Exists(exe) || !Directory.Exists(Path.Combine(root, "Storage"))) return;
+            var own = typeof(Program).Assembly.GetName().Version ?? new Version(0, 0, 0);
+            if (!Version.TryParse(UpdateClient.InstalledVersion(root), out var installed)
+                || new Version(installed.Major, installed.Minor, Math.Max(0, installed.Build)) < new Version(own.Major, own.Minor, Math.Max(0, own.Build)))
+                return;
+            var start = new ProcessStartInfo(exe) { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = root };
+            start.ArgumentList.Add("--migrate");
+            start.ArgumentList.Add(root);
+            using var process = Process.Start(start) ?? throw new IOException(L.T("Не удалось запустить обновление сохранений."));
+            if (!process.WaitForExit(TimeSpan.FromMinutes(5)))
+            {
+                try { process.Kill(entireProcessTree: true); } catch { }
+                throw new IOException(L.T("Обновление сохранений не завершилось за 5 минут."));
+            }
+            if (process.ExitCode is not (0 or 1)) throw new IOException(L.F("Обновление сохранений завершилось с ошибкой (код {0}).", process.ExitCode));
+        }
+        catch (Exception error)
+        {
+            try { File.AppendAllText(Path.Combine(root, "Storage", "update-error.txt"), error.Message + "\n"); } catch { }
+        }
+    }
+
     private static void RunUpdate(string destination, int parentPid, string workDir, bool legacy)
     {
         bool parentExited = false;
@@ -102,6 +132,7 @@ internal static class Program
                 if (chain.Count > 0) PatchInstaller.ApplyChain(destination, chain);
                 UpdateClient.InstallHelper(destination);
             }
+            MigrateSaves(destination);
         }
         catch (Exception error)
         {
@@ -206,6 +237,9 @@ internal sealed class SetupForm : Form
                         patchError.Message + "\n" + L.T("Игра предложит обновиться при запуске."), L.T("Обновления"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     version = UpdateClient.InstalledVersion(destination);
                 }
+                // Поверх прежней установки — её сохранения к формату новой версии.
+                Report(L.T("Обновление сохранений…"), null);
+                await Task.Run(() => Program.MigrateSaves(destination));
                 string executable = Path.Combine(destination, "NaviDnD.exe");
                 if (shortcut.Checked) CreateShortcut(destination, executable);
                 Report(L.F("Игра {0} установлена. Настройки и сохранения создаются при запуске.", version), 1);

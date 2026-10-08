@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -83,6 +83,9 @@ public class Storage
 
     public void ResetWorldState()
     {
+        // Новая игра — на языке выбранного мира (L.World ставит мастер новой игры при выборе мира).
+        WorldState.Language = L.World;
+        WorldState.FormatVersion = StorageFormat.Current;
         WorldState.Hero = null;
         WorldState.Map = new MapConfig();
         WorldState.Narrative = new Narrative();
@@ -330,9 +333,30 @@ public class Storage
                         ? null
                         : prop.Value.GetString();
                     break;
+
+                // Из файла сохранения (мастер их не присылает): формат и язык игры.
+                case "formatversion":
+                    if (prop.Value.ValueKind == JsonValueKind.Number) WorldState.FormatVersion = prop.Value.GetInt32();
+                    break;
+
+                case "language":
+                    if (prop.Value.ValueKind == JsonValueKind.String) WorldState.Language = L.Normalize(prop.Value.GetString());
+                    break;
             }
         }
+        NormalizeKeys();
+        L.SetWorld(WorldState.Language);
         FillMissingStats();
+    }
+
+    // Слова мастера на любом языке → постоянные ключи (Data/Models/Keys.cs): часть суток, особые статы героя,
+    // категории ресурсов. Код сравнивает только ключи.
+    private void NormalizeKeys()
+    {
+        WorldState.Time.PartOfDay = PartsOfDay.Normalize(WorldState.Time.PartOfDay);
+        if (WorldState.Hero is not { } hero) return;
+        foreach (var stat in hero.Stats ?? []) stat.Key ??= StatKeys.FromName(stat.Name);
+        foreach (var resource in hero.Resources ?? []) resource.Category = ResourceCategories.Normalize(resource.Category);
     }
 
     // Существо убрано с карты посреди боя (убито) — на его клетке остаётся тело: объект со всем, что мастер о нём
@@ -379,7 +403,7 @@ public class Storage
                 var known = (WorldState.Narrative ??= new Narrative()).KnownMonsters ??= [];
                 if (!known.Contains(key, StringComparer.OrdinalIgnoreCase)) known.Add(key);
             }
-            string name = $"Тело: {dead.Name}";
+            string name = L.WF("Тело: {0}", dead.Name);
             var objects = WorldState.Map.Objects ??= [];
             if (objects.Any(o => o.Deleted != true && o.Position is { Count: >= 2 } p && p[0] == dead.Position[0] && p[1] == dead.Position[1]
                                  && o.Name?.Contains(dead.Name ?? "\0", StringComparison.OrdinalIgnoreCase) == true)) continue;
@@ -390,7 +414,7 @@ public class Storage
                 Position = [dead.Position[0], dead.Position[1]],
                 Color = [150, 150, 150],
                 Image = dead.Image,
-                AiInfo = [.. dead.AiInfo ?? [], $"Убит в бою ({dead.MonsterKey ?? dead.Name})"],
+                AiInfo = [.. dead.AiInfo ?? [], L.WF("Убит в бою ({0})", dead.MonsterKey ?? dead.Name)],
             });
         }
     }
@@ -455,9 +479,7 @@ public class Storage
                 e.SpeedMax = int.Parse(sp.Groups[1].Value) * (sp.Groups[2].Value.StartsWith("клет", StringComparison.OrdinalIgnoreCase) ? 5 : 1);
         }
 
-        if (WorldState.Hero is { DarkvisionFt: null } hero
-            && hero.Stats?.FirstOrDefault(s => s.Name is { } n && n.Contains("зрение", StringComparison.OrdinalIgnoreCase)
-                   && (n.Contains("Тём", StringComparison.OrdinalIgnoreCase) || n.Contains("Тем", StringComparison.OrdinalIgnoreCase))) is { Value: { } dv }
+        if (WorldState.Hero is { DarkvisionFt: null } hero && hero.Stat(StatKeys.Darkvision) is { Value: { } dv }
             && System.Text.RegularExpressions.Regex.Match(dv, @"(\d+)") is { Success: true } ft && int.Parse(ft.Groups[1].Value) > 0)
             hero.DarkvisionFt = int.Parse(ft.Groups[1].Value);
     }

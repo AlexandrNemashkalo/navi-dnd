@@ -1,5 +1,6 @@
 using NaviDnD.Clients;
 using NaviDnD.Data;
+using NaviDnD.Data.Models;
 using NaviDnD.Helpers;
 
 namespace NaviDnD.Display;
@@ -79,12 +80,13 @@ public class NewGameDisplay
                 {
                     // Вариант — строкой («1») или объектом с портретом ({"name","portrait"}).
                     bool plain = o is System.Text.Json.Nodes.JsonValue;
-                    string name = plain ? o!.ToString() : (string?)o?["name"] ?? "";
+                    // Варианты — русские (ключи перевода), в анкете и мастеру — на языке мира.
+                    string name = L.W(plain ? o!.ToString() : (string?)o?["name"] ?? "");
                     if (name.Length == 0) continue;
                     _fields[field].Options.Add(name);
                     if (!plain) _optionPortraits[name] = (string?)o?["portrait"];
                 }
-            foreach (var n in root?["names"]?.AsArray() ?? [])
+            foreach (var n in root?[L.WorldIsEnglish ? "namesEn" : "names"]?.AsArray() ?? [])
                 if (n?.ToString() is { Length: > 0 } s) _names.Add(s);
         }
         catch { /* нет списка — листалки пустые */ }
@@ -222,6 +224,9 @@ public class NewGameDisplay
     private List<int> Bright => ColorHelper.Pale(_display.MainForeground, 0.75);
     private List<int> Dim => ColorHelper.Darker(_display.MainForeground, 0.5);
 
+    // Язык мира, на котором собрана анкета (варианты, имена): мир сменился на другой язык — анкета создаётся заново.
+    public string Language { get; } = L.World;
+
     public NewGameDisplay(WorldState settings, DisplayConfig display, ScreenConfig screen, GameAiClient aiClient)
     {
         _aiClient = aiClient;
@@ -294,8 +299,8 @@ public class NewGameDisplay
         if (h.Race.Length > 0) SetChoice(RaceField, h.Race);
         if (h.Class.Length > 0) SetChoice(ClassField, h.Class);
         SetChoice(LevelField, System.Text.RegularExpressions.Regex.Match(h.Level, @"\d+").Value);
-        SetChoice(AlignmentField, HeroStat(h.HeroJson, "Мировоззрение"));
-        SetChoice(BackgroundField, HeroStat(h.HeroJson, "Предыстория"));
+        SetChoice(AlignmentField, HeroStat(h.HeroJson, StatKeys.Alignment));
+        SetChoice(BackgroundField, HeroStat(h.HeroJson, StatKeys.Background));
         _fields[DescriptionField].Value = h.Description;   // нет описания — пусто (не текст прежнего героя)
         if (h.Color != null && Array.FindIndex(Palette, p => p.Rgb.SequenceEqual(h.Color)) is int ci and >= 0) _color = ci;
         if (h.Image != null)
@@ -306,13 +311,13 @@ public class NewGameDisplay
         }
     }
 
-    // Стат героя из его JSON (лист персонажа) по имени; нет — "".
-    private static string HeroStat(string? heroJson, string name)
+    // Стат героя из его JSON (лист персонажа) по ключу (StatKeys); нет — "".
+    private static string HeroStat(string? heroJson, string key)
     {
         try
         {
             return System.Text.Json.Nodes.JsonNode.Parse(heroJson ?? "")?["stats"]?.AsArray()
-                .FirstOrDefault(s => string.Equals((string?)s?["name"], name, StringComparison.OrdinalIgnoreCase))?["value"]?.ToString() ?? "";
+                .FirstOrDefault(s => (string?)s?["key"] == key)?["value"]?.ToString() ?? "";
         }
         catch { return ""; }
     }
@@ -451,7 +456,7 @@ public class NewGameDisplay
         Data.Image = string.IsNullOrEmpty(portrait.Image) ? null : portrait.Image;
         if (_settings.Hero is not { } hero) return;
         hero.Name = Data.Name;
-        if (hero.Stats?.FirstOrDefault(s => string.Equals(s.Name, "Мировоззрение", StringComparison.OrdinalIgnoreCase)) is { } align)
+        if (hero.Stat(StatKeys.Alignment) is { } align)
             align.Value = Data.Alignment;
         if (Data.Symbol.Length > 0) hero.Symbol = Data.Symbol;
         hero.Color = [.. Data.Color];
@@ -1071,8 +1076,9 @@ public class NewGameDisplay
         string goText = desc.Value.Trim().Length > 0 ? L.T("ИЗМЕНИТЬ") : L.T("ПРИДУМАТЬ");
         int gx = left + total - 3 - (goText.Length + 4);
         bool promptFocus = _focus == PromptField;
-        Put(iy, lx, L.T("Ввод: "), promptFocus ? Bright : Fg);
-        int px = lx + 6, promptW = gx - 2 - px;
+        string inputLabel = L.T("Ввод: ");
+        Put(iy, lx, inputLabel, promptFocus ? Bright : Fg);
+        int px = lx + inputLabel.Length, promptW = gx - 2 - px;
         var prompt = _fields[PromptField].Value;
         bool empty = prompt.Length == 0 && !(promptFocus && _editing);
         string text = empty ? L.T("что придумать или как изменить описание (необязательно)") : TailFit(prompt + (promptFocus && _editing ? "▌" : ""), promptW);

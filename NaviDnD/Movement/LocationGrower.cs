@@ -1,4 +1,4 @@
-﻿using NaviDnD.Data.Models;
+using NaviDnD.Data.Models;
 using NaviDnD.MapGen.Generators;
 
 namespace NaviDnD;
@@ -222,7 +222,7 @@ public static class LocationGrower
         while (queue.Count > 0)
         {
             var x = queue.Dequeue();
-            if (roomOf.TryGetValue(x, out int room) && map.Rooms[room].Name is not ("Коридор" or "Галерея"))
+            if (roomOf.TryGetValue(x, out int room) && map.Rooms[room].Passage != true)
             {
                 // Шаг-другой вглубь комнаты, а не на пороге.
                 var deeper = new[] { (x.c + 1, x.r), (x.c - 1, x.r), (x.c, x.r + 1), (x.c, x.r - 1) }
@@ -336,7 +336,6 @@ public static class LocationGrower
         return place;
     }
 
-    private static readonly string[] Passages = ["Коридор", "Лаз", "Галерея"];
 
     // Лестница: клетка нижнего блока «вверх» (U) ↔ клетка верхнего «вниз» (D). Клетка — проходимая, у стены,
     // не у двери/выхода и не перерезает комнату (шаг на неё переносит героя — пройти сквозь неё нельзя).
@@ -419,7 +418,7 @@ public static class LocationGrower
                     if (p is { Count: >= 2 }) exact.Add((p[0] - chunk.OriginCol - 1, p[1] - chunk.OriginRow - 1));
         bool strict = true;
         // В коридоре двери через каждые 3–4 клетки — там обходим только сами клетки дверей.
-        bool InPassage((int c, int r) x) => region[x] >= 0 && Passages.Contains(rooms[region[x]].Name);
+        bool InPassage((int c, int r) x) => region[x] >= 0 && rooms[region[x]].Passage == true;
         bool Avoided((int c, int r) x) => strict && !InPassage(x) ? avoid.Contains(x) : exact.Contains(x) || TerrainCatalog.IsStair(TerrainChar(chunk, x.c, x.r));
         List<(int c, int r)> Candidates(bool byWall) => region.Keys.Where(x => Free(x) && !Avoided(x) && TerrainChar(chunk, x.c, x.r) != '='
                 && (!byWall || region[x] < 0 || Around(x).Any(n => !region.TryGetValue(n, out int rn) || rn != region[x]))
@@ -430,7 +429,7 @@ public static class LocationGrower
         if (list.Count == 0) list = Candidates(byWall: false);
         if (list.Count == 0) { strict = false; list = Candidates(byWall: false); }
         if (list.Any(x => region[x] >= 0)) list = list.Where(x => region[x] >= 0).ToList();
-        int Weight((int c, int r) x) => region[x] < 0 ? 1 : Passages.Contains(rooms[region[x]].Name) ? 100 : rooms[region[x]].Positions?.Count ?? 1;
+        int Weight((int c, int r) x) => region[x] < 0 ? 1 : rooms[region[x]].Passage == true ? 100 : rooms[region[x]].Positions?.Count ?? 1;
         return list.ToDictionary(x => x, Weight);
     }
 

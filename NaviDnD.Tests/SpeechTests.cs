@@ -8,13 +8,17 @@ namespace NaviDnD.Tests;
 public class SpeechTests
 {
     [Theory]
-    [InlineData("DM", "<speak voice=\"female\">Текст.</speak>", "eugene")]
-    [InlineData("Анна", "<speak voice=\"female\">Текст.</speak>", "baya")]
-    [InlineData("Борис", "<speak voice=\"male\">Текст.</speak>", "eugene")]
-    public void NarratorKeepsSelectedVoiceAndCharactersUseTheirVoiceMarker(string author, string ssml, string expected)
+    [InlineData("DM", "<speak voice=\"female\">Текст.</speak>", "eugene", false)]
+    [InlineData("Анна", "<speak voice=\"female\">Текст.</speak>", "baya", false)]
+    [InlineData("Борис", "<speak voice=\"male\">Текст.</speak>", "eugene", false)]
+    // Английская игра — голоса английской модели: рассказчик — выбранный, персонажи — по полю voice.
+    [InlineData("DM", "<speak voice=\"female\">Text.</speak>", "eugene", true)]
+    [InlineData("Anna", "<speak voice=\"female\">Text.</speak>", "en_6", true)]
+    [InlineData("Boris", "<speak voice=\"male\">Text.</speak>", "en_23", true)]
+    public void NarratorKeepsSelectedVoiceAndCharactersUseTheirVoiceMarker(string author, string ssml, string expected, bool english)
     {
         var speech = typeof(AppConfig).Assembly.GetType("NaviDnD.Helpers.Speech")!;
-        Assert.Equal(expected, speech.GetMethod("SelectVoice", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [author, ssml, "eugene"]));
+        Assert.Equal(expected, speech.GetMethod("SelectVoice", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [author, ssml, "eugene", english]));
     }
 
     [Fact]
@@ -38,11 +42,19 @@ public class SpeechTests
         var complete = typeof(GameAiClient).GetMethod("CompleteConfigured", BindingFlags.NonPublic | BindingFlags.Instance)!;
         string[] blocks = ["instructions"];
         await (Task<string>)complete.Invoke(client, [blocks, "action", "path", "model"])!;
-        Assert.Equal("speechEnabled:false\naction", provider.Message);
+        Assert.Equal("lang:ru\nspeechEnabled:false\naction", provider.Message);
         Assert.Same(blocks, provider.Blocks);
         config.SpeechEnabled = true;
         await (Task<string>)complete.Invoke(client, [blocks, "action", "path", "model"])!;
-        Assert.Equal("speechEnabled:true\naction", provider.Message);
+        Assert.Equal("lang:ru\nspeechEnabled:true\naction", provider.Message);
+        // Язык игры — язык мира загруженного сохранения.
+        try
+        {
+            storage.ApplyUpdateWorldState("""{"language":"en"}""");
+            await (Task<string>)complete.Invoke(client, [blocks, "action", "path", "model"])!;
+            Assert.Equal("lang:en\nspeechEnabled:true\naction", provider.Message);
+        }
+        finally { L.SetWorld(L.Russian); }
     }
 
     private sealed class CapturingProvider : IAiProvider

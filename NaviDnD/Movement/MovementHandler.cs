@@ -77,7 +77,7 @@ public class MovementHandler
                 _storage.ApplyClientMovement(GetStepCost(newCol, newRow, diag), diag);
                 hero.Position = [behindCol, behindRow];
                 _storage.ApplyClientMovement(GetStepCost(behindCol, behindRow, diag), diag);
-                _world.History?.Add(new DialogMessage { Text = $"Ты протискиваешься мимо: {bystander.Name}." });
+                _world.History?.Add(new DialogMessage { Text = L.WF("Ты протискиваешься мимо: {0}.", bystander.Name) });
                 _storage.Save();
                 activatedTriggers.AddRange(GetStepTriggers(behindCol, behindRow));
                 activatedTriggers.AddRange(GetVisibleTriggers(behindCol, behindRow));
@@ -112,8 +112,11 @@ public class MovementHandler
             int fromZ = _world.Map.FloorAt(newCol, newRow), toZ = _world.Map.FloorAt(stairCol, stairRow);
             (newCol, newRow) = (stairCol, stairRow);
             hero.Position = [newCol, newRow];
-            string verb = toZ > fromZ ? "поднимаешься" : "спускаешься";
-            _world.History?.Add(new DialogMessage { Text = $"Ты {verb} по лестнице: {MapConfig.FloorName(toZ)}." });
+            string floor = MapConfig.FloorName(toZ);
+            _world.History?.Add(new DialogMessage
+            {
+                Text = toZ > fromZ ? L.WF("Ты поднимаешься по лестнице: {0}.", floor) : L.WF("Ты спускаешься по лестнице: {0}.", floor),
+            });
         }
         _storage.Save();
 

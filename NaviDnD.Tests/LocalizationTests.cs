@@ -4,7 +4,7 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.Tests;
 
-// Перевод интерфейса (L): у каждой строки из L.T/L.F/L.Plural в исходниках есть английский вариант
+// Перевод (L): у каждой строки из L.T/L.F/L.Plural и L.W/L.WF/L.WPlural в исходниках есть английский вариант
 // в NaviDnD.Data/Localization/en.json с теми же подстановками {0}, {1}…
 public class LocalizationTests
 {
@@ -43,7 +43,7 @@ public class LocalizationTests
     public void KeysAreStaticLiterals()
     {
         // L.T($"…") и L.T(@"…") не найти в en.json: ключ — обычная строка, значения — через L.F.
-        var dynamic = SourceFiles().SelectMany(f => Regex.Matches(File.ReadAllText(f.File), @"L\.(T|F)\(\s*[$@]")
+        var dynamic = SourceFiles().SelectMany(f => Regex.Matches(File.ReadAllText(f.File), @"L\.(T|F|W|WF)\(\s*[$@]")
             .Select(m => $"{Path.GetFileName(f.File)}: {m.Value}")).ToList();
         Assert.True(dynamic.Count == 0, string.Join("\n", dynamic));
     }
@@ -61,6 +61,22 @@ public class LocalizationTests
             .Concat(["Ночь", "Утро", "День", "Вечер"]);
         var missing = names.Where(n => !L.EnglishTable.ContainsKey(n)).Distinct().ToList();
         Assert.True(missing.Count == 0, "Нет перевода в en.json:\n" + string.Join("\n", missing));
+    }
+
+    // Варианты анкеты героя и шага «Приключение» — русские ключи (Prompts/Dnd5e/*.json): в английской игре — перевод.
+    [Fact]
+    public void HeroAndAdventureOptionsHaveEnglishTranslation()
+    {
+        string dir = Path.Combine(RepoRoot(), "NaviDnD", "Prompts", "Dnd5e");
+        var hero = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(Path.Combine(dir, "heroOptions.json")))!;
+        var values = new[] { "races", "classes", "alignments", "backgrounds" }
+            .SelectMany(k => hero[k]!.AsArray().Select(o => o is System.Text.Json.Nodes.JsonValue ? o.ToString() : (string)o!["name"]!));
+        var adventure = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(Path.Combine(dir, "adventureOptions.json")))!;
+        values = values.Concat(adventure["params"]!.AsArray()
+            .SelectMany(p => p!["options"]!.AsArray().Select(o => o!.ToString()).Append((string)p["label"]!)));
+        var missing = values.Where(v => !L.EnglishTable.ContainsKey(v)).Distinct().ToList();
+        Assert.True(missing.Count == 0, "Нет перевода в en.json:\n" + string.Join("\n", missing));
+        Assert.NotEmpty(hero["namesEn"]!.AsArray());
     }
 
     [Fact]
@@ -91,9 +107,9 @@ public class LocalizationTests
         {
             string code = File.ReadAllText(file);
             string name = Path.GetFileName(file);
-            foreach (Match m in Regex.Matches(code, @"L\.(?:T|F)\(\s*" + Literal))
+            foreach (Match m in Regex.Matches(code, @"L\.(?:T|F|W|WF)\(\s*" + Literal))
                 yield return (dir, name, Unescape(m.Groups[1].Value));
-            foreach (Match m in Regex.Matches(code, @"L\.Plural\([^,]+,\s*" + Literal + @"\s*,\s*" + Literal + @"\s*,\s*" + Literal))
+            foreach (Match m in Regex.Matches(code, @"L\.W?Plural\([^,]+,\s*" + Literal + @"\s*,\s*" + Literal + @"\s*,\s*" + Literal))
             {
                 yield return (dir, name, Unescape(m.Groups[1].Value));
                 yield return (dir, name, Unescape(m.Groups[3].Value));

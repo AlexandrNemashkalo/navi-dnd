@@ -1530,13 +1530,13 @@ public class DialogDisplay
 
     private static string DescribeTargetSelection(TargetSelectionResult result)
     {
-        if (result.TimedOut) return "Цель не выбрана (время вышло)";
-        if (result.Cancelled) return "Отмена выбора цели";
-        return "Цель: " + string.Join(", ", result.Targets.Select(t =>
+        if (result.TimedOut) return L.W("Цель не выбрана (время вышло)");
+        if (result.Cancelled) return L.W("Отмена выбора цели");
+        return L.W("Цель: ") + string.Join(", ", result.Targets.Select(t =>
         {
             string label = t.Name != null ? $"{t.Name} [{t.Position[0]},{t.Position[1]}]" : $"[{t.Position[0]},{t.Position[1]}]";
             var inArea = (t.InArea ?? []).Concat(t.ObjectsInArea ?? []).Select(a => a.Name).ToList();
-            if (inArea.Count > 0) label += $" (в области: {string.Join(", ", inArea)})";
+            if (inArea.Count > 0) label += " " + L.WF("(в области: {0})", string.Join(", ", inArea));
             return label;
         }));
     }

@@ -104,7 +104,7 @@ internal static class MusicDirector
         bool inGame = state.CurrentScreen is Screen.Map or Screen.World or Screen.Journal or Screen.Character or Screen.Abilities;
         if (!inGame) return ("menu", null);
 
-        bool night = ws.Time.PartOfDay == "Ночь";
+        bool night = ws.Time.PartOfDay == PartsOfDay.Night;
         bool combat = ws.Combat?.Active == true;
         (string mood, string? ambience) place;
         if (Traveling || !GameWorld.HasLocation(ws))

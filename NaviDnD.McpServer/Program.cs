@@ -29,6 +29,13 @@ HashSet<string>? allowedTools = toolsArg == null ? null
 if (!File.Exists(worldStatePath))
     throw new FileNotFoundException($"worldState.json not found: {worldStatePath}");
 
+// Язык игры (поле language сохранения): названия из справочников и генератора — на нём, как пишет мастер.
+try
+{
+    NaviDnD.L.SetWorld(System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(worldStatePath))?["language"]?.GetValue<string>());
+}
+catch { /* не прочиталось — русский */ }
+
 var builder = Host.CreateApplicationBuilder(Array.Empty<string>());
 
 // All logs go to stderr — stdout must stay clean for JSON-RPC messages

@@ -20,10 +20,10 @@ public static class WorldGenerator
     // -2 ледяной … 0 умеренный … 2 жаркий, Kingdoms — число королевств (0 — по размеру мира), Continents — число
     // материков (0 — по размеру мира), Mountains/Forests/Deserts/Rivers — -3 нет, -2 очень мало … 0 обычно … 2 очень много.
     public sealed record Options(int Seed, string Size = WorldSizes.Small, string? Name = null, int Water = 0, int Climate = 0, int Kingdoms = 0,
-        int Continents = 0, int Mountains = 0, int Forests = 0, int Deserts = 0, int Rivers = 0);
+        int Continents = 0, int Mountains = 0, int Forests = 0, int Deserts = 0, int Rivers = 0, string Language = L.Russian);
 
     // Имя мира по умолчанию (свой источник случайности — не совпадает с именами столиц этого seed).
-    public static string DefaultName(int seed) => new NameGen(new Random(seed ^ 0x77a1)).Proper();
+    public static string DefaultName(int seed, string language) => new NameGen(new Random(seed ^ 0x77a1), language).Proper();
 
     private sealed class Ctx
     {
@@ -53,7 +53,7 @@ public static class WorldGenerator
         Relief(c);
         Climate(c);
         Rivers(c);
-        var names = new NameGen(new Random(o.Seed ^ 0x5eed));
+        var names = new NameGen(new Random(o.Seed ^ 0x5eed), o.Language);
         var places = Settlements(c, names);
         var kingdoms = Kingdoms(c, places, names);
         RoadsBetween(c, places);
@@ -64,6 +64,7 @@ public static class WorldGenerator
         {
             Id = $"world-{o.Seed}",
             Name = o.Name ?? names.Proper(),
+            Language = o.Language,
             Seed = o.Seed,
             Size = o.Size,
             Water = c.Water,
@@ -118,14 +119,8 @@ public static class WorldGenerator
 
     public static void AddIslands(WorldMap map, Random rng)
     {
-        // Сокращённые «о. …» (были недолго) — снова полностью: «о. Тилдан» → «Остров Тилдан», «о. Туманный» → «Туманный остров».
-        foreach (var f in map.Features.Where(f => f.Biome == IslandCode && f.Name.StartsWith("о. ")))
-        {
-            string rest = f.Name[3..];
-            f.Name = rest.EndsWith("ый") || rest.EndsWith("ий") || rest.EndsWith("ой") ? $"{rest} остров" : $"Остров {rest}";
-        }
         if (map.Features.Any(f => f.Biome == IslandCode)) return;
-        var names = new NameGen(rng);
+        var names = new NameGen(rng, map.Language);
         var seen = new bool[map.Width, map.Height];
         var masses = new List<List<(int x, int y)>>();
         for (int x = 0; x < map.Width; x++)
@@ -717,31 +712,39 @@ public static class WorldGenerator
         return (h & 0xFFFFFF) / (double)0xFFFFFF;
     }
 
-    // ── Имена (временные, слоговые) ─────────────────────────────────────────
-    private sealed class NameGen(Random rng)
+    // ── Имена (временные, слоговые) — на языке мира ──────────────────────────
+    private sealed class NameGen(Random rng, string language)
     {
         private readonly HashSet<string> _used = [];
+        private readonly bool En = language == L.English;
         private static readonly string[] Starts = ["Ар", "Вел", "Кал", "Дор", "Мир", "Тар", "Эл", "Гра", "Бри", "Сол", "Ост", "Лор", "Зар", "Хел", "Нор", "Фал", "Вин", "Тор", "Кер", "Ам", "Ил", "Эр", "Мор", "Бел", "Сар", "Гол", "Дан", "Лим", "Рав", "Кор", "Ул", "Ван", "Сел", "Тил", "Гер"];
         private static readonly string[] Mids = ["а", "е", "и", "о", "ан", "ен", "ор", "ар", "ил", "ер", "", "", ""];
         private static readonly string[] Ends = ["дор", "мор", "ин", "ель", "град", "ск", "ен", "ар", "ос", "вин", "рет", "дан", "гард", "ла", "ия", "ор", "им", "ест", "ан", "ход", "мир"];
         private static readonly string[] VillageEnds = ["овка", "ино", "ище", "ец", "ки", "ово", "ня", "ичи", "ка"];
         private static readonly string[] VillageStarts = ["Берёз", "Ольх", "Медв", "Лис", "Сосн", "Камен", "Озёр", "Рыб", "Мельн", "Глин", "Ключ", "Вереш", "Боров", "Ясен", "Красн", "Тих", "Грязн", "Сух", "Заболот", "Полян"];
+        private static readonly string[] StartsEn = ["Ar", "Vel", "Kal", "Dor", "Mir", "Tar", "El", "Gra", "Bri", "Sol", "Ost", "Lor", "Zar", "Hel", "Nor", "Fal", "Vin", "Tor", "Ker", "Am", "Il", "Er", "Mor", "Bel", "Sar", "Gol", "Dan", "Lim", "Rav", "Cor", "Ul", "Van", "Sel", "Til", "Ger"];
+        private static readonly string[] MidsEn = ["a", "e", "i", "o", "an", "en", "or", "ar", "il", "er", "", "", ""];
+        private static readonly string[] EndsEn = ["dor", "mor", "in", "el", "grad", "sk", "en", "ar", "os", "vin", "ret", "dan", "gard", "la", "ia", "or", "im", "est", "an", "hold", "mir"];
+        private static readonly string[] VillageEndsEn = ["ford", "ton", "wick", "dale", "by", "ham", "stead", "brook", "field"];
+        private static readonly string[] VillageStartsEn = ["Birch", "Alder", "Bear", "Fox", "Pine", "Stone", "Lake", "Fish", "Mill", "Clay", "Spring", "Heath", "Oak", "Ash", "Red", "Still", "Mud", "Dry", "Marsh", "Glade"];
 
         public string Proper()
         {
+            var (starts, mids, ends) = En ? (StartsEn, MidsEn, EndsEn) : (Starts, Mids, Ends);
             for (int i = 0; i < 50; i++)
             {
-                string n = Starts[rng.Next(Starts.Length)] + Mids[rng.Next(Mids.Length)] + Ends[rng.Next(Ends.Length)];
+                string n = starts[rng.Next(starts.Length)] + mids[rng.Next(mids.Length)] + ends[rng.Next(ends.Length)];
                 if (n.Length is >= 4 and <= 11 && _used.Add(n)) return n;
             }
-            return "Безымянное";
+            return En ? "Nameless" : "Безымянное";
         }
 
         public string Village()
         {
+            var (starts, ends) = En ? (VillageStartsEn, VillageEndsEn) : (VillageStarts, VillageEnds);
             for (int i = 0; i < 50; i++)
             {
-                string n = VillageStarts[rng.Next(VillageStarts.Length)] + VillageEnds[rng.Next(VillageEnds.Length)];
+                string n = starts[rng.Next(starts.Length)] + ends[rng.Next(ends.Length)];
                 if (_used.Add(n)) return n;
             }
             return Proper();
@@ -750,6 +753,16 @@ public static class WorldGenerator
         public string Site(string type)
         {
             string proper = Proper();
+            if (En)
+                return type switch
+                {
+                    WorldPlaceTypes.Ruins => Pick("Ruins of", "Remnants of") + " " + proper,
+                    WorldPlaceTypes.Dungeon => Pick("Crypt of", "Dungeon of", "Catacombs of") + " " + proper,
+                    WorldPlaceTypes.Cave => Pick("Cave of", "Grotto of", "Lair of") + " " + proper,
+                    WorldPlaceTypes.Shrine => Pick("Shrine of", "Altar of", "Sanctuary of") + " " + proper,
+                    WorldPlaceTypes.Castle => Pick("Fortress", "Castle", "Fort") + " " + proper,
+                    _ => proper,
+                };
             return type switch
             {
                 WorldPlaceTypes.Ruins => Pick("Руины", "Развалины") + " " + proper,
@@ -764,6 +777,10 @@ public static class WorldGenerator
         public string Island(int size)
         {
             string Adj(params string[] a) => a[rng.Next(a.Length)];
+            if (En)
+                return size < 25
+                    ? rng.Next(2) == 0 ? $"{Adj("Misty", "Gull", "Rocky", "Nameless", "Lonely", "Seal")} Isle" : $"Isle of {Proper()}"
+                    : rng.Next(2) == 0 ? $"{Adj("Green", "Far", "Stone", "Northern", "Southern", "Windy")} Island" : $"Island of {Proper()}";
             return size < 25
                 ? rng.Next(2) == 0 ? $"{Adj("Туманный", "Чаячий", "Скалистый", "Безымянный", "Одинокий", "Тюлений")} остров" : $"Остров {Proper()}"
                 : rng.Next(2) == 0 ? $"{Adj("Зелёный", "Дальний", "Каменный", "Северный", "Южный", "Ветреный")} остров" : $"Остров {Proper()}";
@@ -773,6 +790,19 @@ public static class WorldGenerator
         {
             string proper = Proper();
             string Adj(params string[] a) => a[rng.Next(a.Length)];
+            if (En)
+                return biome switch
+                {
+                    WorldBiomes.Forest => rng.Next(2) == 0 ? $"{Adj("Dark", "Old", "Whispering", "Wild", "Gloomy", "Green")} Wood" : $"{proper} Forest",
+                    WorldBiomes.Mountains => rng.Next(2) == 0 ? $"{Adj("Grey", "Northern", "Dragon", "Stone", "Hoary", "Iron")} Mountains" : $"{proper} Mountains",
+                    WorldBiomes.Hills => rng.Next(2) == 0 ? $"{Adj("Windy", "Green", "Barrow", "Rolling", "Sheep")} Hills" : $"{proper} Hills",
+                    WorldBiomes.Swamp => rng.Next(2) == 0 ? $"{Adj("Rotting", "Misty", "Black", "Midge")} Fens" : $"{proper} Marshes",
+                    WorldBiomes.Desert => rng.Next(2) == 0 ? $"{Adj("Red", "Scorched", "Salt", "Dead")} Sands" : $"{proper} Desert",
+                    WorldBiomes.Lake => rng.Next(2) == 0 ? $"{Adj("Mirror", "Deep", "Still", "Moon", "Blue")} Lake" : $"Lake {proper}",
+                    WorldBiomes.Tundra => $"{Adj("White", "Icy", "Frozen")} Lands",
+                    WorldBiomes.SnowForest => rng.Next(2) == 0 ? $"{Adj("White", "Winter", "Northern", "Icy", "Hoary")} Pinewood" : $"{proper} Taiga",
+                    _ => proper,
+                };
             return biome switch
             {
                 WorldBiomes.Forest => rng.Next(2) == 0 ? $"{Adj("Тёмный", "Старый", "Шепчущий", "Дикий", "Сумрачный", "Зелёный")} лес" : $"Лес {proper}",

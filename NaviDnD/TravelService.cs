@@ -117,9 +117,9 @@ public static class TravelService
         bool arrived = stopDay < 0;
 
         // Время: в путь — с утра (вечером/ночью — со следующего утра), день пути — до вечера, привал, ночь.
-        int startDay = ws.Time.Day + (ws.Time.PartOfDay is "Вечер" or "Ночь" ? 1 : 0);
+        int startDay = ws.Time.Day + (ws.Time.PartOfDay is PartsOfDay.Evening or PartsOfDay.Night ? 1 : 0);
         ws.Time.Day = startDay + walked - 1;
-        ws.Time.PartOfDay = "Вечер";
+        ws.Time.PartOfDay = PartsOfDay.Evening;
         ws.Time.TotalRounds = 1;
 
         link.X = end.x; link.Y = end.y;

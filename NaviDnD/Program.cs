@@ -11,6 +11,15 @@ class Program
 {
     static async Task Main(string[] args)
     {
+        // Миграция сохранений из помощника обновления: без окна и консоли, код выхода — результат.
+        if (args is ["--migrate", ..])
+        {
+            var migrateConfig = new AppConfig();
+            migrateConfig.LoadUserSettings();   // язык сообщений об ошибке — как в игре
+            L.SetLanguage(migrateConfig.Language);
+            Environment.ExitCode = Migrations.MigrateCommand.Run(args.Length > 1 ? args[1] : AppConfig.ProjectRoot);
+            return;
+        }
         if (ConsoleHostLauncher.TryRelaunch(args)) return;
         // Необработанное исключение раньше просто ронял процесс молча (консоль закрывается сразу,
         // .NET печатает стек в stderr, который никто не видит) — ни строчки в логах. Теперь падение
@@ -39,12 +48,18 @@ class Program
         ConsoleZoomBlocker.Start(); // Ctrl+колесо / щипок тачпада не меняют шрифт и размер окна
         AppDomain.CurrentDomain.ProcessExit += (_, _) => ConsoleMouseReader.Disable();
 
+        // Сохранения старого формата переводит обновление; здесь — запасной путь (исходники, сбой обновления).
+        // В UI-тестах — нет: там своё тестовое состояние.
+        if (Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null)
+            Migrations.MigrateCommand.RunIfNeeded(AppConfig.ProjectRoot);
+
         var config = new AppConfig();
         bool firstSettings = !File.Exists(AppConfig.UserSettingsPath);
         config.InitializeStorage();
         // Настройки игрока (экран «НАСТРОЙКИ») — не в UI-тестах: там важны значения по умолчанию.
         if (Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null) config.LoadUserSettings();
-        L.SetLanguage(config.Language);
+        // UI-тесты (настройки не читаются) — на русском, как их ожидания.
+        L.SetLanguage(Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null ? config.Language : L.Russian);
         string initialClaudePath = config.ClaudeCliPath, initialCodexPath = config.CodexCliPath;
         string initialProvider = config.AiProvider;
         var cliDiscovery = Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null
@@ -84,6 +99,7 @@ class Program
         Action loadCurrentState = testStatePath != null ? () => storage.LoadFrom(testStatePath) : () => { storage.LoadSave(); GameWorld.EnsureLink(storage.WorldState); };
         Storage.InitGames(); // прежнее сохранение → игра 1, активная игра — последняя
         if (hasSave()) loadCurrentState();
+        Speech.WarmUp();   // модель языка последней игры — в память заранее (её язык известен после загрузки)
         var settings = storage.WorldState;
 
         ConsoleSetup.ShowWindow(); // без этого не открывается
@@ -241,7 +257,8 @@ class Program
                 borderDrawer.DrawTopBorder();
                 borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(L.T(" НОВАЯ ИГРА"), display));
                 borderDrawer.DrawSeparator();
-                int waitRows = Math.Max(3, Console.WindowHeight - 5);
+                // Рамка до последней строки окна, как на остальных экранах: верх, заголовок, разделитель и низ — 4 строки.
+                int waitRows = Math.Max(3, Console.WindowHeight - 4);
                 for (int r = 0; r < waitRows; r++) borderDrawer.DrawContentLine(() => { });
                 borderDrawer.DrawBottomBorder();
                 await Helpers.Spinner.WhileCentered(startTask, L.T("Создаём мир"), 3 + waitRows / 2,
@@ -610,6 +627,8 @@ class Program
                     var ng = state.NewGame;
                     if (ng?.Wizard == null || ng.WorldId == null) { state.CurrentScreen = Screen.NewGame; break; }
                     Console.SetCursorPosition(0, ng.Wizard.StartTop);
+                    // Вернулись и выбрали мир на другом языке — анкета и герой заново (варианты и имена — на языке мира).
+                    if (ng.Form is { } old && old.Language != L.World) { ng.Form = null; ng.HeroReady = false; }
                     var form = ng.Form ??= new NewGameDisplay(settings, display, screen, aiClient);
                     form.CanGo = ng.CanGo;
                     int to = await form.Show();

@@ -60,7 +60,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                 foreach (var t in threads.Where(IsActive).Concat(threads.Where(t => !IsActive(t))))
                 {
                     bool active = IsActive(t);
-                    bool failed = t.Status?.StartsWith("провал", StringComparison.OrdinalIgnoreCase) == true;
+                    bool failed = IsFailed(t);
                     var details = new List<(string, List<int>)> { (t.Name ?? L.T("Задание"), Bright), (L.T("Статус: ") + (t.Status ?? L.T("активна")), Dim), ("", Fg) };
                     if (!string.IsNullOrWhiteSpace(t.Description)) details.Add((t.Description, Fg));
                     if (t.Steps is { Count: > 0 } steps)
@@ -130,7 +130,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                 {
                     var info = MonsterDatabase.Find(key);
                     var onMap = (settings.Map.Entities ?? []).FirstOrDefault(e => string.Equals(e.MonsterKey, key, StringComparison.OrdinalIgnoreCase));
-                    var details = new List<(string, List<int>)> { (info?.Name ?? key, Bright) };
+                    var details = new List<(string, List<int>)> { (info?.LocalizedName ?? key, Bright) };
                     if (info != null)
                     {
                         string kind = string.Join(", ", new[] { info.Size, info.Type, info.Alignment }.Where(s => !string.IsNullOrWhiteSpace(s)));
@@ -141,7 +141,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                         if (!string.IsNullOrWhiteSpace(info.Senses)) details.Add((L.T("Чувства: ") + info.Senses, Dim));
                         if (!string.IsNullOrWhiteSpace(info.Languages)) details.Add((L.T("Языки: ") + info.Languages, Dim));
                     }
-                    list.Add(new Entry(info?.Name ?? key, "♦", Fg, details, onMap?.Image, onMap?.Color));
+                    list.Add(new Entry(info?.LocalizedName ?? key, "♦", Fg, details, onMap?.Image, onMap?.Color));
                 }
                 break;
 
@@ -163,16 +163,20 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         return list;
     }
 
-    private static bool IsActive(PlotThread t) =>
-        t.Status is null || !(t.Status.StartsWith("заверш", StringComparison.OrdinalIgnoreCase)
-            || t.Status.StartsWith("провал", StringComparison.OrdinalIgnoreCase));
+    // Статус задания мастер пишет словом на языке игры: «завершено», «провалено», «completed», «failed».
+    private static bool StatusIs(PlotThread t, params string[] prefixes) =>
+        t.Status is { } s && prefixes.Any(p => s.StartsWith(p, StringComparison.OrdinalIgnoreCase));
+
+    private static bool IsFailed(PlotThread t) => StatusIs(t, "провал", "fail");
+
+    private static bool IsActive(PlotThread t) => !StatusIs(t, "заверш", "выполн", "complet", "done", "finish") && !IsFailed(t);
 
     private List<int> AttitudeColor(string? attitude)
     {
         string a = attitude?.ToLowerInvariant() ?? "";
-        if (a.Contains("враж")) return [214, 110, 98];
-        if (a.Contains("друж") || a.Contains("союз")) return [130, 196, 120];
-        if (a.Contains("нейтр")) return [206, 186, 128];
+        if (a.Contains("враж") || a.Contains("hostil") || a.Contains("enemy")) return [214, 110, 98];
+        if (a.Contains("друж") || a.Contains("союз") || a.Contains("friend") || a.Contains("ally") || a.Contains("allied")) return [130, 196, 120];
+        if (a.Contains("нейтр") || a.Contains("neutral")) return [206, 186, 128];
         return Bright;
     }
 

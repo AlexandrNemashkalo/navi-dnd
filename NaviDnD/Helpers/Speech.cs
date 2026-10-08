@@ -66,14 +66,21 @@ internal static class Speech
         WarmUp();
     }
 
-    public static void WarmUp()
+    // Модели — в память заранее, даже при выключенной озвучке: включение и пробные фразы в настройках — без
+    // задержки. Язык игры (и интерфейса); both — оба языка (экран настроек). Ничего не устанавливает и не скачивает.
+    public static void WarmUp(bool both = false)
     {
-        if (config?.SpeechEnabled == true)
+        // В UI-тестах (своё состояние, озвучка выключена) модели не грузим — тесты быстрее и без лишних процессов.
+        if (config == null || !SileroSpeech.Installed || Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") != null) return;
+        bool english = both || L.WorldIsEnglish || L.IsEnglish, russian = both || !L.WorldIsEnglish || !L.IsEnglish;
+        if (russian)
         {
             Queue.Writer.TryWrite(("Добро пожаловать.", null, config.SileroVoice, true, Lifetime.Token));
             if (config.SileroVoice != "baya")
                 Queue.Writer.TryWrite(("Добро пожаловать.", null, "baya", true, Lifetime.Token));
         }
+        if (english)
+            Queue.Writer.TryWrite(("Welcome.", null, config.SileroVoiceEn, true, Lifetime.Token));
     }
 
     public static void Stop()
@@ -93,26 +100,39 @@ internal static class Speech
         session = new CancellationTokenSource();
     }
 
+    // Английские голоса модели v3_en (по высоте тона: en_57/en_31/en_20 — мужские, en_21/en_11 — женские).
+    public static readonly string[] EnglishVoices = ["en_57", "en_31", "en_20", "en_21", "en_11"];
+    private const string EnglishNpcMale = "en_23", EnglishNpcFemale = "en_6";
+
     public static void Speak(string text, string? author = null, string? speechText = null)
     {
         if (config?.SpeechEnabled != true || author is "Hero" or "Герой" or "System" or "system") return;
         text = PrepareText(text);
         if (text.Length == 0) return;
         string? ssml = ValidateSsml(speechText);
-        string voice = SelectVoice(author, ssml, config.SileroVoice);
+        // Голос — языка игры (рассказ мастера на нём): русская или английская модель.
+        string voice = SelectVoice(author, ssml, L.WorldIsEnglish ? config.SileroVoiceEn : config.SileroVoice, L.WorldIsEnglish);
         ssml = ApplyVoiceStyle(text, ssml, author);
         lock (Gate)
             if (!_windowMinimized) Queue.Writer.TryWrite((text, ssml, voice, false, session.Token));
     }
 
-    private static bool IsNarrator(string? author) => string.IsNullOrWhiteSpace(author)
-        || author.Equals("DM", StringComparison.OrdinalIgnoreCase) || author is "Мастер" or "Рассказчик";
+    // Пробная фраза выбранным голосом (настройки) — независимо от языка игры.
+    public static void Sample(string text, string voice)
+    {
+        if (config?.SpeechEnabled != true) return;
+        lock (Gate)
+            if (!_windowMinimized) Queue.Writer.TryWrite((text, ApplyVoiceStyle(text, null, null), voice, false, session.Token));
+    }
 
-    internal static string SelectVoice(string? author, string? ssml, string narratorVoice)
+    private static bool IsNarrator(string? author) => string.IsNullOrWhiteSpace(author)
+        || author.Equals("DM", StringComparison.OrdinalIgnoreCase) || author is "Мастер" or "Рассказчик" or "Narrator";
+
+    internal static string SelectVoice(string? author, string? ssml, string narratorVoice, bool english = false)
     {
         if (IsNarrator(author)) return narratorVoice;
         string? kind = ssml == null ? null : XElement.Parse(ssml).Attribute("voice")?.Value;
-        return kind == "female" ? "baya" : "eugene";
+        return english ? kind == "female" ? EnglishNpcFemale : EnglishNpcMale : kind == "female" ? "baya" : "eugene";
     }
 
     internal static string ApplyVoiceStyle(string text, string? ssml, string? author)
@@ -184,7 +204,9 @@ internal static class Speech
     {
         await foreach (var item in Queue.Reader.ReadAllAsync())
         {
-            if (item.Token.IsCancellationRequested || config?.SpeechEnabled != true) continue;
+            // Заранее загрузить модель (Warmup) — и при выключенной озвучке; реплики — только при включённой.
+            if (item.Token.IsCancellationRequested || !item.Warmup && config?.SpeechEnabled != true) continue;
+            if (item.Warmup && !SileroSpeech.Installed) continue;
             string wav = Path.Combine(Path.GetTempPath(), $"NaviDnD-speech-{Guid.NewGuid():N}.wav");
             try
             {
@@ -192,8 +214,8 @@ internal static class Speech
                 timeout.CancelAfter(TimeSpan.FromMinutes(15)); // первый запуск Silero устанавливает CPU PyTorch
                 var token = timeout.Token;
                 await SileroSpeech.SynthesizeAsync(item.Text, item.Ssml, item.Voice, wav, config!.SileroPythonPath,
-                    value => status = value, token);
-                if (item.Warmup) { status = L.T("Готова"); continue; }
+                    value => { if (!item.Warmup || config.SpeechEnabled) status = value; }, token);
+                if (item.Warmup) { if (config!.SpeechEnabled) status = L.T("Готова"); continue; }
                 using var reader = new WaveFileReader(wav);
                 using var output = new WaveOutEvent();
                 // Громкость — в самом потоке: WaveOutEvent.Volume (waveOutSetVolume) меняет громкость всего приложения,

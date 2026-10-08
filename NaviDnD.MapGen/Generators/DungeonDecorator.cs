@@ -27,7 +27,7 @@ public static class DungeonDecorator
             var cells = (room.Positions ?? []).Where(p => p.Count >= 2 && chunk.Contains(p[0], p[1]))
                 .Select(p => (c: p[0] - chunk.OriginCol - 1, r: p[1] - chunk.OriginRow - 1)).ToList();
             if (cells.Count == 0) continue;
-            bool corridor = room.Name is "Коридор" or "Лаз";
+            bool corridor = room.Passage == true;
             bool cave = chunk.Theme == MapChunk.Cave;
 
             // Стиль пола комнаты (пещера — всегда природный: камень, мох, лужи, осыпь).

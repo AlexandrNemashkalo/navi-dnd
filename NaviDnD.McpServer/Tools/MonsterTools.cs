@@ -19,8 +19,8 @@ public sealed class MonsterTools(McpServerConfig config)
         Ищет монстра D&D 5e в справочнике по АНГЛИЙСКОМУ названию — НЕ выдумывай статы сам, сначала
         найди каноничного монстра здесь. query = английское название или его часть ("goblin",
         "skeleton warrior").
-        Возвращает через запятую русские названия совпадений по убыванию релевантности — возьмите
-        лучшее и используйте БУКВАЛЬНО как map.entities[].monsterKey (полные статы движок достанет
+        Возвращает через запятую названия совпадений на языке игры (lang) по убыванию релевантности —
+        возьмите лучшее и используйте БУКВАЛЬНО как map.entities[].monsterKey (полные статы движок достанет
         сам по этому имени, отдельно указывать их не нужно). Пустая строка — монстра нет в
         справочнике: тогда придумайте существо и его статы сами, monsterKey не указывайте.
         """)]
@@ -53,7 +53,7 @@ public sealed class MonsterTools(McpServerConfig config)
                 .OrderByDescending(x => x.score)
                 .ThenBy(x => x.monster.Name, StringComparer.Ordinal)
                 .Take(15)
-                .Select(x => x.monster.Name)
+                .Select(x => x.monster.LocalizedName)
                 .ToList();
 
             string result = string.Join(", ", names);

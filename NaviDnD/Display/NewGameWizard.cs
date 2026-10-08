@@ -115,7 +115,7 @@ public class NewGameWizard
         if (_pick == null)
         {
             _pick = new WorldPick { Seed = rnd.Next(), Param = [.. Params.Select(p => p.def)] };
-            _pick.Name = WorldGenerator.DefaultName(_pick.Seed);
+            _pick.Name = WorldGenerator.DefaultName(_pick.Seed, L.Language);
             _pick.Entries.Add(new(null, L.T("новый мир")));
             string? active = null;
             try { active = WorldLibrary.Current.Id; } catch { }
@@ -159,8 +159,7 @@ public class NewGameWizard
             {
                 draft = WorldGenerator.Generate(new WorldGenerator.Options(seed, param[0] == 1 ? WorldSizes.Large : WorldSizes.Small,
                     Continents: param[1], Water: V(2), Climate: V(3), Mountains: V(4), Forests: V(5),
-                    Deserts: V(6), Rivers: V(7), Kingdoms: param[8]));
-                draft.Language = L.Language;
+                    Deserts: V(6), Rivers: V(7), Kingdoms: param[8], Language: L.Language));
                 draftKey = key;
             }
             return draft;
@@ -317,8 +316,9 @@ public class NewGameWizard
             }
             else
             {
-            Put(iy, lx, L.T("Ввод: "), focus == FQ ? Bright : Fg);
-            int px = lx + 6, promptW = gx - 2 - px;
+            string inputLabel = L.T("Ввод: ");
+            Put(iy, lx, inputLabel, focus == FQ ? Bright : Fg);
+            int px = lx + inputLabel.Length, promptW = gx - 2 - px;
             // Есть итог (готово / ошибка) и поле пустое — вместо подсказки в строке ввода он.
             string status = message.Split('\n')[0];
             bool showStatus = status.Length > 0 && prompt.Length == 0 && focus != FQ;
@@ -467,7 +467,7 @@ public class NewGameWizard
                 Archive();
                 param[p] = (param[p] + dir + Params[p].options.Length) % Params[p].options.Length;
                 seed = rnd.Next();
-                if (!nameEdited) name = WorldGenerator.DefaultName(seed);
+                if (!nameEdited) name = WorldGenerator.DefaultName(seed, L.Language);
                 message = "";
                 Sound.PlayClick();
             }
@@ -484,7 +484,7 @@ public class NewGameWizard
                     for (int p = 0; p < param.Length; p++) param[p] = rnd.Next(Params[p].options.Length);
                     nameEdited = false;
                 }
-                if (!nameEdited) name = WorldGenerator.DefaultName(seed);
+                if (!nameEdited) name = WorldGenerator.DefaultName(seed, L.Language);
                 message = "";
             }
 
@@ -562,6 +562,8 @@ public class NewGameWizard
                     WorldLibrary.Delete(ps.RegisteredId);
                 ps.RegisteredId = entry.Id == null ? id : null;
                 ChosenWorldId = id;
+                // Герой и приключение — на языке выбранного мира (готовый мир — на своём, новый — языка интерфейса).
+                L.SetWorld(WorldLibrary.Get(id)?.Language);
                 return id;
             }
 
@@ -660,12 +662,16 @@ public class NewGameWizard
         return _advOptions;
     }
 
-    // Параметры приключения строкой для мастера: «Жанр: тёмное фэнтези; Сложность: сложная; …».
+    // Параметры приключения строкой для мастера — на языке мира: «Жанр: тёмное фэнтези; Сложность: сложная; …».
+    // В файле — русские подписи и варианты (ключи перевода): на экране — L.T/L.W, мастеру — L.W.
     private string StyleText(int[] values)
     {
         var opts = AdventureOptions();
         return string.Join("; ", opts.Select((o, i) =>
-            $"{char.ToUpperInvariant(o.label[0])}{o.label[1..].ToLowerInvariant()}: {o.options[Math.Clamp(values[i], 0, o.options.Length - 1)]}"));
+        {
+            string label = L.W(o.label);
+            return $"{char.ToUpperInvariant(label[0])}{label[1..].ToLowerInvariant()}: {L.W(o.options[Math.Clamp(values[i], 0, o.options.Length - 1)])}";
+        }));
     }
 
     // Камера карты (масштаб: -1 — весь мир; центр: NaN — середина мира): колесо — масштаб у курсора, перетаскивание —
@@ -755,8 +761,8 @@ public class NewGameWizard
             for (int p = 0; p < opts.Count; p++, y++)
             {
                 if (p > 0 && opts[p].group != opts[p - 1].group) y++;
-                Label(y, lx, opts[p].label, focus == p);
-                ChoiceValue(y, vx, valueW, opts[p].options[values[p]], focus == p, $"p{p}", $"f:{p}");
+                Label(y, lx, L.T(opts[p].label), focus == p);
+                ChoiceValue(y, vx, valueW, L.W(opts[p].options[values[p]]), focus == p, $"p{p}", $"f:{p}");
                 Hit(y, lx - 2, ValueCol - LabelCol + 2, $"f:{p}");
             }
             y++;

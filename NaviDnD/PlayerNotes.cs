@@ -18,6 +18,21 @@ public static class PlayerNotes
         public bool ByMaster { get; set; } // запись добавил мастер (ИИ) — сам он заметки не читает
     }
 
+    // Файл: { formatVersion, notes: [...] } (StorageFormat; прежний голый массив переписывает миграция).
+    public sealed class NotesFile
+    {
+        public int FormatVersion { get; set; } = StorageFormat.Current;
+        public List<Note> Notes { get; set; } = [];
+    }
+
+    private static readonly JsonSerializerOptions _json = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All),
+    };
+
     private static List<Note>? _notes;
     private static string? _loadedFor;
 
@@ -35,10 +50,15 @@ public static class PlayerNotes
             try
             {
                 _notes = File.Exists(CurrentPath)
-                    ? JsonSerializer.Deserialize<List<Note>>(File.ReadAllText(CurrentPath, Encoding.UTF8)) ?? []
+                    ? JsonSerializer.Deserialize<NotesFile>(File.ReadAllText(CurrentPath, Encoding.UTF8), _json)?.Notes ?? []
                     : [];
             }
-            catch { _notes = []; }
+            catch
+            {
+                // Не прочитался (повреждён, не переведён миграцией) — копия рядом, чтобы следующая запись не стёрла заметки.
+                _notes = [];
+                try { File.Copy(CurrentPath, CurrentPath + ".unreadable", overwrite: false); } catch { }
+            }
             return _notes;
         }
     }
@@ -60,7 +80,7 @@ public static class PlayerNotes
     {
         try
         {
-            File.WriteAllText(CurrentPath, JsonSerializer.Serialize(All, new JsonSerializerOptions { WriteIndented = true }), Encoding.UTF8);
+            File.WriteAllText(CurrentPath, JsonSerializer.Serialize(new NotesFile { Notes = All }, _json), Encoding.UTF8);
         }
         catch { /* не сохранилось — заметки живут до конца сеанса */ }
     }

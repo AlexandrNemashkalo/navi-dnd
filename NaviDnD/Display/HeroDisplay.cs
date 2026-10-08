@@ -64,7 +64,7 @@ public class HeroDisplay
         {
             int light = MovementCalculator.DaylightFt(_settings, p[0], p[1]) ?? Math.Max(dv, 10);
             int ft = hero.VisionFt is > 0 and var v ? Math.Min(v, light) : light;
-            return L.F("{0} фт", ft) + (_settings.Time.PartOfDay == "Ночь" ? " " + L.T("(ночь)") : "");
+            return L.F("{0} фт", ft) + (_settings.Time.PartOfDay == PartsOfDay.Night ? " " + L.T("(ночь)") : "");
         }
         return (hero.VisionFt is > 0 and var own ? L.F("{0} фт", own) : L.T("по свету")) + dark;
     }
@@ -346,10 +346,9 @@ public class HeroDisplay
         // Раса/Класс — обычные hero.stats (как Опыт/Уровень и т.п.), но показываются не в колонке
         // статов, а сразу под именем (это база персонажа) — вытаскиваются из статов отдельно,
         // до сборки middleItems, чтобы не задваивались.
-        string? StatValue(string name) => hero.Stats?.FirstOrDefault(s => s.Deleted != true
-            && string.Equals(s.Name, name, StringComparison.OrdinalIgnoreCase))?.Value;
-        string? heroRace = StatValue("Раса");
-        string? heroClass = StatValue("Класс");
+        string? StatValue(string key) => hero.Stat(key)?.Value;
+        string? heroRace = StatValue(StatKeys.Race);
+        string? heroClass = StatValue(StatKeys.Class);
 
         // Заклинательные статы — та же логика: обычные hero.stats, но показываются не в колонке
         // статов, а в динамическом блоке колонки 1 (только на подвкладке Заклинания), перед ячейками
@@ -360,14 +359,14 @@ public class HeroDisplay
         // каждой подготовке/снятии заклинания и не поспевал — число расходилось с реальным списком.
         int preparedSpellCount = hero.Spells?.Count(s => s.Deleted != true && s.Level > 0 && s.Prepared == true) ?? 0;
         int knownSpellCount    = hero.Spells?.Count(s => s.Deleted != true && s.Level > 0) ?? 0;
-        string? preparedMax = StatValue("Подготовлено заклинаний");
-        string? knownMax    = StatValue("Известно заклинаний");
+        string? preparedMax = StatValue(StatKeys.SpellsPrepared);
+        string? knownMax    = StatValue(StatKeys.SpellsKnown);
 
         (string label, string? value)[] spellStatLines =
         [
-            (L.T("Заклинательная х-ка"), StatValue("Заклинательная характеристика")),
-            (L.T("Спасбросок закл."), StatValue("Спасбросок заклинания")),
-            (L.T("Атака заклинанием"), StatValue("Атака заклинанием")),
+            (L.T("Заклинательная х-ка"), StatValue(StatKeys.SpellAbility)),
+            (L.T("Спасбросок закл."), StatValue(StatKeys.SpellSave)),
+            (L.T("Атака заклинанием"), StatValue(StatKeys.SpellAttack)),
             (L.T("Подготовлено закл."), preparedMax != null ? $"{preparedSpellCount}/{preparedMax}" : null),
             (L.T("Известно закл."), knownMax != null ? $"{knownSpellCount}/{knownMax}" : null),
         ];
@@ -419,7 +418,7 @@ public class HeroDisplay
                 break;
 
             case CharacterSubTab.Abilities:
-                AddResourcesByCategory("Способности");
+                AddResourcesByCategory(ResourceCategories.Abilities);
                 break;
 
             case CharacterSubTab.Spells:
@@ -427,7 +426,7 @@ public class HeroDisplay
                 foreach (var (label, value) in spellStatLines)
                     if (!string.IsNullOrEmpty(value))
                         leftSlots.Add((label.PadRight(leftKeyMax) + "   ", value, null));
-                AddResourcesByCategory("Заклинания");
+                AddResourcesByCategory(ResourceCategories.Spells);
                 break;
         }
 
@@ -435,7 +434,7 @@ public class HeroDisplay
         {
             if (hero.Resources == null) return;
             foreach (var resource in hero.Resources.Where(r => r.Deleted != true
-                && string.Equals(r.Category, category, StringComparison.OrdinalIgnoreCase)))
+                && r.Category == category))
                 leftSlots.Add((resource.Name.PadRight(leftKeyMax) + "   ", resource.Value ?? "", null));
         }
 
@@ -443,12 +442,9 @@ public class HeroDisplay
         if (hero.Stats != null && hero.Stats.Any())
         {
             // Раса/Класс/заклинательные статы уже показаны в колонке 1 (leftSlots) — не дублируем.
-            var shownElsewhere = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                "Раса", "Класс", "Заклинательная характеристика", "Спасбросок заклинания",
-                "Атака заклинанием", "Подготовлено заклинаний", "Известно заклинаний",
-            };
-            foreach (var stat in hero.Stats.Where(s => s.Deleted != true && !shownElsewhere.Contains(s.Name)))
+            string[] shownElsewhere = [StatKeys.Race, StatKeys.Class, StatKeys.SpellAbility, StatKeys.SpellSave,
+                StatKeys.SpellAttack, StatKeys.SpellsPrepared, StatKeys.SpellsKnown];
+            foreach (var stat in hero.Stats.Where(s => s.Deleted != true && !shownElsewhere.Contains(s.Key)))
                 middleItems.Add((stat.Name, stat.Value, null));
         }
         if (middleItems.Count == 0)

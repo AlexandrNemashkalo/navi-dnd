@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using NaviDnD.Data.Models;
 
 namespace NaviDnD;
 
@@ -13,6 +14,7 @@ public static class HeroLibrary
 {
     public sealed class Card
     {
+        public int FormatVersion { get; set; } = StorageFormat.Current;
         public string Name { get; set; } = "";
         public string Symbol { get; set; } = "";
         public string Race { get; set; } = "";
@@ -78,15 +80,16 @@ public static class HeroLibrary
             var savedAt = File.GetLastWriteTime(savePath);
             var old = File.Exists(file) ? JsonSerializer.Deserialize<Card>(File.ReadAllText(file, Encoding.UTF8)) : null;
             if (old != null && old.SavedAt >= savedAt) return;
-            string Stat(string n) => hero["stats"]?.AsArray()
-                .FirstOrDefault(s => string.Equals((string?)s?["name"], n, StringComparison.OrdinalIgnoreCase))?["value"]?.ToString() ?? "";
-            string cls = Stat("Класс");
+            string Stat(string key) => hero["stats"]?.AsArray()
+                .FirstOrDefault(s => (string?)s?["key"] == key)?["value"]?.ToString() ?? "";
+            // «Воин 1 ур», «Fighter 3», «Wizard (level 2)» — класс без уровня и номер уровня.
+            string cls = Stat(StatKeys.Class);
             var color = hero["color"]?.AsArray().Select(v => (int)v!).ToList();
             var card = new Card
             {
-                Name = name, Symbol = (string?)hero["symbol"] ?? "", Race = Stat("Раса"),
-                Class = Regex.Replace(cls, @"\s*\d+\s*ур.*$", "").Trim(),
-                Level = Regex.Match(cls, @"\d+\s*ур").Value,
+                Name = name, Symbol = (string?)hero["symbol"] ?? "", Race = Stat(StatKeys.Race),
+                Class = Regex.Replace(cls, @"[\s,(]*(?:ур\w*\.?|lvl\.?|level)?\s*\d+.*$", "", RegexOptions.IgnoreCase).Trim(),
+                Level = Regex.Match(cls, @"\d+").Value,
                 // Описание (предыстория из анкеты) в сохранении игры не хранится — остаётся с карточки.
                 Description = (string?)hero["description"] ?? old?.Description ?? "", Color = color is { Count: 3 } ? color : null,
                 Image = (string?)hero["image"], HeroJson = hero.ToJsonString(), SavedAt = savedAt,

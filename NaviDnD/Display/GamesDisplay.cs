@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using NaviDnD.Data;
+using NaviDnD.Data.Models;
 using NaviDnD.Helpers;
 
 namespace NaviDnD.Display;
@@ -143,8 +144,8 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         {
             var root = JsonNode.Parse(File.ReadAllText(path));
             var hero = root?["hero"];
-            string Stat(string name) => hero?["stats"]?.AsArray()
-                .FirstOrDefault(s => string.Equals((string?)s?["name"], name, StringComparison.OrdinalIgnoreCase))?["value"]?.ToString() ?? "";
+            string Stat(string key) => hero?["stats"]?.AsArray()
+                .FirstOrDefault(s => (string?)s?["key"] == key)?["value"]?.ToString() ?? "";
             var color = hero?["color"]?.AsArray().Select(v => (int)v!).ToList();
             var time = root?["time"];
             string timeText = time == null ? "" : L.F("День {0}", time["day"]) + " · " + GameTime.PartOfDayText((string?)time["partOfDay"]);
@@ -153,8 +154,8 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
                 Symbol: (string?)hero?["symbol"] ?? "",
                 Color: color is { Count: 3 } ? color : null,
                 Image: (string?)hero?["image"],
-                Race: Stat("Раса"),
-                Class: Stat("Класс"),
+                Race: Stat(StatKeys.Race),
+                Class: Stat(StatKeys.Class),
                 Hp: hero?["dead"]?.GetValue<bool>() == true ? L.T("— погиб") : (string?)hero?["hp"] ?? "",
                 Arc: (string?)root?["narrative"]?["currentArc"] ?? "",
                 Time: timeText,

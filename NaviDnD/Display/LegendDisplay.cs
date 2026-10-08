@@ -305,7 +305,7 @@ public class LegendDisplay
         {
             var rooms = settings.Map.Rooms
                 .Where(x =>
-                    x.Name is not ("Corridor" or "Коридор" or "Лаз") &&
+                    x.Passage != true &&
                     (_config.RevealMap || RoomExplored(x)) && InViewport(x.Positions)
                 );
             foreach (var room in rooms)

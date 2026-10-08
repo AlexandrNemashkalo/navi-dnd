@@ -34,6 +34,9 @@ public class MonsterInfo
     public List<(string Name, string Text)> Reactions { get; init; } = [];
     public string LegendaryIntro { get; init; } = "";
     public List<(string Name, string Text)> Legendary { get; init; } = [];
+
+    // Название на языке игры (L.World); статья справочника — только по-русски.
+    public string LocalizedName => L.WorldIsEnglish && NameEn.Length > 0 ? NameEn : Name;
 }
 
 // Справочник монстров DnD5e (GameData/DnD5e_monsters_BD.dtn). По аналогии с SpellDatabase: файл
@@ -52,7 +55,7 @@ public static class MonsterDatabase
 
     public static IReadOnlyList<MonsterInfo> AllMonsters => All.Value;
 
-    // Точный поиск по русскому имени — используется картой при поиске полных статов по monsterKey.
+    // Точный поиск по имени на любом языке (monsterKey мастер пишет на языке игры) — полные статы для карты.
     public static MonsterInfo? Find(string? name)
     {
         if (string.IsNullOrWhiteSpace(name)) return null;
@@ -114,6 +117,7 @@ public static class MonsterDatabase
             };
 
             result.TryAdd(Normalize(nameRu), info);
+            if (nameEn.Length > 0) result.TryAdd(Normalize(nameEn), info);
         }
         return result;
     }

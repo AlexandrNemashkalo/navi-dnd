@@ -15,6 +15,11 @@ public class SpellInfo
     public string Duration { get; init; } = "";
     public string Text { get; init; } = "";
     public string Source { get; init; } = "";
+    // Та же статья по-английски (у справочника оба языка); null — перевода нет.
+    public SpellInfo? En { get; init; }
+
+    // Статья на языке игры: имя у героя и карточка — как пишет мастер (L.World).
+    public SpellInfo Localized => L.WorldIsEnglish && En != null ? En : this;
 }
 
 // Справочник заклинаний DnD5e (GameData/DnD5e_spells_BD.dtn). Файл читается и парсится один раз за
@@ -31,8 +36,8 @@ public static class SpellDatabase
 
     public static IReadOnlyList<SpellInfo> AllSpells => All.Value;
 
-    // Точный поиск по русскому имени (или "nic") — используется карточкой заклинания в игре, где
-    // имя у героя (HeroSpell.Name) должно совпадать с каноничным русским названием буквально.
+    // Точный поиск по имени на любом языке (русское, "nic", английское) — карточка заклинания в игре: имя у героя
+    // (HeroSpell.Name) — каноничное название из справочника на языке игры.
     public static SpellInfo? Find(string? name)
     {
         if (string.IsNullOrWhiteSpace(name)) return null;
@@ -55,12 +60,28 @@ public static class SpellDatabase
             string name = GetStr(ru, "name");
             if (name.Length == 0) continue;
 
-            string nameEn = entry.TryGetProperty("en", out var en) ? GetStr(en, "name") : "";
+            bool hasEn = entry.TryGetProperty("en", out var en);
+            string nameEn = hasEn ? GetStr(en, "name") : "";
+            SpellInfo? english = nameEn.Length == 0 ? null : new SpellInfo
+            {
+                Name = nameEn,
+                NameEn = nameEn,
+                Level = int.TryParse(GetStr(en, "level"), out var enLvl) ? enLvl : int.TryParse(GetStr(ru, "level"), out var ruLvl) ? ruLvl : 0,
+                School = GetStr(en, "school"),
+                CastingTime = GetStr(en, "castingTime"),
+                Range = GetStr(en, "range"),
+                Components = GetStr(en, "components"),
+                Materials = GetStr(en, "materials"),
+                Duration = GetStr(en, "duration"),
+                Text = GetStr(en, "text"),
+                Source = GetStr(en, "source"),
+            };
 
             var info = new SpellInfo
             {
                 Name = name,
                 NameEn = nameEn,
+                En = english,
                 Level = int.TryParse(GetStr(ru, "level"), out var lvl) ? lvl : 0,
                 School = GetStr(ru, "school"),
                 CastingTime = GetStr(ru, "castingTime"),
@@ -75,6 +96,7 @@ public static class SpellDatabase
             result[Normalize(name)] = info;
             string nic = GetStr(ru, "nic");
             if (nic.Length > 0) result.TryAdd(Normalize(nic), info);
+            if (nameEn.Length > 0) result.TryAdd(Normalize(nameEn), info);
         }
         return result;
     }

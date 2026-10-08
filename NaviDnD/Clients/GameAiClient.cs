@@ -155,6 +155,7 @@ public class GameAiClient
     public async Task<bool> CreateWorld(WorldMap world, string? wish, string? name = null, string? description = null)
     {
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(CreateWorld));
+        L.SetWorld(world.Language);   // описание мира — на его языке
         try
         {
             string userMessage = WorldAtlas.TerrainSummary(world)
@@ -196,6 +197,9 @@ public class GameAiClient
         }
         var world = WorldLibrary.Current;
         _settings.World = new GameWorldLink { Id = world.Id };
+        // Игра — на языке мира (рассказ, история, названия); он же в каждом запросе (lang:).
+        _settings.Language = world.Language;
+        L.SetWorld(world.Language);
         // Мир уже описан в прошлых играх (хроника) — та же концепция и места; новый — только земля.
         // Королевства уже описаны (прошлые игры или «ПРИДУМАТЬ» в анкете) — концепцию не менять; есть только
         // название/описание от игрока — взять их и придумать королевства.
@@ -211,7 +215,7 @@ public class GameAiClient
         // Параметры приключения (шаг «Приключение»): жанр, упор, длина, сложность, темп.
         if (_storage.NewGameData?.AdventureStyle is { Length: > 0 } style)
             worldBrief = $"\nПараметры приключения: {style}" + worldBrief;
-        worldBrief += $"\nСейчас: день {_settings.Time.Day}, {_settings.Time.PartOfDay.ToLowerInvariant()} — описывай сцену в это время суток или задай другое в time.";
+        worldBrief += $"\nСейчас: день {_settings.Time.Day}, {PartsOfDay.Normalize(_settings.Time.PartOfDay)} — описывай сцену в это время суток или задай другое в time.";
         // Место старта, выбранное игроком на карте (шаг «Приключение»).
         if (_storage.NewGameData?.StartPlace is { Length: > 0 } sp)
             worldBrief += $"\nИгрок выбрал стартовое место: «{sp}» — начни там (world.place).";
@@ -745,9 +749,7 @@ public class GameAiClient
 
     private string GetPassivePerception()
     {
-        var skill = _settings.Hero?.Skills?.FirstOrDefault(s =>
-            s.Name?.Contains("Восприятие", StringComparison.OrdinalIgnoreCase) == true ||
-            s.Name?.Contains("Perception", StringComparison.OrdinalIgnoreCase) == true);
+        var skill = _settings.Hero?.Skills?.FirstOrDefault(s => SkillNames.IsPerception(s.Name));
 
         if (skill?.Value == null) return "10";
         return $"10 {skill.Value}";
@@ -761,7 +763,7 @@ public class GameAiClient
         try
         {
             return await _provider.Complete(systemBlocks,
-                $"speechEnabled:{(_appConfig.SpeechEnabled ? "true" : "false")}\n{userMessage}", actionPath, model);
+                $"lang:{L.World}\nspeechEnabled:{(_appConfig.SpeechEnabled ? "true" : "false")}\n{userMessage}", actionPath, model);
         }
         finally { WindowControls.NotifyIfMinimized(); }
     }

@@ -15,7 +15,9 @@ for line in sys.stdin:
     try:
         request = json.loads(line)
         with torch.inference_mode():
-            kwargs = {"speaker": request["voice"], "sample_rate": 48000}
+            # Частота — из запроса: английская v3 на 48 кГц синтезирует вдвое дольше, ей хватает 24 кГц.
+            rate = int(request.get("sample_rate", 48000))
+            kwargs = {"speaker": request["voice"], "sample_rate": rate}
             if request.get("ssml_text"):
                 try:
                     audio = model.apply_tts(ssml_text=request["ssml_text"], **kwargs)
@@ -27,7 +29,7 @@ for line in sys.stdin:
         with wave.open(request["output"], "wb") as target:
             target.setnchannels(1)
             target.setsampwidth(2)
-            target.setframerate(48000)
+            target.setframerate(rate)
             target.writeframes(pcm)
         print(json.dumps({"ok": True}), flush=True)
     except Exception as error:

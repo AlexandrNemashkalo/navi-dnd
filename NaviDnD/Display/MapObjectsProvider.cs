@@ -1,4 +1,4 @@
-﻿using NaviDnD.Data;
+using NaviDnD.Data;
 using NaviDnD.Data.Models;
 using NaviDnD.Helpers;
 
@@ -981,8 +981,8 @@ public class MapObjectsProvider
         var hero = _settings.Hero;
         int light = _settings.Time.PartOfDay switch
         {
-            "Ночь" => Math.Max(hero?.DarkvisionFt ?? 0, 10),
-            "Утро" or "Вечер" => 60,
+            PartsOfDay.Night => Math.Max(hero?.DarkvisionFt ?? 0, 10),
+            PartsOfDay.Morning or PartsOfDay.Evening => 60,
             _ => 120,
         };
         return hero?.VisionFt is > 0 and var v ? Math.Min(v, light) : light;

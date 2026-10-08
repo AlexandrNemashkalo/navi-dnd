@@ -21,6 +21,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         public string Label = label;
         public Kind Kind = kind;
         public string Hint = hint;
+        public Func<string>? HintTail;               // меняющийся хвост подсказки (полный статус озвучки)
         public Func<string> Get = () => "";
         public Action<int> Step = _ => { };          // ←→ для переключателей и выбора
         public Action<string> Set = _ => { };        // текст
@@ -65,6 +66,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         _drawnChars = null;
         _drawnFg = null;
         _titleTabs = MouseUiHelper.ComputeTitleTabs(_title);
+        Speech.WarmUp(both: true);   // пробные фразы обоих голосов — без задержки на загрузку модели
         BuildItems();
         var border = new BorderDrawer(settings, display);
         _titleRow = Console.CursorTop - 1;
@@ -228,7 +230,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     private void BuildItems()
     {
         _items.Clear();
-        _items.Add(new Item(L.T("ЯЗЫК"), Kind.Choice, L.T("Язык меню и экранов. Рассказ мастера пока на русском."))
+        _items.Add(new Item(L.T("ЯЗЫК"), Kind.Choice, L.T("Язык меню и экранов. Новый мир создаётся на этом языке: на нём рассказ мастера, имена и озвучка. У готового мира язык свой и не меняется."))
         {
             Get = () => L.IsEnglish ? "ENGLISH" : "РУССКИЙ",
             Step = _ =>
@@ -274,16 +276,20 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             () => config.ShowKeyHints, v => { config.ShowKeyHints = v; display.ShowKeyHints = v; },
             on: L.T("ПОКАЗЫВАТЬ"), off: L.T("СКРЫТЬ"));
 
-        // Озвучка — русская модель Silero: пробные фразы по-русски при любом языке интерфейса.
-        Toggle(L.T("ОЗВУЧКА"), L.T("Русские голоса, локально без ключа. В готовой сборке Silero, Python и модель уже включены: скачивание не требуется. F11 — остановить речь; Enter/Esc также останавливают её."),
+        // Озвучка — на языке игры (Silero): русская и английская модели — в игре.
+        // Пробные фразы — на языке голоса, а не интерфейса.
+        Toggle(L.T("ОЗВУЧКА"), L.T("Локально, без ключа, на языке игры: русский и английский голоса уже в игре. F11 — остановить речь; Enter/Esc также останавливают её."),
             () => config.SpeechEnabled, v =>
             {
                 config.SpeechEnabled = v;
                 Speech.Stop();
                 if (v) Speech.WarmUp();
-                if (v) Speech.Speak("Озвучка включена. Я буду читать рассказ ведущего.");
+                if (v && L.WorldIsEnglish) Speech.Sample("Voice-over is on. I will read the story to you.", config.SileroVoiceEn);
+                else if (v) Speech.Sample("Озвучка включена. Я буду читать рассказ ведущего.", config.SileroVoice);
             }, group: L.T("ОЗВУЧКА"));
-        _items.Add(new Item(L.T("ГОЛОС РАССКАЗЧИКА"), Kind.Choice, L.T("Айдар и Евгений — мужские голоса; Бая, Ксения и Ксения 2 — женские. При переключении звучит пробная фраза; выбор сохраняется."))
+        // Строка «СТАТУС ОЗВУЧКИ» коротка для ошибки — целиком она в подсказке озвучки.
+        _items[^1].HintTail = () => config.SpeechEnabled ? "\n\n" + L.T("Статус: ") + Speech.Status : "";
+        _items.Add(new Item(L.T("ГОЛОС РАССКАЗЧИКА"), Kind.Choice, L.T("Голос русской игры. Айдар и Евгений — мужские голоса; Бая, Ксения и Ксения 2 — женские. При переключении звучит пробная фраза; выбор сохраняется."))
         {
             Get = () => config.SileroVoice switch { "aidar" => L.T("Айдар"), "baya" => L.T("Бая"), "kseniya" => L.T("Ксения"), "xenia" => L.T("Ксения 2"), _ => L.T("Евгений") },
             Step = dir =>
@@ -293,7 +299,22 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
                 int index = Array.IndexOf(voices, config.SileroVoice);
                 if (index < 0) index = dir > 0 ? voices.Length - 1 : 0;
                 config.SileroVoice = voices[(index + dir + voices.Length) % voices.Length];
-                Speech.Speak("Вы входите в тёмный лес. У старого дуба вас ждёт незнакомец.");
+                Speech.Sample("Вы входите в тёмный лес. У старого дуба вас ждёт незнакомец.", config.SileroVoice);
+            },
+        });
+        _items.Add(new Item(L.T("АНГЛИЙСКИЙ ГОЛОС"), Kind.Choice, L.T("Голос английской игры: три мужских и два женских. При переключении звучит пробная фраза; выбор сохраняется."))
+        {
+            Get = () => Array.IndexOf(Speech.EnglishVoices, config.SileroVoiceEn) switch
+            {
+                0 => L.T("Мужской 1"), 1 => L.T("Мужской 2"), 2 => L.T("Мужской 3"), 3 => L.T("Женский 1"), _ => L.T("Женский 2"),
+            },
+            Step = dir =>
+            {
+                var voices = Speech.EnglishVoices;
+                Speech.Stop();
+                int index = Math.Max(0, Array.IndexOf(voices, config.SileroVoiceEn));
+                config.SileroVoiceEn = voices[(index + dir + voices.Length) % voices.Length];
+                Speech.Sample("You enter a dark forest. A stranger waits for you by the old oak tree.", config.SileroVoiceEn);
             },
         });
         _items.Add(new Item(L.T("ГРОМКОСТЬ РЕЧИ"), Kind.Choice, L.T("Отдельная громкость речи, независимо от музыки и звуков. Шаг — 10%."))
@@ -609,7 +630,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
 
     // Строки подсказки пункта: абзацы — по переносам строк (пустая строка — отступ между абзацами).
     private static List<string> HintLines(Item item, int width) =>
-        item.Hint.Split('\n').SelectMany(p => p.Length == 0 ? [""] : TextWrapper.WrapText(p, width)).ToList();
+        (item.Hint + item.HintTail?.Invoke()).Split('\n').SelectMany(p => p.Length == 0 ? [""] : TextWrapper.WrapText(p, width)).ToList();
 
     // Токен в списке — начало и конец, середина скрыта.
     private static string Mask(string token) =>

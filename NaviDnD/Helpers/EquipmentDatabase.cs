@@ -20,6 +20,9 @@ public class EquipmentInfo
     public string Attunement { get; init; } = "";
     public string Text { get; init; } = "";
     public string Source { get; init; } = "";
+
+    // Название на языке игры (L.World).
+    public string LocalizedName => L.WorldIsEnglish ? NameEn : Name;
 }
 
 // Справочник снаряжения DnD5e (GameData/DnD5e_equipment_BD.dtn — обычные предметы,
@@ -42,7 +45,7 @@ public static class EquipmentDatabase
 
     public static IReadOnlyList<EquipmentInfo> AllItems => All.Value;
 
-    // Точный поиск по русскому имени (или "nic").
+    // Точный поиск по имени на любом языке (русское, "nic", английское).
     public static EquipmentInfo? Find(string? name)
     {
         if (string.IsNullOrWhiteSpace(name)) return null;
@@ -99,6 +102,7 @@ public static class EquipmentDatabase
 
             string nic = entry.TryGetProperty("ru", out var ru2) ? GetStr(ru2, "nic") : "";
             if (nic.Length > 0) result.TryAdd(Normalize(nic), info);
+            result.TryAdd(Normalize(nameEn), info);
         }
     }
 

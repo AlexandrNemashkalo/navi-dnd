@@ -23,8 +23,8 @@ public sealed class SpellTools(McpServerConfig config)
         заклинание сам, сначала найди его здесь. query = английское название или его часть
         ("fireball", "cure wounds"). level = круг заклинания (0 = заговор) — если указан, в
         результат попадут ТОЛЬКО заклинания этого круга; не уверены — не указывайте.
-        Возвращает через запятую русские названия совпадений по убыванию релевантности — возьмите
-        лучшее и используйте БУКВАЛЬНО как hero.spells[].name, не меняя ни буквы. Пустая строка —
+        Возвращает через запятую названия совпадений на языке игры (lang) по убыванию релевантности —
+        возьмите лучшее и используйте БУКВАЛЬНО как hero.spells[].name, не меняя ни буквы. Пустая строка —
         ничего не нашлось (в этом круге, если он указан): только тогда можно придумать собственное
         (гомбрю) заклинание и его описание.
         """)]
@@ -61,7 +61,7 @@ public sealed class SpellTools(McpServerConfig config)
                 .OrderByDescending(x => x.score)
                 .ThenBy(x => x.spell.Name, StringComparer.Ordinal)
                 .Take(15)
-                .Select(x => x.spell.Name)
+                .Select(x => x.spell.Localized.Name)
                 .ToList();
 
             string result = string.Join(", ", names);

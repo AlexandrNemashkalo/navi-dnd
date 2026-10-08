@@ -21,8 +21,10 @@ public class WorldMap
     public string? Description { get; set; }
     public string? DmNotes { get; set; }
     // Язык мира (L.Russian/L.English): язык интерфейса при создании; описания, имена, журнал и рассказ мастера —
-    // на нём, смена языка интерфейса его не меняет. null — мир до выбора языка (русский).
-    public string? Language { get; set; }
+    // на нём, смена языка интерфейса его не меняет.
+    public string Language { get; set; } = L.Russian;
+    // Версия формата файла мира и его локаций (locations/*.json) — StorageMigration.
+    public int FormatVersion { get; set; } = StorageFormat.Current;
     public int Width { get; set; }
     public int Height { get; set; }
 

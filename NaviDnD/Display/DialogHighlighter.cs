@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 namespace NaviDnD;
 
 // Подсветка текста нейронки в диалоге: имена существ/объектов их цветом с карты (с учётом падежей),
-// механика в [...] приглушённо, урон/лечение/изменения «A→B» и исход броска — цветом.
+// механика в [...] приглушённо, урон/лечение/изменения «A→B» и исход броска — цветом. Слова — на обоих языках игры.
 // Чистая функция над строкой: считается при отрисовке видимых строк, а не при сборке кэша.
 public sealed class DialogHighlighter
 {
@@ -16,15 +16,15 @@ public sealed class DialogHighlighter
     private const string Num = @"\d+(?:\s*[кkdд]\s*\d+)?(?:\s*[+\-]\s*\d+(?:\s*[кkdд]\s*\d+)?)*(?:\s*=\s*\d+)?";
 
     private static readonly Regex Damage = new(
-        $@"(?<![\p{{L}}\d])(урон\p{{L}}*\s*{Num}|{Num}\s*(урон|колющ|рубящ|дробящ|огн|холод|некрот|психич|излуч|звук|кисл|силов|электр|яд)\p{{L}}*)",
+        $@"(?<![\p{{L}}\d])((урон|damage)\p{{L}}*\s*{Num}|{Num}\s*(урон|колющ|рубящ|дробящ|огн|холод|некрот|психич|излуч|звук|кисл|силов|электр|яд|damage|piercing|slashing|bludgeoning|fire|cold|necrotic|psychic|radiant|thunder|acid|force|lightning|poison)\p{{L}}*)",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
     private static readonly Regex Heal = new(
-        $@"(?<![\p{{L}}\d])((лечени|исцел|восстан)\p{{L}}*\s*\+?{Num}|\+\d+\s*(хп|hp)(?![\p{{L}}\d]))",
+        $@"(?<![\p{{L}}\d])((лечени|исцел|восстан|heal|restor|regain)\p{{L}}*\s*\+?{Num}|\+\d+\s*(хп|hp)(?![\p{{L}}\d]))",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
     private static readonly Regex Change = new(@"(\d+)\s*→\s*(\d+)", RegexOptions.Compiled);
-    private static readonly Regex GoodWord = new(@"(?<!\p{L})(попадани|успех|успешн|крит\p{L}*\s+успех)\p{L}*",
+    private static readonly Regex GoodWord = new(@"(?<!\p{L})(попадани|успех|успешн|крит\p{L}*\s+успех|hits?(?!\s+points?)(?!\p{L})|success|crit\p{L}*\s+success)\p{L}*",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
-    private static readonly Regex BadWord = new(@"(?<!\p{L})(промах|провал)\p{L}*",
+    private static readonly Regex BadWord = new(@"(?<!\p{L})(промах|провал|miss(?:es|ed)?(?!\p{L})|fail)\p{L}*",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     private const string Vowels = "аяоеёуюыийьАЯОЕЁУЮЫИЙЬ";
@@ -117,6 +117,8 @@ public sealed class DialogHighlighter
 
     private static string WordPattern(string word)
     {
+        // Английское имя — без падежей: «Goblin», «Goblins», «Goblin's».
+        if (!word.Any(c => c is >= 'Ѐ' and <= 'ӿ')) return Regex.Escape(word) + "(?:'s|s|es)?";
         string stem = word.TrimEnd(Vowels.ToCharArray());
         if (stem.Length >= 4) return Regex.Escape(stem) + @"\p{L}{0,3}";
         if (stem.Length >= 2) return Regex.Escape(stem) + ShortStemEndings;

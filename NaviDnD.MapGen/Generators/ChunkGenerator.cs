@@ -50,7 +50,7 @@ public static class ChunkGenerator
         var zones = Zones.OrderBy(_ => rng.Next()).Take(roomCount).ToList();
         var rooms = zones.Select((z, i) => new RoomRequest
         {
-            Name = $"Комната {i + 1}",
+            Name = L.WF("Комната {0}", i + 1),
             Zone = z.Zone,
             Size = rng.Next(10) switch { < 3 => RoomSize.Small, < 8 => RoomSize.Medium, _ => RoomSize.Large },
             Shape = cave
@@ -101,7 +101,7 @@ public static class ChunkGenerator
         map.Translate(chunk.OriginCol, chunk.OriginRow);
         foreach (var room in map.Rooms ?? [])
         {
-            if (room.Name == "Corridor") room.Name = cave ? "Лаз" : "Коридор";
+            if (room.Passage == true) room.Name = cave ? L.W("Лаз") : L.W("Коридор");
             if (cave) room.Color = [.. CaveFloor];
         }
         return new Result(map.Rooms ?? [], map.Doors ?? []);

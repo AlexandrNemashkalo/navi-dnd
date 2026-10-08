@@ -531,7 +531,7 @@ public static class MovementCalculator
     // день 120 фт, утро/вечер 60; ночь или под крышей — null.
     public static int? DaylightFt(WorldState ws, int col, int row) =>
         ws.Map.TerrainAt(col, row) is { Indoor: false }
-            ? ws.Time.PartOfDay switch { "Ночь" => null, "Утро" or "Вечер" => 60, _ => 120 }
+            ? ws.Time.PartOfDay switch { PartsOfDay.Night => null, PartsOfDay.Morning or PartsOfDay.Evening => 60, _ => 120 }
             : null;
 
     public static int ChebyshevDist(int c1, int r1, int c2, int r2)
@@ -562,7 +562,7 @@ public static class MovementCalculator
     public static bool IsCellLit(WorldState ws, int col, int row)
     {
         // Открытая местность не ночью — дневной свет.
-        if (ws.Time.PartOfDay != "Ночь" && ws.Map.TerrainAt(col, row) is { Indoor: false }) return true;
+        if (ws.Time.PartOfDay != PartsOfDay.Night && ws.Map.TerrainAt(col, row) is { Indoor: false }) return true;
 
         if (ws.Hero is { Light.On: true, Position: { Count: >= 2 } heroPos }
             && heroPos[0] == col && heroPos[1] == row)

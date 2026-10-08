@@ -44,7 +44,7 @@ public static class BuildingGenerator
     {
         public required HashSet<(int c, int r)> Cells { get; init; }
         public Role Role { get; set; }
-        public string Name { get; set; } = "Комната";
+        public string Name { get; set; } = L.W("Комната");
         public Rect? Box { get; init; }            // зал: прямоугольник и задняя сторона (стойка/алтарь)
         public ChunkSide? Back { get; init; }
     }
@@ -144,12 +144,12 @@ public static class BuildingGenerator
             int number = houses.Count;
             var regions = new List<Region>();
             foreach (var part in parts) Split(part, rng, regions, hall: false, minArea: 10);
-            var names = new[] { "кухня", "спальня", "кладовая", "мастерская" };
+            var names = new[] { L.W("кухня"), L.W("спальня"), L.W("кладовая"), L.W("мастерская") };
             Role[] roles = [Role.Kitchen, Role.Bedroom, Role.Storage, Role.Workshop];
             for (int i = 0; i < regions.Count; i++)
             {
                 regions[i].Role = regions.Count == 1 ? Role.Living : roles[i % roles.Length];
-                regions[i].Name = regions.Count == 1 ? $"Дом {number}" : $"Дом {number}: {names[i % names.Length]}";
+                regions[i].Name = regions.Count == 1 ? L.WF("Дом {0}", number) : L.WF("Дом {0}", number) + ": " + names[i % names.Length];
             }
             b.AddRooms(regions, WoodFloor);
             b.ConnectRooms(regions, "house");
@@ -260,12 +260,12 @@ public static class BuildingGenerator
         if (basement)
         {
             foreach (var part in parts) Split(part, rng, regions, hall: false, minArea: 12);
-            foreach (var r in regions) { r.Role = Role.Storage; r.Name = "Подвал"; }
+            foreach (var r in regions) { r.Role = Role.Storage; r.Name = L.W("Подвал"); }
             return regions;
         }
         if (style == "tower")
         {
-            regions.Add(new Region { Cells = parts.SelectMany(p => p.Cells()).ToHashSet(), Role = Role.Tower, Name = ground ? "Нижний зал башни" : "Зал башни" });
+            regions.Add(new Region { Cells = parts.SelectMany(p => p.Cells()).ToHashSet(), Role = Role.Tower, Name = ground ? L.W("Нижний зал башни") : L.W("Зал башни") });
             return regions;
         }
 
@@ -296,11 +296,11 @@ public static class BuildingGenerator
                 int len = alongX ? strip.Width : strip.Height, pos = 0;
                 string[] backNames = style switch
                 {
-                    "tavern" => ["Кухня", "Кладовая", "Комната трактирщика"],
-                    "shop" => ["Склад", "Мастерская", "Жильё хозяина"],
-                    "temple" => ["Ризница", "Келья", "Келья"],
-                    "manor" => ["Кухня", "Кабинет", "Библиотека"],
-                    _ => ["Оружейная", "Комната командира", "Кладовая"],
+                    "tavern" => [L.W("Кухня"), L.W("Кладовая"), L.W("Комната трактирщика")],
+                    "shop" => [L.W("Склад"), L.W("Мастерская"), L.W("Жильё хозяина")],
+                    "temple" => [L.W("Ризница"), L.W("Келья"), L.W("Келья")],
+                    "manor" => [L.W("Кухня"), L.W("Кабинет"), L.W("Библиотека")],
+                    _ => [L.W("Оружейная"), L.W("Комната командира"), L.W("Кладовая")],
                 };
                 Role[] backRoles = style switch
                 {
@@ -321,13 +321,13 @@ public static class BuildingGenerator
             regions.Insert(0, new Region
             {
                 Cells = hallBox.Cells().ToHashSet(), Role = Role.Hall, Box = hallBox, Back = back,
-                Name = style switch { "tavern" => "Общий зал", "shop" => "Торговый зал", "temple" => "Святилище", "manor" => "Холл", _ => "Казарма" },
+                Name = style switch { "tavern" => L.W("Общий зал"), "shop" => L.W("Торговый зал"), "temple" => L.W("Святилище"), "manor" => L.W("Холл"), _ => L.W("Казарма") },
             });
             foreach (var wing in parts.Skip(1))
             {
                 int before = regions.Count;
                 Split(wing, rng, regions, hall: false, minArea: 16);
-                foreach (var r in regions.Skip(before)) { r.Role = Role.Living; r.Name = style == "temple" ? "Часовня" : "Комната"; }
+                foreach (var r in regions.Skip(before)) { r.Role = Role.Living; r.Name = style == "temple" ? L.W("Часовня") : L.W("Комната"); }
             }
             return regions;
         }
@@ -342,19 +342,19 @@ public static class BuildingGenerator
             {
                 (r.Role, r.Name) = style switch
                 {
-                    "barracks" => (Role.Hall, "Казарма"),
-                    "tavern" => (Role.Bedroom, "Гостевая комната"),
-                    "manor" => (Role.Bedroom, "Спальня"),
-                    "house" => ground ? (Role.Living, "Комната") : (Role.Bedroom, "Спальня"),
-                    _ => (Role.Living, "Комната"),
+                    "barracks" => (Role.Hall, L.W("Казарма")),
+                    "tavern" => (Role.Bedroom, L.W("Гостевая комната")),
+                    "manor" => (Role.Bedroom, L.W("Спальня")),
+                    "house" => ground ? (Role.Living, L.W("Комната")) : (Role.Bedroom, L.W("Спальня")),
+                    _ => (Role.Living, L.W("Комната")),
                 };
             }
         }
         if (ground && style is "house" or null && regions.Count(r => r.Role != Role.Corridor) > 1)
         {
             var rooms = regions.Where(r => r.Role != Role.Corridor).ToList();
-            rooms[0].Name = "Горница";
-            rooms[1].Role = Role.Kitchen; rooms[1].Name = "Кухня";
+            rooms[0].Name = L.W("Горница");
+            rooms[1].Role = Role.Kitchen; rooms[1].Name = L.W("Кухня");
         }
         return regions;
     }
@@ -371,7 +371,7 @@ public static class BuildingGenerator
             var (a, corridor, b) = horizontal
                 ? (new Rect(rect.C, rect.R, rect.Width, mid), new Rect(rect.C, rect.R + mid, rect.Width, 1), new Rect(rect.C, rect.R + mid + 1, rect.Width, across - mid - 1))
                 : (new Rect(rect.C, rect.R, mid, rect.Height), new Rect(rect.C + mid, rect.R, 1, rect.Height), new Rect(rect.C + mid + 1, rect.R, across - mid - 1, rect.Height));
-            rooms.Add(new Region { Cells = corridor.Cells().ToHashSet(), Role = Role.Corridor, Name = "Коридор" });
+            rooms.Add(new Region { Cells = corridor.Cells().ToHashSet(), Role = Role.Corridor, Name = L.W("Коридор") });
             SplitAlong(a, horizontal, rng, rooms);
             SplitAlong(b, horizontal, rng, rooms);
             return;
@@ -478,6 +478,7 @@ public static class BuildingGenerator
                 _rooms.Add(new Room
                 {
                     Name = reg.Name,
+                    Passage = reg.Role == Role.Corridor ? true : null,
                     Color = Tint(reg.Role == Role.Hall && floor == WoodFloor ? HallFloor : floor),
                     Positions = [.. reg.Cells.OrderBy(x => x.r).ThenBy(x => x.c).Select(Field)],
                 });
@@ -664,7 +665,8 @@ public static class BuildingGenerator
                 {
                     _rooms.Add(new Room
                     {
-                        Name = "Галерея",
+                        Name = L.W("Галерея"),
+                        Passage = true,
                         Color = Tint(basement ? StoneFloor : WoodFloor),
                         Positions = [.. gallery.Select(Field)],
                     });

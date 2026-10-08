@@ -26,8 +26,9 @@ public class AppConfig
 
     public string RuleSet { get; init; } = "Dnd5e";
 
-    // Язык интерфейса: "ru" или "en" (L.SetLanguage). Язык мира — отдельно, в мире при создании.
-    public string Language { get; set; } = L.Russian;
+    // Язык интерфейса: "ru" или "en" (L.SetLanguage). Язык мира — отдельно, в мире при создании. Новая установка
+    // (файла настроек ещё нет) — английский; настройки прежней версии без поля — русский (LoadUserSettings).
+    public string Language { get; set; } = L.English;
 
     // Claude CLI
     public string ClaudeOAuthToken { get; set; } = "";
@@ -115,6 +116,8 @@ public class AppConfig
     public bool SpeechEnabled { get; set; } = false;
     public int SpeechVolume { get; set; } = 70;
     public string SileroVoice { get; set; } = "baya";
+    // Голос рассказчика английской игры (Speech.EnglishVoices; модель — Speech/models/v3_en.pt).
+    public string SileroVoiceEn { get; set; } = "en_57";
     public string SileroPythonPath { get; set; } = "python";
     // [] = off, ["*"] = all actions, or any subset of:
     // "CreateNewGame", "FixHeroForNewGame", "StartNewGame", "SendAction"
@@ -145,6 +148,7 @@ public class AppConfig
         public bool? SpeechEnabled { get; set; }
         public int? SpeechVolume { get; set; }
         public string? SileroVoice { get; set; }
+        public string? SileroVoiceEn { get; set; }
         public string? SileroPythonPath { get; set; }
         public bool? MusicEnabled { get; set; }
         public int? MusicVolume { get; set; }
@@ -184,6 +188,7 @@ public class AppConfig
             SpeechEnabled = s.SpeechEnabled ?? SpeechEnabled;
             SpeechVolume = Math.Clamp(s.SpeechVolume ?? SpeechVolume, 0, 100);
             SileroVoice = s.SileroVoice is "eugene" or "aidar" or "baya" or "kseniya" or "xenia" ? s.SileroVoice : SileroVoice;
+            SileroVoiceEn = s.SileroVoiceEn is { } en && Helpers.Speech.EnglishVoices.Contains(en) ? en : SileroVoiceEn;
             SileroPythonPath = s.SileroPythonPath ?? SileroPythonPath;
             MusicEnabled = s.MusicEnabled ?? MusicEnabled;
             MusicVolume = Math.Clamp(s.MusicVolume ?? MusicVolume, 0, 100);
@@ -208,7 +213,8 @@ public class AppConfig
             Fullscreen = s.Fullscreen ?? Fullscreen;
             FullscreenFontSize = s.FullscreenFontSize ?? FullscreenFontSize;
             FontFace = s.FontFace ?? FontFace;
-            Language = L.Normalize(s.Language ?? Language);
+            // Нет поля — настройки из версии до выбора языка: игрок играл по-русски, после обновления — тоже.
+            Language = L.Normalize(s.Language ?? L.Russian);
         }
         catch { /* битый файл настроек — остаются значения по умолчанию */ }
     }
@@ -222,7 +228,7 @@ public class AppConfig
             {
                 SoundEnabled = SoundEnabled, TypingSoundEnabled = TypingSoundEnabled, SoundVolume = SoundVolume,
                 SpeechEnabled = SpeechEnabled, SpeechVolume = SpeechVolume,
-                SileroVoice = SileroVoice, SileroPythonPath = SileroPythonPath,
+                SileroVoice = SileroVoice, SileroVoiceEn = SileroVoiceEn, SileroPythonPath = SileroPythonPath,
                 MusicEnabled = MusicEnabled, MusicVolume = MusicVolume, AmbienceEnabled = AmbienceEnabled,
                 ClaudeModel = ClaudeModel, ClaudeCreateNewGameModel = ClaudeCreateNewGameModel,
                 ClaudeStartNewGameModel = ClaudeStartNewGameModel, ClaudeOAuthToken = ClaudeOAuthToken,
