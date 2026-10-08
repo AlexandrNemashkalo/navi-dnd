@@ -46,7 +46,7 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
         {
             try { return await call(); }
             // MCP мог уже изменить мир или получить бросок: повтор всего хода повторит побочный эффект.
-            catch (Exception ex) when (canRetry && attempt < 3 && IsTransient(ex))
+            catch (Exception ex) when (ex is not AiSetupException && canRetry && attempt < 3 && IsTransient(ex))
             {
                 logger?.LogNote($"Codex: временная ошибка (попытка {attempt}) — повтор через {attempt * 5} с");
                 await Task.Delay(attempt * 5000);
@@ -73,10 +73,14 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
             var sw = Stopwatch.StartNew();
             Process? started;
             try { started = Process.Start(psi); }
-            catch (System.ComponentModel.Win32Exception)
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode is 2 or 3)
             {
                 throw new AiSetupException($"Codex CLI не найден ({config.CodexCliPath}): установи его (npm i -g @openai/codex), войди (codex login) " +
                                     "и при необходимости укажи путь в настройках («ПУТЬ К CODEX»).");
+            }
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 5)
+            {
+                throw new AiSetupException("Нет доступа к запуску Codex CLI.\nПроверь разрешения, блокировку антивирусом и «ПУТЬ К CODEX» в настройках.");
             }
             using var process = started ?? throw new Exception("Не удалось запустить Codex CLI.");
             ChildProcessJob.Add(process);   // игру закрыли — запрос завершается вместе с ней
@@ -104,9 +108,9 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
             if (process.ExitCode != 0 || error != null || string.IsNullOrWhiteSpace(final))
             {
                 string reason = error ?? (process.ExitCode != 0 ? $"код {process.ExitCode}" : "пустой ответ");
-                if (!string.IsNullOrWhiteSpace(stderr) && error == null) reason += $"; stderr: {stderr.Trim()}";
+                if (!string.IsNullOrWhiteSpace(stderr)) reason += $"; stderr: {stderr.Trim()}";
                 logger?.LogResponse(events.ToString(), $"ERROR: {reason}", sw.Elapsed);
-                throw new Exception($"Codex CLI: {reason}");
+                throw CreateError($"Codex CLI: {reason}");
             }
             string response = StripMarkdownFences(final);
             logger?.LogResponse(events.ToString(), response, sw.Elapsed);
@@ -117,6 +121,21 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
             try { Directory.Delete(workDir, recursive: true); }
             catch (Exception ex) { logger?.LogNote($"Не удалось удалить временную папку {workDir}: {ex.Message}"); }
         }
+    }
+
+    public static Exception CreateError(string rawMessage)
+    {
+        string[] authMarkers = ["not logged in", "not authenticated", "unauthorized", "authentication_error",
+            "authentication required", "authentication token", "failed to authenticate", "please log in",
+            "please login", "codex login", "token expired", "token has expired", "refresh_token_reused",
+            "invalid_api_key", "incorrect api key", "401"];
+        if (authMarkers.Any(marker => rawMessage.Contains(marker, StringComparison.OrdinalIgnoreCase)))
+            return new AiSetupException("Codex не авторизован или вход истёк.\nВыполни codex login в терминале и повтори запрос.");
+        string[] accessMarkers = ["403", "model_not_found", "does not have access", "do not have access",
+            "insufficient_quota", "usage limit", "usage_limit"];
+        if (accessMarkers.Any(marker => rawMessage.Contains(marker, StringComparison.OrdinalIgnoreCase)))
+            return new AiSetupException("Codex: нет доступа к модели или исчерпан лимит.\nПроверь аккаунт, подписку, лимиты и модель в настройках.");
+        return new Exception(rawMessage);
     }
 
     private ProcessStartInfo BuildPsi(string workDir, string lastMessagePath, string instructionsPath, string action)
@@ -178,32 +197,9 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
         return string.IsNullOrWhiteSpace(selected) ? config.CodexModel : selected;
     }
 
-    // Codex из npm — это codex.cmd (пакетный файл): запуск через него гонит аргументы через cmd.exe, который портит
-    // скобки/запятые в -c. Поэтому берём настоящий codex.exe из пакета (@openai/codex/vendor/…), если он есть.
-    private static string ResolveCodex(string path)
-    {
-        if (Path.IsPathRooted(path) && !path.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase)) return path;
-        string? found = Path.IsPathRooted(path) ? path : null;
-        foreach (var dir in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(Path.PathSeparator))
-        {
-            if (found != null) break;
-            foreach (var ext in new[] { ".exe", ".cmd", "" })
-            {
-                string candidate = Path.Combine(dir.Trim(), path + ext);
-                if (File.Exists(candidate)) { found = candidate; break; }
-            }
-        }
-        if (found == null) return path;
-        if (!found.EndsWith(".cmd", StringComparison.OrdinalIgnoreCase)) return found;
-        try
-        {
-            string pkg = Path.Combine(Path.GetDirectoryName(found)!, "node_modules", "@openai", "codex");
-            if (Directory.Exists(pkg) && Directory.GetFiles(pkg, "codex*.exe", SearchOption.AllDirectories).FirstOrDefault() is { } exe)
-                return exe;
-        }
-        catch { /* нет доступа — запускаем .cmd */ }
-        return found;
-    }
+    // Use the same bounded discovery as startup, including repair of stale absolute paths.
+    private static string ResolveCodex(string path) =>
+        AiCliDiscovery.Resolve("codex", path) ?? AiCliDiscovery.NormalizePath(path);
 
     private static void Config(ProcessStartInfo psi, string key, string tomlValue)
     {

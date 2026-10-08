@@ -5,6 +5,13 @@ namespace NaviDnD.Tests;
 public class AiCliDiscoveryTests
 {
     [Fact]
+    public void StaleCodexPathFallsBackToInstalledCli()
+    {
+        string missing = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "codex.exe");
+        Assert.Equal(AiCliDiscovery.Find("codex"), AiCliDiscovery.Resolve("codex", missing));
+    }
+
+    [Fact]
     public void MissingConfiguredExecutableDoesNotFallBackToAnotherInstallation()
     {
         string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "codex.exe");
@@ -42,16 +49,28 @@ public class AiCliDiscoveryTests
         finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
     }
 
-    [Fact]
-    public void EditorExtensionOutsideStandardVsCodeFolderIsFound()
+    [Theory]
+    [InlineData("claude")]
+    [InlineData("codex")]
+    public void EditorExtensionOutsideStandardVsCodeFolderIsFound(string name)
     {
         string root = Path.Combine(Path.GetTempPath(), "discovery-" + Guid.NewGuid().ToString("N"));
-        string exe = Path.Combine(root, "anthropic.claude-code-1.0", "resources", "native-binary", "claude.exe");
+        string windows = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.Arm64
+            ? "windows-aarch64" : "windows-x86_64";
+        string exe = name == "codex" ? Path.Combine(root, "openai.chatgpt-1.0", "bin", windows, "codex.exe")
+            : Path.Combine(root, "anthropic.claude-code-1.0", "resources", "native-binary", "claude.exe");
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(exe)!);
             File.WriteAllText(exe, "fixture");
-            Assert.Equal(exe, AiCliDiscovery.Find("claude", [], [root]));
+            Assert.Equal(exe, AiCliDiscovery.Find(name, [], [root]));
+            var config = new NaviDnD.AppConfig { CodexCliPath = Path.Combine(root, "deleted", "codex.exe") };
+            if (name == "codex")
+            {
+                Assert.True(config.ApplyAiPaths(null, AiCliDiscovery.Find(name, [], [root]), false));
+                Assert.Equal(exe, config.CodexCliPath);
+                Assert.Equal("claude", config.AiProvider);
+            }
         }
         finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
     }
