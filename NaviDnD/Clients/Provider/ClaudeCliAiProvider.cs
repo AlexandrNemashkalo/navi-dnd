@@ -63,10 +63,9 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
     private Process StartCli(ProcessStartInfo psi)
     {
         try { return Process.Start(psi) ?? throw new AiSetupException("Не удалось запустить Claude CLI."); }
-        catch (System.ComponentModel.Win32Exception)
+        catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode is 2 or 3)
         {
-            throw new AiSetupException($"Claude CLI не найден ({config.ClaudeCliPath}): установи его, войди (claude login) " +
-                                       "и при необходимости укажи путь в настройках («ПУТЬ К CLAUDE»).");
+            throw new AiSetupException("Claude не найден.\nУстанови Claude Code или укажи «ПУТЬ К CLAUDE» в настройках.");
         }
     }
 
@@ -96,6 +95,9 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
             if (!string.IsNullOrWhiteSpace(stderr))
                 logger?.LogNote($"STDERR: {stderr.Trim()}");
 
+            if (process.ExitCode != 0)
+                throw CreateError($"Claude CLI (код {process.ExitCode}): {output}\n{stderr}");
+
             try
             {
                 var doc = JsonDocument.Parse(output);
@@ -107,7 +109,7 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
                 if (isError)
                 {
                     logger?.LogResponse(output, $"ERROR: {resultText}", sw.Elapsed);
-                    throw new Exception(BuildErrorMessage($"Claude CLI: {resultText}"));
+                    throw CreateError($"Claude CLI: {resultText}");
                 }
 
                 string stripped = StripMarkdownFences(resultText);
@@ -160,7 +162,7 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
                 var (chunk, result, error) = ParseStreamEvent(line, streamedSoFar);
 
                 if (error != null)
-                    throw new Exception(BuildErrorMessage($"Claude CLI: {error}"));
+                    throw CreateError($"Claude CLI: {error}");
 
                 if (result != null)
                 {
@@ -181,7 +183,7 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
             {
                 string exitMessage = $"Claude CLI завершился с ошибкой (код {process.ExitCode}). Попробуй ещё раз.";
                 if (!string.IsNullOrWhiteSpace(stderr)) exitMessage += $" stderr: {stderr.Trim()}";
-                throw new Exception(BuildErrorMessage(exitMessage));
+                throw CreateError(exitMessage);
             }
 
             // Prefer the authoritative result-event text; fall back to accumulated streaming text.
@@ -372,20 +374,16 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
         }
     }
 
-    // Claude CLI отвечает этим текстом, когда CLAUDE_CODE_OAUTH_TOKEN просрочен/недействителен или
-    // организация потеряла доступ (например сменили аккаунт, под которым сгенерирован токен) —
-    // добавляем понятную подсказку прямо в сообщение, которое увидит игрок в истории диалога
-    // (GameAiClient.RecordError пишет ex.Message как есть).
-    private static string BuildErrorMessage(string rawMessage)
+    public static Exception CreateError(string rawMessage)
     {
-        if (rawMessage.Contains("does not have access to Claude", StringComparison.OrdinalIgnoreCase)
-            || rawMessage.Contains("login again", StringComparison.OrdinalIgnoreCase)
-            || rawMessage.Contains("please run /login", StringComparison.OrdinalIgnoreCase))
-        {
-            return $"{rawMessage} — похоже, недействителен CLAUDE_CODE_OAUTH_TOKEN (AppConfig.ClaudeOAuthToken). " +
-                   "Выполните claude login под нужным аккаунтом или claude setup-token и обновите токен в настройках игры.";
-        }
-        return rawMessage;
+        string[] authMarkers = ["not logged in", "login again", "please run /login",
+            "authentication_error", "invalid authentication", "invalid oauth token",
+            "oauth token has expired", "token expired", "unauthorized", "failed to authenticate"];
+        if (authMarkers.Any(marker => rawMessage.Contains(marker, StringComparison.OrdinalIgnoreCase)))
+            return new AiSetupException("Claude не авторизован или вход истёк.\nВыполни claude auth login; если задан токен в настройках игры, обнови или удали его.");
+        if (rawMessage.Contains("does not have access to Claude", StringComparison.OrdinalIgnoreCase))
+            return new AiSetupException("Аккаунт не имеет доступа к Claude.\nПроверь аккаунт, подписку и токен в настройках.");
+        return new Exception(rawMessage);
     }
 
     private static string StripMarkdownFences(string text)

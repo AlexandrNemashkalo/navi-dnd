@@ -185,7 +185,10 @@ public class NewGameWizard
             }
             if (aiTask is { IsCompleted: true })
             {
-                if (aiTask.Result && aiWorld == world)
+                if (aiTask.IsFaulted)
+                    message = aiTask.Exception?.GetBaseException() is AiSetupException setup
+                        ? setup.Message : "Нейронка не ответила — попробуй ещё раз.";
+                else if (aiTask.IsCompletedSuccessfully && aiTask.Result && aiWorld == world)
                 {
                     desc = world.Chronicle.Description ?? desc;
                     descCur = desc.Length;
@@ -195,7 +198,7 @@ public class NewGameWizard
                     message = "";
                     prompt = "";   // запрос выполнен — строка ввода снова чистая
                 }
-                else if (!aiTask.Result) message = "Нейронка не ответила — попробуй ещё раз.";
+                else if (!aiTask.IsCompletedSuccessfully || !aiTask.Result) message = "Нейронка не ответила — попробуй ещё раз.";
                 aiTask = null;
             }
             if (!Visible(focus)) focus = 0;
@@ -316,7 +319,7 @@ public class NewGameWizard
             Put(iy, lx, "Ввод: ", focus == FQ ? Bright : Fg);
             int px = lx + 6, promptW = gx - 2 - px;
             // Есть итог (готово / ошибка) и поле пустое — вместо подсказки в строке ввода он.
-            string status = message;
+            string status = message.Split('\n')[0];
             bool showStatus = status.Length > 0 && prompt.Length == 0 && focus != FQ;
             string promptShown = showStatus ? status
                 : prompt.Length == 0 && focus != FQ ? "что придумать или как изменить описание (необязательно)" : TailFit(prompt + (focus == FQ ? "▌" : ""), promptW);
@@ -331,7 +334,12 @@ public class NewGameWizard
             Button(by, left + (total - "ДАЛЕЕ: ГЕРОЙ".Length - 4) / 2, "ДАЛЕЕ: ГЕРОЙ", focus == FN, "next", disabled: desc.Trim().Length == 0);
             // Подсказка; вместо неё — подтверждение удаления или сообщение (у готового мира строки ввода нет).
             if (confirmDelete) CenterIn(by + 2, left, total, $"Удалить мир «{entry.Label}» со всеми локациями?   [Enter]ДА   [Esc]НЕТ", Bright);
-            else if (message.Length > 0 && descLocked) CenterIn(by + 2, left, total, message, Bright);
+            else if (message.Length > 0)
+            {
+                var lines = message.Split('\n');
+                for (int i = 0; i < lines.Length && i < 2; i++)
+                    CenterIn(by + 2 + i, left, total, Fit(lines[i], total), Bright);
+            }
             else CenterIn(by + 2, left, total, "[↑↓]ПОЛЕ   [←→]ВЫБОР/КУРСОР   [Enter]ДАЛЕЕ" + (isNew ? "" : "   [Del]УДАЛИТЬ МИР") + "   [Esc]МЕНЮ", Dim);
             // Карта: колесо — масштаб, перетаскивание — сдвиг (клик ничего не делает); другой мир — камера с начала.
             if (_worldCam.For != world.Id) _worldCam.Reset(world.Id);

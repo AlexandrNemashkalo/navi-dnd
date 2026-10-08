@@ -647,7 +647,10 @@ public class NewGameDisplay
 
     private void FinishDescribe()
     {
-        if (_describeTask is { Result: { Length: > 0 } text })
+        if (_describeTask?.IsFaulted == true)
+            _message = _describeTask.Exception?.GetBaseException() is AiSetupException setup
+                ? setup.Message : "Нейронка не ответила — попробуй ещё раз";
+        else if (_describeTask is { IsCompletedSuccessfully: true, Result: { Length: > 0 } text })
         {
             _fields[DescriptionField].Value = text.Length > 1500 ? text[..1500] : text;
             _fields[PromptField].Value = "";   // запрос выполнен — строка ввода чистая

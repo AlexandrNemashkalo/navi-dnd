@@ -49,6 +49,8 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     private int _width, _height, _x0, _bodyTop, _left;
     private char[,] _chars = new char[0, 0];
     private List<int>?[,] _fg = new List<int>?[0, 0];
+    private char[,]? _drawnChars;
+    private List<int>?[,]? _drawnFg;
     private readonly List<(int row, int item)> _itemRows = [];
     private readonly List<(int row, int item, int left, int right)> _arrows = [];
     private int _hovered = -1;
@@ -59,6 +61,8 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
 
     public void Show()
     {
+        _drawnChars = null;
+        _drawnFg = null;
         BuildItems();
         var border = new BorderDrawer(settings, display);
         _bodyTop = Console.CursorTop + 1;
@@ -123,12 +127,19 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             }
 
             if (ConsoleMouseReader.TryReadKey() is not { } key) { Thread.Sleep(15); continue; }
-            if (key.Key == ConsoleKey.Escape)
+            // Read queued repeats before drawing, so holding a key cannot build a render backlog.
+            for (int i = 0; i < 64; i++)
             {
-                if (_editing) { _editing = false; Redraw(); continue; } // отменить ввод
-                return;
+                if (key.Key == ConsoleKey.Escape)
+                {
+                    if (_editing) { _editing = false; break; } // отменить ввод
+                    return;
+                }
+                bool wasEditing = _editing;
+                if (HandleKey(key)) return;
+                if (i == 63 || !wasEditing || !_editing || ConsoleMouseReader.TryReadKey() is not { } next) break;
+                key = next;
             }
-            if (HandleKey(key)) return;
             Redraw();
         }
     }
@@ -387,6 +398,8 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     // Весь экран и масштаб — сразу: шрифт и размер окна (ConsoleSetup), подложка и окно по центру.
     private void ApplyScreen()
     {
+        _drawnChars = null;
+        _drawnFg = null;
         if (!config.Fullscreen) FullscreenBackdrop.Set(false, display.MainBackground);
         ConsoleSetup.Fullscreen = config.Fullscreen;
         ConsoleSetup.FullscreenFontSize = config.FullscreenFontSize;
@@ -494,7 +507,21 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         CenterIn(top + boxHeight + 1, _left, total, footer, Dim);
 
         Console.CursorVisible = false;
-        for (int r = 0; r < _height; r++) WriteRow(r);
+        for (int r = 0; r < _height; r++)
+            if (RowChanged(r)) WriteRow(r);
+        _drawnChars = _chars;
+        _drawnFg = _fg;
+    }
+
+    private bool RowChanged(int row)
+    {
+        if (_drawnChars == null || _drawnFg == null
+            || _drawnChars.GetLength(0) != _height || _drawnChars.GetLength(1) != _width) return true;
+        for (int c = 0; c < _width; c++)
+            if (_drawnChars[row, c] != _chars[row, c]
+                || !(_drawnFg[row, c] ?? display.MainForeground)
+                    .SequenceEqual(_fg[row, c] ?? display.MainForeground)) return true;
+        return false;
     }
 
     private void DrawItem(int index, int y, int valueWidth)

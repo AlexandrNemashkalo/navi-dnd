@@ -18,7 +18,8 @@ public static class AiCliDiscovery
         string path = NormalizePath(configuredPath);
         if (Path.IsPathRooted(path) && File.Exists(path))
         {
-            if (path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) return path;
+            if (path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
+                && !(name == "claude" && IsDesktopApp(path))) return path;
             // npm launchers are scripts; providers need the native executable beside their package.
             if (Find(name, [Path.GetDirectoryName(path)!], []) is { } native) return native;
         }
@@ -45,7 +46,12 @@ public static class AiCliDiscovery
         var extensions = new[] { ".vscode", ".vscode-insiders", ".cursor", ".windsurf" }
             .Select(editor => Path.Combine(home, editor, "extensions"))
             .Append(Environment.GetEnvironmentVariable("VSCODE_EXTENSIONS") ?? "");
-        return Find(name, directories, extensions);
+        string? cli = Find(name, directories, extensions);
+        if (cli != null || name != "claude") return cli;
+        return FindDesktopClaude([
+            Path.Combine(roaming, "Claude", "claude-code"),
+            Path.Combine(local, "Packages", "Claude_pzs8sxrjxfjjc", "LocalCache", "Roaming", "Claude", "claude-code")
+        ]);
     }
 
     public static string? Find(string name, IEnumerable<string> directories, IEnumerable<string> extensionRoots)
@@ -74,7 +80,7 @@ public static class AiCliDiscovery
                     Path.Combine(package, "node_modules", "@anthropic-ai", $"claude-code-win32-{arch}", "claude.exe")
                 ];
                 foreach (string candidate in candidates)
-                    if (File.Exists(candidate)) return Path.GetFullPath(candidate);
+                    if (File.Exists(candidate) && !(name == "claude" && IsDesktopApp(candidate))) return Path.GetFullPath(candidate);
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or System.Security.SecurityException)
             { }
@@ -93,11 +99,47 @@ public static class AiCliDiscovery
                         : [Path.Combine(extension, "resources", "native-binary", "claude.exe"),
                            Path.Combine(extension, "resources", "native-binary", $"win32-{arch}", "claude.exe")];
                     foreach (string candidate in candidates)
-                        if (File.Exists(candidate)) return Path.GetFullPath(candidate);
+                        if (File.Exists(candidate) && !(name == "claude" && IsDesktopApp(candidate))) return Path.GetFullPath(candidate);
                 }
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or System.Security.SecurityException)
             { }
+        }
+        return null;
+    }
+    // Electron Desktop's GUI executable is also named claude.exe, but is not a CLI.
+    private static bool IsDesktopApp(string executable) =>
+        File.Exists(Path.Combine(Path.GetDirectoryName(executable)!, "resources", "app.asar"));
+
+    public static string? FindDesktopClaude(IEnumerable<string> roots)
+    {
+        var versions = new List<(Version version, string path)>();
+        foreach (string raw in roots.Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            try
+            {
+                string root = NormalizePath(raw);
+                if (!Path.IsPathRooted(root) || !Directory.Exists(root)) continue;
+                foreach (string directory in Directory.EnumerateDirectories(root))
+                    if (Version.TryParse(Path.GetFileName(directory), out var version))
+                        versions.Add((version, directory));
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or System.Security.SecurityException) { }
+        }
+        // Inspect just version/hash directories; never walk WindowsApps or the user's whole profile.
+        foreach (var item in versions.OrderByDescending(v => v.version))
+        {
+            try
+            {
+                string direct = Path.Combine(item.path, "claude.exe");
+                if (File.Exists(direct)) return direct;
+                foreach (string hash in Directory.EnumerateDirectories(item.path).OrderByDescending(Directory.GetLastWriteTimeUtc))
+                {
+                    string executable = Path.Combine(hash, "claude.exe");
+                    if (File.Exists(executable)) return executable;
+                }
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or System.Security.SecurityException) { }
         }
         return null;
     }

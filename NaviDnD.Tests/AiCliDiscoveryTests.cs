@@ -75,4 +75,41 @@ public class AiCliDiscoveryTests
         }
         finally { File.Delete(exe); }
     }
+    [Fact]
+    public void DesktopSearchUsesNewestCompleteVersionAndRepairsSavedPath()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "desktop-discovery-" + Guid.NewGuid().ToString("N"));
+        string old = Path.Combine(root, "2.1.9", "old-hash", "claude.exe");
+        string latest = Path.Combine(root, "2.1.293", "new-hash", "claude.exe");
+        try
+        {
+            foreach (string exe in new[] { old, latest })
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(exe)!);
+                File.WriteAllText(exe, "fixture");
+            }
+            Directory.CreateDirectory(Path.Combine(root, "2.1.294", "unfinished"));
+            Assert.Equal(latest, AiCliDiscovery.FindDesktopClaude([root]));
+            var config = new NaviDnD.AppConfig { ClaudeCliPath = Path.Combine(root, "deleted", "claude.exe") };
+            Assert.True(config.ApplyAiPaths(AiCliDiscovery.FindDesktopClaude([root]), null, false));
+            Assert.Equal(latest, config.ClaudeCliPath);
+            File.Delete(latest);
+            Assert.Equal(old, AiCliDiscovery.FindDesktopClaude([root]));
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public void DesktopGuiIsNotMistakenForCliInSearchDirectories()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "desktop-discovery-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(root, "resources"));
+            File.WriteAllText(Path.Combine(root, "claude.exe"), "fixture");
+            File.WriteAllText(Path.Combine(root, "resources", "app.asar"), "fixture");
+            Assert.Null(AiCliDiscovery.Find("claude", [root], []));
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
 }

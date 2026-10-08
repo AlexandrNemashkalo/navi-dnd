@@ -115,6 +115,7 @@ public class GameAiClient
             string? text = JsonNode.Parse(ExtractJson(response))?["description"]?.GetValue<string>();
             return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
         }
+        catch (AiSetupException) { throw; }
         catch
         {
             return null;
@@ -165,6 +166,7 @@ public class GameAiClient
             if (ok && !string.IsNullOrWhiteSpace(name)) world.Chronicle.Name = name.Trim();
             return ok;
         }
+        catch (AiSetupException) { throw; }
         catch
         {
             return false;
