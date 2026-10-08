@@ -1,21 +1,21 @@
 {
-    "name":  "NaviDnD 2.0.3",
-    "tag_name":  "v2.0.3",
-    "description":  "# NaviDnD 2.0.3\n\n- В установщике появилась полоса прогресса: подготовка архива, распаковка игры, установка файлов и применение обновлений.\n- Установка базы быстрее: распакованные файлы переносятся в папку игры, а не копируются второй раз.\n\nОбновление из игры в этот раз снова скачивает новый установщик (около 50 МБ): им обновляется помощник `Updater/`.\n\n## Как проверить\n\n1. Скачай ZIP по ссылке «📦 Скачать NaviDnD», распакуй и запусти `releases/NaviDnD-Setup-win-x64.exe`.\n2. После нажатия «Установить» под кнопкой заполняется полоса, подпись показывает текущий этап.\n",
+    "name":  "NaviDnD 2.0.4",
+    "tag_name":  "v2.0.4",
+    "description":  "# NaviDnD 2.0.4\n\n- Анимации текста, ожидания и кубика работают в общем цикле с независимыми скоростями; карту можно перетаскивать во время ожидания и броска.\n- Наведение на объекты карты, предметы инвентаря и записи журнала обновляет только нужные области и работает во время печати текста, включая первое открытие вкладки.\n- Картинки подготавливаются в фоне; сокращены повторные команды цвета и расчёты пути под курсором.\n- Кубик сохраняет паузу каждого кадра и начинает анимацию после запуска звука.\n- Добавлена очистка временных файлов игры и тестов.\n\nОбновление распространяется небольшим патчем; сохранения и настройки сохраняются.\n\n## Как проверить\n\n1. Во время ответа мастера двигай карту и наводи мышь на её объекты — текст продолжает печататься.\n2. Перейди в инвентарь и журнал во время печати и наведи мышь на предметы и записи.\n3. Во время ожидания и броска кубика перетаскивай карту; проверь плавность анимации и звук.\r\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.3/navi-dnd-v2.0.3-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.4/navi-dnd-v2.0.4-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.3/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.4/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.3/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.4/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
@@ -84,6 +84,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.0.2-2.0.3.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.3/releases/patches/NaviDnD-patch-2.0.2-2.0.3.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.0.3-2.0.4.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.4/releases/patches/NaviDnD-patch-2.0.3-2.0.4.zip"
                                  }
                              ]
                }
