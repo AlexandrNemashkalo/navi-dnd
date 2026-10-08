@@ -1,21 +1,21 @@
 {
-    "name":  "NaviDnD 2.0.5",
-    "tag_name":  "v2.0.5",
-    "description":  "# NaviDnD 2.0.5\n\n- Claude и Codex ищутся в фоне при каждом запуске: меню не ждёт завершения поиска.\n- Устаревшие пути исправляются автоматически, рабочие ручные настройки сохраняются. Поддержаны новые npm-пакеты, обновлённый PATH и расширения VS Code, Cursor и Windsurf.\n- Игру можно запускать напрямую через NaviDnD.exe: в неподходящей консоли она перезапускается через conhost.exe до загрузки настроек и интерфейса. Добавлена защита от повторного перезапуска.\n\nОбновление распространяется патчем; сохранения и настройки сохраняются.\n\n## Как проверить\n\n1. Запусти NaviDnD.exe напрямую при выбранном Windows Terminal — игра открывается в классической консоли Windows.\n2. После установки или обновления Claude/Codex перезапусти игру и проверь найденный путь в настройках.\n3. Укажи рабочий путь вручную и перезапусти игру — он сохраняется.\r\n",
+    "name":  "NaviDnD 2.0.6",
+    "tag_name":  "v2.0.6",
+    "description":  "# NaviDnD 2.0.6\n\n- Добавлен поиск Claude Code из Claude Desktop, включая установку из Microsoft Store. Исправляется устаревший путь; приложение Desktop не принимается за CLI.\n- При создании мира и описания героя показываются понятные причины: Claude не найден, вход не выполнен или истёк, у аккаунта нет доступа. Добавлены подсказки по исправлению.\n- В настройках накопленный ввод обрабатывается перед отрисовкой, обновляются только изменившиеся строки — устранена задержка стирания пути при удержании Backspace.\n\nОбновление распространяется патчем; сохранения и настройки сохраняются.",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.5/navi-dnd-v2.0.5-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.6/navi-dnd-v2.0.6-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.5/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.6/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.5/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.6/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
@@ -92,6 +92,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.0.4-2.0.5.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.5/releases/patches/NaviDnD-patch-2.0.4-2.0.5.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.0.5-2.0.6.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.6/releases/patches/NaviDnD-patch-2.0.5-2.0.6.zip"
                                  }
                              ]
                }
