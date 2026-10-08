@@ -9,8 +9,9 @@ namespace NaviDnD;
 
 class Program
 {
-    static async Task Main()
+    static async Task Main(string[] args)
     {
+        if (ConsoleHostLauncher.TryRelaunch(args)) return;
         // Необработанное исключение раньше просто ронял процесс молча (консоль закрывается сразу,
         // .NET печатает стек в stderr, который никто не видит) — ни строчки в логах. Теперь падение
         // хотя бы попадает в тот же ai_*.log, где и обычные вызовы ИИ, и его можно разобрать.
@@ -39,9 +40,32 @@ class Program
         AppDomain.CurrentDomain.ProcessExit += (_, _) => ConsoleMouseReader.Disable();
 
         var config = new AppConfig();
+        bool firstSettings = !File.Exists(AppConfig.UserSettingsPath);
         config.InitializeStorage();
         // Настройки игрока (экран «НАСТРОЙКИ») — не в UI-тестах: там важны значения по умолчанию.
         if (Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null) config.LoadUserSettings();
+        string initialClaudePath = config.ClaudeCliPath, initialCodexPath = config.CodexCliPath;
+        string initialProvider = config.AiProvider;
+        var cliDiscovery = Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null
+            ? config.DiscoverAiPathsAsync() : null;
+
+        bool discoveredClientAvailable = true;
+        async Task<bool> ApplyCliDiscovery()
+        {
+            if (cliDiscovery == null) return discoveredClientAvailable
+                || File.Exists(AiCliDiscovery.NormalizePath(config.ClaudeCliPath))
+                || File.Exists(AiCliDiscovery.NormalizePath(config.CodexCliPath));
+            var result = await cliDiscovery;
+            cliDiscovery = null;
+            // Settings may have been edited while discovery was running.
+            bool changed = config.ApplyAiPaths(
+                config.ClaudeCliPath == initialClaudePath ? result.claude : null,
+                config.CodexCliPath == initialCodexPath ? result.codex : null,
+                firstSettings && config.AiProvider == initialProvider);
+            if (changed) config.SaveUserSettings();
+            discoveredClientAvailable = result.claude != null || result.codex != null;
+            return discoveredClientAvailable;
+        }
         Sound.Enabled = config.SoundEnabled;
         Speech.Initialize(config);
         GameUpdates.Initialize();
@@ -177,19 +201,10 @@ class Program
             }
         }
 
-        if (testStatePath == null && !AiCliDiscovery.IsAvailable("claude", config.ClaudeCliPath)
-            && !AiCliDiscovery.IsAvailable("codex", config.CodexCliPath))
-        {
-            AiSetupNotice.Show();
-            ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
-            borderDrawer.DrawTopBorder();
-            const string setupTitle = " НАСТРОЙКИ: Claude и Codex не найдены   [Esc]МЕНЮ";
-            borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(setupTitle, display));
-            new SettingsDisplay(settings, display, config, storage, setupTitle).Show();
-        }
-
         while (true)
         {
+            if (cliDiscovery != null && (cliDiscovery.IsCompleted || state.CurrentScreen != Screen.Menu))
+                await ApplyCliDiscovery();
             if (state.PendingStartNewGame)
             {
                 state.PendingStartNewGame = false;
@@ -239,6 +254,20 @@ class Program
             {
                 display.ActiveTabKey = null;
                 var choice = new MainMenuDisplay(settings, display).Show(hasSave());
+                if (choice is MainMenuDisplay.Choice.Continue or MainMenuDisplay.Choice.NewGame)
+                {
+                    if (!await ApplyCliDiscovery())
+                    {
+                        AiSetupNotice.Show();
+                        ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
+                        borderDrawer.DrawTopBorder();
+                        const string setupTitle = " ?????????: Claude ? Codex ?? ???????   [Esc]????";
+                        borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(setupTitle, display));
+                        new SettingsDisplay(settings, display, config, storage, setupTitle).Show();
+                        continue;
+                    }
+                }
+                else if (cliDiscovery?.IsCompleted == true) await ApplyCliDiscovery();
                 if (choice == MainMenuDisplay.Choice.Updates)
                 {
                     if (await GameUpdates.ShowAsync(new UpdateDisplay(settings, display))) return;

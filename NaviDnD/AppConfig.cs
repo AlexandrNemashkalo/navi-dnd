@@ -62,18 +62,23 @@ public class AppConfig
             Directory.CreateDirectory(Path.Combine(ProjectRoot, folder));
         if (!File.Exists(UserSettingsPath))
         {
-            InitializeAiPaths();
             SaveUserSettings();
         }
     }
 
-    public void InitializeAiPaths()
+    public Task<(string? claude, string? codex)> DiscoverAiPathsAsync()
     {
-        string? claude = Helpers.AiCliDiscovery.Find("claude");
-        string? codex = Helpers.AiCliDiscovery.Find("codex");
-        if (claude != null) ClaudeCliPath = claude;
-        if (codex != null) CodexCliPath = codex;
-        if (claude == null && codex != null) AiProvider = "codex";
+        string claude = ClaudeCliPath, codex = CodexCliPath;
+        return Task.Run(() => (Helpers.AiCliDiscovery.Resolve("claude", claude), Helpers.AiCliDiscovery.Resolve("codex", codex)));
+    }
+
+    public bool ApplyAiPaths(string? claude, string? codex, bool chooseProvider)
+    {
+        bool changed = false;
+        if (claude != null && ClaudeCliPath != claude) { ClaudeCliPath = claude; changed = true; }
+        if (codex != null && CodexCliPath != codex) { CodexCliPath = codex; changed = true; }
+        if (chooseProvider && claude == null && codex != null && AiProvider != "codex") { AiProvider = "codex"; changed = true; }
+        return changed;
     }
 
     // Debug
