@@ -1,25 +1,25 @@
 {
-    "name":  "NaviDnD 2.0.8",
-    "tag_name":  "v2.0.8",
-    "description":  "# NaviDnD 2.0.8\n\n- Codex использует общий автопоиск CLI при запуске запроса: устаревший путь заменяется найденной установкой из PATH, npm или расширения редактора. Claude остаётся провайдером по умолчанию.\n- При отсутствии авторизации или истёкшем входе Codex показывает понятное сообщение с командой codex login, в том числе при создании мира и описания героя.\n- Отдельно показываются отсутствие CLI, запрет запуска, отсутствие доступа к модели и исчерпание лимита; ошибки авторизации не вызывают автоматических повторных запросов.\n\nОбновление распространяется патчем; сохранения и настройки сохраняются.\n",
+    "name":  "NaviDnD 2.1.0",
+    "tag_name":  "v2.1.0",
+    "description":  "# NaviDnD 2.1.0\n\n- Английский язык: интерфейс, рассказ мастера, названия мира и озвучка. Язык выбирается в настройках (пункт ЯЗЫК); после обновления игра остаётся на русском, новая установка — на английском.\n- Язык игры задаётся миром при создании: новый мир — на языке интерфейса, прежние миры и игры — русские.\n- Английский голос озвучки входит в игру: пункт АНГЛИЙСКИЙ ГОЛОС — три мужских и два женских голоса. Модели озвучки загружаются заранее, после остановки речи модель больше не загружается заново.\n- Сохранения при обновлении переводятся в новый формат; копия прежних файлов — в Storage/Backup.\n- Настройки: подсказка и управление — отдельными блоками справа, громкость речи — полоской, путь к Python убран.\n- Исправлено: заголовок «Claude и Codex не найдены» показывался вопросительными знаками; рамка экрана «Создаём мир» не доходила до низа окна.\n\nОбновление распространяется патчем (вместе с английским голосом — около 60 МБ); сохранения и настройки сохраняются.\n\n## English\n\n- English language: interface, the Dungeon Master\u0027s story, world names and voice-over. Choose it in Settings (LANGUAGE); after the update the game stays in Russian, a new installation starts in English.\n- The game language is set by the world when it is created: a new world uses the interface language, existing worlds and games stay Russian.\n- An English voice is included: ENGLISH VOICE — three male and two female voices. Voice models load in advance and are no longer reloaded after speech is stopped.\n- Saves are converted to the new format during the update; the previous files are kept in Storage/Backup.\n\nThe update is delivered as a patch (about 60 MB with the English voice); saves and settings are kept.\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.8/navi-dnd-v2.0.8-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.1.0/navi-dnd-v2.1.0-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.8/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.1.0/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.8/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.1.0/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.3/releases/NaviDnD-Setup-win-x64.exe"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.1.0/releases/NaviDnD-Setup-win-x64.exe"
                                  },
                                  {
                                      "name":  "NaviDnD-payload.001",
@@ -104,6 +104,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.0.7-2.0.8.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.8/releases/patches/NaviDnD-patch-2.0.7-2.0.8.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.0.8-2.1.0.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.1.0/releases/patches/NaviDnD-patch-2.0.8-2.1.0.zip"
                                  }
                              ]
                }
