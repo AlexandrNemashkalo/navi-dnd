@@ -1,21 +1,21 @@
 {
-    "name":  "NaviDnD 2.0.7",
-    "tag_name":  "v2.0.7",
-    "description":  "# NaviDnD 2.0.7\n\n- Добавлены кнопки сворачивания, переключения полноэкранного режима и закрытия окна. Исправлена отрисовка символов и подсветка для Consolas и DejaVu Sans Mono.\n- При сворачивании музыка и остальные звуки отключаются, а текст, броски кубиков и запросы продолжаются. После возврата озвучивается с начала текущая печатающаяся реплика; завершённые в фоне реплики не повторяются.\n- Панель задач уведомляет о завершении ожидания и необходимости выбора. Исправлено восстановление полноэкранного окна после сворачивания.\n- Добавлена обработка плавного скролла тачпада. Устранён двойной звук некоторых нажатий мышью.\n- Голос «Бая» установлен по умолчанию; сохранённый выбор голоса сохраняется.\n\nОбновление распространяется патчем; сохранения и настройки сохраняются.\n",
+    "name":  "NaviDnD 2.0.8",
+    "tag_name":  "v2.0.8",
+    "description":  "# NaviDnD 2.0.8\n\n- Codex использует общий автопоиск CLI при запуске запроса: устаревший путь заменяется найденной установкой из PATH, npm или расширения редактора. Claude остаётся провайдером по умолчанию.\n- При отсутствии авторизации или истёкшем входе Codex показывает понятное сообщение с командой codex login, в том числе при создании мира и описания героя.\n- Отдельно показываются отсутствие CLI, запрет запуска, отсутствие доступа к модели и исчерпание лимита; ошибки авторизации не вызывают автоматических повторных запросов.\n\nОбновление распространяется патчем; сохранения и настройки сохраняются.\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.7/navi-dnd-v2.0.7-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.8/navi-dnd-v2.0.8-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.7/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.8/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.7/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.8/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
@@ -100,6 +100,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.0.6-2.0.7.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.7/releases/patches/NaviDnD-patch-2.0.6-2.0.7.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.0.7-2.0.8.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.8/releases/patches/NaviDnD-patch-2.0.7-2.0.8.zip"
                                  }
                              ]
                }
