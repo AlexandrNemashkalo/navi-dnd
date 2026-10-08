@@ -16,14 +16,14 @@ public static class MonsterCard
         public string Plain => string.Concat(Segments.Select(s => s.text));
     }
 
-    private static readonly Dictionary<string, string> SizeRu = new()
+    private static Dictionary<string, string> SizeRu => new()
     {
-        ["T"] = "крошечный", ["S"] = "маленький", ["M"] = "средний",
-        ["L"] = "большой", ["H"] = "огромный", ["G"] = "громадный",
+        ["T"] = L.T("крошечный"), ["S"] = L.T("маленький"), ["M"] = L.T("средний"),
+        ["L"] = L.T("большой"), ["H"] = L.T("огромный"), ["G"] = L.T("громадный"),
     };
 
-    private static readonly (string en, string ru)[] AbilityAbbr =
-        [("Str", "Сил"), ("Dex", "Лов"), ("Con", "Тел"), ("Int", "Инт"), ("Wis", "Мдр"), ("Cha", "Хар")];
+    private static (string en, string ru)[] AbilityAbbr =>
+        [("Str", L.T("Сил")), ("Dex", L.T("Лов")), ("Con", L.T("Тел")), ("Int", L.T("Инт")), ("Wis", L.T("Мдр")), ("Cha", L.T("Хар"))];
 
     public static List<Line> Build(MonsterInfo info, int width, Palette p)
     {
@@ -34,29 +34,29 @@ public static class MonsterCard
         AddWrapped(lines, width, (Capitalize(string.Join(", ", new[] { info.Type, size, info.Alignment }.Where(s => s.Length > 0))), p.Dim));
         lines.Add(new Line());
 
-        AddField(lines, width, p, "КД", info.Ac);
-        AddField(lines, width, p, "ХП", info.Hp);
-        AddField(lines, width, p, "Скорость", ToFeet(info.Speed));
+        AddField(lines, width, p, L.T("КД"), info.Ac);
+        AddField(lines, width, p, L.T("ХП"), info.Hp);
+        AddField(lines, width, p, L.T("Скорость"), ToFeet(info.Speed));
         lines.Add(new Line());
 
         AddAbilityGrid(lines, width, p, info);
         lines.Add(new Line());
 
-        AddField(lines, width, p, "Уязвимость", info.Vulnerable, p.Good);
-        AddField(lines, width, p, "Сопротивление", info.Resist, p.Warn);
-        AddField(lines, width, p, "Иммунитет", info.Immune, p.Warn);
-        AddField(lines, width, p, "Не подвержен", info.ConditionImmune, p.Warn);
-        AddField(lines, width, p, "Спасброски", TranslateAbilities(info.Save));
-        AddField(lines, width, p, "Навыки", info.Skill);
-        AddField(lines, width, p, "Чувства", JoinNonEmpty(ToFeet(info.Senses), info.Passive.Length > 0 ? $"пасс. Восприятие {info.Passive}" : ""));
-        AddField(lines, width, p, "Языки", info.Languages);
-        AddField(lines, width, p, "Опасность", info.Cr);
-        if (info.Spells.Length > 0) AddField(lines, width, p, "Заклинания", Clean(info.Spells));
+        AddField(lines, width, p, L.T("Уязвимость"), info.Vulnerable, p.Good);
+        AddField(lines, width, p, L.T("Сопротивление"), info.Resist, p.Warn);
+        AddField(lines, width, p, L.T("Иммунитет"), info.Immune, p.Warn);
+        AddField(lines, width, p, L.T("Не подвержен"), info.ConditionImmune, p.Warn);
+        AddField(lines, width, p, L.T("Спасброски"), TranslateAbilities(info.Save));
+        AddField(lines, width, p, L.T("Навыки"), info.Skill);
+        AddField(lines, width, p, L.T("Чувства"), JoinNonEmpty(ToFeet(info.Senses), info.Passive.Length > 0 ? L.F("пасс. Восприятие {0}", info.Passive) : ""));
+        AddField(lines, width, p, L.T("Языки"), info.Languages);
+        AddField(lines, width, p, L.T("Опасность"), info.Cr);
+        if (info.Spells.Length > 0) AddField(lines, width, p, L.T("Заклинания"), Clean(info.Spells));
 
-        AddSection(lines, width, p, "ОСОБЕННОСТИ", info.Traits, "");
-        AddSection(lines, width, p, "ДЕЙСТВИЯ", info.Actions, "");
-        AddSection(lines, width, p, "РЕАКЦИИ", info.Reactions, "");
-        AddSection(lines, width, p, "ЛЕГЕНДАРНЫЕ ДЕЙСТВИЯ", info.Legendary, info.LegendaryIntro);
+        AddSection(lines, width, p, L.T("ОСОБЕННОСТИ"), info.Traits, "");
+        AddSection(lines, width, p, L.T("ДЕЙСТВИЯ"), info.Actions, "");
+        AddSection(lines, width, p, L.T("РЕАКЦИИ"), info.Reactions, "");
+        AddSection(lines, width, p, L.T("ЛЕГЕНДАРНЫЕ ДЕЙСТВИЯ"), info.Legendary, info.LegendaryIntro);
 
         while (lines.Count > 0 && lines[^1].Segments.Count == 0) lines.RemoveAt(lines.Count - 1);
         return lines;
@@ -93,7 +93,7 @@ public static class MonsterCard
 
     private static void AddAbilityGrid(List<Line> lines, int width, Palette p, MonsterInfo info)
     {
-        string[] names = ["СИЛ", "ЛОВ", "ТЕЛ", "ИНТ", "МДР", "ХАР"];
+        string[] names = [L.T("СИЛ"), L.T("ЛОВ"), L.T("ТЕЛ"), L.T("ИНТ"), L.T("МДР"), L.T("ХАР")];
         string[] raw = [info.Str, info.Dex, info.Con, info.Int, info.Wis, info.Cha];
         int col = Math.Clamp(width / 6, 4, 6);
 
@@ -184,8 +184,8 @@ public static class MonsterCard
     // «6 клеток» → «30 фт», «16/64 клетки» → «80/320 фт».
     private static string ToFeet(string s) => Regex.Replace(s ?? "", @"(\d+)(?:\s*/\s*(\d+))?\s*клет\p{L}*", m =>
         m.Groups[2].Success
-            ? $"{int.Parse(m.Groups[1].Value) * 5}/{int.Parse(m.Groups[2].Value) * 5} фт"
-            : $"{int.Parse(m.Groups[1].Value) * 5} фт");
+            ? L.F("{0}/{1} фт", int.Parse(m.Groups[1].Value) * 5, int.Parse(m.Groups[2].Value) * 5)
+            : L.F("{0} фт", int.Parse(m.Groups[1].Value) * 5));
 
     private static string TranslateAbilities(string s)
     {

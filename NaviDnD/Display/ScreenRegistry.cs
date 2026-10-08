@@ -1,4 +1,4 @@
-﻿namespace NaviDnD;
+namespace NaviDnD;
 
 internal static class ScreenRegistry
 {
@@ -11,20 +11,21 @@ internal static class ScreenRegistry
     // текстом) — «{F1}КАРТА»: рисуется серой и не нажимается (MouseUiHelper.WriteColoredTitle/ComputeTitleTabs).
     internal static string GameTitleText(string activeKey, bool journalUnread, bool mapDisabled = false)
     {
-        (string key, string name)[] tabs = [("F1", "КАРТА"), ("F2", "МИР"), ("F3", "ЖУРНАЛ"), ("F4", "ПЕРСОНАЖ"), ("F5", "СПУТНИК")];
+        (string key, string name)[] tabs =
+            [("F1", L.T("КАРТА")), ("F2", L.T("МИР")), ("F3", L.T("ЖУРНАЛ")), ("F4", L.T("ПЕРСОНАЖ")), ("F5", L.T("СПУТНИК"))];
         return string.Concat(tabs.Select(t => "   " + (t.key == activeKey ? $"  → {t.name} ←"
                    : t.key == "F1" && mapDisabled ? $"{{{t.key}}}{t.name}  "
                    : t.key == "F3" && journalUnread ? $"[{t.key}]{t.name}• " : $"[{t.key}]{t.name}  ")))
-               + "   [Esc]МЕНЮ   ";
+               + "   " + L.T("[Esc]МЕНЮ") + "   ";
     }
 
     // Заголовок новой игры: шаги — как вкладки игры («  → РЕДАКТОР ←», «[F1]МИР  »; ещё недоступный шаг —
     // «{F4}ПРИКЛЮЧЕНИЕ», тёмный и не нажимается) через «›» — порядок этапов, справа — «[Esc]МЕНЮ».
     internal static string NewGameTitle(int step, Func<int, bool>? canGo = null)
     {
-        string[] steps = ["МИР", "ГЕРОЙ", "РЕДАКТОР", "ПРИКЛЮЧЕНИЕ"];
-        return " НОВАЯ ИГРА" + string.Concat(steps.Select((s, i) => (i == 0 ? "   " : "  ›  ") + (i + 1 == step ? $"  → {s} ←"
-                   : canGo?.Invoke(i + 1) ?? i == 0 ? $"[F{i + 1}]{s}  " : $"{{F{i + 1}}}{s}  "))) + "   [Esc]МЕНЮ   ";
+        string[] steps = [L.T("МИР"), L.T("ГЕРОЙ"), L.T("РЕДАКТОР"), L.T("ПРИКЛЮЧЕНИЕ")];
+        return L.T(" НОВАЯ ИГРА") + string.Concat(steps.Select((s, i) => (i == 0 ? "   " : "  ›  ") + (i + 1 == step ? $"  → {s} ←"
+                   : canGo?.Invoke(i + 1) ?? i == 0 ? $"[F{i + 1}]{s}  " : $"{{F{i + 1}}}{s}  "))) + "   " + L.T("[Esc]МЕНЮ") + "   ";
     }
 
     // Заголовки шагов новой игры — по тому, какие шаги уже доступны.
@@ -110,7 +111,7 @@ internal static class ScreenRegistry
 
             [Screen.Menu] = new ScreenConfig
             {
-                Title = " МЕНЮ   [F1]ПРОДОЛЖИТЬ     [F2]НОВАЯ ИГРА     [Esc]ВЫЙТИ",
+                Title = L.T(" МЕНЮ   [F1]ПРОДОЛЖИТЬ     [F2]НОВАЯ ИГРА     [Esc]ВЫЙТИ"),
                 Commands =
                 {
                     ["F1"] = () =>

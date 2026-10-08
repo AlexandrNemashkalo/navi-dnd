@@ -1,4 +1,4 @@
-﻿using NaviDnD.Data;
+using NaviDnD.Data;
 using NaviDnD.Data.Models;
 
 namespace NaviDnD;
@@ -35,7 +35,7 @@ public class MovementHandler
         if (_world.Combat?.Active == true && (hero.SpeedLeft ?? 0) <= 0)
         {
             // Подсказка один раз, а не на каждое нажатие стрелки.
-            const string noSpeed = "Скорость на этот ход потрачена — действуй или [F10] конец хода.";
+            string noSpeed = L.T("Скорость на этот ход потрачена — действуй или [F10] конец хода.");
             if (_world.History?.LastOrDefault()?.Text != noSpeed)
             {
                 _world.History?.Add(new DialogMessage { Text = noSpeed });
@@ -87,7 +87,7 @@ public class MovementHandler
                 return activatedTriggers.Count > 0 || activatedAreaTriggers.Count > 0 || activatedDoorTriggers.Count > 0;
             }
             _passAttempt = (dirNow, DateTime.UtcNow, heroCol, heroRow);
-            blockReason = $"Путь преграждён: {bystander.Name}. Нажми ещё раз — протиснуться мимо.";
+            blockReason = L.F("Путь преграждён: {0}. Нажми ещё раз — протиснуться мимо.", bystander.Name);
         }
 
         if (blockReason != null)
@@ -244,30 +244,30 @@ public class MovementHandler
     private string? GetBlockReason(int fromCol, int fromRow, int toCol, int toRow, LivingEntity? ignore = null)
     {
         if (toCol < 1 || toCol > _world.Map.Cols || toRow < 1 || toRow > _world.Map.Rows)
-            return "Путь преграждён.";
+            return L.T("Путь преграждён.");
 
         // Этажи лежат на поле в разных местах: шагнуть с одного на другой нельзя (только лестницей).
         if (_world.Map.FloorAt(fromCol, fromRow) != _world.Map.FloorAt(toCol, toRow))
-            return "Путь преграждён.";
+            return L.T("Путь преграждён.");
 
         // Рельеф открытой местности: чаща, скалы, глубокая вода — непроходимы.
         var terrain = _world.Map.TerrainAt(toCol, toRow);
         if (terrain is { BlocksMove: true })
-            return $"Путь преграждён: {terrain.Name.ToLowerInvariant()}.";
+            return L.F("Путь преграждён: {0}.", L.T(terrain.Name).ToLowerInvariant());
 
         // Клетка вне комнат, зон и рельефа — пустота (поле локации 100×100 сгенерировано не целиком): туда нельзя.
         // Выход из локации (дверь-вход на краю карты) ведёт именно туда — переход в мир пока не сделан.
         if ((_world.Map.Rooms is { Count: > 0 } || _world.Map.Chunks is { Count: > 0 })
             && terrain == null && GetRoom(toCol, toRow) == null && !IsAreaCell(toCol, toRow))
             return IsLocationExit(fromCol, fromRow, toCol, toRow)
-                ? "Здесь выход на карту мира — путь наружу пока недоступен."
-                : "Путь преграждён.";
+                ? L.T("Здесь выход на карту мира — путь наружу пока недоступен.")
+                : L.T("Путь преграждён.");
 
         // Target cell blocked by a living entity
         foreach (var entity in _world.Map.Entities ?? [])
             if (entity != ignore && entity.Deleted != true && entity.Position?.Count >= 2
                 && entity.Position[0] == toCol && entity.Position[1] == toRow)
-                return "Путь преграждён.";
+                return L.T("Путь преграждён.");
 
         if (fromCol != toCol && fromRow != toRow)
         {
@@ -278,7 +278,7 @@ public class MovementHandler
             bool path2 = IsTerrainCrossable(fromCol, fromRow, fromCol, toRow)    // hero → N/S
                       && IsTerrainCrossable(fromCol, toRow,   toCol,   toRow);   // N/S → target
             if (!path1 && !path2)
-                return "Путь преграждён.";
+                return L.T("Путь преграждён.");
         }
         else
         {
@@ -287,7 +287,7 @@ public class MovementHandler
             var toRoom   = GetRoom(toCol,   toRow);
             bool crossingRoomBoundary = fromRoom != toRoom && (fromRoom != null || toRoom != null);
             if (crossingRoomBoundary && !HasDoor(fromCol, fromRow, toCol, toRow))
-                return "Путь преграждён.";
+                return L.T("Путь преграждён.");
         }
 
         return null;

@@ -19,8 +19,9 @@ public static class Spinner
         }
     }
 
-    public static async Task While(Task task, string message = "Мастер думает")
+    public static async Task While(Task task, string? message = null)
     {
+        message ??= L.T("Мастер думает");
         Console.CursorVisible = false;
         int top  = Console.CursorTop;
         int i    = 0;

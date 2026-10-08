@@ -75,14 +75,14 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
             try { started = Process.Start(psi); }
             catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode is 2 or 3)
             {
-                throw new AiSetupException($"Codex CLI не найден ({config.CodexCliPath}): установи его (npm i -g @openai/codex), войди (codex login) " +
-                                    "и при необходимости укажи путь в настройках («ПУТЬ К CODEX»).");
+                throw new AiSetupException(L.F("Codex CLI не найден ({0}): установи его (npm i -g @openai/codex), войди (codex login) и при необходимости укажи путь в настройках («ПУТЬ К CODEX»).",
+                    config.CodexCliPath));
             }
             catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 5)
             {
-                throw new AiSetupException("Нет доступа к запуску Codex CLI.\nПроверь разрешения, блокировку антивирусом и «ПУТЬ К CODEX» в настройках.");
+                throw new AiSetupException(L.T("Нет доступа к запуску Codex CLI.\nПроверь разрешения, блокировку антивирусом и «ПУТЬ К CODEX» в настройках."));
             }
-            using var process = started ?? throw new Exception("Не удалось запустить Codex CLI.");
+            using var process = started ?? throw new Exception(L.T("Не удалось запустить Codex CLI."));
             ChildProcessJob.Add(process);   // игру закрыли — запрос завершается вместе с ней
             await process.StandardInput.WriteAsync(userPart);
             process.StandardInput.Close();
@@ -107,7 +107,7 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
             if (string.IsNullOrWhiteSpace(final) && process.ExitCode == 0 && error == null) final = lastAgentText;
             if (process.ExitCode != 0 || error != null || string.IsNullOrWhiteSpace(final))
             {
-                string reason = error ?? (process.ExitCode != 0 ? $"код {process.ExitCode}" : "пустой ответ");
+                string reason = error ?? (process.ExitCode != 0 ? L.F("код {0}", process.ExitCode) : L.T("пустой ответ"));
                 if (!string.IsNullOrWhiteSpace(stderr)) reason += $"; stderr: {stderr.Trim()}";
                 logger?.LogResponse(events.ToString(), $"ERROR: {reason}", sw.Elapsed);
                 throw CreateError($"Codex CLI: {reason}");
@@ -130,11 +130,11 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
             "please login", "codex login", "token expired", "token has expired", "refresh_token_reused",
             "invalid_api_key", "incorrect api key", "401"];
         if (authMarkers.Any(marker => rawMessage.Contains(marker, StringComparison.OrdinalIgnoreCase)))
-            return new AiSetupException("Codex не авторизован или вход истёк.\nВыполни codex login в терминале и повтори запрос.");
+            return new AiSetupException(L.T("Codex не авторизован или вход истёк.\nВыполни codex login в терминале и повтори запрос."));
         string[] accessMarkers = ["403", "model_not_found", "does not have access", "do not have access",
             "insufficient_quota", "usage limit", "usage_limit"];
         if (accessMarkers.Any(marker => rawMessage.Contains(marker, StringComparison.OrdinalIgnoreCase)))
-            return new AiSetupException("Codex: нет доступа к модели или исчерпан лимит.\nПроверь аккаунт, подписку, лимиты и модель в настройках.");
+            return new AiSetupException(L.T("Codex: нет доступа к модели или исчерпан лимит.\nПроверь аккаунт, подписку, лимиты и модель в настройках."));
         return new Exception(rawMessage);
     }
 

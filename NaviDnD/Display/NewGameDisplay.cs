@@ -1,4 +1,4 @@
-﻿using NaviDnD.Clients;
+using NaviDnD.Clients;
 using NaviDnD.Data;
 using NaviDnD.Helpers;
 
@@ -29,37 +29,37 @@ public class NewGameDisplay
 
     private sealed record Portrait(string Image, string Title);
 
-    private static readonly (string Name, List<int> Rgb)[] Palette =
+    private static (string Name, List<int> Rgb)[] Palette =>
     [
-        ("ЯНТАРНЫЙ", [220, 170, 60]), ("АЛЫЙ", [210, 70, 60]), ("ИЗУМРУДНЫЙ", [70, 190, 110]),
-        ("ЛАЗУРНЫЙ", [80, 150, 230]), ("АМЕТИСТОВЫЙ", [160, 105, 220]), ("БИРЮЗОВЫЙ", [70, 200, 200]),
-        ("МЕДНЫЙ", [205, 125, 75]), ("СЕРЕБРЯНЫЙ", [190, 195, 205]), ("ЗОЛОТОЙ", [240, 210, 90]),
-        ("РОЗОВЫЙ", [230, 120, 170]), ("ЛЕСНОЙ", [120, 175, 70]), ("ПЕПЕЛЬНЫЙ", [155, 145, 135]),
+        (L.T("ЯНТАРНЫЙ"), [220, 170, 60]), (L.T("АЛЫЙ"), [210, 70, 60]), (L.T("ИЗУМРУДНЫЙ"), [70, 190, 110]),
+        (L.T("ЛАЗУРНЫЙ"), [80, 150, 230]), (L.T("АМЕТИСТОВЫЙ"), [160, 105, 220]), (L.T("БИРЮЗОВЫЙ"), [70, 200, 200]),
+        (L.T("МЕДНЫЙ"), [205, 125, 75]), (L.T("СЕРЕБРЯНЫЙ"), [190, 195, 205]), (L.T("ЗОЛОТОЙ"), [240, 210, 90]),
+        (L.T("РОЗОВЫЙ"), [230, 120, 170]), (L.T("ЛЕСНОЙ"), [120, 175, 70]), (L.T("ПЕПЕЛЬНЫЙ"), [155, 145, 135]),
     ];
 
     // Готовый набор портретов (game-icons) — листается после подобранных нейронкой.
-    private static readonly Portrait[] Gallery =
+    private static Portrait[] Gallery =>
     [
-        new("delapouite/wizard-face", "МАГ"), new("delapouite/woman-elf-face", "ЭЛЬФИЙКА"),
-        new("delapouite/dwarf-face", "ДВАРФ"), new("delapouite/barbarian", "ВАРВАР"),
-        new("delapouite/monk-face", "МОНАХ"), new("delapouite/bandit", "РАЗБОЙНИК"),
-        new("cathelineau/witch-face", "ВЕДЬМА"), new("cathelineau/nun-face", "ЖРИЦА"),
-        new("darkzaitzev/ninja-head", "НИНДЗЯ"), new("darkzaitzev/hooded-assassin", "УБИЙЦА"),
-        new("darkzaitzev/hooded-figure", "СТРАННИК"), new("lorc/cowled", "ОТШЕЛЬНИК"),
-        new("lorc/visored-helm", "РЫЦАРЬ"), new("delapouite/closed-barbute", "ВОИН"),
-        new("delapouite/black-knight-helm", "ЧЁРНЫЙ РЫЦАРЬ"), new("delapouite/overlord-helm", "ВЛАСТЕЛИН"),
-        new("delapouite/viking-helmet", "ВИКИНГ"), new("delapouite/spartan-helmet", "ГОПЛИТ"),
-        new("delapouite/samurai-helmet", "САМУРАЙ"), new("kier-heyl/elf-helmet", "ЭЛЬФ-ВОИН"),
-        new("kier-heyl/dwarf-helmet", "ДВАРФ-ВОИН"), new("kier-heyl/dwarf-king", "КОРОЛЬ ДВАРФОВ"),
-        new("delapouite/orc-head", "ОРК"), new("delapouite/goblin-head", "ГОБЛИН"),
-        new("delapouite/kenku-head", "КЕНКУ"), new("lorc/lizardman", "ЯЩЕРОЛЮД"),
-        new("faithtoken/dragon-head", "ДРАКОНОРОЖДЁННЫЙ"), new("delapouite/vampire-dracula", "ВАМПИР"),
-        new("lorc/werewolf", "ОБОРОТЕНЬ"), new("lorc/cultist", "КУЛЬТИСТ"),
-        new("delapouite/plague-doctor-profile", "ЧУМНОЙ ДОКТОР"), new("delapouite/fairy", "ФЕЯ"),
-        new("delapouite/archer", "ЛУЧНИК"), new("cathelineau/swordman", "МЕЧНИК"),
+        new("delapouite/wizard-face", L.T("МАГ")), new("delapouite/woman-elf-face", L.T("ЭЛЬФИЙКА")),
+        new("delapouite/dwarf-face", L.T("ДВАРФ")), new("delapouite/barbarian", L.T("ВАРВАР")),
+        new("delapouite/monk-face", L.T("МОНАХ")), new("delapouite/bandit", L.T("РАЗБОЙНИК")),
+        new("cathelineau/witch-face", L.T("ВЕДЬМА")), new("cathelineau/nun-face", L.T("ЖРИЦА")),
+        new("darkzaitzev/ninja-head", L.T("НИНДЗЯ")), new("darkzaitzev/hooded-assassin", L.T("УБИЙЦА")),
+        new("darkzaitzev/hooded-figure", L.T("СТРАННИК")), new("lorc/cowled", L.T("ОТШЕЛЬНИК")),
+        new("lorc/visored-helm", L.T("РЫЦАРЬ")), new("delapouite/closed-barbute", L.T("ВОИН")),
+        new("delapouite/black-knight-helm", L.T("ЧЁРНЫЙ РЫЦАРЬ")), new("delapouite/overlord-helm", L.T("ВЛАСТЕЛИН")),
+        new("delapouite/viking-helmet", L.T("ВИКИНГ")), new("delapouite/spartan-helmet", L.T("ГОПЛИТ")),
+        new("delapouite/samurai-helmet", L.T("САМУРАЙ")), new("kier-heyl/elf-helmet", L.T("ЭЛЬФ-ВОИН")),
+        new("kier-heyl/dwarf-helmet", L.T("ДВАРФ-ВОИН")), new("kier-heyl/dwarf-king", L.T("КОРОЛЬ ДВАРФОВ")),
+        new("delapouite/orc-head", L.T("ОРК")), new("delapouite/goblin-head", L.T("ГОБЛИН")),
+        new("delapouite/kenku-head", L.T("КЕНКУ")), new("lorc/lizardman", L.T("ЯЩЕРОЛЮД")),
+        new("faithtoken/dragon-head", L.T("ДРАКОНОРОЖДЁННЫЙ")), new("delapouite/vampire-dracula", L.T("ВАМПИР")),
+        new("lorc/werewolf", L.T("ОБОРОТЕНЬ")), new("lorc/cultist", L.T("КУЛЬТИСТ")),
+        new("delapouite/plague-doctor-profile", L.T("ЧУМНОЙ ДОКТОР")), new("delapouite/fairy", L.T("ФЕЯ")),
+        new("delapouite/archer", L.T("ЛУЧНИК")), new("cathelineau/swordman", L.T("МЕЧНИК")),
     ];
 
-    private static readonly string[] PortraitActions = ["ВЫБРАТЬ ФАЙЛ…"];
+    private static string[] PortraitActions => [L.T("ВЫБРАТЬ ФАЙЛ…")];
 
     // Расы и классы правил с подходящим портретом (слаг галереи) — Prompts/{RuleSet}/heroOptions.json.
     private sealed record HeroOption(string Name, string? Portrait);
@@ -166,16 +166,16 @@ public class NewGameDisplay
 
     private readonly List<Field> _fields =
     [
-        new("ИМЯ", Kind.Text, 30), new("СИМВОЛ", Kind.Text, 3),
-        new("РАСА", Kind.Choice), new("КЛАСС", Kind.Choice),
-        new("ОПИСАНИЕ", Kind.Text, 1500),
-        new("ЦВЕТ", Kind.Color), new("ПОРТРЕТ", Kind.Portrait), new("", Kind.Actions),
-        new("ГЕРОЙ", Kind.Choice),
-        new("ЗАПРОС", Kind.Text, 300), new("ПРИДУМАТЬ", Kind.AiButton),
-        new("УРОВЕНЬ", Kind.Choice), new("МИРОВОЗЗРЕНИЕ", Kind.Choice),
-        new("РАНДОМ", Kind.RandomButton),
-        new("ПРЕДЫСТОРИЯ", Kind.Choice),
-        new("ДАЛЕЕ", Kind.Button),
+        new(L.T("ИМЯ"), Kind.Text, 30), new(L.T("СИМВОЛ"), Kind.Text, 3),
+        new(L.T("РАСА"), Kind.Choice), new(L.T("КЛАСС"), Kind.Choice),
+        new(L.T("ОПИСАНИЕ"), Kind.Text, 1500),
+        new(L.T("ЦВЕТ"), Kind.Color), new(L.T("ПОРТРЕТ"), Kind.Portrait), new("", Kind.Actions),
+        new(L.T("ГЕРОЙ"), Kind.Choice),
+        new(L.T("ЗАПРОС"), Kind.Text, 300), new(L.T("ПРИДУМАТЬ"), Kind.AiButton),
+        new(L.T("УРОВЕНЬ"), Kind.Choice), new(L.T("МИРОВОЗЗРЕНИЕ"), Kind.Choice),
+        new(L.T("РАНДОМ"), Kind.RandomButton),
+        new(L.T("ПРЕДЫСТОРИЯ"), Kind.Choice),
+        new(L.T("ДАЛЕЕ"), Kind.Button),
     ];
     private const int NameField = 0, SymbolField = 1, RaceField = 2, ClassField = 3, DescriptionField = 4,
         ColorField = 5, HeroField = 8, PromptField = 9, AiField = 10, LevelField = 11, AlignmentField = 12, RandomField = 13,
@@ -232,7 +232,7 @@ public class NewGameDisplay
         _startTop = Console.CursorTop;
         LoadHeroOptions(aiClient.RuleSet);
         PortraitFor(RaceField);
-        _fields[HeroField].Options.Add("новый герой");
+        _fields[HeroField].Options.Add(L.T("новый герой"));
         foreach (var h in HeroLibrary.All())
         {
             _heroes.Add(new(h));
@@ -281,9 +281,9 @@ public class NewGameDisplay
     {
         if (_fields[HeroField].Index != 0 || _fields[DescriptionField].Value.Trim().Length == 0) return;
         _heroes.Insert(1, new(Draft: Snapshot()));
-        _fields[HeroField].Options.Insert(1, _fields[NameField].Value.Trim() is { Length: > 0 } n ? n : "вариант");
+        _fields[HeroField].Options.Insert(1, _fields[NameField].Value.Trim() is { Length: > 0 } n ? n : L.T("вариант"));
         _fields[DescriptionField].Value = _fields[PromptField].Value = "";
-        _message = "Прежний вариант — в списке ГЕРОЙ (◄ ►), пока создаётся эта игра";
+        _message = L.T("Прежний вариант — в списке ГЕРОЙ (◄ ►), пока создаётся эта игра");
     }
 
     // Герой из библиотеки (шаг «Герой» мастера новой игры) — поля анкеты заполнены его личностью, их можно поправить.
@@ -411,7 +411,7 @@ public class NewGameDisplay
         if (step == 2) return null;
         if (!CanCreate())
         {
-            _message = "Заполни все поля анкеты: " + string.Join(", ", MissingFields());
+            _message = L.T("Заполни все поля анкеты: ") + string.Join(", ", MissingFields());
             return null;
         }
         string key = EssentialKey();
@@ -423,7 +423,7 @@ public class NewGameDisplay
         if (_createdKey != null && !_recreateWarned)
         {
             _recreateWarned = true;
-            _message = "Раса, класс, уровень, предыстория или герой изменились — персонаж создастся заново.\nПравки редактора пропадут. Нажми ещё раз — создать.";
+            _message = L.T("Раса, класс, уровень, предыстория или герой изменились — персонаж создастся заново.\nПравки редактора пропадут. Нажми ещё раз — создать.");
             return null;
         }
         _recreateWarned = false;
@@ -539,7 +539,7 @@ public class NewGameDisplay
                     case Kind.RandomButton: Randomize(); return false;
                     case Kind.Button:
                         if (CanCreate()) return true;
-                        _message = "Заполни все поля анкеты: " + string.Join(", ", MissingFields());
+                        _message = L.T("Заполни все поля анкеты: ") + string.Join(", ", MissingFields());
                         return false;
                 }
                 return false;
@@ -635,7 +635,7 @@ public class NewGameDisplay
         // Без запроса нейронка только придумывает с нуля; переписывать готовое описание «ни о чём» — нет.
         if (_fields[PromptField].Value.Trim().Length == 0 && _fields[DescriptionField].Value.Trim().Length > 0)
         {
-            _message = "Напиши в «Ввод», что изменить в описании";
+            _message = L.T("Напиши в «Ввод», что изменить в описании");
             _focus = PromptField;
             _editing = true;
             return;
@@ -649,7 +649,7 @@ public class NewGameDisplay
     {
         if (_describeTask?.IsFaulted == true)
             _message = _describeTask.Exception?.GetBaseException() is AiSetupException setup
-                ? setup.Message : "Нейронка не ответила — попробуй ещё раз";
+                ? setup.Message : L.T("Нейронка не ответила — попробуй ещё раз.");
         else if (_describeTask is { IsCompletedSuccessfully: true, Result: { Length: > 0 } text })
         {
             _fields[DescriptionField].Value = text.Length > 1500 ? text[..1500] : text;
@@ -658,7 +658,7 @@ public class NewGameDisplay
             _descCursor = text.Length;
             _descFollow = false;   // новый текст — с начала
         }
-        else _message = "Нейронка не ответила — попробуй ещё раз";
+        else _message = L.T("Нейронка не ответила — попробуй ещё раз.");
         _describeTask = null;
         Redraw();
     }
@@ -800,7 +800,7 @@ public class NewGameDisplay
             Sound.PlayClick();
             if (CanCreate()) return true;
             _focus = field;
-            _message = "Заполни все поля анкеты: " + string.Join(", ", MissingFields());
+            _message = L.T("Заполни все поля анкеты: ") + string.Join(", ", MissingFields());
             Redraw();
             return false;
         }
@@ -884,12 +884,12 @@ public class NewGameDisplay
     // «ВЫБРАТЬ ФАЙЛ…»: окно Windows, файл копируется в Storage/Portraits и встаёт первым в галерее.
     private void PickCustomImage()
     {
-        string? path = FileDialog.OpenFile("Портрет героя",
-            "Картинки (PNG, JPG, BMP, GIF, SVG)|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.svg");
+        string? path = FileDialog.OpenFile(L.T("Портрет героя"),
+            L.T("Картинки (PNG, JPG, BMP, GIF, SVG)") + "|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.svg");
         if (path == null) return;
         if (!SvgToBrailleConverter.IsSupportedImageFile(path))
         {
-            _message = "Формат не поддерживается (PNG, JPG, BMP, GIF, SVG)";
+            _message = L.T("Формат не поддерживается (PNG, JPG, BMP, GIF, SVG)");
             return;
         }
         try
@@ -904,17 +904,17 @@ public class NewGameDisplay
             string image = SvgToBrailleConverter.PortraitsPrefix + Path.GetFileName(target);
             if (SvgToBrailleConverter.Convert(image, "", PortraitWidth) == null)
             {
-                _message = "Не удалось прочитать картинку";
+                _message = L.T("Не удалось прочитать картинку");
                 return;
             }
             _portraits.RemoveAll(p => p.Image == image);
-            _portraits.Insert(0, new Portrait(image, "СВОЙ: " + Path.GetFileNameWithoutExtension(target).ToUpperInvariant()));
+            _portraits.Insert(0, new Portrait(image, L.T("СВОЙ: ") + Path.GetFileNameWithoutExtension(target).ToUpperInvariant()));
             _portrait = 0;
             _message = "";
         }
         catch (Exception ex)
         {
-            _message = "Не удалось загрузить картинку: " + ex.Message;
+            _message = L.T("Не удалось загрузить картинку: ") + ex.Message;
         }
     }
 
@@ -946,7 +946,7 @@ public class NewGameDisplay
         _editing = false;
         var reused = _heroes[_fields[HeroField].Index].Card;
         var aiTask = reused?.HeroJson is { } heroJson ? _aiClient.ReuseHero(result, heroJson) : _aiClient.CreateNewGame(result);
-        string waitText = reused?.HeroJson != null ? "Готовим героя к новому приключению..." : "Создаём персонажа...";
+        string waitText = reused?.HeroJson != null ? L.T("Готовим героя к новому приключению...") : L.T("Создаём персонажа...");
         for (int frame = 0; !aiTask.IsCompleted; frame++)
         {
             // Пока создаётся персонаж — клики не принимаются, указатель обычный (не «рука»).
@@ -981,8 +981,8 @@ public class NewGameDisplay
         int top = Math.Max(0, (_height - blockHeight) / 2);
         int boxTop = top; // отдельного заголовка нет — «НОВАЯ ИГРА» уже в строке заголовка экрана
 
-        DrawBox(boxTop, left, FormWidth, boxHeight, "АНКЕТА");
-        DrawBox(boxTop, left + FormWidth + Gap, PreviewWidth, boxHeight, "ГЕРОЙ");
+        DrawBox(boxTop, left, FormWidth, boxHeight, L.T("АНКЕТА"));
+        DrawBox(boxTop, left + FormWidth + Gap, PreviewWidth, boxHeight, L.T("ГЕРОЙ"));
 
         // Поля анкеты: группы через пустую строку, от верха рамки (не центрируются — иначе вся анкета
         // съезжала бы, когда описание/пожелания прибавляют строку).
@@ -1004,7 +1004,7 @@ public class NewGameDisplay
         if (!_fields[RandomField].ReadOnly)
         {
             int ry = boxTop + boxHeight - 3, rx = left + LabelCol;
-            _randomButton = (ry, rx, Chip(ry, rx, "РАНДОМ", _focus == RandomField || _randomHovered, false));
+            _randomButton = (ry, rx, Chip(ry, rx, L.T("РАНДОМ"), _focus == RandomField || _randomHovered, false));
         }
 
         DrawDescription(boxTop + boxHeight + 1, left, total);
@@ -1017,7 +1017,7 @@ public class NewGameDisplay
         _buttonWidth = Chip(_buttonRow, _buttonX, button.Label, highlighted, !enabled);
         _fieldRows.Add((_buttonRow, _fields.Count - 1));
         // Подсказка или сообщение — до двух строк («\n» — перенос).
-        var hint = (_message.Length > 0 ? _message : "[↑↓]ПОЛЕ   [Enter]ИЗМЕНИТЬ   [←→]ЛИСТАТЬ   [F1]МИР   [Esc]МЕНЮ").Split('\n');
+        var hint = (_message.Length > 0 ? _message : L.T("[↑↓]ПОЛЕ   [Enter]ИЗМЕНИТЬ   [←→]ЛИСТАТЬ   [F1]МИР   [Esc]МЕНЮ")).Split('\n');
         for (int i = 0; i < hint.Length && i < 2; i++)
             CenterIn(_buttonRow + 2 + i, left, total, Fit(hint[i], total), _recreateWarned ? Bright : Dim);
 
@@ -1033,7 +1033,7 @@ public class NewGameDisplay
     {
         var desc = _fields[DescriptionField];
         string name = _fields[NameField].Value.Trim();
-        DrawBox(top, left, total, DescHeight, name.Length > 0 ? $"ОПИСАНИЕ ГЕРОЯ · {name.ToUpperInvariant()}" : "ОПИСАНИЕ ГЕРОЯ");
+        DrawBox(top, left, total, DescHeight, name.Length > 0 ? L.T("ОПИСАНИЕ ГЕРОЯ") + " · " + name.ToUpperInvariant() : L.T("ОПИСАНИЕ ГЕРОЯ"));
         int lx = left + 3, width = total - 6;
         bool locked = desc.ReadOnly;
         int rows = locked ? DescHeight - 2 : DescHeight - 4;
@@ -1041,7 +1041,7 @@ public class NewGameDisplay
         _descRect = (top + 1, lx, width, rows);
         // Текст: перенос по словам, курсор (подсвеченная клетка), прокрутка — колесом, ↑↓, PgUp/PgDn; полоса справа.
         if (desc.Value.Length == 0 && !editing)
-            Put(top + 1, lx, Fit("внешность, характер, предыстория — своим текстом или «ПРИДУМАТЬ» по запросу", width), Dim);
+            Put(top + 1, lx, Fit(L.T("внешность, характер, предыстория — своим текстом или «ПРИДУМАТЬ» по запросу"), width), Dim);
         else
         {
             var view = TextArea.View(desc.Value, _descCursor, ref _descScroll, width, rows, editing && _descFollow,
@@ -1065,17 +1065,17 @@ public class NewGameDisplay
         if (_describeTask != null)
         {
             // Нейронка думает — строка целиком под ожидание, без «Ввод:» и кнопки.
-            Put(iy, lx, Fit($"{Spinner.Frames[_frame % Spinner.Frames.Length]} Нейронка пишет описание героя…", width), Bright);
+            Put(iy, lx, Fit(Spinner.Frames[_frame % Spinner.Frames.Length] + " " + L.T("Нейронка пишет описание героя…"), width), Bright);
             return;
         }
-        string goText = desc.Value.Trim().Length > 0 ? "ИЗМЕНИТЬ" : "ПРИДУМАТЬ";
+        string goText = desc.Value.Trim().Length > 0 ? L.T("ИЗМЕНИТЬ") : L.T("ПРИДУМАТЬ");
         int gx = left + total - 3 - (goText.Length + 4);
         bool promptFocus = _focus == PromptField;
-        Put(iy, lx, "Ввод: ", promptFocus ? Bright : Fg);
+        Put(iy, lx, L.T("Ввод: "), promptFocus ? Bright : Fg);
         int px = lx + 6, promptW = gx - 2 - px;
         var prompt = _fields[PromptField].Value;
         bool empty = prompt.Length == 0 && !(promptFocus && _editing);
-        string text = empty ? "что придумать или как изменить описание (необязательно)" : TailFit(prompt + (promptFocus && _editing ? "▌" : ""), promptW);
+        string text = empty ? L.T("что придумать или как изменить описание (необязательно)") : TailFit(prompt + (promptFocus && _editing ? "▌" : ""), promptW);
         Put(iy, px, Fit(text, promptW), empty ? Dim : promptFocus ? Bright : Fg);
         _fieldRows.Add((iy, PromptField));
         int w = Chip(iy, gx, goText, _focus == AiField || _aiHovered, false);
@@ -1206,17 +1206,18 @@ public class NewGameDisplay
         if (art != null)
             for (int i = 0; i < art.Length && i < artRows; i++) Put(y + 1 + i, artX, art[i], color, skipBlank: true);
         else
-            CenterIn(y + artRows / 2, left, PreviewWidth, string.IsNullOrEmpty(p.Image) ? "Enter — выбрать файл" : "нет картинки", Dim);
+            CenterIn(y + artRows / 2, left, PreviewWidth, string.IsNullOrEmpty(p.Image) ? L.T("Enter — выбрать файл") : L.T("нет картинки"), Dim);
 
         int ty = y + 1 + artRows;
         string name = _fields[NameField].Value.Trim();
-        CenterIn(ty, left, PreviewWidth, name.Length == 0 ? "ИМЯ ГЕРОЯ" : Fit(name, inner - 2), name.Length == 0 ? Dim : color);
+        CenterIn(ty, left, PreviewWidth, name.Length == 0 ? L.T("ИМЯ ГЕРОЯ") : Fit(name, inner - 2), name.Length == 0 ? Dim : color);
 
         // Символ — как клетка героя на карте (MapObjectsProvider: фон комнаты, бледнее, с зеленцой).
         string symbol = _fields[SymbolField].Value.Trim();
-        int sx = CenterIn(ty + 1, left, PreviewWidth, "НА КАРТЕ  ???", Dim);
+        string onMap = L.T("НА КАРТЕ  ???");
+        int sx = CenterIn(ty + 1, left, PreviewWidth, onMap, Dim);
         var cellBg = ColorHelper.MixWith(ColorHelper.Pale([55, 55, 65]), [0, 200, 80], 0.18);
-        Put(ty + 1, sx + 10, symbol.Length == 0 ? "???" : symbol.PadRight(3)[..3], ColorHelper.Saturate(color), bg: cellBg);
+        Put(ty + 1, sx + onMap.Length - 3, symbol.Length == 0 ? "???" : symbol.PadRight(3)[..3], ColorHelper.Saturate(color), bg: cellBg);
     }
 
     // Рамка в цвете рамок игры, заголовок — в разрыве верхней линии: «╭─ АНКЕТА ──…──╮».

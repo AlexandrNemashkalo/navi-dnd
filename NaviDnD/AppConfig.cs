@@ -26,6 +26,9 @@ public class AppConfig
 
     public string RuleSet { get; init; } = "Dnd5e";
 
+    // Язык интерфейса: "ru" или "en" (L.SetLanguage). Язык мира — отдельно, в мире при создании.
+    public string Language { get; set; } = L.Russian;
+
     // Claude CLI
     public string ClaudeOAuthToken { get; set; } = "";
     public string ClaudeCliPath { get; set; } = "claude.exe";
@@ -165,6 +168,7 @@ public class AppConfig
         public bool? Fullscreen { get; set; }
         public int? FullscreenFontSize { get; set; }
         public string? FontFace { get; set; }
+        public string? Language { get; set; }
     }
 
     public void LoadUserSettings()
@@ -204,6 +208,7 @@ public class AppConfig
             Fullscreen = s.Fullscreen ?? Fullscreen;
             FullscreenFontSize = s.FullscreenFontSize ?? FullscreenFontSize;
             FontFace = s.FontFace ?? FontFace;
+            Language = L.Normalize(s.Language ?? Language);
         }
         catch { /* битый файл настроек — остаются значения по умолчанию */ }
     }
@@ -226,7 +231,7 @@ public class AppConfig
                 CodexReasoningEffort = CodexReasoningEffort,
                 CodexCreateNewGameModel = CodexCreateNewGameModel, CodexStartNewGameModel = CodexStartNewGameModel,
                 FullscreenFontSize = FullscreenFontSize, FontFace = FontFace,
-                DisableTriggers = DisableTriggers, ShowKeyHints = ShowKeyHints,
+                DisableTriggers = DisableTriggers, ShowKeyHints = ShowKeyHints, Language = Language,
             };
             File.WriteAllText(UserSettingsPath, System.Text.Json.JsonSerializer.Serialize(s,
                 new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));

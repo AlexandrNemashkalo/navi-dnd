@@ -133,7 +133,7 @@ public class LegendDisplay
         var cats = WorldMapView.Categories;
         lines.Add(() =>
         {
-            Toggle("Все", "F6", all, half);
+            Toggle(L.T("Все"), "F6", all, half);
             Toggle(cats[0].label, cats[0].fkey, _display.WorldFilter.Contains(cats[0].key), legendWidth - half);
         });
         lines.Add(() =>
@@ -146,15 +146,15 @@ public class LegendDisplay
         var ws = _storage.WorldState;
         if (GameWorld.HeroTile(ws) is { } ht)
         {
-            string here = ws.World?.Place is { Length: > 0 } pl ? pl : WorldBiomes.Get(world.BiomeAt(ht.x, ht.y)).Name.ToLowerInvariant();
+            string here = ws.World?.Place is { Length: > 0 } pl ? pl : L.T(WorldBiomes.Get(world.BiomeAt(ht.x, ht.y)).Name).ToLowerInvariant();
             int own = world.OwnerAt(ht.x, ht.y);
-            string land = own >= 0 && own < world.Kingdoms.Count ? world.Kingdoms[own].Name : "ничьи земли";
+            string land = own >= 0 && own < world.Kingdoms.Count ? world.Kingdoms[own].Name : L.T("ничьи земли");
             lines.Add(() =>
             {
                 Console.Write(" ");
                 // Тот же значок, что у героя на карте мира.
                 ColorHelper.WriteColored(WorldMapView.MarkerGlyph.ToString(), WorldMapView.MarkerColor, bg);
-                string t = $" Вы: {here} · {land}";
+                string t = " " + L.F("Вы: {0} · {1}", here, land);
                 t = t.Length > legendWidth - 2 ? t[..(legendWidth - 3)] + "…" : t.PadRight(legendWidth - 2);
                 ColorHelper.WriteColored(t, _display.MainForeground, bg);
             });
@@ -200,23 +200,23 @@ public class LegendDisplay
                 else Console.Write(new string(' ', rightWidth));
             });
         }
-        if (places.Count > skip + shown.Count || skip > 0) Line($"… ещё {places.Count - shown.Count}", dim);
+        if (places.Count > skip + shown.Count || skip > 0) Line(L.F("… ещё {0}", places.Count - shown.Count), dim);
         while (lines.Count < capacity - 3) lines.Add(() => Console.Write(new string(' ', legendWidth)));
         // Время — день и часть дня (путешествие сдвигает их на дни).
         var now = _storage.WorldState.Time;
-        Line($"Время: День {now.Day} · {now.PartOfDay}", _display.MainForeground);
+        Line(L.F("Время: День {0} · {1}", now.Day, GameTime.PartOfDayText(now.PartOfDay)), _display.MainForeground);
         // Путь: цель кликом по карте, [F10] — в путь, [F5] — темп.
-        string pace = TravelService.PaceName((TravelService.Pace)_display.TravelPace);
+        string pace = L.T(TravelService.PaceName((TravelService.Pace)_display.TravelPace));
         if (_display.WorldTarget != null && _display.WorldRouteInfo is { } info)
         {
             double days = TravelService.DaysAt(info.days, (TravelService.Pace)_display.TravelPace);
-            Line($"Путь: {info.dest} — {MapGen.Generators.WorldAtlas.DaysText(days)}, дорогой {info.road:P0}", _display.MainForeground);
-            Line($"[F10] в путь · [F12] темп: {pace}", ColorHelper.Pale(_display.MainForeground, 0.3));
+            Line(L.F("Путь: {0} — {1}, дорогой {2:P0}", info.dest, TravelService.DaysLabel(days), info.road), _display.MainForeground);
+            Line(L.F("[F10] в путь · [F12] темп: {0}", pace), ColorHelper.Pale(_display.MainForeground, 0.3));
         }
         else
         {
-            Line("Клик по карте — цель пути · Tab — места", dim);
-            Line($"[F12] темп: {pace}", dim);
+            Line(L.T("Клик по карте — цель пути · Tab — места"), dim);
+            Line(L.F("[F12] темп: {0}", pace), dim);
         }
     }
 
@@ -378,7 +378,7 @@ public class LegendDisplay
         bool isHovered = kind == hovered;
         var color = kind.LegendColor ?? kind.Fg;
         if (isHovered) color = ColorHelper.Pale(color, 0.25);
-        string name = kind.Name + (kind.StepCostFt > 5 ? $" ×{kind.StepCostFt / 5}" : "");
+        string name = L.T(kind.Name) + (kind.StepCostFt > 5 ? $" ×{kind.StepCostFt / 5}" : "");
         int nameWidth = width - kind.LegendGlyph.Length - 3 - 1;
         if (name.Length > nameWidth) name = name[..Math.Max(0, nameWidth - 1)] + "…";
         // У кровати — подушка (первый символ светлым).
@@ -445,7 +445,7 @@ public class LegendDisplay
     // не бой или ход не героя).
     public int CombatLineIndex { get; private set; } = -1;
     public (int x0, int x1) EndTurnButton { get; private set; } = (-1, -1);
-    public const string EndTurnText = "[F10] КОНЕЦ ХОДА";
+    public static string EndTurnText => "[F10] " + L.T("КОНЕЦ ХОДА");
 
     // Ход героя в бою — кнопка конца хода активна.
     public bool IsHeroTurn => _storage.WorldState.Combat is { Active: true } c && c.CurrentTurn == _storage.WorldState.Hero?.Symbol;
@@ -472,9 +472,9 @@ public class LegendDisplay
         var fg     = _display.MainForeground;
         var bg     = _display.MainBackground;
 
-        const string label1 = "Порядок боя    ";
-        const string label2 = "Движение:      ";
-        const string label7 = "Время:         ";
+        string label1 = L.T("Порядок боя").PadRight(15);
+        string label2 = L.T("Движение:").PadRight(15);
+        string label7 = L.T("Время:").PadRight(15);
 
         var hero = _storage.WorldState.Hero;
         var time = _storage.WorldState.Time;
@@ -488,7 +488,7 @@ public class LegendDisplay
         string sqGrayStr  = sqGray  > 0 ? new string('■', sqGray)  : "";
         string speedNum   = speedMax > 0 ? $" {speedLeft}/{speedMax}" : "";
 
-        string timeStr = $"День {time.Day} · {time.PartOfDay} · Раунд {time.TotalRounds}";
+        string timeStr = L.F("День {0} · {1} · Раунд {2}", time.Day, GameTime.PartOfDayText(time.PartOfDay), time.TotalRounds);
 
 
         var actions = hero?.Actions?.Where(a => a.Deleted != true).ToList() ?? [];
@@ -520,7 +520,7 @@ public class LegendDisplay
                     {
                         Console.Write(new string(' ', at - used));
                         ColorHelper.WriteColored("[F10] ", dim, bg);
-                        ColorHelper.WriteColored("КОНЕЦ ХОДА", bright, bg);
+                        ColorHelper.WriteColored(L.T("КОНЕЦ ХОДА"), bright, bg);
                         EndTurnButton = (at, at + EndTurnText.Length - 1);
                     }
                     else EndTurnButton = (-1, -1);
@@ -539,7 +539,7 @@ public class LegendDisplay
             var a = actions[i];
             var color = i < _actionColors.Count ? _actionColors[i] : bright;
             string sym = i < _actionSymbols.Length ? _actionSymbols[i] : "●";
-            string label = PadActionLabel(a.Name);
+            string label = PadActionLabel(L.T(a.Name));
             int activeCount = a.Value;
             int spentCount  = a.MaxValue - a.Value;
 
@@ -577,20 +577,20 @@ public class LegendDisplay
             Console.Write(" ");
             if (path == null)
             {
-                ColorHelper.WriteColored("Дистанция:     ", dim, bg);
-                ColorHelper.WriteColored($"{hover.DistanceFt} фт", fg, bg);
+                ColorHelper.WriteColored(L.T("Дистанция:").PadRight(15), dim, bg);
+                ColorHelper.WriteColored(L.F("{0} фт", hover.DistanceFt), fg, bg);
                 return;
             }
-            ColorHelper.WriteColored("Путь:          ", dim, bg);
-            string target = path.TargetSymbol != null ? $"до {path.TargetSymbol} · " : "";
+            ColorHelper.WriteColored(L.T("Путь:").PadRight(15), dim, bg);
+            string target = path.TargetSymbol != null ? L.F("до {0}", path.TargetSymbol) + " · " : "";
             if (path.CostFt is not int cost)
-                ColorHelper.WriteColored($"{target}не дойти", badColor, bg);
+                ColorHelper.WriteColored(target + L.T("не дойти"), badColor, bg);
             else if (cost == 0)
-                ColorHelper.WriteColored($"{target}рядом", fg, bg);
+                ColorHelper.WriteColored(target + L.T("рядом"), fg, bg);
             else if (cost > speedLeft)
-                ColorHelper.WriteColored($"{target}{cost} фт · не хватит {cost - speedLeft}", badColor, bg);
+                ColorHelper.WriteColored(target + L.F("{0} фт · не хватит {1}", cost, cost - speedLeft), badColor, bg);
             else
-                ColorHelper.WriteColored($"{target}{cost} фт · останется {speedLeft - cost}", fg, bg);
+                ColorHelper.WriteColored(target + L.F("{0} фт · останется {1}", cost, speedLeft - cost), fg, bg);
         });
         lines.Add(() =>
         {
@@ -612,7 +612,7 @@ public class LegendDisplay
         lines.Add(() =>
         {
             Console.Write(" ");
-            ColorHelper.WriteColored("Место:         ", dim, bg);
+            ColorHelper.WriteColored(L.T("Место:").PadRight(15), dim, bg);
             ColorHelper.WriteColored(HeroPlace(width - 16), fg, bg);
         });
         lines.Add(() =>
@@ -629,8 +629,8 @@ public class LegendDisplay
     {
         var settings = _storage.WorldState;
         if (settings.Hero?.Position is not { Count: >= 2 } hp) return "—";
-        string place = settings.Map.RoomAt(hp[0], hp[1]) is { Deleted: not true } room ? room.Name : "снаружи";
-        if (settings.Map.HasFloors) place = $"{MapConfig.FloorName(settings.Map.FloorAt(hp[0], hp[1]))} · {place}";
+        string place = settings.Map.RoomAt(hp[0], hp[1]) is { Deleted: not true } room ? room.Name : L.T("снаружи");
+        if (settings.Map.HasFloors) place = $"{MapConfig.FloorLabel(settings.Map.FloorAt(hp[0], hp[1]))} · {place}";
         return place.Length > maxLen ? place[..Math.Max(0, maxLen - 1)] + "…" : place;
     }
 

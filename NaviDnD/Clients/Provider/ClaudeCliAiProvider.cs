@@ -62,10 +62,10 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
     // Claude CLI не запустился (нет по пути из настроек) — ошибка настройки, а не сбой ответа.
     private Process StartCli(ProcessStartInfo psi)
     {
-        try { return Process.Start(psi) ?? throw new AiSetupException("Не удалось запустить Claude CLI."); }
+        try { return Process.Start(psi) ?? throw new AiSetupException(L.T("Не удалось запустить Claude CLI.")); }
         catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode is 2 or 3)
         {
-            throw new AiSetupException("Claude не найден.\nУстанови Claude Code или укажи «ПУТЬ К CLAUDE» в настройках.");
+            throw new AiSetupException(L.T("Claude не найден.\nУстанови Claude Code или укажи «ПУТЬ К CLAUDE» в настройках."));
         }
     }
 
@@ -181,7 +181,7 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
 
             if (process.ExitCode != 0 && fullResult == null)
             {
-                string exitMessage = $"Claude CLI завершился с ошибкой (код {process.ExitCode}). Попробуй ещё раз.";
+                string exitMessage = L.F("Claude CLI завершился с ошибкой (код {0}). Попробуй ещё раз.", process.ExitCode);
                 if (!string.IsNullOrWhiteSpace(stderr)) exitMessage += $" stderr: {stderr.Trim()}";
                 throw CreateError(exitMessage);
             }
@@ -380,9 +380,9 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
             "authentication_error", "invalid authentication", "invalid oauth token",
             "oauth token has expired", "token expired", "unauthorized", "failed to authenticate"];
         if (authMarkers.Any(marker => rawMessage.Contains(marker, StringComparison.OrdinalIgnoreCase)))
-            return new AiSetupException("Claude не авторизован или вход истёк.\nВыполни claude auth login; если задан токен в настройках игры, обнови или удали его.");
+            return new AiSetupException(L.T("Claude не авторизован или вход истёк.\nВыполни claude auth login; если задан токен в настройках игры, обнови или удали его."));
         if (rawMessage.Contains("does not have access to Claude", StringComparison.OrdinalIgnoreCase))
-            return new AiSetupException("Аккаунт не имеет доступа к Claude.\nПроверь аккаунт, подписку и токен в настройках.");
+            return new AiSetupException(L.T("Аккаунт не имеет доступа к Claude.\nПроверь аккаунт, подписку и токен в настройках."));
         return new Exception(rawMessage);
     }
 

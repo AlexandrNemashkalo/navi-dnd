@@ -17,7 +17,7 @@ internal static class Speech
     private static CancellationTokenSource session = new();
     private static readonly CancellationTokenSource Lifetime = new();
     private static AppConfig? config;
-    private static string status = "Выключена";
+    private static string status = L.T("Выключена");
     private static int started;
     private static volatile bool _windowMinimized;
     private static IWavePlayer? _activeOutput;
@@ -62,7 +62,7 @@ internal static class Speech
         config = settings;
         if (Interlocked.Exchange(ref started, 1) == 0) _ = Task.Run(ConsumeAsync);
         AppDomain.CurrentDomain.ProcessExit += (_, _) => { Lifetime.Cancel(); Stop(); SileroSpeech.Close(); };
-        status = settings.SpeechEnabled ? "Готова к запуску" : "Выключена";
+        status = settings.SpeechEnabled ? L.T("Готова к запуску") : L.T("Выключена");
         WarmUp();
     }
 
@@ -193,7 +193,7 @@ internal static class Speech
                 var token = timeout.Token;
                 await SileroSpeech.SynthesizeAsync(item.Text, item.Ssml, item.Voice, wav, config!.SileroPythonPath,
                     value => status = value, token);
-                if (item.Warmup) { status = "Готова"; continue; }
+                if (item.Warmup) { status = L.T("Готова"); continue; }
                 using var reader = new WaveFileReader(wav);
                 using var output = new WaveOutEvent();
                 // Громкость — в самом потоке: WaveOutEvent.Volume (waveOutSetVolume) меняет громкость всего приложения,
@@ -210,7 +210,7 @@ internal static class Speech
                         _activeOutput = output;
                         output.Play();
                     }
-                    status = "Озвучивание";
+                    status = L.T("Озвучивание");
                     while (output.PlaybackState == PlaybackState.Playing)
                     {
                         await Task.Delay(30, token);
@@ -223,12 +223,12 @@ internal static class Speech
                         if (ReferenceEquals(_activeOutput, output)) _activeOutput = null;
                     Music.Ducked = false;
                 }
-                status = "Готова";
+                status = L.T("Готова");
             }
-            catch (OperationCanceledException) { status = "Остановлена"; }
+            catch (OperationCanceledException) { status = L.T("Остановлена"); }
             catch (Exception ex)
             {
-                status = "Ошибка: " + ex.Message;
+                status = L.T("Ошибка: ") + ex.Message;
                 // Текст реплики и секреты в диагностический лог не записываются.
                 try { File.AppendAllText(Path.Combine(AppConfig.ProjectRoot, "logs", "speech.log"), $"{DateTime.Now:s} {ex.GetType().Name}: {ex.Message}\n"); } catch { }
             }

@@ -343,7 +343,7 @@ public class DialogDisplay
         _cachedMaxPage = Math.Max(0, allLines.Count - _display.MaxHistoryLines);
     }
 
-    private const string TitleBase = "ДИАЛОГОВОЕ ОКНО ";
+    private static string TitleBase => L.T("ДИАЛОГОВОЕ ОКНО ");
 
     // Текст "текущая/всего" между стрелками — одно место, чтобы формула здесь и в ArrowPositions
     // (позиции ▲/▼ зависят от длины этого текста) не разъехались.
@@ -949,12 +949,12 @@ public class DialogDisplay
         {
             string frame = Spinner.Frames[_spinnerFrame % Spinner.Frames.Length];
             _cachedBorderDrawer.DrawContentLine(() =>
-                ColorHelper.WriteColored($" {frame} Бросок...", _display.SystemCommandHistory));
+                ColorHelper.WriteColored($" {frame} " + L.T("Бросок..."), _display.SystemCommandHistory));
         }
         else
         {
-            string line = secondsLeft == 0 ? " Авто-бросок (1)"
-                : $" [Пробел/Enter] бросить ⏱ {secondsLeft,2}с";
+            string line = secondsLeft == 0 ? " " + L.T("Авто-бросок (1)")
+                : " " + L.F("[Пробел/Enter] бросить ⏱ {0,2}с", secondsLeft);
             _cachedBorderDrawer.DrawContentLine(() => Console.Write(line));
         }
 
@@ -968,10 +968,10 @@ public class DialogDisplay
 
         var header = new List<string>();
         if (request.Difficulty.HasValue)
-            header.Add(Fit($"  СЛ: {request.Difficulty}", w));
+            header.Add(Fit("  " + L.F("СЛ: {0}", request.Difficulty), w));
         if (isPair)
         {
-            string label = request.Advantage ? "  ПРЕИМУЩЕСТВО" : "  ПОМЕХА";
+            string label = "  " + (request.Advantage ? L.T("ПРЕИМУЩЕСТВО") : L.T("ПОМЕХА"));
             header.Add(Fit(label, w));
         }
 
@@ -983,10 +983,10 @@ public class DialogDisplay
         if (rolled && usedRoll.HasValue)
         {
             int modSum = request.Modifiers.Sum(m => m.Value);
-            string? outcome = request.Critical == "critical_success" ? "  КРИТИЧЕСКИЙ УСПЕХ!"
-                            : request.Critical == "critical_failure" ? "  КРИТИЧЕСКИЙ ПРОВАЛ!"
+            string? outcome = request.Critical == "critical_success" ? "  " + L.T("КРИТИЧЕСКИЙ УСПЕХ!")
+                            : request.Critical == "critical_failure" ? "  " + L.T("КРИТИЧЕСКИЙ ПРОВАЛ!")
                             : request.Difficulty.HasValue
-                                ? ((usedRoll.Value + modSum) >= request.Difficulty.Value ? "  УСПЕХ" : "  ПРОВАЛ")
+                                ? "  " + ((usedRoll.Value + modSum) >= request.Difficulty.Value ? L.T("УСПЕХ") : L.T("ПРОВАЛ"))
                                 : null;
             if (outcome != null)
                 footer.Add(Fit(outcome, w));
@@ -1053,7 +1053,7 @@ public class DialogDisplay
                 if (isOutcome)
                 {
                     _outcomeRow = row;
-                    bool isSuccess = f.Contains("Успех", StringComparison.OrdinalIgnoreCase);
+                    bool isSuccess = f.Contains(L.T("УСПЕХ"), StringComparison.OrdinalIgnoreCase);
                     _outcomeColor = isSuccess ? [80, 220, 80] : [220, 80, 80];
                 }
                 if (fi == highlightFooterIndex)
@@ -1342,7 +1342,7 @@ public class DialogDisplay
         else
             _cachedBorderDrawer.DrawSeparator();
         _cachedBorderDrawer.DrawContentLine(() =>
-            ColorHelper.WriteColored($" {frame} Ожидание...", _display.SystemCommandHistory));
+            ColorHelper.WriteColored($" {frame} " + L.T("Ожидание..."), _display.SystemCommandHistory));
         _cachedBorderDrawer.DrawBottomBorder();
     }
 
@@ -1550,8 +1550,8 @@ public class DialogDisplay
 
         _cachedBorderDrawer.DrawContentLine(() =>
         {
-            string counter = total > 1 ? $" {picked}/{total} · Enter — готово" : "";
-            Console.Write($" Выберите на карте ({secondsLeft,2}с){counter} · Bksp — назад · Esc — отмена");
+            string counter = total > 1 ? $" {picked}/{total} · " + L.T("Enter — готово") : "";
+            Console.Write(" " + L.F("Выберите на карте ({0,2}с)", secondsLeft) + counter + " · " + L.T("Bksp — назад · Esc — отмена"));
         });
 
         _cachedBorderDrawer.DrawBottomBorder();
@@ -1643,8 +1643,8 @@ public class DialogDisplay
         _cachedBorderDrawer.DrawContentLine(() =>
         {
             string prefix = secondsLeft > 0
-                ? $" Выберите ({secondsLeft,2}с): "
-                : " Авто-выбор: ";
+                ? " " + L.F("Выберите ({0,2}с): ", secondsLeft)
+                : " " + L.T("Авто-выбор: ");
             Console.Write(prefix);
             int curX = 1 + prefix.Length;
 
@@ -1694,8 +1694,8 @@ public class DialogDisplay
             int secondsLeft = (int)Math.Ceiling((deadline - DateTime.UtcNow).TotalSeconds);
             if (secondsLeft < 0) secondsLeft = 0;
 
-            string timerPart = secondsLeft > 0 ? $"({secondsLeft,2}с)" : "(истёк)";
-            string prompt = $" Ввод {timerPart}: ";
+            string timerPart = secondsLeft > 0 ? L.F("({0,2}с)", secondsLeft) : L.T("(истёк)");
+            string prompt = " " + L.F("Ввод {0}: ", timerPart);
             int maxTextWidth = DialogTextWidth - prompt.Length;
 
             // Keep cursor inside the visible window with a small right margin

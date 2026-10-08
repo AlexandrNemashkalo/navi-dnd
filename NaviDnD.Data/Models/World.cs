@@ -20,6 +20,9 @@ public class WorldMap
     public int RiverAmount { get; set; }
     public string? Description { get; set; }
     public string? DmNotes { get; set; }
+    // Язык мира (L.Russian/L.English): язык интерфейса при создании; описания, имена, журнал и рассказ мастера —
+    // на нём, смена языка интерфейса его не меняет. null — мир до выбора языка (русский).
+    public string? Language { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
 

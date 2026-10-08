@@ -21,12 +21,12 @@ internal static class SileroSpeech
         {
             if (!File.Exists(Path.Combine(Root, ".ready")))
             {
-                status("Установка Silero и PyTorch");
+                status(L.T("Установка Silero и PyTorch"));
                 var setup = CreateStart("powershell.exe");
                 foreach (var arg in new[] { "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
                     Path.Combine(AppConfig.ProjectRoot, "Speech", "setup-silero.ps1"), "-Python", python, "-Destination", Root })
                     setup.ArgumentList.Add(arg);
-                using var process = Process.Start(setup) ?? throw new IOException("Не удалось начать установку Silero");
+                using var process = Process.Start(setup) ?? throw new IOException(L.T("Не удалось начать установку Silero"));
                 using var kill = token.Register(() => Kill(process));
                 var stdout = process.StandardOutput.ReadToEndAsync(token);
                 var stderr = process.StandardError.ReadToEndAsync(token);
@@ -35,34 +35,34 @@ internal static class SileroSpeech
                 Directory.CreateDirectory(Path.Combine(AppConfig.ProjectRoot, "logs"));
                 await File.WriteAllTextAsync(Path.Combine(AppConfig.ProjectRoot, "logs", "silero-setup.log"),
                     stdout.Result + stderr.Result, token);
-                if (process.ExitCode != 0) throw new IOException("Установка Silero не удалась. Нужен Python 3.10–3.12 x64; проверь путь к Python и интернет.");
+                if (process.ExitCode != 0) throw new IOException(L.T("Установка Silero не удалась. Нужен Python 3.10–3.12 x64; проверь путь к Python и интернет."));
             }
             if (worker == null || worker.HasExited)
             {
                 Close();
-                status("Загрузка модели Silero");
+                status(L.T("Загрузка модели Silero"));
                 var start = CreateStart(Python);
                 start.Environment["PYTHONIOENCODING"] = "utf-8";
                 foreach (var arg in new[] { "-u", Path.Combine(AppConfig.ProjectRoot, "Speech", "silero_worker.py"),
                     Path.Combine(Root, "v5_5_ru.pt") }) start.ArgumentList.Add(arg);
-                worker = Process.Start(start) ?? throw new IOException("Не удалось запустить Silero");
+                worker = Process.Start(start) ?? throw new IOException(L.T("Не удалось запустить Silero"));
                 errors = worker.StandardError.ReadToEndAsync();
                 using var kill = token.Register(() => Kill(worker));
                 string? ready = await worker.StandardOutput.ReadLineAsync(token);
                 if (ready == null)
-                    throw new IOException("Silero не загрузил модель");
+                    throw new IOException(L.T("Silero не загрузил модель"));
                 using var handshake = JsonDocument.Parse(ready);
                 if (!handshake.RootElement.TryGetProperty("ready", out var readyValue) || !readyValue.GetBoolean())
-                    throw new IOException("Silero не загрузил модель");
+                    throw new IOException(L.T("Silero не загрузил модель"));
             }
             using var cancel = token.Register(() => Kill(worker));
-            status("Синтез Silero");
+            status(L.T("Синтез Silero"));
             string request = JsonSerializer.Serialize(new { text, ssml_text = ssmlText, voice, output = wav });
             await worker.StandardInput.WriteLineAsync(request.AsMemory(), token);
             await worker.StandardInput.FlushAsync(token);
-            string response = await worker.StandardOutput.ReadLineAsync(token) ?? throw new IOException("Silero завершился без ответа");
+            string response = await worker.StandardOutput.ReadLineAsync(token) ?? throw new IOException(L.T("Silero завершился без ответа"));
             using var result = JsonDocument.Parse(response);
-            if (!result.RootElement.GetProperty("ok").GetBoolean()) throw new IOException("Silero не смог озвучить реплику");
+            if (!result.RootElement.GetProperty("ok").GetBoolean()) throw new IOException(L.T("Silero не смог озвучить реплику"));
         }
         catch { Close(); throw; }
     }

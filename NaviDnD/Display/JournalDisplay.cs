@@ -12,11 +12,11 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
 {
     public enum Section { Quests, People, Locations, Bestiary, Notes }
 
-    private static readonly (Section section, string label, string key)[] Sections =
-        [(Section.Quests, "ЗАДАНИЯ", "F6"), (Section.People, "ПЕРСОНАЖИ", "F7"), (Section.Locations, "ЛОКАЦИИ", "F8"),
-         (Section.Bestiary, "БЕСТИАРИЙ", "F9"), (Section.Notes, "ЗАМЕТКИ", "F10")];
+    private static (Section section, string label, string key)[] Sections =>
+        [(Section.Quests, L.T("ЗАДАНИЯ"), "F6"), (Section.People, L.T("ПЕРСОНАЖИ"), "F7"), (Section.Locations, L.T("ЛОКАЦИИ"), "F8"),
+         (Section.Bestiary, L.T("БЕСТИАРИЙ"), "F9"), (Section.Notes, L.T("ЗАМЕТКИ"), "F10")];
 
-    private const string NotesHint = "Текст внизу + Enter — заметка";
+    private static string NotesHint => L.T("Текст внизу + Enter — заметка");
 
     // Раздел «Заметки»: запись списка → индекс в PlayerNotes.All (новые сверху).
     private List<int> _noteIndex = [];
@@ -54,22 +54,22 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
             case Section.Quests:
                 // Текущая цель — первой записью.
                 if (n?.CurrentArc is { Length: > 0 } arc)
-                    list.Add(new Entry("Текущая цель", "»", Bright, [("Текущая цель", Bright), ("", Fg), (arc, Fg)], "lorc/scroll-unfurled", null));
+                    list.Add(new Entry(L.T("Текущая цель"), "»", Bright, [(L.T("Текущая цель"), Bright), ("", Fg), (arc, Fg)], "lorc/scroll-unfurled", null));
                 // Только то, что знает герой: скрытые нити и заметки мастера (dmNotes) в журнал не попадают.
                 var threads = (n?.PlotThreads ?? []).Where(t => t.Deleted != true && t.Hidden != true).ToList();
                 foreach (var t in threads.Where(IsActive).Concat(threads.Where(t => !IsActive(t))))
                 {
                     bool active = IsActive(t);
                     bool failed = t.Status?.StartsWith("провал", StringComparison.OrdinalIgnoreCase) == true;
-                    var details = new List<(string, List<int>)> { (t.Name ?? "Задание", Bright), ($"Статус: {t.Status ?? "активна"}", Dim), ("", Fg) };
+                    var details = new List<(string, List<int>)> { (t.Name ?? L.T("Задание"), Bright), (L.T("Статус: ") + (t.Status ?? L.T("активна")), Dim), ("", Fg) };
                     if (!string.IsNullOrWhiteSpace(t.Description)) details.Add((t.Description, Fg));
                     if (t.Steps is { Count: > 0 } steps)
                     {
                         details.Add(("", Fg));
-                        details.Add(("Ход задания:", Dim));
+                        details.Add((L.T("Ход задания:"), Dim));
                         details.AddRange(steps.Select(s => ("· " + s, Fg)));
                     }
-                    list.Add(new Entry(t.Name ?? "Задание", active ? "▸" : failed ? "✗" : "✓", active ? Fg : Dim, details, "lorc/scroll-unfurled", null));
+                    list.Add(new Entry(t.Name ?? L.T("Задание"), active ? "▸" : failed ? "✗" : "✓", active ? Fg : Dim, details, "lorc/scroll-unfurled", null));
                 }
                 break;
 
@@ -80,13 +80,13 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                     var color = AttitudeColor(p.Attitude);
                     var onMap = (settings.Map.Entities ?? []).FirstOrDefault(e => e.Deleted != true && string.Equals(e.Name, p.Name, StringComparison.OrdinalIgnoreCase));
                     var details = new List<(string, List<int>)> { (p.Name ?? "?", color) };
-                    if (!string.IsNullOrWhiteSpace(p.Attitude)) details.Add(($"Отношение: {p.Attitude}", Dim));
+                    if (!string.IsNullOrWhiteSpace(p.Attitude)) details.Add((L.T("Отношение: ") + p.Attitude, Dim));
                     details.Add(("", Fg));
                     if (!string.IsNullOrWhiteSpace(p.Notes)) details.Add((p.Notes, Fg));
                     if (p.Memory is { Count: > 0 } memory)
                     {
                         details.Add(("", Fg));
-                        details.Add(("Запомнилось:", Dim));
+                        details.Add((L.T("Запомнилось:"), Dim));
                         details.AddRange(memory.Select(m => ("· " + m, Fg)));
                     }
                     list.Add(new Entry(p.Name ?? "?", "●", color, details, onMap?.Image ?? "delapouite/person", onMap?.Color ?? color));
@@ -105,19 +105,19 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                     {
                         bool here = p.Name == link.Place, visited = link.Visited.Contains(p.Name);
                         var (icon, iconColor) = WorldMapView.Icon(p.Type);
-                        string kingdom = p.Kingdom >= 0 && p.Kingdom < world.Kingdoms.Count ? $"королевство {world.Kingdoms[p.Kingdom].Name}" : "ничья земля";
+                        string kingdom = p.Kingdom >= 0 && p.Kingdom < world.Kingdoms.Count ? L.F("королевство {0}", world.Kingdoms[p.Kingdom].Name) : L.T("ничья земля");
                         var details = new List<(string, List<int>)>
                         {
                             (p.Name, Bright),
-                            ($"{WorldPlaceTypes.Label(p.Type)} · {kingdom} · {MapGen.Generators.WorldAtlas.Compass(world, p.X, p.Y)}", Dim),
-                            (here ? "Вы здесь" : visited ? "Бывали здесь" : "Знаете понаслышке", Dim),
+                            ($"{L.T(WorldPlaceTypes.Label(p.Type))} · {kingdom} · {L.T(MapGen.Generators.WorldAtlas.Compass(world, p.X, p.Y))}", Dim),
+                            (here ? L.T("Вы здесь") : visited ? L.T("Бывали здесь") : L.T("Знаете понаслышке"), Dim),
                             ("", Fg),
                         };
                         if (!string.IsNullOrWhiteSpace(p.Description)) details.Add((p.Description, Fg));
                         if (!here && hero is { } h && MapGen.Generators.WorldAtlas.Route(world, h, (p.X, p.Y)) is { } r)
                         {
                             details.Add(("", Fg));
-                            details.Add(($"Отсюда: {MapGen.Generators.WorldAtlas.Direction(p.X - h.x, p.Y - h.y)}, {r.Summary}", Dim));
+                            details.Add((L.T("Отсюда: ") + $"{L.T(MapGen.Generators.WorldAtlas.Direction(p.X - h.x, p.Y - h.y))}, {r.Summary}", Dim));
                         }
                         list.Add(new Entry(p.Name, here ? "@" : visited ? icon.ToString() : "·", here || visited ? Fg : Dim, details,
                             WorldMapView.PlaceImage(p.Type), iconColor));
@@ -136,10 +136,10 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                         string kind = string.Join(", ", new[] { info.Size, info.Type, info.Alignment }.Where(s => !string.IsNullOrWhiteSpace(s)));
                         if (kind.Length > 0) details.Add((kind, Dim));
                         details.Add(("", Fg));
-                        details.Add(($"КД {info.Ac} · ХП {info.Hp} · скорость {info.Speed}", Fg));
-                        details.Add(($"СИЛ {info.Str}  ЛОВ {info.Dex}  ТЕЛ {info.Con}  ИНТ {info.Int}  МДР {info.Wis}  ХАР {info.Cha}", Fg));
-                        if (!string.IsNullOrWhiteSpace(info.Senses)) details.Add(($"Чувства: {info.Senses}", Dim));
-                        if (!string.IsNullOrWhiteSpace(info.Languages)) details.Add(($"Языки: {info.Languages}", Dim));
+                        details.Add((L.F("КД {0} · ХП {1} · скорость {2}", info.Ac, info.Hp, info.Speed), Fg));
+                        details.Add((L.F("СИЛ {0}  ЛОВ {1}  ТЕЛ {2}  ИНТ {3}  МДР {4}  ХАР {5}", info.Str, info.Dex, info.Con, info.Int, info.Wis, info.Cha), Fg));
+                        if (!string.IsNullOrWhiteSpace(info.Senses)) details.Add((L.T("Чувства: ") + info.Senses, Dim));
+                        if (!string.IsNullOrWhiteSpace(info.Languages)) details.Add((L.T("Языки: ") + info.Languages, Dim));
                     }
                     list.Add(new Entry(info?.Name ?? key, "♦", Fg, details, onMap?.Image, onMap?.Color));
                 }
@@ -152,10 +152,10 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                 foreach (int ni in _noteIndex)
                 {
                     var note = notes[ni];
-                    string when = $"День {note.Day}" + (string.IsNullOrEmpty(note.PartOfDay) ? "" : $" · {note.PartOfDay}");
+                    string when = L.F("День {0}", note.Day) + (string.IsNullOrEmpty(note.PartOfDay) ? "" : " · " + GameTime.PartOfDayText(note.PartOfDay));
                     string firstLine = note.Text.Split('\n')[0];
-                    if (note.ByMaster) when += " · записал мастер";
-                    var details = new List<(string, List<int>)> { (when, Dim), ("", Fg), (note.Text, Fg), ("", Fg), ("[Del] — удалить заметку", Dim) };
+                    if (note.ByMaster) when += " · " + L.T("записал мастер");
+                    var details = new List<(string, List<int>)> { (when, Dim), ("", Fg), (note.Text, Fg), ("", Fg), (L.T("[Del] — удалить заметку"), Dim) };
                     list.Add(new Entry(firstLine, note.ByMaster ? "✦" : "✎", Fg, details, "lorc/quill-ink", null));
                 }
                 break;
@@ -181,11 +181,11 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
 
     private string EmptyText => Current switch
     {
-        Section.Quests => "Заданий пока нет.",
-        Section.People => "Знакомств пока нет.",
-        Section.Notes => "Заметок пока нет.",
-        Section.Locations => "Известных мест пока нет.",
-        _ => "Опознанных существ пока нет.",
+        Section.Quests => L.T("Заданий пока нет."),
+        Section.People => L.T("Знакомств пока нет."),
+        Section.Notes => L.T("Заметок пока нет."),
+        Section.Locations => L.T("Известных мест пока нет."),
+        _ => L.T("Опознанных существ пока нет."),
     };
 
     // ── Отрисовка ──

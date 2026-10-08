@@ -20,7 +20,7 @@ public class AbilityDisplay
         var startTop = Console.CursorTop;
         var borderDrawer = new BorderDrawer(_settings, _display);
         borderDrawer.DrawSeparator();
-        borderDrawer.DrawTitleLine("СПУТНИК");
+        borderDrawer.DrawTitleLine(L.T("СПУТНИК"));
         borderDrawer.DrawSeparator();
 
         int currentHeight = Console.CursorTop - startTop;

@@ -82,9 +82,9 @@ function BaseParts($tag) {
 }
 # Отпечаток исходников установщика (без номера версии): не изменились — установщик не пересобирается.
 function InstallerSource() {
-    $files = & git -c "safe.directory=$gitRoot" -C $root ls-files -s -- 'NaviDnD.Installer' 'NaviDnD/dnd.ico'
+    $files = & git -c "safe.directory=$gitRoot" -C $root ls-files -s -- 'NaviDnD.Installer' 'NaviDnD/dnd.ico' 'NaviDnD.Data/L.cs'
     if ($LASTEXITCODE -ne 0) { throw 'Cannot fingerprint installer sources' }
-    $untracked = & git -c "safe.directory=$gitRoot" -C $root status --porcelain -- 'NaviDnD.Installer'
+    $untracked = & git -c "safe.directory=$gitRoot" -C $root status --porcelain -- 'NaviDnD.Installer' 'NaviDnD.Data/L.cs'
     if ($untracked) { throw 'Commit installer sources before building a release' }
     $sha = [Security.Cryptography.SHA256]::Create()
     try { ([BitConverter]::ToString($sha.ComputeHash($utf8.GetBytes(($files -join "`n"))))).Replace('-', '').ToLowerInvariant() } finally { $sha.Dispose() }

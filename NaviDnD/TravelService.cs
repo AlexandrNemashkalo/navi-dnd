@@ -15,6 +15,10 @@ public static class TravelService
 
     public static string PaceName(Pace p) => p switch { Pace.Fast => "быстрый", Pace.Slow => "медленный", _ => "обычный" };
 
+    // Срок пути для экрана (легенда): «2 дня», «1,5 дня» — на языке интерфейса; сводка мастеру — по-русски.
+    public static string DaysLabel(double d) =>
+        d % 1 != 0 ? L.F("{0:0.#} дня", d) : $"{(int)d} {L.Plural((int)d, "день", "дня", "дней")}";
+
     // Сколько пути за то же время: быстрый — 30 миль в день вместо 24, медленный — 18.
     private static double Speed(Pace p) => p switch { Pace.Fast => 1.25, Pace.Slow => 0.75, _ => 1.0 };
 

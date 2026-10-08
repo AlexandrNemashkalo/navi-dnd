@@ -25,7 +25,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         "╚═╝  ╚═══╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚═════╝ ╚═╝  ╚═══╝╚═════╝ ",
     ];
 
-    private const string Title = " ГЛАВНОЕ МЕНЮ";
+    private static string Title => L.T(" ГЛАВНОЕ МЕНЮ");
     private const int HeaderRows = 3; // верхняя рамка, заголовок, разделитель
 
     private List<int> Fg => display.MainForeground;
@@ -43,8 +43,8 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     {
         _items =
         [
-            new("ПРОДОЛЖИТЬ", null), new("НОВАЯ ИГРА", null), new("МОИ ИГРЫ", null),
-            new("НАСТРОЙКИ", null), new("ОБНОВЛЕНИЯ", Choice.Updates), new("ВЫХОД", null),
+            new(L.T("ПРОДОЛЖИТЬ"), null), new(L.T("НОВАЯ ИГРА"), null), new(L.T("МОИ ИГРЫ"), null),
+            new(L.T("НАСТРОЙКИ"), null), new(L.T("ОБНОВЛЕНИЯ"), Choice.Updates), new(L.T("ВЫХОД"), null),
         ];
         _selected = 4;
         Layout();
@@ -55,12 +55,12 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     {
         _items =
         [
-            new("ПРОДОЛЖИТЬ", hasSave ? Choice.Continue : null),
-            new("НОВАЯ ИГРА", Choice.NewGame),
-            new("МОИ ИГРЫ", Choice.Games),
-            new("НАСТРОЙКИ", Choice.Settings),
+            new(L.T("ПРОДОЛЖИТЬ"), hasSave ? Choice.Continue : null),
+            new(L.T("НОВАЯ ИГРА"), Choice.NewGame),
+            new(L.T("МОИ ИГРЫ"), Choice.Games),
+            new(L.T("НАСТРОЙКИ"), Choice.Settings),
             new(GameUpdates.MenuLabel, Choice.Updates),
-            new("ВЫХОД", Choice.Exit),
+            new(L.T("ВЫХОД"), Choice.Exit),
         ];
         _selected = hasSave ? 0 : 1;
 
@@ -158,7 +158,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         for (int i = 0; i < Logo.Length; i++)
             Center(y + i, Logo[i], ColorHelper.MixWith(Bright, Dim, i / (double)(Logo.Length - 1) * 0.6));
         y += Logo.Length + 1;
-        Center(y, "ИИ-МАСТЕР ПОДЗЕМЕЛИЙ", Dim);
+        Center(y, L.T("ИИ-МАСТЕР ПОДЗЕМЕЛИЙ"), Dim);
         y += 3;
         _itemPos.Clear();
         foreach (var _ in _items)
@@ -167,7 +167,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
             y += 2;
         }
         RenderItems();
-        Center(Math.Min(_height - 2, y), "[↑↓]ВЫБОР     [Enter]ПОДТВЕРДИТЬ", Dim);
+        Center(Math.Min(_height - 2, y), L.T("[↑↓]ВЫБОР     [Enter]ПОДТВЕРДИТЬ"), Dim);
 
         // По бокам — картинки приглушённым цветом игры: замок слева, дракон справа.
         int sideWidth = Math.Min(40, (_width - Logo[0].Length) / 2 - 6);

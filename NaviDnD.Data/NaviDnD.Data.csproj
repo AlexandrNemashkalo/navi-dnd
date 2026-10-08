@@ -1,9 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <!-- Перевод интерфейса (L.T): ключ — русская строка, значение — английская. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\en.json" LogicalName="NaviDnD.Localization.en.json" />
+  </ItemGroup>
 
 </Project>

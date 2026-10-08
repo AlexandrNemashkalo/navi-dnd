@@ -80,20 +80,20 @@ public class NewGameWizard
 
     // Параметры нового мира: ←→ на поле — следующий вариант; карта сразу перестраивается (тот же seed).
     // Сколько чего-то в мире; индекс 3 («обычно») — 0 у генератора, «нет» — -3.
-    private static readonly string[] Amount = ["нет", "очень мало", "мало", "обычно", "много", "очень много"];
+    private static string[] Amount => [L.T("нет"), L.T("очень мало"), L.T("мало"), L.T("обычно"), L.T("много"), L.T("очень много")];
 
     // def — вариант по умолчанию; для шкал он же «ноль» генератора (значение = индекс - def).
-    private static readonly (string label, string[] options, int def)[] Params =
+    private static (string label, string[] options, int def)[] Params =>
     [
-        ("РАЗМЕР", ["малый", "большой"], 0),
-        ("КОНТИНЕНТЫ", ["авто", "1", "2", "3", "4", "5"], 0),
-        ("ВОДА", ["очень мало", "мало", "обычно", "много", "очень много"], 2),
-        ("КЛИМАТ", ["ледяной", "холодный", "умеренный", "тёплый", "жаркий"], 2),
-        ("ГОРЫ", Amount, 3),
-        ("ЛЕСА", Amount, 3),
-        ("ПУСТЫНИ", Amount, 3),
-        ("РЕКИ", Amount, 3),
-        ("КОРОЛЕВСТВ", ["авто", "1", "2", "3", "4", "5", "6", "7", "8"], 0),
+        (L.T("РАЗМЕР"), [L.T("малый"), L.T("большой")], 0),
+        (L.T("КОНТИНЕНТЫ"), [L.T("авто"), "1", "2", "3", "4", "5"], 0),
+        (L.T("ВОДА"), [L.T("очень мало"), L.T("мало"), L.T("обычно"), L.T("много"), L.T("очень много")], 2),
+        (L.T("КЛИМАТ"), [L.T("ледяной"), L.T("холодный"), L.T("умеренный"), L.T("тёплый"), L.T("жаркий")], 2),
+        (L.T("ГОРЫ"), Amount, 3),
+        (L.T("ЛЕСА"), Amount, 3),
+        (L.T("ПУСТЫНИ"), Amount, 3),
+        (L.T("РЕКИ"), Amount, 3),
+        (L.T("КОРОЛЕВСТВ"), [L.T("авто"), "1", "2", "3", "4", "5", "6", "7", "8"], 0),
     ];
 
     private const int DescHeight = 13, DescLines = 9;
@@ -116,7 +116,7 @@ public class NewGameWizard
         {
             _pick = new WorldPick { Seed = rnd.Next(), Param = [.. Params.Select(p => p.def)] };
             _pick.Name = WorldGenerator.DefaultName(_pick.Seed);
-            _pick.Entries.Add(new(null, "новый мир"));
+            _pick.Entries.Add(new(null, L.T("новый мир")));
             string? active = null;
             try { active = WorldLibrary.Current.Id; } catch { }
             foreach (var w in WorldLibrary.All().OrderBy(w => w.id == active ? 0 : 1))
@@ -160,6 +160,7 @@ public class NewGameWizard
                 draft = WorldGenerator.Generate(new WorldGenerator.Options(seed, param[0] == 1 ? WorldSizes.Large : WorldSizes.Small,
                     Continents: param[1], Water: V(2), Climate: V(3), Mountains: V(4), Forests: V(5),
                     Deserts: V(6), Rivers: V(7), Kingdoms: param[8]));
+                draft.Language = L.Language;
                 draftKey = key;
             }
             return draft;
@@ -187,7 +188,7 @@ public class NewGameWizard
             {
                 if (aiTask.IsFaulted)
                     message = aiTask.Exception?.GetBaseException() is AiSetupException setup
-                        ? setup.Message : "Нейронка не ответила — попробуй ещё раз.";
+                        ? setup.Message : L.T("Нейронка не ответила — попробуй ещё раз.");
                 else if (aiTask.IsCompletedSuccessfully && aiTask.Result && aiWorld == world)
                 {
                     desc = world.Chronicle.Description ?? desc;
@@ -198,7 +199,7 @@ public class NewGameWizard
                     message = "";
                     prompt = "";   // запрос выполнен — строка ввода снова чистая
                 }
-                else if (!aiTask.IsCompletedSuccessfully || !aiTask.Result) message = "Нейронка не ответила — попробуй ещё раз.";
+                else if (!aiTask.IsCompletedSuccessfully || !aiTask.Result) message = L.T("Нейронка не ответила — попробуй ещё раз.");
                 aiTask = null;
             }
             if (!Visible(focus)) focus = 0;
@@ -213,16 +214,16 @@ public class NewGameWizard
             int top = Math.Max(1, (_height - blockH) / 2);
 
             // Блок «МИР»: рельеф и карта.
-            DrawBox(top, left, FormWidth, TopBoxHeight, "МИР");
+            DrawBox(top, left, FormWidth, TopBoxHeight, L.T("МИР"));
             int vx = left + ValueCol, lx = left + LabelCol, valueW = FormWidth - ValueCol - 3;
             int y = top + 2;
-            Label(y, lx, "МИР", focus == 0);
+            Label(y, lx, L.T("МИР"), focus == 0);
             ChoiceValue(y, vx, valueW, entry.Label, focus == 0, "world", "f:0", $"{sel + 1}/{entries.Count}");
             Hit(y, lx - 2, ValueCol - LabelCol + 2, "f:0");
             y += 2;
             if (isNew)
             {
-                Label(y, lx, "НАЗВАНИЕ", focus == 1);
+                Label(y, lx, L.T("НАЗВАНИЕ"), focus == 1);
                 Put(y, vx, Fit(name + (focus == 1 ? "▌" : ""), valueW), focus == 1 ? Bright : Fg);
                 Hit(y, lx - 2, FormWidth - LabelCol, "f:1");
                 y += 2;
@@ -235,8 +236,8 @@ public class NewGameWizard
                 }
                 // Кнопки карты — внизу блока, плашками.
                 int bx = lx;
-                bx = Button(top + TopBoxHeight - 3, bx, "ДРУГАЯ КАРТА", focus == FB && mapAction == 0, "regen:0") + 2;
-                Button(top + TopBoxHeight - 3, bx, "РАНДОМ", focus == FB && mapAction == 1, "regen:1");
+                bx = Button(top + TopBoxHeight - 3, bx, L.T("ДРУГАЯ КАРТА"), focus == FB && mapAction == 0, "regen:0") + 2;
+                Button(top + TopBoxHeight - 3, bx, L.T("РАНДОМ"), focus == FB && mapAction == 1, "regen:1");
             }
             else
             {
@@ -244,25 +245,25 @@ public class NewGameWizard
                 string Level(int p, int v) => Params[p].options[Math.Clamp(v + Params[p].def, 0, Params[p].options.Length - 1)];
                 string[] values =
                 [
-                    world.Size == WorldSizes.Large ? "большой" : "малый",
-                    world.Continents > 0 ? world.Continents.ToString() : "авто",
+                    world.Size == WorldSizes.Large ? L.T("большой") : L.T("малый"),
+                    world.Continents > 0 ? world.Continents.ToString() : L.T("авто"),
                     Level(2, world.Water), Level(3, world.Climate),
                     Level(4, world.Mountains), Level(5, world.Forests), Level(6, world.Deserts), Level(7, world.RiverAmount),
                     world.Kingdoms.Count.ToString(),
                 ];
-                ReadOnlyRow(y, lx, vx, valueW, "НАЗВАНИЕ", world.Chronicle.Name is { Length: > 0 } cn ? cn : world.Name, center: false);
+                ReadOnlyRow(y, lx, vx, valueW, L.T("НАЗВАНИЕ"), world.Chronicle.Name is { Length: > 0 } cn ? cn : world.Name, center: false);
                 y += 2;
                 for (int p = 0; p < Params.Length; p++, y++)
                 {
                     y = GroupHeading(p, y, left, lx);
                     ReadOnlyRow(y, lx, vx, valueW, Params[p].label, values[p], center: true);
                 }
-                if (world.Chronicle.Places.Count > 0) ReadOnlyRow(y++, lx, vx, valueW, "МЕСТ", world.Chronicle.Places.Count.ToString(), center: true);
+                if (world.Chronicle.Places.Count > 0) ReadOnlyRow(y++, lx, vx, valueW, L.T("МЕСТ"), world.Chronicle.Places.Count.ToString(), center: true);
             }
 
             // Блок «КАРТА».
             int mapBoxLeft = left + FormWidth + Gap;
-            DrawBox(top, mapBoxLeft, MapBoxWidth, TopBoxHeight, "КАРТА");
+            DrawBox(top, mapBoxLeft, MapBoxWidth, TopBoxHeight, L.T("КАРТА"));
             var (mw, mh) = MapSize(world, MapW, MapH);
             int mapLeft = mapBoxLeft + (MapBoxWidth - mw) / 2, mapTop = top + 1 + (MapH - mh) / 2;
 
@@ -270,7 +271,7 @@ public class NewGameWizard
             // запроса к нейронке и ПРИДУМАТЬ/ИЗМЕНИТЬ.
             int dTop = top + TopBoxHeight + 1;
             string shownName = isNew ? name : world.Chronicle.Name is { Length: > 0 } wn ? wn : world.Name;
-            DrawBox(dTop, left, total, DescHeight, $"ОПИСАНИЕ МИРА · {shownName.ToUpperInvariant()}");
+            DrawBox(dTop, left, total, DescHeight, L.T("ОПИСАНИЕ МИРА") + " · " + shownName.ToUpperInvariant());
             int dW = total - 6;
             if (descLocked)
             {
@@ -289,7 +290,7 @@ public class NewGameWizard
             // Текст: перенос по словам, курсор (подсвеченная клетка) и прокрутка — колесом, ↑↓, PgUp/PgDn.
             descW = dW;
             bool descEditing = focus == FD;
-            if (desc.Length == 0 && !descEditing) Put(dTop + 1, lx, Fit("свой текст о мире — или пусть придумает нейронка", dW), Dim);
+            if (desc.Length == 0 && !descEditing) Put(dTop + 1, lx, Fit(L.T("свой текст о мире — или пусть придумает нейронка"), dW), Dim);
             else
             {
                 var view = TextArea.View(desc, descCur, ref descScroll, dW, DescLines, descEditing && descFollow,
@@ -307,22 +308,22 @@ public class NewGameWizard
             Put(sepY, left, "├" + new string('─', total - 2) + "┤", Dim);
             // Ввод запроса и кнопка отправки справа.
             int iy = sepY + 1;
-            string goText = desc.Length > 0 ? "ИЗМЕНИТЬ" : "ПРИДУМАТЬ";
+            string goText = desc.Length > 0 ? L.T("ИЗМЕНИТЬ") : L.T("ПРИДУМАТЬ");
             int gx = left + total - 3 - (goText.Length + 4);
             // Нейронка думает — вся строка (без «Ввод:» и кнопки) под статус.
             if (aiTask != null)
             {
-                Put(iy, lx, Fit($"{Spinner.Frames[frame++ % Spinner.Frames.Length]} Нейронка думает: описание, королевства и столицы…", total - 6), Bright);
+                Put(iy, lx, Fit(Spinner.Frames[frame++ % Spinner.Frames.Length] + " " + L.T("Нейронка думает: описание, королевства и столицы…"), total - 6), Bright);
             }
             else
             {
-            Put(iy, lx, "Ввод: ", focus == FQ ? Bright : Fg);
+            Put(iy, lx, L.T("Ввод: "), focus == FQ ? Bright : Fg);
             int px = lx + 6, promptW = gx - 2 - px;
             // Есть итог (готово / ошибка) и поле пустое — вместо подсказки в строке ввода он.
             string status = message.Split('\n')[0];
             bool showStatus = status.Length > 0 && prompt.Length == 0 && focus != FQ;
             string promptShown = showStatus ? status
-                : prompt.Length == 0 && focus != FQ ? "что придумать или как изменить описание (необязательно)" : TailFit(prompt + (focus == FQ ? "▌" : ""), promptW);
+                : prompt.Length == 0 && focus != FQ ? L.T("что придумать или как изменить описание (необязательно)") : TailFit(prompt + (focus == FQ ? "▌" : ""), promptW);
             Put(iy, px, Fit(promptShown, promptW), showStatus ? Bright : prompt.Length == 0 && focus != FQ ? Dim : focus == FQ ? Bright : Fg);
             Hit(iy, left + 1, gx - 2 - left, $"f:{FQ}");
             Button(iy, gx, goText, focus == FA, "ai");
@@ -331,16 +332,17 @@ public class NewGameWizard
 
             // ДАЛЕЕ и подсказка.
             int by = dTop + DescHeight + 1;
-            Button(by, left + (total - "ДАЛЕЕ: ГЕРОЙ".Length - 4) / 2, "ДАЛЕЕ: ГЕРОЙ", focus == FN, "next", disabled: desc.Trim().Length == 0);
+            string nextText = L.T("ДАЛЕЕ: ГЕРОЙ");
+            Button(by, left + (total - nextText.Length - 4) / 2, nextText, focus == FN, "next", disabled: desc.Trim().Length == 0);
             // Подсказка; вместо неё — подтверждение удаления или сообщение (у готового мира строки ввода нет).
-            if (confirmDelete) CenterIn(by + 2, left, total, $"Удалить мир «{entry.Label}» со всеми локациями?   [Enter]ДА   [Esc]НЕТ", Bright);
+            if (confirmDelete) CenterIn(by + 2, left, total, L.F("Удалить мир «{0}» со всеми локациями?   [Enter]ДА   [Esc]НЕТ", entry.Label), Bright);
             else if (message.Length > 0)
             {
                 var lines = message.Split('\n');
                 for (int i = 0; i < lines.Length && i < 2; i++)
                     CenterIn(by + 2 + i, left, total, Fit(lines[i], total), Bright);
             }
-            else CenterIn(by + 2, left, total, "[↑↓]ПОЛЕ   [←→]ВЫБОР/КУРСОР   [Enter]ДАЛЕЕ" + (isNew ? "" : "   [Del]УДАЛИТЬ МИР") + "   [Esc]МЕНЮ", Dim);
+            else CenterIn(by + 2, left, total, L.T("[↑↓]ПОЛЕ   [←→]ВЫБОР/КУРСОР   [Enter]ДАЛЕЕ") + (isNew ? "" : "   " + L.T("[Del]УДАЛИТЬ МИР")) + "   " + L.T("[Esc]МЕНЮ"), Dim);
             // Карта: колесо — масштаб, перетаскивание — сдвиг (клик ничего не делает); другой мир — камера с начала.
             if (_worldCam.For != world.Id) _worldCam.Reset(world.Id);
             Flush(mapLeft, mapTop, mw, mh);
@@ -445,7 +447,7 @@ public class NewGameWizard
             bool Busy()
             {
                 if (aiTask == null) return false;
-                message = "Подожди — нейронка думает.";
+                message = L.T("Подожди — нейронка думает.");
                 return true;
             }
 
@@ -499,7 +501,7 @@ public class NewGameWizard
                 desc = newDesc = prompt = "";
                 descCur = 0;
                 nameEdited = false;
-                message = "Прежний вариант — в списке миров (◄ ►), пока создаётся эта игра.";
+                message = L.T("Прежний вариант — в списке миров (◄ ►), пока создаётся эта игра.");
             }
 
             // [Del] — удалить выбранный мир (с подтверждением). Мир, в котором есть игра, не удаляется.
@@ -507,11 +509,11 @@ public class NewGameWizard
             {
                 Sound.PlayClick();
                 if (Busy()) return;
-                if (isNew) { message = "Новый мир ещё не сохранён — удалять нечего."; return; }
+                if (isNew) { message = L.T("Новый мир ещё не сохранён — удалять нечего."); return; }
                 if (entry.Id != null && WorldLibrary.GamesUsing(entry.Id) is { Count: > 0 } games)
                 {
-                    message = $"Нельзя удалить: в этом мире {(games.Count == 1 ? "игра" : "игры")} " +
-                              string.Join(", ", games.Select(g => $"«{g.hero}»")) + " — сначала удали их в «Мои игры».";
+                    message = L.F("Нельзя удалить: в этом мире {0} {1} — сначала удали их в «Мои игры».", games.Count == 1 ? L.T("игра") : L.T("игры"),
+                              string.Join(", ", games.Select(g => $"«{g.hero}»")));
                     return;
                 }
                 confirmDelete = true;
@@ -520,11 +522,11 @@ public class NewGameWizard
             void DeleteWorld()
             {
                 Sound.PlayClick();
-                if (entry.Id != null && !WorldLibrary.Delete(entry.Id)) { message = "Не удалось удалить мир."; return; }
+                if (entry.Id != null && !WorldLibrary.Delete(entry.Id)) { message = L.T("Не удалось удалить мир."); return; }
                 entries.RemoveAt(sel);
                 sel = Math.Min(sel, entries.Count - 1);
                 descFor = null;
-                message = $"Мир «{entry.Label}» удалён.";
+                message = L.F("Мир «{0}» удалён.", entry.Label);
             }
 
             void RunAi()
@@ -534,7 +536,7 @@ public class NewGameWizard
                 // Без запроса нейронка только придумывает с нуля; переписывать готовое описание «ни о чём» — нет.
                 if (prompt.Trim().Length == 0 && desc.Trim().Length > 0)
                 {
-                    message = "Напиши в «Ввод», что изменить в описании";   // видно в строке ввода
+                    message = L.T("Напиши в «Ввод», что изменить в описании");   // видно в строке ввода
                     return;
                 }
                 aiWorld = world;
@@ -570,7 +572,7 @@ public class NewGameWizard
                 // Готовый мир обязан иметь описание.
                 if (desc.Trim().Length == 0)
                 {
-                    message = "Сначала описание мира: напиши своё или нажми «ПРИДУМАТЬ».";
+                    message = L.T("Сначала описание мира: напиши своё или нажми «ПРИДУМАТЬ».");
                     focus = FQ;
                     return null;
                 }
@@ -611,12 +613,13 @@ public class NewGameWizard
             Clear();
             const int w = 64, h = 7;
             int left = Math.Max(0, (_width - w) / 2), top = Math.Max(1, (_height - h) / 2 - 2);
-            DrawBox(top, left, w, h, "ВЫЙТИ В МЕНЮ?");
-            CenterIn(top + 2, left, w, "Прогресс создания новой игры не сохранится.", Bright);
-            int bx = left + (w - "ВЫЙТИ".Length - "ОСТАТЬСЯ".Length - 10) / 2;
-            bx = Button(top + 4, bx, "ВЫЙТИ", false, "yes") + 2;
-            Button(top + 4, bx, "ОСТАТЬСЯ", false, "no");
-            CenterIn(top + h + 1, left, w, "[Enter]ВЫЙТИ   [Esc]ОСТАТЬСЯ", Dim);
+            DrawBox(top, left, w, h, L.T("ВЫЙТИ В МЕНЮ?"));
+            CenterIn(top + 2, left, w, L.T("Прогресс создания новой игры не сохранится."), Bright);
+            string quit = L.T("ВЫЙТИ"), stay = L.T("ОСТАТЬСЯ");
+            int bx = left + (w - quit.Length - stay.Length - 10) / 2;
+            bx = Button(top + 4, bx, quit, false, "yes") + 2;
+            Button(top + 4, bx, stay, false, "no");
+            CenterIn(top + h + 1, left, w, L.T("[Enter]ВЫЙТИ   [Esc]ОСТАТЬСЯ"), Dim);
             Flush();
             var input = await WaitInput(0);
             if (input == null) continue;
@@ -747,7 +750,7 @@ public class NewGameWizard
             int vx = left + ValueCol, lx = left + LabelCol, valueW = FormWidth - ValueCol - 3;
 
             // Блок «ПРИКЛЮЧЕНИЕ»: параметры группами, старт и кнопки.
-            DrawBox(top, left, FormWidth, TopBoxHeight, "ПРИКЛЮЧЕНИЕ");
+            DrawBox(top, left, FormWidth, TopBoxHeight, L.T("ПРИКЛЮЧЕНИЕ"));
             int y = top + 2;
             for (int p = 0; p < opts.Count; p++, y++)
             {
@@ -757,18 +760,18 @@ public class NewGameWizard
                 Hit(y, lx - 2, ValueCol - LabelCol + 2, $"f:{p}");
             }
             y++;
-            Label(y, lx, "СТАРТ", false);
-            string start = startPlace ?? (startTile is { } st ? TileText(world, st) : "решит мастер");
+            Label(y, lx, L.T("СТАРТ"), false);
+            string start = startPlace ?? (startTile is { } st ? TileText(world, st) : L.T("решит мастер"));
             var startLines = Wrap(start, valueW);
             for (int i = 0; i < startLines.Count && i < 2; i++) Put(y + i, vx, startLines[i], hasStart ? StartMarkColor : Dim);
-            if (!hasStart) Put(y + 1, vx, Fit("или клик по карте", valueW), Dim);
+            if (!hasStart) Put(y + 1, vx, Fit(L.T("или клик по карте"), valueW), Dim);
             int bx = lx;
-            if (hasStart) bx = Button(top + TopBoxHeight - 3, bx, "СБРОСИТЬ", focus == FB && action == 0, "reset") + 2;
-            Button(top + TopBoxHeight - 3, bx, "РАНДОМ СТАРТ", focus == FB && (action == 1 || !hasStart), "random");
+            if (hasStart) bx = Button(top + TopBoxHeight - 3, bx, L.T("СБРОСИТЬ"), focus == FB && action == 0, "reset") + 2;
+            Button(top + TopBoxHeight - 3, bx, L.T("РАНДОМ СТАРТ"), focus == FB && (action == 1 || !hasStart), "random");
 
             // Блок карты: колесо — масштаб, перетаскивание — сдвиг, клик — старт.
             int mapBoxLeft = left + FormWidth + Gap;
-            DrawBox(top, mapBoxLeft, MapBoxWidth, TopBoxHeight, (world.Chronicle.Name is { Length: > 0 } wn ? wn : "КАРТА").ToUpperInvariant());
+            DrawBox(top, mapBoxLeft, MapBoxWidth, TopBoxHeight, (world.Chronicle.Name is { Length: > 0 } wn ? wn : L.T("КАРТА")).ToUpperInvariant());
             int mapLeft = mapBoxLeft + (MapBoxWidth - mw) / 2, mapTop = top + 1;
             string under = "";   // что под курсором
             var underColor = Dim;
@@ -776,10 +779,10 @@ public class NewGameWizard
             {
                 int place = mp.view.PlaceAtCell(hc.col, hc.row);
                 var t = mp.view.TileAt(hc.col, hc.row, mw, mh, _advCam.Cx, _advCam.Cy, _advCam.Zoom);
-                if (place >= 0) { under = $"{mp.world.Places[place].Name} — {WorldPlaceTypes.Label(mp.world.Places[place].Type)}"; underColor = Fg; }
+                if (place >= 0) { under = $"{mp.world.Places[place].Name} — {L.T(WorldPlaceTypes.Label(mp.world.Places[place].Type))}"; underColor = Fg; }
                 else if (mp.world.InBounds(t.x, t.y))
                 {
-                    under = WorldBiomes.IsWater(mp.world.BiomeAt(t.x, t.y)) ? "вода — сюда нельзя" : TileText(mp.world, t);
+                    under = WorldBiomes.IsWater(mp.world.BiomeAt(t.x, t.y)) ? L.T("вода — сюда нельзя") : TileText(mp.world, t);
                     underColor = Fg;
                 }
             }
@@ -787,11 +790,11 @@ public class NewGameWizard
 
             // Блок «ПОЖЕЛАНИЯ К ИСТОРИИ» (необязательно): поле с курсором и прокруткой, как описание мира.
             int dTop = top + TopBoxHeight + 1;
-            DrawBox(dTop, left, total, DescHeight, "ПОЖЕЛАНИЯ К ИСТОРИИ");
+            DrawBox(dTop, left, total, DescHeight, L.T("ПОЖЕЛАНИЯ К ИСТОРИИ"));
             wishW = total - 6;
             bool wishEditing = focus == FW;
             if (wish.Length == 0 && !wishEditing)
-                Put(dTop + 1, lx, Fit("что хочешь от истории: сюжет, враги, настроение — необязательно, хватит параметров выше", wishW), Dim);
+                Put(dTop + 1, lx, Fit(L.T("что хочешь от истории: сюжет, враги, настроение — необязательно, хватит параметров выше"), wishW), Dim);
             else
             {
                 var view = TextArea.View(wish, wishCur, ref wishScroll, wishW, WishRows, wishEditing && wishFollow,
@@ -807,8 +810,9 @@ public class NewGameWizard
             for (int i = 0; i < WishRows; i++) Hit(dTop + 1 + i, left + 1, total - 3, $"wish:{i}");
 
             int by = dTop + DescHeight + 1;
-            Button(by, left + (total - "НАЧАТЬ ИГРУ".Length - 4) / 2, "НАЧАТЬ ИГРУ", focus == FS, "next");
-            CenterIn(by + 2, left, total, "[↑↓]ПОЛЕ   [←→]ВЫБОР   [Enter]НАЧАТЬ   [Esc]МЕНЮ", Dim);
+            string startText = L.T("НАЧАТЬ ИГРУ");
+            Button(by, left + (total - startText.Length - 4) / 2, startText, focus == FS, "next");
+            CenterIn(by + 2, left, total, L.T("[↑↓]ПОЛЕ   [←→]ВЫБОР   [Enter]НАЧАТЬ   [Esc]МЕНЮ"), Dim);
 
             // Карта: сначала холст (место карты не затирается), потом сама карта с камерой и отметкой старта.
             var marker = startTile ?? (startPlace != null && WorldAtlas.FindPlace(Preview(world), startPlace) is { } sp ? (sp.X, sp.Y) : null);
@@ -947,8 +951,8 @@ public class NewGameWizard
     private static string TileText(WorldMap w, (int x, int y) t)
     {
         int own = w.OwnerAt(t.x, t.y);
-        string land = own >= 0 && own < w.Kingdoms.Count ? (w.Chronicle.Kingdoms.FirstOrDefault(k => k.Id == own)?.Name ?? w.Kingdoms[own].Name) : "ничьи земли";
-        return $"{WorldBiomes.Get(w.BiomeAt(t.x, t.y)).Name.ToLowerInvariant()}, {land} ({WorldAtlas.Compass(w, t.x, t.y)})";
+        string land = own >= 0 && own < w.Kingdoms.Count ? (w.Chronicle.Kingdoms.FirstOrDefault(k => k.Id == own)?.Name ?? w.Kingdoms[own].Name) : L.T("ничьи земли");
+        return $"{L.T(WorldBiomes.Get(w.BiomeAt(t.x, t.y)).Name).ToLowerInvariant()}, {land} ({L.T(WorldAtlas.Compass(w, t.x, t.y))})";
     }
 
     // ── Карта ────────────────────────────────────────────────────────────────

@@ -13,7 +13,7 @@ public class InputBox
     private readonly bool _arrowKeysMovement;
 
     private int _textWidth;
-    private string _prompt = " Ввод: ";
+    private string _prompt = " " + L.T("Ввод: ");
     private int _promptLength;
 
     private int _maxLine = 1;

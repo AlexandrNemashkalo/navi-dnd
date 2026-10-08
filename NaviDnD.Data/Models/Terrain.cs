@@ -1,4 +1,4 @@
-﻿namespace NaviDnD.Data.Models;
+namespace NaviDnD.Data.Models;
 
 // Вид рельефа клетки (открытая местность): как выглядит и как влияет на движение/обзор. Рельеф лежит
 // в блоке локации строками кодов (MapChunk.Terrain), генерирует его код (OutdoorGenerator) — карта не
@@ -143,14 +143,15 @@ public static class TerrainCatalog
 
     public static string? Image(TerrainKind kind) => Images.GetValueOrDefault(kind.Code);
 
-    // Свойства вида одной строкой («непроходимо, закрывает обзор») или null — обычная клетка.
+    // Свойства вида одной строкой («непроходимо, закрывает обзор») для подсказки на экране — на языке интерфейса;
+    // null — обычная клетка.
     public static string? Properties(TerrainKind kind)
     {
         var props = new List<string>();
-        if (kind.BlocksMove) props.Add("непроходимо");
-        if (kind.BlocksSight) props.Add("закрывает обзор");
-        if (kind.StepCostFt > 5) props.Add($"трудная ×{kind.StepCostFt / 5}");
-        if (kind.Cover != null) props.Add($"укрытие {kind.Cover}");
+        if (kind.BlocksMove) props.Add(L.T("непроходимо"));
+        if (kind.BlocksSight) props.Add(L.T("закрывает обзор"));
+        if (kind.StepCostFt > 5) props.Add(L.F("трудная ×{0}", kind.StepCostFt / 5));
+        if (kind.Cover != null) props.Add(L.F("укрытие {0}", L.T(kind.Cover)));
         return props.Count == 0 ? null : string.Join(", ", props);
     }
 

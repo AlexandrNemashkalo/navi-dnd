@@ -360,8 +360,8 @@ public class GameAiClient
         }
         catch (Exception ex)
         {
-            RecordError(ex, response, "Ошибка в пути");
-            _settings.History.Add(new DialogMessage { Text = "Мастер не ответил, но путь пройден: дорогу, еду и встречи он опишет со следующим твоим действием." });
+            RecordError(ex, response, L.T("Ошибка в пути"));
+            _settings.History.Add(new DialogMessage { Text = L.T("Мастер не ответил, но путь пройден: дорогу, еду и встречи он опишет со следующим твоим действием.") });
             _storage.Save();
         }
     }
@@ -397,7 +397,7 @@ public class GameAiClient
         }
         catch (Exception ex)
         {
-            RecordError(ex, response, "Ошибка хода врагов");
+            RecordError(ex, response, L.T("Ошибка хода врагов"));
         }
     }
 
@@ -418,7 +418,7 @@ public class GameAiClient
         }
         catch (Exception ex)
         {
-            RecordError(ex, response, "Ошибка раунда");
+            RecordError(ex, response, L.T("Ошибка раунда"));
         }
     }
 
@@ -455,7 +455,7 @@ public class GameAiClient
         }
         catch (Exception ex)
         {
-            RecordError(ex, response, "Ошибка триггера");
+            RecordError(ex, response, L.T("Ошибка триггера"));
         }
     }
 
@@ -724,8 +724,9 @@ public class GameAiClient
 
     // Подробности — только при настройке «ОШИБКИ ИИ: ПОДРОБНО»; иначе игроку — коротко, что делать. Ошибка настройки
     // нейронки (CLI не найден) — всегда своим текстом: повтор не поможет. Полностью — в логе нейронки.
-    private void RecordError(Exception ex, string response, string prefix = "Ошибка")
+    private void RecordError(Exception ex, string response, string? prefix = null)
     {
+        prefix ??= L.T("Ошибка");
         Logger?.LogNote($"{prefix}: {ex}" + (response.Length > 0 ? $"\nОтвет: {response}" : ""));
         if ((ex as AiSetupException ?? ex.InnerException as AiSetupException) is { } setup)
         {
@@ -737,8 +738,8 @@ public class GameAiClient
         _settings.History.Add(new DialogMessage
         {
             Text = _appConfig.ShowAiErrors || _appConfig.MockedActions.Length > 0
-                ? $"{prefix}: {ex.Message} Ответ: {preview}"
-                : $"{prefix}: мастер запнулся и не смог ответить — повтори действие.",
+                ? $"{prefix}: {ex.Message} " + L.T("Ответ: ") + preview
+                : $"{prefix}: " + L.T("мастер запнулся и не смог ответить — повтори действие."),
         });
     }
 

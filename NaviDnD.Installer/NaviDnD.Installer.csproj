@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
     <ApplicationIcon>../NaviDnD/dnd.ico</ApplicationIcon>
   </PropertyGroup>
+  <!-- Язык окна и сообщений: общий L из игры, перевод — только строки установщика (en.json рядом), чтобы правки
+       текста игры не пересобирали установщик. -->
+  <ItemGroup>
+    <Compile Include="../NaviDnD.Data/L.cs" Link="L.cs" />
+    <EmbeddedResource Include="en.json" LogicalName="NaviDnD.Localization.en.json" />
+  </ItemGroup>
 </Project>

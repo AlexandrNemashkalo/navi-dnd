@@ -44,6 +44,7 @@ class Program
         config.InitializeStorage();
         // Настройки игрока (экран «НАСТРОЙКИ») — не в UI-тестах: там важны значения по умолчанию.
         if (Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null) config.LoadUserSettings();
+        L.SetLanguage(config.Language);
         string initialClaudePath = config.ClaudeCliPath, initialCodexPath = config.CodexCliPath;
         string initialProvider = config.AiProvider;
         var cliDiscovery = Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null
@@ -206,7 +207,7 @@ class Program
         {
             ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
             borderDrawer.DrawTopBorder();
-            const string gamesTitle = " МОИ ИГРЫ   [Esc]МЕНЮ";
+            string gamesTitle = L.T(" МОИ ИГРЫ   [Esc]МЕНЮ");
             borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(gamesTitle, display));
             var (action, slot) = new GamesDisplay(settings, display, gamesTitle, message).Show();
             if (action == GamesDisplay.Action.Play)
@@ -238,12 +239,12 @@ class Program
                 ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
                 Console.SetCursorPosition(0, 0);
                 borderDrawer.DrawTopBorder();
-                borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(" НОВАЯ ИГРА", display));
+                borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(L.T(" НОВАЯ ИГРА"), display));
                 borderDrawer.DrawSeparator();
                 int waitRows = Math.Max(3, Console.WindowHeight - 5);
                 for (int r = 0; r < waitRows; r++) borderDrawer.DrawContentLine(() => { });
                 borderDrawer.DrawBottomBorder();
-                await Helpers.Spinner.WhileCentered(startTask, "Создаём мир", 3 + waitRows / 2,
+                await Helpers.Spinner.WhileCentered(startTask, L.T("Создаём мир"), 3 + waitRows / 2,
                     DisplayConfig.LeftMargin + 1, display.InnerWidth(display.ViewCols(settings.Map)), ColorHelper.Pale(display.MainForeground, 0.75));
                 await startTask;
                 // Параметры приключения — мастеру на каждый ход (narrative.style → строка style: в состоянии).
@@ -283,9 +284,9 @@ class Program
                         AiSetupNotice.Show();
                         ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
                         borderDrawer.DrawTopBorder();
-                        const string setupTitle = " ?????????: Claude ? Codex ?? ???????   [Esc]????";
-                        borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(setupTitle, display));
-                        new SettingsDisplay(settings, display, config, storage, setupTitle).Show();
+                        static string SetupTitle() => L.T(" НАСТРОЙКИ: Claude и Codex не найдены   [Esc]МЕНЮ");
+                        borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(SetupTitle(), display));
+                        new SettingsDisplay(settings, display, config, storage, SetupTitle).Show();
                         continue;
                     }
                 }
@@ -300,9 +301,9 @@ class Program
                     // Настройки — свой экран в рамке с заголовком; выход из них — снова в меню.
                     ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
                     borderDrawer.DrawTopBorder();
-                    const string settingsTitle = " НАСТРОЙКИ   [Esc]МЕНЮ";
-                    borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(settingsTitle, display));
-                    new SettingsDisplay(settings, display, config, storage, settingsTitle).Show();
+                    static string SettingsTitle() => L.T(" НАСТРОЙКИ   [Esc]МЕНЮ");
+                    borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(SettingsTitle(), display));
+                    new SettingsDisplay(settings, display, config, storage, SettingsTitle).Show();
                     continue;
                 }
                 // Новая игра — в первое свободное место; все заняты — «МОИ ИГРЫ» с подсказкой освободить.
@@ -310,7 +311,7 @@ class Program
                 {
                     state.NewGame = null;   // создание с чистого листа
                     if (Storage.FreeSlot() is int free) state.NewGameSlot = free;
-                    else { ShowGames($"Все {Storage.MaxGames} места заняты — удали одну из игр [Del], чтобы начать новую"); continue; }
+                    else { ShowGames(L.F("Все {0} места заняты — удали одну из игр [Del], чтобы начать новую", Storage.MaxGames)); continue; }
                 }
                 if (choice == MainMenuDisplay.Choice.Games) { ShowGames(null); continue; }
                 string command = choice switch
@@ -338,7 +339,7 @@ class Program
             if (state.NewGame is { } newGameSession) ScreenRegistry.RefreshNewGameTitles(screens, newGameSession);
 
             string title = state.CurrentScreen == Screen.Menu && !hasSave()
-                ? " МЕНЮ   [F2]НОВАЯ ИГРА     [Esc]ВЫЙТИ"
+                ? L.T(" МЕНЮ   [F2]НОВАЯ ИГРА     [Esc]ВЫЙТИ")
                 : screen.Title;
 
             borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(title, display));

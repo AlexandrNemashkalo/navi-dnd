@@ -1,4 +1,4 @@
-﻿namespace NaviDnD.Data.Models;
+namespace NaviDnD.Data.Models;
 
 public class MapConfig
 {
@@ -87,6 +87,9 @@ public class MapConfig
 
     // «1 этаж», «2 этаж», «подвал», «подвал 2».
     public static string FloorName(int z) => z >= 0 ? $"{z + 1} этаж" : z == -1 ? "подвал" : $"подвал {-z}";
+
+    // То же для экрана — на языке интерфейса (FloorName уходит мастеру и в историю — по-русски).
+    public static string FloorLabel(int z) => z >= 0 ? L.F("{0} этаж", z + 1) : z == -1 ? L.T("подвал") : L.F("подвал {0}", -z);
 
     // Сдвиг всего содержимого карты: комнаты, двери, зоны, существа, объекты, клетки-триггеры.
     public void Translate(int dx, int dy)

@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using NaviDnD.Data.Models;
 using NaviDnD.Helpers;
 using NaviDnD.MapGen.Generators;
@@ -43,8 +43,8 @@ public sealed class WorldMapView
     private string _filterKey = "";
 
     // Категории фильтра легенды: ключ, подпись, клавиша.
-    public static readonly (string key, string label, string fkey)[] Categories =
-        [("settlements", "Поселения", "F7"), ("sites", "Приключения", "F8"), ("nature", "Природа", "F9")];
+    public static (string key, string label, string fkey)[] Categories =>
+        [("settlements", L.T("Поселения"), "F7"), ("sites", L.T("Приключения"), "F8"), ("nature", L.T("Природа"), "F9")];
 
     // Крепости — вместе с поселениями.
     public static string Category(string type) => type switch

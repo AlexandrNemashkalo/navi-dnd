@@ -374,9 +374,9 @@ internal class MapScreenLoop
                 pendingHoverDoor = null;
                 doorHoverSince = null;
                 var committedDoor = _display.HoveredDoor!;
-                string doorLabel = committedDoor.IsWorldExit == true ? "Выход на карту мира"
-                    : committedDoor.IsWindow == true ? ((committedDoor.IsDoorOpen ?? false) ? "Окно открыто" : "Окно")
-                    : (committedDoor.IsDoorOpen ?? false) ? "Дверь открыта" : "Дверь закрыта";
+                string doorLabel = committedDoor.IsWorldExit == true ? L.T("Выход на карту мира")
+                    : committedDoor.IsWindow == true ? ((committedDoor.IsDoorOpen ?? false) ? L.T("Окно открыто") : L.T("Окно"))
+                    : (committedDoor.IsDoorOpen ?? false) ? L.T("Дверь открыта") : L.T("Дверь закрыта");
                 SetMapImage(MouseUiHelper.DoorImage(committedDoor, _settings.Map), doorLabel, committedDoor.Color);
                 bool visDoor = Console.CursorVisible;
                 Console.CursorVisible = false;
@@ -578,7 +578,7 @@ internal class MapScreenLoop
                     shownFurniture = hoverThing;
                     if (furnitureHere != null)
                     {
-                        string label = FurnitureCatalog.DisplayName(furnitureHere) + (string.IsNullOrEmpty(furnitureHere.State) ? "" : $" ({furnitureHere.State})");
+                        string label = L.T(FurnitureCatalog.DisplayName(furnitureHere)) + (string.IsNullOrEmpty(furnitureHere.State) ? "" : $" ({furnitureHere.State})");
                         if (FurnitureCatalog.Terrain(furnitureHere) is { } fk && TerrainCatalog.Properties(fk) is { } fprops) label += "\n" + fprops;
                         SetMapImage(furnitureHere.Image ?? FurnitureCatalog.Get(furnitureHere.Kind)?.Image, label,
                             FurnitureCatalog.Terrain(furnitureHere)?.LegendColor);
@@ -588,13 +588,13 @@ internal class MapScreenLoop
                     {
                         var (sc, sr) = cell!.Value;
                         string label = _settings.Map.StairTarget(sc, sr) is var (tc, tr)
-                            ? $"{stairHere.Name} → {MapConfig.FloorName(_settings.Map.FloorAt(tc, tr))}" : stairHere.Name;
+                            ? $"{L.T(stairHere.Name)} → {MapConfig.FloorLabel(_settings.Map.FloorAt(tc, tr))}" : L.T(stairHere.Name);
                         SetMapImage(TerrainCatalog.Image(stairHere), label, stairHere.LegendColor);
                         activeDialog?.RerenderRightPanel();
                     }
                     else if (terrainHere != null)
                     {
-                        string label = terrainHere.Name + (TerrainCatalog.Properties(terrainHere) is { } tprops ? "\n" + tprops : "");
+                        string label = L.T(terrainHere.Name) + (TerrainCatalog.Properties(terrainHere) is { } tprops ? "\n" + tprops : "");
                         SetMapImage(TerrainCatalog.Image(terrainHere), label, terrainHere.LegendColor ?? terrainHere.Fg);
                         activeDialog?.RerenderRightPanel();
                     }
@@ -648,21 +648,22 @@ internal class MapScreenLoop
             {
                 char b = world.BiomeAt(h.x, h.y);
                 int own = world.OwnerAt(h.x, h.y);
-                string land = WorldBiomes.IsWater(b) ? "" : own >= 0 && own < world.Kingdoms.Count ? world.Kingdoms[own].Name : "ничьи земли";
+                string land = WorldBiomes.IsWater(b) ? "" : own >= 0 && own < world.Kingdoms.Count ? world.Kingdoms[own].Name : L.T("ничьи земли");
                 // Река или дорога на клетке — главное (своя картинка и название), рельеф — во второй строке.
                 int road = world.RoadAt(h.x, h.y);
                 var biome = WorldBiomes.Get(b);
-                var (title, image, color) = world.RiverAt(h.x, h.y) > 0 && road > 0 ? ("Мост", road == 2 ? "delapouite/stone-bridge" : "delapouite/arch-bridge", new List<int> { 150, 108, 70 })
-                    : world.RiverAt(h.x, h.y) > 0 ? ("Река", "delapouite/river", new List<int> { 72, 122, 178 })
-                    : road == 2 ? ("Тракт", "delapouite/stone-path", new List<int> { 176, 148, 102 })
-                    : road == 1 ? ("Тропа", "delapouite/trail", new List<int> { 146, 128, 96 })
-                    : (biome.Name, WorldMapView.BiomeImage(b), biome.Color);
-                string terrain = title == biome.Name ? "" : biome.Name.ToLowerInvariant();
+                string biomeName = L.T(biome.Name);
+                var (title, image, color) = world.RiverAt(h.x, h.y) > 0 && road > 0 ? (L.T("Мост"), road == 2 ? "delapouite/stone-bridge" : "delapouite/arch-bridge", new List<int> { 150, 108, 70 })
+                    : world.RiverAt(h.x, h.y) > 0 ? (L.T("Река"), "delapouite/river", new List<int> { 72, 122, 178 })
+                    : road == 2 ? (L.T("Тракт"), "delapouite/stone-path", new List<int> { 176, 148, 102 })
+                    : road == 1 ? (L.T("Тропа"), "delapouite/trail", new List<int> { 146, 128, 96 })
+                    : (biomeName, WorldMapView.BiomeImage(b), biome.Color);
+                string terrain = title == biomeName ? "" : biomeName.ToLowerInvariant();
                 // Клетка героя — «Вы здесь» его портретом.
                 if (GameWorld.HeroTile(_settings) == (h.x, h.y))
                 {
-                    terrain = title == biome.Name ? biome.Name.ToLowerInvariant() : title.ToLowerInvariant();
-                    (title, image, color) = ("Вы здесь", _settings.Hero?.Image ?? image, _settings.Hero?.Color ?? color);
+                    terrain = title == biomeName ? biomeName.ToLowerInvariant() : title.ToLowerInvariant();
+                    (title, image, color) = (L.T("Вы здесь"), _settings.Hero?.Image ?? image, _settings.Hero?.Color ?? color);
                 }
                 string second = string.Join(" · ", new[] { terrain, land }.Where(t => t.Length > 0));
                 SetMapImage(image, title + (second.Length > 0 ? "\n" + second : ""), color);
@@ -678,7 +679,7 @@ internal class MapScreenLoop
             if (place < 0 || place >= world.Places.Count) { SetMapImage(null, null, null); return; }
             var pl = world.Places[place];
             string kingdom = pl.Kingdom >= 0 && pl.Kingdom < world.Kingdoms.Count ? " · " + world.Kingdoms[pl.Kingdom].Name : "";
-            SetMapImage(WorldMapView.PlaceImage(pl.Type), pl.Name + "\n" + WorldPlaceTypes.Label(pl.Type) + kingdom,
+            SetMapImage(WorldMapView.PlaceImage(pl.Type), pl.Name + "\n" + L.T(WorldPlaceTypes.Label(pl.Type)) + kingdom,
                 _mapDisplay.WorldView.PlaceLabelColor(pl));
         }
 
@@ -713,7 +714,7 @@ internal class MapScreenLoop
             bool heroTile = GameWorld.HeroTile(_settings) == target;
             var plan = heroTile ? null : TravelService.PlanTo(_settings, target);
             if (plan == null && !heroTile && GameWorld.HeroTile(_settings) != null)
-                SetMapImage("lorc/waves", "Пешком не дойти\nвода или горные пики на пути", [110, 150, 200]);
+                SetMapImage("lorc/waves", L.T("Пешком не дойти\nвода или горные пики на пути"), [110, 150, 200]);
             _display.WorldTarget = plan != null ? target : null;
             _display.WorldRoute = plan?.Route.Path;
             var w = _mapDisplay.WorldView.World;
@@ -727,13 +728,13 @@ internal class MapScreenLoop
             _settings.History ??= [];
             if (_display.WorldTarget is not { } target || TravelService.PlanTo(_settings, target) is not { } plan)
             {
-                _settings.History.Add(new Data.Models.DialogMessage { Text = "Выбери цель пути кликом по карте мира, затем [F10] — в путь." });
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Выбери цель пути кликом по карте мира, затем [F10] — в путь.") });
                 _storage.Save();
                 return;
             }
             if (_settings.Combat?.Active == true)
             {
-                _settings.History.Add(new Data.Models.DialogMessage { Text = "Идёт бой — уйти в путь нельзя." });
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Идёт бой — уйти в путь нельзя.") });
                 _storage.Save();
                 return;
             }
@@ -1137,7 +1138,7 @@ internal class MapScreenLoop
             // Ход героя, а он без сознания (0 хитов): сам он не действует — мастер ведёт его ход (спасбросок от
             // смерти и т.п. по правилам НРИ), раз в раунд, игроку писать нечего.
             string? downTurn = null;
-            if (_settings.Hero?.Dead == true) AddNoteOnce($"{_settings.Hero.Name} погиб. Игра окончена — [Esc] меню.");
+            if (_settings.Hero?.Dead == true) AddNoteOnce(L.F("{0} погиб. Игра окончена — [Esc] меню.", _settings.Hero.Name));
             if (_settings.Combat is { Active: true } dc && dc.CurrentTurn == _settings.Hero?.Symbol
                 && _settings.Hero is { IsDown: true, Dead: not true } && downTurnRound != _settings.Time.TotalRounds)
             {
@@ -1150,7 +1151,7 @@ internal class MapScreenLoop
             // Герой погиб — игра окончена: действия и движение не принимаются (вкладки и меню — как обычно).
             if (_settings.Hero?.Dead == true && mapInput is { Length: > 0 } && !mapInput.StartsWith('F') && mapInput != "Esc")
             {
-                AddNoteOnce($"{_settings.Hero.Name} погиб. Игра окончена — [Esc] меню.");
+                AddNoteOnce(L.F("{0} погиб. Игра окончена — [Esc] меню.", _settings.Hero.Name));
                 continue;
             }
 
@@ -1278,10 +1279,10 @@ internal class MapScreenLoop
             {
                 // Шаг через выход на карту мира: локация сохраняется за местом, вкладка «Карта» — мир.
                 movementHandler.LeaveRequested = false;
-                string where = _settings.World?.Place ?? "локацию";
+                string where = _settings.World?.Place ?? L.T("локацию");
                 GameWorld.LeaveLocation(_settings);
                 _settings.History ??= [];
-                _settings.History.Add(new Data.Models.DialogMessage { Text = $"Ты покидаешь {where} — карта мира: выбери цель кликом, [F10] — в путь." });
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.F("Ты покидаешь {0} — карта мира: выбери цель кликом, [F10] — в путь.", where) });
                 _storage.Save();
                 _display.PendingCommand = "F2";
                 break;

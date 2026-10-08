@@ -87,7 +87,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
                 {
                     Storage.DeleteSlot(_cards[_selected].Slot);
                     _cards[_selected] = new GameCard(_cards[_selected].Slot, false);
-                    _message = "Игра удалена";
+                    _message = L.T("Игра удалена");
                     Sound.PlayClick();
                 }
                 else _message = "";
@@ -147,22 +147,22 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
                 .FirstOrDefault(s => string.Equals((string?)s?["name"], name, StringComparison.OrdinalIgnoreCase))?["value"]?.ToString() ?? "";
             var color = hero?["color"]?.AsArray().Select(v => (int)v!).ToList();
             var time = root?["time"];
-            string timeText = time == null ? "" : $"День {time["day"]} · {time["partOfDay"]}";
+            string timeText = time == null ? "" : L.F("День {0}", time["day"]) + " · " + GameTime.PartOfDayText((string?)time["partOfDay"]);
             return new GameCard(slot, true,
-                Name: (string?)hero?["name"] ?? "Безымянный",
+                Name: (string?)hero?["name"] ?? L.T("Безымянный"),
                 Symbol: (string?)hero?["symbol"] ?? "",
                 Color: color is { Count: 3 } ? color : null,
                 Image: (string?)hero?["image"],
                 Race: Stat("Раса"),
                 Class: Stat("Класс"),
-                Hp: hero?["dead"]?.GetValue<bool>() == true ? "— погиб" : (string?)hero?["hp"] ?? "",
+                Hp: hero?["dead"]?.GetValue<bool>() == true ? L.T("— погиб") : (string?)hero?["hp"] ?? "",
                 Arc: (string?)root?["narrative"]?["currentArc"] ?? "",
                 Time: timeText,
                 Played: File.GetLastWriteTime(path));
         }
         catch
         {
-            return new GameCard(slot, true, Name: "Повреждённое сохранение", Played: File.GetLastWriteTime(path));
+            return new GameCard(slot, true, Name: L.T("Повреждённое сохранение"), Played: File.GetLastWriteTime(path));
         }
     }
 
@@ -195,9 +195,9 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         for (int i = 0; i < _cards.Count; i++) DrawCard(i);
 
         string footer = _confirmDelete
-            ? $"Удалить игру «{_cards[_selected].Name}»?   [Enter]ДА   [Esc]НЕТ"
+            ? L.F("Удалить игру «{0}»?   [Enter]ДА   [Esc]НЕТ", _cards[_selected].Name)
             : _message.Length > 0 ? _message
-            : _cards[_selected].Exists ? "[←→↑↓]ВЫБОР   [Enter]ИГРАТЬ   [Del]УДАЛИТЬ" : "[←→↑↓]ВЫБОР   [Enter]НОВАЯ ИГРА";
+            : _cards[_selected].Exists ? L.T("[←→↑↓]ВЫБОР   [Enter]ИГРАТЬ   [Del]УДАЛИТЬ") : L.T("[←→↑↓]ВЫБОР   [Enter]НОВАЯ ИГРА");
         CenterIn(_top + CardHeight * 2 + 2, _left, total, footer, _confirmDelete ? Bright : Dim);
 
         Console.CursorVisible = false;
@@ -210,13 +210,13 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         var (x, y) = CardOrigin(index);
         bool selected = index == _selected;
         bool active = card.Exists && card.Slot == Storage.ActiveSlot;
-        string boxTitle = $"ИГРА {card.Slot}" + (active ? " · ПОСЛЕДНЯЯ" : "");
+        string boxTitle = L.F("ИГРА {0}", card.Slot) + (active ? " · " + L.T("ПОСЛЕДНЯЯ") : "");
         DrawBox(y, x, CardWidth, CardHeight, boxTitle, selected ? Bright : MouseUiHelper.FrameColor(display), selected); // выбранная — светлой рамкой и стрелками
 
         if (!card.Exists)
         {
-            CenterIn(y + CardHeight / 2 - 1, x, CardWidth, "СВОБОДНО", selected ? Bright : Dim);
-            CenterIn(y + CardHeight / 2 + 1, x, CardWidth, "новая игра", Dim);
+            CenterIn(y + CardHeight / 2 - 1, x, CardWidth, L.T("СВОБОДНО"), selected ? Bright : Dim);
+            CenterIn(y + CardHeight / 2 + 1, x, CardWidth, L.T("новая игра"), Dim);
             return;
         }
 
@@ -232,7 +232,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         Put(ty, tx, Fit(card.Name, tw), color);
         string who = string.Join(" · ", new[] { card.Race, card.Class }.Where(s => s.Length > 0));
         if (who.Length > 0) Put(ty + 1, tx, Fit(who, tw), Fg);
-        if (card.Hp.Length > 0) Put(ty + 2, tx, Fit("ХП " + card.Hp, tw), Fg);
+        if (card.Hp.Length > 0) Put(ty + 2, tx, Fit(L.T("ХП ") + card.Hp, tw), Fg);
 
         if (card.Arc.Length > 0)
         {
@@ -241,7 +241,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
                 Put(ty + 4 + i, tx, Fit(i == 2 && arc.Count > 3 ? arc[i] + "…" : arc[i], tw), Dim);
         }
         if (card.Time.Length > 0) Put(y + CardHeight - 3, tx, Fit(card.Time, tw), Dim);
-        Put(y + CardHeight - 2, tx, Fit($"Играли {card.Played:dd.MM HH:mm}", tw), Dim);
+        Put(y + CardHeight - 2, tx, Fit(L.F("Играли {0:dd.MM HH:mm}", card.Played), tw), Dim);
     }
 
     // Заголовок в разрыве верхней линии: «╭──── ИГРА 1 ────╮», у выбранной вместо части рамки стрелки —

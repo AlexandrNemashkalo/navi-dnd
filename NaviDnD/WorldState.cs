@@ -60,6 +60,12 @@ public class GameTime
 
     // Номер игрового дня — ИИ инкрементирует сам при переходе цикла через Ночь (см. промпт).
     public int Day { get; set; } = 1;
+
+    // Часть суток для экрана: канонические значения — на языке интерфейса, остальное как есть.
+    public static string PartOfDayText(string? value) => value switch
+    {
+        "Ночь" => L.T("Ночь"), "Утро" => L.T("Утро"), "День" => L.T("День"), "Вечер" => L.T("Вечер"), _ => value ?? "",
+    };
 }
 
 public class CombatState

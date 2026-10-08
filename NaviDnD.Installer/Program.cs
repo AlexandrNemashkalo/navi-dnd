@@ -8,6 +8,7 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        ChooseLanguage(args.Length >= 2 && args[0] is "--apply-update" or "--update-silent" or "--update" ? args[1] : null);
         // Автоматические проверки сборки без окна: база из частей рядом с установщиком / цепочка патчей из папки.
         if (args.Length == 2 && args[0] == "--extract")
         {
@@ -39,6 +40,23 @@ internal static class Program
         Application.Run(new SetupForm(destination, waitPid));
     }
 
+    // Язык окна и сообщений: как в установленной игре (Storage/settings.json), иначе — язык Windows.
+    private static void ChooseLanguage(string? root)
+    {
+        string? language = null;
+        try
+        {
+            string path = Path.Combine(root ?? "", "Storage", "settings.json");
+            if (root != null && File.Exists(path)
+                && System.Text.Json.JsonDocument.Parse(File.ReadAllText(path)).RootElement.TryGetProperty("Language", out var value))
+                language = value.GetString();
+        }
+        catch { }
+        language ??= System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName is "ru" or "uk" or "be" or "kk"
+            ? L.Russian : L.English;
+        L.SetLanguage(language);
+    }
+
     internal static void Extract(string destination, Action<string, double?>? progress = null)
     {
         Installation.Apply(destination, AppContext.BaseDirectory, progress);
@@ -60,7 +78,7 @@ internal static class Program
         {
             if (download != null) chain = await UpdateClient.DownloadPatchesAsync(installed, download, text => progress?.Invoke(text, null));
             if (chain.Count > 0) installed = PatchInstaller.ApplyChain(root, chain, progress);
-            progress?.Invoke("Установка помощника обновлений…", null);
+            progress?.Invoke(L.T("Установка помощника обновлений…"), null);
             UpdateClient.InstallHelper(root);
             return installed;
         }
@@ -72,7 +90,7 @@ internal static class Program
         bool parentExited = false;
         try
         {
-            try { using var parent = Process.GetProcessById(parentPid); if (!parent.WaitForExit(30000)) throw new IOException("Игра не закрылась за 30 секунд."); }
+            try { using var parent = Process.GetProcessById(parentPid); if (!parent.WaitForExit(30000)) throw new IOException(L.T("Игра не закрылась за 30 секунд.")); }
             catch (ArgumentException) { }
             parentExited = true;
             // Части базы есть — полная установка (повреждённая база, версия вне цепочки, переход со старого клиента).
@@ -99,7 +117,7 @@ internal static class Program
         }
         catch (Exception error)
         {
-            try { File.AppendAllText(Path.Combine(destination, "Storage", "update-error.txt"), "\nНе удалось перезапустить игру: " + error.Message); } catch { }
+            try { File.AppendAllText(Path.Combine(destination, "Storage", "update-error.txt"), "\n" + L.T("Не удалось перезапустить игру: ") + error.Message); } catch { }
         }
         // Скачанное — во временной папке игры/старого клиента; сам помощник там занят и удалится позже вместе с Temp.
         foreach (string pattern in new[] { "NaviDnD-payload.*", "NaviDnD-patch-*.zip" })
@@ -112,9 +130,9 @@ internal sealed class SetupForm : Form
 {
     private readonly TextBox folder = new() { Width = 390, Text = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NaviDnD") };
-    private readonly Button install = new() { Text = "Установить", AutoSize = true };
-    private readonly CheckBox shortcut = new() { Text = "Ярлык на рабочем столе", Checked = true, AutoSize = true };
-    private readonly CheckBox launch = new() { Text = "Запустить после установки", Checked = true, AutoSize = true };
+    private readonly Button install = new() { Text = L.T("Установить"), AutoSize = true };
+    private readonly CheckBox shortcut = new() { Text = L.T("Ярлык на рабочем столе"), Checked = true, AutoSize = true };
+    private readonly CheckBox launch = new() { Text = L.T("Запустить после установки"), Checked = true, AutoSize = true };
     private readonly Label status = new() { AutoSize = true };
     private readonly ProgressBar bar = new() { Maximum = 1000, Visible = false };
     private bool installed;
@@ -123,8 +141,8 @@ internal sealed class SetupForm : Form
 
     internal SetupForm(string? updateDestination = null, int waitPid = 0)
     {
-        if (updateDestination != null) { folder.Text = updateDestination; shortcut.Checked = false; install.Text = "Обновить"; }
-        Text = "Установка NaviDnD";
+        if (updateDestination != null) { folder.Text = updateDestination; shortcut.Checked = false; install.Text = L.T("Обновить"); }
+        Text = L.T("Установка NaviDnD");
         // Окно по содержимому: при масштабе Windows 150–200% шрифт крупнее, и окно фиксированного размера обрезало кнопку.
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -137,12 +155,12 @@ internal sealed class SetupForm : Form
         bar.Size = new Size(textWidth.Width, LogicalToDeviceUnits(20));
         var panel = new FlowLayoutPanel { AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
             Padding = new Padding(LogicalToDeviceUnits(20)), FlowDirection = FlowDirection.TopDown, WrapContents = false };
-        panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = "NaviDnD для Windows x64 — .NET уже включён." });
-        panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = "Для ИИ нужен отдельный Codex CLI или Claude Code и вход в аккаунт." });
-        panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = "Папка установки:" });
+        panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = L.T("NaviDnD для Windows x64 — .NET уже включён.") });
+        panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = L.T("Для ИИ нужен отдельный Codex CLI или Claude Code и вход в аккаунт.") });
+        panel.Controls.Add(new Label { AutoSize = true, MaximumSize = textWidth, Text = L.T("Папка установки:") });
         var row = new FlowLayoutPanel { AutoSize = true, WrapContents = false };
         row.Controls.Add(folder);
-        var browse = new Button { Text = "Обзор…", AutoSize = true };
+        var browse = new Button { Text = L.T("Обзор…"), AutoSize = true };
         browse.Click += (_, _) => {
             using var dialog = new FolderBrowserDialog { SelectedPath = folder.Text };
             if (dialog.ShowDialog(this) == DialogResult.OK) folder.Text = dialog.SelectedPath;
@@ -165,16 +183,16 @@ internal sealed class SetupForm : Form
                 string destination = Path.GetFullPath(folder.Text);
                 if (waitPid > 0)
                 {
-                    status.Text = "Ожидание закрытия игры…";
-                    await Task.Run(() => { try { using var process = Process.GetProcessById(waitPid); if (!process.WaitForExit(30000)) throw new IOException("Закройте игру перед обновлением."); } catch (ArgumentException) { } });
+                    status.Text = L.T("Ожидание закрытия игры…");
+                    await Task.Run(() => { try { using var process = Process.GetProcessById(waitPid); if (!process.WaitForExit(30000)) throw new IOException(L.T("Закройте игру перед обновлением.")); } catch (ArgumentException) { } });
                 }
                 foreach (var process in Process.GetProcessesByName("NaviDnD"))
                 {
                     using (process)
                     if (string.Equals(process.MainModule?.FileName, Path.Combine(destination, "NaviDnD.exe"), StringComparison.OrdinalIgnoreCase))
-                        throw new IOException("Закройте игру перед обновлением.");
+                        throw new IOException(L.T("Закройте игру перед обновлением."));
                 }
-                Report("Подготовка архива…", 0);
+                Report(L.T("Подготовка архива…"), 0);
                 await Task.Run(() => Program.Extract(destination, Report));
                 // База поставлена — до актуальной версии патчами (рядом с установщиком или из релиза).
                 string version;
@@ -184,13 +202,13 @@ internal sealed class SetupForm : Form
                 }
                 catch (Exception patchError)
                 {
-                    MessageBox.Show(this, $"Установлена базовая версия {UpdateClient.InstalledVersion(destination)}. Обновления не применены: " +
-                        patchError.Message + "\nИгра предложит обновиться при запуске.", "Обновления", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, L.F("Установлена базовая версия {0}. Обновления не применены: ", UpdateClient.InstalledVersion(destination)) +
+                        patchError.Message + "\n" + L.T("Игра предложит обновиться при запуске."), L.T("Обновления"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     version = UpdateClient.InstalledVersion(destination);
                 }
                 string executable = Path.Combine(destination, "NaviDnD.exe");
                 if (shortcut.Checked) CreateShortcut(destination, executable);
-                Report($"Игра {version} установлена. Настройки и сохранения создаются при запуске.", 1);
+                Report(L.F("Игра {0} установлена. Настройки и сохранения создаются при запуске.", version), 1);
                 if (launch.Checked)
                 {
                     var start = new ProcessStartInfo(ConsoleHostPath) {
@@ -198,15 +216,15 @@ internal sealed class SetupForm : Form
                     start.ArgumentList.Add(executable);
                     Process.Start(start);
                 }
-                install.Text = "Закрыть";
+                install.Text = L.T("Закрыть");
                 installed = true;
                 install.Enabled = true;
             }
             catch (Exception error)
             {
                 bar.Visible = false;
-                MessageBox.Show(this, error.Message + "\nЗакройте игру и проверьте доступ к папке.",
-                    "Ошибка установки", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, error.Message + "\n" + L.T("Закройте игру и проверьте доступ к папке."),
+                    L.T("Ошибка установки"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 install.Enabled = true;
                 row.Enabled = true;
             }

@@ -6,9 +6,9 @@ namespace NaviDnD.Display;
 internal sealed class UpdateDisplay(WorldState settings, DisplayConfig display)
 {
     private readonly object gate = new();
-    private string status = "Проверка новой версии…";
+    private string status = L.T("Проверка новой версии…");
     private double? fraction;
-    private string detail = "Esc — отменить";
+    private string detail = L.T("Esc — отменить");
     private string? rendered;
     private int statusRow, width;
 
@@ -20,9 +20,9 @@ internal sealed class UpdateDisplay(WorldState settings, DisplayConfig display)
         Render();
     }
 
-    internal void Set(string message, double? progress = null, string hint = "Esc — отменить")
+    internal void Set(string message, double? progress = null, string? hint = null)
     {
-        lock (gate) { status = message; fraction = progress; detail = hint; }
+        lock (gate) { status = message; fraction = progress; detail = hint ?? L.T("Esc — отменить"); }
     }
 
     private void Render()
@@ -56,7 +56,7 @@ internal sealed class UpdateDisplay(WorldState settings, DisplayConfig display)
             if (ConsoleMouseReader.TryReadKey()?.Key == ConsoleKey.Escape)
             {
                 cancellation.Cancel();
-                Set("Отмена загрузки…", hint: "");
+                Set(L.T("Отмена загрузки…"), hint: "");
             }
             await Task.Delay(50);
         }
@@ -66,7 +66,7 @@ internal sealed class UpdateDisplay(WorldState settings, DisplayConfig display)
 
     internal async Task<bool> ConfirmAsync(string text, bool confirm)
     {
-        Set(text, hint: confirm ? "Enter — обновить и перезапустить    Esc — меню" : "Enter / Esc — меню");
+        Set(text, hint: confirm ? L.T("Enter — обновить и перезапустить    Esc — меню") : L.T("Enter / Esc — меню"));
         while (true)
         {
             Render();

@@ -938,14 +938,14 @@ internal static class MouseUiHelper
             if (lines.Count > 0) lines.Add("");
             lines.AddRange(TextWrapper.WrapText(trimmed, width));
         }
-        return lines.Count > 0 ? lines : ["Нет данных."];
+        return lines.Count > 0 ? lines : [L.T("Нет данных.")];
     }
 
     // Ширина колонки лейблов в блоке время/дистанция/компоненты/длительность — все значения
     // выравниваются под самый длинный лейбл ("Длительность"), по аналогии с колонкой статов
     // персонажа (HeroDisplay.DrawHeroCard: key.PadRight(leftKeyMax) + разделитель).
-    private static readonly int SpellFieldLabelWidth =
-        new[] { "Время", "Дистанция", "Компоненты", "Длительность" }.Max(l => l.Length);
+    private static int SpellFieldLabelWidth =>
+        new[] { L.T("Время"), L.T("Дистанция"), L.T("Компоненты"), L.T("Длительность") }.Max(l => l.Length);
 
     // Карточка заклинания: шапка (название, круг+школа, время/дистанция/компоненты/длительность)
     // остаётся неизменной на каждой странице, листается только текст описания — в отличие от
@@ -960,7 +960,7 @@ internal static class MouseUiHelper
         int total = display.MaxHistoryLines;
         int textWidth = Math.Max(1, display.DialogRightPanelWidth - 2);
 
-        string levelText = spell.Level <= 0 ? "Заговор" : $"{LevelToRoman(spell.Level)} круг";
+        string levelText = spell.Level <= 0 ? L.T("Заговор") : L.F("{0} круг", LevelToRoman(spell.Level));
         string schoolText = Capitalize(info?.School);
         string subtitle = schoolText.Length == 0 ? levelText : $"{levelText}, {schoolText}";
 
@@ -969,10 +969,10 @@ internal static class MouseUiHelper
             spell.Name.ToUpperInvariant(),
             subtitle,
             new string('─', textWidth),
-            SpellField("Время", info?.CastingTime, textWidth),
-            SpellField("Дистанция", info?.Range, textWidth),
-            SpellField("Компоненты", info?.Components, textWidth),
-            SpellField("Длительность", info?.Duration, textWidth),
+            SpellField(L.T("Время"), info?.CastingTime, textWidth),
+            SpellField(L.T("Дистанция"), info?.Range, textWidth),
+            SpellField(L.T("Компоненты"), info?.Components, textWidth),
+            SpellField(L.T("Длительность"), info?.Duration, textWidth),
             new string('─', textWidth),
         };
 
@@ -1008,7 +1008,7 @@ internal static class MouseUiHelper
     // абзац отдельным TextWrapper.WrapText, между абзацами пустая строка.
     private static List<string> WrapSpellText(string? raw, int width)
     {
-        if (string.IsNullOrEmpty(raw)) return ["Нет описания."];
+        if (string.IsNullOrEmpty(raw)) return [L.T("Нет описания.")];
         var paragraphs = raw.Replace("<br/>", "<br>").Replace("<br />", "<br>").Split("<br>");
         var lines = new List<string>();
         foreach (var p in paragraphs)
@@ -1018,7 +1018,7 @@ internal static class MouseUiHelper
             if (lines.Count > 0) lines.Add("");
             lines.AddRange(TextWrapper.WrapText(trimmed, width));
         }
-        return lines.Count > 0 ? lines : ["Нет описания."];
+        return lines.Count > 0 ? lines : [L.T("Нет описания.")];
     }
 
     private static string Capitalize(string? s) =>

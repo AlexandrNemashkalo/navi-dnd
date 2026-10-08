@@ -41,23 +41,23 @@ internal static class UpdateClient
     // Патчи последнего релиза от установленной версии — в workDir, с проверкой SHA256. Пусто — обновлять нечего.
     internal static async Task<List<string>> DownloadPatchesAsync(string installed, string workDir, Action<string>? status = null)
     {
-        status?.Invoke("Проверка обновлений…");
+        status?.Invoke(L.T("Проверка обновлений…"));
         using var release = JsonDocument.Parse(await Client.GetStringAsync(LatestRelease));
         var link = release.RootElement.GetProperty("assets").GetProperty("links").EnumerateArray()
             .FirstOrDefault(a => a.GetProperty("name").GetString() == UpdateManifest.FileName);
         if (link.ValueKind == JsonValueKind.Undefined) return [];
         string url = link.GetProperty("url").GetString()!;
-        if (!url.StartsWith("https://gitlab.com/navitalevich/navi-dnd/", StringComparison.Ordinal)) throw new InvalidDataException("Некорректный адрес обновления.");
+        if (!url.StartsWith("https://gitlab.com/navitalevich/navi-dnd/", StringComparison.Ordinal)) throw new InvalidDataException(L.T("Некорректный адрес обновления."));
         var manifest = UpdateManifest.Parse(await Client.GetStringAsync(url));
-        var patches = manifest.PatchesFrom(installed) ?? throw new InvalidDataException($"Нет патчей для версии {installed}.");
+        var patches = manifest.PatchesFrom(installed) ?? throw new InvalidDataException(L.F("Нет патчей для версии {0}.", installed));
         var result = new List<string>();
         int index = 0;
         foreach (var patch in patches)
         {
-            status?.Invoke($"Загрузка обновления {++index}/{patches.Length}: {patch.To}");
+            status?.Invoke(L.F("Загрузка обновления {0}/{1}: {2}", ++index, patches.Length, patch.To));
             string path = Path.Combine(workDir, patch.Name);
             await DownloadAsync(patch.Url, path);
-            if (UpdateManifest.Sha256(path) != patch.Sha256.ToLowerInvariant()) throw new InvalidDataException("Не совпала контрольная сумма: " + patch.Name);
+            if (UpdateManifest.Sha256(path) != patch.Sha256.ToLowerInvariant()) throw new InvalidDataException(L.T("Не совпала контрольная сумма: ") + patch.Name);
             result.Add(path);
         }
         return result;

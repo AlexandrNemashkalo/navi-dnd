@@ -170,7 +170,7 @@ internal static class ConsoleSetup
 
     internal static void SetConsoleConfig(WorldState settings)
     {
-        Console.Title = "DnD Движок";
+        Console.Title = "NaviDnD";
         Console.OutputEncoding = Encoding.UTF8;
 
         var display = new DisplayConfig();
@@ -405,7 +405,7 @@ internal static class ConsoleSetup
         }
         else
         {
-            Console.WriteLine("Не удалось загрузить иконку. Проверьте путь и формат (требуется .ico).");
+            Console.WriteLine(L.T("Не удалось загрузить иконку. Проверьте путь и формат (требуется .ico)."));
         }
     }
 

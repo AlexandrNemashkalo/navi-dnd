@@ -134,9 +134,9 @@ public static class WorldLibrary
                 var root = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8));
                 string? worldId = (string?)(root?["world"]?["id"] ?? root?["World"]?["Id"]);
                 if (worldId == id || worldId == null && id == active)
-                    list.Add((slot, (string?)(root?["hero"]?["name"] ?? root?["Hero"]?["Name"]) ?? $"игра {slot}"));
+                    list.Add((slot, (string?)(root?["hero"]?["name"] ?? root?["Hero"]?["Name"]) ?? L.F("игра {0}", slot)));
             }
-            catch { list.Add((slot, $"игра {slot}")); }   // не прочиталось — лучше не удалять
+            catch { list.Add((slot, L.F("игра {0}", slot))); }   // не прочиталось — лучше не удалять
         }
         return list;
     }
@@ -164,6 +164,7 @@ public static class WorldLibrary
     public static WorldMap Create(string size, int seed)
     {
         var world = WorldGenerator.Generate(new WorldGenerator.Options(seed, size));
+        world.Language = L.Language;
         try
         {
             Directory.CreateDirectory(Path.Combine(Dir, world.Id));

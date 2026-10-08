@@ -19,12 +19,12 @@ public class HeroDisplay
     private const int SubTabSuffixLen = 2; // "  " (неактивна) или " ←" (активна)
     private const int SubTabBarContentLen = 137; // до "◄ N/M ►"
 
-    private static readonly (string Key, string Label, string FKey)[] _subTabs =
+    private static (string Key, string Label, string FKey)[] _subTabs =>
     [
-        ("inv",  "ИНВЕНТАРЬ",   "F6"),
-        ("abil", "СПОСОБНОСТИ", "F7"),
-        ("eff",  "СОСТОЯНИЯ",   "F8"),
-        ("spell","ЗАКЛИНАНИЯ",  "F9"),
+        ("inv",  L.T("ИНВЕНТАРЬ"),   "F6"),
+        ("abil", L.T("СПОСОБНОСТИ"), "F7"),
+        ("eff",  L.T("СОСТОЯНИЯ"),   "F8"),
+        ("spell",L.T("ЗАКЛИНАНИЯ"),  "F9"),
     ];
 
     private BorderDrawer? _cachedBorderDrawer;
@@ -57,16 +57,16 @@ public class HeroDisplay
     // Раньше в карточке стояло поле visionFt как есть — пустое у большинства героев и не то, что на карте.
     private string SightText(Hero hero)
     {
-        if (hero.VisionFt == 0) return "слеп";
+        if (hero.VisionFt == 0) return L.T("слеп");
         int dv = hero.DarkvisionFt ?? 0;
-        string dark = dv > 0 ? $" · тёмн. {dv}" : "";
+        string dark = dv > 0 ? " · " + L.F("тёмн. {0}", dv) : "";
         if (hero.Position is { Count: >= 2 } p && _settings.Map.TerrainAt(p[0], p[1]) is { Indoor: false })
         {
             int light = MovementCalculator.DaylightFt(_settings, p[0], p[1]) ?? Math.Max(dv, 10);
             int ft = hero.VisionFt is > 0 and var v ? Math.Min(v, light) : light;
-            return $"{ft} фт" + (_settings.Time.PartOfDay == "Ночь" ? " (ночь)" : "");
+            return L.F("{0} фт", ft) + (_settings.Time.PartOfDay == "Ночь" ? " " + L.T("(ночь)") : "");
         }
-        return (hero.VisionFt is > 0 and var own ? $"{own} фт" : "по свету") + dark;
+        return (hero.VisionFt is > 0 and var own ? L.F("{0} фт", own) : L.T("по свету")) + dark;
     }
 
     public bool HasSpells => _settings.Hero?.Spells?.Any(s => s.Deleted != true) == true;
@@ -340,7 +340,7 @@ public class HeroDisplay
         borderDrawer.DrawSeparatorTop();
 
         int leftKeyMax = hero.EquipmentSlots.Max(s => s.Length);
-        leftKeyMax = Math.Max(leftKeyMax, "Вдохновение".Length);
+        leftKeyMax = Math.Max(leftKeyMax, L.T("Вдохновение").Length);
         leftKeyMax = Math.Max(leftKeyMax, hero.Resources?.Count > 0 ? hero.Resources.Max(s => s.Name.Length) : 0);
 
         // Раса/Класс — обычные hero.stats (как Опыт/Уровень и т.п.), но показываются не в колонке
@@ -365,25 +365,25 @@ public class HeroDisplay
 
         (string label, string? value)[] spellStatLines =
         [
-            ("Заклинательная х-ка", StatValue("Заклинательная характеристика")),
-            ("Спасбросок закл.", StatValue("Спасбросок заклинания")),
-            ("Атака заклинанием", StatValue("Атака заклинанием")),
-            ("Подготовлено закл.", preparedMax != null ? $"{preparedSpellCount}/{preparedMax}" : null),
-            ("Известно закл.", knownMax != null ? $"{knownSpellCount}/{knownMax}" : null),
+            (L.T("Заклинательная х-ка"), StatValue("Заклинательная характеристика")),
+            (L.T("Спасбросок закл."), StatValue("Спасбросок заклинания")),
+            (L.T("Атака заклинанием"), StatValue("Атака заклинанием")),
+            (L.T("Подготовлено закл."), preparedMax != null ? $"{preparedSpellCount}/{preparedMax}" : null),
+            (L.T("Известно закл."), knownMax != null ? $"{knownSpellCount}/{knownMax}" : null),
         ];
         leftKeyMax = Math.Max(leftKeyMax, spellStatLines.Max(l => l.label.Length));
 
         var leftSlots = new List<(string slotName, string itemName, List<int> itemColor)>
         {
-            ("Имя".PadRight(leftKeyMax) + "   ", $"{hero.Symbol} {hero.Name}", hero.Color),
+            (L.T("Имя").PadRight(leftKeyMax) + "   ", $"{hero.Symbol} {hero.Name}", hero.Color),
         };
         if (!string.IsNullOrEmpty(heroRace))
-            leftSlots.Add(("Раса".PadRight(leftKeyMax) + "   ", heroRace, null));
+            leftSlots.Add((L.T("Раса").PadRight(leftKeyMax) + "   ", heroRace, null));
         if (!string.IsNullOrEmpty(heroClass))
-            leftSlots.Add(("Класс".PadRight(leftKeyMax) + "   ", heroClass, null));
+            leftSlots.Add((L.T("Класс").PadRight(leftKeyMax) + "   ", heroClass, null));
         leftSlots.Add(("HP".PadRight(leftKeyMax) + "   ", $"{hero.Hp} ❤", null));
-        leftSlots.Add(("Обзор".PadRight(leftKeyMax) + "   ", SightText(hero), null));
-        leftSlots.Add(("Вдохновение".PadRight(leftKeyMax) + "   ", hero.Inspiration == true ? "Да" : "—", null));
+        leftSlots.Add((L.T("Обзор").PadRight(leftKeyMax) + "   ", SightText(hero), null));
+        leftSlots.Add((L.T("Вдохновение").PadRight(leftKeyMax) + "   ", hero.Inspiration == true ? L.T("Да") : "—", null));
 
         // Разделитель сразу после базового блока — дальше идёт контекстная часть колонки 1, разная
         // под каждую подвкладку: Инвентарь — слоты экипировки, Способности/Заклинания — их ресурсы
@@ -414,7 +414,7 @@ public class HeroDisplay
                 }
                 else
                 {
-                    leftSlots.Add(("", "(нет слотов)", null));
+                    leftSlots.Add(("", L.T("(нет слотов)"), null));
                 }
                 break;
 
@@ -453,7 +453,7 @@ public class HeroDisplay
         }
         if (middleItems.Count == 0)
         {
-            middleItems.Add(("", "(нет характеристик)", null));
+            middleItems.Add(("", L.T("(нет характеристик)"), null));
         }
 
         var rightItems = new List<(string key, string value, List<int> valueColor)>();
@@ -464,7 +464,7 @@ public class HeroDisplay
         }
         if (rightItems.Count == 0)
         {
-            rightItems.Add(("", "(нет навыков)", null));
+            rightItems.Add(("", L.T("(нет навыков)"), null));
         }
 
         // -3: отступ слева в начале каждой из 3 колонок (Console.Write(" ") ниже).
@@ -630,7 +630,7 @@ public class HeroDisplay
         }
 
         if (flat.Count == 0)
-            flat.Add(new InvLine(-1, false, "", "", null, "(пусто)"));
+            flat.Add(new InvLine(-1, false, "", "", null, L.T("(пусто)")));
 
         int rows = Math.Max(1, preTitleRows - 4);
         int pageSize = rows * 2;
@@ -719,7 +719,7 @@ public class HeroDisplay
         }
 
         if (flat.Count == 0)
-            flat.Add(new InvLine(-1, false, "", "", null, "(нет способностей)"));
+            flat.Add(new InvLine(-1, false, "", "", null, L.T("(нет способностей)")));
 
         int rows = Math.Max(1, preTitleRows - 4);
         int pageSize = rows * 2;
@@ -763,8 +763,8 @@ public class HeroDisplay
     }
 
     private static string EffectDuration(StatusEffect e) => e.ExpiresAtRound.HasValue
-        ? $"до раунда {e.ExpiresAtRound}"
-        : e.UntilLongRest == true ? "до долгого отдыха" : "бессрочно";
+        ? L.F("до раунда {0}", e.ExpiresAtRound)
+        : e.UntilLongRest == true ? L.T("до долгого отдыха") : L.T("бессрочно");
 
     private void DrawEffectsSection(Hero hero, int innerWidth, int preTitleRows, BorderDrawer borderDrawer)
     {
@@ -845,7 +845,7 @@ public class HeroDisplay
         _ => level.ToString(),
     };
 
-    private static string SpellColumnHeader(int level) => level == 0 ? "ЗАГОВОРЫ" : $"{LevelToRoman(level)} КРУГ";
+    private static string SpellColumnHeader(int level) => level == 0 ? L.T("ЗАГОВОРЫ") : L.F("{0} КРУГ", LevelToRoman(level));
 
     // Единая точка правды для порядка/фильтра заклинаний — использует и отрисовка (группировка по
     // кругам), и Program.cs (Tab/Shift+Tab), чтобы оба места ссылались на один и тот же индекс.
