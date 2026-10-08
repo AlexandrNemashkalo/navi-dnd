@@ -1,21 +1,21 @@
 {
-    "name":  "NaviDnD 2.0.4",
-    "tag_name":  "v2.0.4",
-    "description":  "# NaviDnD 2.0.4\n\n- Анимации текста, ожидания и кубика работают в общем цикле с независимыми скоростями; карту можно перетаскивать во время ожидания и броска.\n- Наведение на объекты карты, предметы инвентаря и записи журнала обновляет только нужные области и работает во время печати текста, включая первое открытие вкладки.\n- Картинки подготавливаются в фоне; сокращены повторные команды цвета и расчёты пути под курсором.\n- Кубик сохраняет паузу каждого кадра и начинает анимацию после запуска звука.\n- Добавлена очистка временных файлов игры и тестов.\n\nОбновление распространяется небольшим патчем; сохранения и настройки сохраняются.\n\n## Как проверить\n\n1. Во время ответа мастера двигай карту и наводи мышь на её объекты — текст продолжает печататься.\n2. Перейди в инвентарь и журнал во время печати и наведи мышь на предметы и записи.\n3. Во время ожидания и броска кубика перетаскивай карту; проверь плавность анимации и звук.\r\n",
+    "name":  "NaviDnD 2.0.5",
+    "tag_name":  "v2.0.5",
+    "description":  "# NaviDnD 2.0.5\n\n- Claude и Codex ищутся в фоне при каждом запуске: меню не ждёт завершения поиска.\n- Устаревшие пути исправляются автоматически, рабочие ручные настройки сохраняются. Поддержаны новые npm-пакеты, обновлённый PATH и расширения VS Code, Cursor и Windsurf.\n- Игру можно запускать напрямую через NaviDnD.exe: в неподходящей консоли она перезапускается через conhost.exe до загрузки настроек и интерфейса. Добавлена защита от повторного перезапуска.\n\nОбновление распространяется патчем; сохранения и настройки сохраняются.\n\n## Как проверить\n\n1. Запусти NaviDnD.exe напрямую при выбранном Windows Terminal — игра открывается в классической консоли Windows.\n2. После установки или обновления Claude/Codex перезапусти игру и проверь найденный путь в настройках.\n3. Укажи рабочий путь вручную и перезапусти игру — он сохраняется.\r\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.4/navi-dnd-v2.0.4-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.0.5/navi-dnd-v2.0.5-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.4/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.5/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.4/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.5/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
@@ -88,6 +88,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.0.3-2.0.4.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.4/releases/patches/NaviDnD-patch-2.0.3-2.0.4.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.0.4-2.0.5.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.0.5/releases/patches/NaviDnD-patch-2.0.4-2.0.5.zip"
                                  }
                              ]
                }
