@@ -43,6 +43,30 @@ public class ConsoleHostLauncherTests
         Assert.Equal(before, (Read("DelegationConsole"), Read("DelegationTerminal")));
     }
 
+    // Перезапущенная игра возвращает настройки из файла, оставленного первым запуском, и удаляет файл.
+    [Fact]
+    public void PendingRestoreReturnsSettingsAndRemovesFile()
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        string original = ConsoleHostLauncher.RestorePath;
+        ConsoleHostLauncher.RestorePath = Path.Combine(Path.GetTempPath(), $"navidnd-restore-test-{Guid.NewGuid():N}.json");
+        try
+        {
+            object? Read(string name)
+            {
+                using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Console\%%Startup");
+                return key?.GetValue(name);
+            }
+            var before = (Read("DelegationConsole"), Read("DelegationTerminal"));
+            var saved = ConsoleHostLauncher.ForceConhostDelegation();
+            File.WriteAllText(ConsoleHostLauncher.RestorePath, System.Text.Json.JsonSerializer.Serialize(saved));
+            ConsoleHostLauncher.RestorePending();
+            Assert.Equal(before, (Read("DelegationConsole"), Read("DelegationTerminal")));
+            Assert.False(File.Exists(ConsoleHostLauncher.RestorePath));
+        }
+        finally { ConsoleHostLauncher.RestorePath = original; }
+    }
+
     [Fact]
     public void RelaunchedGameNeverStartsAnotherHost()
     {

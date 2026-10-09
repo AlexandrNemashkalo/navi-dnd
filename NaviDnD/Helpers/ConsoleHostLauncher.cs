@@ -22,6 +22,13 @@ public static class ConsoleHostLauncher
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsWindowVisible(nint window);
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShowWindow(nint window, int command);
+
+    // Прежние настройки консоли игрока на время перезапуска: их возвращает уже перезапущенная игра (её консоль к тому
+    // времени создана); не вернула (сбой) — вернёт следующий запуск.
+    public static string RestorePath { get; set; } = Path.Combine(Path.GetTempPath(), "navidnd-console-restore.json");
 
     // Видимое окно классической консоли; у псевдоконсоли терминала — скрытое служебное окно.
     public static bool InClassicConsole()
@@ -37,10 +44,12 @@ public static class ConsoleHostLauncher
             || Console.IsInputRedirected || Console.IsOutputRedirected) return false;
         if (args.Contains(RelaunchFlag))
         {
+            RestorePending();
             // Перезапуск уже был, а окна классической консоли всё равно нет — терминал перехватил и его.
             if (!InClassicConsole()) Log("После перезапуска игра всё ещё не в классической консоли.");
             return false;
         }
+        RestorePending();   // прошлый перезапуск не вернул настройки (сбой) — вернуть до новой подмены
         // Без флага — всегда перезапуск (ярлык, exe, перезапуск после обновления): угадать по окну, кто хозяин
         // консоли, ненадёжно — на части Windows 11 терминал перехватывает даже явный conhost.exe из ярлыка.
         string? executable = Environment.ProcessPath;
@@ -50,16 +59,17 @@ public static class ConsoleHostLauncher
             string? assembly = Path.GetFileNameWithoutExtension(executable).Equals("dotnet", StringComparison.OrdinalIgnoreCase)
                 ? Assembly.GetEntryAssembly()?.Location : null;
             // На время запуска «консоль по умолчанию» — классическая (иначе Windows 11 с терминалом по умолчанию
-            // может отдать и conhost.exe терминалу); прежние настройки игрока возвращаются, как только окно появилось.
+            // может отдать и conhost.exe терминалу); прежние настройки возвращает перезапущенная игра (RestorePending).
             var saved = ForceConhostDelegation();
-            try
-            {
-                using var child = Process.Start(CreateStartInfo(executable, args, Environment.CurrentDirectory, assembly));
-                if (child == null) { Log("conhost.exe не запустился."); return false; }
-                WaitForWindow(child, TimeSpan.FromSeconds(5));
-                return true;
-            }
-            finally { RestoreDelegation(saved); }
+            if (saved.Count > 0) File.WriteAllText(RestorePath, System.Text.Json.JsonSerializer.Serialize(saved));
+            // Первое окно — сразу прочь: игра откроется во втором, ждать его не нужно.
+            if (GetConsoleWindow() is var own and not 0) ShowWindow(own, 0);
+            using var child = Process.Start(CreateStartInfo(executable, args, Environment.CurrentDirectory, assembly));
+            if (child != null) return true;
+            Log("conhost.exe не запустился.");
+            RestorePending();
+            if (GetConsoleWindow() is var back and not 0) ShowWindow(back, 5);
+            return false;
         }
         catch (Exception error) when (error is Win32Exception or IOException or InvalidOperationException or UnauthorizedAccessException)
         {
@@ -121,21 +131,20 @@ public static class ConsoleHostLauncher
         }
     }
 
-    // Пока conhost не создал окно, настройка «по умолчанию» ещё нужна; дольше timeout не ждём.
-    private static void WaitForWindow(Process child, TimeSpan timeout)
+    // Вернуть настройки консоли, сохранённые при перезапуске (файл RestorePath), и удалить файл.
+    public static void RestorePending()
     {
-        var sw = Stopwatch.StartNew();
         try
         {
-            while (sw.Elapsed < timeout && !child.HasExited)
-            {
-                child.Refresh();
-                if (child.MainWindowHandle != 0) break;
-                Thread.Sleep(50);
-            }
-            Thread.Sleep(300);   // окно есть — игра внутри уже стартует в нём
+            if (!File.Exists(RestorePath)) return;
+            var saved = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string?>>(File.ReadAllText(RestorePath));
+            if (saved != null) RestoreDelegation(saved.ToDictionary(kv => kv.Key, kv => (object?)kv.Value));
+            File.Delete(RestorePath);
         }
-        catch (InvalidOperationException) { }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or System.Text.Json.JsonException)
+        {
+            Log("Не удалось вернуть настройки консоли: " + error.Message);
+        }
     }
 
     private static void Log(string message)

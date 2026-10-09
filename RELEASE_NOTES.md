@@ -1,13 +1,13 @@
-# NaviDnD 2.2.1
+# NaviDnD 2.2.2
 
-- Игра всегда открывается в классической консоли Windows. Раньше на части компьютеров с Windows 11 (где консолью по умолчанию выбран Windows Terminal) она запускалась внутри терминала PowerShell, даже из ярлыка. Настройки консоли игрока не меняются.
-- Если перезапуск в классической консоли не удался, причина записывается в logs/console.log.
+- Запуск без лишнего окна: первое окно сразу закрывается, игра открывается в классической консоли за долю секунды.
+- Исправлено: в 2.2.1, если закрыть первое окно во время запуска, Windows могла запомнить классическую консоль как консоль по умолчанию. Теперь прежние настройки консоли всегда возвращаются — при сбое их вернёт следующий запуск игры.
 
 Обновление распространяется патчем; сохранения и настройки сохраняются.
 
 ## English
 
-- The game now always opens in the classic Windows console. Previously, on some Windows 11 computers (with Windows Terminal set as the default console) it started inside a PowerShell terminal tab, even from the shortcut. Your console settings are not changed.
-- If restarting in the classic console fails, the reason is written to logs/console.log.
+- Startup without an extra window: the first window closes immediately and the game opens in the classic console in a fraction of a second.
+- Fixed: in 2.2.1, closing the first window during startup could leave the classic console set as the Windows default console. Your console settings are now always restored — after a failure, the next game start restores them.
 
 The update is delivered as a patch; saves and settings are kept.
