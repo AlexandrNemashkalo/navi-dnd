@@ -251,7 +251,7 @@ public sealed class MapGenTools(McpServerConfig config)
             return reader.ReadToEnd();
         });
         var storage = new Storage();
-        storage.ApplyUpdateWorldState(json);
+        storage.ApplySavedState(json);
         return storage;
     }
 

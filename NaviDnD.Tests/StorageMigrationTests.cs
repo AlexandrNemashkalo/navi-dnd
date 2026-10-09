@@ -80,6 +80,25 @@ public class StorageMigrationTests : IDisposable
     }
 
     [Fact]
+    public void LevelAndXpLeaveStats()
+    {
+        Write("game1.json", """
+            {"formatVersion":1,"hero":{"name":"Лира","stats":[{"key":"class","name":"Класс","value":"Волшебник 3 ур"},
+              {"name":"Опыт","value":"1200/2700"},{"name":"Сила","value":"-1 (8)"}]}}
+            """);
+        Assert.True(StorageMigration.Run(Storage).Ok);
+        var hero = Read("game1.json")["hero"]!;
+        Assert.Equal(3, (int)hero["level"]!);
+        Assert.Equal(1200, (int)hero["xp"]!);
+        Assert.Equal(["Волшебник", "-1 (8)"], hero["stats"]!.AsArray().Select(s => (string)s!["value"]!).ToList());
+
+        var storage = new Storage();
+        storage.LoadFrom(Path.Combine(Storage, "game1.json"));
+        Assert.Equal(3, storage.WorldState.Hero!.Level);
+        Assert.Equal(1200, storage.WorldState.Hero.Xp);
+    }
+
+    [Fact]
     public void NotesArrayBecomesVersionedObject()
     {
         Write("game2.notes.json", """[{"Text":"Ключ у мельника","Day":2,"PartOfDay":"Ночь","Created":"2026-01-01T00:00:00","ByMaster":false}]""");
@@ -103,6 +122,7 @@ public class StorageMigrationTests : IDisposable
         Assert.Equal(StorageFormat.Current, (int)migrated["FormatVersion"]!);
         var inner = JsonNode.Parse((string)migrated["HeroJson"]!)!;
         Assert.Contains(inner["stats"]!.AsArray(), s => (string?)s!["key"] == StatKeys.Race);
+        Assert.Equal(3, (int)inner["level"]!);
     }
 
     [Fact]

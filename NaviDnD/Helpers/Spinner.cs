@@ -12,7 +12,7 @@ public static class Spinner
         int x = left + Math.Max(0, (width - text.Length) / 2);
         for (int i = 0; !task.IsCompleted; i++)
         {
-            ConsoleMouseReader.DrainMouseEvents();
+            ConsoleMouseReader.DrainWhileWaiting();
             Console.SetCursorPosition(x, row);
             ColorHelper.WriteColored($"{Frames[i % Frames.Length]} {message}...", color);
             await Task.Delay(100);
@@ -28,7 +28,7 @@ public static class Spinner
 
         while (!task.IsCompleted)
         {
-            ConsoleMouseReader.DrainMouseEvents();
+            ConsoleMouseReader.DrainWhileWaiting();
             Console.SetCursorPosition(2, top);
             Console.Write($" {Frames[i % Frames.Length]} {message}...");
             i++;

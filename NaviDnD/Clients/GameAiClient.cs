@@ -68,6 +68,11 @@ public class GameAiClient
         // Выбранное игроком в анкете — как есть, поверх ответа нейронки.
         if (_settings.Hero is { } hero)
         {
+            if (int.TryParse(newGameData.Level, out int level) && level > 0)
+            {
+                hero.Level = level;
+                hero.Xp = LevelRules.Current.XpFor(level);
+            }
             hero.VisionFt = null;   // обзор героя — по свету (движок); нейронка ставила «Зрение 5 фт»
             if (!string.IsNullOrWhiteSpace(newGameData.Image)) hero.Image = newGameData.Image;
             if (newGameData.Color is { Count: 3 }) hero.Color = [.. newGameData.Color];
@@ -83,7 +88,7 @@ public class GameAiClient
     public async Task ReuseHero(NewGameData data, string heroJson)
     {
         _storage.ResetWorldState();
-        _storage.ApplyUpdateWorldState("{\"hero\":" + heroJson + "}");
+        _storage.ApplySavedState("{\"hero\":" + heroJson + "}");   // уровень и опыт — как были
         if (_settings.Hero is not { } hero) return;
         if (hero.Hp is { } hp && hp.Split('/') is [_, var max] && max.Trim().Length > 0) hero.Hp = $"{max.Trim()}/{max.Trim()}";
         hero.Effects = [];
@@ -119,6 +124,63 @@ public class GameAiClient
         catch (AiSetupException) { throw; }
         catch
         {
+            return null;
+        }
+    }
+
+    // Окно «Новый уровень»: что класс получает на уровне и группы выбора — JSON для LevelUp.LoadPlan (разбирает окно,
+    // в своём потоке). null — не вышло.
+    public async Task<string?> LevelUpOptions(LevelUp levelUp)
+    {
+        string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(LevelUpOptions));
+        string response = "";
+        try
+        {
+            response = await CompleteConfigured([ReadPrompt(actionPath)], levelUp.OptionsRequest(), actionPath, _appConfig.ClaudeModel);
+            return await EnsureValidJson(ExtractJson(response));
+        }
+        catch (AiSetupException) { throw; }
+        catch (Exception ex)
+        {
+            Logger?.LogNote($"LevelUpOptions: {ex}\nОтвет: {response}");
+            return null;
+        }
+    }
+
+    // Просьба игрока о своём варианте прокачки (поле ввода) — тот же промпт вариантов; JSON для LevelUp.MergeCustom.
+    public async Task<string?> LevelUpCustom(LevelUp levelUp, string request)
+    {
+        string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(LevelUpOptions));
+        string response = "";
+        try
+        {
+            response = await CompleteConfigured([ReadPrompt(actionPath)], levelUp.CustomRequest(request), actionPath, _appConfig.ClaudeModel);
+            return await EnsureValidJson(ExtractJson(response));
+        }
+        catch (AiSetupException) { throw; }
+        catch (Exception ex)
+        {
+            Logger?.LogNote($"LevelUpCustom: {ex}\nОтвет: {response}");
+            return null;
+        }
+    }
+
+    // Выбор сделан: новый герой (копия текущего) с полученным и выбранным; null — мастер не ответил. Нечего
+    // вносить в лист (ни умений, ни выбора, ни новых чисел) — без вызова нейронки.
+    public async Task<Hero?> LevelUpApply(LevelUp levelUp)
+    {
+        if (!levelUp.NeedsMaster) return levelUp.Apply(null);
+        string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(LevelUpApply));
+        string response = "";
+        try
+        {
+            response = await CompleteConfigured([ReadPrompt(actionPath)], levelUp.ApplyRequest(), actionPath, _appConfig.ClaudeModel);
+            return levelUp.Apply(await EnsureValidJson(ExtractJson(response)));
+        }
+        catch (AiSetupException) { throw; }
+        catch (Exception ex)
+        {
+            Logger?.LogNote($"LevelUpApply: {ex}\nОтвет: {response}");
             return null;
         }
     }
@@ -533,6 +595,7 @@ public class GameAiClient
         {
             response = await CompleteWithSpinner([systemPrompt], userMessage, actionPath, model, onIdle);
             _storage.ApplyUpdateWorldState(await EnsureValidJson(ExtractJson(response)));
+            AddEngineNotices();
             if (actionName is nameof(StartNewGame) or nameof(SendAction))
                 _storage.Save();
         }
@@ -694,6 +757,14 @@ public class GameAiClient
             animations: ActiveDialog?.Animations);
         var history = await player.PlayAsync(json);
         (_settings.History ??= []).AddRange(history);
+        AddEngineNotices();
+    }
+
+    // Сообщения движка (начислен опыт, доступен уровень) — после записей мастера.
+    private void AddEngineNotices()
+    {
+        foreach (string notice in _storage.TakeNotices())
+            (_settings.History ??= []).Add(new DialogMessage { Text = notice });
     }
 
     // Ответ мастера с битым JSON (лишняя/потерянная кавычка, запятая, обрыв) — разбирается целиком до того, как

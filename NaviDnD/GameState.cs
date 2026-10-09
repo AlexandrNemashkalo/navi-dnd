@@ -5,6 +5,7 @@ public enum Screen
     Map,
     Journal,
     Character,
+    LevelUp,      // окно «Новый уровень» поверх вкладки «Персонаж»
     Abilities,
     World,
     Menu,

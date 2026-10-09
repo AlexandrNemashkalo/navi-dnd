@@ -3,7 +3,7 @@ namespace NaviDnD;
 internal static class ScreenRegistry
 {
     private static readonly (Screen screen, string key)[] GameTabs =
-        [(Screen.Map, "F1"), (Screen.World, "F2"), (Screen.Journal, "F3"), (Screen.Character, "F4"), (Screen.Abilities, "F5")];
+        [(Screen.Map, "F1"), (Screen.World, "F2"), (Screen.Journal, "F3"), (Screen.Character, "F4"), (Screen.LevelUp, "F4"), (Screen.Abilities, "F5")];
 
     // Заголовок игрового экрана: активная вкладка "  → ИМЯ ←", остальные "[Fn]ИМЯ  " — одинаковой длины,
     // поэтому названия не сдвигаются при переключении (MouseUiHelper.ComputeTitleTabs). Новое в журнале —
@@ -77,6 +77,14 @@ internal static class ScreenRegistry
         // длины, поэтому названия не сдвигаются при переключении (MouseUiHelper.ComputeTitleTabs).
         string GameTitle(string activeKey) => GameTitleText(activeKey, journalUnread: false);
 
+        // «Персонаж»: F10 (или кнопка на карточке) — окно «Новый уровень», когда опыта хватает и нет боя.
+        ScreenConfig CharacterScreen()
+        {
+            var cfg = GameScreen(GameTitle("F4"));
+            cfg.Commands["F10"] = () => { if (LevelUp.Available(storage.WorldState)) state.CurrentScreen = Screen.LevelUp; };
+            return cfg;
+        }
+
         // Шаг новой игры (F1–F4), если он уже доступен; Esc — выход в меню с предупреждением.
         void GoStep(int step)
         {
@@ -106,7 +114,8 @@ internal static class ScreenRegistry
             [Screen.Map]      = GameScreen(GameTitle("F1")),
             [Screen.World]    = GameScreen(GameTitle("F2")),
             [Screen.Journal]  = GameScreen(GameTitle("F3")),
-            [Screen.Character]= GameScreen(GameTitle("F4")),
+            [Screen.Character]= CharacterScreen(),
+            [Screen.LevelUp]  = GameScreen(GameTitle("F4")),
             [Screen.Abilities]= GameScreen(GameTitle("F5")), // вкладка «Спутник» (пока заглушка)
 
             [Screen.Menu] = new ScreenConfig

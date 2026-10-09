@@ -11,7 +11,9 @@ internal static class AiActionTools
         // Нейронка задаёт план локации (plan_location), геометрию строит код — generate_map не нужен.
         "StartNewGame" => ["plan_location", "find_assets", "find_icon", "find_monster", "add_place"],
         // Концепция мира и описание героя — по данным в сообщении, инструменты не нужны.
-        "CreateWorld" or "DescribeHero" or "RepairJson" => [],
+        "CreateWorld" or "DescribeHero" or "RepairJson" or "LevelUpApply" => [],
+        // Повышение уровня: варианты заклинаний — по справочнику.
+        "LevelUpOptions" => ["find_spell"],
         "PopulateChunk" => ["get_world_state", "find_assets", "find_icon", "find_monster", "find_item", "world_query"],
         _ => ["get_world_state", "calculate_movement", "roll_dice", "use_reaction", "select_target",
               "advance_round", "long_rest", "short_rest", "door_action", "find_icon",
@@ -22,7 +24,7 @@ internal static class AiActionTools
     public static readonly HashSet<string> DraftActions = ["CreateNewGame", "FixHeroForNewGame", "StartNewGame", "DescribeHero"];
 
     // Действия без диалогового окна: ask_player/roll_dice там зависли бы до таймаута.
-    public static readonly HashSet<string> NonInteractiveActions = ["CreateNewGame", "StartNewGame", "DescribeHero", "CreateWorld", "RepairJson"];
+    public static readonly HashSet<string> NonInteractiveActions = ["CreateNewGame", "StartNewGame", "DescribeHero", "CreateWorld", "RepairJson", "LevelUpOptions", "LevelUpApply"];
 
     // Аргументы запуска MCP-сервера для действия; withToolFilter — сервер сам отдаёт только ToolsFor(action)
     // (для клиентов без своего списка разрешённых инструментов).

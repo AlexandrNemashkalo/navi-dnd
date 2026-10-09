@@ -52,7 +52,7 @@ internal sealed class UpdateDisplay(WorldState settings, DisplayConfig display)
         while (!task.IsCompleted)
         {
             Render();
-            ConsoleMouseReader.DrainMouseEvents();
+            ConsoleMouseReader.DrainWhileWaiting();
             if (ConsoleMouseReader.TryReadKey()?.Key == ConsoleKey.Escape)
             {
                 cancellation.Cancel();
@@ -70,7 +70,7 @@ internal sealed class UpdateDisplay(WorldState settings, DisplayConfig display)
         while (true)
         {
             Render();
-            ConsoleMouseReader.DrainMouseEvents();
+            ConsoleMouseReader.DrainWhileWaiting();
             var key = ConsoleMouseReader.TryReadKey()?.Key;
             if (key == ConsoleKey.Enter) return confirm;
             if (key == ConsoleKey.Escape) return false;

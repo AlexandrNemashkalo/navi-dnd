@@ -351,7 +351,7 @@ public class NewGameDisplay
                 if (_describeTask.IsCompleted) FinishDescribe();
                 else
                 {
-                    ConsoleMouseReader.DrainMouseEvents();
+                    ConsoleMouseReader.DrainWhileWaiting();
                     ConsoleMouseReader.SetCursorShape(false);   // ничего не нажимается — обычный указатель
                     if (ConsoleMouseReader.TryReadKey() is { Key: ConsoleKey.Escape }) return 0;
                     _frame++;
@@ -955,7 +955,7 @@ public class NewGameDisplay
         for (int frame = 0; !aiTask.IsCompleted; frame++)
         {
             // Пока создаётся персонаж — клики не принимаются, указатель обычный (не «рука»).
-            ConsoleMouseReader.DrainMouseEvents();
+            ConsoleMouseReader.DrainWhileWaiting();
             ConsoleMouseReader.SetCursorShape(false);
             _message = $"{Spinner.Frames[frame % Spinner.Frames.Length]} {waitText}";
             Redraw();

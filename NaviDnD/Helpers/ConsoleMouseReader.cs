@@ -380,6 +380,13 @@ public static class ConsoleMouseReader
 
     public static (short x, short y)? DrainMouseMoves() => DrainMouseEvents().move;
 
+    // Ожидание (нейронка думает, загрузка): клики не принимаются, но окно по-прежнему тащится за верхний блок
+    // (рамка, заголовок, разделитель — строки 0–2).
+    public static void DrainWhileWaiting()
+    {
+        if (DrainMouseEvents().click is { y: >= 0 and <= 2 }) StartWindowDrag();
+    }
+
     private static int _wheelNotches;
     private static (short x, short y) _wheelPos;
     private static DateTime _wheelAt;

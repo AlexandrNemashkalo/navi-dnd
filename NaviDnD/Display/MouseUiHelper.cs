@@ -287,6 +287,9 @@ internal static class MouseUiHelper
                 if (clickedTabKey != null) { Sound.PlayClick(); display.PendingCommand = clickedTabKey; return; }
                 if (clickPos.Value.y is >= 0 and <= 2) { ConsoleMouseReader.StartWindowDrag(); return; }
 
+                // Кнопка «Новый уровень» в строке уровня карточки — то же, что F10.
+                if (heroDisplay.IsOnLevelUp(clickPos.Value)) { Sound.PlayClick(); display.PendingCommand = "F10"; return; }
+
                 var si = heroDisplay.SubTabInfo;
                 if (si.titleY >= 0 && clickPos.Value.y == si.titleY)
                 {
@@ -430,7 +433,7 @@ internal static class MouseUiHelper
                 hoveredTabKey = newTabKey;
                 if (hoveredTabKey != null) SetTabHighlight(activeTitle, activeTabs, hoveredTabKey, true, display);
             }
-            if (hoveredTabKey != null) { ConsoleMouseReader.SetCursorShape(true); return; }
+            if (hoveredTabKey != null) { heroDisplay.SetLevelUpHover(false); ConsoleMouseReader.SetCursorShape(true); return; }
 
             // Sub-tab label hover → highlight + hand cursor
             var subInfo = heroDisplay.SubTabInfo;
@@ -542,10 +545,12 @@ internal static class MouseUiHelper
             var (isOnLeft, isOnRight) = SubTabArrowHover(mousePos.Value, heroDisplay);
             var (isOnNoteLeft, isOnNoteRight) = NotePageArrowHover(mousePos.Value, dialog, display);
             bool isOnAny = isOnUp || isOnDown || isOnLeft || isOnRight || isOnNoteLeft || isOnNoteRight
-                           || newHoveredSubTab != null || newHoveredInv >= 0 || newHoveredSpell >= 0;
+                           || newHoveredSubTab != null || newHoveredInv >= 0 || newHoveredSpell >= 0
+                           || heroDisplay.IsOnLevelUp(mousePos.Value);
             ConsoleMouseReader.SetCursorShape(isOnAny);
             dialog.SetArrowHover(isOnUp, isOnDown);
             heroDisplay.SetSubTabArrowHover(isOnLeft, isOnRight);
+            heroDisplay.SetLevelUpHover(heroDisplay.IsOnLevelUp(mousePos.Value));
             dialog.SetNoteArrowHover(isOnNoteLeft, isOnNoteRight);
         };
     }

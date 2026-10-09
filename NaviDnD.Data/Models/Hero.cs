@@ -19,6 +19,17 @@ public class Hero : LivingEntity
     // Герой погиб (решает мастер по правилам НРИ) — игра окончена: ввод закрыт, только выход в меню.
     public bool? Dead { get; set; }
 
+    // Уровень и опыт ведёт движок (LevelRules): мастер начисляет опыт патчем xpAward, уровень растёт только в окне
+    // «Новый уровень» выбором игрока. Из ответа мастера level/xp не применяются — только из сохранения (Storage).
+    // null — 1-й уровень / 0 опыта.
+    public int? Level { get; set; }
+
+    public int? Xp { get; set; }
+
+    // Начатое повышение уровня (окно «Новый уровень»): варианты мастера и бросок хитов — в сохранении, чтобы отмена,
+    // выход в меню или перезапуск не спрашивали нейронку заново и не давали перебросить хиты. Только движок.
+    public LevelUpDraft? LevelUpDraft { get; set; }
+
     // Хиты на нуле («0/12») — без сознания/при смерти: свой ход герой не делает, мастер ведёт его сам.
     [JsonIgnore]
     public bool IsDown => Hp is { Length: > 0 } hp && int.TryParse(hp.Split('/')[0].Trim(), out int cur) && cur <= 0;
@@ -44,6 +55,18 @@ public class Hero : LivingEntity
 
     // Особый стат по ключу (StatKeys) или null.
     public HeroStat? Stat(string key) => Stats?.FirstOrDefault(s => s.Deleted != true && s.Key == key);
+}
+
+public class LevelUpDraft
+{
+    // На какой уровень (черновик другого уровня не подходит).
+    public int Level { get; set; }
+
+    // Ответ мастера с вариантами (вместе с добавленными по просьбе игрока) — JSON LevelUp.LoadPlan.
+    public string? Plan { get; set; }
+
+    // Выпавшее на кости хитов (бросок один).
+    public int? HpDie { get; set; }
 }
 
 public class HeroInventory : IPatchable

@@ -135,6 +135,7 @@ class Program
         var mapDisplay = new MapDisplay(settings, display, legendDisplay);
         var heroDisplay = new HeroDisplay(settings, display);
         var abilityDisplay = new AbilityDisplay(settings, display);
+        var levelUpDisplay = new LevelUpDisplay(settings, display, aiClient, storage);
         var journalDisplay = new JournalDisplay(settings, display);
         // Что в журнале уже видели (для метки «ЖУРНАЛ•»): снимок содержимого; новая/другая игра — заново.
         string? journalSeen = null;
@@ -407,7 +408,19 @@ class Program
                     display.JournalShown = false;
                     break;
 
+                // Окно «Новый уровень»: выбор — и обратно на карточку (или на вкладку, нажатую в заголовке).
+                case Screen.LevelUp:
+                {
+                    display.JournalShown = false;
+                    display.ActiveTabKey = "F4";
+                    string? go = await levelUpDisplay.Run(title, heroDisplay);
+                    state.CurrentScreen = Screen.Character;
+                    if (go != null && screen.Commands.TryGetValue(go, out var goAction)) goAction();
+                    break;
+                }
+
                 case Screen.Character:
+                    heroDisplay.OfferLevelUp = true;
                     display.JournalShown = false;
                     display.ActiveTabKey = "F4";
                     display.SelectedInventoryIndex = -1;
@@ -691,6 +704,7 @@ class Program
                 }
 
                 case Screen.NewGameCharacter:
+                    heroDisplay.OfferLevelUp = false;
                     display.ActiveTabKey = "F3";
                     display.SelectedInventoryIndex = -1;
                     display.SelectedImageLines = null;

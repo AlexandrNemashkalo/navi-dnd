@@ -5,7 +5,7 @@ using NaviDnD.Helpers;
 
 namespace NaviDnD.Display;
 
-// Экран «МОИ ИГРЫ» в стиле анкеты: до Storage.MaxGames игр карточками 2×2. На карточке — портрет цветом
+// Экран «МОИ ИГРЫ» в стиле анкеты: до Storage.MaxGames игр карточками в две колонки (6 — 2×3). На карточке — портрет цветом
 // героя, имя, раса/класс, HP, сюжетная арка, день/время суток и когда играли. Пустая карточка —
 // «СВОБОДНО» (новая игра в это место). Стрелки — выбор, Enter — играть, Del — удалить (с подтверждением),
 // мышь — наведение выбирает, клик подтверждает. Esc / «[Esc]МЕНЮ» в заголовке — назад.
@@ -15,13 +15,14 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
 
     private sealed record GameCard(int Slot, bool Exists, string Name = "", string Symbol = "", List<int>? Color = null,
         string? Image = null, string Race = "", string Class = "", string Hp = "", string Arc = "", string Time = "",
-        DateTime Played = default);
+        DateTime Played = default, string World = "");
 
     private const int CardWidth = 58, CardHeight = 13, Gap = 3, PortraitWidth = 16;
 
     private readonly List<MouseUiHelper.TitleTab> _titleTabs = MouseUiHelper.ComputeTitleTabs(title);
     private List<GameCard> _cards = [];
     private int _selected;
+    private static int Rows => (Storage.MaxGames + 1) / 2;
     private bool _confirmDelete;
     private string _message = message ?? "";
     private bool _escHovered;
@@ -103,7 +104,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
                 case ConsoleKey.LeftArrow: MoveTo(_selected % 2 == 1 ? _selected - 1 : _selected); break;
                 case ConsoleKey.RightArrow: MoveTo(_selected % 2 == 0 ? _selected + 1 : _selected); break;
                 case ConsoleKey.UpArrow: MoveTo(_selected >= 2 ? _selected - 2 : _selected); break;
-                case ConsoleKey.DownArrow: MoveTo(_selected < 2 ? _selected + 2 : _selected); break;
+                case ConsoleKey.DownArrow: MoveTo(_selected + 2 < _cards.Count ? _selected + 2 : _selected); break;
                 case ConsoleKey.Tab: MoveTo((_selected + 1) % _cards.Count); break;
                 case ConsoleKey.Enter: Sound.PlayClick(); return Open();
                 case ConsoleKey.Delete or ConsoleKey.Backspace:
@@ -155,11 +156,13 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
                 Color: color is { Count: 3 } ? color : null,
                 Image: (string?)hero?["image"],
                 Race: Stat(StatKeys.Race),
-                Class: Stat(StatKeys.Class),
+                // «Воин 2 ур» — как на карточке героя (уровень — hero.level).
+                Class: Stat(StatKeys.Class) is { Length: > 0 } cls ? L.F("{0} {1} ур", cls, (int?)hero?["level"] ?? 1) : "",
                 Hp: hero?["dead"]?.GetValue<bool>() == true ? L.T("— погиб") : (string?)hero?["hp"] ?? "",
                 Arc: (string?)root?["narrative"]?["currentArc"] ?? "",
                 Time: timeText,
-                Played: File.GetLastWriteTime(path));
+                Played: File.GetLastWriteTime(path),
+                World: WorldLibrary.Get((string?)root?["world"]?["id"]) is { } w ? (w.Chronicle.Name is { Length: > 0 } n ? n : w.Name) : "");
         }
         catch
         {
@@ -189,7 +192,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         for (int r = 0; r < _height; r++) for (int c = 0; c < _width; c++) _chars[r, c] = ' ';
 
         int total = CardWidth * 2 + Gap;
-        int blockHeight = CardHeight * 2 + 1 + 3;
+        int blockHeight = CardHeight * Rows + (Rows - 1) + 3;
         _left = Math.Max(1, (_width - total) / 2);
         _top = Math.Max(0, (_height - blockHeight) / 2);
 
@@ -199,7 +202,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
             ? L.F("Удалить игру «{0}»?   [Enter]ДА   [Esc]НЕТ", _cards[_selected].Name)
             : _message.Length > 0 ? _message
             : _cards[_selected].Exists ? L.T("[←→↑↓]ВЫБОР   [Enter]ИГРАТЬ   [Del]УДАЛИТЬ") : L.T("[←→↑↓]ВЫБОР   [Enter]НОВАЯ ИГРА");
-        CenterIn(_top + CardHeight * 2 + 2, _left, total, footer, _confirmDelete ? Bright : Dim);
+        CenterIn(_top + CardHeight * Rows + Rows, _left, total, footer, _confirmDelete ? Bright : Dim);
 
         Console.CursorVisible = false;
         for (int r = 0; r < _height; r++) WriteRow(r);
@@ -234,12 +237,14 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         string who = string.Join(" · ", new[] { card.Race, card.Class }.Where(s => s.Length > 0));
         if (who.Length > 0) Put(ty + 1, tx, Fit(who, tw), Fg);
         if (card.Hp.Length > 0) Put(ty + 2, tx, Fit(L.T("ХП ") + card.Hp, tw), Fg);
+        if (card.World.Length > 0) Put(ty + 3, tx, Fit(L.F("Мир: {0}", card.World), tw), Fg);
 
+        // Сюжет — две строки под миром (ниже — время и когда играли).
         if (card.Arc.Length > 0)
         {
             var arc = TextWrapper.WrapText(card.Arc, tw);
-            for (int i = 0; i < arc.Count && i < 3; i++)
-                Put(ty + 4 + i, tx, Fit(i == 2 && arc.Count > 3 ? arc[i] + "…" : arc[i], tw), Dim);
+            for (int i = 0; i < arc.Count && i < 2; i++)
+                Put(ty + 5 + i, tx, Fit(i == 1 && arc.Count > 2 ? arc[i] + "…" : arc[i], tw), Dim);
         }
         if (card.Time.Length > 0) Put(y + CardHeight - 3, tx, Fit(card.Time, tw), Dim);
         Put(y + CardHeight - 2, tx, Fit(L.F("Играли {0:dd.MM HH:mm}", card.Played), tw), Dim);

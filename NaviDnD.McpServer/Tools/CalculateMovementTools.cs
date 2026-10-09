@@ -90,7 +90,7 @@ public sealed class CalculateMovementTools(McpServerConfig config)
             return reader.ReadToEnd();
         });
         var storage = new Storage();
-        storage.ApplyUpdateWorldState(json);
+        storage.ApplySavedState(json);
         return storage.WorldState;
     }
 

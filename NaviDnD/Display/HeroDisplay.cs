@@ -71,6 +71,28 @@ public class HeroDisplay
 
     public bool HasSpells => _settings.Hero?.Spells?.Any(s => s.Deleted != true) == true;
 
+    // Режим «Новый уровень» (LevelUpDisplay): карточка показывает героя после повышения (Preview), отличия от
+    // нынешнего (PreviewBase) — золотым («+2 (15) → +3 (16)»), новые умения и заклинания — золотым «+».
+    public Hero? Preview { get; set; }
+    public Hero? PreviewBase { get; set; }
+
+    private string? PreviewValue(string? before, string? after) =>
+        PreviewBase == null || before == after ? null : before == null ? after : $"{before} → {after}";
+
+    private bool IsNewInPreview(string name) => PreviewBase != null
+        && !PreviewBase.Abilities.Any(a => a.Name == name) && !(PreviewBase.Spells ?? []).Any(sp => sp.Name == name);
+
+    // Карточка в игре (не в редакторе новой игры): показывать кнопку «Новый уровень», когда он доступен.
+    public bool OfferLevelUp { get; set; }
+
+    // Кнопка «[F10]НОВЫЙ УРОВЕНЬ» внизу колонки статов (экранные координаты) — клик и наведение (MouseUiHelper); null — нет.
+    public (int y, int x, int width)? LevelUpHit { get; private set; }
+
+    public bool IsOnLevelUp((short x, short y) pos) =>
+        LevelUpHit is { } h && pos.y == h.y && pos.x >= h.x && pos.x < h.x + h.width;
+
+    private static readonly List<int> LevelUpColor = [235, 190, 80];
+
     private static string ActiveKey(CharacterSubTab tab) => tab switch
     {
         CharacterSubTab.Inventory => "inv",
@@ -132,6 +154,35 @@ public class HeroDisplay
         _leftArrowHovered = leftHovered;
         _rightArrowHovered = rightHovered;
         RedrawSubTabTitle();
+    }
+
+    // Наведение на кнопку «Новый уровень»: плашка ярче (как кнопки мастера новой игры), перерисовывается только она.
+    private bool _levelUpHovered;
+    private string _levelUpText = "";
+    private bool _levelUpActive;
+
+    public void SetLevelUpHover(bool hovered)
+    {
+        if (hovered == _levelUpHovered) return;
+        _levelUpHovered = hovered;
+        if (LevelUpHit is not { } h) return;
+        int sl = Console.CursorLeft, st = Console.CursorTop;
+        bool vis = OperatingSystem.IsWindows() && Console.CursorVisible;
+        Console.CursorVisible = false;
+        Console.SetCursorPosition(h.x + LevelUpKey.Length, h.y);
+        WriteLevelUpButton();
+        Console.SetCursorPosition(sl, st);
+        Console.CursorVisible = vis;
+    }
+
+    private const string LevelUpKey = "[F10]";
+
+    private void WriteLevelUpButton()
+    {
+        bool on = _levelUpActive && _levelUpHovered;
+        var fg = !_levelUpActive ? ColorHelper.Darker(_display.MainForeground, 0.5) : on ? ColorHelper.Pale(LevelUpColor, 0.5) : LevelUpColor;
+        var bg = ColorHelper.MixWith(_display.MainBackground, _display.MainForeground, on ? 0.42 : 0.16);
+        ColorHelper.WriteColored(_levelUpText, fgColor: fg, bgColor: bg);
     }
 
     public void SetSubTabLabelHover(string? hovered) // "inv", "abil", "eff", or null
@@ -221,6 +272,7 @@ public class HeroDisplay
         public List<int>? Color { get; set; }
         public bool HasColor => Color != null && Color.Count == 3;
         public string? FullText { get; set; } // значение не влезло и обрезано с «...» — полный текст для бегущей строки
+        public string? KeyHint { get; set; }  // «[F10]» перед текстом — цветом подсказок клавиш заголовка
     }
 
     // ── Обрезанные значения карточки и бегущая строка при наведении ─────────────
@@ -325,7 +377,7 @@ public class HeroDisplay
         _selectionRows.Clear();
         _selectionState = (_display.SelectedInventoryIndex, _display.PinnedInventoryIndex, _display.SelectedSpellIndex, _display.PinnedSpellIndex);
         var settings = _settings;
-        var hero = settings.Hero;
+        var hero = Preview ?? settings.Hero;
         if (hero == null) return;
 
         int startTop = Console.CursorTop;
@@ -362,13 +414,22 @@ public class HeroDisplay
         string? preparedMax = StatValue(StatKeys.SpellsPrepared);
         string? knownMax    = StatValue(StatKeys.SpellsKnown);
 
+        // Предпросмотр уровня: заклинательный стат изменился — «было → стало» золотым.
+        string? SpellStat(string key, string? shown, string? before)
+        {
+            string? was = PreviewBase?.Stat(key)?.Value;
+            return PreviewBase == null || was == hero.Stat(key)?.Value || shown == null ? shown : $"{before ?? was} → {shown}";
+        }
+        int baseSpells(bool prepared) => PreviewBase?.Spells?.Count(s => s.Deleted != true && s.Level > 0 && (!prepared || s.Prepared == true)) ?? 0;
         (string label, string? value)[] spellStatLines =
         [
-            (L.T("Заклинательная х-ка"), StatValue(StatKeys.SpellAbility)),
-            (L.T("Спасбросок закл."), StatValue(StatKeys.SpellSave)),
-            (L.T("Атака заклинанием"), StatValue(StatKeys.SpellAttack)),
-            (L.T("Подготовлено закл."), preparedMax != null ? $"{preparedSpellCount}/{preparedMax}" : null),
-            (L.T("Известно закл."), knownMax != null ? $"{knownSpellCount}/{knownMax}" : null),
+            (L.T("Заклинательная х-ка"), SpellStat(StatKeys.SpellAbility, StatValue(StatKeys.SpellAbility), null)),
+            (L.T("Спасбросок закл."), SpellStat(StatKeys.SpellSave, StatValue(StatKeys.SpellSave), null)),
+            (L.T("Атака заклинанием"), SpellStat(StatKeys.SpellAttack, StatValue(StatKeys.SpellAttack), null)),
+            (L.T("Подготовлено закл."), SpellStat(StatKeys.SpellsPrepared, preparedMax != null ? $"{preparedSpellCount}/{preparedMax}" : null,
+                $"{baseSpells(true)}/{PreviewBase?.Stat(StatKeys.SpellsPrepared)?.Value}")),
+            (L.T("Известно закл."), SpellStat(StatKeys.SpellsKnown, knownMax != null ? $"{knownSpellCount}/{knownMax}" : null,
+                $"{baseSpells(false)}/{PreviewBase?.Stat(StatKeys.SpellsKnown)?.Value}")),
         ];
         leftKeyMax = Math.Max(leftKeyMax, spellStatLines.Max(l => l.label.Length));
 
@@ -378,9 +439,14 @@ public class HeroDisplay
         };
         if (!string.IsNullOrEmpty(heroRace))
             leftSlots.Add((L.T("Раса").PadRight(leftKeyMax) + "   ", heroRace, null));
+        // Уровень (ведёт движок) — в строке класса: «Воин 1 ур».
+        var rules = LevelRules.Current;
+        int level = LevelRules.LevelOf(hero);
         if (!string.IsNullOrEmpty(heroClass))
-            leftSlots.Add((L.T("Класс").PadRight(leftKeyMax) + "   ", heroClass, null));
-        leftSlots.Add(("HP".PadRight(leftKeyMax) + "   ", $"{hero.Hp} ❤", null));
+            leftSlots.Add((L.T("Класс").PadRight(leftKeyMax) + "   ", L.F("{0} {1} ур", heroClass, level),
+                PreviewBase != null && LevelRules.LevelOf(PreviewBase) != level ? LevelUpColor : null));
+        leftSlots.Add(("HP".PadRight(leftKeyMax) + "   ", (PreviewValue(PreviewBase?.Hp, hero.Hp) ?? hero.Hp) + " ❤",
+            PreviewValue(PreviewBase?.Hp, hero.Hp) != null ? LevelUpColor : null));
         leftSlots.Add((L.T("Обзор").PadRight(leftKeyMax) + "   ", SightText(hero), null));
         leftSlots.Add((L.T("Вдохновение").PadRight(leftKeyMax) + "   ", hero.Inspiration == true ? L.T("Да") : "—", null));
 
@@ -425,7 +491,7 @@ public class HeroDisplay
                 // Заклинательные статы — перед ячейками заклинаний (когда появятся) и ресурсами.
                 foreach (var (label, value) in spellStatLines)
                     if (!string.IsNullOrEmpty(value))
-                        leftSlots.Add((label.PadRight(leftKeyMax) + "   ", value, null));
+                        leftSlots.Add((label.PadRight(leftKeyMax) + "   ", value, value.Contains(" → ") ? LevelUpColor : null));
                 AddResourcesByCategory(ResourceCategories.Spells);
                 break;
         }
@@ -435,7 +501,11 @@ public class HeroDisplay
             if (hero.Resources == null) return;
             foreach (var resource in hero.Resources.Where(r => r.Deleted != true
                 && r.Category == category))
-                leftSlots.Add((resource.Name.PadRight(leftKeyMax) + "   ", resource.Value ?? "", null));
+            {
+                string? was = PreviewBase?.Resources?.FirstOrDefault(x => x.Deleted != true && x.Name == resource.Name)?.Value;
+                string? changed = PreviewValue(was, resource.Value);
+                leftSlots.Add((resource.Name.PadRight(leftKeyMax) + "   ", changed ?? resource.Value ?? "", changed != null ? LevelUpColor : null));
+            }
         }
 
         var middleItems = new List<(string key, string value, List<int> valueColor)>();
@@ -444,19 +514,43 @@ public class HeroDisplay
             // Раса/Класс/заклинательные статы уже показаны в колонке 1 (leftSlots) — не дублируем.
             string[] shownElsewhere = [StatKeys.Race, StatKeys.Class, StatKeys.SpellAbility, StatKeys.SpellSave,
                 StatKeys.SpellAttack, StatKeys.SpellsPrepared, StatKeys.SpellsKnown];
-            foreach (var stat in hero.Stats.Where(s => s.Deleted != true && !shownElsewhere.Contains(s.Key)))
-                middleItems.Add((stat.Name, stat.Value, null));
+            // Опыт — строкой движка в конце колонки; стат «Опыт» от мастера по старой привычке не дублируем.
+            // Размер и тип существа — одной строкой «Существо: Средний гуманоид» (колонка короче, кнопке уровня есть место).
+            var size = hero.Stats.FirstOrDefault(s => s.Deleted != true && CreatureNames.IsSize(s.Name));
+            var type = hero.Stats.FirstOrDefault(s => s.Deleted != true && CreatureNames.IsType(s.Name));
+            foreach (var stat in hero.Stats.Where(s => s.Deleted != true && !shownElsewhere.Contains(s.Key) && !ClassLevel.IsExperienceStat(s.Name)))
+            {
+                if (size != null && type != null && stat == type) continue;
+                if (size != null && type != null && stat == size)
+                {
+                    string t = type.Value?.Trim() ?? "";
+                    middleItems.Add((L.T("Существо"), $"{size.Value?.Trim()} {(t.Length > 0 ? char.ToLower(t[0]) + t[1..] : "")}".Trim(), null));
+                    continue;
+                }
+            {
+                string? changed = PreviewValue(PreviewBase?.Stats?.FirstOrDefault(x => x.Deleted != true && x.Name == stat.Name)?.Value, stat.Value);
+                middleItems.Add((stat.Name, changed ?? stat.Value, changed != null ? LevelUpColor : null));
+            }
+            }
         }
         if (middleItems.Count == 0)
         {
             middleItems.Add(("", L.T("(нет характеристик)"), null));
         }
+        // Опыт — последней строкой колонки статов; опыта хватает — внизу колонки по центру кнопка «Новый уровень».
+        middleItems.Add((L.T("Опыт"), rules.NextXp(level) is int next ? $"{hero.Xp ?? 0}/{next}" : (hero.Xp ?? 0).ToString(), null));
+        // Опыта хватает — кнопка видна; в бою она серая и не нажимается (LevelUp.Available).
+        bool showLevelUp = OfferLevelUp && Preview == null && hero.Dead != true && rules.CanLevelUp(hero);
+        bool canLevelUp = showLevelUp && LevelUp.Available(_settings);
 
         var rightItems = new List<(string key, string value, List<int> valueColor)>();
         if (hero.Skills != null && hero.Skills.Any())
         {
             foreach (var skill in hero.Skills.Where(s => s.Deleted != true))
-                rightItems.Add((skill.Name, skill.Value, null));
+            {
+                string? changed = PreviewValue(PreviewBase?.Skills?.FirstOrDefault(x => x.Deleted != true && x.Name == skill.Name)?.Value, skill.Value);
+                rightItems.Add((skill.Name, changed ?? skill.Value, changed != null ? LevelUpColor : null));
+            }
         }
         if (rightItems.Count == 0)
         {
@@ -477,13 +571,32 @@ public class HeroDisplay
         var middleLines = middleItems.Select(item => FitLine(item.key.PadRight(middleKeyMax) + "   ", item.value, middleWidth, item.valueColor)).ToList();
         var rightLines = rightItems.Select(item => FitLine(item.key.PadRight(rightKeyMax) + "   ", item.value, rightWidth, item.valueColor)).ToList();
 
-        int maxLinesCount = Math.Max(leftLines.Count, Math.Max(middleLines.Count, rightLines.Count));
+        // Кнопка — последней строкой блока, от опыта её отделяет хотя бы одна пустая строка.
+        int levelUpRow = -1;
+        int maxLinesCount = Math.Max(leftLines.Count, Math.Max(middleLines.Count + (showLevelUp ? 2 : 0), rightLines.Count));
+        if (showLevelUp)
+        {
+            while (middleLines.Count < maxLinesCount - 1) middleLines.Add(new ColoredLine { Prefix = "", ColoredText = "", Suffix = new string(' ', middleWidth), Color = null });
+            // Плашка «  НОВЫЙ УРОВЕНЬ  » на фоне — по центру колонки, подсказка «[F10]» — слева от неё, в центровке не участвует.
+            const string key = LevelUpKey;
+            string button = $"  {L.T("НОВЫЙ УРОВЕНЬ")}  ";
+            if (key.Length + button.Length > middleWidth) button = button[..Math.Max(0, middleWidth - key.Length)];
+            int pad = Math.Max(key.Length, (middleWidth - button.Length) / 2) - key.Length;
+            if (canLevelUp) levelUpRow = middleLines.Count;
+            _levelUpText = button;
+            _levelUpActive = canLevelUp;
+            if (!canLevelUp) _levelUpHovered = false;
+            middleLines.Add(new ColoredLine { Prefix = new string(' ', pad), KeyHint = key, ColoredText = button,
+                Suffix = new string(' ', Math.Max(0, middleWidth - pad - key.Length - button.Length)),
+                Color = canLevelUp ? LevelUpColor : ColorHelper.Darker(_display.MainForeground, 0.5) });
+        }
         while (leftLines.Count   < maxLinesCount) leftLines.Add(new ColoredLine   { Prefix = "", ColoredText = "", Suffix = new string(' ', leftWidth),   Color = null });
         while (middleLines.Count < maxLinesCount) middleLines.Add(new ColoredLine { Prefix = "", ColoredText = "", Suffix = new string(' ', middleWidth), Color = null });
         while (rightLines.Count  < maxLinesCount) rightLines.Add(new ColoredLine  { Prefix = "", ColoredText = "", Suffix = new string(' ', rightWidth),  Color = null });
 
         _truncated.Clear();
         _marqueeIdx = -1;
+        LevelUpHit = null;
         // Начало текста колонок в строке: отступ + рамка + " " (колонка 1), далее «│ » между колонками.
         int leftX   = DisplayConfig.LeftMargin + 2;
         int middleX = leftX + leftWidth + 2;
@@ -496,6 +609,7 @@ public class HeroDisplay
             var right  = rightLines[i];
 
             int rowY = Console.CursorTop;
+            if (i == levelUpRow) LevelUpHit = (rowY, middleX + middle.Prefix.Length, (middle.KeyHint?.Length ?? 0) + middle.ColoredText.Length);   // с подсказкой
             if (left.FullText != null)   _truncated.Add((rowY, leftX + left.Prefix.Length, left.ColoredText.Length, left.FullText, left.Color));
             if (middle.FullText != null) _truncated.Add((rowY, middleX + middle.Prefix.Length, middle.ColoredText.Length, middle.FullText, middle.Color));
             if (right.FullText != null)  _truncated.Add((rowY, rightX + right.Prefix.Length, right.ColoredText.Length, right.FullText, right.Color));
@@ -507,7 +621,8 @@ public class HeroDisplay
                 else               { Console.Write(left.Prefix); Console.Write(left.ColoredText); Console.Write(left.Suffix); }
                 ColorHelper.WriteColored("│", MouseUiHelper.FrameColor(_display));
                 Console.Write(" ");
-                if (middle.HasColor) { Console.Write(middle.Prefix); ColorHelper.WriteColored(middle.ColoredText, middle.Color!); Console.Write(middle.Suffix); }
+                if (middle.KeyHint != null) { Console.Write(middle.Prefix); MouseUiHelper.WriteKeyHint(middle.KeyHint, _display); WriteLevelUpButton(); Console.Write(middle.Suffix); }
+                else if (middle.HasColor) { Console.Write(middle.Prefix); ColorHelper.WriteColored(middle.ColoredText, middle.Color!); Console.Write(middle.Suffix); }
                 else                 { Console.Write(middle.Prefix); Console.Write(middle.ColoredText); Console.Write(middle.Suffix); }
                 ColorHelper.WriteColored("│", MouseUiHelper.FrameColor(_display));
                 Console.Write(" ");
@@ -593,7 +708,7 @@ public class HeroDisplay
         return (w1, w2, w3, w4);
     }
 
-    private record struct InvLine(int ItemIdx, bool IsFirst, string Marker, string Name, List<int>? Color, string Rest);
+    private record struct InvLine(int ItemIdx, bool IsFirst, string Marker, string Name, List<int>? Color, string Rest, List<int>? MarkerColor = null);
 
     private void DrawInventorySection(Hero hero, int innerWidth, int preTitleRows, BorderDrawer borderDrawer)
     {
@@ -697,7 +812,8 @@ public class HeroDisplay
         for (int i = 0; i < abilities.Count; i++)
         {
             var ability = abilities[i];
-            string marker = " ";
+            bool isNew = IsNewInPreview(ability.Name);
+            string marker = isNew ? "+" : " ";
             string name = ability.Name;
             int prefixLen = marker.Length + name.Length + 2;
             // -1: резерв под стрелку "←" при наведении/выборе — без него описание могло впритык
@@ -709,7 +825,7 @@ public class HeroDisplay
             var descLines = TextWrapper.WrapText(desc, continuationWidth, firstLineWidth);
 
             flat.Add(new InvLine(i, true, marker, name, ability.Color,
-                ": " + (descLines.Count > 0 ? descLines[0] : "")));
+                ": " + (descLines.Count > 0 ? descLines[0] : ""), isNew ? LevelUpColor : null));
             for (int d = 1; d < descLines.Count; d++)
                 flat.Add(new InvLine(i, false, " ", "", null, descLines[d]));
         }
@@ -947,8 +1063,9 @@ public class HeroDisplay
             InvLine Line(int c)
             {
                 var spell = visible[c].Items[r];
-                string marker = spell.Prepared == true ? "•" : " ";
-                return new InvLine(visible[c].GlobalStart + r, true, marker, spell.Name, spell.Color, "");
+                bool isNew = IsNewInPreview(spell.Name);
+                string marker = isNew ? "+" : spell.Prepared == true ? "•" : " ";
+                return new InvLine(visible[c].GlobalStart + r, true, marker, spell.Name, spell.Color, "", isNew ? LevelUpColor : null);
             }
             bool Selected(int c) => r < visible[c].Items.Count && visible[c].GlobalStart + r == _display.SelectedSpellIndex;
             bool Arrow(int c) => r < visible[c].Items.Count &&
@@ -975,7 +1092,8 @@ public class HeroDisplay
         bool arrow = showArrow ?? selected;
         var selFg = selected ? ColorHelper.Pale(_display.MainForeground, 0.6) : null;
         int written = 0;
-        if (selFg != null) ColorHelper.WriteColored(line.Marker, selFg); else Console.Write(line.Marker);
+        if (line.MarkerColor != null) ColorHelper.WriteColored(line.Marker, line.MarkerColor);
+        else if (selFg != null) ColorHelper.WriteColored(line.Marker, selFg); else Console.Write(line.Marker);
         written += line.Marker.Length;
         var nameColor = selected && line.Color != null ? ColorHelper.Pale(line.Color, 0.6) : line.Color;
         if (nameColor != null && nameColor.Count == 3)

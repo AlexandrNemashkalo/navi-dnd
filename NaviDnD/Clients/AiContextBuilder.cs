@@ -62,7 +62,7 @@ public class AiContextBuilder
                           + (_ws.Hero.Dead == true ? " dead:true" : "");
             var lightStr = _ws.Hero.Light is { On: true } l ? $" light:{l.Ft}ft" : "";
             // Кто герой — имя, раса, класс и заметка о нём: обращаться к нему в верном роде и характере.
-            string who = string.Join(", ", new[] { _ws.Hero.Stat(StatKeys.Race)?.Value, _ws.Hero.Stat(StatKeys.Class)?.Value }
+            string who = string.Join(", ", new[] { _ws.Hero.Stat(StatKeys.Race)?.Value, _ws.Hero.Stat(StatKeys.Class)?.Value, LevelText(_ws.Hero) }
                 .Where(x => !string.IsNullOrEmpty(x)));
             sb.AppendLine($"hero: {_ws.Hero.Name}{(who.Length > 0 ? $" ({who})" : "")}"
                           + (_ws.Hero.AiInfo is { Count: > 0 } note ? $" — {string.Join(" ", note)}" : ""));
@@ -455,6 +455,14 @@ public class AiContextBuilder
             return $"ряд {g.Key}: {string.Join(", ", ranges)}";
         }));
 
+    // «lvl 3, xp 1200/2700» — уровень и опыт героя (ведёт движок).
+    public static string LevelText(Hero hero)
+    {
+        var rules = Helpers.LevelRules.Current;
+        int level = Helpers.LevelRules.LevelOf(hero);
+        return $"lvl {level}, xp {hero.Xp ?? 0}" + (rules.NextXp(level) is int next ? $"/{next}" : "");
+    }
+
     public string HeroMinimalState(string request)
     {
         var sb = new System.Text.StringBuilder();
@@ -463,7 +471,7 @@ public class AiContextBuilder
         {
             if (!string.IsNullOrEmpty(_ws.Hero.Name))
                 sb.AppendLine($"name: {_ws.Hero.Name} symbol: {_ws.Hero.Symbol}");
-            sb.AppendLine($"HP:{_ws.Hero.Hp}");
+            sb.AppendLine($"HP:{_ws.Hero.Hp} {LevelText(_ws.Hero)}");
         }
 
         if (_ws.Hero?.Inventory is { Count: > 0 } inv)

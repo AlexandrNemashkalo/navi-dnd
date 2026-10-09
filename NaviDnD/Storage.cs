@@ -247,6 +247,29 @@ public class Storage
         return result;
     }
 
+    // Применяется сохранение (своё, а не ответ мастера): поля, которые ведёт только движок (hero.level/xp), берутся
+    // из файла. Ответ мастера их не меняет — опыт он начисляет патчем xpAward.
+    private bool _fromSave;
+
+    // Сохранение или карточка героя библиотеки — как ApplyUpdateWorldState, но с полями движка.
+    public void ApplySavedState(string json)
+    {
+        _fromSave = true;
+        try { ApplyUpdateWorldState(json); }
+        finally { _fromSave = false; }
+    }
+
+    // Сообщения движка для истории (начислен опыт, доступен новый уровень) — после записей ответа мастера:
+    // GameAiClient забирает их, когда ответ показан.
+    private readonly List<string> _notices = [];
+
+    public List<string> TakeNotices()
+    {
+        var list = _notices.ToList();
+        _notices.Clear();
+        return list;
+    }
+
     public void ApplyUpdateWorldState(string jsonUpdate)
     {
         using JsonDocument doc = JsonDocument.Parse(jsonUpdate);
@@ -357,6 +380,47 @@ public class Storage
         if (WorldState.Hero is not { } hero) return;
         foreach (var stat in hero.Stats ?? []) stat.Key ??= StatKeys.FromName(stat.Name);
         foreach (var resource in hero.Resources ?? []) resource.Category = ResourceCategories.Normalize(resource.Category);
+        // «Воин 3 ур» → «Воин»: уровень — hero.level. Уровень из стата берётся только у героя без уровня (создание
+        // героя); у героя с уровнем мастер его так не поднимет.
+        if (hero.Stat(StatKeys.Class) is { } cls && ClassLevel.Split(cls.Value) is (var name, int level))
+        {
+            cls.Value = name;
+            if (hero.Level == null)
+            {
+                hero.Level = level;
+                hero.Xp ??= Helpers.LevelRules.Current.XpFor(level);
+            }
+        }
+    }
+
+    // Опыт от мастера: {"monsters":["Гоблин",…], "xp":N, "reason":"…"} — монстры справочника считаются по уровню
+    // опасности (LevelRules), xp — за прочее (задание, находка). Итог — в историю после ответа мастера.
+    private void ApplyXpAward(JsonElement el)
+    {
+        if (el.ValueKind != JsonValueKind.Object || WorldState.Hero is not { } hero) return;
+        var rules = Helpers.LevelRules.Current;
+        int total = 0;
+        string? reason = null;
+        foreach (var p in el.EnumerateObject())
+            switch (p.Name.ToLowerInvariant())
+            {
+                case "monsters" when p.Value.ValueKind == JsonValueKind.Array:
+                    foreach (var m in p.Value.EnumerateArray())
+                        if (m.ValueKind == JsonValueKind.String) total += rules.MonsterXp(m.GetString());
+                    break;
+                case "xp" when p.Value.ValueKind == JsonValueKind.Number && p.Value.TryGetInt32(out int xp):
+                    total += Math.Max(0, xp);
+                    break;
+                case "reason" when p.Value.ValueKind == JsonValueKind.String:
+                    reason = p.Value.GetString();
+                    break;
+            }
+        if (total <= 0) return;
+        bool could = rules.CanLevelUp(hero);
+        hero.Xp = (hero.Xp ?? 0) + total;
+        _notices.Add(string.IsNullOrWhiteSpace(reason) ? L.WF("[+{0} опыта]", total) : L.WF("[+{0} опыта: {1}]", total, reason.Trim()));
+        if (!could && rules.CanLevelUp(hero))
+            _notices.Add(L.W("[Доступен новый уровень: ПЕРСОНАЖ → «Новый уровень»]"));
     }
 
     // Существо убрано с карты посреди боя (убито) — на его клетке остаётся тело: объект со всем, что мастер о нём
@@ -633,7 +697,7 @@ public class Storage
 
         WorldState.Hero ??= new Hero();
 
-        ValidateKeys<Hero>(el, "hero");
+        ValidateKeys<Hero>(el, "hero", "xpaward");
 
         var oldPosition = WorldState.Hero.Position?.ToList();
         bool speedLeftUpdated = false;
@@ -664,6 +728,24 @@ public class Storage
                     break;
                 case "dead":
                     WorldState.Hero.Dead = prop.Value.ValueKind == JsonValueKind.True ? true : null;
+                    break;
+                // Ведёт движок: только из сохранения; мастер — через xpAward.
+                case "level" when _fromSave:
+                    WorldState.Hero.Level = prop.Value.ValueKind == JsonValueKind.Number ? prop.Value.GetInt32() : null;
+                    break;
+                case "xp" when _fromSave:
+                    WorldState.Hero.Xp = prop.Value.ValueKind == JsonValueKind.Number ? prop.Value.GetInt32() : null;
+                    break;
+                case "level":
+                case "xp":
+                    Console.Error.WriteLine($"[AI ERROR] hero.{prop.Name} is engine-owned, ignoring (use xpAward).");
+                    break;
+                case "xpaward":
+                    ApplyXpAward(prop.Value);
+                    break;
+                case "levelupdraft" when _fromSave:
+                    WorldState.Hero.LevelUpDraft = prop.Value.ValueKind == JsonValueKind.Object
+                        ? JsonSerializer.Deserialize<LevelUpDraft>(prop.Value.GetRawText(), options) : null;
                     break;
                 case "noopportunityattacksround":
                     WorldState.Hero.NoOpportunityAttacksRound = prop.Value.ValueKind == JsonValueKind.Null ? null : prop.Value.GetInt32();
@@ -985,7 +1067,7 @@ public class Storage
 
     private static readonly Dictionary<Type, HashSet<string>> _knownKeys = new();
 
-    private static void ValidateKeys<T>(JsonElement el, string context)
+    private static void ValidateKeys<T>(JsonElement el, string context, params string[] extraKeys)
     {
         if (el.ValueKind != JsonValueKind.Object) return;
 
@@ -1000,7 +1082,7 @@ public class Storage
         foreach (var prop in el.EnumerateObject())
         {
             string name = prop.Name.ToLower();
-            if (name is "id" or "deleted") continue; // patch-protocol fields, not model properties
+            if (name is "id" or "deleted" || extraKeys.Contains(name)) continue; // patch-protocol fields, not model properties
             if (!keys.Contains(name))
                 Console.Error.WriteLine($"[AI ERROR] Unknown field '{prop.Name}' in {context} ({typeof(T).Name}), ignoring.");
         }
@@ -1011,7 +1093,7 @@ public class Storage
     // и раньше, — файлы запросов MCP (roll_request.json и др.) лежат рядом с сохранением, как и были.
     // Активная игра — Storage/activeGame.txt. UI-тесты (NAVIDND_TEST_WORLDSTATE) по-прежнему пишут в
     // worldState.json — его GameSession бэкапит и восстанавливает.
-    public const int MaxGames = 4;
+    public const int MaxGames = 6;
     private static readonly string StorageDir = Path.Combine(AppConfig.ProjectRoot, "Storage");
     private static readonly string LegacySavePath = Path.Combine(StorageDir, "worldState.json");
     private static readonly string ActiveGamePath = Path.Combine(StorageDir, "activeGame.txt");
@@ -1205,7 +1287,7 @@ public class Storage
         WorldState.Combat = null;
         WorldState?.History?.Clear();
         _entityColors.Clear();
-        ApplyUpdateWorldState(json);
+        ApplySavedState(json);
         LoadExploredCellsFrom(path);
     }
 }

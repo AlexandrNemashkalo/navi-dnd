@@ -168,7 +168,7 @@ public static class StorageMigration
         Func<JsonObject, JsonObject> World,
         Action<JsonObject> Location);
 
-    private static readonly Step[] Steps = [Migration1.Step];
+    private static readonly Step[] Steps = [Migration1.Step, Migration2.Step];
 
     private static class Migration1
     {
@@ -260,6 +260,53 @@ public static class StorageMigration
             foreach (var room in rooms.OfType<JsonObject>())
                 if (Get(room, "name") is JsonValue n && n.TryGetValue(out string? name) && PassageNames.Contains(name))
                     Set(room, "passage", true);
+        }
+    }
+
+    private static class Migration2
+    {
+        // 1 → 2: уровень и опыт героя — поля hero.level/xp (ведёт движок), а не текст статов «Класс: Воин 3 ур»
+        // и «Опыт: 900/2700».
+        public static readonly Step Step = new(SaveFile, notes => notes, HeroCard, world => world, _ => { });
+
+        private static JsonObject SaveFile(JsonObject save)
+        {
+            if (Get(save, "hero") is JsonObject hero) Hero(hero);
+            return save;
+        }
+
+        private static JsonObject HeroCard(JsonObject card)
+        {
+            if (Get(card, "HeroJson") is JsonValue v && v.TryGetValue(out string? json) && JsonNode.Parse(json) is JsonObject hero)
+                Set(card, "HeroJson", Hero(hero).ToJsonString(Write));
+            return card;
+        }
+
+        private static JsonObject Hero(JsonObject hero)
+        {
+            if (Get(hero, "stats") is not JsonArray stats) return hero;
+            int? level = null, xp = null;
+            foreach (var s in stats.OfType<JsonObject>().ToList())
+            {
+                string name = Get(s, "name") is JsonValue n && n.TryGetValue(out string? nv) ? nv.Trim().ToLowerInvariant() : "";
+                string value = Get(s, "value")?.ToString() ?? "";
+                if (Get(s, "key") is JsonValue k && k.TryGetValue(out string? key) && key == Data.Models.StatKeys.Class)
+                {
+                    var (cls, lvl) = Data.Models.ClassLevel.Split(value);
+                    Set(s, "value", cls);
+                    level ??= lvl;
+                }
+                else if (Data.Models.ClassLevel.IsExperienceStat(name))
+                {
+                    // «900/2700» — набранный опыт первым числом.
+                    var m = System.Text.RegularExpressions.Regex.Match(value, @"\d+");
+                    if (m.Success) xp = int.Parse(m.Value);
+                    stats.Remove(s);
+                }
+            }
+            if (level != null && Get(hero, "level") is null) Set(hero, "level", level.Value, "level");
+            if (xp != null && Get(hero, "xp") is null) Set(hero, "xp", xp.Value, "xp");
+            return hero;
         }
     }
 
