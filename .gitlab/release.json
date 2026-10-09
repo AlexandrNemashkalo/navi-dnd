@@ -1,21 +1,21 @@
 {
-    "name":  "NaviDnD 2.1.0",
-    "tag_name":  "v2.1.0",
-    "description":  "# NaviDnD 2.1.0\n\n- Английский язык: интерфейс, рассказ мастера, названия мира и озвучка. Язык выбирается в настройках (пункт ЯЗЫК); после обновления игра остаётся на русском, новая установка — на английском.\n- Язык игры задаётся миром при создании: новый мир — на языке интерфейса, прежние миры и игры — русские.\n- Английский голос озвучки входит в игру: пункт АНГЛИЙСКИЙ ГОЛОС — три мужских и два женских голоса. Модели озвучки загружаются заранее, после остановки речи модель больше не загружается заново.\n- Сохранения при обновлении переводятся в новый формат; копия прежних файлов — в Storage/Backup.\n- Настройки: подсказка и управление — отдельными блоками справа, громкость речи — полоской, путь к Python убран.\n- Исправлено: заголовок «Claude и Codex не найдены» показывался вопросительными знаками; рамка экрана «Создаём мир» не доходила до низа окна.\n\nОбновление распространяется патчем (вместе с английским голосом — около 60 МБ); сохранения и настройки сохраняются.\n\n## English\n\n- English language: interface, the Dungeon Master\u0027s story, world names and voice-over. Choose it in Settings (LANGUAGE); after the update the game stays in Russian, a new installation starts in English.\n- The game language is set by the world when it is created: a new world uses the interface language, existing worlds and games stay Russian.\n- An English voice is included: ENGLISH VOICE — three male and two female voices. Voice models load in advance and are no longer reloaded after speech is stopped.\n- Saves are converted to the new format during the update; the previous files are kept in Storage/Backup.\n\nThe update is delivered as a patch (about 60 MB with the English voice); saves and settings are kept.\n",
+    "name":  "NaviDnD 2.2.0",
+    "tag_name":  "v2.2.0",
+    "description":  "# NaviDnD 2.2.0\n\n- Опыт и уровни. Мастер начисляет опыт за побеждённых врагов (по уровню опасности из справочника монстров), выполненные задания и находки — итог пишется в истории. Набрал опыт — на вкладке ПЕРСОНАЖ появляется кнопка [F10]НОВЫЙ УРОВЕНЬ (в бою она неактивна).\n- Повышение уровня — прямо на вкладке ПЕРСОНАЖ: хиты (среднее или один бросок кости), улучшение характеристик, подкласс, заклинания и прочее, что предлагает мастер по правилам класса. Карточка героя сразу показывает изменения золотым, новые умения и заклинания отмечены «+», справа — описание варианта или карточка заклинания из справочника.\n- Свой вариант прокачки: в строке ввода можно попросить мастера, например «хочу Туманный шаг вместо Щита». Мастер добавит вариант (★), если его разрешают правила класса и уровня, или объяснит отказ. Напрямую героя никто не меняет.\n- Варианты и бросок хитов запоминаются: отмена, выход в меню и перезапуск не спрашивают мастера заново и не дают перебросить хиты.\n- Карточка героя: класс и уровень одной строкой («Волшебник 2 ур»), опыт, размер и тип существа — одной строкой.\n- МОИ ИГРЫ: шесть мест для игр вместо четырёх; на карточке игры — уровень героя и мир.\n- Окно можно перетаскивать за верхнюю часть и во время ожиданий («Мастер думает», «Создаём мир»).\n- Сохранения при обновлении переводятся в новый формат (уровень и опыт); копия прежних файлов — в Storage/Backup.\n\nОбновление распространяется патчем; сохранения и настройки сохраняются.\n\n## English\n\n- Experience and levels. The DM awards experience for defeated enemies (by challenge rating from the monster manual), completed quests and discoveries — the total appears in the story. Once you have enough, the CHARACTER tab shows a [F10]LEVEL UP button (inactive during combat).\n- Leveling up happens right on the CHARACTER tab: hit points (average or a single die roll), ability score improvement, subclass, spells and other options the DM offers by your class rules. The character card shows the changes in gold, new features and spells are marked “+”, and the right panel shows the option\u0027s description or the spell card from the manual.\n- Your own option: in the input line you can ask the DM, e.g. “I want Misty Step instead of Shield”. The DM adds the option (★) if your class and level rules allow it, or explains the refusal. Nobody edits the hero directly.\n- Options and the hit point roll are remembered: cancelling, going to the menu or restarting does not ask the DM again or allow a reroll.\n- Character card: class and level on one line, experience, size and creature type on one line.\n- MY GAMES: six game slots instead of four; each game card shows the hero\u0027s level and the world.\n- The window can be dragged by its top part during waits as well.\n- Saves are converted to the new format during the update; the previous files are kept in Storage/Backup.\n\nThe update is delivered as a patch; saves and settings are kept.\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.1.0/navi-dnd-v2.1.0-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.0/navi-dnd-v2.2.0-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.1.0/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.0/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.1.0/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.0/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
@@ -108,6 +108,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.0.8-2.1.0.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.1.0/releases/patches/NaviDnD-patch-2.0.8-2.1.0.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.1.0-2.2.0.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.0/releases/patches/NaviDnD-patch-2.1.0-2.2.0.zip"
                                  }
                              ]
                }
