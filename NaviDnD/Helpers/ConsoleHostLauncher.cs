@@ -37,19 +37,43 @@ public static class ConsoleHostLauncher
         return window != 0 && IsWindowVisible(window);
     }
 
-    // Must run before ConsoleSetup hides the window or initializes input/sound/storage.
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(nint window);
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool AllowSetForegroundWindow(int processId);
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsIconic(nint window);
+
+    // Одна игра на пользователя: второй запуск (ещё клик по ярлыку, пока игра грузится) не открывает вторую копию —
+    // показывает окно уже запущенной. Без этого каждый клик запускал игру с моделью озвучки, и десяток копий
+    // забивал память. Мьютекс держит игра (с флагом) до выхода; окно — в файле рядом с ним.
+    private const string InstanceName = @"Local\NaviDnD.Game";
+    private const string SwitchName = @"Local\NaviDnD.ConsoleSwitch";
+    private static Mutex? _instance;
+    public static string WindowPath { get; set; } = Path.Combine(Path.GetTempPath(), "navidnd-window.txt");
+
+    // Must run before ConsoleSetup hides the window or initializes input/sound/storage. true — этому процессу выйти.
     public static bool TryRelaunch(string[] args)
     {
         if (!OperatingSystem.IsWindows() || Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") != null
             || Console.IsInputRedirected || Console.IsOutputRedirected) return false;
         if (args.Contains(RelaunchFlag))
         {
-            RestorePending();
+            using (SwitchGate()) RestorePending();
+            // Уже идёт другая игра (два запуска наперегонки) — показать её окно, эту закрыть.
+            if (!ClaimInstance()) { ActivateRunning(); return true; }
+            nint own = GetConsoleWindow();
+            try { File.WriteAllText(WindowPath, own.ToString()); } catch { /* не важно для запуска */ }
+            if (own != 0) SetForegroundWindow(own);
             // Перезапуск уже был, а окна классической консоли всё равно нет — терминал перехватил и его.
             if (!InClassicConsole()) Log("После перезапуска игра всё ещё не в классической консоли.");
             return false;
         }
-        RestorePending();   // прошлый перезапуск не вернул настройки (сбой) — вернуть до новой подмены
+        // Игра уже запущена — её окно вперёд, вторую копию не запускать.
+        if (IsRunning()) { ActivateRunning(); return true; }
         // Без флага — всегда перезапуск (ярлык, exe, перезапуск после обновления): угадать по окну, кто хозяин
         // консоли, ненадёжно — на части Windows 11 терминал перехватывает даже явный conhost.exe из ярлыка.
         string? executable = Environment.ProcessPath;
@@ -58,23 +82,74 @@ public static class ConsoleHostLauncher
         {
             string? assembly = Path.GetFileNameWithoutExtension(executable).Equals("dotnet", StringComparison.OrdinalIgnoreCase)
                 ? Assembly.GetEntryAssembly()?.Location : null;
-            // На время запуска «консоль по умолчанию» — классическая (иначе Windows 11 с терминалом по умолчанию
-            // может отдать и conhost.exe терминалу); прежние настройки возвращает перезапущенная игра (RestorePending).
-            var saved = ForceConhostDelegation();
-            if (saved.Count > 0) File.WriteAllText(RestorePath, System.Text.Json.JsonSerializer.Serialize(saved));
-            // Первое окно — сразу прочь: игра откроется во втором, ждать его не нужно.
+            using (SwitchGate())
+            {
+                RestorePending();   // прошлый перезапуск не вернул настройки (сбой) — вернуть до новой подмены
+                // На время запуска «консоль по умолчанию» — классическая (иначе Windows 11 с терминалом по умолчанию
+                // может отдать и conhost.exe терминалу); прежние настройки возвращает перезапущенная игра.
+                var saved = ForceConhostDelegation();
+                if (saved.Count > 0) File.WriteAllText(RestorePath, System.Text.Json.JsonSerializer.Serialize(saved));
+                // Новое окно игры получает фокус (иначе Windows может открыть его позади других окон).
+                AllowSetForegroundWindow(-1);
+                using var child = Process.Start(CreateStartInfo(executable, args, Environment.CurrentDirectory, assembly));
+                if (child == null)
+                {
+                    Log("conhost.exe не запустился.");
+                    RestorePending();
+                    return false;
+                }
+            }
+            // Первое окно прячется уже после запуска второго: игра откроется в нём, ждать не нужно.
             if (GetConsoleWindow() is var own and not 0) ShowWindow(own, 0);
-            using var child = Process.Start(CreateStartInfo(executable, args, Environment.CurrentDirectory, assembly));
-            if (child != null) return true;
-            Log("conhost.exe не запустился.");
-            RestorePending();
-            if (GetConsoleWindow() is var back and not 0) ShowWindow(back, 5);
-            return false;
+            return true;
         }
         catch (Exception error) when (error is Win32Exception or IOException or InvalidOperationException or UnauthorizedAccessException)
         {
             Log("Не удалось перезапустить в классической консоли: " + error.Message);
             return false;
+        }
+    }
+
+    private static bool IsRunning() => Mutex.TryOpenExisting(InstanceName, out var existing) && Dispose(existing);
+
+    private static bool Dispose(Mutex mutex) { mutex.Dispose(); return true; }
+
+    // Занять место игры; прежняя копия ещё закрывается (перезапуск после обновления) — подождать её немного.
+    private static bool ClaimInstance()
+    {
+        _instance = new Mutex(false, InstanceName);
+        try { return _instance.WaitOne(TimeSpan.FromSeconds(3)); }
+        catch (AbandonedMutexException) { return true; }   // прошлая игра упала, не отпустив
+    }
+
+    // Окно запущенной игры — развернуть и вперёд.
+    private static void ActivateRunning()
+    {
+        try
+        {
+            if (!nint.TryParse(File.ReadAllText(WindowPath).Trim(), out nint window) || window == 0) return;
+            if (IsIconic(window)) ShowWindow(window, 9);   // SW_RESTORE
+            SetForegroundWindow(window);
+        }
+        catch { /* окна нет — просто не дублируем игру */ }
+    }
+
+    // Подмена и возврат настройки консоли — по одному процессу за раз (параллельные запуски не перетирают друг друга).
+    private static IDisposable SwitchGate()
+    {
+        var gate = new Mutex(false, SwitchName);
+        bool owned;
+        try { owned = gate.WaitOne(TimeSpan.FromSeconds(5)); }
+        catch (AbandonedMutexException) { owned = true; }
+        return new Gate(gate, owned);
+    }
+
+    private sealed class Gate(Mutex mutex, bool owned) : IDisposable
+    {
+        public void Dispose()
+        {
+            if (owned) mutex.ReleaseMutex();
+            mutex.Dispose();
         }
     }
 
