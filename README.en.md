@@ -9,6 +9,14 @@ Create a hero, explore the world and fight on a tactical map. The DM runs the st
 
 [All releases](https://gitlab.com/navitalevich/navi-dnd/-/releases) · Windows x64
 
+![A combat turn: action, dice roll, DM narration](docs/media/g4_combat_turn.gif)
+
+| Fair roll with disadvantage | World map |
+| --- | --- |
+| ![Roll with disadvantage](docs/media/07_dice_disadvantage.png) | ![World map](docs/media/09_world_map.png) |
+
+*Screenshots are from a Russian playthrough; the game is fully playable in English too.*
+
 ---
 
 ## ✨ Features

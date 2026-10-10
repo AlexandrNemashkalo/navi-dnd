@@ -9,6 +9,12 @@
 
 [Все релизы](https://gitlab.com/navitalevich/navi-dnd/-/releases) · [Что нового](RELEASE_NOTES.md) · Windows x64
 
+![Ход в бою: действие, бросок кубика, рассказ мастера](docs/media/g4_combat_turn.gif)
+
+| Честный бросок с помехой | Карта мира |
+| --- | --- |
+| ![Бросок с помехой](docs/media/07_dice_disadvantage.png) | ![Карта мира](docs/media/09_world_map.png) |
+
 ---
 
 ## ✨ Что внутри
