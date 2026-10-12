@@ -254,7 +254,9 @@ public sealed class LevelUp
     public Hero Apply(string? masterPatchJson)
     {
         var scratch = new Storage();
-        scratch.WorldState.Hero = JsonSerializer.Deserialize<Hero>(JsonSerializer.Serialize(Hero, CopyJson), CopyJson);
+        // Применение патча выставляет язык мира по своему состоянию (L.SetWorld) — у копии он тот же, что у игры.
+        scratch.WorldState.Language = L.World;
+        scratch.WorldState.Hero =JsonSerializer.Deserialize<Hero>(JsonSerializer.Serialize(Hero, CopyJson), CopyJson);
         if (masterPatchJson != null && JsonNode.Parse(masterPatchJson) is JsonObject root
             && root.FirstOrDefault(p => p.Key.Equals("hero", StringComparison.OrdinalIgnoreCase)).Value is JsonObject patch)
         {

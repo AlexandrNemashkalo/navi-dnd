@@ -9,13 +9,19 @@ Create a hero, explore the world and fight on a tactical map. The DM runs the st
 
 [All releases](https://gitlab.com/navitalevich/navi-dnd/-/releases) · Windows x64
 
-![A combat turn: action, dice roll, DM narration](docs/media/g4_combat_turn.gif)
+![A combat turn: the hero tries to intimidate goblins, rolls the d20 on screen, the DM narrates the result](docs/media/en/combat_turn.gif)
 
-| Fair roll with disadvantage | World map |
+| Your roll, not the AI's | World map |
 | --- | --- |
-| ![Roll with disadvantage](docs/media/07_dice_disadvantage.png) | ![World map](docs/media/09_world_map.png) |
+| ![Intimidation check: d20 roll against DC 13](docs/media/en/dice_roll.png) | ![World map with regions and the hero's location](docs/media/en/world_map.png) |
 
-*Screenshots are from a Russian playthrough; the game is fully playable in English too.*
+**Leveling up** — pick hit points, subclass and spells; the character sheet shows every change in gold before you accept.
+
+![Level up: the druid chooses a circle, changes are highlighted on the character sheet](docs/media/en/level_up.gif)
+
+| Character sheet | Spell card from the manual |
+| --- | --- |
+| ![Character sheet](docs/media/en/character_sheet.png) | ![Thunderwave spell card](docs/media/en/spell_card.png) |
 
 ---
 
@@ -24,6 +30,7 @@ Create a hero, explore the world and fight on a tactical map. The DM runs the st
 - 🎲 **AI Dungeon Master** — Claude or OpenAI Codex runs the game by the D&D 5e rules
 - 🗺️ **Tactical and world maps** — grid combat and travel between locations
 - 📜 **Journal and character sheet** — everything about your hero and adventure at hand
+- ⬆️ **Experience and levels** — the DM awards XP, you choose how your hero grows
 - 🌐 **English or Russian** — interface, story and generated names; choose in Settings
 - 🔊 **Voice-over** — the narrator reads lines aloud, offline
 - 🔄 **Auto-updates** — the game downloads only changed files

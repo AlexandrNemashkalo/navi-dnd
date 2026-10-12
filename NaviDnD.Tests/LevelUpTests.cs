@@ -266,6 +266,19 @@ public class LevelUpTests
     }
 
     [Fact]
+    public void ApplyKeepsWorldLanguage()
+    {
+        string before = L.World;
+        try
+        {
+            L.SetWorld(L.English);
+            new LevelUp(Fighter(), LevelRules.Current).Apply("""{"hero":{"abilities":[{"name":"Action Surge"}]}}""");
+            Assert.Equal(L.English, L.World);
+        }
+        finally { L.SetWorld(before); }
+    }
+
+    [Fact]
     public void NewSpellsDoNotExceedPreparedMax()
     {
         var hero = Fighter();
