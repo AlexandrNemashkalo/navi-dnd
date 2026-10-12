@@ -102,6 +102,12 @@ public static class ChildProcessJob
             .Select(signal => PosixSignalRegistration.Create(signal, _ => KillUnixChildren()))];
     }
 
+    // Перед перезапуском после обновления (macOS): процессы запросов не переживут замену процесса игры.
+    internal static void KillAll()
+    {
+        if (!OperatingSystem.IsWindows()) KillUnixChildren();
+    }
+
     private static void KillUnixChildren()
     {
         foreach (var (id, started) in _unixChildren.ToArray())

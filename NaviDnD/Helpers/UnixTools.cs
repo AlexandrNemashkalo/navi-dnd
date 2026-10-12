@@ -89,4 +89,16 @@ internal static class UnixTools
         }
         catch (Exception e) when (e is System.ComponentModel.Win32Exception or IOException or InvalidOperationException) { return null; }
     }
+
+    // macOS: скачанный архив помечен карантином, и macOS проверяет каждый файл, который игра загрузит или запустит
+    // (библиотеки картинок, Python озвучки, MCP-сервер), — а разрешение игрок дал только самой игре. Снимаем пометку
+    // со всей папки игры до первой такой загрузки; признак — пометка на библиотеке SkiaSharp.
+    internal static void ClearQuarantine(string folder)
+    {
+        if (!OperatingSystem.IsMacOS() || getxattr(Path.Combine(folder, "libSkiaSharp.dylib"), "com.apple.quarantine", 0, 0, 0, 0) < 0) return;
+        Run("/usr/bin/xattr", ["-dr", "com.apple.quarantine", folder], TimeSpan.FromMinutes(1));
+    }
+
+    [System.Runtime.InteropServices.DllImport("libc", SetLastError = true)]
+    private static extern nint getxattr(string path, string name, nint value, nint size, uint position, int options);
 }

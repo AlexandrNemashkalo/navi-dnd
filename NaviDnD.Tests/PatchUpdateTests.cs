@@ -145,12 +145,67 @@ public class PatchUpdateTests
             Manifest("1.1.5", ("1.1.4", "1.1.5")).Replace("https://gitlab.com/navitalevich/navi-dnd/-/raw/v1.1.5/", "https://evil.example/")));
     }
 
-    private static string Manifest(string version, params (string From, string To)[] chain)
+    [Fact]
+    public void MacManifestHasOwnPayloadAndNoInstaller()
+    {
+        var manifest = UpdateManifest.Parse(Manifest("1.1.5", mac: true, ("1.1.4", "1.1.5")), macOS: true);
+        Assert.Null(manifest.Installer);
+        Assert.Equal("NaviDnD-macOS-payload.001", manifest.Base.Files.Single().Name);
+        // Описание одной системы не принимается за описание другой.
+        Assert.Throws<InvalidDataException>(() => UpdateManifest.Parse(Manifest("1.1.5", mac: false, ("1.1.4", "1.1.5")), macOS: true));
+        Assert.Throws<InvalidDataException>(() => UpdateManifest.Parse(Manifest("1.1.5", mac: true, ("1.1.4", "1.1.5"))));
+    }
+
+    [Fact]
+    public void MacBaseInstallReplacesGameAppliesPatchesAndKeepsStorage()
+    {
+        WithGame(new() { ["release-version.txt"] = "0.9.0", ["NaviDnD.dll"] = "edited", ["extra.txt"] = "x" }, (root, temp) =>
+        {
+            File.WriteAllText(Path.Combine(Directory.CreateDirectory(Path.Combine(root, "Storage")).FullName, "save.json"), "private");
+            // База — ZIP с папкой NaviDnD/, разрезанный на две части, как в релизе.
+            string zip = Path.Combine(temp, "base.zip");
+            using (var archive = ZipFile.Open(zip, ZipArchiveMode.Create))
+                foreach (var (name, text) in Base)
+                    using (var writer = new StreamWriter(archive.CreateEntry("NaviDnD/" + name).Open())) writer.Write(text);
+            byte[] bytes = File.ReadAllBytes(zip);
+            string part1 = Path.Combine(temp, "NaviDnD-macOS-payload.001"), part2 = Path.Combine(temp, "NaviDnD-macOS-payload.002");
+            File.WriteAllBytes(part1, bytes[..(bytes.Length / 2)]);
+            File.WriteAllBytes(part2, bytes[(bytes.Length / 2)..]);
+            string patch = MakePatch(temp, "1.0.0", "1.0.1", Base, [("release-version.txt", "1.0.1"), ("NaviDnD.dll", "a2")], ["old/legacy.txt"]);
+
+            PatchInstaller.InstallBase(root, [part1, part2], [patch], (_, _) => { });
+            Assert.Equal("1.0.1", Read(root, "release-version.txt"));
+            Assert.Equal("a2", Read(root, "NaviDnD.dll"));
+            Assert.Equal("prompt", Read(root, "Prompts/x.md"));
+            Assert.False(File.Exists(Path.Combine(root, "old", "legacy.txt")));
+            Assert.Equal("private", Read(root, "Storage/save.json"));
+            Assert.Empty(Directory.GetDirectories(root, ".update-*"));
+        });
+    }
+
+    [Fact]
+    public void BrokenMacBaseLeavesGameUntouched()
+    {
+        WithGame(new() { ["release-version.txt"] = "0.9.0", ["NaviDnD.dll"] = "old" }, (root, temp) =>
+        {
+            string part = Path.Combine(temp, "NaviDnD-macOS-payload.001");
+            File.WriteAllText(part, "not a zip");
+            Assert.ThrowsAny<Exception>(() => PatchInstaller.InstallBase(root, [part], [], (_, _) => { }));
+            Assert.Equal("old", Read(root, "NaviDnD.dll"));
+            Assert.Empty(Directory.GetDirectories(root, ".update-*"));
+        });
+    }
+
+    private static string Manifest(string version, params (string From, string To)[] chain) => Manifest(version, false, chain);
+
+    private static string Manifest(string version, bool mac, params (string From, string To)[] chain)
     {
         string sha = new('a', 64);
         string File(string name, string tag) => $$"""{"name":"{{name}}","url":"https://gitlab.com/navitalevich/navi-dnd/-/raw/{{tag}}/releases/{{name}}","sha256":"{{sha}}","size":1}""";
         string patches = string.Join(",", chain.Select(p => $$"""{"from":"{{p.From}}","to":"{{p.To}}","name":"NaviDnD-patch-{{p.From}}-{{p.To}}.zip","url":"https://gitlab.com/navitalevich/navi-dnd/-/raw/v{{p.To}}/releases/patches/NaviDnD-patch-{{p.From}}-{{p.To}}.zip","sha256":"{{sha}}","size":1}"""));
-        return $$"""{"format":1,"version":"{{version}}","base":{"version":"1.1.4","files":[{{File("NaviDnD-payload.001", "v1.1.4")}}]},"installer":{{File("NaviDnD-Setup-win-x64.exe", "v1.1.5")}},"patches":[{{patches}}]}""";
+        string payload = mac ? "NaviDnD-macOS-payload.001" : "NaviDnD-payload.001";
+        string installer = mac ? "null" : File("NaviDnD-Setup-win-x64.exe", "v1.1.5");
+        return $$"""{"format":1,"version":"{{version}}","base":{"version":"1.1.4","files":[{{File(payload, "v1.1.4")}}]},"installer":{{installer}},"patches":[{{patches}}]}""";
     }
 
     private static string MakePatch(string dir, string from, string to, Dictionary<string, string> baseFiles,

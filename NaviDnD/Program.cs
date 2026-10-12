@@ -37,6 +37,7 @@ class Program
             catch { /* краш-логгер не должен сам уронить обработчик краша */ }
         };
 
+        if (OperatingSystem.IsMacOS()) UnixTools.ClearQuarantine(AppContext.BaseDirectory);
         // macOS/Linux: взять терминал под себя (сырой ввод, мышь, альтернативный экран) до того, как что-то рисуется.
         UnixTerminal.Start();
         // Окно консоли Windows создаёт и показывает ДО первой строчки Main() — прячем сразу же,

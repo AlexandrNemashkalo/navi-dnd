@@ -18,8 +18,8 @@ internal static class GameUpdates
     internal sealed record Asset(string Name, string Url);
     internal sealed record Release(string Version, string Page, Asset[] Assets);
 
-    // Обновляет установщик Windows: на других ОС фоновой проверки нет, а экран «Обновления» отсылает к git.
-    internal static bool Supported => OperatingSystem.IsWindows();
+    // Windows — установщиком-помощником, macOS — сама игра (своя цепочка патчей); на Linux экран «Обновления» отсылает к git.
+    internal static bool Supported => OperatingSystem.IsWindows() || OperatingSystem.IsMacOS();
 
     internal static void Initialize()
     {
@@ -49,6 +49,8 @@ internal static class GameUpdates
             if (!IsNewer(version, CurrentVersion)) return null;
             var assets = root.GetProperty("assets").GetProperty("links").EnumerateArray()
                 .Select(a => new Asset(a.GetProperty("name").GetString()!, a.GetProperty("url").GetString()!)).ToArray();
+            // Релиз без сборки для macOS Mac-версии не предлагается.
+            if (OperatingSystem.IsMacOS() && !assets.Any(a => a.Name == UpdateManifest.MacFileName)) return null;
             return new Release(version, root.GetProperty("_links").GetProperty("self").GetString()!, assets);
         }
         catch (Exception error)
@@ -95,6 +97,11 @@ internal static class GameUpdates
             Directory.CreateDirectory(directory);
             try
             {
+                if (OperatingSystem.IsMacOS())
+                {
+                    await InstallMacAsync(view, release.Assets.Single(a => a.Name == UpdateManifest.MacFileName), directory, cancellation);
+                    return false;   // нечего устанавливать (иначе игра уже перезапущена)
+                }
                 // Релиз с описанием обновлений — патчами (и помощником в папке игры); иначе — прежняя полная установка.
                 var updates = release.Assets.FirstOrDefault(a => a.Name == UpdateManifest.FileName);
                 var (program, arguments) = updates != null
@@ -151,6 +158,57 @@ internal static class GameUpdates
         await view.RunAsync(DownloadAsync(updates, manifestPath, token), cancellation);
         var manifest = UpdateManifest.Parse(await File.ReadAllTextAsync(manifestPath, token));
         string root = AppContext.BaseDirectory;
+        await DownloadPatchesAsync(view, manifest, root, directory, cancellation);
+        var installer = manifest.Installer!;
+        string helper = Path.Combine(directory, UpdateManifest.InstallerName);
+        string installedHelper = Path.Combine(root, UpdateManifest.HelperPath.Replace('/', Path.DirectorySeparatorChar));
+        if (File.Exists(installedHelper) && UpdateManifest.Sha256(installedHelper) == installer.Sha256.ToLowerInvariant())
+            File.Copy(installedHelper, helper);
+        else
+            await DownloadVerifiedAsync(view, [(new Asset(installer.Name, installer.Url), installer.Sha256)], directory, cancellation);
+        return (helper, ["--apply-update", root, Environment.ProcessId.ToString(), directory]);
+    }
+
+    // macOS: та же цепочка, но своя (NaviDnD-macOS-updates.json) и без помощника — всё скачивается и проверяется, игра
+    // ставит патчи (или полную базу) сама, с откатом при ошибке, и перезапускается в том же окне терминала.
+    [System.Runtime.Versioning.SupportedOSPlatform("macos")]
+    private static async Task InstallMacAsync(UpdateDisplay view, Asset updates, string directory, CancellationTokenSource cancellation)
+    {
+        string manifestPath = Path.Combine(directory, updates.Name);
+        view.Set(L.T("Получение списка обновлений…"));
+        await view.RunAsync(DownloadAsync(updates, manifestPath, cancellation.Token), cancellation);
+        var manifest = UpdateManifest.Parse(await File.ReadAllTextAsync(manifestPath, cancellation.Token), macOS: true);
+        string root = Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
+        var patches = await DownloadPatchesAsync(view, manifest, root, directory, cancellation);
+        if (patches is { Length: 0 })
+        {
+            Directory.Delete(directory, true);
+            await view.ConfirmAsync(L.F("Установлена актуальная версия {0}.", CurrentVersion), false);
+            return;
+        }
+        string In(string name) => Path.Combine(directory, name);
+        view.Set(L.T("Установка обновления…"), null, L.T("Не закрывайте игру"));
+        // Установку не прервать: Esc отменил бы только ожидание, а не замену файлов.
+        using var uninterruptible = new CancellationTokenSource();
+        await view.RunAsync(Task.Run(() =>
+        {
+            Action<string, double?> progress = (text, fraction) => view.Set(text, fraction, L.T("Не закрывайте игру"));
+            if (patches != null) PatchInstaller.ApplyChain(root, [.. patches.Select(p => In(p.Name))], progress);
+            else PatchInstaller.InstallBase(root, [.. manifest.Base.Files.Select(f => In(f.Name))], [.. manifest.Patches.Select(p => In(p.Name))], progress);
+            UnixUpdate.MarkExecutable(root);
+            return true;
+        }), uninterruptible);
+        Directory.Delete(directory, true);
+        view.Set(L.T("Загрузка завершена. Перезапуск игры…"), 1, L.T("Сохранения и настройки сохраняются"));
+        UnixUpdate.Restart();
+    }
+
+    // Патчи от установленной версии — скачаны и проверены вместе с базой (целиком). Повреждённая база или версия вне
+    // цепочки — null: скачаны части полной базы и вся цепочка патчей от неё. Пустой массив — обновлять нечего.
+    private static async Task<UpdatePatch[]?> DownloadPatchesAsync(UpdateDisplay view, UpdateManifest manifest, string root,
+        string directory, CancellationTokenSource cancellation)
+    {
+        var token = cancellation.Token;
         string installed = (await File.ReadAllTextAsync(Path.Combine(root, "release-version.txt"), token)).Trim();
         var patches = manifest.PatchesFrom(installed);
         if (patches is { Length: > 0 })
@@ -180,13 +238,7 @@ internal static class GameUpdates
                 .Concat(manifest.Patches.Select(p => (new Asset(p.Name, p.Url), p.Sha256))).ToList();
             await DownloadVerifiedAsync(view, full, directory, cancellation);
         }
-        string helper = Path.Combine(directory, UpdateManifest.InstallerName);
-        string installedHelper = Path.Combine(root, UpdateManifest.HelperPath.Replace('/', Path.DirectorySeparatorChar));
-        if (File.Exists(installedHelper) && UpdateManifest.Sha256(installedHelper) == manifest.Installer.Sha256.ToLowerInvariant())
-            File.Copy(installedHelper, helper);
-        else
-            await DownloadVerifiedAsync(view, [(new Asset(manifest.Installer.Name, manifest.Installer.Url), manifest.Installer.Sha256)], directory, cancellation);
-        return (helper, ["--apply-update", root, Environment.ProcessId.ToString(), directory]);
+        return patches;
     }
 
     private static async Task DownloadVerifiedAsync(UpdateDisplay view, List<(Asset Asset, string Sha256)> files, string directory,

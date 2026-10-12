@@ -68,5 +68,7 @@
   "Цепочка патчей не доходит до версии релиза.": "The patch chain doesn't reach the release version.",
   "Некорректное имя файла обновления.": "Invalid update file name.",
   "Некорректная контрольная сумма.": "Invalid checksum.",
-  "Некорректная версия: ": "Invalid version: "
+  "Некорректная версия: ": "Invalid version: ",
+  "Распаковка обновления…": "Unpacking the update…",
+  "Установка обновления…": "Installing the update…"
 }

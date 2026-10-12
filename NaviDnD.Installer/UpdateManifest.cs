@@ -6,12 +6,15 @@ namespace NaviDnD.Installer;
 // Описание обновлений релиза (releases/NaviDnD-updates.json, ссылка в GitLab Release): неизменная база (полная сборка
 // частями — для первой установки и восстановления), установщик-помощник и цепочка патчей от базы до текущей версии.
 // Каждый файл — со ссылкой на тег, где он опубликован, и SHA256: неизменные части не отправляются заново.
+// У macOS своя цепочка (NaviDnD-macOS-updates.json): файлы игры другие, помощника нет — патчи ставит сама игра.
 internal sealed record UpdateFile(string Name, string Url, string Sha256, long Size);
 internal sealed record UpdatePatch(string From, string To, string Name, string Url, string Sha256, long Size);
 internal sealed record UpdateBase(string Version, UpdateFile[] Files);
-internal sealed record UpdateManifest(int Format, string Version, UpdateBase Base, UpdateFile Installer, UpdatePatch[] Patches)
+internal sealed record UpdateManifest(int Format, string Version, UpdateBase Base, UpdateFile? Installer, UpdatePatch[] Patches)
 {
     internal const string FileName = "NaviDnD-updates.json";
+    internal const string MacFileName = "NaviDnD-macOS-updates.json";
+    internal const string MacPayloadPrefix = "NaviDnD-macOS-payload.";
     internal const string InstallerName = "NaviDnD-Setup-win-x64.exe";
     // Помощник обновления в папке игры: копия установщика, запускается из временной папки (файлы игры не заняты).
     internal const string HelperPath = "Updater/" + InstallerName;
@@ -19,27 +22,27 @@ internal sealed record UpdateManifest(int Format, string Version, UpdateBase Bas
 
     internal static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
 
-    internal static UpdateManifest Parse(string json)
+    internal static UpdateManifest Parse(string json, bool macOS = false)
     {
         var manifest = JsonSerializer.Deserialize<UpdateManifest>(json, Json) ?? throw new InvalidDataException(L.T("Пустое описание обновлений."));
-        manifest.Validate();
+        manifest.Validate(macOS);
         return manifest;
     }
 
-    private void Validate()
+    private void Validate(bool macOS)
     {
         if (Format != 1) throw new InvalidDataException(L.T("Неизвестный формат описания обновлений."));
-        if (Base?.Files is not { Length: > 0 } || Installer == null || Patches == null)
+        if (Base?.Files is not { Length: > 0 } || (Installer == null) != macOS || Patches == null)
             throw new InvalidDataException(L.T("Неполное описание обновлений."));
         ParseVersion(Version);
         ParseVersion(Base.Version);
         for (int i = 0; i < Base.Files.Length; i++)
         {
             Check(Base.Files[i].Name, Base.Files[i].Url, Base.Files[i].Sha256);
-            if (Base.Files[i].Name != $"NaviDnD-payload.{i + 1:D3}") throw new InvalidDataException(L.T("Части базы перечислены не по порядку."));
+            if (Base.Files[i].Name != (macOS ? MacPayloadPrefix : "NaviDnD-payload.") + $"{i + 1:D3}") throw new InvalidDataException(L.T("Части базы перечислены не по порядку."));
         }
-        Check(Installer.Name, Installer.Url, Installer.Sha256);
-        if (Installer.Name != InstallerName) throw new InvalidDataException(L.T("Некорректное имя установщика."));
+        if (Installer != null) Check(Installer.Name, Installer.Url, Installer.Sha256);
+        if (Installer != null && Installer.Name != InstallerName) throw new InvalidDataException(L.T("Некорректное имя установщика."));
         // Цепочка патчей без разрывов: база → … → текущая версия, каждая версия старше предыдущей.
         string at = Base.Version;
         foreach (var patch in Patches)

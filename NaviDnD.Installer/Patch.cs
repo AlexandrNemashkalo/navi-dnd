@@ -174,6 +174,76 @@ internal static class PatchInstaller
         return version!;
     }
 
+    // Полная установка на macOS (файлы игры изменены или версия вне цепочки; на Windows это делает установщик): части базы → ZIP → распаковка рядом с игрой,
+    // цепочка патчей поверх, затем все файлы заменяются с резервом; при ошибке всё возвращается как было.
+    // Лишние файлы прежней версии остаются — как и у установщика Windows поверх старой папки.
+    internal static void InstallBase(string root, IReadOnlyList<string> parts, IReadOnlyList<string> patches, Action<string, double?> progress)
+    {
+        root = Path.GetFullPath(root);
+        string work = Path.Combine(root, ".update-" + Guid.NewGuid().ToString("N"));
+        string backup = Path.Combine(work, "old");
+        var changed = new List<(string Target, string? Backup)>();
+        bool keepBackup = false;
+        try
+        {
+            Directory.CreateDirectory(work);
+            string zip = Path.Combine(work, "base.zip");
+            progress(L.T("Распаковка обновления…"), null);
+            using (var output = File.Create(zip))
+                foreach (string part in parts)
+                {
+                    using var input = File.OpenRead(part);
+                    input.CopyTo(output);
+                }
+            string extracted = Path.Combine(work, "base");
+            ZipFile.ExtractToDirectory(zip, extracted);
+            File.Delete(zip);
+            // В архиве базы игра лежит в папке NaviDnD/.
+            string fresh = Path.Combine(extracted, "NaviDnD");
+            if (!File.Exists(Path.Combine(fresh, "release-version.txt"))) throw new InvalidDataException(L.T("Неполное описание обновлений."));
+            if (patches.Count > 0) PatchInstaller.ApplyChain(fresh, patches, progress);
+
+            string[] files = Directory.GetFiles(fresh, "*", SearchOption.AllDirectories);
+            for (int i = 0; i < files.Length; i++)
+            {
+                string name = Patch.RelativePath(Path.GetRelativePath(fresh, files[i]).Replace(Path.DirectorySeparatorChar, '/'));
+                string target = Path.Combine(root, name);
+                Patch.RejectLinks(root, target);
+                if (Directory.Exists(target)) throw new IOException(L.T("На месте файла папка: ") + name);
+                Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+                string? old = null;
+                if (File.Exists(target))
+                {
+                    old = Path.Combine(backup, name);
+                    Directory.CreateDirectory(Path.GetDirectoryName(old)!);
+                    File.Move(target, old);
+                }
+                changed.Add((target, old));
+                File.Move(files[i], target);
+                progress(L.T("Установка обновления…"), (i + 1) / (double)files.Length);
+            }
+        }
+        catch (Exception installError)
+        {
+            try
+            {
+                foreach (var file in changed.AsEnumerable().Reverse())
+                {
+                    if (File.Exists(file.Target)) File.Delete(file.Target);
+                    if (file.Backup != null) File.Move(file.Backup, file.Target);
+                }
+            }
+            catch (Exception rollbackError)
+            {
+                keepBackup = true;
+                throw new IOException(L.T("Ошибка обновления и отката. Резервные файлы сохранены: ") + backup,
+                    new AggregateException(installError, rollbackError));
+            }
+            throw;
+        }
+        finally { if (!keepBackup && Directory.Exists(work)) Directory.Delete(work, true); }
+    }
+
     private static string SafePath(string root, string relative)
     {
         string target = Path.GetFullPath(Path.Combine(root, relative));

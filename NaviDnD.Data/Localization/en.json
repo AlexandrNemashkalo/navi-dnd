@@ -927,5 +927,8 @@
   "Установите клиент и войдите в аккаунт. Если он уже установлен, укажите в настройках игры полный путь к исполняемому файлу claude или codex (его покажет команда which claude).\n\nНажмите ОК, чтобы открыть настройки.": "Install a client and sign in. If it is already installed, set the full path to the claude or codex executable in the game settings (find it with: which claude).\n\nPress OK to open the settings.",
   "Установка Silero не удалась. Нужен Python 3.10–3.12 (например: brew install python@3.12); проверь путь к Python и интернет.": "Silero installation failed. Python 3.10–3.12 is required (for example: brew install python@3.12); check the Python path and your internet connection.",
   "Путь к claude (Claude CLI), через который игра обращается к мастеру.": "Path to claude (Claude CLI), which the game uses to reach the Dungeon Master.",
-  "Путь к Codex CLI. «codex» — найти в PATH.": "Path to Codex CLI. \"codex\" — look it up in PATH."
+  "Путь к Codex CLI. «codex» — найти в PATH.": "Path to Codex CLI. \"codex\" — look it up in PATH.",
+  "Распаковка обновления…": "Unpacking the update…",
+  "Установка обновления…": "Installing the update…",
+  "Не закрывайте игру": "Do not close the game"
 }

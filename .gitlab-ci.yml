@@ -7,6 +7,19 @@ publish-release:
         - .gitlab-ci.yml
         - .gitlab/release.json
   script:
+    # macOS: архив базы для игроков (ссылка «macOS» в релизе) — склеенные части releases-macos/, один раз на версию базы.
+    - |
+      if [ -f releases-macos/base-version.txt ]; then
+        version=$(tr -d ' \r\n' < releases-macos/base-version.txt)
+        package="$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/NaviDnD-macOS/$version/NaviDnD-macOS-arm64-$version.zip"
+        if curl --silent --fail --range 0-0 --output /dev/null --header "JOB-TOKEN: $CI_JOB_TOKEN" "$package"; then
+          echo "macOS archive $version already published."
+        else
+          cat releases-macos/NaviDnD-macOS-payload.* > NaviDnD-macOS.zip
+          curl --silent --show-error --fail --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file NaviDnD-macOS.zip "$package"
+          echo "macOS archive $version published."
+        fi
+      fi
     - |
       status=$(curl --silent --show-error --output release-response.json --write-out '%{http_code}' \
         --header "JOB-TOKEN: $CI_JOB_TOKEN" --header "Content-Type: application/json" \

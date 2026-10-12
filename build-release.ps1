@@ -6,7 +6,9 @@
 #   -Base        — новая полная база (части payload с Silero, установщик, описание файлов), цепочка патчей с нуля.
 #   -AdoptBase   — объявить базой уже собранные releases/NaviDnD-payload.* (без пересборки): описание её файлов и
 #                  NaviDnD-updates.json без патчей.
-param([switch]$Base, [switch]$AdoptBase)
+# Сборка для macOS — своя цепочка в releases-macos/ (build-macos.ps1): патч к ней собирается вместе с релизом, а если
+# её ещё нет — база. -NoMac — без неё (в релизе останутся ссылки на прежнюю).
+param([switch]$Base, [switch]$AdoptBase, [switch]$NoMac)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $gitRoot = $root.Replace('\', '/')
@@ -17,6 +19,7 @@ $release = Join-Path $root 'releases'
 $manifests = Join-Path $release 'manifests'
 $patches = Join-Path $release 'patches'
 $updatesPath = Join-Path $release 'NaviDnD-updates.json'
+$macUpdatesPath = Join-Path $root 'releases-macos/NaviDnD-macOS-updates.json'
 $installerName = 'NaviDnD-Setup-win-x64.exe'
 $rawBase = 'https://gitlab.com/navitalevich/navi-dnd/-/raw/'
 $version = ([xml](Get-Content (Join-Path $root 'Directory.Build.props') -Raw)).Project.PropertyGroup.Version
@@ -134,6 +137,13 @@ function WriteLegacySums($updates) {
     $lines = @("$($updates.installer.sha256)  $installerName") + @($updates.base.files | ForEach-Object { "$($_.sha256)  $($_.name)" })
     [IO.File]::WriteAllText("$release/SHA256SUMS.txt", (($lines -join "`n") + "`n"), $utf8)
 }
+function BuildMac() {
+    if ($NoMac) { return }
+    $macArguments = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $root 'build-macos.ps1'))
+    if (-not (Test-Path -LiteralPath $macUpdatesPath)) { $macArguments += '-Base' }
+    & powershell.exe @macArguments | Out-Host
+    if ($LASTEXITCODE -ne 0) { throw 'macOS build failed' }
+}
 function WriteReleaseMetadata($updates) {
     # Первая ссылка — для людей: «📦 Скачать NaviDnD (все файлы установки)» в группе «Packages» над остальными (архив папки releases/, GitLab собирает его на лету); дальше — служебные,
     # игра ищет их по имени. Название в \u-escape: скрипт без BOM, Windows PowerShell 5.1 читает его как ANSI.
@@ -144,6 +154,15 @@ function WriteReleaseMetadata($updates) {
         [ordered]@{ name = $installerName; url = $updates.installer.url }
     ) + @($updates.base.files | ForEach-Object { [ordered]@{ name = $_.name; url = $_.url } }) +
         @($updates.patches | ForEach-Object { [ordered]@{ name = $_.name; url = $_.url } })
+    # macOS: архив базы для игроков (CI выкладывает его в Package Registry на теге базы, дальше — патчи из игры) и
+    # описание цепочки, по которому игра на Mac находит патчи. Название — «Скачать для macOS (Apple Silicon)» с яблоком.
+    if (Test-Path -LiteralPath $macUpdatesPath) {
+        $macBase = (Get-Content -LiteralPath $macUpdatesPath -Raw -Encoding UTF8 | ConvertFrom-Json).base.version
+        $links = @($links[0]) + @(
+            [ordered]@{ name = [regex]::Unescape('🍎 Скачать для macOS (Apple Silicon)'); url = "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/packages/generic/NaviDnD-macOS/$macBase/NaviDnD-macOS-arm64-$macBase.zip"; link_type = 'package' }
+            [ordered]@{ name = 'NaviDnD-macOS-updates.json'; url = (RawUrl "v$version" 'releases-macos/NaviDnD-macOS-updates.json') }
+        ) + @($links | Select-Object -Skip 1)
+    }
     New-Item -ItemType Directory -Force -Path (Join-Path $root '.gitlab') | Out-Null
     WriteJson (Join-Path $root '.gitlab/release.json') ([ordered]@{
         name = "NaviDnD $version"; tag_name = "v$version"
@@ -195,6 +214,7 @@ elseif ($Base) {
     $updates = [ordered]@{ format = 1; version = $version; base = [ordered]@{ version = $version; files = (BaseParts "v$version") }; installer = (PublishInstaller); patches = @() }
     WriteJson $updatesPath $updates
     WriteLegacySums $updates
+    BuildMac
     WriteReleaseMetadata $updates
 }
 else {
@@ -235,6 +255,7 @@ else {
     }
     WriteJson $updatesPath $updates
     WriteLegacySums $updates
+    BuildMac
     WriteReleaseMetadata $updates
     Write-Host ("Patch {0}: {1} changed, {2} removed, {3:N1} MiB" -f $patchName, $changed.Count, $removed.Count, ($patchFile.Length / 1MB))
 }
