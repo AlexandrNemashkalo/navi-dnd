@@ -59,7 +59,7 @@ public class LevelUpDisplay
         }
 
         MouseUiHelper.SetDefaultImage(_display, hero.Image, hero.Color);
-        int startTop = Console.CursorTop, panelTop = startTop;
+        int startTop = Term.CursorTop, panelTop = startTop;
         if (!s.PlanLoaded && _planTask == null) _planTask = _ai.LevelUpOptions(s);
         Task<string?>? customTask = null;
         Task<Hero?>? applyTask = null;
@@ -112,10 +112,10 @@ public class LevelUpDisplay
                 {
                     heroDisplay.PreviewBase = hero;
                     heroDisplay.Preview = s.Preview();
-                    Console.CursorVisible = false;
-                    Console.SetCursorPosition(0, startTop);
+                    Term.CursorVisible = false;
+                    Term.SetCursorPosition(0, startTop);
                     heroDisplay.DrawHeroCard();
-                    panelTop = Console.CursorTop;
+                    panelTop = Term.CursorTop;
                     cardDirty = false;
                 }
 
@@ -386,8 +386,8 @@ public class LevelUpDisplay
         string request, string? busy, bool inputActive, int leftW, int rightW)
     {
         _hits.Clear();
-        Console.CursorVisible = false;
-        Console.SetCursorPosition(0, top);
+        Term.CursorVisible = false;
+        Term.SetCursorPosition(0, top);
         int leftX = DisplayConfig.LeftMargin + 1;
         int rowsN = _display.MaxHistoryLines;
 
@@ -428,9 +428,9 @@ public class LevelUpDisplay
                     bool thumb = barMarks[r];
                     leftContent = () =>
                     {
-                        int start = Console.CursorLeft;
+                        int start = Term.CursorLeft;
                         inner();
-                        int pad = leftW - 1 - (Console.CursorLeft - start);
+                        int pad = leftW - 1 - (Term.CursorLeft - start);
                         if (pad > 0) Console.Write(new string(' ', pad));
                         ColorHelper.WriteColored(thumb ? "┃" : "│", thumb ? Bright : Dim);
                     };
@@ -494,7 +494,7 @@ public class LevelUpDisplay
         // Строка ввода: просьба мастеру о своём варианте; пока мастер думает — его статус, печатать нельзя.
         string prompt = " " + L.T("Ввод: ");
         int inputW = _display.InnerWidth(_display.ViewCols(_settings.Map)) - prompt.Length - 2;
-        int inputY = Console.CursorTop;
+        int inputY = Term.CursorTop;
         _hits.Add((inputY, DisplayConfig.LeftMargin + 1, _display.InnerWidth(_display.ViewCols(_settings.Map)), "input"));
         string visible = request.Length > inputW - 1 ? "…" + request[^(inputW - 2)..] : request;
         _border.DrawContentLine(() =>
@@ -509,8 +509,8 @@ public class LevelUpDisplay
         _border.DrawBottomBorder();
         // Курсор печати — в строке ввода, когда она в фокусе (клик по ней или печать).
         bool typing = inputActive && busy == null && !_frozen;
-        if (typing) Console.SetCursorPosition(DisplayConfig.LeftMargin + 1 + prompt.Length + visible.Length, inputY);
-        Console.CursorVisible = typing;
+        if (typing) Term.SetCursorPosition(DisplayConfig.LeftMargin + 1 + prompt.Length + visible.Length, inputY);
+        Term.CursorVisible = typing;
     }
 
     // Блок картинки: заклинание — карточка из справочника, пункт с описанием — название и текст, иначе портрет героя.

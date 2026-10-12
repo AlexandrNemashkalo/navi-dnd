@@ -38,4 +38,17 @@ internal static class AiActionTools
         if (withToolFilter) args.AddRange(["--tools", string.Join(",", ToolsFor(action).DefaultIfEmpty("none"))]);
         return args;
     }
+
+    // Дополнительное окружение MCP-сервера; на Windows пустое. На macOS/Linux его запускатель должен найти среду .NET, а она
+    // бывает не в папке по умолчанию (DOTNET_ROOT), и Codex запускает MCP-серверы с очищенным окружением.
+    public static Dictionary<string, string> McpEnvironment()
+    {
+        var environment = new Dictionary<string, string>();
+        if (OperatingSystem.IsWindows()) return environment;
+        string? root = Environment.GetEnvironmentVariable("DOTNET_ROOT");
+        if (string.IsNullOrEmpty(root) && Path.GetDirectoryName(typeof(object).Assembly.Location) is { Length: > 0 } runtime)
+            root = Path.GetFullPath(Path.Combine(runtime, "..", "..", ".."));   // <root>/shared/Microsoft.NETCore.App/<version>
+        if (!string.IsNullOrEmpty(root) && Directory.Exists(Path.Combine(root, "shared"))) environment["DOTNET_ROOT"] = root;
+        return environment;
+    }
 }

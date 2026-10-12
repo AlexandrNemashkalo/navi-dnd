@@ -22,9 +22,17 @@ public static class WindowControls
     private static bool _attentionNotified;
     private static DisplayConfig? _display;
 
+    // У окна терминала на macOS/Linux свой заголовок: кнопки рисуются и нажимаются только на Windows.
+    public static bool Available => OperatingSystem.IsWindows();
+
     public static void Draw(DisplayConfig display, int hovered = -1)
     {
         _display = display;
+        if (!Available)
+        {
+            ColorHelper.WriteColored(new string(' ', Buttons.Length), display.MainForeground, display.MainBackground);
+            return;
+        }
         var frame = new StringBuilder();
         var baseFg = display.MainForeground;
         var baseBg = display.MainBackground;

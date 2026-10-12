@@ -32,7 +32,7 @@ public class AppConfig
 
     // Claude CLI
     public string ClaudeOAuthToken { get; set; } = "";
-    public string ClaudeCliPath { get; set; } = "claude.exe";
+    public string ClaudeCliPath { get; set; } = OperatingSystem.IsWindows() ? "claude.exe" : "claude";
     public string ClaudeModel { get; set; } = "claude-opus-5-5"; // "claude-sonnet-5"; //"claude-haiku-4-5-20251001"; //"claude-sonnet-4-6";
     public string ClaudeCreateNewGameModel { get; set; } = "claude-opus-5-5";
     public string ClaudeStartNewGameModel { get; set; } = "claude-opus-5-5";
@@ -50,14 +50,16 @@ public class AppConfig
 
     public string McpServerPath { get; init; } = FindMcpServer();
 
+    // Запускатель: NaviDnD.McpServer.exe на Windows, NaviDnD.McpServer (без расширения) на macOS/Linux.
     private static string FindMcpServer()
     {
+        string executable = OperatingSystem.IsWindows() ? "NaviDnD.McpServer.exe" : "NaviDnD.McpServer";
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-        string bundled = Path.Combine(baseDir, "NaviDnD.McpServer.exe");
+        string bundled = Path.Combine(baseDir, executable);
         if (File.Exists(bundled)) return bundled;
         string configuration = new DirectoryInfo(baseDir).Parent?.Name ?? "Debug";
         return Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..",
-            "NaviDnD.McpServer", "bin", configuration, "net9.0", "NaviDnD.McpServer.exe"));
+            "NaviDnD.McpServer", "bin", configuration, "net9.0", executable));
     }
 
     public void InitializeStorage()

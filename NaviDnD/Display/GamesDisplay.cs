@@ -42,10 +42,10 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         if (!_cards[_selected].Exists && _cards.FindIndex(c => c.Exists) is var first and >= 0) _selected = first;
 
         var border = new BorderDrawer(settings, display);
-        _bodyTop = Console.CursorTop + 1;
+        _bodyTop = Term.CursorTop + 1;
         border.DrawSeparator();
         _width = display.InnerWidth(display.ViewCols(settings.Map));
-        _height = Math.Max(24, Console.WindowHeight - _bodyTop - 1);
+        _height = Math.Max(24, Term.WindowHeight - _bodyTop - 1);
         _x0 = DisplayConfig.LeftMargin + 1;
         for (int r = 0; r < _height; r++) border.DrawContentLine(() => { });
         border.DrawBottomBorder();
@@ -204,7 +204,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
             : _cards[_selected].Exists ? L.T("[←→↑↓]ВЫБОР   [Enter]ИГРАТЬ   [Del]УДАЛИТЬ") : L.T("[←→↑↓]ВЫБОР   [Enter]НОВАЯ ИГРА");
         CenterIn(_top + CardHeight * Rows + Rows, _left, total, footer, _confirmDelete ? Bright : Dim);
 
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         for (int r = 0; r < _height; r++) WriteRow(r);
     }
 
@@ -285,7 +285,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
 
     private void WriteRow(int row)
     {
-        Console.SetCursorPosition(_x0, _bodyTop + row);
+        Term.SetCursorPosition(_x0, _bodyTop + row);
         int c = 0;
         while (c < _width)
         {

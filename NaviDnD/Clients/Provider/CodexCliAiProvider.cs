@@ -78,7 +78,7 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
                 throw new AiSetupException(L.F("Codex CLI не найден ({0}): установи его (npm i -g @openai/codex), войди (codex login) и при необходимости укажи путь в настройках («ПУТЬ К CODEX»).",
                     config.CodexCliPath));
             }
-            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == 5)
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == (OperatingSystem.IsWindows() ? 5 : 13))   // нет доступа / EACCES
             {
                 throw new AiSetupException(L.T("Нет доступа к запуску Codex CLI.\nПроверь разрешения, блокировку антивирусом и «ПУТЬ К CODEX» в настройках."));
             }
@@ -153,6 +153,8 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
             StandardOutputEncoding = Encoding.UTF8,
             StandardErrorEncoding = Encoding.UTF8,
         };
+        // macOS/Linux: запускателю из npm (codex.js) нужен `node`, а его может не быть в PATH игры.
+        if (!OperatingSystem.IsWindows()) psi.Environment["PATH"] = AiCliDiscovery.ChildPath(psi.FileName);
         foreach (string a in new[] { "exec", "--json", "--ephemeral", "--ignore-user-config", "--skip-git-repo-check", "--sandbox", "read-only", "--cd", workDir,
                      "--output-last-message", lastMessagePath })
             psi.ArgumentList.Add(a);
@@ -172,6 +174,8 @@ public class CodexCliAiProvider(AppConfig config, AiLogger? logger = null) : IAi
             Config(psi, "mcp_servers.navidnd.command", TomlLiteral(config.McpServerPath));
             Config(psi, "mcp_servers.navidnd.args", "[" + string.Join(",", args.Select(TomlLiteral)) + "]");
             Config(psi, "mcp_servers.navidnd.required", "true");
+            foreach (var (key, value) in AiActionTools.McpEnvironment())
+                Config(psi, $"mcp_servers.navidnd.env.{key}", TomlLiteral(value));
             // Игрок уже разрешил мастеру пользоваться инструментами игры; CLI работает без диалога approvals.
             foreach (string tool in AiActionTools.ToolsFor(action))
                 Config(psi, $"mcp_servers.navidnd.tools.{tool}.approval_mode", "'approve'");

@@ -217,7 +217,7 @@ internal static class Speech
                     value => { if (!item.Warmup || config.SpeechEnabled) status = value; }, token);
                 if (item.Warmup) { if (config!.SpeechEnabled) status = L.T("Готова"); continue; }
                 using var reader = new WaveFileReader(wav);
-                using var output = new WaveOutEvent();
+                using var output = AudioOutput.Create();
                 // Громкость — в самом потоке: WaveOutEvent.Volume (waveOutSetVolume) меняет громкость всего приложения,
                 // и музыка оставалась на громкости речи.
                 var volume = new VolumeSampleProvider(reader.ToSampleProvider())

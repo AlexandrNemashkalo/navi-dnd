@@ -151,10 +151,10 @@ public class BorderDrawer
     public void DrawContentLine(Action drawContent)
     {
         WriteLeftMargin();
-        int lineStart = Console.CursorLeft;
+        int lineStart = Term.CursorLeft;
         Write(Vertical);
         drawContent();
-        int filled = Console.CursorLeft - lineStart - 1;
+        int filled = Term.CursorLeft - lineStart - 1;
         int remaining = _innerWidth - filled;
         if (remaining > 0)
             Write(new string(' ', remaining));
@@ -166,12 +166,12 @@ public class BorderDrawer
     public void DrawContentLine2Columns(Action drawLeftContent, Action drawRightContent, int leftWidth, int rightWidth)
     {
         WriteLeftMargin();
-        int lineStart = Console.CursorLeft;
+        int lineStart = Term.CursorLeft;
         Write(Vertical);
 
         // Left column
         drawLeftContent();
-        int filledLeft = Console.CursorLeft - lineStart - 1;
+        int filledLeft = Term.CursorLeft - lineStart - 1;
         int remainingLeft = leftWidth - filledLeft;
         if (remainingLeft > 0)
             Write(new string(' ', remainingLeft));
@@ -180,9 +180,9 @@ public class BorderDrawer
         Write(Vertical);
 
         // Right column
-        int rightStart = Console.CursorLeft;
+        int rightStart = Term.CursorLeft;
         drawRightContent();
-        int filledRight = Console.CursorLeft - rightStart;
+        int filledRight = Term.CursorLeft - rightStart;
         int remainingRight = rightWidth - filledRight;
         if (remainingRight > 0)
             Write(new string(' ', remainingRight));
@@ -231,30 +231,30 @@ public class BorderDrawer
         int w1, int w2, int w3, int w4)
     {
         WriteLeftMargin();
-        int lineStart = Console.CursorLeft;
+        int lineStart = Term.CursorLeft;
         Write(Vertical);
 
         drawCol1();
-        int filled1 = Console.CursorLeft - lineStart - 1;
+        int filled1 = Term.CursorLeft - lineStart - 1;
         int remaining1 = w1 - filled1;
         if (remaining1 > 0) Write(new string(' ', remaining1));
         Write(Vertical);
 
-        int start2 = Console.CursorLeft;
+        int start2 = Term.CursorLeft;
         drawCol2();
-        int remaining2 = w2 - (Console.CursorLeft - start2);
+        int remaining2 = w2 - (Term.CursorLeft - start2);
         if (remaining2 > 0) Write(new string(' ', remaining2));
         Write(Vertical);
 
-        int start3 = Console.CursorLeft;
+        int start3 = Term.CursorLeft;
         drawCol3();
-        int remaining3 = w3 - (Console.CursorLeft - start3);
+        int remaining3 = w3 - (Term.CursorLeft - start3);
         if (remaining3 > 0) Write(new string(' ', remaining3));
         Write(Vertical);
 
-        int start4 = Console.CursorLeft;
+        int start4 = Term.CursorLeft;
         drawCol4();
-        int remaining4 = w4 - (Console.CursorLeft - start4);
+        int remaining4 = w4 - (Term.CursorLeft - start4);
         if (remaining4 > 0) Write(new string(' ', remaining4));
         Write(Vertical);
 
@@ -266,10 +266,10 @@ public class BorderDrawer
     public void DrawContentLine2ColumnsRightSeparator(Action drawLeftContent, int leftWidth, int rightWidth, int? junction = null, char junctionChar = SeparatorBottom)
     {
         WriteLeftMargin();
-        int lineStart = Console.CursorLeft;
+        int lineStart = Term.CursorLeft;
         Write(Vertical);
         drawLeftContent();
-        int filledLeft = Console.CursorLeft - lineStart - 1;
+        int filledLeft = Term.CursorLeft - lineStart - 1;
         int remainingLeft = leftWidth - filledLeft;
         if (remainingLeft > 0)
             Write(new string(' ', remainingLeft));
@@ -304,7 +304,7 @@ public class BorderDrawer
 
     private void FillRestWithMain()
     {
-        int remaining = Console.WindowWidth - Console.CursorLeft;
+        int remaining = Term.WindowWidth - Term.CursorLeft;
         if (remaining > 0)
         {
             Write(new string(' ', remaining));
@@ -313,7 +313,7 @@ public class BorderDrawer
 
     private static void SafeNewLine()
     {
-        if (Console.CursorTop < Console.WindowHeight - 1)
+        if (Term.CursorTop < Term.WindowHeight - 1)
             Console.WriteLine();
     }
 }

@@ -21,7 +21,7 @@ public class MapDisplay
     public void DrawMap(MapObjectsProvider provider)
     {
         var settings = _settings;
-        int startTop = Console.CursorTop;
+        int startTop = Term.CursorTop;
 
         var mapBg = settings.Map.Colors.MapBackground;
         var mapFg = settings.Map.Colors.MapForeground;
@@ -106,21 +106,21 @@ public class MapDisplay
         ColorHelper.SetBackgroundColor(mainBg);
         ColorHelper.SetForegroundColor(mainFg);
 
-        int currentHeight = Console.CursorTop - startTop;
+        int currentHeight = Term.CursorTop - startTop;
         _display.MapHigh = currentHeight;
         int needed = _display.MaxHigh - currentHeight;
         if (needed > 0)
         {
             for (int i = 0; i < needed; i++)
             {
-                if (Console.CursorTop >= Console.WindowHeight - 1) break;
+                if (Term.CursorTop >= Term.WindowHeight - 1) break;
                 DrawRow(() => { });
             }
         }
 
         borderDrawer.DrawSeparatorWith2Parts('┴', mapWidth, legendWidth);
-        DrawEndLeft = Console.CursorLeft;
-        DrawEndTop = Console.CursorTop;
+        DrawEndLeft = Term.CursorLeft;
+        DrawEndTop = Term.CursorTop;
 
         // Снимок легенды — RedrawAfterMove перерисует только изменившиеся строки.
         _legendSnapshot = worldMap ? null : legendLines.Select(CaptureOutput).ToList();
@@ -159,7 +159,7 @@ public class MapDisplay
         if (_display.MapLevel != MapLevel.Location || _legendSnapshot == null
             || lines.Count != _legendSnapshot.Count || _legendDisplay.SeparatorLineIndex != _legendSnapshotSeparator)
         {
-            Console.SetCursorPosition(0, _display.MapDrawTop);
+            Term.SetCursorPosition(0, _display.MapDrawTop);
             DrawMap(provider);
             return;
         }
@@ -196,7 +196,7 @@ public class MapDisplay
             if (old >= 0 && old < _legendRowsDrawn) RedrawLegendLine(old, lines);
             if (terrainSep >= 0 && terrainSep < _legendRowsDrawn)
             {
-                Console.SetCursorPosition(LegendX - 1, _display.MapDrawTop + 1 + terrainSep);
+                Term.SetCursorPosition(LegendX - 1, _display.MapDrawTop + 1 + terrainSep);
                 ColorHelper.WriteColored("├" + BorderDrawer.SeparatorLine(_display.GetLegendWidth(ViewCols),
                         _legendDisplay.SeparatorJunction, BorderDrawer.JunctionDown) + "┤",
                     fgColor: MouseUiHelper.FrameColor(_display), bgColor: _display.MainBackground);
@@ -208,7 +208,7 @@ public class MapDisplay
         int sep = _legendDisplay.SeparatorLineIndex;
         if (junction != _junctionSnapshot && sep >= 0 && sep < _legendRowsDrawn)
         {
-            Console.SetCursorPosition(LegendX, _display.MapDrawTop + 1 + sep);
+            Term.SetCursorPosition(LegendX, _display.MapDrawTop + 1 + sep);
             ColorHelper.WriteColored(BorderDrawer.SeparatorLine(_display.GetLegendWidth(ViewCols), junction),
                 fgColor: MouseUiHelper.FrameColor(_display), bgColor: _display.MainBackground);
             _junctionSnapshot = junction;
@@ -461,7 +461,7 @@ public class MapDisplay
         int screenY = _display.MapDrawTop + 3 + (TopRow - row) * 2;
         int screenX = DisplayConfig.LeftMargin + 4 + (leftCol - _display.CameraCol + 1) * cellW;
 
-        Console.SetCursorPosition(screenX, screenY);
+        Term.SetCursorPosition(screenX, screenY);
         ColorHelper.SetBackgroundColor(_settings.Map.Colors.MapBackground ?? _display.MainBackground);
         ColorHelper.SetForegroundColor(_settings.Map.Colors.MapForeground ?? _display.MainForeground);
 
@@ -479,7 +479,7 @@ public class MapDisplay
         int screenY = _display.MapDrawTop + 3 + (TopRow - upperRow) * 2 + 1;
         int screenX = DisplayConfig.LeftMargin + _display.CellWidth + 2 + (col - _display.CameraCol) * cellW;
 
-        Console.SetCursorPosition(screenX, screenY);
+        Term.SetCursorPosition(screenX, screenY);
         ColorHelper.SetBackgroundColor(_settings.Map.Colors.MapBackground ?? _display.MainBackground);
         ColorHelper.SetForegroundColor(_settings.Map.Colors.MapForeground ?? _display.MainForeground);
 
@@ -505,15 +505,15 @@ public class MapDisplay
         int x = LegendX;
         int width = _display.GetLegendWidth(ViewCols);
         // Рамки строки (│ слева и справа) — на месте бывшего разделителя рельефа там стояли ├ ┤.
-        Console.SetCursorPosition(x - 1, _display.MapDrawTop + 1 + index);
+        Term.SetCursorPosition(x - 1, _display.MapDrawTop + 1 + index);
         ColorHelper.WriteColored("│", fgColor: MouseUiHelper.FrameColor(_display), bgColor: _display.MainBackground);
         ColorHelper.SetBackgroundColor(_display.MainBackground);
         ColorHelper.SetForegroundColor(_display.MainForeground);
 
         lines[index]();
-        int rest = width - (Console.CursorLeft - x);
+        int rest = width - (Term.CursorLeft - x);
         if (rest > 0) Console.Write(new string(' ', rest));
-        Console.SetCursorPosition(x + width, _display.MapDrawTop + 1 + index);
+        Term.SetCursorPosition(x + width, _display.MapDrawTop + 1 + index);
         ColorHelper.WriteColored("│", fgColor: MouseUiHelper.FrameColor(_display), bgColor: _display.MainBackground);
     }
 
@@ -535,7 +535,7 @@ public class MapDisplay
         int screenY = _display.MapDrawTop + 4 + (int)Math.Round((TopRow - y - 0.5) * 2);
         int screenX = DisplayConfig.LeftMargin + 4 + (col - _display.CameraCol) * cellW;
 
-        Console.SetCursorPosition(screenX, screenY);
+        Term.SetCursorPosition(screenX, screenY);
         ColorHelper.SetBackgroundColor(_settings.Map.Colors.MapBackground ?? _display.MainBackground);
         ColorHelper.SetForegroundColor(_settings.Map.Colors.MapForeground ?? _display.MainForeground);
 
@@ -574,7 +574,7 @@ public class MapDisplay
         int screenY = _display.MapDrawTop + 3 + (TopRow - row) * 2;
         int screenX = DisplayConfig.LeftMargin + 4 + (col - _display.CameraCol) * cellW;
 
-        Console.SetCursorPosition(screenX, screenY);
+        Term.SetCursorPosition(screenX, screenY);
         ColorHelper.SetBackgroundColor(settings.Map.Colors.MapBackground ?? _display.MainBackground);
         ColorHelper.SetForegroundColor(settings.Map.Colors.MapForeground ?? _display.MainForeground);
 

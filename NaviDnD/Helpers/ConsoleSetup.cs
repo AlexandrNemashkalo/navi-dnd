@@ -1,3 +1,4 @@
+using NaviDnD.Helpers;
 using NaviDnD.Data;
 using NaviDnD.Data.Models;
 using System.Runtime.InteropServices;
@@ -142,6 +143,11 @@ internal static class ConsoleSetup
     // окно консоли иногда остаётся висеть — явный WM_CLOSE перед выходом гарантированно его закрывает.
     internal static void CloseConsoleAndExit()
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            UnixTerminal.Current?.Restore();
+            Environment.Exit(0);
+        }
         var consoleWindow = GetConsoleWindow();
         if (consoleWindow != IntPtr.Zero)
             SendMessage(consoleWindow, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
@@ -173,14 +179,14 @@ internal static class ConsoleSetup
         Console.Title = "NaviDnD";
         Console.OutputEncoding = Encoding.UTF8;
 
-        var display = new DisplayConfig();
-        // рамка(2) + предохранитель от автопереноса справа(1) + DisplayConfig.LeftMargin слева.
-        int width = display.InnerWidth(display.ViewCols(settings.Map)) + 3 + DisplayConfig.LeftMargin;
-        // Карточка персонажа/способностей растягивается минимум до FixedMapContentHigh
-        // (см. DisplayConfig.MaxHigh) — окно должно быть высоким настолько же, иначе
-        // диалоговому окну и блоку картинки под карточкой не остаётся места.
-        int cardHigh = Math.Max(display.ViewRows(settings.Map) * 2, DisplayConfig.FixedMapContentHigh);
-        int height = cardHigh + display.MaxHistoryLines + 18;
+        var (width, height) = WindowSize(settings);
+        if (!OperatingSystem.IsWindows())
+        {
+            // Терминал оставляет свой шрифт: просим у него ту же сетку (xterm-совместимые терминалы это выполняют) и ждём,
+            // пока он станет не меньше.
+            UnixTerminal.Current?.EnsureSize(Math.Min(width, MaxWidth), Math.Min(Math.Max(1, height - 1), MaxHeight));
+            return;
+        }
 
         // EnableAnsiSupport снимает WS_CAPTION ДО этого места, но conhost пересчитывает пиксели под
         // N строк так, будто заголовок никуда не делся — внизу окна остаётся пустая полоса. Буфер
@@ -192,8 +198,6 @@ internal static class ConsoleSetup
         // выполнял только Console.LargestWindowWidth/Height (максимум, что помещается на текущий
         // монитор) — из-за этого на мониторе с более высоким разрешением окно становилось выше/шире,
         // чем на старом, хотя карта та же самая. Числа совпадают с Window Size в свойствах ярлыка.
-        const int MaxWidth = 150;
-        const int MaxHeight = 63;
         if (width > MaxWidth) width = MaxWidth;
         if (windowHeight > MaxHeight) windowHeight = MaxHeight;
 
@@ -226,6 +230,22 @@ internal static class ConsoleSetup
         NaviDnD.Helpers.FullscreenBackdrop.Recenter();   // весь экран — после смены размера окно снова по центру
     }
 
+    private const int MaxWidth = 150;
+    private const int MaxHeight = 63;
+
+    // Сетка, под которую раскладывается игра: поле карты с рамкой, карточка и диалог под ней.
+    internal static (int width, int height) WindowSize(WorldState settings)
+    {
+        var display = new DisplayConfig();
+        // рамка(2) + предохранитель от автопереноса справа(1) + DisplayConfig.LeftMargin слева.
+        int width = display.InnerWidth(display.ViewCols(settings.Map)) + 3 + DisplayConfig.LeftMargin;
+        // Карточка персонажа/способностей растягивается минимум до FixedMapContentHigh
+        // (см. DisplayConfig.MaxHigh) — окно должно быть высоким настолько же, иначе
+        // диалоговому окну и блоку картинки под карточкой не остаётся места.
+        int cardHigh = Math.Max(display.ViewRows(settings.Map) * 2, DisplayConfig.FixedMapContentHigh);
+        return (width, cardHigh + display.MaxHistoryLines + 18);
+    }
+
     // Окно консоли бывает чуть выше целого числа строк (заголовок снят, а conhost считает пиксели с ним) — под
     // нижней рамкой оставалась полоса в несколько пикселей, которую консоль красила текущим фоном (то вода с
     // карты мира, то другой цвет). Подрезаем высоту окна ровно до строк; ширину не трогаем (её подгонка ломала
@@ -240,7 +260,7 @@ internal static class ConsoleSetup
             var font = new CONSOLE_FONT_INFOEX();
             font.cbSize = (uint)Marshal.SizeOf(font);
             if (!GetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), false, ref font) || font.FontSizeY <= 0) return;
-            int extra = (client.Bottom - client.Top) - Console.WindowHeight * font.FontSizeY;
+            int extra = (client.Bottom - client.Top) - Term.WindowHeight * font.FontSizeY;
             if (extra <= 0 || extra >= font.FontSizeY || !GetWindowRect(hwnd, out var win)) return;
             const uint SWP_NOMOVE = 0x0002, SWP_NOZORDER = 0x0004, SWP_NOACTIVATE = 0x0010;
             SetWindowPos(hwnd, IntPtr.Zero, 0, 0, win.Right - win.Left, win.Bottom - win.Top - extra, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
@@ -384,6 +404,7 @@ internal static class ConsoleSetup
 
     internal static void DisableQuickEdit()
     {
+        if (!OperatingSystem.IsWindows()) return;
         IntPtr handle = GetStdHandle(STD_INPUT_HANDLE);
         GetConsoleMode(handle, out uint mode);
         mode &= ~ENABLE_QUICK_EDIT;
@@ -412,6 +433,7 @@ internal static class ConsoleSetup
 
     internal static void ShowWindow()
     {
+        if (!OperatingSystem.IsWindows()) return;
         IntPtr hWnd = GetConsoleWindow();
         if (hWnd == IntPtr.Zero) return;
 
@@ -426,6 +448,7 @@ internal static class ConsoleSetup
     // resize уже применён к окну в обычном положении и всё готово к показу пользователю.
     internal static void RevealWindow()
     {
+        if (!OperatingSystem.IsWindows()) return;
         IntPtr hWnd = GetConsoleWindow();
         if (hWnd == IntPtr.Zero) return;
 

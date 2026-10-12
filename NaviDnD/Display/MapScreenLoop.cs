@@ -34,7 +34,7 @@ internal class MapScreenLoop
         _display.ArrowKeysMovement = true;
         MouseUiHelper.SetDefaultImage(_display, _settings.Map.DefaultImage);
         var movementHandler = new MovementHandler(_settings, _storage, _display);
-        int mapDrawTop = Console.CursorTop;
+        int mapDrawTop = Term.CursorTop;
         _display.MapDrawTop = mapDrawTop;
         bool firstMapDraw = true;
         var mapObjectsProvider = new MapObjectsProvider(_settings, _display, _storage, _config);
@@ -78,8 +78,8 @@ internal class MapScreenLoop
 
         Action redrawAction = () =>
         {
-            Console.CursorVisible = false;
-            Console.SetCursorPosition(0, mapDrawTop);
+            Term.CursorVisible = false;
+            Term.SetCursorPosition(0, mapDrawTop);
             hoverReachability = null;
             mapObjectsProvider.Refresh();
             FollowHeroIfMoved();
@@ -88,12 +88,12 @@ internal class MapScreenLoop
         _display.OnMapRedraw = redrawAction;
         _display.OnMapCellsRedraw = cells =>
         {
-            bool vis = Console.CursorVisible;
-            Console.CursorVisible = false;
-            int sl = Console.CursorLeft, st = Console.CursorTop;
+            bool vis = Term.CursorVisible;
+            Term.CursorVisible = false;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
             foreach (var (c, r) in cells) _mapDisplay.RedrawCellFrame(c, r, mapObjectsProvider);
-            Console.SetCursorPosition(sl, st);
-            Console.CursorVisible = vis;
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
         };
         DialogDisplay? hoverDialog = null;
         Task? pendingImageLoad = null;
@@ -260,20 +260,20 @@ internal class MapScreenLoop
                         lastRow = _display.CameraRow;
                         panned = true;
                         _display.HoveredCell = null;
-                        bool vis = Console.CursorVisible;
-                        int sl = Console.CursorLeft, st = Console.CursorTop;
-                        Console.CursorVisible = false;
+                        bool vis = Term.CursorVisible;
+                        int sl = Term.CursorLeft, st = Term.CursorTop;
+                        Term.CursorVisible = false;
                         _mapDisplay.RedrawLocationViewport(mapObjectsProvider, refreshLegend: false); // только область карты, одной записью
-                        Console.SetCursorPosition(sl, st);
-                        Console.CursorVisible = vis;
+                        Term.SetCursorPosition(sl, st);
+                        Term.CursorVisible = vis;
                     }, () =>
                     {
                         if (!panned) HandleMapClick(clickPos.Value);
                         else
                         {
-                            int sl = Console.CursorLeft, st = Console.CursorTop;
+                            int sl = Term.CursorLeft, st = Term.CursorTop;
                             _mapDisplay.RefreshLegend();
-                            Console.SetCursorPosition(sl, st);
+                            Term.SetCursorPosition(sl, st);
                         }
                     });
                     return;
@@ -297,12 +297,12 @@ internal class MapScreenLoop
                 && wheelPos.y <= _display.MapDrawTop + _legendDisplay.SeparatorLineIndex)
             {
                 _display.LegendScroll = Math.Max(0, _display.LegendScroll - wheel);
-                bool lvis = Console.CursorVisible;
-                int lsl = Console.CursorLeft, lst = Console.CursorTop;
-                Console.CursorVisible = false;
+                bool lvis = Term.CursorVisible;
+                int lsl = Term.CursorLeft, lst = Term.CursorTop;
+                Term.CursorVisible = false;
                 _mapDisplay.RefreshLegend();
-                Console.SetCursorPosition(lsl, lst);
-                Console.CursorVisible = lvis;
+                Term.SetCursorPosition(lsl, lst);
+                Term.CursorVisible = lvis;
             }
 
             if (!_display.MapHoverEnabled || _display.MapLevel != MapLevel.Location)
@@ -355,14 +355,14 @@ internal class MapScreenLoop
                     {
                         SetMapImage(null, null, null);
                     }
-                    bool vis0 = Console.CursorVisible;
-                    Console.CursorVisible = false;
-                    int sl0 = Console.CursorLeft, st0 = Console.CursorTop;
+                    bool vis0 = Term.CursorVisible;
+                    Term.CursorVisible = false;
+                    int sl0 = Term.CursorLeft, st0 = Term.CursorTop;
                     _mapDisplay.RefreshLegend();
                     activeDialog?.RerenderRightPanel();
                     SyncHoverImage();
-                    Console.SetCursorPosition(sl0, st0);
-                    Console.CursorVisible = vis0;
+                    Term.SetCursorPosition(sl0, st0);
+                    Term.CursorVisible = vis0;
                 }
             }
 
@@ -378,12 +378,12 @@ internal class MapScreenLoop
                     : committedDoor.IsWindow == true ? ((committedDoor.IsDoorOpen ?? false) ? L.T("Окно открыто") : L.T("Окно"))
                     : (committedDoor.IsDoorOpen ?? false) ? L.T("Дверь открыта") : L.T("Дверь закрыта");
                 SetMapImage(MouseUiHelper.DoorImage(committedDoor, _settings.Map), doorLabel, committedDoor.Color);
-                bool visDoor = Console.CursorVisible;
-                Console.CursorVisible = false;
-                int slDoor = Console.CursorLeft, stDoor = Console.CursorTop;
+                bool visDoor = Term.CursorVisible;
+                Term.CursorVisible = false;
+                int slDoor = Term.CursorLeft, stDoor = Term.CursorTop;
                 activeDialog?.RerenderRightPanel();
-                Console.SetCursorPosition(slDoor, stDoor);
-                Console.CursorVisible = visDoor;
+                Term.SetCursorPosition(slDoor, stDoor);
+                Term.CursorVisible = visDoor;
             }
 
             mousePos ??= pendingMousePosition;
@@ -413,9 +413,9 @@ internal class MapScreenLoop
 
                 if (wallDoor != _display.HoveredDoor)
                 {
-                    bool visD = Console.CursorVisible;
-                    Console.CursorVisible = false;
-                    int slD = Console.CursorLeft, stD = Console.CursorTop;
+                    bool visD = Term.CursorVisible;
+                    Term.CursorVisible = false;
+                    int slD = Term.CursorLeft, stD = Term.CursorTop;
 
                     var doorOldCell = _display.HoveredCell;
                     var oldDoorWall = hoveredDoorWall;
@@ -460,17 +460,17 @@ internal class MapScreenLoop
                     pendingHoverDoor = wallDoor;
                     doorHoverSince = DateTime.UtcNow;
 
-                    Console.SetCursorPosition(slD, stD);
-                    Console.CursorVisible = visD;
+                    Term.SetCursorPosition(slD, stD);
+                    Term.CursorVisible = visD;
                 }
                 return;
             }
             else if (_display.HoveredDoor != null)
             {
                 // Left a door — clear hover
-                bool visC = Console.CursorVisible;
-                Console.CursorVisible = false;
-                int slC = Console.CursorLeft, stC = Console.CursorTop;
+                bool visC = Term.CursorVisible;
+                Term.CursorVisible = false;
+                int slC = Term.CursorLeft, stC = Term.CursorTop;
 
                 if (hoveredDoorWall.HasValue)
                 {
@@ -488,8 +488,8 @@ internal class MapScreenLoop
                 SetMapImage(null, null, null);
                 activeDialog?.RerenderRightPanel();
 
-                Console.SetCursorPosition(slC, stC);
-                Console.CursorVisible = visC;
+                Term.SetCursorPosition(slC, stC);
+                Term.CursorVisible = visC;
             }
 
             var cell = KnownCellOrNull(_mapDisplay.ScreenToCell(mousePos.Value.x, mousePos.Value.y));
@@ -518,9 +518,9 @@ internal class MapScreenLoop
             mouseHoverCandidate = null;
             var oldCell = _display.HoveredCell;
             _display.HoveredCell = cell;
-            bool vis = Console.CursorVisible;
-            Console.CursorVisible = false;
-            int sl = Console.CursorLeft, st = Console.CursorTop;
+            bool vis = Term.CursorVisible;
+            Term.CursorVisible = false;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
 
             int newEntityIdx = cell.HasValue
                 ? _legendDisplay.GetSelectableIndexForCell(cell.Value.col, cell.Value.row)
@@ -559,8 +559,8 @@ internal class MapScreenLoop
             SyncHoverImage();
 
             UpdateHoverInfo(_display.HoveredCell);
-            Console.SetCursorPosition(sl, st);
-            Console.CursorVisible = vis;
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
 
             // Мебель или лестница под курсором (на клетке нет существа/объекта) — картинка и название в блоке картинок.
             void SyncHoverImage()
@@ -685,12 +685,12 @@ internal class MapScreenLoop
 
         void RerenderRightPanelKeepCursor()
         {
-            bool vis = Console.CursorVisible;
-            int sl = Console.CursorLeft, st = Console.CursorTop;
-            Console.CursorVisible = false;
+            bool vis = Term.CursorVisible;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            Term.CursorVisible = false;
             hoverDialog?.RerenderRightPanel();
-            Console.SetCursorPosition(sl, st);
-            Console.CursorVisible = vis;
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
         }
 
         // Tab / Shift+Tab на карте мира — следующее/предыдущее место из тех, что в окне карты (как в легенде);
@@ -761,7 +761,7 @@ internal class MapScreenLoop
             try { await _aiClient.Travel(report, dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, null); }
             finally { MusicDirector.Traveling = false; }
             dialog.FinalizeStreaming();
-            while (Console.KeyAvailable) Console.ReadKey(true);
+            Term.FlushKeys();
             _display.PendingCommand = GameWorld.HasLocation(_settings) ? "F1" : null;
             RedrawWorldKeepCursor();
         }
@@ -789,12 +789,12 @@ internal class MapScreenLoop
 
         void RedrawWorldKeepCursor(bool refreshLegend = true)
         {
-            bool vis = Console.CursorVisible;
-            int sl = Console.CursorLeft, st = Console.CursorTop;
-            Console.CursorVisible = false;
+            bool vis = Term.CursorVisible;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            Term.CursorVisible = false;
             _mapDisplay.RedrawWorldViewport(refreshLegend);
-            Console.SetCursorPosition(sl, st);
-            Console.CursorVisible = vis;
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
         }
 
         // Подсказка при наведении — строка блока боя: дистанция, а в бою в ход героя — путь; подсветка
@@ -912,28 +912,28 @@ internal class MapScreenLoop
         // Выбор элемента карты сменился: легенда (маркер «←» выбранного — полная перерисовка карты) и панель картинки.
         void RedrawSelection(bool redrawMap)
         {
-            bool vis = Console.CursorVisible;
-            int sl = Console.CursorLeft, st = Console.CursorTop;
-            Console.CursorVisible = false;
+            bool vis = Term.CursorVisible;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            Term.CursorVisible = false;
             if (redrawMap)
             {
                 _mapDisplay.RefreshLegend();
             }
             (hoverDialog ?? _aiClient.ActiveDialog)?.RerenderRightPanel();
-            Console.SetCursorPosition(sl, st);
-            Console.CursorVisible = vis;
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
         }
         _display.MapOnTabKey = _display.OnTabKey;
         _display.MapOnShiftTabKey = _display.OnShiftTabKey;
         _display.RedrawCurrentContent = () =>
         {
-            int sl = Console.CursorLeft, st = Console.CursorTop;
-            Console.CursorVisible = false;
-            Console.SetCursorPosition(0, mapDrawTop);
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            Term.CursorVisible = false;
+            Term.SetCursorPosition(0, mapDrawTop);
             hoverReachability = null;
             mapObjectsProvider.Refresh();
             _mapDisplay.DrawMap(mapObjectsProvider);
-            Console.SetCursorPosition(sl, st);
+            Term.SetCursorPosition(sl, st);
         };
 
         async Task RunEnemyTurn()
@@ -946,7 +946,7 @@ internal class MapScreenLoop
                 .ToHashSet() ?? [];
             if (!entitySymbols.Contains(_settings.Combat.CurrentTurn)) return;
 
-            Console.SetCursorPosition(0, mapDrawTop);
+            Term.SetCursorPosition(0, mapDrawTop);
             hoverReachability = null;
             mapObjectsProvider.Refresh();
             _mapDisplay.DrawMap(mapObjectsProvider);
@@ -959,7 +959,7 @@ internal class MapScreenLoop
                 enemyHistory.TickSpinner,
                 onRedraw: redrawAction);
             enemyHistory.FinalizeStreaming();
-            while (Console.KeyAvailable) Console.ReadKey(true);
+            Term.FlushKeys();
         }
 
         // spotted проверяется не только на шаге героя (TryMove): ответ ИИ мог открыть дверь или убрать
@@ -998,7 +998,7 @@ internal class MapScreenLoop
             await _aiClient.FireTrigger(encounters, [], [], dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, redrawAction);
             dialog.FinalizeStreaming();
             _aiClient.ActiveDialog = null;
-            while (Console.KeyAvailable) Console.ReadKey(true);
+            Term.FlushKeys();
         }
 
         // Финальная запись хода врагов тоже может продвинуть раунд (totalRounds+1, см. § БОЙ) —
@@ -1020,7 +1020,7 @@ internal class MapScreenLoop
                 await _aiClient.FireRoundTransition(bundle, roundHistory.AppendStreamChunk, roundHistory.NewStreamingMessage, roundHistory.TickSpinner, redrawAction);
                 roundHistory.FinalizeStreaming();
                 _aiClient.ActiveDialog = (null);
-                while (Console.KeyAvailable) Console.ReadKey(true);
+                Term.FlushKeys();
             }
         }
 
@@ -1043,9 +1043,9 @@ internal class MapScreenLoop
                 "PanUp" => (0, 1),
                 _ => (0, -1),
             };
-            int sl = Console.CursorLeft, st = Console.CursorTop;
-            bool vis = Console.CursorVisible;
-            Console.CursorVisible = false;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            bool vis = Term.CursorVisible;
+            Term.CursorVisible = false;
             if (_display.MapLevel == MapLevel.World)
             {
                 // Карта мира: Y растёт вниз, шаг — несколько символов экрана.
@@ -1061,8 +1061,8 @@ internal class MapScreenLoop
                 _display.HoveredCell = null;
                 _mapDisplay.RedrawLocationViewport(mapObjectsProvider);
             }
-            Console.SetCursorPosition(sl, st);
-            Console.CursorVisible = vis;
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
         }
 
         bool movedFrameDrawn = false;
@@ -1096,11 +1096,11 @@ internal class MapScreenLoop
         while (true)
         {
             // Hide cursor before any repositioning/drawing to avoid visual jumping
-            Console.CursorVisible = false;
+            Term.CursorVisible = false;
 
             // On movement: restore cursor and redraw in-place (no Console.Clear)
             if (!firstMapDraw)
-                Console.SetCursorPosition(0, mapDrawTop);
+                Term.SetCursorPosition(0, mapDrawTop);
             firstMapDraw = false;
 
             // Герой сдвинулся / ИИ поменял мир — путь до клетки под курсором пересчитать.
@@ -1114,7 +1114,7 @@ internal class MapScreenLoop
                 _mapDisplay.DrawMap(mapObjectsProvider);
             }
             else
-                Console.SetCursorPosition(_mapDisplay.DrawEndLeft, _mapDisplay.DrawEndTop);
+                Term.SetCursorPosition(_mapDisplay.DrawEndLeft, _mapDisplay.DrawEndTop);
             movedFrameDrawn = false;
 
             // Новая игра: вступление мастера — посимвольно, со звуком, как обычный ответ.
@@ -1126,7 +1126,7 @@ internal class MapScreenLoop
                 await _aiClient.PlayIntro(introDialog.AppendStreamChunk, introDialog.NewStreamingMessage, redrawAction);
                 introDialog.FinalizeStreaming();
                 _aiClient.ActiveDialog = null;
-                while (Console.KeyAvailable) Console.ReadKey(true);
+                Term.FlushKeys();
                 continue;
             }
 
@@ -1203,7 +1203,7 @@ internal class MapScreenLoop
             if (_display.MapLevel == MapLevel.World && mapInput is "Tab" or "ShiftTab")
             {
                 SelectWorldPlace(mapInput == "Tab" ? 1 : -1);
-                while (Console.KeyAvailable) Console.ReadKey(intercept: true);
+                Term.FlushKeys();
                 movedFrameDrawn = true;
                 continue;
             }
@@ -1215,13 +1215,13 @@ internal class MapScreenLoop
             {
                 if (_display.MapLevel == MapLevel.World)
                 {
-                    int sl = Console.CursorLeft, st = Console.CursorTop;
-                    bool vis = Console.CursorVisible;
-                    Console.CursorVisible = false;
+                    int sl = Term.CursorLeft, st = Term.CursorTop;
+                    bool vis = Term.CursorVisible;
+                    Term.CursorVisible = false;
                     _mapDisplay.ZoomWorldAtCenter(mapInput == "ZoomIn" ? 1 : -1);
                     _mapDisplay.RedrawWorldViewport();
-                    Console.SetCursorPosition(sl, st);
-                    Console.CursorVisible = vis;
+                    Term.SetCursorPosition(sl, st);
+                    Term.CursorVisible = vis;
                 }
                 movedFrameDrawn = true;
                 continue;
@@ -1259,7 +1259,7 @@ internal class MapScreenLoop
                             : _display.SelectedMapItemIndex - 1;
                     SetMapEntityImage();
                 }
-                while (Console.KeyAvailable) Console.ReadKey(intercept: true);
+                Term.FlushKeys();
                 continue;
             }
 
@@ -1296,7 +1296,7 @@ internal class MapScreenLoop
                 mapHistory.PrepareStreaming();
                 await _aiClient.SendAction(aiInput, mapHistory.AppendStreamChunk, mapHistory.NewStreamingMessage, mapHistory.TickSpinner, redrawAction);
                 mapHistory.FinalizeStreaming();
-                while (Console.KeyAvailable) Console.ReadKey(true);
+                Term.FlushKeys();
                 // Мастер построил сцену (plan_location) — на карту местности; тактическая карта пропала — на мир.
                 if ((_display.MapLevel == MapLevel.World) == GameWorld.HasLocation(_settings))
                 {
@@ -1318,7 +1318,7 @@ internal class MapScreenLoop
                     await _aiClient.FireRoundTransition(sendActionRoundBundle, mapHistory.AppendStreamChunk, mapHistory.NewStreamingMessage, mapHistory.TickSpinner, redrawAction);
                     mapHistory.FinalizeStreaming();
                     _aiClient.ActiveDialog = (null);
-                    while (Console.KeyAvailable) Console.ReadKey(true);
+                    Term.FlushKeys();
                     break;
                 }
 
@@ -1326,7 +1326,7 @@ internal class MapScreenLoop
                 break;
             }
             // Hero moved — show new position before any AI call
-            Console.CursorVisible = false;
+            Term.CursorVisible = false;
             hoverReachability = null;
             _display.HoverPath = ComputeHoverPath(KnownCellOrNull(_display.HoveredCell));
             mapObjectsProvider.Refresh();
@@ -1341,7 +1341,7 @@ internal class MapScreenLoop
                 await _aiClient.FireRoundTransition(roundBundle, mapHistory.AppendStreamChunk, mapHistory.NewStreamingMessage, mapHistory.TickSpinner, redrawAction);
                 mapHistory.FinalizeStreaming();
                 _aiClient.ActiveDialog = (null);
-                while (Console.KeyAvailable) Console.ReadKey(true);
+                Term.FlushKeys();
                 break;
             }
             if (moved == true && !_config.DisableTriggers && !_config.RevealMap)
@@ -1351,7 +1351,7 @@ internal class MapScreenLoop
                 await _aiClient.FireTrigger(activatedTriggers, activatedAreaTriggers, activatedDoorTriggers, mapHistory.AppendStreamChunk, mapHistory.NewStreamingMessage, mapHistory.TickSpinner, redrawAction);
                 mapHistory.FinalizeStreaming();
                 _aiClient.ActiveDialog = (null);
-                while (Console.KeyAvailable) Console.ReadKey(true);
+                Term.FlushKeys();
                 await FireEncounterTriggers(mapHistory);
                 await RunEnemyTurnAndCheckRoundEnd();
                 break;
@@ -1365,7 +1365,7 @@ internal class MapScreenLoop
             // Зажатая стрелка: автоповтор клавиатуры копит события быстрее, чем идёт шаг с перерисовкой, —
             // без сброса герой «доезжал» по накопленному буферу уже после отпускания (как раньше с Tab).
             // Пока клавиша зажата, новые повторы продолжают приходить — движение не прерывается.
-            while (Console.KeyAvailable) Console.ReadKey(intercept: true);
+            Term.FlushKeys();
         }
 
         _display.ArrowKeysMovement = false;

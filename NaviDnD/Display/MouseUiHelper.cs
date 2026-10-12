@@ -220,10 +220,10 @@ internal static class MouseUiHelper
         var tab = tabs.Find(t => t.Key == key);
         if (tab.Key == null) return;
         title = AlignTitle(title);
-        bool vis = Console.CursorVisible;
-        Console.CursorVisible = false;
-        int sl = Console.CursorLeft, st = Console.CursorTop;
-        Console.SetCursorPosition(tab.StartX, 1);
+        bool vis = Term.CursorVisible;
+        Term.CursorVisible = false;
+        int sl = Term.CursorLeft, st = Term.CursorTop;
+        Term.SetCursorPosition(tab.StartX, 1);
         // tab.StartX/EndX — экранные колонки (уже с учётом отступа); title — исходная строка без
         // отступа, поэтому для индекса в title его нужно вычесть обратно.
         string tabText = title.Substring(tab.StartX - 1 - DisplayConfig.LeftMargin, tab.EndX - tab.StartX);
@@ -232,8 +232,8 @@ internal static class MouseUiHelper
         if (keyEnd > 0)
             ColorHelper.WriteColored(tabText[..keyEnd], fgColor: KeyHintColor(display), bgColor: display.MainBackground); // клавиша не подсвечивается
         ColorHelper.WriteColored(tabText[keyEnd..], fgColor: fg, bgColor: display.MainBackground);
-        Console.SetCursorPosition(sl, st);
-        Console.CursorVisible = vis;
+        Term.SetCursorPosition(sl, st);
+        Term.CursorVisible = vis;
     }
 
     internal static Action MakeCharacterPollAction(
@@ -260,11 +260,11 @@ internal static class MouseUiHelper
 
         void RedrawAll()
         {
-            int savedLeft = Console.CursorLeft, savedTop = Console.CursorTop;
-            Console.CursorVisible = false;
+            int savedLeft = Term.CursorLeft, savedTop = Term.CursorTop;
+            Term.CursorVisible = false;
             heroDisplay.RefreshSelection();
             dialog.RerenderRightPanel();
-            Console.SetCursorPosition(savedLeft, savedTop);
+            Term.SetCursorPosition(savedLeft, savedTop);
         }
 
         return () =>
@@ -320,11 +320,11 @@ internal static class MouseUiHelper
                     if (handled)
                     {
                         Sound.PlayClick();
-                        int savedLeft = Console.CursorLeft, savedTop = Console.CursorTop;
-                        Console.CursorVisible = false;
-                        Console.SetCursorPosition(0, drawStartTop);
+                        int savedLeft = Term.CursorLeft, savedTop = Term.CursorTop;
+                        Term.CursorVisible = false;
+                        Term.SetCursorPosition(0, drawStartTop);
                         draw();
-                        Console.SetCursorPosition(savedLeft, savedTop);
+                        Term.SetCursorPosition(savedLeft, savedTop);
                         if (mousePos != null)
                         {
                             var (isL, isR) = SubTabArrowHover(mousePos.Value, heroDisplay);
@@ -1053,11 +1053,11 @@ internal static class MouseUiHelper
         Action? onDelete = null)
     {
         var titleTabs = ComputeTitleTabs(title);
-        int startTop = Console.CursorTop;
+        int startTop = Term.CursorTop;
         while (true)
         {
-            Console.CursorVisible = false;
-            Console.SetCursorPosition(0, startTop);
+            Term.CursorVisible = false;
+            Term.SetCursorPosition(0, startTop);
             draw();
             var history = new DialogDisplay(settings, display, storage);
             if (pollFactory != null)
@@ -1094,11 +1094,11 @@ internal static class MouseUiHelper
             }
             display.RedrawCurrentContent = () =>
             {
-                int sl = Console.CursorLeft, st = Console.CursorTop;
-                Console.CursorVisible = false;
-                Console.SetCursorPosition(0, startTop);
+                int sl = Term.CursorLeft, st = Term.CursorTop;
+                Term.CursorVisible = false;
+                Term.SetCursorPosition(0, startTop);
                 draw();
-                Console.SetCursorPosition(sl, st);
+                Term.SetCursorPosition(sl, st);
             };
             var input = history.Draw();
             ConsoleMouseReader.SetCursorShape(false);
@@ -1142,8 +1142,8 @@ internal static class MouseUiHelper
                 if (display.NotePage < display.NotePageCount - 1) Sound.PlayClick();
                 notePageSelect(notePagePinnedIdx, display.NotePage + 1); continue;
             }
-            if (input == "Tab"      && onTab      != null) { onTab();      while (Console.KeyAvailable) Console.ReadKey(intercept: true); continue; }
-            if (input == "ShiftTab" && onShiftTab != null) { onShiftTab(); while (Console.KeyAvailable) Console.ReadKey(intercept: true); continue; }
+            if (input == "Tab"      && onTab      != null) { onTab();      Term.FlushKeys(); continue; }
+            if (input == "ShiftTab" && onShiftTab != null) { onShiftTab(); Term.FlushKeys(); continue; }
             if (input == "F6" && onF6 != null) { onF6(); continue; }
             if (input == "F7" && onF7 != null) { onF7(); continue; }
             if (input == "F8" && onF8 != null) { onF8(); continue; }

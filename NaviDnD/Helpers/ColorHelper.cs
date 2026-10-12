@@ -11,7 +11,7 @@ public static class ColorHelper
     {
         SetBackgroundColor(bg);
         SetForegroundColor(fg);
-        Console.Clear();
+        Term.Clear();
     }
 
     public static void SetBackgroundColor(List<int> rgb)

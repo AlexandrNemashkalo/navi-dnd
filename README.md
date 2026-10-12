@@ -7,7 +7,7 @@
 
 ### [⬇️ Скачать последнюю версию](https://gitlab.com/navitalevich/navi-dnd/-/releases/permalink/latest)
 
-[Все релизы](https://gitlab.com/navitalevich/navi-dnd/-/releases) · [Что нового](RELEASE_NOTES.md) · Windows x64
+[Все релизы](https://gitlab.com/navitalevich/navi-dnd/-/releases) · [Что нового](RELEASE_NOTES.md) · Windows x64 · macOS из исходников ([как](docs/development.md#macos-и-linux))
 
 ![Ход в бою: действие, бросок кубика, рассказ мастера](docs/media/g4_combat_turn.gif)
 

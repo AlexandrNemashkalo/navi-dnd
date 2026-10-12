@@ -37,9 +37,11 @@ class Program
             catch { /* краш-логгер не должен сам уронить обработчик краша */ }
         };
 
+        // macOS/Linux: взять терминал под себя (сырой ввод, мышь, альтернативный экран) до того, как что-то рисуется.
+        UnixTerminal.Start();
         // Окно консоли Windows создаёт и показывает ДО первой строчки Main() — прячем сразу же,
         // всё (без рамки, размер под карту, шрифт/цвета) настраиваем невидимо и показываем готовым.
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         ConsoleSetup.BlockConsoleFullscreen();
         ConsoleSetup.LoadBundledFonts();   // шрифты из папки Fonts — до настройки шрифта консоли
         ConsoleSetup.EnableAnsiSupport();
@@ -90,6 +92,9 @@ class Program
         Sound.TypingEnabled = config.TypingSoundEnabled;
         Music.Enabled = config.MusicEnabled;
         Music.AmbienceEnabled = config.AmbienceEnabled;
+        // NAVIDND_MUTE=1: тишина при разработке (запуск на тестовом состоянии не читает настройки игрока — там звук включён).
+        if (Environment.GetEnvironmentVariable("NAVIDND_MUTE") == "1")
+            Sound.Enabled = Sound.TypingEnabled = Music.Enabled = Music.AmbienceEnabled = false;
         Music.Volume = config.MusicVolume / 100f;
 
         var storage = new Storage { SaveExploredCells = config.SaveExploredCells };
@@ -143,7 +148,7 @@ class Program
 
         // Прогреть фон/рамку темы ДО показа окна — иначе пользователь видит кадр с дефолтным
         // чёрным фоном/белым текстом на месте нашего оформления в момент появления окна.
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         Console.BackgroundColor = ConsoleColor.Black;
         ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
         ColorHelper.SetBackgroundColor(display.MainBackground);
@@ -254,12 +259,12 @@ class Program
                 var startTask = aiClient.StartNewGame("");
                 // Ожидание — отдельным экраном: рамка, заголовок и надпись по центру (а не в углу прежнего экрана).
                 ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
-                Console.SetCursorPosition(0, 0);
+                Term.SetCursorPosition(0, 0);
                 borderDrawer.DrawTopBorder();
                 borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(L.T(" НОВАЯ ИГРА"), display));
                 borderDrawer.DrawSeparator();
                 // Рамка до последней строки окна, как на остальных экранах: верх, заголовок, разделитель и низ — 4 строки.
-                int waitRows = Math.Max(3, Console.WindowHeight - 4);
+                int waitRows = Math.Max(3, Term.WindowHeight - 4);
                 for (int r = 0; r < waitRows; r++) borderDrawer.DrawContentLine(() => { });
                 borderDrawer.DrawBottomBorder();
                 await Helpers.Spinner.WhileCentered(startTask, L.T("Создаём мир"), 3 + waitRows / 2,
@@ -278,7 +283,7 @@ class Program
             }
 
             ConsoleSetup.SetConsoleConfig(settings);
-            Console.CursorVisible = false;
+            Term.CursorVisible = false;
             Console.BackgroundColor = ConsoleColor.Black;
             ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
             ColorHelper.SetBackgroundColor(display.MainBackground);
@@ -639,7 +644,7 @@ class Program
                 {
                     var ng = state.NewGame;
                     if (ng?.Wizard == null || ng.WorldId == null) { state.CurrentScreen = Screen.NewGame; break; }
-                    Console.SetCursorPosition(0, ng.Wizard.StartTop);
+                    Term.SetCursorPosition(0, ng.Wizard.StartTop);
                     // Вернулись и выбрали мир на другом языке — анкета и герой заново (варианты и имена — на языке мира).
                     if (ng.Form is { } old && old.Language != L.World) { ng.Form = null; ng.HeroReady = false; }
                     var form = ng.Form ??= new NewGameDisplay(settings, display, screen, aiClient);

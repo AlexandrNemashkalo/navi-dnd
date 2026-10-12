@@ -272,7 +272,8 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
     {
         var psi = new ProcessStartInfo
         {
-            FileName               = config.ClaudeCliPath,
+            FileName               = OperatingSystem.IsWindows() ? config.ClaudeCliPath
+                : AiCliDiscovery.Resolve("claude", config.ClaudeCliPath) ?? AiCliDiscovery.NormalizePath(config.ClaudeCliPath),
             WorkingDirectory       = workDir,
             RedirectStandardInput  = true,
             RedirectStandardOutput = true,
@@ -284,6 +285,8 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
         };
         if (!string.IsNullOrWhiteSpace(config.ClaudeOAuthToken))
             psi.Environment["CLAUDE_CODE_OAUTH_TOKEN"] = config.ClaudeOAuthToken;
+        // macOS/Linux: запускателю из npm нужен `node`, а его может не быть в PATH игры (в голом терминале нет Homebrew/nvm).
+        if (!OperatingSystem.IsWindows()) psi.Environment["PATH"] = AiCliDiscovery.ChildPath(psi.FileName);
 
         psi.ArgumentList.Add("--model");
         psi.ArgumentList.Add(model);
@@ -336,15 +339,14 @@ public class ClaudeCliAiProvider(AppConfig config, AiLogger? logger = null) : IA
 
         var mcpArgs = AiActionTools.McpArgs(Path.GetFileName(actionPath), logger, withToolFilter: false);
 
+        var mcpEnvironment = AiActionTools.McpEnvironment();
         var mcpConfig = new
         {
             mcpServers = new Dictionary<string, object>
             {
-                ["navidnd"] = new
-                {
-                    command = config.McpServerPath,
-                    args = mcpArgs
-                }
+                ["navidnd"] = mcpEnvironment.Count == 0
+                    ? (object)new { command = config.McpServerPath, args = mcpArgs }
+                    : new { command = config.McpServerPath, args = mcpArgs, env = mcpEnvironment }
             }
         };
         File.WriteAllText(Path.Combine(workDir, "mcp.json"), JsonSerializer.Serialize(mcpConfig, _camelCase), Encoding.UTF8);

@@ -234,7 +234,7 @@ public class NewGameDisplay
         _settings = settings;
         _display = display;
         _borderDrawer = new BorderDrawer(settings, display);
-        _startTop = Console.CursorTop;
+        _startTop = Term.CursorTop;
         LoadHeroOptions(aiClient.RuleSet);
         PortraitFor(RaceField);
         _fields[HeroField].Options.Add(L.T("новый герой"));
@@ -325,18 +325,18 @@ public class NewGameDisplay
     // Анкета (шаг 2). Возвращает шаг, на который перейти: 1 — мир, 3/4 — дальше (герой создан, Data), 0 — выход в меню.
     public async Task<int> Show()
     {
-        _startTop = Console.CursorTop;
+        _startTop = Term.CursorTop;
         _titleTabsCache = null;   // заголовок мог измениться (доступные шаги)
         _tabHovered = null;
         _exitToMenu = false;
         _recreateWarned = false;
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         _borderDrawer.DrawSeparator();
         _bodyTop = _startTop + 1;
         _width = _display.InnerWidth(_display.ViewCols(_settings.Map));
-        _height = Math.Max(24, Console.WindowHeight - _bodyTop - 1);
+        _height = Math.Max(24, Term.WindowHeight - _bodyTop - 1);
         _x0 = DisplayConfig.LeftMargin + 1;
-        Console.SetCursorPosition(0, _bodyTop);
+        Term.SetCursorPosition(0, _bodyTop);
         for (int r = 0; r < _height; r++) _borderDrawer.DrawContentLine(() => { });
         _borderDrawer.DrawBottomBorder();
 
@@ -1028,7 +1028,7 @@ public class NewGameDisplay
 
         DrawPreview(boxTop + 1, left + FormWidth + Gap);
 
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         for (int r = 0; r < _height; r++) WriteRow(r);
     }
 
@@ -1288,7 +1288,7 @@ public class NewGameDisplay
 
     private void WriteRow(int row)
     {
-        Console.SetCursorPosition(_x0, _bodyTop + row);
+        Term.SetCursorPosition(_x0, _bodyTop + row);
         int c = 0;
         while (c < _width)
         {

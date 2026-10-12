@@ -166,13 +166,13 @@ public class HeroDisplay
         if (hovered == _levelUpHovered) return;
         _levelUpHovered = hovered;
         if (LevelUpHit is not { } h) return;
-        int sl = Console.CursorLeft, st = Console.CursorTop;
-        bool vis = OperatingSystem.IsWindows() && Console.CursorVisible;
-        Console.CursorVisible = false;
-        Console.SetCursorPosition(h.x + LevelUpKey.Length, h.y);
+        int sl = Term.CursorLeft, st = Term.CursorTop;
+        bool vis = OperatingSystem.IsWindows() && Term.CursorVisible;
+        Term.CursorVisible = false;
+        Term.SetCursorPosition(h.x + LevelUpKey.Length, h.y);
         WriteLevelUpButton();
-        Console.SetCursorPosition(sl, st);
-        Console.CursorVisible = vis;
+        Term.SetCursorPosition(sl, st);
+        Term.CursorVisible = vis;
     }
 
     private const string LevelUpKey = "[F10]";
@@ -201,11 +201,11 @@ public class HeroDisplay
         if (_cachedBorderDrawer == null || _subTabTitleY < 0) return;
         ColorHelper.SetBackgroundColor(_display.MainBackground);
         ColorHelper.SetForegroundColor(_display.MainForeground);
-        Console.CursorVisible = false;
-        int savedLeft = Console.CursorLeft, savedTop = Console.CursorTop;
-        Console.SetCursorPosition(0, _subTabTitleY);
+        Term.CursorVisible = false;
+        int savedLeft = Term.CursorLeft, savedTop = Term.CursorTop;
+        Term.SetCursorPosition(0, _subTabTitleY);
         DrawSubTabTitle(_display.CharacterSubTab);
-        Console.SetCursorPosition(savedLeft, savedTop);
+        Term.SetCursorPosition(savedLeft, savedTop);
     }
 
     private void DrawSubTabTitle(CharacterSubTab active)
@@ -224,7 +224,7 @@ public class HeroDisplay
 
         _cachedBorderDrawer!.DrawTitleLine(() =>
         {
-            _subTabContentStart = Console.CursorLeft;
+            _subTabContentStart = Term.CursorLeft;
             Console.Write(new string(' ', SubTabIndent));
             int written = SubTabIndent;
             for (int i = 0; i < _subTabs.Length; i++)
@@ -336,14 +336,14 @@ public class HeroDisplay
             frame = (loop + loop)[offset..(offset + width)];
         }
 
-        bool vis = Console.CursorVisible;
-        int sl = Console.CursorLeft, st = Console.CursorTop;
-        Console.CursorVisible = false;
-        Console.SetCursorPosition(x, y);
+        bool vis = Term.CursorVisible;
+        int sl = Term.CursorLeft, st = Term.CursorTop;
+        Term.CursorVisible = false;
+        Term.SetCursorPosition(x, y);
         if (color is { Count: 3 }) ColorHelper.WriteColored(frame, color);
         else Console.Write(frame);
-        Console.SetCursorPosition(sl, st);
-        Console.CursorVisible = vis;
+        Term.SetCursorPosition(sl, st);
+        Term.CursorVisible = vis;
     }
 
     private readonly List<(int y, int[] items, Action draw)> _selectionRows = [];
@@ -356,20 +356,20 @@ public class HeroDisplay
         if (next == _selectionState) return;
         int[] changed = [_selectionState.inv, _selectionState.invPin, _selectionState.spell,
             _selectionState.spellPin, next.Item1, next.Item2, next.Item3, next.Item4];
-        int x = Console.CursorLeft, y = Console.CursorTop;
-        bool visible = Console.CursorVisible;
+        int x = Term.CursorLeft, y = Term.CursorTop;
+        bool visible = Term.CursorVisible;
         try
         {
-            Console.CursorVisible = false;
+            Term.CursorVisible = false;
             foreach (var row in _selectionRows)
                 if (row.items.Any(i => i >= 0 && changed.Contains(i)))
                 {
-                    Console.SetCursorPosition(0, row.y);
+                    Term.SetCursorPosition(0, row.y);
                     row.draw();
                 }
             _selectionState = next;
         }
-        finally { Console.SetCursorPosition(x, y); Console.CursorVisible = visible; }
+        finally { Term.SetCursorPosition(x, y); Term.CursorVisible = visible; }
     }
 
     public void DrawHeroCard()
@@ -380,7 +380,7 @@ public class HeroDisplay
         var hero = Preview ?? settings.Hero;
         if (hero == null) return;
 
-        int startTop = Console.CursorTop;
+        int startTop = Term.CursorTop;
 
         ColorHelper.SetBackgroundColor(_display.MainBackground);
         ColorHelper.SetForegroundColor(_display.MainForeground);
@@ -608,7 +608,7 @@ public class HeroDisplay
             var middle = middleLines[i];
             var right  = rightLines[i];
 
-            int rowY = Console.CursorTop;
+            int rowY = Term.CursorTop;
             if (i == levelUpRow) LevelUpHit = (rowY, middleX + middle.Prefix.Length, (middle.KeyHint?.Length ?? 0) + middle.ColoredText.Length);   // с подсказкой
             if (left.FullText != null)   _truncated.Add((rowY, leftX + left.Prefix.Length, left.ColoredText.Length, left.FullText, left.Color));
             if (middle.FullText != null) _truncated.Add((rowY, middleX + middle.Prefix.Length, middle.ColoredText.Length, middle.FullText, middle.Color));
@@ -634,8 +634,8 @@ public class HeroDisplay
         borderDrawer.DrawSeparatorBottom();
 
         int dialogReserve = _display.MaxHistoryLines + 7;
-        int availableForContent = Math.Max(1, Console.WindowHeight - Console.CursorTop - dialogReserve - 1);
-        int statsDrawn = Console.CursorTop - startTop;
+        int availableForContent = Math.Max(1, Term.WindowHeight - Term.CursorTop - dialogReserve - 1);
+        int statsDrawn = Term.CursorTop - startTop;
         int predictedNeeded = Math.Max(0, _display.MaxHigh - (statsDrawn + availableForContent - 2));
         int totalContent = availableForContent + predictedNeeded;
 
@@ -655,7 +655,7 @@ public class HeroDisplay
                 break;
         }
 
-        int currentHeight = Console.CursorTop - startTop;
+        int currentHeight = Term.CursorTop - startTop;
         _display.HeroHigh = currentHeight;
         int needed = _display.MaxHigh - currentHeight;
 
@@ -754,7 +754,7 @@ public class HeroDisplay
         _subTabPage = page;
         _subTabPageCount = pageCount;
 
-        _subTabTitleY = Console.CursorTop;
+        _subTabTitleY = Term.CursorTop;
         DrawSubTabTitle(CharacterSubTab.Inventory);
         borderDrawer.DrawSeparatorWith2Parts('─', col1W, col2W);
 
@@ -762,7 +762,7 @@ public class HeroDisplay
         var col1 = flat.Skip(startIdx).Take(rows).ToList();
         var col2 = flat.Skip(startIdx + rows).Take(rows).ToList();
 
-        _invContentStartY = Console.CursorTop;
+        _invContentStartY = Term.CursorTop;
         _invRows = rows;
         // Отступ + рамка(1) до начала col1, затем col1W до разделителя-колонки.
         _invSplitX = col1W + 1 + DisplayConfig.LeftMargin;
@@ -793,7 +793,7 @@ public class HeroDisplay
                 () => { if (h2) WriteInvLine(e2, col2W, e2.ItemIdx == _display.SelectedInventoryIndex,
                     e2.ItemIdx == (_display.PinnedInventoryIndex >= 0 ? _display.PinnedInventoryIndex : _display.SelectedInventoryIndex)); },
                 col1W, col2W);
-            _selectionRows.Add((Console.CursorTop, [h1 ? e1.ItemIdx : -1, h2 ? e2.ItemIdx : -1], DrawRow));
+            _selectionRows.Add((Term.CursorTop, [h1 ? e1.ItemIdx : -1, h2 ? e2.ItemIdx : -1], DrawRow));
             DrawRow();
         }
 
@@ -847,7 +847,7 @@ public class HeroDisplay
         _invContentStartY = -1;
         _invRows = 0;
 
-        _subTabTitleY = Console.CursorTop;
+        _subTabTitleY = Term.CursorTop;
         DrawSubTabTitle(CharacterSubTab.Abilities);
         borderDrawer.DrawSeparatorWith2Parts('─', col1W, col2W);
 
@@ -922,7 +922,7 @@ public class HeroDisplay
         _invContentStartY = -1;
         _invRows = 0;
 
-        _subTabTitleY = Console.CursorTop;
+        _subTabTitleY = Term.CursorTop;
         DrawSubTabTitle(CharacterSubTab.Effects);
         borderDrawer.DrawSeparatorWith2Parts('─', col1W, col2W);
 
@@ -1000,7 +1000,7 @@ public class HeroDisplay
         _invContentStartY = -1;
         _invRows = 0;
 
-        _subTabTitleY = Console.CursorTop;
+        _subTabTitleY = Term.CursorTop;
         DrawSubTabTitle(CharacterSubTab.Spells);
         borderDrawer.DrawSeparatorWith4Parts('─', col1W, col2W, col3W, col4W);
 
@@ -1036,7 +1036,7 @@ public class HeroDisplay
         );
         borderDrawer.DrawInnerSeparatorWith4Parts(col1W, col2W, col3W, col4W);
 
-        _spellContentStartY = Console.CursorTop;
+        _spellContentStartY = Term.CursorTop;
         _spellRows = itemsPerCol;
         int leftContentX = DisplayConfig.LeftMargin + 1;
         _spellSplitX =
@@ -1078,7 +1078,7 @@ public class HeroDisplay
                 () => { if (r < visible[3].Items.Count) WriteInvLine(Line(3), col4W, Selected(3), Arrow(3)); },
                 col1W, col2W, col3W, col4W
             );
-            _selectionRows.Add((Console.CursorTop, Enumerable.Range(0, 4).Select(c => r < visible[c].Items.Count ? visible[c].GlobalStart + r : -1).ToArray(), DrawRow));
+            _selectionRows.Add((Term.CursorTop, Enumerable.Range(0, 4).Select(c => r < visible[c].Items.Count ? visible[c].GlobalStart + r : -1).ToArray(), DrawRow));
             DrawRow();
         }
 

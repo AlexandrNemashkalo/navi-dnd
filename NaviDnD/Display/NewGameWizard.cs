@@ -69,7 +69,7 @@ public class NewGameWizard
         _display = display;
         _ai = ai;
         _border = new BorderDrawer(settings, display);
-        StartTop = Console.CursorTop;
+        StartTop = Term.CursorTop;
     }
 
     // ── Шаг 1: мир ───────────────────────────────────────────────────────────
@@ -942,16 +942,16 @@ public class NewGameWizard
         string drawn = $"{key}|{left},{top}|{marker}|{cam.Zoom}|{cam.Cx:0.##},{cam.Cy:0.##}";
         if (_mapDrawn == drawn) return;
         _mapDrawn = drawn;
-        bool vis = Console.CursorVisible;
-        Console.CursorVisible = false;
+        bool vis = Term.CursorVisible;
+        Term.CursorVisible = false;
         for (int r = 0; r < h; r++)
         {
-            Console.SetCursorPosition(_x0 + left, _bodyTop + top + r);
+            Term.SetCursorPosition(_x0 + left, _bodyTop + top + r);
             Console.Write(view.RenderRow(r, w, h, cam.Cx, cam.Cy, cam.Zoom, -1));
         }
         ColorHelper.SetBackgroundColor(_display.MainBackground);
         ColorHelper.SetForegroundColor(_display.MainForeground);
-        Console.CursorVisible = vis;
+        Term.CursorVisible = vis;
     }
 
     private static string TileText(WorldMap w, (int x, int y) t)
@@ -1082,14 +1082,14 @@ public class NewGameWizard
 
     private void Begin()
     {
-        Console.CursorVisible = false;
-        Console.SetCursorPosition(0, StartTop);
+        Term.CursorVisible = false;
+        Term.SetCursorPosition(0, StartTop);
         _border.DrawSeparator();
         _bodyTop = StartTop + 1;
         _width = _display.InnerWidth(_display.ViewCols(_settings.Map));
-        _height = Math.Max(TopBoxHeight + InfoHeight + 8, Console.WindowHeight - _bodyTop - 1);
+        _height = Math.Max(TopBoxHeight + InfoHeight + 8, Term.WindowHeight - _bodyTop - 1);
         _x0 = DisplayConfig.LeftMargin + 1;
-        Console.SetCursorPosition(0, _bodyTop);
+        Term.SetCursorPosition(0, _bodyTop);
         for (int r = 0; r < _height; r++) _border.DrawContentLine(() => { });
         _border.DrawBottomBorder();
         _map = null;
@@ -1182,7 +1182,7 @@ public class NewGameWizard
     // Текст экрана; место карты (если она там же) не затирается — карта не мигает при наведении мыши.
     private void Flush(int mapLeft = -1, int mapTop = -1, int mapW = 0, int mapH = 0)
     {
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         if (_mapRect != (mapLeft, mapTop, mapW, mapH)) _mapDrawn = null;   // карта сместилась — нарисовать заново
         _mapRect = (mapLeft, mapTop, mapW, mapH);
         bool keepMap = _mapDrawn != null;
@@ -1255,7 +1255,7 @@ public class NewGameWizard
     private void WriteRow(int row, int from, int to)
     {
         if (from >= to) return;
-        Console.SetCursorPosition(_x0 + from, _bodyTop + row);
+        Term.SetCursorPosition(_x0 + from, _bodyTop + row);
         int c = from;
         while (c < to)
         {

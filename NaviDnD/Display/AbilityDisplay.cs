@@ -17,13 +17,13 @@ public class AbilityDisplay
 
     public void Draw()
     {
-        var startTop = Console.CursorTop;
+        var startTop = Term.CursorTop;
         var borderDrawer = new BorderDrawer(_settings, _display);
         borderDrawer.DrawSeparator();
         borderDrawer.DrawTitleLine(L.T("СПУТНИК"));
         borderDrawer.DrawSeparator();
 
-        int currentHeight = Console.CursorTop - startTop;
+        int currentHeight = Term.CursorTop - startTop;
         _display.AbilityHigh = currentHeight;
 
         int needed = _display.MaxHigh - currentHeight;

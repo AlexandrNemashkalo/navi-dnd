@@ -16,7 +16,7 @@ internal sealed class UpdateDisplay(WorldState settings, DisplayConfig display)
     {
         width = display.InnerWidth(display.ViewCols(settings.Map));
         new MainMenuDisplay(settings, display).DrawForUpdate();
-        statusRow = Console.WindowHeight - 3;
+        statusRow = Term.WindowHeight - 3;
         Render();
     }
 
@@ -43,7 +43,7 @@ internal sealed class UpdateDisplay(WorldState settings, DisplayConfig display)
     {
         if (text.Length > width - 2) text = text[..(width - 3)] + "…";
         text = text.PadLeft((width + text.Length) / 2).PadRight(width);
-        Console.SetCursorPosition(DisplayConfig.LeftMargin + 1, row);
+        Term.SetCursorPosition(DisplayConfig.LeftMargin + 1, row);
         ColorHelper.WriteColored(text, display.MainForeground, display.MainBackground);
     }
 

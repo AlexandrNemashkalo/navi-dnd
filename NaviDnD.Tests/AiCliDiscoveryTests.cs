@@ -35,6 +35,7 @@ public class AiCliDiscoveryTests
     [InlineData("codex")]
     public void ModernNpmPlatformPackageIsFoundWithoutRecursiveSearch(string name)
     {
+        if (!OperatingSystem.IsWindows()) { LauncherInBinFolderIsFoundOnUnix(name); return; }
         string root = Path.Combine(Path.GetTempPath(), "discovery-" + Guid.NewGuid().ToString("N"));
         string arch = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.Arm64 ? "arm64" : "x64";
         string relative = name == "claude" ? $"node_modules/@anthropic-ai/claude-code-win32-{arch}/claude.exe"
@@ -49,22 +50,68 @@ public class AiCliDiscoveryTests
         finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
     }
 
+    // macOS/Linux: в папке bin у npm/nvm/Homebrew лежит сам запускатель; он должен быть исполняемым.
+    private static void LauncherInBinFolderIsFoundOnUnix(string name)
+    {
+        string root = Path.Combine(Path.GetTempPath(), "discovery-" + Guid.NewGuid().ToString("N"));
+        string bin = Path.Combine(root, "bin");
+        try
+        {
+            Directory.CreateDirectory(bin);
+            File.WriteAllText(Path.Combine(bin, name), "fixture");
+            Assert.Null(AiCliDiscovery.Find(name, [bin], []));   // не исполняемый
+            string exe = Fixture(Path.Combine(bin, name));
+            Assert.Equal(exe, AiCliDiscovery.Find(name, [bin], []));
+            Assert.Null(AiCliDiscovery.Find(name, [Path.Combine(root, "missing")], []));
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    // Обёртка терминала на сеанс (cmux) раньше в PATH пропускается — берётся настоящий CLI за ней.
+    [Fact]
+    public void TerminalShimIsSkippedForRealCli()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        string root = Path.Combine(Path.GetTempPath(), "discovery-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            string shim = Path.Combine(root, ".cmuxterm", "cmux-cli-shims", "SESSION");
+            Fixture(Path.Combine(shim, "claude"));
+            string real = Fixture(Path.Combine(root, "bin", "claude"));
+            Assert.Equal(real, AiCliDiscovery.Find("claude", [shim, Path.Combine(root, "bin")], []));
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    // Файл для теста; вне Windows помечается исполняемым — там поиск этого требует.
+    private static string Fixture(string path)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, "fixture");
+        if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        return path;
+    }
+
+    // Имя исполняемого файла на этой ОС.
+    private static string Exe(string name) => OperatingSystem.IsWindows() ? name + ".exe" : name;
+
     [Theory]
     [InlineData("claude")]
     [InlineData("codex")]
     public void EditorExtensionOutsideStandardVsCodeFolderIsFound(string name)
     {
         string root = Path.Combine(Path.GetTempPath(), "discovery-" + Guid.NewGuid().ToString("N"));
-        string windows = System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.Arm64
-            ? "windows-aarch64" : "windows-x86_64";
-        string exe = name == "codex" ? Path.Combine(root, "openai.chatgpt-1.0", "bin", windows, "codex.exe")
-            : Path.Combine(root, "anthropic.claude-code-1.0", "resources", "native-binary", "claude.exe");
+        string platform = OperatingSystem.IsWindows()
+            ? System.Runtime.InteropServices.RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.Arm64
+                ? "windows-aarch64" : "windows-x86_64"
+            : "macos-aarch64";
+        string exe = name == "codex" ? Path.Combine(root, "openai.chatgpt-1.0", "bin", platform, Exe("codex"))
+            : Path.Combine(root, "anthropic.claude-code-1.0", "resources", "native-binary", Exe("claude"));
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(exe)!);
-            File.WriteAllText(exe, "fixture");
+            Fixture(exe);
             Assert.Equal(exe, AiCliDiscovery.Find(name, [], [root]));
-            var config = new NaviDnD.AppConfig { CodexCliPath = Path.Combine(root, "deleted", "codex.exe") };
+            var config = new NaviDnD.AppConfig { CodexCliPath = Path.Combine(root, "deleted", Exe("codex")) };
             if (name == "codex")
             {
                 Assert.True(config.ApplyAiPaths(null, AiCliDiscovery.Find(name, [], [root]), false));
@@ -81,7 +128,7 @@ public class AiCliDiscoveryTests
         string exe = Path.Combine(Path.GetTempPath(), "discovery-" + Guid.NewGuid().ToString("N") + ".exe");
         try
         {
-            File.WriteAllText(exe, "fixture");
+            Fixture(exe);
             var config = new NaviDnD.AppConfig { ClaudeCliPath = "\"" + exe + "\"", CodexCliPath = "missing.exe" };
             var found = await config.DiscoverAiPathsAsync();
             Assert.Equal(exe, found.claude);
@@ -98,8 +145,8 @@ public class AiCliDiscoveryTests
     public void DesktopSearchUsesNewestCompleteVersionAndRepairsSavedPath()
     {
         string root = Path.Combine(Path.GetTempPath(), "desktop-discovery-" + Guid.NewGuid().ToString("N"));
-        string old = Path.Combine(root, "2.1.9", "old-hash", "claude.exe");
-        string latest = Path.Combine(root, "2.1.293", "new-hash", "claude.exe");
+        string old = Path.Combine(root, "2.1.9", "old-hash", Exe("claude"));
+        string latest = Path.Combine(root, "2.1.293", "new-hash", Exe("claude"));
         try
         {
             foreach (string exe in new[] { old, latest })
@@ -109,7 +156,7 @@ public class AiCliDiscoveryTests
             }
             Directory.CreateDirectory(Path.Combine(root, "2.1.294", "unfinished"));
             Assert.Equal(latest, AiCliDiscovery.FindDesktopClaude([root]));
-            var config = new NaviDnD.AppConfig { ClaudeCliPath = Path.Combine(root, "deleted", "claude.exe") };
+            var config = new NaviDnD.AppConfig { ClaudeCliPath = Path.Combine(root, "deleted", Exe("claude")) };
             Assert.True(config.ApplyAiPaths(AiCliDiscovery.FindDesktopClaude([root]), null, false));
             Assert.Equal(latest, config.ClaudeCliPath);
             File.Delete(latest);
@@ -130,5 +177,29 @@ public class AiCliDiscoveryTests
             Assert.Null(AiCliDiscovery.Find("claude", [root], []));
         }
         finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public void MacDesktopBundledCliIsFoundInsideItsAppBundle()
+    {
+        if (OperatingSystem.IsWindows()) return;   // раскладка Windows: DesktopSearchUsesNewestCompleteVersionAndRepairsSavedPath
+        string root = Path.Combine(Path.GetTempPath(), "desktop-discovery-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            string cli = Fixture(Path.Combine(root, "2.1.295", "9d6405864fdc", "claude.app", "Contents", "MacOS", "claude"));
+            Assert.Equal(cli, AiCliDiscovery.FindDesktopClaude([root]));
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
+    public void UnixDefaultsHaveNoExeSuffixAndHomeIsExpanded()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        var config = new NaviDnD.AppConfig();
+        Assert.Equal("claude", config.ClaudeCliPath);
+        Assert.EndsWith("NaviDnD.McpServer", config.McpServerPath);
+        Assert.Equal(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "bin", "claude"),
+            AiCliDiscovery.NormalizePath(" \"~/.local/bin/claude\" "));
     }
 }

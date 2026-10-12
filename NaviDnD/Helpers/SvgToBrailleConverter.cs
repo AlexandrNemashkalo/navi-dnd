@@ -1,7 +1,5 @@
-using Svg;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
+using SkiaSharp;
+using Svg.Skia;
 using System.Text;
 
 namespace NaviDnD.Helpers;
@@ -53,8 +51,6 @@ public static class SvgToBrailleConverter
 
         try
         {
-            var svgDoc = SvgDocument.Open(fullPath);
-
             // Each braille char covers 2×4 pixels.
             // For a square icon: pixelW = widthChars*2, pixelH = pixelW/2*4 = pixelW*2
             // But terminal chars are typically ~2× taller than wide, so for a square display:
@@ -65,60 +61,37 @@ public static class SvgToBrailleConverter
             int pixelW = widthChars * 2;
             int pixelH = pixelW; // square image in pixels
 
-            using Bitmap bmp = svgDoc.Draw(pixelW, pixelH);
+            using var bmp = RenderSvg(fullPath, pixelW, pixelH);
             if (bmp == null) return null;
 
             int charsW = pixelW / 2;
             int charsH = pixelH / 4;
 
             var lines = new List<string>(charsH + 2);
-            var bmpData = bmp.LockBits(
-                new Rectangle(0, 0, pixelW, pixelH),
-                ImageLockMode.ReadOnly,
-                PixelFormat.Format32bppArgb);
-
-            try
+            for (int cy = 0; cy < charsH; cy++)
             {
-                IntPtr ptr = bmpData.Scan0;
-                int stride = bmpData.Stride;
-
-                for (int cy = 0; cy < charsH; cy++)
+                var sb = new StringBuilder(charsW);
+                for (int cx = 0; cx < charsW; cx++)
                 {
-                    var sb = new StringBuilder(charsW);
-                    for (int cx = 0; cx < charsW; cx++)
+                    int code = 0;
+                    for (int py = 0; py < 4; py++)
                     {
-                        int code = 0;
-                        for (int py = 0; py < 4; py++)
+                        for (int px = 0; px < 2; px++)
                         {
-                            for (int px = 0; px < 2; px++)
-                            {
-                                int x = cx * 2 + px;
-                                int y = cy * 4 + py;
-                                int byteOff = y * stride + x * 4;
+                            var c = bmp.GetPixel(cx * 2 + px, cy * 4 + py);
 
-                                // Format32bppArgb in memory: B G R A
-                                byte b = Marshal.ReadByte(ptr, byteOff + 0);
-                                byte g = Marshal.ReadByte(ptr, byteOff + 1);
-                                byte r = Marshal.ReadByte(ptr, byteOff + 2);
-                                byte a = Marshal.ReadByte(ptr, byteOff + 3);
+                            // Luminance (perceptual, from the JS source)
+                            float grey = 0.22f * c.Red + 0.72f * c.Green + 0.06f * c.Blue;
 
-                                // Luminance (perceptual, from the JS source)
-                                float grey = 0.22f * r + 0.72f * g + 0.06f * b;
-
-                                // Dark pixels (black symbol on white background) become dots
-                                bool lit = a >= 128 && grey < 128f;
-                                if (lit)
-                                    code |= 1 << BrailleBit(px, py);
-                            }
+                            // Dark pixels (black symbol on white background) become dots
+                            bool lit = c.Alpha >= 128 && grey < 128f;
+                            if (lit)
+                                code |= 1 << BrailleBit(px, py);
                         }
-                        sb.Append((char)(0x2800 + code));
                     }
-                    lines.Add(sb.ToString());
+                    sb.Append((char)(0x2800 + code));
                 }
-            }
-            finally
-            {
-                bmp.UnlockBits(bmpData);
+                lines.Add(sb.ToString());
             }
 
             _cache[cacheKey] = lines.ToArray();
@@ -128,6 +101,22 @@ public static class SvgToBrailleConverter
         {
             return null;
         }
+    }
+
+    // Рисует SVG, растянутый до width×height, на прозрачном фоне (SkiaSharp: одинаково на всех ОС).
+    private static SKBitmap? RenderSvg(string path, int width, int height)
+    {
+        using var svg = new SKSvg();
+        var picture = svg.Load(path);
+        if (picture == null || picture.CullRect.Width <= 0 || picture.CullRect.Height <= 0) return null;
+        var bmp = new SKBitmap(new SKImageInfo(width, height, SKColorType.Bgra8888, SKAlphaType.Unpremul));
+        using var canvas = new SKCanvas(bmp);
+        canvas.Clear(SKColors.Transparent);
+        canvas.Scale(width / picture.CullRect.Width, height / picture.CullRect.Height);
+        canvas.Translate(-picture.CullRect.Left, -picture.CullRect.Top);
+        canvas.DrawPicture(picture);
+        canvas.Flush();
+        return bmp;
     }
 
     private static string[] AppendName(string[] brailleLines, string name, int widthChars)
@@ -157,16 +146,18 @@ public static class SvgToBrailleConverter
     {
         try
         {
-            using var src = new Bitmap(fullPath);
+            using var src = SKBitmap.Decode(fullPath);
+            if (src == null) return null;
             int pixelW = widthChars * 2, pixelH = pixelW;
-            using var bmp = new Bitmap(pixelW, pixelH, PixelFormat.Format32bppArgb);
-            using (var g = Graphics.FromImage(bmp))
+            using var bmp = new SKBitmap(new SKImageInfo(pixelW, pixelH, SKColorType.Bgra8888, SKAlphaType.Unpremul));
+            using (var canvas = new SKCanvas(bmp))
+            using (var image = SKImage.FromBitmap(src))
             {
-                g.Clear(Color.White);
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                canvas.Clear(SKColors.White);
                 double scale = Math.Min(pixelW / (double)src.Width, pixelH / (double)src.Height);
                 int w = Math.Max(1, (int)(src.Width * scale)), h = Math.Max(1, (int)(src.Height * scale));
-                g.DrawImage(src, (pixelW - w) / 2, (pixelH - h) / 2, w, h);
+                var dest = SKRect.Create((pixelW - w) / 2, (pixelH - h) / 2, w, h);
+                canvas.DrawImage(image, dest, new SKSamplingOptions(SKCubicResampler.Mitchell));
             }
 
             var grey = new float[pixelW, pixelH];
@@ -175,7 +166,7 @@ public static class SvgToBrailleConverter
                 for (int x = 0; x < pixelW; x++)
                 {
                     var c = bmp.GetPixel(x, y);
-                    grey[x, y] = 0.22f * c.R + 0.72f * c.G + 0.06f * c.B;
+                    grey[x, y] = 0.22f * c.Red + 0.72f * c.Green + 0.06f * c.Blue;
                     sum += grey[x, y];
                 }
             float threshold = (float)(sum / (pixelW * pixelH));

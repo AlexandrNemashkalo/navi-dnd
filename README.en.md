@@ -7,7 +7,7 @@ Create a hero, explore the world and fight on a tactical map. The DM runs the st
 
 ### [⬇️ Download the latest version](https://gitlab.com/navitalevich/navi-dnd/-/releases/permalink/latest)
 
-[All releases](https://gitlab.com/navitalevich/navi-dnd/-/releases) · Windows x64
+[All releases](https://gitlab.com/navitalevich/navi-dnd/-/releases) · Windows x64 · macOS from source ([how](docs/development.md#macos-и-linux), in Russian)
 
 ![A combat turn: the hero tries to intimidate goblins, rolls the d20 on screen, the DM narrates the result](docs/media/en/combat_turn.gif)
 

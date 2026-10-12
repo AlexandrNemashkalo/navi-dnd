@@ -104,6 +104,8 @@ function BuildGame() {
         & dotnet publish (Join-Path $root "$project/$project.csproj") -c Release -r win-x64 --self-contained true -o $payload -p:DebugType=None -p:DebugSymbols=false | Out-Host
         if ($LASTEXITCODE -ne 0) { throw "Publish failed: $project" }
     }
+    # DebugType=None covers managed symbols only; native packages (SkiaSharp, HarfBuzzSharp) ship their own ~100 MB of .pdb.
+    Get-ChildItem -LiteralPath $payload -Filter '*.pdb' -File -Recurse | Remove-Item -Force
     # Only public tracked assets: never package Storage, logs, dev mocks or local settings.
     foreach ($asset in @('Prompts', 'sound', 'Fonts', 'GameData', 'icons')) {
         $assetOutput = Join-Path $payload $asset

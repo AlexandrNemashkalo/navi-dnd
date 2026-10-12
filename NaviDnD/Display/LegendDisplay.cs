@@ -84,13 +84,13 @@ public class LegendDisplay
             bool? on = bar?[i];
             lines.Add(() =>
             {
-                int start = Console.CursorLeft;
+                int start = Term.CursorLeft;
                 line();
                 if (on is not { } isThumb) return;
                 // Полоса — в последнем столбце легенды (снимок CaptureOutput пишет в строку — курсор не движется).
                 if (Console.Out is not StringWriter)
                 {
-                    int used = Console.CursorLeft - start;
+                    int used = Term.CursorLeft - start;
                     if (used < legendWidth - 1) Console.Write(new string(' ', legendWidth - 1 - used));
                 }
                 ColorHelper.WriteColored(isThumb ? "┃" : "│", isThumb ? thumb : frame, _display.MainBackground);
@@ -498,7 +498,7 @@ public class LegendDisplay
             // инициатива
             () =>
             {
-                int lineStart = Console.CursorLeft;
+                int lineStart = Term.CursorLeft;
                 Console.Write(" ");
                 ColorHelper.WriteColored(label1, dim, bg);
                 var combat = _storage.WorldState.Combat;
@@ -514,7 +514,7 @@ public class LegendDisplay
                     // Справа — кнопка конца хода (вместо текста «завершаю ход» мастеру), если влезает.
                     // Снимок легенды (MapDisplay.CaptureOutput) пишет в строку — курсор не движется, ширина по тексту.
                     int used = Console.Out is StringWriter ? 1 + label1.Length + 5 * combat.Initiative.Count(e => e.Deleted != true)
-                                                           : Console.CursorLeft - lineStart;
+                                                           : Term.CursorLeft - lineStart;
                     int at = width - EndTurnText.Length - 1;
                     if (IsHeroTurn && used < at)
                     {

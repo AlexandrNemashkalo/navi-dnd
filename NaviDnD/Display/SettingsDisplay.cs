@@ -69,11 +69,11 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         Speech.WarmUp(both: true);   // пробные фразы обоих голосов — без задержки на загрузку модели
         BuildItems();
         var border = new BorderDrawer(settings, display);
-        _titleRow = Console.CursorTop - 1;
-        _bodyTop = Console.CursorTop + 1;
+        _titleRow = Term.CursorTop - 1;
+        _bodyTop = Term.CursorTop + 1;
         border.DrawSeparator();
         _width = display.InnerWidth(display.ViewCols(settings.Map));
-        _height = Math.Max(24, Console.WindowHeight - _bodyTop - 1);
+        _height = Math.Max(24, Term.WindowHeight - _bodyTop - 1);
         _x0 = DisplayConfig.LeftMargin + 1;
         for (int r = 0; r < _height; r++) border.DrawContentLine(() => { });
         border.DrawBottomBorder();
@@ -242,36 +242,40 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             },
             Group = L.T("ИНТЕРФЕЙС"),
         });
-        Toggle(L.T("ЭКРАН"), L.T("Весь экран: игра того же размера по центру монитора, вокруг — фон игры (панель задач скрыта). В окне — как обычно, окно можно перетаскивать."),
-            () => config.Fullscreen, v => { config.Fullscreen = v; ApplyScreen(); },
-            on: L.T("ВЕСЬ ЭКРАН"), off: L.T("В ОКНЕ"));
-        string[] faces = ConsoleSetup.FontFaces;
-        _items.Add(new Item(L.T("ТИП ШРИФТА"), Kind.Choice,
-            L.T("Шрифт игры: Consolas — обычный, DejaVu Sans Mono — гладкий (из папки Fonts игры, ровный и на размерах крупнее 16)."))
+        // Режим окна и шрифт консоли есть только на Windows: у терминала на macOS/Linux они свои.
+        if (OperatingSystem.IsWindows())
         {
-            Get = () => config.FontFace,
-            Step = dir =>
+            Toggle(L.T("ЭКРАН"), L.T("Весь экран: игра того же размера по центру монитора, вокруг — фон игры (панель задач скрыта). В окне — как обычно, окно можно перетаскивать."),
+                () => config.Fullscreen, v => { config.Fullscreen = v; ApplyScreen(); },
+                on: L.T("ВЕСЬ ЭКРАН"), off: L.T("В ОКНЕ"));
+            string[] faces = ConsoleSetup.FontFaces;
+            _items.Add(new Item(L.T("ТИП ШРИФТА"), Kind.Choice,
+                L.T("Шрифт игры: Consolas — обычный, DejaVu Sans Mono — гладкий (из папки Fonts игры, ровный и на размерах крупнее 16)."))
             {
-                int i = Math.Max(0, Array.IndexOf(faces, config.FontFace));
-                config.FontFace = faces[(i + dir + faces.Length) % faces.Length];
-                ConsoleSetup.FontFace = config.FontFace;
-                // У шрифта свои размеры — выбранного у него нет: авто.
-                if (!ConsoleSetup.FontSizes(config.FontFace).Contains(config.FullscreenFontSize)) config.FullscreenFontSize = 0;
-                ApplyScreen();
-            },
-        });
-        _items.Add(new Item(L.T("ШРИФТ"), Kind.Choice,
-            L.T("Размер шрифта во весь экран — от него размер всей игры: авто — самый крупный, при котором игра влезает в монитор; число — этот размер (не влезает — сколько влезает). Размеры — те, где шрифт ровный: Consolas 14/16, DejaVu 16–22. В окне — всегда 16."))
-        {
-            Get = () => config.FullscreenFontSize <= 0 ? L.T("авто") : config.FullscreenFontSize.ToString(),
-            Step = dir =>
+                Get = () => config.FontFace,
+                Step = dir =>
+                {
+                    int i = Math.Max(0, Array.IndexOf(faces, config.FontFace));
+                    config.FontFace = faces[(i + dir + faces.Length) % faces.Length];
+                    ConsoleSetup.FontFace = config.FontFace;
+                    // У шрифта свои размеры — выбранного у него нет: авто.
+                    if (!ConsoleSetup.FontSizes(config.FontFace).Contains(config.FullscreenFontSize)) config.FullscreenFontSize = 0;
+                    ApplyScreen();
+                },
+            });
+            _items.Add(new Item(L.T("ШРИФТ"), Kind.Choice,
+                L.T("Размер шрифта во весь экран — от него размер всей игры: авто — самый крупный, при котором игра влезает в монитор; число — этот размер (не влезает — сколько влезает). Размеры — те, где шрифт ровный: Consolas 14/16, DejaVu 16–22. В окне — всегда 16."))
             {
-                int[] fonts = [0, .. ConsoleSetup.FontSizes(config.FontFace)];   // авто + размеры этого шрифта
-                int i = Math.Max(0, Array.IndexOf(fonts, config.FullscreenFontSize));
-                config.FullscreenFontSize = fonts[(i + dir + fonts.Length) % fonts.Length];
-                ApplyScreen();
-            },
-        });
+                Get = () => config.FullscreenFontSize <= 0 ? L.T("авто") : config.FullscreenFontSize.ToString(),
+                Step = dir =>
+                {
+                    int[] fonts = [0, .. ConsoleSetup.FontSizes(config.FontFace)];   // авто + размеры этого шрифта
+                    int i = Math.Max(0, Array.IndexOf(fonts, config.FullscreenFontSize));
+                    config.FullscreenFontSize = fonts[(i + dir + fonts.Length) % fonts.Length];
+                    ApplyScreen();
+                },
+            });
+        }
         Toggle(L.T("ПОДСКАЗКИ КЛАВИШ"), L.T("Подсказки клавиш [F1]…[F10], [Esc] у вкладок и подвкладок. Выключено — их не видно, клавиши работают как прежде."),
             () => config.ShowKeyHints, v => { config.ShowKeyHints = v; display.ShowKeyHints = v; },
             on: L.T("ПОКАЗЫВАТЬ"), off: L.T("СКРЫТЬ"));
@@ -372,7 +376,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         Text(L.T("ТОКЕН CLAUDE"), L.T("OAuth-токен Claude (claude setup-token). Хранится только у тебя в Storage/settings.json."),
             () => config.ClaudeOAuthToken, v => config.ClaudeOAuthToken = v, secret: true);
         OnlyFor("claude");
-        Text(L.T("ПУТЬ К CLAUDE"), L.T("Путь к claude.exe (Claude CLI), через который игра обращается к мастеру."),
+        Text(L.T("ПУТЬ К CLAUDE"), OperatingSystem.IsWindows() ? L.T("Путь к claude.exe (Claude CLI), через который игра обращается к мастеру.") : L.T("Путь к claude (Claude CLI), через который игра обращается к мастеру."),
             () => config.ClaudeCliPath, v => config.ClaudeCliPath = v);
         OnlyFor("claude");
         Model(L.T("МОДЕЛЬ ИГРЫ"), L.T("Модель Codex для ходов игры: действия, бой, триггеры. Sol — баланс, Astra — сложные задачи, Luna — простые. Доступность зависит от аккаунта."),
@@ -398,7 +402,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             },
         });
         OnlyFor("codex");
-        Text(L.T("ПУТЬ К CODEX"), L.T("Путь к Codex CLI. «codex» — найти в PATH (из npm-пакета игра сама берёт codex.exe)."),
+        Text(L.T("ПУТЬ К CODEX"), OperatingSystem.IsWindows() ? L.T("Путь к Codex CLI. «codex» — найти в PATH (из npm-пакета игра сама берёт codex.exe).") : L.T("Путь к Codex CLI. «codex» — найти в PATH."),
             () => config.CodexCliPath, v => config.CodexCliPath = v.Trim().Length > 0 ? v.Trim() : "codex");
         OnlyFor("codex");
 
@@ -439,7 +443,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         _titleTabs = MouseUiHelper.ComputeTitleTabs(_title);
         _drawnChars = null;
         _drawnFg = null;
-        Console.SetCursorPosition(0, _titleRow);
+        Term.SetCursorPosition(0, _titleRow);
         new BorderDrawer(settings, display).DrawContentLine(() => MouseUiHelper.WriteColoredTitle(_title, display));
     }
 
@@ -567,7 +571,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         string footer = _editing ? L.T("[Enter]СОХРАНИТЬ   [Esc]ОТМЕНИТЬ") : L.T("[↑↓]ПУНКТ   [←→]ИЗМЕНИТЬ");
         CenterIn(top + boxHeight + 1, _left, total, footer, Dim);
 
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         for (int r = 0; r < _height; r++)
             if (RowChanged(r)) WriteRow(r);
         _drawnChars = _chars;
@@ -668,7 +672,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
 
     private void WriteRow(int row)
     {
-        Console.SetCursorPosition(_x0, _bodyTop + row);
+        Term.SetCursorPosition(_x0, _bodyTop + row);
         int c = 0;
         while (c < _width)
         {

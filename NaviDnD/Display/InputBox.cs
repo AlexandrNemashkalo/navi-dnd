@@ -76,7 +76,7 @@ public class InputBox
     {
         List<string> lines = RestoreLines(_display?.PendingInputText);
         int cursorX = lines[^1].Length, cursorY = lines.Count - 1;
-        int startTop = Console.CursorTop;
+        int startTop = Term.CursorTop;
         int viewOffset = cursorX > _textWidth ? cursorX - _textWidth : 0;
 
         Draw(lines, cursorX, cursorY, startTop, viewOffset);
@@ -309,8 +309,8 @@ public class InputBox
 
     private void Draw(List<string> lines, int cursorX, int cursorY, int startTop, int viewOffset = 0)
     {
-        Console.CursorVisible = false;
-        Console.SetCursorPosition(0, startTop);
+        Term.CursorVisible = false;
+        Term.SetCursorPosition(0, startTop);
 
         ColorHelper.SetBackgroundColor(_mainBg);
         ColorHelper.SetForegroundColor(_mainFg);
@@ -346,10 +346,10 @@ public class InputBox
             }
 
             ColorHelper.WriteColored("│", MouseUiHelper.FrameColor(_display));
-            int remaining = Console.WindowWidth - Console.CursorLeft;
+            int remaining = Term.WindowWidth - Term.CursorLeft;
             if (remaining > 0)
                 Console.Write(new string(' ', remaining));
-            if (Console.CursorTop < Console.WindowHeight - 1)
+            if (Term.CursorTop < Term.WindowHeight - 1)
                 Console.WriteLine();
         }
 
@@ -367,10 +367,10 @@ public class InputBox
         }
 
         int cursorOffsetInLine = cursorY == 0 ? _promptLength + (cursorX - viewOffset) : cursorX;
-        int clampedLeft = Math.Clamp(DisplayConfig.LeftMargin + 1 + cursorOffsetInLine, 0, Console.BufferWidth - 1);
-        int clampedTop  = Math.Clamp(startTop + cursorY,     0, Console.BufferHeight - 1);
-        Console.SetCursorPosition(clampedLeft, clampedTop);
-        Console.CursorVisible = true;
+        int clampedLeft = Math.Clamp(DisplayConfig.LeftMargin + 1 + cursorOffsetInLine, 0, Term.BufferWidth - 1);
+        int clampedTop  = Math.Clamp(startTop + cursorY,     0, Term.BufferHeight - 1);
+        Term.SetCursorPosition(clampedLeft, clampedTop);
+        Term.CursorVisible = true;
     }
 
     private static List<string> RestoreLines(string pending)
@@ -382,20 +382,20 @@ public class InputBox
 
     private void Clear(int startTop, int height)
     {
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         ColorHelper.SetBackgroundColor(_mainBg);
 
         for (int i = 0; i < height; i++)
         {
             int row = startTop + i;
-            if (row < 0 || row >= Console.BufferHeight) continue;
-            Console.SetCursorPosition(0, row);
+            if (row < 0 || row >= Term.BufferHeight) continue;
+            Term.SetCursorPosition(0, row);
             Console.Write(new string(' ', DisplayConfig.LeftMargin + _innerWidth + 2));
         }
 
-        if (startTop >= 0 && startTop < Console.BufferHeight)
-            Console.SetCursorPosition(0, startTop);
-        Console.CursorVisible = true;
+        if (startTop >= 0 && startTop < Term.BufferHeight)
+            Term.SetCursorPosition(0, startTop);
+        Term.CursorVisible = true;
     }
 
     // Окно консоли чуть выше целого числа строк (см. ConsoleSetup.SetConsoleConfig): полоску пикселей под последней

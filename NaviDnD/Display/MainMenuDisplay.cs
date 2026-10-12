@@ -64,7 +64,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         ];
         _selected = hasSave ? 0 : 1;
 
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         Layout();
         DrawAll();
 
@@ -146,7 +146,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     private void Layout()
     {
         _width = display.InnerWidth(display.ViewCols(settings.Map));
-        _height = Math.Max(20, Console.WindowHeight - HeaderRows - 1); // нижняя рамка — в последней строке окна
+        _height = Math.Max(20, Term.WindowHeight - HeaderRows - 1); // нижняя рамка — в последней строке окна
         _x0 = DisplayConfig.LeftMargin + 1;
         _chars = new char[_height, _width];
         _colors = new List<int>?[_height, _width];
@@ -232,7 +232,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     private void DrawAll()
     {
         var border = new BorderDrawer(settings, display);
-        Console.SetCursorPosition(0, 0);
+        Term.SetCursorPosition(0, 0);
         border.DrawTopBorder();
         border.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(Title, display));
         border.DrawSeparator();
@@ -246,7 +246,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
 
     private void WriteRow(int row, bool positioned)
     {
-        if (positioned) Console.SetCursorPosition(_x0, HeaderRows + row);
+        if (positioned) Term.SetCursorPosition(_x0, HeaderRows + row);
         var bg = display.MainBackground;
         int c = 0;
         while (c < _width)

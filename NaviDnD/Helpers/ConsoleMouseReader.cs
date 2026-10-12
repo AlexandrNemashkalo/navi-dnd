@@ -58,6 +58,7 @@ public static class ConsoleMouseReader
     // DrainMouseEvents) и переносим окно на дельту курсора, пока кнопка физически зажата.
     public static void StartWindowDrag()
     {
+        if (!OperatingSystem.IsWindows()) return;   // окно терминала двигается за свой заголовок
         if (FullscreenBackdrop.Active) return;   // весь экран — окно стоит по центру
         var hwnd = GetConsoleWindow();
         if (hwnd == 0) return;
@@ -66,7 +67,7 @@ public static class ConsoleMouseReader
 
         _windowDrag = () =>
         {
-            if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) == 0 || !GetCursorPos(out var cur))
+            if (!LeftButtonHeld() || !GetCursorPos(out var cur))
             {
                 _windowDrag = null;
                 return;
@@ -125,10 +126,10 @@ public static class ConsoleMouseReader
         {
             (short x, short y)? moved = null;
             bool queueEmpty = true;
-            while (_enabled && PeekConsoleInput(_inputHandle, buf, 1, out int n) && n > 0)
+            while (_enabled && PeekInputAnsi(buf, out int n) && n > 0)
             {
                 if (buf[0].EventType == KEY_EVENT_TYPE && buf[0].KeyDownFlag != 0) { queueEmpty = false; break; }   // клавиша — не наша
-                ReadConsoleInput(_inputHandle, buf, 1, out _);
+                ReadInputAnsi(buf, out _);
                 if (buf[0].EventType != MOUSE_EVENT_TYPE || (buf[0].MouseEvent.dwEventFlags & MOUSE_WHEELED) != 0) continue;
                 moved = (buf[0].MouseEvent.dwMousePosition.X, buf[0].MouseEvent.dwMousePosition.Y);
                 if ((buf[0].MouseEvent.dwButtonState & LEFT_BUTTON) == 0) { released = true; break; }
@@ -145,25 +146,53 @@ public static class ConsoleMouseReader
             if (released) break;
             // Отпускание не дошло до очереди (кнопку отпустили вне окна и т.п.) — по реальному состоянию кнопки,
             // но сначала дать очереди догнать (последние движения ещё в пути).
-            if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) == 0)
+            if (!LeftButtonHeld())
             {
                 if (!queueEmpty) break;   // впереди клавиша — отпускание за ней уже не нужно
                 Thread.Sleep(20);
-                if (!_enabled || !PeekConsoleInput(_inputHandle, buf, 1, out int left) || left == 0) break;
+                if (!_enabled || !PeekInputAnsi(buf, out int left) || left == 0) break;
                 continue;
             }
             Thread.Sleep(10);
         }
     }
 
+    // Очередь ввода: консоли на Windows, UnixTerminal (те же записи) на macOS/Linux.
+    private static bool PeekInput(INPUT_RECORD[] buf, out int n)
+    {
+        if (UnixTerminal.Current is { } u) { n = u.Peek(buf); return true; }
+        return PeekConsoleInputW(_inputHandle, buf, 1, out n);
+    }
+
+    private static bool ReadInput(INPUT_RECORD[] buf, out int n)
+    {
+        if (UnixTerminal.Current is { } u) { n = u.Read(buf); return n > 0; }
+        return ReadConsoleInputW(_inputHandle, buf, 1, out n);
+    }
+
+    private static bool PeekInputAnsi(INPUT_RECORD[] buf, out int n)
+    {
+        if (UnixTerminal.Current is { } u) { n = u.Peek(buf); return true; }
+        return PeekConsoleInput(_inputHandle, buf, 1, out n);
+    }
+
+    private static bool ReadInputAnsi(INPUT_RECORD[] buf, out int n)
+    {
+        if (UnixTerminal.Current is { } u) { n = u.Read(buf); return n > 0; }
+        return ReadConsoleInput(_inputHandle, buf, 1, out n);
+    }
+
+    private static bool LeftButtonHeld() =>
+        UnixTerminal.Current is { } u ? u.LeftButtonDown : (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+
     [StructLayout(LayoutKind.Sequential)] private struct POINT { public int X, Y; }
-    [StructLayout(LayoutKind.Sequential)] private struct COORD { public short X, Y; }
+    [StructLayout(LayoutKind.Sequential)] internal struct COORD { public short X, Y; }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct CONSOLE_FONT_INFO { public int nFont; public COORD dwFontSize; }
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct MOUSE_EVENT_RECORD
+    internal struct MOUSE_EVENT_RECORD
     {
         public COORD dwMousePosition;
         public uint dwButtonState, dwControlKeyState, dwEventFlags;
@@ -171,7 +200,7 @@ public static class ConsoleMouseReader
 
     // INPUT_RECORD: EventType (2) + 2 pad + Event union (16) = 20 bytes
     [StructLayout(LayoutKind.Explicit, Size = 20)]
-    private struct INPUT_RECORD
+    internal struct INPUT_RECORD
     {
         [FieldOffset(0)]  public ushort EventType;
         [FieldOffset(4)]  public int    KeyDownFlag;    // KEY_EVENT_RECORD.bKeyDown: non-zero = key-down
@@ -200,6 +229,8 @@ public static class ConsoleMouseReader
 
     public static void Enable()
     {
+        if (UnixTerminal.Current != null) { _enabled = true; return; }
+        if (!OperatingSystem.IsWindows()) return;
         _inputHandle = GetStdHandle(STD_INPUT_HANDLE);
         GetConsoleMode(_inputHandle, out _originalMode);
         // ENABLE_PROCESSED_INPUT снят: с ним conhost перехватывает Shift+стрелки под своё выделение текста
@@ -213,6 +244,11 @@ public static class ConsoleMouseReader
     {
         CancelDrag();
         _windowDrag = null;
+        if (_enabled && UnixTerminal.Current != null)
+        {
+            SetCursorShape(false);
+            _enabled = false;
+        }
         if (_enabled)
         {
             SetConsoleMode(_inputHandle, _originalMode);
@@ -225,6 +261,11 @@ public static class ConsoleMouseReader
     {
         if (hand == _handCursorActive) return;
         _handCursorActive = hand;
+        if (!OperatingSystem.IsWindows())
+        {
+            UnixTerminal.Current?.SetPointerShape(hand);
+            return;
+        }
         if (hand)
             SetSystemCursor(CopyIcon(LoadCursor(0, IDC_HAND)), OCR_NORMAL);
         else
@@ -249,22 +290,22 @@ public static class ConsoleMouseReader
 
         while (true)
         {
-            if (!PeekConsoleInput(_inputHandle, buf, 1, out int peeked) || peeked == 0) break;
+            if (!PeekInputAnsi(buf, out int peeked) || peeked == 0) break;
             // Consume key-UP events: they are harmless but block subsequent mouse reads.
             // Stop at key-DOWN events so Console.ReadKey can process them.
             if (buf[0].EventType == KEY_EVENT_TYPE && buf[0].KeyDownFlag == 0)
             {
-                ReadConsoleInput(_inputHandle, buf, 1, out _);
+                ReadInputAnsi(buf, out _);
                 continue;
             }
-            if (buf[0].EventType == KEY_EVENT_TYPE) break; // KEY_DOWN — preserve for TryReadKeyDown/Console.ReadKey
+            if (buf[0].EventType == KEY_EVENT_TYPE) break; // KEY_DOWN — оставить для TryReadKeyDown/Term.ReadKey
             if (buf[0].EventType != MOUSE_EVENT_TYPE)
             {
                 // FOCUS_EVENT, WINDOW_BUFFER_SIZE_EVENT, MENU_EVENT — consume silently
-                ReadConsoleInput(_inputHandle, buf, 1, out _);
+                ReadInputAnsi(buf, out _);
                 continue;
             }
-            if (!ReadConsoleInput(_inputHandle, buf, 1, out int read) || read == 0) break;
+            if (!ReadInputAnsi(buf, out int read) || read == 0) break;
             if ((buf[0].MouseEvent.dwEventFlags & MOUSE_WHEELED) != 0)
             {
                 // Keep small precision-touchpad deltas until they form a full wheel notch.
@@ -297,10 +338,10 @@ public static class ConsoleMouseReader
             }
         }
 
-        if (_dragStart.HasValue && (GetAsyncKeyState(VK_LBUTTON) & 0x8000) == 0)
+        if (_dragStart.HasValue && !LeftButtonHeld())
         {
             // Key events ahead of the release must be handled by the caller first.
-            if (!PeekConsoleInput(_inputHandle, buf, 1, out int pending) || pending == 0)
+            if (!PeekInputAnsi(buf, out int pending) || pending == 0)
                 dragReleased = true;
         }
         if (_dragStart is { } start && _dragPending is { } moved
@@ -329,7 +370,7 @@ public static class ConsoleMouseReader
         int left = DisplayConfig.LeftMargin + 1;
         if (latestMove is { } hover)
         {
-            int button = WindowControls.HitTest(hover.x, hover.y, left, width);
+            int button = WindowControls.Available ? WindowControls.HitTest(hover.x, hover.y, left, width) : -1;
             if (button != _windowButtonHovered)
             {
                 _windowButtonHovered = button;
@@ -339,7 +380,7 @@ public static class ConsoleMouseReader
         }
         if (latestClick is { } controlClick)
         {
-            int button = WindowControls.HitTest(controlClick.x, controlClick.y, left, width);
+            int button = WindowControls.Available ? WindowControls.HitTest(controlClick.x, controlClick.y, left, width) : -1;
             if (button >= 0)
             {
                 WindowControls.Activate(button);
@@ -363,18 +404,18 @@ public static class ConsoleMouseReader
     private static void DrawWindowButtons(int hovered, int left, int width)
     {
         if (width < WindowControls.Buttons.Length + 3) return;
-        int x = Console.CursorLeft, y = Console.CursorTop;
-        bool visible = Console.CursorVisible;
-        Console.CursorVisible = false;
+        int x = Term.CursorLeft, y = Term.CursorTop;
+        bool visible = Term.CursorVisible;
+        Term.CursorVisible = false;
         try
         {
-            Console.SetCursorPosition(left + width - WindowControls.Buttons.Length, 1);
+            Term.SetCursorPosition(left + width - WindowControls.Buttons.Length, 1);
             WindowControls.Draw(hovered);
         }
         finally
         {
-            Console.SetCursorPosition(x, y);
-            Console.CursorVisible = visible;
+            Term.SetCursorPosition(x, y);
+            Term.CursorVisible = visible;
         }
     }
 
@@ -441,23 +482,23 @@ public static class ConsoleMouseReader
         var buf = new INPUT_RECORD[1];
         while (true)
         {
-            if (!PeekConsoleInput(_inputHandle, buf, 1, out int peeked) || peeked == 0) return null;
+            if (!PeekInputAnsi(buf, out int peeked) || peeked == 0) return null;
             if (buf[0].EventType == MOUSE_EVENT_TYPE) return null; // leave for DrainMouseEvents
             if (buf[0].EventType == KEY_EVENT_TYPE)
             {
                 if (buf[0].KeyDownFlag == 0)
                 {
-                    ReadConsoleInput(_inputHandle, buf, 1, out _); // consume KEY_UP
+                    ReadInputAnsi(buf, out _); // забрать KEY_UP
                     continue;
                 }
-                ReadConsoleInput(_inputHandle, buf, 1, out _); // consume KEY_DOWN
+                ReadInputAnsi(buf, out _); // забрать KEY_DOWN
                 var key = (ConsoleKey)buf[0].VirtualKeyCode;
                 if (key == ConsoleKey.F11) { Speech.Stop(); continue; }
                 if (key is ConsoleKey.Escape or ConsoleKey.Enter) Speech.Stop();
                 return key;
             }
             // FOCUS_EVENT, WINDOW_BUFFER_SIZE_EVENT, MENU_EVENT — consume silently
-            ReadConsoleInput(_inputHandle, buf, 1, out _);
+            ReadInputAnsi(buf, out _);
         }
     }
 
@@ -470,18 +511,18 @@ public static class ConsoleMouseReader
     public static ConsoleKeyInfo? TryReadKey()
     {
         if (_repeatLeft > 0) { _repeatLeft--; return _repeatKey; }   // остаток склеенного нажатия («нн», зажатая клавиша)
-        if (!_enabled) return Console.KeyAvailable ? Console.ReadKey(true) : null;
+        if (!_enabled) return Term.KeyAvailable ? Term.ReadKey(true) : null;
         var buf = new INPUT_RECORD[1];
         while (true)
         {
-            if (!PeekConsoleInputW(_inputHandle, buf, 1, out int peeked) || peeked == 0) return null;
+            if (!PeekInput(buf, out int peeked) || peeked == 0) return null;
             if (buf[0].EventType == MOUSE_EVENT_TYPE) return null;
-            ReadConsoleInputW(_inputHandle, buf, 1, out _);
+            ReadInput(buf, out _);
             if (buf[0].EventType != KEY_EVENT_TYPE || buf[0].KeyDownFlag == 0) continue;
             var key = (ConsoleKey)buf[0].VirtualKeyCode;
             if (key == ConsoleKey.F11) { Speech.Stop(); continue; }
             if (key is ConsoleKey.Escape or ConsoleKey.Enter) Speech.Stop();
-            if (key is (ConsoleKey)16 or (ConsoleKey)17 or (ConsoleKey)18 or (ConsoleKey)20 or (ConsoleKey)144 or (ConsoleKey)145 or (ConsoleKey)91 or (ConsoleKey)92) continue; // Shift/Ctrl/Alt, Caps/Num/Scroll Lock, Win — сами по себе (как Console.ReadKey)
+            if (key is (ConsoleKey)16 or (ConsoleKey)17 or (ConsoleKey)18 or (ConsoleKey)20 or (ConsoleKey)144 or (ConsoleKey)145 or (ConsoleKey)91 or (ConsoleKey)92) continue; // Shift/Ctrl/Alt, Caps/Num/Scroll Lock, Win — сами по себе (как Term.ReadKey)
             uint s = buf[0].KeyControlState;
             var info = new ConsoleKeyInfo((char)buf[0].UnicodeChar, key,
                 shift: (s & 0x0010) != 0, alt: (s & 0x0003) != 0, control: (s & 0x000C) != 0);
@@ -605,6 +646,7 @@ public static class ConsoleMouseReader
     /// Returns the fractional Y position of the pixel cursor within its character cell (0.0 = top, 1.0 = bottom).
     private static float GetSubCellFraction()
     {
+        if (!OperatingSystem.IsWindows()) return 0.5f;   // терминал сообщает только целые клетки
         try
         {
             if (!GetCursorPos(out var pt)) return 0.5f;
@@ -630,6 +672,7 @@ public static class ConsoleMouseReader
     /// Returns the fractional X position of the pixel cursor within its character cell (0.0 = left, 1.0 = right).
     private static float GetSubCellFractionX()
     {
+        if (!OperatingSystem.IsWindows()) return 0.5f;   // терминал сообщает только целые клетки
         try
         {
             if (!GetCursorPos(out var pt)) return 0.5f;

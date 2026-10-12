@@ -114,7 +114,7 @@ public class DialogDisplay
         var borderDrawer = new BorderDrawer(_setting, _display);
         _cachedBorderDrawer = borderDrawer;
 
-        _dialogBlockStartTop = Console.CursorTop;
+        _dialogBlockStartTop = Term.CursorTop;
 
         RebuildCache();
         RenderDialogBlock();
@@ -123,7 +123,7 @@ public class DialogDisplay
             borderDrawer.DrawSeparatorWith2Parts('┴', LeftWidth, RightPanelWidth);
         else
             borderDrawer.DrawSeparator();
-        Console.CursorVisible = true;
+        Term.CursorVisible = true;
 
         var inputBox = new InputBox(_setting, _display);
         var input = inputBox.GetInput();
@@ -148,7 +148,7 @@ public class DialogDisplay
         _streamingMessages.Clear();
         _charsSinceRerender = 0;
         _spinnerFrame = 0;
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         _isStreaming = true;
         _spinnerAnimation?.Dispose();
         _spinnerAnimation = Animations.Start([new(TimeSpan.FromMilliseconds(SpinnerIntervalMs), () =>
@@ -162,7 +162,7 @@ public class DialogDisplay
         if (_cachedBorderDrawer == null)
         {
             _cachedBorderDrawer = new BorderDrawer(_setting, _display);
-            _dialogBlockStartTop = Console.CursorTop;
+            _dialogBlockStartTop = Term.CursorTop;
         }
         RebuildCache();
         RerenderDialogBlock(DrawSpinner);
@@ -253,7 +253,7 @@ public class DialogDisplay
         _display.StreamingTabTitle = null;
         _streamingMessages.Clear();
         _streamingMessage = null;
-        Console.CursorVisible = true;
+        Term.CursorVisible = true;
     }
 
     private int InnerWidth => _display.InnerWidth(_display.ViewCols(_setting.Map));
@@ -413,7 +413,7 @@ public class DialogDisplay
         _dialogContentDrawn = true;
         ColorHelper.SetBackgroundColor(_display.MainBackground);
         ColorHelper.SetForegroundColor(_display.MainForeground);
-        Console.SetCursorPosition(0, _dialogBlockStartTop + 2 + _display.MaxHistoryLines);
+        Term.SetCursorPosition(0, _dialogBlockStartTop + 2 + _display.MaxHistoryLines);
     }
 
     private string BackgroundAnsi => $"\x1b[48;2;{_display.MainBackground[0]};{_display.MainBackground[1]};{_display.MainBackground[2]}m";
@@ -580,21 +580,21 @@ public class DialogDisplay
     public void RerenderRightPanel()
     {
         if (!HasSplit || _cachedBorderDrawer == null || !_dialogContentDrawn || _animationInProgress) return;
-        int left = Console.CursorLeft, top = Console.CursorTop;
-        bool visible = Console.CursorVisible;
+        int left = Term.CursorLeft, top = Term.CursorTop;
+        bool visible = Term.CursorVisible;
         try
         {
             string patch = BuildImagePatch(BuildRightPanelLines());
             if (patch.Length == 0) return;
-            Console.CursorVisible = false;
+            Term.CursorVisible = false;
             Console.Write(AnsiColorRuns.Compact(patch));
         }
         finally
         {
             ColorHelper.SetBackgroundColor(_display.MainBackground);
             ColorHelper.SetForegroundColor(_display.MainForeground);
-            Console.SetCursorPosition(left, top);
-            Console.CursorVisible = visible;
+            Term.SetCursorPosition(left, top);
+            Term.CursorVisible = visible;
         }
     }
 
@@ -781,7 +781,7 @@ public class DialogDisplay
 
         while (DateTime.UtcNow < deadline)
         {
-            Console.CursorVisible = false;
+            Term.CursorVisible = false;
             int secondsLeft = (int)Math.Ceiling((deadline - DateTime.UtcNow).TotalSeconds);
 
             // Poll mouse: tab switches, map hover, cursor shape.
@@ -1191,20 +1191,20 @@ public class DialogDisplay
             _footerDraw = afterDraw;
             _spinnerFooterVisible = afterDraw == (Action)DrawSpinner;
         }
-        int savedCursorLeft = Console.CursorLeft;
-        int savedCursorTop = Console.CursorTop;
-        bool savedCursorVisible = Console.CursorVisible;
+        int savedCursorLeft = Term.CursorLeft;
+        int savedCursorTop = Term.CursorTop;
+        bool savedCursorVisible = Term.CursorVisible;
 
-        Console.CursorVisible = false;
+        Term.CursorVisible = false;
         // Ensure main colors are active so WriteColored saves/restores the correct base color
         ColorHelper.SetBackgroundColor(_display.MainBackground);
         ColorHelper.SetForegroundColor(_display.MainForeground);
-        Console.SetCursorPosition(0, _dialogBlockStartTop);
+        Term.SetCursorPosition(0, _dialogBlockStartTop);
         RenderDialogBlock();
         afterDraw?.Invoke(); // cursor is right below the dialog block
 
-        Console.SetCursorPosition(savedCursorLeft, savedCursorTop);
-        Console.CursorVisible = savedCursorVisible;
+        Term.SetCursorPosition(savedCursorLeft, savedCursorTop);
+        Term.CursorVisible = savedCursorVisible;
     }
 
     private bool SwitchTab(string tabKey)
@@ -1220,13 +1220,13 @@ public class DialogDisplay
         _display.StreamingTabTitle = title;
         _dialogContentDrawn = false;
         if (tabKey is not ("F1" or "F2")) { _display.HoveredCell = null; _display.HoveredDoor = null; }
-        Console.CursorVisible = false;
-        Console.SetCursorPosition(0, 0);
+        Term.CursorVisible = false;
+        Term.SetCursorPosition(0, 0);
         _cachedBorderDrawer.DrawTopBorder();
         _cachedBorderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(title, _display));
-        int contentTop = Console.CursorTop;
+        int contentTop = Term.CursorTop;
         draw();
-        _dialogBlockStartTop = Console.CursorTop;
+        _dialogBlockStartTop = Term.CursorTop;
 
         // Set RedrawCurrentContent for the new tab (F6/F7 use F3's pure draw — карточка персонажа — to avoid re-applying state)
         // F6–F9 — подвкладки персонажа (или закладки журнала, если на экране журнал): чистая отрисовка — их экрана.
@@ -1238,11 +1238,11 @@ public class DialogDisplay
             var ctop = contentTop; var cd = pureDraw;
             _display.RedrawCurrentContent = () =>
             {
-                int sl = Console.CursorLeft, st = Console.CursorTop;
-                Console.CursorVisible = false;
-                Console.SetCursorPosition(0, ctop);
+                int sl = Term.CursorLeft, st = Term.CursorTop;
+                Term.CursorVisible = false;
+                Term.SetCursorPosition(0, ctop);
                 cd();
-                Console.SetCursorPosition(sl, st);
+                Term.SetCursorPosition(sl, st);
             };
         }
 
@@ -1319,18 +1319,18 @@ public class DialogDisplay
     private void RedrawStreamingFooter()
     {
         if (_cachedBorderDrawer == null || !_isStreaming || !_spinnerFooterVisible) return;
-        int left = Console.CursorLeft, top = Console.CursorTop;
-        bool visible = Console.CursorVisible;
+        int left = Term.CursorLeft, top = Term.CursorTop;
+        bool visible = Term.CursorVisible;
         try
         {
-            Console.CursorVisible = false;
-            Console.SetCursorPosition(0, _dialogBlockStartTop + 2 + _display.MaxHistoryLines);
+            Term.CursorVisible = false;
+            Term.SetCursorPosition(0, _dialogBlockStartTop + 2 + _display.MaxHistoryLines);
             DrawSpinner();
         }
         finally
         {
-            Console.SetCursorPosition(left, top);
-            Console.CursorVisible = visible;
+            Term.SetCursorPosition(left, top);
+            Term.CursorVisible = visible;
         }
     }
 
@@ -1709,8 +1709,8 @@ public class DialogDisplay
 
             RebuildCache();
             RerenderDialogBlock(MakeFreeTextAction(prompt, visible, cursorPos - viewOffset, outCursorX));
-            Console.SetCursorPosition(outCursorX[0], inputRowY);
-            Console.CursorVisible = true;
+            Term.SetCursorPosition(outCursorX[0], inputRowY);
+            Term.CursorVisible = true;
 
             if (DateTime.UtcNow >= deadline)
                 return sb.Length > 0 ? sb.ToString() : null;
@@ -1738,7 +1738,7 @@ public class DialogDisplay
                     case ConsoleKey.F9: SwitchTab("F9"); break;
                     case ConsoleKey.F10 when _display.JournalShown: SwitchTab("F10"); break;
                     case ConsoleKey.Enter:
-                        Console.CursorVisible = false;
+                        Term.CursorVisible = false;
                         return sb.Length > 0 ? sb.ToString() : null;
                     case ConsoleKey.Backspace:
                         if (cursorPos > 0) { sb.Remove(cursorPos - 1, 1); cursorPos--; }

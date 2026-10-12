@@ -15,7 +15,8 @@ internal static class SileroSpeech
     private static string BundledRoot => Path.Combine(AppConfig.ProjectRoot, "Speech", "silero");
     private static bool HasBundle => File.Exists(Path.Combine(BundledRoot, ".ready"));
     private static string Root => HasBundle ? BundledRoot : Path.Combine(AppConfig.ProjectRoot, "Storage", "Speech", "silero");
-    private static string Python => HasBundle ? Path.Combine(Root, "python", "python.exe") : Path.Combine(Root, "venv", "Scripts", "python.exe");
+    private static string Python => !OperatingSystem.IsWindows() ? Path.Combine(Root, HasBundle ? "python" : "venv", "bin", "python3")
+        : HasBundle ? Path.Combine(Root, "python", "python.exe") : Path.Combine(Root, "venv", "Scripts", "python.exe");
 
     internal static string EnglishModelPath => Path.Combine(AppConfig.ProjectRoot, "Speech", "models", "v3_en.pt");
 
@@ -30,10 +31,14 @@ internal static class SileroSpeech
         if (!Installed)
         {
             status(L.T("Установка Silero и PyTorch"));
-            var setup = CreateStart("powershell.exe");
-            foreach (var arg in new[] { "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
-                Path.Combine(AppConfig.ProjectRoot, "Speech", "setup-silero.ps1"), "-Python", python, "-Destination", Root })
+            var setup = CreateStart(OperatingSystem.IsWindows() ? "powershell.exe" : "/bin/bash");
+            string[] setupArguments = OperatingSystem.IsWindows()
+                ? ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                   Path.Combine(AppConfig.ProjectRoot, "Speech", "setup-silero.ps1"), "-Python", python, "-Destination", Root]
+                : [Path.Combine(AppConfig.ProjectRoot, "Speech", "setup-silero.sh"), "--python", FindPython(python), "--destination", Root];
+            foreach (var arg in setupArguments)
                 setup.ArgumentList.Add(arg);
+            if (!OperatingSystem.IsWindows()) setup.Environment["PATH"] = UnixTools.ChildPath(null);
             using var process = Process.Start(setup) ?? throw new IOException(L.T("Не удалось начать установку Silero"));
             using var kill = token.Register(() => Kill(process));
             var stdout = process.StandardOutput.ReadToEndAsync(token);
@@ -43,7 +48,9 @@ internal static class SileroSpeech
             Directory.CreateDirectory(Path.Combine(AppConfig.ProjectRoot, "logs"));
             await File.WriteAllTextAsync(Path.Combine(AppConfig.ProjectRoot, "logs", "silero-setup.log"),
                 stdout.Result + stderr.Result, token);
-            if (process.ExitCode != 0) throw new IOException(L.T("Установка Silero не удалась. Нужен Python 3.10–3.12 x64; проверь путь к Python и интернет."));
+            if (process.ExitCode != 0) throw new IOException(OperatingSystem.IsWindows()
+                ? L.T("Установка Silero не удалась. Нужен Python 3.10–3.12 x64; проверь путь к Python и интернет.")
+                : L.T("Установка Silero не удалась. Нужен Python 3.10–3.12 (например: brew install python@3.12); проверь путь к Python и интернет."));
         }
         string model = IsEnglishVoice(voice) ? EnglishModelPath : Path.Combine(Root, "v5_5_ru.pt");
         if (!File.Exists(model)) throw new FileNotFoundException(L.T("Нет файла модели озвучки — переустанови игру."), model);
@@ -100,6 +107,22 @@ internal static class SileroSpeech
             return worker;
         }
         catch { Close(model); throw; }
+    }
+
+    // macOS/Linux: указанный в настройках интерпретатор, если он есть, иначе самый новый подходящий python3.1x (у PyTorch 2.6 и
+    // numpy 1.26 есть сборки для 3.10–3.12) из PATH, Homebrew, python.org или pyenv; версию проверяет скрипт установки.
+    [System.Runtime.Versioning.UnsupportedOSPlatform("windows")]
+    internal static string FindPython(string configured)
+    {
+        string home = UnixTools.Home;
+        string[] extra = ["/opt/homebrew/opt/python@3.12/bin", "/opt/homebrew/opt/python@3.11/bin", "/opt/homebrew/opt/python@3.10/bin",
+            "/usr/local/opt/python@3.12/bin", "/usr/local/opt/python@3.11/bin", "/usr/local/opt/python@3.10/bin",
+            "/Library/Frameworks/Python.framework/Versions/3.12/bin", "/Library/Frameworks/Python.framework/Versions/3.11/bin",
+            "/Library/Frameworks/Python.framework/Versions/3.10/bin", Path.Combine(home, ".pyenv", "shims"), Path.Combine(home, ".local", "bin")];
+        if (configured.Trim() is { Length: > 0 } name && name != "python" && UnixTools.Which(name, extra) is { } chosen) return chosen;
+        foreach (string candidate in new[] { "python3.12", "python3.11", "python3.10", "python3" })
+            if (UnixTools.Which(candidate, extra) is { } found) return found;
+        return "python3";
     }
 
     private static ProcessStartInfo CreateStart(string executable) => new(executable)

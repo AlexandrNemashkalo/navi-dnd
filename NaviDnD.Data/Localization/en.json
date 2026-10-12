@@ -919,5 +919,13 @@
   "Мастер думает над твоей просьбой…": "The DM is considering your request…",
   "попроси мастера о своём варианте — например, «хочу Туманный шаг вместо Щита»": "ask the DM for your own option — e.g. “I want Misty Step instead of Shield”",
   "Мастер не предложил вариант.": "The DM did not offer an option.",
-  "ОТВЕТ МАСТЕРА": "DM'S ANSWER"
+  "ОТВЕТ МАСТЕРА": "DM'S ANSWER",
+  "Автообновление доступно только в Windows. У вас версия {0}: чтобы обновиться, выполните git pull и пересоберите игру.": "Automatic updates are available only on Windows. You have version {0}: to update, use git pull and rebuild.",
+  "Окно терминала слишком мало для NaviDnD.": "The terminal window is too small for NaviDnD.",
+  "Нужно не меньше {0} × {1} символов, сейчас {2} × {3}.": "It needs at least {0} × {1} characters; now it is {2} × {3}.",
+  "Увеличьте окно или уменьшите шрифт (Cmd и минус).": "Enlarge the window or make the font smaller (Cmd and minus).",
+  "Установите клиент и войдите в аккаунт. Если он уже установлен, укажите в настройках игры полный путь к исполняемому файлу claude или codex (его покажет команда which claude).\n\nНажмите ОК, чтобы открыть настройки.": "Install a client and sign in. If it is already installed, set the full path to the claude or codex executable in the game settings (find it with: which claude).\n\nPress OK to open the settings.",
+  "Установка Silero не удалась. Нужен Python 3.10–3.12 (например: brew install python@3.12); проверь путь к Python и интернет.": "Silero installation failed. Python 3.10–3.12 is required (for example: brew install python@3.12); check the Python path and your internet connection.",
+  "Путь к claude (Claude CLI), через который игра обращается к мастеру.": "Path to claude (Claude CLI), which the game uses to reach the Dungeon Master.",
+  "Путь к Codex CLI. «codex» — найти в PATH.": "Path to Codex CLI. \"codex\" — look it up in PATH."
 }

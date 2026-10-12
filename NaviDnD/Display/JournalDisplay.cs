@@ -200,7 +200,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
 
     private void DrawCore(bool rebuild)
     {
-        _startTop = Console.CursorTop;
+        _startTop = Term.CursorTop;
         int inner = display.InnerWidth(display.ViewCols(settings.Map));
         var border = new BorderDrawer(settings, display);
         if (rebuild) { _entries = BuildEntries(Current); _listRegion.Invalidate(); _detailRegion.Invalidate(); }
@@ -214,13 +214,13 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         _selected[Current] = sel;
 
         border.DrawSeparator();
-        _barRow = Console.CursorTop;
+        _barRow = Term.CursorTop;
         border.DrawContentLine(DrawTabBar);
 
         _leftW = Math.Max(24, inner * 2 / 5);
         _rightW = inner - _leftW - 1;
         border.DrawSeparatorWith2Parts('─', _leftW, _rightW);
-        _listTop = Console.CursorTop;
+        _listTop = Term.CursorTop;
         _listArrowX = DisplayConfig.LeftMargin + 1 + _leftW - 2;
 
         // Подробности по страницам: не влезли — последняя строка колонки под «◄ 1/2 ►».
@@ -263,7 +263,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         Console.Write(AnsiColorRuns.Compact(patch));
         ColorHelper.SetBackgroundColor(display.MainBackground);
         ColorHelper.SetForegroundColor(Fg);
-        Console.SetCursorPosition(0, _listTop + _rows);
+        Term.SetCursorPosition(0, _listTop + _rows);
         border.DrawSeparatorWith2Parts('─', _leftW, _rightW);
         ShowImage(sel);
     }
@@ -343,7 +343,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         {
             var (section, label, key) = Sections[i];
             bool active = section == Current;
-            int x0 = Console.CursorLeft + 4; // без «[Fn]» — наведение на подсказку клавиши ничего не подсвечивает
+            int x0 = Term.CursorLeft + 4; // без «[Fn]» — наведение на подсказку клавиши ничего не подсвечивает
             var color = active || _hoveredTab == i ? Bright : Fg;
             if (active) ColorHelper.WriteColored($"  → {label} ←", color);
             else
@@ -351,7 +351,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                 MouseUiHelper.WriteKeyHint($"[{key}]", display);
                 ColorHelper.WriteColored(stamps[i] != seen[i] ? $"{label}• " : $"{label}  ", color);
             }
-            _tabSpans.Add((x0, Console.CursorLeft - 1, section));
+            _tabSpans.Add((x0, Term.CursorLeft - 1, section));
             if (i < Sections.Length - 1) Console.Write(new string(' ', gap));
         }
     }
@@ -371,13 +371,13 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
     public void Redraw(bool rebuild = true)
     {
         if (_startTop < 0) return;
-        bool vis = Console.CursorVisible;
-        int sl = Console.CursorLeft, st = Console.CursorTop;
-        Console.CursorVisible = false;
-        Console.SetCursorPosition(0, _startTop);
+        bool vis = Term.CursorVisible;
+        int sl = Term.CursorLeft, st = Term.CursorTop;
+        Term.CursorVisible = false;
+        Term.SetCursorPosition(0, _startTop);
         DrawCore(rebuild);
-        Console.SetCursorPosition(sl, st);
-        Console.CursorVisible = vis;
+        Term.SetCursorPosition(sl, st);
+        Term.CursorVisible = vis;
     }
 
     // ── Управление ──
