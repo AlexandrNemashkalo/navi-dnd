@@ -10,9 +10,9 @@ public static class WindowControls
     // for the square even when hover gives it a separate foreground-color run.
     private const string ConsolasButtons = "  ━ \u2800▢  ✕ ";
     private const string DejaVuButtons = "  –  ▢  ✕ ";
-    // NaviDnD.app: окном терминала игра не управляет — «весь экран» нет, место кнопки пустое.
-    private const string MacButtons = "  –     ✕ ";
-    public static string Buttons => OperatingSystem.IsMacOS() ? MacButtons : ButtonsForFont(ConsoleSetup.FontFace);
+    // NaviDnD.app: окном терминала игра не управляет — «весь экран» есть, но неактивен (режим — в настройках).
+    private static bool FullscreenDisabled => OperatingSystem.IsMacOS();
+    public static string Buttons => OperatingSystem.IsMacOS() ? DejaVuButtons : ButtonsForFont(ConsoleSetup.FontFace);
 
     public static string ButtonsForFont(string font) =>
         string.Equals(font, "DejaVu Sans Mono", StringComparison.OrdinalIgnoreCase)
@@ -42,7 +42,8 @@ public static class WindowControls
         frame.Append(Buttons[0]);
         for (int button = 0; button < 3; button++)
         {
-            var fg = button == hovered
+            var fg = button == 1 && FullscreenDisabled ? ColorHelper.Darker(display.MainForeground, 0.5)   // как неактивные кнопки игры
+                : button == hovered
                 ? hovered == 2 ? new List<int> { 235, 110, 110 } : ColorHelper.Pale(display.MainForeground, 0.75)
                 : display.MainForeground;
             frame.Append($"\x1b[38;2;{fg[0]};{fg[1]};{fg[2]}m");
@@ -65,7 +66,7 @@ public static class WindowControls
         if (y != 1 || width < Buttons.Length) return -1;
         int offset = x - (left + width - Buttons.Length);
         int button = offset is >= 1 and < 10 ? (offset - 1) / 3 : -1;
-        return button == 1 && OperatingSystem.IsMacOS() ? -1 : button;
+        return button == 1 && FullscreenDisabled ? -1 : button;   // неактивная кнопка — ни наведения, ни нажатия
     }
 
     public static void Start(Action toggle, Action close)

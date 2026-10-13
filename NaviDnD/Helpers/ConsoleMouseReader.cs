@@ -15,6 +15,7 @@ public static class ConsoleMouseReader
     private const ushort MOUSE_EVENT_TYPE = 0x0002;
     private const uint MOUSE_MOVED    = 0x0001;
     private const uint MOUSE_WHEELED  = 0x0004;
+    private const uint MOUSE_HWHEELED = 0x0008;
     private const uint DOUBLE_CLICK   = 0x0002; // dwEventFlags — Windows fires this instead of 0 for the 2nd+ click of a fast sequence
     private const uint LEFT_BUTTON    = 0x0001; // dwButtonState bit
     private const int  IDC_HAND       = 32649;
@@ -306,7 +307,20 @@ public static class ConsoleMouseReader
                 continue;
             }
             if (!ReadInputAnsi(buf, out int read) || read == 0) break;
-            if ((buf[0].MouseEvent.dwEventFlags & MOUSE_WHEELED) != 0)
+            if ((buf[0].MouseEvent.dwEventFlags & MOUSE_HWHEELED) != 0)
+            {
+                lock (_wheelLock)
+                {
+                    int notches = _hwheelDelta.Add((short)(buf[0].MouseEvent.dwButtonState >> 16), Environment.TickCount64);
+                    if (notches != 0)
+                    {
+                        _hwheelNotches += notches;
+                        _wheelPos = (buf[0].MouseEvent.dwMousePosition.X, buf[0].MouseEvent.dwMousePosition.Y);
+                        _wheelAt = DateTime.UtcNow;
+                    }
+                }
+            }
+            else if ((buf[0].MouseEvent.dwEventFlags & MOUSE_WHEELED) != 0)
             {
                 // Keep small precision-touchpad deltas until they form a full wheel notch.
                 AddWheelDelta((short)(buf[0].MouseEvent.dwButtonState >> 16),
@@ -434,6 +448,9 @@ public static class ConsoleMouseReader
     private static (short x, short y) _lastMousePos;
     private static readonly object _wheelLock = new();
     private static readonly WheelDeltaAccumulator _wheelDelta = new();
+    // Горизонтальная прокрутка (свайп тачпада вбок): > 0 — вправо. Забирается вместе с вертикальной (TakeWheel).
+    private static int _hwheelNotches;
+    private static readonly WheelDeltaAccumulator _hwheelDelta = new();
 
     public static void AddWheelDelta(int delta, (short x, short y)? pos = null)
     {
@@ -461,13 +478,19 @@ public static class ConsoleMouseReader
     /// Накопленная прокрутка колеса (щелчки; > 0 — от себя) и позиция курсора при ней. Копится в
     /// DrainMouseEvents; забирать после него. Старая прокрутка (> 300 мс — экран её не обработал)
     /// отбрасывается, чтобы не сработать внезапно на другом экране.
-    public static int TakeWheel(out (short x, short y) pos)
+    public static int TakeWheel(out (short x, short y) pos) => TakeWheel(out pos, out _);
+
+    // То же вместе с горизонтальной прокруткой (horizontal: > 0 — вправо).
+    public static int TakeWheel(out (short x, short y) pos, out int horizontal)
     {
         lock (_wheelLock)
         {
             pos = _wheelPos;
-            int notches = (DateTime.UtcNow - _wheelAt).TotalMilliseconds <= 300 ? _wheelNotches : 0;
+            bool fresh = (DateTime.UtcNow - _wheelAt).TotalMilliseconds <= 300;
+            int notches = fresh ? _wheelNotches : 0;
+            horizontal = fresh ? _hwheelNotches : 0;
             _wheelNotches = 0;
+            _hwheelNotches = 0;
             return notches;
         }
     }

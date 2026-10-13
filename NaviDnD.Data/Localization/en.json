@@ -946,5 +946,6 @@
   "выполнен": "signed in",
   "не выполнен — Enter": "not signed in — Enter",
   "claude не найден — укажи путь ниже": "claude not found — set the path below",
-  "войди в браузере… Enter — отмена": "sign in in the browser… Enter — cancel"
+  "войди в браузере… Enter — отмена": "sign in in the browser… Enter — cancel",
+  "ТЯНУТЬ, ДВА ПАЛЬЦА": "DRAG, TWO FINGERS"
 }

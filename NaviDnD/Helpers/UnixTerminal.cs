@@ -15,7 +15,7 @@ internal sealed class UnixTerminal
 
     private const int StdIn = 0;
     private const ushort KeyEvent = 0x0001, MouseEvent = 0x0002;
-    private const uint MouseMoved = 0x0001, DoubleClick = 0x0002, MouseWheeled = 0x0004;
+    private const uint MouseMoved = 0x0001, DoubleClick = 0x0002, MouseWheeled = 0x0004, MouseHWheeled = 0x0008;
     private const uint LeftButton = 0x0001, RightButton = 0x0002, MiddleButton = 0x0004;
     private const uint ShiftPressed = 0x0010, LeftAltPressed = 0x0002, LeftCtrlPressed = 0x0008;
 
@@ -469,6 +469,13 @@ internal sealed class UnixTerminal
     {
         if (prefix == '<' && final is 'M' or 'm') { HandleMouse(pars, final == 'M'); return; }
         uint mods = Modifiers(pars);
+        // "code;mods u" (CSI u): a character with modifiers — the game's terminal sends Ctrl/Cmd with + and − this way,
+        // which a terminal otherwise passes as a bare "=" or "-".
+        if (final == 'u' && prefix == '\0' && int.TryParse(pars.Split(';')[0], out int code) && code is > 0x20 and < 0x7f)
+        {
+            HandleChar(code, mods);
+            return;
+        }
         ConsoleKey? key = final switch
         {
             'A' => ConsoleKey.UpArrow, 'B' => ConsoleKey.DownArrow, 'C' => ConsoleKey.RightArrow, 'D' => ConsoleKey.LeftArrow,
@@ -513,9 +520,10 @@ internal sealed class UnixTerminal
         if (cx < 0 || cy < 0) return;   // outside the game (the margins around it in full screen)
         if ((b & 64) != 0)
         {
-            if ((b & 3) > 1) return;   // horizontal scrolling
             int delta = (b & 1) == 0 ? 120 : -120;   // like WHEEL_DELTA: positive is away from the user
-            Mouse(cx, cy, (uint)(delta << 16), MouseWheeled);
+            // Horizontal scrolling (trackpad swipe): like MOUSE_HWHEELED, positive is to the right.
+            if ((b & 3) > 1) Mouse(cx, cy, (uint)(-delta << 16), MouseHWheeled);
+            else Mouse(cx, cy, (uint)(delta << 16), MouseWheeled);
             return;
         }
         uint button = (b & 3) switch { 0 => LeftButton, 1 => MiddleButton, 2 => RightButton, _ => 0 };

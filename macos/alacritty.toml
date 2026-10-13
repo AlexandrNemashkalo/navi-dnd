@@ -39,6 +39,7 @@ hide_when_typing = false
 
 [keyboard]
 # Лишнее для игры: новые окна и вкладки, поиск, очистка, смена кегля и весь экран (сетка игры фиксирована).
+# ⌘ или Ctrl с «+»/«−» — масштаб карты мира: терминал передал бы просто «=»/«-», поэтому — как Ctrl+«=»/«-» (CSI u).
 bindings = [
   { key = "N", mods = "Command", action = "None" },
   { key = "T", mods = "Command", action = "None" },
@@ -46,10 +47,17 @@ bindings = [
   { key = "F", mods = "Command", action = "None" },
   { key = "B", mods = "Command", action = "None" },
   { key = "F", mods = "Command|Control", action = "None" },
-  { key = "=", mods = "Command", action = "None" },
-  { key = "+", mods = "Command", action = "None" },
-  { key = "NumpadAdd", mods = "Command", action = "None" },
-  { key = "-", mods = "Command", action = "None" },
-  { key = "NumpadSubtract", mods = "Command", action = "None" },
   { key = "0", mods = "Command", action = "None" },
+  { key = "=", mods = "Command", chars = "\u001b[61;5u" },
+  { key = "+", mods = "Command", chars = "\u001b[61;5u" },
+  { key = "+", mods = "Command|Shift", chars = "\u001b[61;5u" },
+  { key = "NumpadAdd", mods = "Command", chars = "\u001b[61;5u" },
+  { key = "-", mods = "Command", chars = "\u001b[45;5u" },
+  { key = "NumpadSubtract", mods = "Command", chars = "\u001b[45;5u" },
+  { key = "=", mods = "Control", chars = "\u001b[61;5u" },
+  { key = "+", mods = "Control", chars = "\u001b[61;5u" },
+  { key = "+", mods = "Control|Shift", chars = "\u001b[61;5u" },
+  { key = "NumpadAdd", mods = "Control", chars = "\u001b[61;5u" },
+  { key = "-", mods = "Control", chars = "\u001b[45;5u" },
+  { key = "NumpadSubtract", mods = "Control", chars = "\u001b[45;5u" },
 ]

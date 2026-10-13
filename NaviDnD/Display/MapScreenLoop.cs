@@ -283,8 +283,31 @@ internal class MapScreenLoop
 
             // Карта мира: колесо мыши — приблизить (от себя) / отдалить, относительно точки под курсором.
             // Прокрутку забираем всегда — иначе накопленная на других видах сработала бы позже.
-            int wheel = ConsoleMouseReader.TakeWheel(out var wheelPos);
+            int wheel = ConsoleMouseReader.TakeWheel(out var wheelPos, out int sideWheel);
             if (MouseUiHelper.HandleDialogWheel(activeDialog, wheel, wheelPos)) { }   // над диалогом — листать историю
+            // macOS: на тачпаде щипка терминал не передаёт, а свайп двумя пальцами приходит прокруткой — над картой
+            // она двигает карту, как перетаскивание (масштаб — ⌘/Ctrl и «+»/«−»).
+            else if ((wheel != 0 || sideWheel != 0) && OperatingSystem.IsMacOS() && _display.MapHoverEnabled && activeDialog != null
+                && _mapDisplay.IsInMapArea(wheelPos) && !(_display.MapLevel == MapLevel.Location && wheelPos.x >= _mapDisplay.LegendX))
+            {
+                if (_display.MapLevel == MapLevel.World)
+                {
+                    _mapDisplay.PanWorld(_display.WorldCenterX, _display.WorldCenterY, -2 * sideWheel, 2 * wheel);
+                    RedrawWorldKeepCursor(refreshLegend: false);
+                }
+                else
+                {
+                    // Клетка — на прокрутку: столько же, сколько при перетаскивании на одну клетку.
+                    _mapDisplay.PanCamera(_display.CameraCol, _display.CameraRow, -(_display.CellWidth + 1) * sideWheel, 2 * wheel);
+                    _display.HoveredCell = null;
+                    bool panVisible = Term.CursorVisible;
+                    int panLeft = Term.CursorLeft, panTop = Term.CursorTop;
+                    Term.CursorVisible = false;
+                    _mapDisplay.RedrawLocationViewport(mapObjectsProvider, refreshLegend: false);
+                    Term.SetCursorPosition(panLeft, panTop);
+                    Term.CursorVisible = panVisible;
+                }
+            }
             else if (wheel != 0 && _display.MapHoverEnabled && activeDialog != null
                 && _display.MapLevel == MapLevel.World && _mapDisplay.IsInMapArea(wheelPos))
             {
