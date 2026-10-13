@@ -320,15 +320,16 @@ public static class WorldAtlas
         for (int dx = -1; dx <= 1; dx++)
             for (int dy = -1; dy <= 1; dy++)
             {
+                if (!w.InBounds(x + dx, y + dy)) continue;
                 char b = w.BiomeAt(x + dx, y + dy);
                 if (w.RiverAt(x + dx, y + dy) > 0) river = true;
                 if (b is WorldBiomes.Sea or WorldBiomes.Ocean) sea = true;
                 if (b == WorldBiomes.Lake) lake = true;
                 if (b is WorldBiomes.Mountains or WorldBiomes.Peaks) mountains = true;
             }
-        if (river) parts.Add("у реки");
-        if (sea) parts.Add("у моря");
-        if (lake) parts.Add("у озера");
+        if (river) parts.Add(w.RiverAt(x, y) > 0 ? L.W("у реки") : L.W("река неподалёку"));
+        if (sea) parts.Add(w.BiomeAt(x, y) is WorldBiomes.Sea or WorldBiomes.Ocean ? L.W("у моря") : L.W("море неподалёку"));
+        if (lake) parts.Add(w.BiomeAt(x, y) == WorldBiomes.Lake ? L.W("у озера") : L.W("озеро неподалёку"));
         if (mountains) parts.Add("у гор");
         int road = Enumerable.Range(-1, 3).SelectMany(dx => Enumerable.Range(-1, 3).Select(dy => w.RoadAt(x + dx, y + dy))).Max();
         parts.Add(road == 2 ? "на тракте" : road == 1 ? "у тропы" : "в глуши");

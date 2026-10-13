@@ -947,5 +947,11 @@
   "не выполнен — Enter": "not signed in — Enter",
   "claude не найден — укажи путь ниже": "claude not found — set the path below",
   "войди в браузере… Enter — отмена": "sign in in the browser… Enter — cancel",
-  "ТЯНУТЬ, ДВА ПАЛЬЦА": "DRAG, TWO FINGERS"
+  "ТЯНУТЬ, ДВА ПАЛЬЦА": "DRAG, TWO FINGERS",
+  "у реки": "by a river",
+  "река неподалёку": "river nearby",
+  "у моря": "by the sea",
+  "море неподалёку": "sea nearby",
+  "у озера": "by a lake",
+  "озеро неподалёку": "lake nearby"
 }
