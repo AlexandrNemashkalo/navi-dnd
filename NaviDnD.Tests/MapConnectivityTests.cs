@@ -40,6 +40,13 @@ public class MapConnectivityTests
             chunk.Terrain = result.Terrain;
             var map = new MapConfig { Chunks = [chunk], Rooms = result.Rooms, Doors = result.Doors, Furniture = result.Furniture };
             Check(map, chunk);
+            if (layout == "river")
+            {
+                var roomCells = result.Rooms.SelectMany(r => r.Positions).Select(p => (p[0], p[1])).ToHashSet();
+                int entrances = result.Doors.Count(d => d.IsWindow != true && d.IsDoor == true
+                    && (roomCells.Contains((d.From[0], d.From[1])) != roomCells.Contains((d.To[0], d.To[1]))));
+                Assert.True(entrances >= 2, $"River village seed {seed} has only {entrances} houses");
+            }
             if (layout == "island")
             {
                 Assert.Contains(result.Terrain, row => row.Contains('W'));

@@ -110,6 +110,7 @@ public static class BuildingGenerator
             street.Add((c, r));
             for (int i = 0; i < 2; i++) { c -= dx; r -= dy; street.Add((c, r)); }
             bool horizontalFirst = rng.Next(2) == 0;
+            if (layout == "road") horizontalFirst = exit.Side is ChunkSide.Top or ChunkSide.Bottom;
             for (int guard = 0; guard < 60 && (c, r) != (hubC, hubR); guard++)
             {
                 if ((horizontalFirst && c != hubC) || r == hubR) c += Math.Sign(hubC - c);
@@ -134,7 +135,7 @@ public static class BuildingGenerator
         var houses = new List<HashSet<(int c, int r)>>();
         for (int attempt = 0; attempt < 300 && houses.Count < (layout == "road" ? 6 : layout == "river" ? 3 : 5); attempt++)
         {
-            int w = layout == "road" ? rng.Next(3, 6) : rng.Next(4, 8), h = layout == "road" ? rng.Next(3, 5) : rng.Next(3, 6);
+            int w = layout is "road" or "river" ? rng.Next(3, 6) : rng.Next(4, 8), h = layout is "road" or "river" ? rng.Next(3, 5) : rng.Next(3, 6);
             int c0 = rng.Next(2, W - 2 - w + 1), r0 = rng.Next(2, H - 2 - h + 1);
             var parts = new List<Rect> { new(c0, r0, w, h) };
             if (w >= 6 && h >= 4 && rng.Next(2) == 0)
