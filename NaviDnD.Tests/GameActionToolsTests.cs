@@ -114,4 +114,35 @@ public class GameActionToolsTests : IDisposable
     }
 
     private static JsonDocument Parse(string json) => JsonDocument.Parse(json);
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RestRemovesOnlyTimedAndEligibleEffects(bool isLong)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"navidnd_test_{Guid.NewGuid():N}.json");
+        _files.Add(path);
+        File.WriteAllText(path, """
+            {"time":{"totalRounds":5,"partOfDay":"evening","day":1},
+             "hero":{"symbol":"HRO","hp":"5/10","speedMax":30,"speedLeft":0,
+              "actions":[{"name":"Реакция","value":0,"maxValue":1}],
+              "effects":[{"name":"Щит","expiresAtRound":6},
+                         {"name":"Усталость","untilLongRest":true},
+                         {"name":"Проклятие","description":"Пока не снято заклинанием"},
+                         {"name":"Болезнь","description":"До исцеления"}]}}
+            """);
+        var tools = new GameActionTools(new McpServerConfig(path, LogPath: null));
+        var storage = new Storage();
+        storage.ApplySavedState(File.ReadAllText(path));
+        storage.ApplyUpdateWorldState(isLong ? tools.LongRest() : tools.ShortRest());
+        var hero = storage.WorldState.Hero!;
+        Assert.DoesNotContain(hero.Effects!, e => e.Name == "Щит");
+        Assert.Equal(!isLong, hero.Effects!.Any(e => e.Name == "Усталость"));
+        Assert.Contains(hero.Effects!, e => e.Name == "Проклятие");
+        Assert.Contains(hero.Effects!, e => e.Name == "Болезнь");
+        Assert.Equal(30, hero.SpeedLeft);
+        Assert.Equal(1, hero.Actions![0].Value);
+        Assert.Equal(isLong ? "morning" : "night", storage.WorldState.Time.PartOfDay);
+        Assert.Equal(5, int.Parse(hero.Hp.Split('/')[0])); // лечение и ресурсы — отдельный патч мастера
+    }
+
 }

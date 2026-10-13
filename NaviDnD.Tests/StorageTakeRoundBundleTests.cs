@@ -437,4 +437,21 @@ public class StorageTakeRoundBundleTests
         Assert.NotNull(bundle);
         Assert.Equal(42, bundle.NewRound);
     }
+    [Fact]
+    public void ExpirationBoundaryTicksLastActiveRoundThenExpiresWithoutAnotherTick()
+    {
+        var storage = MakeStorage(5);
+        storage.WorldState.Hero = MakeHero();
+        storage.WorldState.Hero.Effects = [new() { Name = "Отравлен", ExpiresAtRound = 5,
+            OnRound = new() { Effect = "1 poison damage" }, OnExpire = new() { Effect = "Яд прошёл" } }];
+        var lastActive = storage.TakeRoundBundle()!;
+        Assert.Single(lastActive.OnRoundEffects);
+        Assert.Empty(lastActive.ExpiredEffects);
+        storage.WorldState.Time.TotalRounds = 6;
+        var expired = storage.TakeRoundBundle()!;
+        Assert.Single(expired.ExpiredEffects);
+        Assert.Empty(expired.OnRoundEffects);
+        Assert.Null(storage.TakeRoundBundle());
+    }
+
 }
