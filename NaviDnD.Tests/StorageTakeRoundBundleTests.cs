@@ -454,4 +454,65 @@ public class StorageTakeRoundBundleTests
         Assert.Null(storage.TakeRoundBundle());
     }
 
+    [Fact]
+    public void ReusedEffectIndexDoesNotSuppressNewExpiration()
+    {
+        var storage = MakeStorage(5);
+        storage.WorldState.Hero = MakeHero();
+        storage.WorldState.Hero.Effects = [new() { Name = "Первый", ExpiresAtRound = 4, OnExpire = new() { Effect = "Первый спал" } }];
+        Assert.Single(storage.TakeRoundBundle()!.ExpiredEffects);
+        storage.ApplyUpdateWorldState("""{"hero":{"effects":[{"id":0,"deleted":true}]}}""");
+        storage.ApplyUpdateWorldState("""{"hero":{"effects":[{"name":"Второй","expiresAtRound":4,"onExpire":{"effect":"Второй спал"}}]}}""");
+        Assert.Equal("Второй", Assert.Single(storage.TakeRoundBundle()!.ExpiredEffects).Effect.Name);
+    }
+
+    [Fact]
+    public void DeletingEarlierEffectDoesNotTickRemainingEffectTwice()
+    {
+        var storage = MakeStorage(5);
+        storage.WorldState.Hero = MakeHero();
+        storage.WorldState.Hero.Effects = [new() { Name = "Метка" }, new() { Name = "Яд", OnRound = new() { Effect = "Урон" } }];
+        Assert.Single(storage.TakeRoundBundle()!.OnRoundEffects);
+        storage.ApplyUpdateWorldState("""{"hero":{"effects":[{"id":0,"deleted":true}]}}""");
+        Assert.Null(storage.TakeRoundBundle());
+    }
+
+    [Fact]
+    public void RoundResetAfterRestDoesNotFreezeRemainingRoundEffects()
+    {
+        var storage = MakeStorage(5);
+        storage.WorldState.Hero = MakeHero();
+        storage.WorldState.Hero.Effects = [new() { Name = "Болезнь", OnRound = new() { Effect = "Проверка болезни" } }];
+        Assert.Single(storage.TakeRoundBundle()!.OnRoundEffects);
+        storage.ApplyUpdateWorldState("""{"time":{"totalRounds":1}}""");
+        Assert.Single(storage.TakeRoundBundle()!.OnRoundEffects);
+        Assert.Null(storage.TakeRoundBundle());
+    }
+
+    [Fact]
+    public void PatchingEffectAndMovingItsOwnerDoesNotRepeatTick()
+    {
+        var storage = MakeStorage(5);
+        storage.WorldState.Map.Entities = [new() { Name = "Орк", Symbol = "ORC", Hp = "10/10", Position = [2, 2],
+            Effects = [new() { Name = "Яд", OnRound = new() { Effect = "Урон" } }] }];
+        Assert.Single(storage.TakeRoundBundle()!.OnRoundEffects);
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"position":[3,2]}]}}""");
+        Assert.Null(storage.TakeRoundBundle());
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"effects":[{"id":0,"description":"Обновлённое описание"}]}]}}""");
+        Assert.Null(storage.TakeRoundBundle());
+        storage.WorldState.Time.TotalRounds = 6;
+        Assert.Single(storage.TakeRoundBundle()!.OnRoundEffects);
+    }
+
+    [Fact]
+    public void IdenticalEffectsStillHaveIndependentRuntimeIdentity()
+    {
+        var storage = MakeStorage(5);
+        storage.WorldState.Hero = MakeHero();
+        storage.WorldState.Hero.Effects = [new() { Name = "Яд", OnRound = new() { Effect = "Урон" } },
+            new() { Name = "Яд", OnRound = new() { Effect = "Урон" } }];
+        Assert.Equal(2, storage.TakeRoundBundle()!.OnRoundEffects.Count);
+        Assert.Null(storage.TakeRoundBundle());
+    }
+
 }

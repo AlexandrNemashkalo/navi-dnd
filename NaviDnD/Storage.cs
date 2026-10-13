@@ -1,4 +1,5 @@
 using System.Text;
+using System.Runtime.CompilerServices;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -37,8 +38,13 @@ public class Storage
     private Dictionary<string, List<int>> _entityColors = [];
     private bool _wasSpeedExhausted = false;
     private readonly Dictionary<int, int> _areaRoundFired = [];
-    private readonly HashSet<string> _firedEffectIds = [];
-    private readonly Dictionary<string, int> _firedEffectOnRoundIds = [];
+    // Runtime identity survives index shifts and patches; removed effects release their entries.
+    private sealed class EffectRuntime
+    {
+        public bool ExpirationFired;
+        public int? LastRound;
+    }
+    private readonly ConditionalWeakTable<StatusEffect, EffectRuntime> _effectRuntime = new();
     private readonly HashSet<int> _firedScheduledEventIds = [];
     private readonly Dictionary<string, int> _oaOnHeroLastRound = [];
     private readonly HashSet<string> _entitiesSeeingHero = [];
@@ -101,8 +107,7 @@ public class Storage
         _wasSpeedExhausted = false;
         DiagonalUsed = 0;
         _areaRoundFired.Clear();
-        _firedEffectIds.Clear();
-        _firedEffectOnRoundIds.Clear();
+        _effectRuntime.Clear();
         _firedScheduledEventIds.Clear();
         _oaOnHeroLastRound.Clear();
         _entitiesSeeingHero.Clear();
@@ -198,14 +203,17 @@ public class Storage
         {
             var e = effects[i];
             if (e.Deleted == true) continue;
-            string key = $"{ownerPath}:{entityId}:{i}";
+            var runtime = _effectRuntime.GetOrCreateValue(e);
 
             if (e.ExpiresAtRound.HasValue && currentRound > e.ExpiresAtRound.Value)
             {
                 if (e.OnExpire != null)
                 {
-                    if (_firedEffectIds.Add(key))
+                    if (!runtime.ExpirationFired)
+                    {
+                        runtime.ExpirationFired = true;
                         expired.Add(new EffectRef(ownerPath, entityId, owner.Name, i, e));
+                    }
                 }
                 else
                 {
@@ -216,9 +224,9 @@ public class Storage
             }
             else if (e.OnRound != null)
             {
-                if (!_firedEffectOnRoundIds.TryGetValue(key, out int lastRound) || lastRound < currentRound)
+                if (runtime.LastRound != currentRound)
                 {
-                    _firedEffectOnRoundIds[key] = currentRound;
+                    runtime.LastRound = currentRound;
                     onRound.Add(new EffectRef(ownerPath, entityId, owner.Name, i, e));
                 }
             }
@@ -877,7 +885,15 @@ public class Storage
             switch (prop.Name.ToLower())
             {
                 case "totalrounds":
-                    WorldState.Time.TotalRounds = prop.Value.GetInt32();
+                    int nextRound = prop.Value.GetInt32();
+                    if (nextRound < WorldState.Time.TotalRounds)
+                    {
+                        _effectRuntime.Clear();
+                        _areaRoundFired.Clear();
+                        _entityRoundFired.Clear();
+                        _oaOnHeroLastRound.Clear();
+                    }
+                    WorldState.Time.TotalRounds = nextRound;
                     break;
                 case "partofday":
                     WorldState.Time.PartOfDay = prop.Value.GetString()!;
@@ -890,7 +906,7 @@ public class Storage
     }
 
 
-    private static List<T> PatchByIndex<T>(List<T>? existing, JsonElement patches, JsonSerializerOptions options, bool allowDelete = true)
+    private List<T> PatchByIndex<T>(List<T>? existing, JsonElement patches, JsonSerializerOptions options, bool allowDelete = true)
     {
         var result = (existing ?? []).ToList();
         if (patches.ValueKind != JsonValueKind.Array) return result;
@@ -987,9 +1003,10 @@ public class Storage
         }
     }
 
-    private static T MergeInto<T>(T existing, JsonElement patch, JsonSerializerOptions options)
+    private T MergeInto<T>(T existing, JsonElement patch, JsonSerializerOptions options)
     {
         var baseNode = JsonSerializer.SerializeToNode(existing, options)!.AsObject();
+        List<StatusEffect>? effects = (existing as CellEntity)?.Effects;
         foreach (var prop in patch.EnumerateObject())
         {
             if ((prop.Name.Equals("aiInfo", StringComparison.OrdinalIgnoreCase)
@@ -1005,31 +1022,32 @@ public class Storage
             }
             else if (prop.Name.Equals("effects", StringComparison.OrdinalIgnoreCase)
                 && prop.Value.ValueKind == JsonValueKind.Array)
-                MergeEffects(baseNode, prop.Value, options);
+            {
+                effects = PatchByIndex(effects, prop.Value, options);
+                baseNode["effects"] = JsonSerializer.SerializeToNode(effects, options);
+            }
             else if (prop.Name.Equals("triggers", StringComparison.OrdinalIgnoreCase)
                 && prop.Value.ValueKind == JsonValueKind.Object)
                 MergeTriggers(baseNode, prop.Value);
             else
+            {
                 baseNode[prop.Name] = JsonNode.Parse(prop.Value.GetRawText());
+                if (prop.Name.Equals("effects", StringComparison.OrdinalIgnoreCase)) effects = null;
+            }
         }
-        return baseNode.Deserialize<T>(options)!;
+        var merged = baseNode.Deserialize<T>(options)!;
+        // Serializing the owner must not discard the identities of its unmodified effects.
+        if (merged is CellEntity cell) cell.Effects = effects;
+        if (existing is StatusEffect oldEffect && merged is StatusEffect newEffect
+            && _effectRuntime.TryGetValue(oldEffect, out var runtime))
+        {
+            _effectRuntime.Add(newEffect, new EffectRuntime { LastRound = runtime.LastRound,
+                ExpirationFired = runtime.ExpirationFired && oldEffect.ExpiresAtRound == newEffect.ExpiresAtRound });
+        }
+        return merged;
     }
 
-    // "effects" внутри вложенной сущности (map.entities[i].effects, map.objects[i].effects,
-    // hero.inventory[i].effects) патчится по id так же, как hero.effects на верхнем уровне —
-    // а не заменяется целиком, как остальные свойства при MergeInto.
-    private static void MergeEffects(JsonObject baseNode, JsonElement patch, JsonSerializerOptions options)
-    {
-        var existingNode = baseNode["effects"];
-        var existing = existingNode != null
-            ? existingNode.Deserialize<List<StatusEffect>>(options) ?? []
-            : [];
-        var merged = PatchByIndex(existing, patch, options);
-        baseNode["effects"] = JsonSerializer.SerializeToNode(merged, options);
-    }
-
-    // triggers патчится по под-ключам: {"triggers":{"spotted":null}} снимает только spotted, не
-    // затирая onStep/onVisible той же сущности. {"triggers":null} (не объект) — снять все, как раньше.
+    // Патч triggers по подключам сохраняет остальные триггеры владельца.
     private static void MergeTriggers(JsonObject baseNode, JsonElement patch)
     {
         var existing = baseNode["triggers"] as JsonObject;
