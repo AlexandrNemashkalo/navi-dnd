@@ -930,5 +930,12 @@
   "Путь к Codex CLI. «codex» — найти в PATH.": "Path to Codex CLI. \"codex\" — look it up in PATH.",
   "Распаковка обновления…": "Unpacking the update…",
   "Установка обновления…": "Installing the update…",
-  "Не закрывайте игру": "Do not close the game"
+  "Не закрывайте игру": "Do not close the game",
+  "Распаковка озвучки": "Unpacking voice-over",
+  "Весь экран: игра по центру экрана, вокруг — фон игры, полоса меню и Dock скрыты. В окне — окно ровно под игру, его можно перетаскивать за верх. При смене окно игры перезапустится.": "Full screen: the game in the middle of the screen with the game background around it, the menu bar and Dock hidden. Windowed: a window exactly the size of the game that you can drag by its top. Changing it restarts the game window.",
+  "Размер шрифта — от него размер всей игры: авто — самый крупный, при котором игра помещается на экран; в списке — только размеры, которые помещаются. При смене окно игры перезапустится.": "Font size sets the size of the whole game: auto is the largest that fits the screen; the list shows only sizes that fit. Changing it restarts the game window.",
+  "ТИТРЫ": "CREDITS",
+  "СОЗДАТЕЛЬ": "CREATOR",
+  "СПАСИБО": "THANKS",
+  "{0} — порт на macOS": "{0} — macOS port"
 }

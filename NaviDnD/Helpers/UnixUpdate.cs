@@ -9,7 +9,9 @@ namespace NaviDnD.Helpers;
 internal static class UnixUpdate
 {
     // Программы игры: «исполняемый» нужен им и после замены. ZIP сборки несёт права сам, это — страховка.
-    private static readonly string[] Programs = ["NaviDnD", "NaviDnD.McpServer", "Speech/setup-silero.sh", "Speech/silero/python/bin/python3", "Speech/silero/python/bin/python3.12"];
+    // Пути — от папки программ и от папки файлов игры (у NaviDnD.app это Contents/MacOS и Contents/Resources).
+    private static readonly string[] Programs = ["NaviDnD", "NaviDnD.McpServer", "alacritty", "createdump", "Speech/setup-silero.sh",
+        "Speech/silero/python/bin/python3", "Speech/silero/python/bin/python3.12"];
 
     internal static void MarkExecutable(string root)
     {

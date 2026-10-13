@@ -27,7 +27,7 @@ public static class HeroLibrary
         [System.Text.Json.Serialization.JsonIgnore] public string File { get; set; } = "";
     }
 
-    public static string Dir => Path.Combine(AppConfig.ProjectRoot, "Storage", "Heroes");
+    public static string Dir => Path.Combine(AppConfig.DataRoot, "Storage", "Heroes");
     private static readonly JsonSerializerOptions _json = new()
     {
         WriteIndented = true,

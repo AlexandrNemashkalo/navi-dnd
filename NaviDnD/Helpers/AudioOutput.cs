@@ -39,7 +39,7 @@ internal static class AudioOutput
         if (OperatingSystem.IsWindows()) return;
         try
         {
-            string dir = Path.Combine(AppConfig.ProjectRoot, "logs");
+            string dir = Path.Combine(AppConfig.DataRoot, "logs");
             Directory.CreateDirectory(dir);
             File.AppendAllText(Path.Combine(dir, "audio.log"), $"{DateTime.Now:s} {ex.GetType().Name}: {ex.Message}\n");
         }

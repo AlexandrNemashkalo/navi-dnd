@@ -135,7 +135,7 @@ public static class SvgToBrailleConverter
     // Свои картинки игрока (анкета новой игры) лежат в Storage/Portraits и хранятся как
     // "portraits/<файл>" — PNG/JPG/BMP/GIF или SVG. Остальное — слаг game-icons ("author/name").
     public const string PortraitsPrefix = "portraits/";
-    public static string PortraitsDir => Path.Combine(AppConfig.ProjectRoot, "Storage", "Portraits");
+    public static string PortraitsDir => Path.Combine(AppConfig.DataRoot, "Storage", "Portraits");
 
     public static bool IsSupportedImageFile(string path) =>
         Path.GetExtension(path).ToLowerInvariant() is ".svg" or ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif";

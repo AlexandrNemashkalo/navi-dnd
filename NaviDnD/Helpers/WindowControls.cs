@@ -10,7 +10,9 @@ public static class WindowControls
     // for the square even when hover gives it a separate foreground-color run.
     private const string ConsolasButtons = "  ━ \u2800▢  ✕ ";
     private const string DejaVuButtons = "  –  ▢  ✕ ";
-    public static string Buttons => ButtonsForFont(ConsoleSetup.FontFace);
+    // NaviDnD.app: окном терминала игра не управляет — «весь экран» нет, место кнопки пустое.
+    private const string MacButtons = "  –     ✕ ";
+    public static string Buttons => OperatingSystem.IsMacOS() ? MacButtons : ButtonsForFont(ConsoleSetup.FontFace);
 
     public static string ButtonsForFont(string font) =>
         string.Equals(font, "DejaVu Sans Mono", StringComparison.OrdinalIgnoreCase)
@@ -22,8 +24,8 @@ public static class WindowControls
     private static bool _attentionNotified;
     private static DisplayConfig? _display;
 
-    // У окна терминала на macOS/Linux свой заголовок: кнопки рисуются и нажимаются только на Windows.
-    public static bool Available => OperatingSystem.IsWindows();
+    // Кнопки — на Windows и в своём терминале NaviDnD.app; у обычного терминала macOS/Linux свой заголовок.
+    public static bool Available => OperatingSystem.IsWindows() || (OperatingSystem.IsMacOS() && MacApp.InOwnTerminal);
 
     public static void Draw(DisplayConfig display, int hovered = -1)
     {
@@ -62,18 +64,25 @@ public static class WindowControls
     {
         if (y != 1 || width < Buttons.Length) return -1;
         int offset = x - (left + width - Buttons.Length);
-        return offset is >= 1 and < 10 ? (offset - 1) / 3 : -1;
+        int button = offset is >= 1 and < 10 ? (offset - 1) / 3 : -1;
+        return button == 1 && OperatingSystem.IsMacOS() ? -1 : button;
     }
 
     public static void Start(Action toggle, Action close)
     {
         _toggle = toggle;
         _close = close;
-        if (!OperatingSystem.IsWindows()) return;
+        if (!Available) return;
         _timer ??= new Timer(_ =>
         {
             lock (_stateLock)
             {
+                if (!OperatingSystem.IsWindows())
+                {
+                    // macOS: «свёрнута» — приложение скрыто (кнопкой, Cmd+H); показали из Dock — звук снова идёт.
+                    if (OperatingSystem.IsMacOS()) SetMinimized(MacApp.IsHidden());
+                    return;
+                }
                 var window = GetConsoleWindow();
                 bool minimized = IsIconic(window);
                 if (!minimized && _attentionNotified)
@@ -81,14 +90,19 @@ public static class WindowControls
                     Flash(window, 0, 0);
                     _attentionNotified = false;
                 }
-                if (minimized == _minimized) return;
-                _minimized = minimized;
-                Sound.Suspended = minimized;
-                Speech.SetWindowMinimized(minimized);
-                Music.SetPaused(minimized);
-                FullscreenBackdrop.SetMinimized(minimized);
+                SetMinimized(minimized);
             }
         }, null, 0, 100);
+    }
+
+    private static void SetMinimized(bool minimized)
+    {
+        if (minimized == _minimized) return;
+        _minimized = minimized;
+        Sound.Suspended = minimized;
+        Speech.SetWindowMinimized(minimized);
+        Music.SetPaused(minimized);
+        FullscreenBackdrop.SetMinimized(minimized);
     }
 
     public static void NotifyIfMinimized()
@@ -127,6 +141,11 @@ public static class WindowControls
                 FullscreenBackdrop.SetMinimized(true);
                 ShowWindow(GetConsoleWindow(), 6);
             }
+        }
+        else if (button == 0 && OperatingSystem.IsMacOS())
+        {
+            lock (_stateLock) SetMinimized(true);
+            MacApp.Hide();
         }
         else if (button == 1) _toggle?.Invoke();
         else if (button == 2) _close?.Invoke();

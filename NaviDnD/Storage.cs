@@ -1094,7 +1094,7 @@ public class Storage
     // Активная игра — Storage/activeGame.txt. UI-тесты (NAVIDND_TEST_WORLDSTATE) по-прежнему пишут в
     // worldState.json — его GameSession бэкапит и восстанавливает.
     public const int MaxGames = 6;
-    private static readonly string StorageDir = Path.Combine(AppConfig.ProjectRoot, "Storage");
+    private static readonly string StorageDir = Path.Combine(AppConfig.DataRoot, "Storage");
     private static readonly string LegacySavePath = Path.Combine(StorageDir, "worldState.json");
     private static readonly string ActiveGamePath = Path.Combine(StorageDir, "activeGame.txt");
     private static bool TestMode => Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") != null;
@@ -1157,7 +1157,7 @@ public class Storage
 
     // Черновик для CreateNewGame/FixHeroForNewGame/StartNewGame — MCP-инструменты читают/пишут сюда,
     // пока новая игра не создана успешно. Боевой SavePath не трогаем до финального Save() в StartNewGame.
-    public static readonly string DraftSavePath = Path.Combine(AppConfig.ProjectRoot, "Storage", "newGameState.json");
+    public static readonly string DraftSavePath = Path.Combine(AppConfig.DataRoot, "Storage", "newGameState.json");
 
     private static readonly JsonSerializerOptions _saveOptions = new()
     {

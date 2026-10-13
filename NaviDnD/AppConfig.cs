@@ -2,10 +2,22 @@ namespace NaviDnD;
 
 public class AppConfig
 {
+    // Игра запущена из NaviDnD.app на macOS: программы — в Contents/MacOS, остальные файлы игры — в Contents/Resources.
+    // (Объявлено до ProjectRoot: статические свойства инициализируются по порядку.)
+    public static bool InMacApp { get; } = OperatingSystem.IsMacOS()
+        && Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory).EndsWith(".app/Contents/MacOS", StringComparison.Ordinal);
+
     public static string ProjectRoot { get; } = FindProjectRoot();
+
+    // Сохранения, настройки и логи (Storage/, logs/) — рядом с игрой; у NaviDnD.app — в ~/Library/Application Support/NaviDnD:
+    // приложение заменяется целиком и подписано, своим файлам игрока внутри него не место.
+    public static string DataRoot { get; } = InMacApp
+        ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "NaviDnD")
+        : ProjectRoot;
 
     private static string FindProjectRoot()
     {
+        if (InMacApp) return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "Resources")) + Path.DirectorySeparatorChar;
         if (Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Prompts")))
             return AppDomain.CurrentDomain.BaseDirectory;
         var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
@@ -65,7 +77,7 @@ public class AppConfig
     public void InitializeStorage()
     {
         foreach (string folder in new[] { "Storage", "Storage/Worlds", "Storage/Heroes", "Storage/Portraits", "logs" })
-            Directory.CreateDirectory(Path.Combine(ProjectRoot, folder));
+            Directory.CreateDirectory(Path.Combine(DataRoot, folder));
         if (!File.Exists(UserSettingsPath))
         {
             SaveUserSettings();
@@ -136,11 +148,11 @@ public class AppConfig
     // Storage/DevMocks/{Action}/response.json. CreateNewGame — готовый герой, чтобы тестировать генерацию
     // карты/старт игры без создания персонажа каждый раз. [] — выключить.
     public static readonly string[] DevMockedActions = [];
-    public static string DevMocksDir => Path.Combine(ProjectRoot, "Storage", "DevMocks");
+    public static string DevMocksDir => Path.Combine(DataRoot, "Storage", "DevMocks");
 
     // ── Настройки игрока (экран «НАСТРОЙКИ») ──────────────────────────────────
     // Сохраняются в Storage/settings.json (в .gitignore — там токен) поверх значений по умолчанию выше.
-    public static string UserSettingsPath => Path.Combine(ProjectRoot, "Storage", "settings.json");
+    public static string UserSettingsPath => Path.Combine(DataRoot, "Storage", "settings.json");
 
     private sealed class UserSettings
     {

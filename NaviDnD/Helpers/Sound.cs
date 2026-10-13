@@ -36,7 +36,7 @@ internal static class Sound
         Typing?.Trigger();
     }
 
-    private static readonly string DiceRollPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sound", "dice-roll.mp3");
+    private static readonly string DiceRollPath = Path.Combine(AppConfig.ProjectRoot, "sound", "dice-roll.mp3");
 
     // Без предзагрузки в память — играем mp3 напрямую с диска через свежий reader на каждый
     // бросок. Предзагрузка (чтение всего файла в плоский массив заранее) стабильно портила именно
@@ -82,7 +82,7 @@ internal static class Sound
         {
             try
             {
-                string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sound", fileName);
+                string path = Path.Combine(AppConfig.ProjectRoot, "sound", fileName);
                 if (!File.Exists(path)) return;
 
                 using var reader = AudioOutput.Open(path, out var source);

@@ -184,6 +184,26 @@ public class PatchUpdateTests
     }
 
     [Fact]
+    public void AppBundlePatchKeepsVersionInsideContents()
+    {
+        // NaviDnD.app: корень патча — само приложение, release-version.txt — в Contents/MacOS.
+        var app = new Dictionary<string, string>
+        {
+            ["Contents/MacOS/release-version.txt"] = "1.0.0", ["Contents/MacOS/NaviDnD.dll"] = "a1",
+            ["Contents/_CodeSignature/CodeResources"] = "seal1",
+        };
+        WithGame(app, (root, temp) =>
+        {
+            string zip = MakePatch(temp, "1.0.0", "1.0.1", app,
+                [("Contents/MacOS/release-version.txt", "1.0.1"), ("Contents/MacOS/NaviDnD.dll", "a2"), ("Contents/_CodeSignature/CodeResources", "seal2")],
+                [], versionFile: "Contents/MacOS/release-version.txt");
+            Assert.Equal("1.0.1", PatchInstaller.ApplyChain(root, [zip]));
+            Assert.Equal("a2", Read(root, "Contents/MacOS/NaviDnD.dll"));
+            Assert.Equal("seal2", Read(root, "Contents/_CodeSignature/CodeResources"));
+        });
+    }
+
+    [Fact]
     public void BrokenMacBaseLeavesGameUntouched()
     {
         WithGame(new() { ["release-version.txt"] = "0.9.0", ["NaviDnD.dll"] = "old" }, (root, temp) =>
@@ -209,13 +229,13 @@ public class PatchUpdateTests
     }
 
     private static string MakePatch(string dir, string from, string to, Dictionary<string, string> baseFiles,
-        (string Name, string Text)[] files, string[] removed, string? corrupt = null)
+        (string Name, string Text)[] files, string[] removed, string? corrupt = null, string? versionFile = null)
     {
         string path = Path.Combine(dir, $"NaviDnD-patch-{from}-{to}.zip");
         using var archive = ZipFile.Open(path, ZipArchiveMode.Create);
         var description = new
         {
-            baseVersion = from, version = to,
+            baseVersion = from, version = to, versionFile,
             baseFiles = baseFiles.ToDictionary(f => f.Key, f => Hash(f.Value)),
             files = files.ToDictionary(f => f.Name, f => Hash(f.Text)),
             removed,

@@ -1169,7 +1169,7 @@ internal class MapScreenLoop
                 mapInput = L.W("Завершаю ход.");
             }
             if (mapInput == "F9" && _display.MapLevel == MapLevel.Location) {
-                var braille = File.ReadAllText(Path.Combine(AppConfig.ProjectRoot, "Storage", "test.txt"));
+                var braille = File.ReadAllText(Path.Combine(AppConfig.DataRoot, "Storage", "test.txt"));
                 _settings.Images ??= [];
                 _settings.Images.RemoveAll(i => i.Key == "test");
                 _settings.Images.Add(new WorldImage { Key = "test", Content = braille, Height = braille.Split('\n').Length });

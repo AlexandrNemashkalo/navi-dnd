@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>ru</string>
+  <key>CFBundleExecutable</key>
+  <string>NaviDnD</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.navitalevich.navidnd</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>NaviDnD</string>
+  <key>CFBundleDisplayName</key>
+  <string>NaviDnD</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleShortVersionString</key>
+  <string>$(VERSION)</string>
+  <key>CFBundleVersion</key>
+  <string>$(VERSION)</string>
+  <key>CFBundleSupportedPlatforms</key>
+  <array>
+    <string>MacOSX</string>
+  </array>
+  <key>CFBundleIconFile</key>
+  <string>NaviDnD.icns</string>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.role-playing-games</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>12.0</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>NSMainNibFile</key>
+  <string></string>
+  <key>NSSupportsAutomaticGraphicsSwitching</key>
+  <true/>
+  <key>NSRequiresAquaSystemAppearance</key>
+  <string>NO</string>
+  <key>NSAppleEventsUsageDescription</key>
+  <string>NaviDnD opens the file picker for hero portraits and shows setup notices.</string>
+</dict>
+</plist>

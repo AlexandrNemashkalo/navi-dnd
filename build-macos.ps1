@@ -1,19 +1,21 @@
-# Сборка для macOS (Apple Silicon) — на Windows. Своя цепочка обновлений в releases-macos/ (файлы игры не те, что у
-# Windows), устроенная так же, как в build-release.ps1:
-#   (без ключей) — патч: игра и MCP собираются заново и сравниваются с описанием предыдущей версии
+# Сборка NaviDnD.app для macOS (Apple Silicon) — на Windows. Своя цепочка обновлений в releases-macos/ (файлы не те,
+# что у Windows), устроенная так же, как в build-release.ps1:
+#   (без ключей) — патч: приложение собирается заново и сравнивается с описанием предыдущей версии
 #                  (releases-macos/manifests/<версия>.json); в releases-macos/patches/ — ZIP только с изменениями.
-#                  Озвучка не пересобирается — она из базы. Патчи ставит сама игра (Обновления в меню).
-#   -Base        — новая база: полная сборка с озвучкой, архив для игроков artifacts/NaviDnD-macOS-arm64-<версия>.zip
-#                  и он же частями releases-macos/NaviDnD-macOS-payload.* (лимит размера файлов); цепочка патчей с нуля.
-#                  GitLab CI на теге версии базы склеивает части и выкладывает архив в Package Registry — по ссылке
-#                  «macOS» в релизе. Игроки с ним доходят до текущей версии патчами.
+#                  Патчи ставит сама игра (Обновления в меню) — вместе с подписью приложения.
+#   -Base        — новая база: архив для игроков artifacts/NaviDnD-macOS-arm64-<версия>.zip и он же частями
+#                  releases-macos/NaviDnD-macOS-payload.* (лимит размера файлов); цепочка патчей с нуля. GitLab CI на теге
+#                  версии базы склеивает части и выкладывает архив в Package Registry — по ссылке «macOS» в релизе.
 #   -Test        — только архив в artifacts/ для проверки на Mac; releases-macos/ не трогается.
-# Внутри архива всё готовое: .NET (игра и MCP-сервер — по одному файлу, среда .NET встроена: macOS при запуске не
-# проверяет отдельных библиотек), озвучка (свой Python 3.12 + PyTorch). Игрок запускает NaviDnD двойным щелчком и один
-# раз разрешает его в настройках; карантин загрузки с остальной папки игра снимает сама. Программы подписываются здесь
-# же локальной подписью (rcodesign): Apple Silicon не запускает неподписанное, у неподписанного macOS не предлагает
-# «Всё равно открыть», а подпись на Mac изменила бы файлы и сломала проверку патчей.
-# Нужны: .NET SDK, git, Python 3 с pip (колёса озвучки и ZIP базы), интернет.
+# NaviDnD.app по правилам Apple: в Contents/MacOS — только программы (игра и MCP-сервер одним файлом каждый, .NET
+# внутри; библиотеки картинок; терминал Alacritty, в котором игра идёт: окно без рамки, значок NaviDnD в Dock), в
+# Contents/Resources — файлы игры, значок и настройки терминала (macos/). Озвучка (свой Python 3.12 + PyTorch) — архивом
+# Speech/silero.zip: папки Python (python3.12, *.dist-info) подпись принимает за вложенные приложения; игра распаковывает
+# его в ~/Library/Application Support/NaviDnD. Приложение подписывается здесь же локальной подписью (rcodesign): без подписи macOS называет
+# скачанное приложение повреждённым, а подпись на Mac изменила бы файлы и сломала проверку патчей. Подпись одинакова
+# при каждой сборке, поэтому сборка всегда полная (с озвучкой) — в патч попадает только изменившееся.
+# Загрузки (с закреплёнными версиями и хешами) кешируются в artifacts/macos-cache.
+# Нужны: .NET SDK, git, Python 3 с pip (колёса озвучки и ZIP), интернет.
 param([switch]$Base, [switch]$Test, [string]$Python = 'python')
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -21,34 +23,59 @@ $root = $PSScriptRoot
 $gitRoot = $root.Replace('\', '/')
 $temporaryRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
 $work = Join-Path $temporaryRoot ('NaviDnD-macos-' + [guid]::NewGuid().ToString('N'))
-$game = Join-Path $work 'NaviDnD'
+$app = Join-Path $work 'NaviDnD.app'
+$programsDir = Join-Path $app 'Contents/MacOS'
+$game = Join-Path $app 'Contents/Resources'
+$resources = $game
+$cache = Join-Path $root 'artifacts/macos-cache'
 $version = ([xml](Get-Content (Join-Path $root 'Directory.Build.props') -Raw)).Project.PropertyGroup.Version
 $release = Join-Path $root 'releases-macos'
 $manifests = Join-Path $release 'manifests'
 $patches = Join-Path $release 'patches'
 $updatesPath = Join-Path $release 'NaviDnD-macOS-updates.json'
+$versionFile = 'Contents/Resources/release-version.txt'
 $rawBase = 'https://gitlab.com/navitalevich/navi-dnd/-/raw/'
 $utf8 = New-Object Text.UTF8Encoding($false)
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
-# Закреплённые загрузки с хешами: Python для macOS arm64 (astral-sh/python-build-standalone), русская модель Silero,
-# rcodesign (indygreg/apple-platform-rs) — подпись Mach-O на Windows.
-$pythonUrl = 'https://github.com/astral-sh/python-build-standalone/releases/download/20260924/cpython-3.12.14%2B20260924-aarch64-apple-darwin-install_only.tar.gz'
-$pythonSha256 = '9763f43db2481a6af36af82ec40302aab7a73632f880129d07a6e81aec846277'
-$modelUrl = 'https://models.silero.ai/models/tts/ru/v5_5_ru.pt'
-$modelSha256 = '50081637b602126ee06cb3bc8a744d25651d2da149ee8864b9a379bfdd934437'
-$rcodesignUrl = 'https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign/0.29.0/apple-codesign-0.29.0-x86_64-pc-windows-msvc.zip'
-$rcodesignSha256 = '54bb500e2da7a8de02fcae0f331d1cac6e6d7173b4281042ff9c528ba3159aaa'
-# Программы (права 755 в ZIP); остальное — 644.
-$programs = @('NaviDnD', 'NaviDnD.McpServer', 'Speech/setup-silero.sh')
+# Закреплённые загрузки: Python для macOS arm64 (astral-sh/python-build-standalone), русская модель Silero, терминал
+# Alacritty и его лицензия, rcodesign (indygreg/apple-platform-rs) — подпись на Windows, 7-Zip — распаковать .dmg.
+$downloads = [ordered]@{
+    'python.tar.gz'     = @('https://github.com/astral-sh/python-build-standalone/releases/download/20260924/cpython-3.12.14%2B20260924-aarch64-apple-darwin-install_only.tar.gz', '9763f43db2481a6af36af82ec40302aab7a73632f880129d07a6e81aec846277')
+    'v5_5_ru.pt'        = @('https://models.silero.ai/models/tts/ru/v5_5_ru.pt', '50081637b602126ee06cb3bc8a744d25651d2da149ee8864b9a379bfdd934437')
+    'alacritty.dmg'     = @('https://github.com/alacritty/alacritty/releases/download/v0.17.0/Alacritty-v0.17.0.dmg', 'ad8d7de35fb38e43184776cac6dfee05ca325caa0b6639a06a55e54e4b026620')
+    'alacritty-LICENSE' = @('https://raw.githubusercontent.com/alacritty/alacritty/v0.17.0/LICENSE-APACHE', '8884289e3969c089cd556c53fa1d3f51d86b29e52a8c1d660a55ce8292986910')
+    'rcodesign.zip'     = @('https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign/0.29.0/apple-codesign-0.29.0-x86_64-pc-windows-msvc.zip', '54bb500e2da7a8de02fcae0f331d1cac6e6d7173b4281042ff9c528ba3159aaa')
+    '7zr.exe'           = @('https://github.com/ip7z/7zip/releases/download/26.03/7zr.exe', 'ad4c82fadcbdf93c03b4fc440f300509c7d60c5c2f4d183e35d9d70d6957037d')
+    '7z-x64.exe'        = @('https://github.com/ip7z/7zip/releases/download/26.03/7z2603-x64.exe', '0859c524b8a63551848f0c246abddcb1d0b7b656b0fbfe879f8d85e61a9e6edd')
+}
+# Права 755 в ZIP: всё в Contents/MacOS и скрипт установки озвучки; остальное — 644.
 
 function RawUrl($tag, $relative) { $rawBase + $tag + '/' + ((($relative -split '/') | ForEach-Object { [uri]::EscapeDataString($_) }) -join '/') }
 function Sha256File($path) { (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() }
 function WriteJson($path, $value) { [IO.File]::WriteAllText($path, ($value | ConvertTo-Json -Depth 10), $utf8) }
-function Download($url, $path, $sha256) {
-    & curl.exe --fail --location --silent --show-error --connect-timeout 20 --max-time 900 --retry 2 --output $path $url
+# Файл из кеша (скачивается, если его нет или хеш не тот).
+function Cached($name) {
+    $url, $sha256 = $downloads[$name]
+    $path = Join-Path $cache $name
+    if ((Test-Path -LiteralPath $path) -and (Sha256File $path) -eq $sha256) { return $path }
+    New-Item -ItemType Directory -Force -Path $cache | Out-Null
+    # Модель Silero уже есть у разработчика (озвучка игры из исходников): сайт Silero бывает очень медленным.
+    $local = Join-Path $root "NaviDnD/Storage/Speech/silero/$name"
+    if ((Test-Path -LiteralPath $local) -and (Sha256File $local) -eq $sha256) { Copy-Item -LiteralPath $local -Destination $path -Force; return $path }
+    & curl.exe --fail --location --silent --show-error --connect-timeout 20 --max-time 900 --retry 2 --output "$path.part" $url
     if ($LASTEXITCODE -ne 0) { throw "Download failed: $url" }
-    if ((Sha256File $path) -ne $sha256) { throw "Checksum mismatch: $url" }
+    if ((Sha256File "$path.part") -ne $sha256) { Remove-Item -LiteralPath "$path.part" -Force; throw "Checksum mismatch: $url" }
+    Move-Item -LiteralPath "$path.part" -Destination $path -Force
+    $path
+}
+# Внешняя программа: ход работы в stderr не считается ошибкой (Windows PowerShell со Stop) — важен код выхода.
+function Native($what) {
+    $ErrorActionPreference = 'Continue'
+    $output = & $args[0] @($args | Select-Object -Skip 1) 2>&1 | ForEach-Object { "$_" }
+    $code = $LASTEXITCODE
+    $ErrorActionPreference = 'Stop'
+    if ($code -ne 0) { $output | Select-Object -Last 15 | Out-Host; throw "$what failed ($code)" }
 }
 function ReadDictionary($path) {
     $result = [ordered]@{}
@@ -65,20 +92,36 @@ function TreeManifest($directory) {
     $result = @{}
     foreach ($file in Get-ChildItem -LiteralPath $directory -Recurse -File) {
         $relative = $file.FullName.Substring($prefix.Length).Replace('\', '/')
-        if ($relative -match '^(Storage|logs|Updater)/') { throw "Private or reserved file in game folder: $relative" }
+        if ($relative -cmatch '(^|/)(Storage|logs|Updater)/') { throw "Private or reserved file in the app: $relative" }
         $result[$relative] = Sha256File $file.FullName
     }
     $result
 }
-function UnixMode($relative) { if ($programs -contains $relative -or $relative -like 'Speech/silero/python/bin/*') { 493 } else { 420 } }   # 0755 / 0644
+function UnixMode($relative) { if ($relative -like 'Contents/MacOS/*' -or $relative -eq 'Contents/Resources/Speech/setup-silero.sh') { 493 } else { 420 } }   # 0755 / 0644
+# Mach-O (64-бит или универсальный) — по первым байтам.
+function IsMachO($path) {
+    $stream = [IO.File]::OpenRead($path)
+    try { $head = New-Object byte[] 4; $read = $stream.Read($head, 0, 4) } finally { $stream.Dispose() }
+    $read -eq 4 -and ((($head[0] -eq 0xCF) -and ($head[1] -eq 0xFA) -and ($head[2] -eq 0xED) -and ($head[3] -eq 0xFE)) -or
+        (($head[0] -eq 0xCA) -and ($head[1] -eq 0xFE) -and ($head[2] -eq 0xBA) -and ($head[3] -eq 0xBE)))
+}
 
 function BuildGame() {
-    New-Item -ItemType Directory -Force -Path $game | Out-Null
+    New-Item -ItemType Directory -Force -Path $programsDir, $game | Out-Null
+    # Одним файлом: в Contents/MacOS не должно быть ничего, кроме программ, а сборки .NET — не программы.
+    $publish = Join-Path $work 'publish'
     foreach ($project in @('NaviDnD', 'NaviDnD.McpServer')) {
-        & dotnet publish (Join-Path $root "$project/$project.csproj") -c Release -r osx-arm64 --self-contained true -p:PublishSingleFile=true -o $game -p:DebugType=None -p:DebugSymbols=false | Out-Host
+        & dotnet publish (Join-Path $root "$project/$project.csproj") -c Release -r osx-arm64 --self-contained true -p:PublishSingleFile=true -o $publish -p:DebugType=None -p:DebugSymbols=false | Out-Host
         if ($LASTEXITCODE -ne 0) { throw "Publish failed: $project" }
     }
-    Get-ChildItem -LiteralPath $game -Filter '*.pdb' -File -Recurse | Remove-Item -Force
+    Get-ChildItem -LiteralPath $publish -Filter '*.pdb' -File -Recurse | Remove-Item -Force
+    $prefix = [IO.Path]::GetFullPath($publish).TrimEnd('\') + '\'
+    foreach ($file in Get-ChildItem -LiteralPath $publish -Recurse -File) {
+        $relative = $file.FullName.Substring($prefix.Length)
+        $target = if ((IsMachO $file.FullName) -and -not $relative.Contains('\')) { Join-Path $programsDir $relative } else { Join-Path $game $relative }
+        New-Item -ItemType Directory -Force -Path (Split-Path $target -Parent) | Out-Null
+        Move-Item -LiteralPath $file.FullName -Destination $target
+    }
     # Только публичные файлы из git — как в build-release.ps1: без Storage, логов и локальных настроек.
     foreach ($asset in @('Prompts', 'sound', 'Fonts', 'GameData', 'icons')) {
         $assetOutput = Join-Path $game $asset
@@ -92,69 +135,67 @@ function BuildGame() {
             Copy-Item -LiteralPath (Join-Path $root $file) -Destination $target
         }
     }
-    if (Get-ChildItem $game -Recurse -Directory | Where-Object Name -in @('Storage', 'logs', 'Updater')) { throw 'Private data in game folder' }
+    if (Get-ChildItem $game -Recurse -Directory | Where-Object Name -in @('Storage', 'logs', 'Updater')) { throw 'Private data in the app' }
     # Скрипты — с переводами строк Unix (иначе bash на Mac их не выполнит), до подсчёта хешей.
     foreach ($script in Get-ChildItem -LiteralPath $game -Recurse -File | Where-Object { $_.Extension -eq '.sh' }) {
-        $bytes = [IO.File]::ReadAllBytes($script.FullName)
-        $text = [Text.Encoding]::UTF8.GetString($bytes).Replace("`r`n", "`n")
+        $text = [IO.File]::ReadAllText($script.FullName).Replace("`r`n", "`n")
         [IO.File]::WriteAllText($script.FullName, $text, $utf8)
     }
     Set-Content (Join-Path $game 'release-version.txt') $version -Encoding ASCII
     Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination (Join-Path $game 'LICENSE')
     Copy-Item -LiteralPath (Join-Path $root 'RELEASE_NOTES.md') -Destination (Join-Path $game 'RELEASE_NOTES.md')
 
-    # Локальная (ad-hoc) подпись программ: результат один и тот же при каждой сборке — патчи их не тянут без нужды.
+    # Терминал: alacritty из .dmg (7-Zip — из своего установщика, без установки в систему).
     $tools = Join-Path $work 'tools'
     New-Item -ItemType Directory -Force -Path $tools | Out-Null
-    Download $rcodesignUrl (Join-Path $tools 'rcodesign.zip') $rcodesignSha256
-    Expand-Archive -LiteralPath (Join-Path $tools 'rcodesign.zip') -DestinationPath $tools -Force
-    $rcodesign = (Get-ChildItem -LiteralPath $tools -Recurse -Filter 'rcodesign.exe' | Select-Object -First 1).FullName
-    foreach ($program in @('NaviDnD', 'NaviDnD.McpServer')) {
-        # rcodesign пишет ход работы в stderr: Windows PowerShell со Stop счёл бы это ошибкой — важен только код выхода.
-        $ErrorActionPreference = 'Continue'
-        & $rcodesign sign (Join-Path $game $program) *> $null
-        $ErrorActionPreference = 'Stop'
-        if ($LASTEXITCODE -ne 0) { throw "Signing failed: $program" }
-    }
+    Native '7-Zip unpack' (Cached '7zr.exe') x -y "-o$tools\7z" (Cached '7z-x64.exe')
+    Native 'Alacritty unpack' "$tools\7z\7z.exe" e -y "-o$tools\alacritty" (Cached 'alacritty.dmg') 'Alacritty\Alacritty.app\Contents\MacOS\alacritty'
+    Copy-Item -LiteralPath "$tools\alacritty\alacritty" -Destination (Join-Path $programsDir 'alacritty')
+    Copy-Item -LiteralPath (Cached 'alacritty-LICENSE') -Destination (Join-Path $resources 'alacritty-LICENSE')
+    Copy-Item -LiteralPath (Join-Path $root 'macos/alacritty.toml') -Destination $resources
+    Copy-Item -LiteralPath (Join-Path $root 'macos/NaviDnD.icns') -Destination $resources
+    $plist = [IO.File]::ReadAllText((Join-Path $root 'macos/Info.plist')).Replace("`r`n", "`n").Replace('$(VERSION)', $version)
+    [IO.File]::WriteAllText((Join-Path $app 'Contents/Info.plist'), $plist, $utf8)
 }
 
-# Озвучка: колёса строго по macos/silero-requirements.txt (версии и хеши), модель — из кеша разработчика или с сайта Silero.
+# Озвучка: колёса строго по macos/silero-requirements.txt (версии и хеши).
 function BuildSpeech() {
-    $downloads = Join-Path $work 'downloads'
-    $wheels = Join-Path $downloads 'wheels'
+    $wheels = Join-Path $work 'wheels'
     New-Item -ItemType Directory -Force -Path $wheels | Out-Null
-    Download $pythonUrl (Join-Path $downloads 'python.tar.gz') $pythonSha256
     & $Python -I -m pip download --disable-pip-version-check --quiet --no-deps --require-hashes --only-binary=:all: `
         --platform macosx_11_0_arm64 --python-version 3.12 --implementation cp --abi cp312 `
         -r (Join-Path $root 'macos/silero-requirements.txt') -d $wheels
     if ($LASTEXITCODE -ne 0) { throw 'Cannot download speech packages.' }
-    $model = Join-Path $root 'NaviDnD/Storage/Speech/silero/v5_5_ru.pt'
-    if (-not (Test-Path -LiteralPath $model) -or (Sha256File $model) -ne $modelSha256) {
-        $model = Join-Path $downloads 'v5_5_ru.pt'
-        Download $modelUrl $model $modelSha256
-    }
-    & $Python -I (Join-Path $root 'macos/package.py') silero (Join-Path $downloads 'python.tar.gz') $wheels $model `
-        (Join-Path $root 'NaviDnD/Speech/THIRD_PARTY_NOTICES.md') (Join-Path $game 'Speech/silero')
+    $silero = Join-Path $work 'silero'
+    & $Python -I (Join-Path $root 'macos/package.py') silero (Cached 'python.tar.gz') $wheels (Cached 'v5_5_ru.pt') `
+        (Join-Path $root 'NaviDnD/Speech/THIRD_PARTY_NOTICES.md') $silero
     if ($LASTEXITCODE -ne 0) { throw 'Cannot build the speech bundle.' }
+    & $Python -I (Join-Path $root 'macos/package.py') zipdir $silero (Join-Path $game 'Speech/silero.zip')
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot pack the speech bundle.' }
+}
+
+# Подпись всего приложения (вложенные программы и библиотеки — тоже), после неё файлы не меняются.
+function SignApp() {
+    $tools = Join-Path $work 'tools'
+    Expand-Archive -LiteralPath (Cached 'rcodesign.zip') -DestinationPath "$tools\rcodesign" -Force
+    $rcodesign = (Get-ChildItem -LiteralPath "$tools\rcodesign" -Recurse -Filter 'rcodesign.exe' | Select-Object -First 1).FullName
+    Native 'Signing' $rcodesign sign $app
 }
 
 function MakeArchive($output) {
     New-Item -ItemType Directory -Force -Path (Split-Path $output -Parent) | Out-Null
     if (Test-Path -LiteralPath $output) { Remove-Item -LiteralPath $output -Force }
-    & $Python -I (Join-Path $root 'macos/package.py') zip $game $output
+    & $Python -I (Join-Path $root 'macos/package.py') zip $app $output
     if ($LASTEXITCODE -ne 0) { throw 'Cannot create the archive.' }
     Write-Host ("macOS archive: {0} ({1:N0} MiB)" -f $output, ((Get-Item -LiteralPath $output).Length / 1MB))
 }
 
 try {
-    if ($Test) {
-        BuildGame; BuildSpeech
-        MakeArchive (Join-Path $root "artifacts/NaviDnD-macOS-arm64-$version.zip")
-    }
+    BuildGame; BuildSpeech; SignApp
+    $archive = Join-Path $root "artifacts/NaviDnD-macOS-arm64-$version.zip"
+    if ($Test) { MakeArchive $archive }
     elseif ($Base) {
-        BuildGame; BuildSpeech
-        $tree = TreeManifest $game
-        $archive = Join-Path $root "artifacts/NaviDnD-macOS-arm64-$version.zip"
+        $tree = TreeManifest $app
         MakeArchive $archive
         New-Item -ItemType Directory -Force -Path $release, $manifests | Out-Null
         Get-ChildItem -LiteralPath $release -Filter 'NaviDnD-macOS-payload.*' -File | Remove-Item -Force
@@ -188,10 +229,7 @@ try {
         $previousVersion = $previous.version
         if ([version]$version -le [version]$previousVersion) { throw "Raise Version in Directory.Build.props above $previousVersion" }
         $previousFiles = ReadDictionary (Join-Path $manifests "$previousVersion.json")
-        BuildGame
-        $tree = TreeManifest $game
-        # Озвучка не пересобирается — она из базы, без изменений.
-        foreach ($key in $previousFiles.Keys) { if ($key.StartsWith('Speech/silero/')) { $tree[$key] = $previousFiles[$key] } }
+        $tree = TreeManifest $app
         $changed = @([string[]]$tree.Keys | Where-Object { $previousFiles[$_] -ne $tree[$_] } | Sort-Object -CaseSensitive)
         $removed = @([string[]]$previousFiles.Keys | Where-Object { -not $tree.Contains($_) } | Sort-Object -CaseSensitive)
         $files = [ordered]@{}; foreach ($key in $changed) { $files[$key] = $tree[$key] }
@@ -201,11 +239,11 @@ try {
         if (Test-Path -LiteralPath $patchPath) { Remove-Item -LiteralPath $patchPath -Force }
         $zip = [IO.Compression.ZipFile]::Open($patchPath, 'Create')
         try {
-            $description = [ordered]@{ baseVersion = $previousVersion; version = $version; baseFiles = $previousFiles; files = $files; removed = $removed }
+            $description = [ordered]@{ baseVersion = $previousVersion; version = $version; versionFile = $versionFile; baseFiles = $previousFiles; files = $files; removed = $removed }
             $writer = New-Object IO.StreamWriter($zip.CreateEntry('patch.json').Open(), $utf8)
             try { $writer.Write(($description | ConvertTo-Json -Depth 10)) } finally { $writer.Dispose() }
             foreach ($key in $changed) {
-                $entry = [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, (Join-Path $game $key), "files/$key", [IO.Compression.CompressionLevel]::Optimal)
+                $entry = [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, (Join-Path $app $key), "files/$key", [IO.Compression.CompressionLevel]::Optimal)
                 # Права Unix: игра на Mac распаковывает с ними — программы остаются исполняемыми.
                 $entry.ExternalAttributes = ((0x8000 -bor (UnixMode $key)) -shl 16)
             }

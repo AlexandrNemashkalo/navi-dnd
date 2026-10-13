@@ -226,7 +226,7 @@ public static class ConsoleHostLauncher
     {
         try
         {
-            string dir = Path.Combine(AppConfig.ProjectRoot, "logs");
+            string dir = Path.Combine(AppConfig.DataRoot, "logs");
             Directory.CreateDirectory(dir);
             File.AppendAllText(Path.Combine(dir, "console.log"), $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {message}{Environment.NewLine}");
         }

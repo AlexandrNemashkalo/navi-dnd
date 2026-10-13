@@ -10,7 +10,7 @@ namespace NaviDnD;
 // (Storage/Worlds/active.txt) — для новой игры по умолчанию и для старых сохранений без мира игры.
 public static class WorldLibrary
 {
-    public static string Dir => Path.Combine(AppConfig.ProjectRoot, "Storage", "Worlds");
+    public static string Dir => Path.Combine(AppConfig.DataRoot, "Storage", "Worlds");
     private static string ActivePath => Path.Combine(Dir, "active.txt");
     private static string WorldPath(string id) => Path.Combine(Dir, id, "world.json");
     public static string LocationsDir(string id) => Path.Combine(Dir, id, "locations");

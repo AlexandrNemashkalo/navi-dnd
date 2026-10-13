@@ -17,10 +17,11 @@ class Program
             var migrateConfig = new AppConfig();
             migrateConfig.LoadUserSettings();   // язык сообщений об ошибке — как в игре
             L.SetLanguage(migrateConfig.Language);
-            Environment.ExitCode = Migrations.MigrateCommand.Run(args.Length > 1 ? args[1] : AppConfig.ProjectRoot);
+            Environment.ExitCode = Migrations.MigrateCommand.Run(args.Length > 1 ? args[1] : AppConfig.DataRoot);
             return;
         }
         if (ConsoleHostLauncher.TryRelaunch(args)) return;
+        if (OperatingSystem.IsMacOS() && MacApp.Launch(args)) return;
         // Необработанное исключение раньше просто ронял процесс молча (консоль закрывается сразу,
         // .NET печатает стек в stderr, который никто не видит) — ни строчки в логах. Теперь падение
         // хотя бы попадает в тот же ai_*.log, где и обычные вызовы ИИ, и его можно разобрать.
@@ -28,7 +29,7 @@ class Program
         {
             try
             {
-                string dir = Path.Combine(AppConfig.ProjectRoot, "logs");
+                string dir = Path.Combine(AppConfig.DataRoot, "logs");
                 Directory.CreateDirectory(dir);
                 string path = Path.Combine(dir, $"ai_{DateTime.Now:yyyy-MM-dd}.log");
                 string text = $"=== {DateTime.Now:HH:mm:ss.fff} | UNHANDLED CRASH ===\n{e.ExceptionObject}\n\n";
@@ -37,7 +38,7 @@ class Program
             catch { /* краш-логгер не должен сам уронить обработчик краша */ }
         };
 
-        if (OperatingSystem.IsMacOS()) UnixTools.ClearQuarantine(AppContext.BaseDirectory);
+        if (OperatingSystem.IsMacOS() && !AppConfig.InMacApp) UnixTools.ClearQuarantine(AppContext.BaseDirectory);
         // macOS/Linux: взять терминал под себя (сырой ввод, мышь, альтернативный экран) до того, как что-то рисуется.
         UnixTerminal.Start();
         // Окно консоли Windows создаёт и показывает ДО первой строчки Main() — прячем сразу же,
@@ -54,7 +55,7 @@ class Program
         // Сохранения старого формата переводит обновление; здесь — запасной путь (исходники, сбой обновления).
         // В UI-тестах — нет: там своё тестовое состояние.
         if (Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null)
-            Migrations.MigrateCommand.RunIfNeeded(AppConfig.ProjectRoot);
+            Migrations.MigrateCommand.RunIfNeeded(AppConfig.DataRoot);
 
         var config = new AppConfig();
         bool firstSettings = !File.Exists(AppConfig.UserSettingsPath);
@@ -119,11 +120,11 @@ class Program
         var logger = new AiLogger();
 
         // Clean up stale requests from previous session
-        string rollRequestPath = Path.Combine(AppConfig.ProjectRoot, "Storage", "roll_request.json");
+        string rollRequestPath = Path.Combine(AppConfig.DataRoot, "Storage", "roll_request.json");
         if (File.Exists(rollRequestPath)) File.Delete(rollRequestPath);
-        string askPlayerRequestPath = Path.Combine(AppConfig.ProjectRoot, "Storage", "ask_player_request.json");
+        string askPlayerRequestPath = Path.Combine(AppConfig.DataRoot, "Storage", "ask_player_request.json");
         if (File.Exists(askPlayerRequestPath)) File.Delete(askPlayerRequestPath);
-        string selectTargetRequestPath = Path.Combine(AppConfig.ProjectRoot, "Storage", "select_target_request.json");
+        string selectTargetRequestPath = Path.Combine(AppConfig.DataRoot, "Storage", "select_target_request.json");
         if (File.Exists(selectTargetRequestPath)) File.Delete(selectTargetRequestPath);
 
         // Нейронка — из настроек: Claude CLI или Codex CLI (один и тот же промпт и MCP-сервер игры), меняется сразу.
@@ -300,7 +301,9 @@ class Program
             if (state.CurrentScreen == Screen.Menu)
             {
                 display.ActiveTabKey = null;
-                var choice = new MainMenuDisplay(settings, display).Show(hasSave());
+                // NaviDnD.app после смены экрана или шрифта — сразу в настройки, на тот же пункт.
+                int? settingsFocus = OperatingSystem.IsMacOS() ? MacApp.TakeSettingsFocus() : null;
+                var choice = settingsFocus != null ? MainMenuDisplay.Choice.Settings : new MainMenuDisplay(settings, display).Show(hasSave());
                 if (choice is MainMenuDisplay.Choice.Continue or MainMenuDisplay.Choice.NewGame)
                 {
                     if (!await ApplyCliDiscovery())
@@ -327,7 +330,7 @@ class Program
                     borderDrawer.DrawTopBorder();
                     static string SettingsTitle() => L.T(" НАСТРОЙКИ   [Esc]МЕНЮ");
                     borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(SettingsTitle(), display));
-                    new SettingsDisplay(settings, display, config, storage, SettingsTitle).Show();
+                    new SettingsDisplay(settings, display, config, storage, SettingsTitle) { InitialFocus = settingsFocus }.Show();
                     continue;
                 }
                 // Новая игра — в первое свободное место; все заняты — «МОИ ИГРЫ» с подсказкой освободить.

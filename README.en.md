@@ -7,7 +7,7 @@ Create a hero, explore the world and fight on a tactical map. The DM runs the st
 
 ### [⬇️ Download the latest version](https://gitlab.com/navitalevich/navi-dnd/-/releases/permalink/latest)
 
-[All releases](https://gitlab.com/navitalevich/navi-dnd/-/releases) · Windows x64 · macOS from source ([how](docs/development.md#macos-и-linux), in Russian)
+[All releases](https://gitlab.com/navitalevich/navi-dnd/-/releases) · Windows x64 · macOS (Apple Silicon)
 
 ![A combat turn: the hero tries to intimidate goblins, rolls the d20 on screen, the DM narrates the result](docs/media/en/combat_turn.gif)
 
@@ -38,6 +38,7 @@ Create a hero, explore the world and fight on a tactical map. The DM runs the st
 ## 🚀 Getting started
 
 1. Download the installer from the link above and run it.
+   On a Mac, get the macOS archive from the release page: unzip it, drag **NaviDnD** to Applications and open it; macOS asks once for permission in System Settings → Privacy & Security → Open Anyway.
 2. Sign in to [Claude Code](https://code.claude.com/docs/en/quickstart) or [Codex CLI](https://developers.openai.com/codex/cli) — the game finds them itself.
 3. In **Settings**, set **LANGUAGE** to **ENGLISH**, then choose **New game** and create a character.
 

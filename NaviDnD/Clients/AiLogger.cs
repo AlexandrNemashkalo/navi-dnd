@@ -12,7 +12,7 @@ public class AiLogger
 
     public AiLogger()
     {
-        string dir = Path.Combine(AppConfig.ProjectRoot, "logs");
+        string dir = Path.Combine(AppConfig.DataRoot, "logs");
         Directory.CreateDirectory(dir);
         _logPath = Path.Combine(dir, $"ai_{DateTime.Now:yyyy-MM-dd}.log");
     }

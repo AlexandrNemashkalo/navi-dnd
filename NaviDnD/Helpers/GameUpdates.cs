@@ -27,7 +27,7 @@ internal static class GameUpdates
             pending = CheckAsync();
     }
 
-    private static string ErrorPath => Path.Combine(AppConfig.ProjectRoot, "Storage", "update-error.txt");
+    private static string ErrorPath => Path.Combine(AppConfig.DataRoot, "Storage", "update-error.txt");
     internal static string MenuLabel => File.Exists(ErrorPath) ? L.T("ОШИБКА ОБНОВЛЕНИЯ") : pending?.IsCompletedSuccessfully == true && pending.Result is { } release
         ? L.F("ОБНОВЛЕНИЕ {0}", release.Version) : L.T("ОБНОВЛЕНИЯ");
 
@@ -88,7 +88,7 @@ internal static class GameUpdates
                 return false;
             }
             if (!await view.ConfirmAsync(L.F("Доступна {0}. Сохранения и настройки сохранятся.", release.Version), true)) return false;
-            if (!File.Exists(Path.Combine(AppContext.BaseDirectory, "release-version.txt")))
+            if (!File.Exists(Path.Combine(AppConfig.ProjectRoot, "release-version.txt")))
             {
                 await view.ConfirmAsync(L.T("Для исходников: git pull и пересборка. Обновляется установленная игра."), false);
                 return false;
@@ -178,7 +178,8 @@ internal static class GameUpdates
         view.Set(L.T("Получение списка обновлений…"));
         await view.RunAsync(DownloadAsync(updates, manifestPath, cancellation.Token), cancellation);
         var manifest = UpdateManifest.Parse(await File.ReadAllTextAsync(manifestPath, cancellation.Token), macOS: true);
-        string root = Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
+        // NaviDnD.app обновляется целиком (вместе с подписью macOS); папка с игрой без .app — как раньше.
+        string root = AppConfig.InMacApp ? MacApp.BundlePath : Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
         var patches = await DownloadPatchesAsync(view, manifest, root, directory, cancellation);
         if (patches is { Length: 0 })
         {
@@ -194,8 +195,10 @@ internal static class GameUpdates
         {
             Action<string, double?> progress = (text, fraction) => view.Set(text, fraction, L.T("Не закрывайте игру"));
             if (patches != null) PatchInstaller.ApplyChain(root, [.. patches.Select(p => In(p.Name))], progress);
-            else PatchInstaller.InstallBase(root, [.. manifest.Base.Files.Select(f => In(f.Name))], [.. manifest.Patches.Select(p => In(p.Name))], progress);
-            UnixUpdate.MarkExecutable(root);
+            else PatchInstaller.InstallBase(root, [.. manifest.Base.Files.Select(f => In(f.Name))], [.. manifest.Patches.Select(p => In(p.Name))], progress,
+                AppConfig.InMacApp ? "NaviDnD.app" : "NaviDnD", AppConfig.InMacApp ? MacApp.VersionFile : Patch.DefaultVersionFile);
+            UnixUpdate.MarkExecutable(AppContext.BaseDirectory);
+            UnixUpdate.MarkExecutable(AppConfig.ProjectRoot);
             return true;
         }), uninterruptible);
         Directory.Delete(directory, true);
@@ -209,7 +212,7 @@ internal static class GameUpdates
         string directory, CancellationTokenSource cancellation)
     {
         var token = cancellation.Token;
-        string installed = (await File.ReadAllTextAsync(Path.Combine(root, "release-version.txt"), token)).Trim();
+        string installed = (await File.ReadAllTextAsync(Path.Combine(AppConfig.ProjectRoot, Patch.DefaultVersionFile), token)).Trim();
         var patches = manifest.PatchesFrom(installed);
         if (patches is { Length: > 0 })
         {
@@ -307,6 +310,6 @@ internal static class GameUpdates
 
     private static void Log(string message)
     {
-        try { string dir = Path.Combine(AppConfig.ProjectRoot, "logs"); Directory.CreateDirectory(dir); File.AppendAllText(Path.Combine(dir, "updates.log"), $"{DateTime.Now:O} {message}\n"); } catch { }
+        try { string dir = Path.Combine(AppConfig.DataRoot, "logs"); Directory.CreateDirectory(dir); File.AppendAllText(Path.Combine(dir, "updates.log"), $"{DateTime.Now:O} {message}\n"); } catch { }
     }
 }

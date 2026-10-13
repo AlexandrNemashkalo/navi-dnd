@@ -41,8 +41,17 @@ internal sealed class UnixTerminal
     public int CursorTop => _out.Row;
     public bool LeftButtonDown => (_buttons & LeftButton) != 0;
 
-    public int Width { get { RefreshSize(); return _width; } }
-    public int Height { get { RefreshSize(); return _height; } }
+    // The game's grid. In a larger terminal (full screen) the game is centred in it: the size is the game's, and
+    // the writer and the mouse shift by the origin.
+    public int Width => _centered ? _layoutCols : RealWidth;
+    public int Height => _centered ? _layoutRows : RealHeight;
+    private int RealWidth { get { RefreshSize(); return _width; } }
+    private int RealHeight { get { RefreshSize(); return _height; } }
+    private int _offX, _offY, _layoutCols, _layoutRows;
+    private bool _centered;
+
+    // Rows at the top the game must not use: on a MacBook with a notch the full-screen terminal reaches under it.
+    public static int ReservedTopRows { get; set; }
 
     // Takes over the terminal; null when this is Windows or stdin/stdout are not a terminal (tests, pipes).
     public static UnixTerminal? Start()
@@ -148,7 +157,7 @@ internal sealed class UnixTerminal
     // Asks the terminal window for a size (honoured by xterm-compatible terminals; ignored elsewhere).
     public void RequestSize(int cols, int rows)
     {
-        if (cols == Width && rows == Height) return;
+        if (cols == RealWidth && rows == RealHeight) return;
         _out.Write($"\x1b[8;{rows};{cols}t");
         _out.Flush();
         Thread.Sleep(50);
@@ -159,14 +168,16 @@ internal sealed class UnixTerminal
     // wrap every line, so wait here — asking the player to enlarge it — until it fits.
     public void EnsureSize(int cols, int rows)
     {
+        _centered = false;
+        _offX = _offY = 0;
         RequestSize(cols, rows);
         bool shown = false;
-        while (Width < cols || Height < rows)
+        while (RealWidth < cols || RealHeight < rows + ReservedTopRows)
         {
             string[] lines =
             [
                 L.T("Окно терминала слишком мало для NaviDnD."),
-                L.F("Нужно не меньше {0} × {1} символов, сейчас {2} × {3}.", cols, rows, Width, Height),
+                L.F("Нужно не меньше {0} × {1} символов, сейчас {2} × {3}.", cols, rows + ReservedTopRows, RealWidth, RealHeight),
                 L.T("Увеличьте окно или уменьшите шрифт (Cmd и минус)."),
             ];
             Clear();
@@ -178,14 +189,25 @@ internal sealed class UnixTerminal
             _out.Flush();
             shown = true;
             int w = Width, h = Height;
-            while (Width == w && Height == h)
+            for (int tick = 1; Width == w && Height == h; tick++)
             {
                 lock (_queueLock) _queue.Clear();   // keys pressed meanwhile are not meant for the game
                 Thread.Sleep(150);
                 RefreshSize(force: true);
+                // Ask again every second: after Cmd-minus (smaller font, same rows) the window fits the screen, and the
+                // terminal (Terminal.app, iTerm2) grows it to the requested size by itself.
+                if (tick % 7 == 0)
+                {
+                    _out.Write($"\x1b[8;{rows};{cols}t");
+                    _out.Flush();
+                }
             }
         }
         if (shown) Clear();
+        _offX = (RealWidth - cols) / 2;
+        _offY = ReservedTopRows + (RealHeight - ReservedTopRows - rows) / 2;
+        (_layoutCols, _layoutRows) = (cols, rows);
+        _centered = _offX > 0 || _offY > 0;
     }
 
     public void SetPointerShape(bool hand)
@@ -487,7 +509,8 @@ internal sealed class UnixTerminal
     {
         var p = pars.Split(';');
         if (p.Length < 3 || !int.TryParse(p[0], out int b) || !int.TryParse(p[1], out int x) || !int.TryParse(p[2], out int y)) return;
-        short cx = (short)(x - 1), cy = (short)(y - 1);
+        short cx = (short)(x - 1 - _offX), cy = (short)(y - 1 - _offY);
+        if (cx < 0 || cy < 0) return;   // outside the game (the margins around it in full screen)
         if ((b & 64) != 0)
         {
             if ((b & 3) > 1) return;   // horizontal scrolling
@@ -544,23 +567,29 @@ internal sealed class UnixTerminal
 
         public override void Write(char value)
         {
-            lock (_lock) { Track(value); _inner.Write(value); }
+            lock (_lock) Track(value);
         }
 
         public override void Write(string? value)
         {
             if (string.IsNullOrEmpty(value)) return;
-            lock (_lock) { foreach (char c in value) Track(c); _inner.Write(value); }
+            lock (_lock) { foreach (char c in value) Track(c); }
         }
 
         public override void Write(char[] buffer, int index, int count)
         {
-            lock (_lock) { for (int i = 0; i < count; i++) Track(buffer[index + i]); _inner.Write(buffer, index, count); }
+            lock (_lock) { for (int i = 0; i < count; i++) Track(buffer[index + i]); }
         }
 
         public override void Write(ReadOnlySpan<char> buffer)
         {
-            lock (_lock) { foreach (char c in buffer) Track(c); _inner.Write(buffer); }
+            lock (_lock) { foreach (char c in buffer) Track(c); }
+        }
+
+        // After a line start the cursor goes to the game's left edge.
+        private void ToLeftEdge()
+        {
+            if (term._offX > 0) _inner.Write($"\x1b[{term._offX}C");
         }
 
         public override void WriteLine(string? value) { Write(value); Write('\n'); }
@@ -573,14 +602,17 @@ internal sealed class UnixTerminal
             }
         }
 
+        // Tracks the cursor (in the game's grid) and writes the character; cursor moves are shifted to the origin.
         private void Track(char c)
         {
             switch (_state)
             {
                 case State.Esc:
                     _state = State.Normal;
-                    if (c == '[') { _state = State.Csi; _params.Clear(); }
-                    else if (c == ']') _state = State.Osc;
+                    if (c == '[') { _state = State.Csi; _params.Clear(); return; }   // written with its final byte
+                    _inner.Write('\x1b');
+                    _inner.Write(c);
+                    if (c == ']') _state = State.Osc;
                     else if (c == '7') { _savedCol = Col; _savedRow = Row; }
                     else if (c == '8') { Col = _savedCol; Row = _savedRow; _pendingWrap = false; }
                     else if (c == 'M') { Row = Math.Max(0, Row - 1); _pendingWrap = false; }
@@ -590,18 +622,21 @@ internal sealed class UnixTerminal
                     else _params.Append(c);
                     return;
                 case State.Osc:
+                    _inner.Write(c);
                     if (c == '\a') _state = State.Normal;
                     else if (c == '\x1b') _state = State.OscEsc;
                     return;
                 case State.OscEsc:
+                    _inner.Write(c);
                     _state = c == '\\' ? State.Normal : State.Osc;
                     return;
             }
+            if (c == '\x1b') { _state = State.Esc; return; }
+            _inner.Write(c);
             switch (c)
             {
-                case '\x1b': _state = State.Esc; return;
-                case '\r': Col = 0; _pendingWrap = false; return;
-                case '\n': Col = 0; Row = Math.Min(Row + 1, term._height - 1); _pendingWrap = false; return;
+                case '\r': Col = 0; _pendingWrap = false; ToLeftEdge(); return;
+                case '\n': Col = 0; Row = Math.Min(Row + 1, term._height - 1); _pendingWrap = false; ToLeftEdge(); return;
                 case '\b': Col = Math.Max(0, Col - 1); _pendingWrap = false; return;
                 case '\t': Col = Math.Min(term._width - 1, (Col / 8 + 1) * 8); return;
             }
@@ -629,8 +664,18 @@ internal sealed class UnixTerminal
 
         private void Csi(char final)
         {
-            var p = _params.ToString().TrimStart('?').Split(';');
+            string raw = _params.ToString();
+            var p = raw.TrimStart('?').Split(';');
             int Arg(int i, int def) => i < p.Length && int.TryParse(p[i], out int v) && v > 0 ? v : def;
+            // Absolute moves go to the game's grid inside the terminal; the rest pass unchanged.
+            _inner.Write(final switch
+            {
+                'H' or 'f' when !raw.StartsWith('?') => $"\x1b[{Arg(0, 1) + term._offY};{Arg(1, 1) + term._offX}H",
+                'G' => $"\x1b[{Arg(0, 1) + term._offX}G",
+                'd' => $"\x1b[{Arg(0, 1) + term._offY}d",
+                _ => $"\x1b[{raw}{final}",
+            });
+            if (final is 'E' or 'F') ToLeftEdge();
             switch (final)
             {
                 case 'H': case 'f': Row = Arg(0, 1) - 1; Col = Arg(1, 1) - 1; break;

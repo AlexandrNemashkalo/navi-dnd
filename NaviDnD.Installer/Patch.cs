@@ -7,9 +7,14 @@ namespace NaviDnD.Installer;
 //  BaseFiles — полный список файлов исходной версии с SHA256: по нему проверяется, что установлена именно она и
 //  ничего не повреждено (иначе — полная установка базы); Files — новые/изменённые файлы с SHA256 результата;
 //  Removed — удаляемые файлы исходной версии. Storage/, logs/ и помощник Updater/ патч не трогает никогда.
+//  VersionFile — где лежит release-version.txt (у NaviDnD.app на macOS — Contents/MacOS/, корень патча — само приложение).
 internal sealed record Patch(string BaseVersion, string Version, Dictionary<string, string> BaseFiles,
     Dictionary<string, string> Files, string[] Removed)
 {
+    internal const string DefaultVersionFile = "release-version.txt";
+    public string? VersionFile { get; init; }
+    internal string VersionPath => VersionFile ?? DefaultVersionFile;
+
     internal const string ManifestName = "patch.json";
     internal const string FilesPrefix = "files/";
 
@@ -22,7 +27,7 @@ internal sealed record Patch(string BaseVersion, string Version, Dictionary<stri
         if (patch.BaseVersion == null || patch.Version == null
             || UpdateManifest.ParseVersion(patch.Version) <= UpdateManifest.ParseVersion(patch.BaseVersion))
             throw new InvalidDataException(L.T("Некорректная версия патча."));
-        if (patch.BaseFiles == null || patch.Files == null || patch.Removed == null || !patch.Files.ContainsKey("release-version.txt"))
+        if (patch.BaseFiles == null || patch.Files == null || patch.Removed == null || !patch.Files.ContainsKey(RelativePath(patch.VersionPath)))
             throw new InvalidDataException(L.T("Неполное описание патча."));
         foreach (var file in patch.BaseFiles.Concat(patch.Files))
         {
@@ -43,7 +48,7 @@ internal sealed record Patch(string BaseVersion, string Version, Dictionary<stri
     // заменяет или удаляет (следующие патчи цепочки: остальное уже проверено первым).
     internal void VerifyBase(string root, bool full, Action<double>? progress = null)
     {
-        string versionFile = Path.Combine(root, "release-version.txt");
+        string versionFile = Path.Combine(root, VersionPath);
         string version = File.Exists(versionFile) ? File.ReadAllText(versionFile).Trim() : "";
         if (version != BaseVersion) throw new InvalidDataException(L.F("Патч для версии {0}, установлена {1}.", BaseVersion, version.Length > 0 ? version : L.T("неизвестная")));
         var check = full ? BaseFiles.ToList() : BaseFiles.Where(f => Files.ContainsKey(f.Key) || Removed.Contains(f.Key)).ToList();
@@ -177,7 +182,9 @@ internal static class PatchInstaller
     // Полная установка на macOS (файлы игры изменены или версия вне цепочки; на Windows это делает установщик): части базы → ZIP → распаковка рядом с игрой,
     // цепочка патчей поверх, затем все файлы заменяются с резервом; при ошибке всё возвращается как было.
     // Лишние файлы прежней версии остаются — как и у установщика Windows поверх старой папки.
-    internal static void InstallBase(string root, IReadOnlyList<string> parts, IReadOnlyList<string> patches, Action<string, double?> progress)
+    // folder — папка игры в архиве базы, versionFile — путь к release-version.txt внутри неё.
+    internal static void InstallBase(string root, IReadOnlyList<string> parts, IReadOnlyList<string> patches, Action<string, double?> progress,
+        string folder = "NaviDnD", string versionFile = Patch.DefaultVersionFile)
     {
         root = Path.GetFullPath(root);
         string work = Path.Combine(root, ".update-" + Guid.NewGuid().ToString("N"));
@@ -198,9 +205,8 @@ internal static class PatchInstaller
             string extracted = Path.Combine(work, "base");
             ZipFile.ExtractToDirectory(zip, extracted);
             File.Delete(zip);
-            // В архиве базы игра лежит в папке NaviDnD/.
-            string fresh = Path.Combine(extracted, "NaviDnD");
-            if (!File.Exists(Path.Combine(fresh, "release-version.txt"))) throw new InvalidDataException(L.T("Неполное описание обновлений."));
+            string fresh = Path.Combine(extracted, folder);
+            if (!File.Exists(Path.Combine(fresh, versionFile))) throw new InvalidDataException(L.T("Неполное описание обновлений."));
             if (patches.Count > 0) PatchInstaller.ApplyChain(fresh, patches, progress);
 
             string[] files = Directory.GetFiles(fresh, "*", SearchOption.AllDirectories);

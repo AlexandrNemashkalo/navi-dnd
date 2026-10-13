@@ -45,6 +45,10 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     private readonly List<Item> _items = [];
     private readonly List<(string keys, string action)> _controls = [];
     private int _focus;
+    // NaviDnD.app: изменился экран или шрифт — окно перезапускается после сохранения.
+    private bool _relaunch;
+    // Пункт, выбранный при открытии (после перезапуска окна — тот, что меняли).
+    public int? InitialFocus { get; init; }
     private bool _editing;
     private string _edit = "";
 
@@ -68,6 +72,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         _titleTabs = MouseUiHelper.ComputeTitleTabs(_title);
         Speech.WarmUp(both: true);   // пробные фразы обоих голосов — без задержки на загрузку модели
         BuildItems();
+        if (InitialFocus is int focus && focus >= 0 && focus < _items.Count) _focus = focus;
         var border = new BorderDrawer(settings, display);
         _titleRow = Term.CursorTop - 1;
         _bodyTop = Term.CursorTop + 1;
@@ -224,6 +229,11 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         item.Step(dir);
         config.SaveUserSettings();
         Sound.PlayClick();
+        if (_relaunch && OperatingSystem.IsMacOS())
+        {
+            _relaunch = false;
+            MacApp.Relaunch(config, _focus);
+        }
     }
 
     // ── Пункты ────────────────────────────────────────────────────────────────
@@ -273,6 +283,25 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
                     int i = Math.Max(0, Array.IndexOf(fonts, config.FullscreenFontSize));
                     config.FullscreenFontSize = fonts[(i + dir + fonts.Length) % fonts.Length];
                     ApplyScreen();
+                },
+            });
+        }
+        else if (OperatingSystem.IsMacOS() && MacApp.InOwnTerminal)
+        {
+            // NaviDnD.app: экран и шрифт — у окна терминала; смена перезапускает окно (и возвращает на этот пункт).
+            Toggle(L.T("ЭКРАН"), L.T("Весь экран: игра по центру экрана, вокруг — фон игры, полоса меню и Dock скрыты. В окне — окно ровно под игру, его можно перетаскивать за верх. При смене окно игры перезапустится."),
+                () => config.Fullscreen, v => { config.Fullscreen = v; _relaunch = true; },
+                on: L.T("ВЕСЬ ЭКРАН"), off: L.T("В ОКНЕ"));
+            _items.Add(new Item(L.T("ШРИФТ"), Kind.Choice,
+                L.T("Размер шрифта — от него размер всей игры: авто — самый крупный, при котором игра помещается на экран; в списке — только размеры, которые помещаются. При смене окно игры перезапустится."))
+            {
+                Get = () => config.FullscreenFontSize <= 0 ? L.T("авто") : config.FullscreenFontSize.ToString(),
+                Step = dir =>
+                {
+                    int[] sizes = MacApp.FontSizes(config);
+                    int i = Math.Max(0, Array.IndexOf(sizes, config.FullscreenFontSize));
+                    config.FullscreenFontSize = sizes[(i + dir + sizes.Length) % sizes.Length];
+                    _relaunch = true;
                 },
             });
         }
@@ -415,6 +444,9 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             () => !config.DisableTriggers, v => config.DisableTriggers = !v);
         Toggle(L.T("ОШИБКИ ИИ"), L.T("Сбой нейронки (кривой ответ, обрыв) — подробно в диалоге. Выключено — коротко «повтори действие», подробности в логе."),
             () => config.ShowAiErrors, v => config.ShowAiErrors = v, on: L.T("ПОДРОБНО"), off: L.T("КОРОТКО"));
+        // Титры: создатель игры и благодарности.
+        _items.Add(new Item(L.T("СОЗДАТЕЛЬ"), Kind.Info, "") { Get = () => "navitalevich", Group = L.T("ТИТРЫ") });
+        _items.Add(new Item(L.T("СПАСИБО"), Kind.Info, "") { Get = () => L.F("{0} — порт на macOS", "keytonw") });
         // Управление — справка (без переназначения клавиш), отдельный блок справа под подсказкой.
         _controls.Clear();
         _controls.AddRange([

@@ -12,9 +12,12 @@ internal static class SileroSpeech
     private sealed record Worker(Process Process, Task<string> Errors);
 
     private static readonly Dictionary<string, Worker> Workers = [];
-    private static string BundledRoot => Path.Combine(AppConfig.ProjectRoot, "Speech", "silero");
+    // NaviDnD.app на macOS: комплект — архивом в приложении (Resources/Speech/silero.zip), распакованный в DataRoot.
+    private static string BundledRoot => Path.Combine(AppConfig.InMacApp ? AppConfig.DataRoot : AppConfig.ProjectRoot, "Speech", "silero");
+    private static string BundledZip => Path.Combine(AppConfig.ProjectRoot, "Speech", "silero.zip");
+    private static readonly SemaphoreSlim UnpackGate = new(1, 1);
     private static bool HasBundle => File.Exists(Path.Combine(BundledRoot, ".ready"));
-    private static string Root => HasBundle ? BundledRoot : Path.Combine(AppConfig.ProjectRoot, "Storage", "Speech", "silero");
+    private static string Root => HasBundle ? BundledRoot : Path.Combine(AppConfig.DataRoot, "Storage", "Speech", "silero");
     private static string Python => !OperatingSystem.IsWindows() ? Path.Combine(Root, HasBundle ? "python" : "venv", "bin", "python3")
         : HasBundle ? Path.Combine(Root, "python", "python.exe") : Path.Combine(Root, "venv", "Scripts", "python.exe");
 
@@ -22,12 +25,39 @@ internal static class SileroSpeech
 
     public static bool IsEnglishVoice(string voice) => voice.StartsWith("en_", StringComparison.Ordinal);
 
+    // NaviDnD.app: Python и PyTorch нельзя держать внутри подписанного приложения как папку (подпись macOS принимает
+    // папки вида python3.12 и *.dist-info за вложенные приложения) — они лежат там архивом и распаковываются сюда при
+    // первом запуске и после обновления, сменившего архив (метка .source — размер и время архива).
+    public static async Task UnpackBundledAsync(Action<string>? status = null, CancellationToken token = default)
+    {
+        await UnpackGate.WaitAsync(token);
+        try
+        {
+            var zip = new FileInfo(BundledZip);
+            if (!zip.Exists) return;
+            string source = $"{zip.Length}:{zip.LastWriteTimeUtc.Ticks}";
+            string marker = Path.Combine(BundledRoot, ".source");
+            if (File.Exists(marker) && File.ReadAllText(marker) == source && HasBundle) return;
+            status?.Invoke(L.T("Распаковка озвучки"));
+            string parent = Path.GetDirectoryName(BundledRoot)!;
+            string fresh = BundledRoot + ".new";
+            Directory.CreateDirectory(parent);
+            if (Directory.Exists(fresh)) Directory.Delete(fresh, true);
+            await Task.Run(() => System.IO.Compression.ZipFile.ExtractToDirectory(zip.FullName, fresh), token);
+            File.WriteAllText(Path.Combine(fresh, ".source"), source);
+            if (Directory.Exists(BundledRoot)) Directory.Delete(BundledRoot, true);
+            Directory.Move(fresh, BundledRoot);
+        }
+        finally { UnpackGate.Release(); }
+    }
+
     // Silero уже установлен (готовая сборка — всегда): заранее загружать модель можно, ничего не скачивая.
     public static bool Installed => File.Exists(Path.Combine(Root, ".ready"));
 
     public static async Task SynthesizeAsync(string text, string? ssmlText, string voice, string wav, string python,
         Action<string> status, CancellationToken token)
     {
+        if (AppConfig.InMacApp && File.Exists(BundledZip)) await UnpackBundledAsync(status, token);
         if (!Installed)
         {
             status(L.T("Установка Silero и PyTorch"));
@@ -45,8 +75,8 @@ internal static class SileroSpeech
             var stderr = process.StandardError.ReadToEndAsync(token);
             await process.WaitForExitAsync(token);
             await Task.WhenAll(stdout, stderr);
-            Directory.CreateDirectory(Path.Combine(AppConfig.ProjectRoot, "logs"));
-            await File.WriteAllTextAsync(Path.Combine(AppConfig.ProjectRoot, "logs", "silero-setup.log"),
+            Directory.CreateDirectory(Path.Combine(AppConfig.DataRoot, "logs"));
+            await File.WriteAllTextAsync(Path.Combine(AppConfig.DataRoot, "logs", "silero-setup.log"),
                 stdout.Result + stderr.Result, token);
             if (process.ExitCode != 0) throw new IOException(OperatingSystem.IsWindows()
                 ? L.T("Установка Silero не удалась. Нужен Python 3.10–3.12 x64; проверь путь к Python и интернет.")

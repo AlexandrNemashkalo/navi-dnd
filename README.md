@@ -7,7 +7,7 @@
 
 ### [⬇️ Скачать последнюю версию](https://gitlab.com/navitalevich/navi-dnd/-/releases/permalink/latest)
 
-[Все релизы](https://gitlab.com/navitalevich/navi-dnd/-/releases) · [Что нового](RELEASE_NOTES.md) · Windows x64 · macOS из исходников ([как](docs/development.md#macos-и-linux))
+[Все релизы](https://gitlab.com/navitalevich/navi-dnd/-/releases) · [Что нового](RELEASE_NOTES.md) · Windows x64 · macOS (Apple Silicon)
 
 ![Ход в бою: действие, бросок кубика, рассказ мастера](docs/media/g4_combat_turn.gif)
 
@@ -29,6 +29,7 @@
 ## 🚀 Как начать
 
 1. Скачай установщик по ссылке выше и запусти его.
+   На Mac — архив «Скачать для macOS» на странице релиза: распакуй, перетащи **NaviDnD** в «Программы» и открой; macOS один раз попросит разрешение в «Системные настройки → Конфиденциальность и безопасность → Всё равно открыть».
 2. Войди в [Claude Code](https://code.claude.com/docs/en/quickstart) или [Codex CLI](https://developers.openai.com/codex/cli) — игра найдёт их сама.
 3. Нажми **Новая игра** и создай персонажа.
 

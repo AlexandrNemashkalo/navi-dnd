@@ -11,7 +11,7 @@ namespace NaviDnD.Helpers;
 // тишина без остановки дорожек. Форматы: wav, mp3, ogg.
 internal static class Music
 {
-    public static string SoundDir => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sound");
+    public static string SoundDir => Path.Combine(AppConfig.ProjectRoot, "sound");
 
     public static bool Enabled { get; set; } = true;
     public static bool AmbienceEnabled { get; set; } = true;

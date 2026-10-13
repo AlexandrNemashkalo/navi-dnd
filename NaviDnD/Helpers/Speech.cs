@@ -63,7 +63,13 @@ internal static class Speech
         if (Interlocked.Exchange(ref started, 1) == 0) _ = Task.Run(ConsumeAsync);
         AppDomain.CurrentDomain.ProcessExit += (_, _) => { Lifetime.Cancel(); Stop(); SileroSpeech.Close(); };
         status = settings.SpeechEnabled ? L.T("Готова к запуску") : L.T("Выключена");
-        WarmUp();
+        // NaviDnD.app: комплект озвучки сначала распаковывается (первый запуск, обновление) — в фоне.
+        if (AppConfig.InMacApp) _ = Task.Run(async () =>
+        {
+            try { await SileroSpeech.UnpackBundledAsync(); WarmUp(); }
+            catch (Exception ex) { try { File.AppendAllText(Path.Combine(AppConfig.DataRoot, "logs", "speech.log"), $"{DateTime.Now:s} unpack: {ex.Message}\n"); } catch { } }
+        });
+        else WarmUp();
     }
 
     // Модели — в память заранее, даже при выключенной озвучке: включение и пробные фразы в настройках — без
@@ -252,7 +258,7 @@ internal static class Speech
             {
                 status = L.T("Ошибка: ") + ex.Message;
                 // Текст реплики и секреты в диагностический лог не записываются.
-                try { File.AppendAllText(Path.Combine(AppConfig.ProjectRoot, "logs", "speech.log"), $"{DateTime.Now:s} {ex.GetType().Name}: {ex.Message}\n"); } catch { }
+                try { File.AppendAllText(Path.Combine(AppConfig.DataRoot, "logs", "speech.log"), $"{DateTime.Now:s} {ex.GetType().Name}: {ex.Message}\n"); } catch { }
             }
             finally { try { File.Delete(wav); } catch { } }
         }

@@ -92,10 +92,11 @@ internal static class UnixTools
 
     // macOS: скачанный архив помечен карантином, и macOS проверяет каждый файл, который игра загрузит или запустит
     // (библиотеки картинок, Python озвучки, MCP-сервер), — а разрешение игрок дал только самой игре. Снимаем пометку
-    // со всей папки игры до первой такой загрузки; признак — пометка на библиотеке SkiaSharp.
-    internal static void ClearQuarantine(string folder)
+    // со всей папки игры до первой такой загрузки; признак — пометка на библиотеке SkiaSharp (probe).
+    internal static void ClearQuarantine(string folder, string? probe = null)
     {
-        if (!OperatingSystem.IsMacOS() || getxattr(Path.Combine(folder, "libSkiaSharp.dylib"), "com.apple.quarantine", 0, 0, 0, 0) < 0) return;
+        probe ??= Path.Combine(folder, "libSkiaSharp.dylib");
+        if (!OperatingSystem.IsMacOS() || getxattr(probe, "com.apple.quarantine", 0, 0, 0, 0) < 0) return;
         Run("/usr/bin/xattr", ["-dr", "com.apple.quarantine", folder], TimeSpan.FromMinutes(1));
     }
 

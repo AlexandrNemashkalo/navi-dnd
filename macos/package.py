@@ -2,8 +2,11 @@
 
 silero <python.tar.gz> <папка колёс> <v5_5_ru.pt> <THIRD_PARTY_NOTICES.md> <Speech/silero>
     Комплект озвучки: переносимый Python 3.12 (python-build-standalone) + torch/numpy из колёс + русская модель.
-zip <папка игры> <архив.zip>
+zip <NaviDnD.app> <архив.zip>
     ZIP с Unix-правами: Finder при распаковке сохраняет «исполняемый» у программ (755), остальным — 644.
+zipdir <папка> <архив.zip>
+    Содержимое папки (без неё самой) — ZIP, одинаковый при каждой сборке: фиксированные даты и порядок, Unix-права
+    (программы Python — 755). Так комплект озвучки лежит в приложении и попадает в патч, только если изменился.
 """
 import os
 import shutil
@@ -19,7 +22,7 @@ SKIP_PYTHON = ('python/share/', 'python/include/', 'python/lib/pkgconfig/', 'pyt
                'python/lib/python3.12/site-packages/')
 # Как в copy_bundle_dependencies.py: без кешей, заголовков сборки и тестов пакетов.
 SKIP_PACKAGE_PARTS = {'__pycache__', 'include', 'tests', 'test', 'benchmarks'}
-EXECUTABLE = {'NaviDnD', 'NaviDnD.McpServer', 'setup-silero.sh'}
+EXECUTABLE = {'NaviDnD', 'NaviDnD.McpServer', 'alacritty', 'createdump', 'setup-silero.sh'}
 
 
 def silero(tar_path, wheels, model, notices, dest):
@@ -83,6 +86,22 @@ def make_zip(source, output):
                 archive.writestr(info, data)
 
 
+def make_dir_zip(source, output):
+    with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+        for root, dirs, files in os.walk(source):
+            dirs.sort()
+            for name in sorted(files):
+                path = os.path.join(root, name)
+                entry = os.path.relpath(path, source).replace('\\', '/')
+                info = zipfile.ZipInfo(entry, date_time=(1980, 1, 1, 0, 0, 0))
+                info.create_system = 3
+                mode = 0o755 if entry.startswith('python/bin/') else 0o644
+                info.external_attr = (0o100000 | mode) << 16
+                info.compress_type = zipfile.ZIP_DEFLATED
+                with open(path, 'rb') as file:
+                    archive.writestr(info, file.read())
+
+
 if __name__ == '__main__':
     command, *arguments = sys.argv[1:]
-    {'silero': silero, 'zip': make_zip}[command](*arguments)
+    {'silero': silero, 'zip': make_zip, 'zipdir': make_dir_zip}[command](*arguments)

@@ -19,13 +19,13 @@ public class GameAiClient
     public DialogDisplay? ActiveDialog { get; set; }
 
     private static readonly string _rollRequestPath =
-        Path.Combine(AppConfig.ProjectRoot, "Storage", "roll_request.json");
+        Path.Combine(AppConfig.DataRoot, "Storage", "roll_request.json");
 
     private static readonly string _askPlayerRequestPath =
-        Path.Combine(AppConfig.ProjectRoot, "Storage", "ask_player_request.json");
+        Path.Combine(AppConfig.DataRoot, "Storage", "ask_player_request.json");
 
     private static readonly string _selectTargetRequestPath =
-        Path.Combine(AppConfig.ProjectRoot, "Storage", "select_target_request.json");
+        Path.Combine(AppConfig.DataRoot, "Storage", "select_target_request.json");
 
     private static readonly JsonSerializerOptions _rollJsonOptions = new()
     {
