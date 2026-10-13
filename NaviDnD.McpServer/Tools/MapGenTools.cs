@@ -183,6 +183,7 @@ public sealed class MapGenTools(McpServerConfig config)
           z — этаж (по умолчанию 0 — земля): верхние этажи здания — блоки с теми же x,y и z=1,2… (terrain building,
           под каждым — building); подвал/подземелье под блоком — z=-1… (dungeon/cave/building). Этажи одной
           клетки x,y связаны лестницей; blocks[0] — на z=0; соседи по x/y на одном z связаны проходом.
+          moat: true — building на z=0 на острове за рвом с одним бродом; layout: road|square|river|palisade — планировка village.
           purpose — что в блоке по сюжету (кто/что там, роль в истории), одна фраза.
         """)]
     public string PlanLocation(

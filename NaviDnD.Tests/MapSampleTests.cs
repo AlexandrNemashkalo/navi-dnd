@@ -17,11 +17,11 @@ public class MapSampleTests
     {
         string root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../artifacts/map-samples"));
         Directory.CreateDirectory(root);
-        foreach (string theme in new[] { "forest", "hills", "swamp", "village", "building", "dungeon", "cave" })
+        foreach (string theme in new[] { "forest", "hills", "swamp", "village", "building", "dungeon", "cave", "island", "village-road", "village-river", "village-palisade" })
         for (int seed = 1; seed <= 5; seed++)
         foreach (bool river in new[] { false, true })
         {
-            var chunk = new MapChunk { Theme = theme, Seed = seed, Style = "tavern" };
+            var chunk = new MapChunk { Theme = theme.StartsWith("village") ? "village" : theme == "island" ? "building" : theme, Seed = seed, Style = "tavern" };
             List<string> terrain;
             List<Room> rooms = [];
             List<Door> doors;
@@ -31,12 +31,19 @@ public class MapSampleTests
                     river ? new(true, 8, 3, seed) : null);
                 terrain = result.Terrain; doors = result.Doors;
             }
-            else if (theme is "building" or "village")
+            else if (chunk.Theme is "building" or "village")
             {
-                var result = theme == "building"
-                    ? BuildingGenerator.Generate(chunk, Exits, seed, true, new Dictionary<ChunkSide, char>(), [])
-                    : BuildingGenerator.GenerateVillage(chunk, Exits, new Dictionary<ChunkSide, char>());
+                var result = chunk.Theme == "building"
+                    ? BuildingGenerator.Generate(chunk, Exits, seed, true, new Dictionary<ChunkSide, char>(), [], moat: theme == "island")
+                    : BuildingGenerator.GenerateVillage(chunk, Exits, new Dictionary<ChunkSide, char>(), theme.StartsWith("village-") ? theme[8..] : null);
                 terrain = result.Terrain; rooms = result.Rooms; doors = result.Doors;
+                foreach (var f in result.Furniture)
+                    foreach (var pos in f.Positions)
+                    {
+                        var row = terrain[pos[1] - 1].ToCharArray();
+                        row[pos[0] - 1] = FurnitureCatalog.Get(f.Kind)?.Code ?? '?';
+                        terrain[pos[1] - 1] = new(row);
+                    }
             }
             else
             {

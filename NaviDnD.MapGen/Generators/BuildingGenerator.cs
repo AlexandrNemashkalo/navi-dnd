@@ -55,7 +55,7 @@ public static class BuildingGenerator
     // bands — сторона → код преграды по краю двора (только для первого этажа); seamDoorSides — стороны,
     // где этот блок сам ставит проход через шов к соседнему зданию того же этажа (сосед-подземелье ставит свой).
     public static Result Generate(MapChunk chunk, IReadOnlyList<ChunkExit> exits, int footprintSeed, bool ground,
-        IReadOnlyDictionary<ChunkSide, char> bands, IReadOnlyCollection<ChunkSide> seamDoorSides)
+        IReadOnlyDictionary<ChunkSide, char> bands, IReadOnlyCollection<ChunkSide> seamDoorSides, bool moat = false)
     {
         var rng = new Random(chunk.Seed);
         string? style = chunk.Style;
@@ -75,10 +75,11 @@ public static class BuildingGenerator
         {
             b.Ground(bands);
             var hall = regions.FirstOrDefault(r => r.Role == Role.Hall);
-            var entrance = b.AddEntrance(inside, hall?.Cells, target, backDoor: true);
+            var entrance = b.AddEntrance(inside, hall?.Cells, target, backDoor: !moat);
             b.Streets(anchors, entrance, inside);
             b.ExternalExits(exits);
             b.Trees(inside, entrance);
+            if (moat) b.Moat(inside, entrance, anchors);
         }
         else
             b.Galleries(exits, inside, seamDoorSides, basement);
@@ -90,14 +91,14 @@ public static class BuildingGenerator
     }
 
     // ── Поселение ────────────────────────────────────────────────────────────
-    public static Result GenerateVillage(MapChunk chunk, IReadOnlyList<ChunkExit> exits, IReadOnlyDictionary<ChunkSide, char> bands)
+    public static Result GenerateVillage(MapChunk chunk, IReadOnlyList<ChunkExit> exits, IReadOnlyDictionary<ChunkSide, char> bands, string? layout = null)
     {
         var rng = new Random(chunk.Seed);
         var b = new Builder(chunk, rng);
         b.Ground(bands);
 
         // Площадь с колодцем в центре и улицы от выходов блока к ней.
-        const int hubC = W / 2, hubR = H / 2;
+        int hubC = layout == "road" ? W / 3 : W / 2, hubR = H / 2;
         var street = new HashSet<(int c, int r)>();
         for (int c = hubC - 2; c <= hubC + 2; c++)
             for (int r = hubR - 1; r <= hubR + 1; r++) street.Add((c, r));
@@ -116,15 +117,24 @@ public static class BuildingGenerator
                 street.Add((c, r));
             }
         }
-        foreach (var (c, r) in street) b.G[c, r] = '=';
+        if (layout == "road")
+            for (int r = 0; r < H; r++) street.Add((hubC, r));
+        if (layout == "palisade")
+            for (int c = 0; c < W; c++)
+                for (int r = 0; r < H; r++)
+                    if (OnBorder((c, r))) b.G[c, r] = '#';
+        if (layout == "river")
+            for (int c = 0; c < W; c++)
+                for (int r = H - 3; r < H - 1; r++) b.G[c, r] = 'W';
+        foreach (var (c, r) in street) b.G[c, r] = b.G[c, r] == 'W' ? '~' : '=';
         b.G[hubC, hubR] = 'V';
 
         // Дома: прямоугольник или Г, не на улице и не вплотную к другим домам.
         var taken = new HashSet<(int, int)>(street.SelectMany(x => Around8(x).Append(x)));
         var houses = new List<HashSet<(int c, int r)>>();
-        for (int attempt = 0; attempt < 300 && houses.Count < 5; attempt++)
+        for (int attempt = 0; attempt < 300 && houses.Count < (layout == "road" ? 6 : layout == "river" ? 3 : 5); attempt++)
         {
-            int w = rng.Next(4, 8), h = rng.Next(3, 6);
+            int w = layout == "road" ? rng.Next(3, 6) : rng.Next(4, 8), h = layout == "road" ? rng.Next(3, 5) : rng.Next(3, 6);
             int c0 = rng.Next(2, W - 2 - w + 1), r0 = rng.Next(2, H - 2 - h + 1);
             var parts = new List<Rect> { new(c0, r0, w, h) };
             if (w >= 6 && h >= 4 && rng.Next(2) == 0)
@@ -616,6 +626,42 @@ public static class BuildingGenerator
                 G[x.c, x.r] = rng.Next(3) == 0 ? '"' : 'T';
                 if (!OutsideConnected(inside, start)) G[x.c, x.r] = was;
             }
+        }
+
+        // Замкнутый ров и единственный брод; выходы сходятся на внешнем берегу.
+        public void Moat(HashSet<(int c, int r)> inside, (int c, int r) entrance, List<(int c, int r)> anchors)
+        {
+            int left = inside.Min(x => x.c) - 1, right = inside.Max(x => x.c) + 1;
+            int bottom = inside.Min(x => x.r) - 1, top = inside.Max(x => x.r) + 1;
+            bool Ring((int c, int r) x) => x.c >= left && x.c <= right && x.r >= bottom && x.r <= top
+                && (x.c == left || x.c == right || x.r == bottom || x.r == top);
+            bool Outside((int c, int r) x) => x.c < left || x.c > right || x.r < bottom || x.r > top;
+            List<(int c, int r)> Path((int c, int r) start, Func<(int c, int r), bool> goal, bool outer)
+            {
+                var prev = new Dictionary<(int c, int r), (int c, int r)> { [start] = start };
+                var q = new Queue<(int c, int r)>([start]);
+                while (q.Count > 0)
+                {
+                    var x = q.Dequeue();
+                    if (goal(x))
+                    {
+                        var path = new List<(int c, int r)> { x };
+                        while (x != start) { x = prev[x]; path.Add(x); }
+                        return path;
+                    }
+                    foreach (var n in Around(x))
+                        if (InBounds(n) && !inside.Contains(n) && (!outer || Outside(n)) && prev.TryAdd(n, x)) q.Enqueue(n);
+                }
+                throw new InvalidOperationException("No approach to island");
+            }
+            var approach = Path(entrance, Outside, false);
+            var end = approach[0];
+            for (int c = 0; c < W; c++)
+                for (int r = 0; r < H; r++)
+                    if (!inside.Contains((c, r))) G[c, r] = Ring((c, r)) ? 'W' : '.';
+            foreach (var x in approach) G[x.c, x.r] = Ring(x) ? '~' : '=';
+            foreach (var anchor in anchors)
+                foreach (var x in Path(anchor, x => x == end, true)) G[x.c, x.r] = '=';
         }
 
         // Все проходимые клетки вне домов связаны (по 4 соседям).

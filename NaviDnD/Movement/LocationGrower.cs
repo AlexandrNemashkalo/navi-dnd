@@ -17,7 +17,7 @@ public static class LocationGrower
     // относительно друг друга; первый — стартовый (вход снаружи, Z = 0). Terrain — тип местности блока:
     // dungeon (по умолчанию), cave, building, village или открытая (MapChunk.IsOutdoorTheme). Building — тип
     // здания (tavern, house, shop, temple, manor, barracks, tower): по нему планировка и мебель.
-    public record PlannedBlock(int X, int Y, string? Purpose, string? Terrain = null, int Z = 0, string? Building = null);
+    public record PlannedBlock(int X, int Y, string? Purpose, string? Terrain = null, int Z = 0, string? Building = null, string? Layout = null, bool Moat = false);
 
     public static readonly string[] Terrains = ["dungeon", MapChunk.Cave, MapChunk.Building, MapChunk.Village, "forest", "plains", "hills", "mountain", "swamp", "desert", "snow", "taiga"];
 
@@ -134,7 +134,7 @@ public static class LocationGrower
                 if (!footprintSeeds.TryGetValue((b.X, b.Y), out int fs)) footprintSeeds[(b.X, b.Y)] = fs = rng.Next();
                 var seamDoors = Enum.GetValues<ChunkSide>()
                     .Where(side => Neighbor(c, side)?.Theme == MapChunk.Building && side is ChunkSide.Right or ChunkSide.Top).ToList();
-                var built = BuildingGenerator.Generate(c, exits[c], fs, ground: c.Z == 0, GroundBands(c), seamDoors);
+                var built = BuildingGenerator.Generate(c, exits[c], fs, ground: c.Z == 0, GroundBands(c), seamDoors, moat: b.Moat);
                 c.Terrain = c.Z == 0 && site != null ? Reskin(built.Terrain, site.Theme) : built.Terrain;
                 map.Rooms.AddRange(built.Rooms);
                 map.Doors.AddRange(built.Doors);
@@ -144,7 +144,7 @@ public static class LocationGrower
             }
             if (c.Theme == MapChunk.Village)
             {
-                var village = BuildingGenerator.GenerateVillage(c, exits[c], GroundBands(c));
+                var village = BuildingGenerator.GenerateVillage(c, exits[c], GroundBands(c), planOf[c].Layout);
                 c.Terrain = site != null ? Reskin(village.Terrain, site.Theme) : village.Terrain;
                 map.Rooms.AddRange(village.Rooms);
                 map.Doors.AddRange(village.Doors);
@@ -252,6 +252,11 @@ public static class LocationGrower
         if (blocks.Select(b => (b.X, b.Y, b.Z)).Distinct().Count() != blocks.Count) return "у двух блоков одинаковые x,y,z";
         if (blocks.FirstOrDefault(b => b.Terrain != null && !Terrains.Contains(b.Terrain)) is { } badTerrain)
             return $"неизвестный terrain \"{badTerrain.Terrain}\", допустимы: {string.Join(", ", Terrains)}";
+        if (blocks.Any(b => b.Moat && ((b.Terrain ?? theme) != MapChunk.Building || b.Z != 0)))
+            return "moat — только для building на z=0";
+        if (blocks.Any(b => b.Layout != null && ((b.Terrain ?? theme) != MapChunk.Village
+            || b.Layout is not ("road" or "square" or "river" or "palisade"))))
+            return "layout — road/square/river/palisade только для village";
         if (blocks[0].Z != 0) return "первый (стартовый) блок должен быть на земле (z = 0)";
         var planned = blocks.ToDictionary(b => (b.X, b.Y, b.Z));
         foreach (var b in blocks.Where(b => b.Z != 0))
