@@ -38,31 +38,7 @@ public sealed class SpellTools(McpServerConfig config)
             if (string.IsNullOrWhiteSpace(query))
                 return "";
 
-            var normalizedQuery = NormalizeForCompare(query);
-            var queryWords = normalizedQuery.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (queryWords.Length == 0)
-                return "";
-
-            var scored = new List<(SpellInfo spell, int score)>();
-            foreach (var spell in SpellDatabase.AllSpells)
-            {
-                if (string.IsNullOrEmpty(spell.NameEn)) continue;
-                if (level.HasValue && spell.Level != level.Value) continue;
-
-                string normalizedName = NormalizeForCompare(spell.NameEn);
-                var nameWords = normalizedName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                int score = ScoreMatch(normalizedName, nameWords, queryWords, normalizedQuery);
-                if (score <= 0) continue;
-                scored.Add((spell, score));
-            }
-
-            var names = scored
-                .OrderByDescending(x => x.score)
-                .ThenBy(x => x.spell.Name, StringComparer.Ordinal)
-                .Take(15)
-                .Select(x => x.spell.Localized.Name)
-                .ToList();
+            var names = CatalogSearch.Spells(query, level).Select(s => s.Localized.Name).ToList();
 
             string result = string.Join(", ", names);
             Log($"find_spell ← {names.Count} results: {result}");
@@ -75,17 +51,6 @@ public sealed class SpellTools(McpServerConfig config)
         }
     }
 
-    private static string NormalizeForCompare(string s) =>
-        s.ToLowerInvariant().Replace('-', ' ').Replace('\'', ' ').Replace(',', ' ');
-
-    private static int ScoreMatch(string normalizedName, string[] nameWords, string[] queryWords, string queryNormalized)
-    {
-        if (normalizedName == queryNormalized) return 100;
-        if (queryWords.All(nameWords.Contains)) return 80;
-        if (normalizedName.StartsWith(queryNormalized, StringComparison.Ordinal)) return 60;
-        if (queryWords.All(t => normalizedName.Contains(t, StringComparison.Ordinal))) return 40;
-        return 0;
-    }
 
     private void Log(string message)
     {

@@ -85,6 +85,16 @@ public class AiContextBuilder
                 .Select(i => $"{string.Join("+", i.EquipmentedSlot!)}: {i.Name}");
             if (equipped?.Any() == true)
                 sb.AppendLine($"equipped: {string.Join(", ", equipped)}");
+
+            // Характеристики и навыки — сразу в контексте (#id — для патча): за ними мастер чаще всего ходил в
+            // get_world_state, а это лишний круг модели (~10 с и полный контекст заново) на каждую проверку.
+            // Раса, класс и КД уже в строках hero/HP, мировоззрение и предыстория броскам не нужны.
+            string[] known = [StatKeys.Race, StatKeys.Class, StatKeys.ArmorClass, StatKeys.Alignment, StatKeys.Background];
+            if (Indexed(_ws.Hero.Stats, s => s.Deleted == true || known.Contains(StatKeys.FromName(s.Name)),
+                    (s, i) => $"{s.Name}#{i} {s.Value}") is { } stats)
+                sb.AppendLine($"hero.stats: {stats}");
+            if (Indexed(_ws.Hero.Skills, s => s.Deleted == true, (s, i) => $"{s.Name}#{i} {s.Value}") is { } skills)
+                sb.AppendLine($"hero.skills: {skills}");
         }
 
         // ── Нарратив ───────────────────────────────────────────────────────
@@ -96,18 +106,23 @@ public class AiContextBuilder
                 sb.AppendLine($"world: {_ws.Narrative.World}");
         }
 
-        // ── Индекс имён (для поиска по name через MCP) ─────────────────────
-        if (_ws.Hero?.Inventory is { Count: > 0 } inv)
-            sb.AppendLine($"hero.inventory: {Join(inv.Where(x => x.Deleted != true).Select(x => x.Name))}");
-        if (_ws.Hero?.Abilities is { Count: > 0 } abl)
-            sb.AppendLine($"hero.abilities: {Join(abl.Where(x => x.Deleted != true).Select(x => x.Name))}");
-        if (_ws.Hero?.Spells is { Count: > 0 } spl)
-            sb.AppendLine($"hero.spells: {Join(spl.Where(x => x.Deleted != true).Select(x => $"{x.Name} (lvl {x.Level})"))}");
-        if (_ws.Hero?.Resources is { Count: > 0 } res)
-            sb.AppendLine($"hero.resources: {Join(res.Where(x => x.Deleted != true).Select(x => x.Name))}");
-        if (_ws.Hero?.Effects is { Count: > 0 } eff)
-            sb.AppendLine($"hero.effects: {Join(eff.Where(x => x.Deleted != true).Select(x =>
-                x.Description is { Length: > 0 } d ? $"{x.Name} ({x.ExpiresAtRound}): {d}" : $"{x.Name} ({x.ExpiresAtRound})"))}");
+        // ── Индекс имён (для поиска по name через MCP); у героя — с #id для патча без запроса ──────
+        if (Indexed(_ws.Hero?.Inventory, x => x.Deleted == true,
+                (x, i) => x.Quantity is > 1 ? $"{x.Name}#{i} ×{x.Quantity}" : $"{x.Name}#{i}") is { } inv)
+            sb.AppendLine($"hero.inventory: {inv}");
+        if (Indexed(_ws.Hero?.Abilities, x => x.Deleted == true, (x, i) => $"{x.Name}#{i}") is { } abl)
+            sb.AppendLine($"hero.abilities: {abl}");
+        if (Indexed(_ws.Hero?.Spells, x => x.Deleted == true,
+                (x, i) => $"{x.Name}#{i} (lvl {x.Level}{(x.Prepared == true && x.Level > 0 ? ", подгот." : "")})") is { } spl)
+            sb.AppendLine($"hero.spells: {spl}");
+        if (Indexed(_ws.Hero?.Resources, x => x.Deleted == true, (x, i) => $"{x.Name}#{i} {x.Value}") is { } res)
+            sb.AppendLine($"hero.resources: {res}");
+        // Действие каждый раунд (onRound) — тоже: от него зависит, можно ли отдыхать, а других полей эффекта тут нет.
+        if (Indexed(_ws.Hero?.Effects, x => x.Deleted == true, (x, i) =>
+                $"{x.Name}#{i} ({x.ExpiresAtRound})"
+                + (x.Description is { Length: > 0 } d ? $": {d}" : "")
+                + (x.OnRound?.Effect is { Length: > 0 } tick ? $" [каждый раунд: {tick}]" : "")) is { } eff)
+            sb.AppendLine($"hero.effects: {eff}");
         if (_ws.Map.Rooms is { Count: > 0 } rooms)
         {
             var visibleRooms = _visibleCells != null
@@ -204,21 +219,24 @@ public class AiContextBuilder
         var visSb = new System.Text.StringBuilder();
         if (_visibleCells != null)
         {
-            var visObj = _ws.Map.Objects?
-                .Where(o => o.Deleted != true && o.Position is { Count: >= 2 } && _visibleCells.Contains((o.Position[0], o.Position[1])))
-                .Select(o => o.Hidden == true ? $"{o.Name}(скрыт)" : o.Name);
-            if (visObj?.Any() == true)
-                visSb.AppendLine($"map.objects: {Join(visObj)}");
+            // Видимое — с #id и клеткой (у существ ещё хиты): для атаки, разговора и патча не нужен запрос.
+            if (Indexed(_ws.Map.Objects, o => o.Deleted == true || o.Position is not { Count: >= 2 } || !_visibleCells.Contains((o.Position[0], o.Position[1])),
+                    (o, i) => $"{o.Name}#{i} [{o.Position![0]},{o.Position[1]}]{(o.Hidden == true ? "(скрыт)" : "")}") is { } visObj)
+                visSb.AppendLine($"map.objects: {visObj}");
 
-            var visEnt = _ws.Map.Entities?
-                .Where(e => e.Deleted != true && e.Position is { Count: >= 2 } && _visibleCells.Contains((e.Position[0], e.Position[1])))
-                .Select(e => e.Hidden == true ? $"{e.Name}(скрыт)" : e.Name);
-            if (visEnt?.Any() == true)
-                visSb.AppendLine($"map.entities: {Join(visEnt)}");
+            if (Indexed(_ws.Map.Entities, e => e.Deleted == true || e.Position is not { Count: >= 2 } || !_visibleCells.Contains((e.Position[0], e.Position[1])),
+                    (e, i) => $"{e.Name}#{i} [{e.Position![0]},{e.Position[1]}]{(string.IsNullOrEmpty(e.Hp) ? "" : $" hp:{e.Hp}")}{(e.Hidden == true ? "(скрыт)" : "")}") is { } visEnt)
+                visSb.AppendLine($"map.entities: {visEnt}");
 
-            AppendDoorIds(visSb, _ws.Map.Doors, isVisible: d =>
+            AppendDoorIds(visSb, _ws.Map.Doors, withState: true, isVisible: d =>
                 d.From is { Count: >= 2 } && d.To is { Count: >= 2 } &&
                 (_visibleCells.Contains((d.From[0], d.From[1])) || _visibleCells.Contains((d.To[0], d.To[1]))));
+
+            // Рельеф в поле зрения (вода, кусты, обломки) — иначе мастер дописывал окружение по плану локации:
+            // «лесной подход у реки» превращался в реку у входа, которой на карте нет.
+            var ground = _visibleCells.Select(c => _ws.Map.GroundAt(c.Item1, c.Item2)?.Name).Where(n => !string.IsNullOrEmpty(n))
+                .GroupBy(n => n).OrderByDescending(g => g.Count()).Select(g => g.Key!).ToList();
+            if (ground.Count > 0) visSb.AppendLine($"рельеф: {Join(ground)}");
         }
 
         // ── Рядом ──────────────────────────────────────────────────────────
@@ -561,7 +579,7 @@ public class AiContextBuilder
     public string CombatTurnState()
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine("Наступает ход врагов. Вызови сalculate_movement для нужных сущностей, сформируй полный план всех ходов одним history-массивом.");
+        sb.AppendLine("Наступает ход врагов. Вызови calculate_movement для нужных сущностей, сформируй полный план всех ходов одним history-массивом.");
         if (_ws.Combat != null)
         {
             var initiative = _ws.Combat.Initiative?
@@ -651,12 +669,22 @@ public class AiContextBuilder
 
     private static string Join(IEnumerable<string> items) => string.Join("; ", items);
 
-    private static void AppendDoorIds(System.Text.StringBuilder sb, List<Door>? doors, Func<Door, bool> isVisible)
+    // Элементы списка с их индексом (он же id для патча), без удалённых; null — показывать нечего.
+    private static string? Indexed<T>(List<T>? items, Func<T, bool> skip, Func<T, int, string> format)
+    {
+        if (items is not { Count: > 0 }) return null;
+        var parts = items.Select((x, i) => (x, i)).Where(p => !skip(p.x)).Select(p => format(p.x, p.i)).ToList();
+        return parts.Count > 0 ? Join(parts) : null;
+    }
+
+    // withState — у дверей ещё «открыта/закрыта» (что видит герой; действие с дверью — door_action по id).
+    private static void AppendDoorIds(System.Text.StringBuilder sb, List<Door>? doors, Func<Door, bool> isVisible, bool withState = false)
     {
         if (doors is not { Count: > 0 }) return;
         var matching = doors.Select((d, i) => (d, i)).Where(x => isVisible(x.d)).ToList();
+        string State(Door d) => withState ? (d.IsDoorOpen == true ? " открыта" : " закрыта") : "";
         var phys = string.Join("; ", matching.Where(x => x.d.IsDoor == true && x.d.IsWindow != true)
-            .Select(x => x.d.Hidden == true ? $"{x.i}(скрыт)" : x.i.ToString()));
+            .Select(x => x.d.Hidden == true ? $"{x.i}(скрыт)" : $"{x.i}{State(x.d)}"));
         var pass = string.Join("; ", matching.Where(x => x.d.IsDoor != true)
             .Select(x => x.d.Hidden == true ? $"{x.i}(скрыт)" : x.i.ToString()));
         if (phys.Length > 0) sb.AppendLine($"map.doors (двери): {phys}");

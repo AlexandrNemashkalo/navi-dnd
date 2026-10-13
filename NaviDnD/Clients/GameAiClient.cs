@@ -839,7 +839,10 @@ public class GameAiClient
         finally { WindowControls.NotifyIfMinimized(); }
     }
 
-    private static string ExtractJson(string text)
+    // JSON из ответа, со ссылками на справочники уже разрешёнными (CatalogReferences: icon/ref/monster).
+    private static string ExtractJson(string text) => CatalogReferences.Resolve(ExtractRawJson(text));
+
+    private static string ExtractRawJson(string text)
     {
         int start = text.IndexOf('{');
         if (start < 0) return text;

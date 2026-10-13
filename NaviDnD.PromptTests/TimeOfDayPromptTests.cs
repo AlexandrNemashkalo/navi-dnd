@@ -38,7 +38,7 @@ public class TimeOfDayPromptTests
         Assert.True(parsed.HistoryTexts.Count > 0, "Долгий отдых должен быть описан в history.");
 
         _output.WriteLine($"После отдыха: totalRounds={storage.WorldState.Time.TotalRounds} day={storage.WorldState.Time.Day} partOfDay={storage.WorldState.Time.PartOfDay}");
-        Assert.Equal("Утро", storage.WorldState.Time.PartOfDay);
+        Assert.Equal("morning", storage.WorldState.Time.PartOfDay);
         Assert.Equal(1, storage.WorldState.Time.TotalRounds);
         Assert.Equal(4, storage.WorldState.Time.Day);
 
@@ -69,7 +69,7 @@ public class TimeOfDayPromptTests
         Assert.True(parsed.HistoryTexts.Count > 0, "Короткий отдых должен быть описан в history.");
 
         _output.WriteLine($"После отдыха: totalRounds={storage.WorldState.Time.TotalRounds} day={storage.WorldState.Time.Day} partOfDay={storage.WorldState.Time.PartOfDay}");
-        Assert.Equal("День", storage.WorldState.Time.PartOfDay);
+        Assert.Equal("day", storage.WorldState.Time.PartOfDay);
         Assert.Equal(1, storage.WorldState.Time.TotalRounds);
         Assert.Equal(1, storage.WorldState.Time.Day);
 
@@ -103,7 +103,7 @@ public class TimeOfDayPromptTests
         Assert.True(parsed.HistoryTexts.Count > 0, "Отказ в отдыхе должен быть объяснён в history.");
 
         _output.WriteLine($"После попытки: totalRounds={storage.WorldState.Time.TotalRounds} partOfDay={storage.WorldState.Time.PartOfDay}");
-        Assert.Equal("Вечер", storage.WorldState.Time.PartOfDay);
+        Assert.Equal("evening", storage.WorldState.Time.PartOfDay);
         Assert.Equal(50, storage.WorldState.Time.TotalRounds);
 
         var stillActive = storage.WorldState.Hero!.Effects?.Where(e => e.Deleted != true).Select(e => e.Name).ToList() ?? [];

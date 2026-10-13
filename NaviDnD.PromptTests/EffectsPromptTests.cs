@@ -172,15 +172,16 @@ public class EffectsPromptTests
 
         var ctx = new AiContextBuilder(storage.WorldState);
 
-        // Угроза вводится самим окружением (DM волен вводить такую опасность сам) — не требует уже
-        // существующей на карте сущности или способности героя, в отличие от провалившихся попыток
-        // из TemporaryBuff-теста выше. Захват описан как УЖЕ СОСТОЯВШИЙСЯ факт (не "пытается
-        // схватить") — первая формулировка ("неожиданно вырывается и обвивает") оставляла ИИ
-        // пространство для спасброска, и он им воспользовался (успешный бросок Силы БЕЗ вызова
-        // roll_dice, вопреки промпту), избежав захвата вообще — эффект не добавлялся, тест падал не
-        // из-за бага, а из-за неоднозначной формулировки сценария.
-        string grabMessage = ctx.MinimalState(
-            "склизкое щупальце из трещины в стене уже туго обвило мою ногу и крепко держит — вырваться с ходу не вышло, я скован на месте");
+        // Угрозу вносит сцена, а не игрок: слова игрока «меня схватило щупальце» без щупальца на карте мастер по
+        // правилам отклоняет (мир — только то, что в сцене). Щупальце — объект на клетке героя с onStep, как ловушка:
+        // захват приходит от игры триггером, и его итог задан однозначно (без спасброска, который ИИ мог бы выиграть).
+        var heroPos = storage.WorldState.Hero!.Position!;
+        storage.ApplyUpdateWorldState($$"""
+            {"map":{"objects":[{"symbol":"(T)","position":[{{heroPos[0]}},{{heroPos[1]}}],"name":"Щупальце из трещины","color":[90,120,90],
+              "triggers":{"onStep":{"effect":"Склизкое щупальце из трещины в стене обвивает ногу героя и держит: состояние «Схвачен» (скорость 0), без спасброска; вырваться — проверка Атлетики или Акробатики СЛ 12","once":true} } }]} }
+            """);
+        var tentacle = storage.WorldState.Map.Objects!.Last();
+        string grabMessage = ctx.TriggerState([(tentacle, "onStep")], [], []);
         var grabResult = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage, grabMessage);
         _output.WriteLine("Ответ модели (хватает щупальце):\n" + grabResult.RawResponse);
 
@@ -257,7 +258,7 @@ public class EffectsPromptTests
         Assert.DoesNotContain(stillActive, e => e.Name == "Истощение");
 
         _output.WriteLine($"partOfDay после отдыха: {storage.WorldState.Time.PartOfDay} (было «Вечер», ожидаем +2 шага = «Утро»)");
-        Assert.Equal("Утро", storage.WorldState.Time.PartOfDay);
+        Assert.Equal("morning", storage.WorldState.Time.PartOfDay);
 
         PromptScenario.RecordAsMock(result.RawResponse, mockResponsesFolder: "LongRest", action: "SendAction");
     }

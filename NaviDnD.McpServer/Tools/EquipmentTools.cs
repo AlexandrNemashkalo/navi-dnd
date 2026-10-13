@@ -36,29 +36,7 @@ public sealed class EquipmentTools(McpServerConfig config)
             if (string.IsNullOrWhiteSpace(query))
                 return "";
 
-            var normalizedQuery = NormalizeForCompare(query);
-            var queryWords = normalizedQuery.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (queryWords.Length == 0)
-                return "";
-
-            var scored = new List<(EquipmentInfo item, int score)>();
-            foreach (var item in EquipmentDatabase.AllItems)
-            {
-                if (string.IsNullOrEmpty(item.NameEn)) continue;
-                string normalizedName = NormalizeForCompare(item.NameEn);
-                var nameWords = normalizedName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                int score = ScoreMatch(normalizedName, nameWords, queryWords, normalizedQuery);
-                if (score <= 0) continue;
-                scored.Add((item, score));
-            }
-
-            var lines = scored
-                .OrderByDescending(x => x.score)
-                .ThenBy(x => x.item.Name, StringComparer.Ordinal)
-                .Take(8)
-                .Select(x => Summarize(x.item))
-                .ToList();
+            var lines = CatalogSearch.Items(query).Select(Summarize).ToList();
 
             string result = string.Join("\n", lines);
             Log($"find_item ← {lines.Count} results");
@@ -88,17 +66,6 @@ public sealed class EquipmentTools(McpServerConfig config)
         return $"{i.LocalizedName}{(L.WorldIsEnglish ? "" : $" ({i.NameEn})")} [{i.Category}, {type}]: {string.Join("; ", parts)}";
     }
 
-    private static string NormalizeForCompare(string s) =>
-        s.ToLowerInvariant().Replace('-', ' ').Replace('\'', ' ').Replace(',', ' ');
-
-    private static int ScoreMatch(string normalizedName, string[] nameWords, string[] queryWords, string queryNormalized)
-    {
-        if (normalizedName == queryNormalized) return 100;
-        if (queryWords.All(nameWords.Contains)) return 80;
-        if (normalizedName.StartsWith(queryNormalized, StringComparison.Ordinal)) return 60;
-        if (queryWords.All(t => normalizedName.Contains(t, StringComparison.Ordinal))) return 40;
-        return 0;
-    }
 
     private void Log(string message)
     {

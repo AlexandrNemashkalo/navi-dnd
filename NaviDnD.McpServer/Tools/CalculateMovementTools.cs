@@ -110,6 +110,6 @@ public sealed class CalculateMovementTools(McpServerConfig config)
     {
         if (config.LogPath is null) return;
         lock (_logLock)
-            File.AppendAllText(config.LogPath, $"  MCP сalculate_movement {message}\n", new UTF8Encoding(false));
+            File.AppendAllText(config.LogPath, $"  MCP calculate_movement {message}\n", new UTF8Encoding(false));
     }
 }

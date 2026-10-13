@@ -7,17 +7,18 @@ internal static class AiActionTools
     // Инструменты MCP-сервера, разрешённые действию (имя действия — папка промпта: SendAction, StartNewGame…).
     public static string[] ToolsFor(string action) => action switch
     {
-        "CreateNewGame" => ["find_icon", "find_spell", "find_item"],
+        // Иконки, заклинания, предметы и монстры — ссылками в ответе ("icon"/"ref"/"monster", CatalogReferences), а не
+        // вызовом инструмента на каждый: каждый вызов — лишний круг модели. find_item остался в игре — механика редкой
+        // магической добычи, которую мастер описывает сам.
         // Нейронка задаёт план локации (plan_location), геометрию строит код — generate_map не нужен.
-        "StartNewGame" => ["plan_location", "find_assets", "find_icon", "find_monster", "add_place"],
-        // Концепция мира и описание героя — по данным в сообщении, инструменты не нужны.
-        "CreateWorld" or "DescribeHero" or "RepairJson" or "LevelUpApply" => [],
-        // Повышение уровня: варианты заклинаний — по справочнику.
-        "LevelUpOptions" => ["find_spell"],
-        "PopulateChunk" => ["get_world_state", "find_assets", "find_icon", "find_monster", "find_item", "world_query"],
+        "StartNewGame" => ["plan_location", "add_place"],
+        // Герой, мир, описание, уровень — по данным в сообщении, инструменты не нужны.
+        "CreateNewGame" or "CreateWorld" or "DescribeHero" or "RepairJson" or "LevelUpOptions" or "LevelUpApply" => [],
+        "PopulateChunk" => ["get_world_state", "world_query"],
+        // Правка героя перед игрой: данные героя — одним запросом.
+        "FixHeroForNewGame" => ["get_world_state"],
         _ => ["get_world_state", "calculate_movement", "roll_dice", "use_reaction", "select_target",
-              "advance_round", "long_rest", "short_rest", "door_action", "find_icon",
-              "find_spell", "find_item", "world_query", "add_place", "plan_location"],
+              "advance_round", "long_rest", "short_rest", "door_action", "find_item", "world_query", "add_place", "plan_location"],
     };
 
     // Действия до создания мира/героя — MCP-сервер читает черновик (newGameState.json), а не сохранение игры.
