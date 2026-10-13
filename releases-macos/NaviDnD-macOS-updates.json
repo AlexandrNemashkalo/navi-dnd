@@ -1,0 +1,67 @@
+{
+    "format":  1,
+    "version":  "2.2.4",
+    "base":  {
+                 "version":  "2.2.4",
+                 "files":  [
+                               {
+                                   "name":  "NaviDnD-macOS-payload.001",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-payload.001",
+                                   "sha256":  "25f3b4c29dbb84c362365eca3bbe2afc4b6478fb495bcfb49a86dcd33137f9a6",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-macOS-payload.002",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-payload.002",
+                                   "sha256":  "17acbd1dbd9f6667b427c8e37b1e16a7e99fe69f284e8053023778e343b4a767",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-macOS-payload.003",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-payload.003",
+                                   "sha256":  "40af9728f85d2903262cc38fe5e558ab5d30d63443456498f80f27f5c437b043",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-macOS-payload.004",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-payload.004",
+                                   "sha256":  "7b838f74f28175d6e3e4dd587add25db0e740e30c2e37c767affad87bbc3d808",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-macOS-payload.005",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-payload.005",
+                                   "sha256":  "499f20d4e00e75706ccf6dd848fa6cb580019dfc87685a8af37c5fffd3dc9f62",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-macOS-payload.006",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-payload.006",
+                                   "sha256":  "fe70f89c824c6d0b807fa85952848a68065c27df03257bd50dba90d0ec219aca",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-macOS-payload.007",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-payload.007",
+                                   "sha256":  "e2854414f29cedaf63e74b45848b69245727460ad293a30991c1c6be3deca93a",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-macOS-payload.008",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-payload.008",
+                                   "sha256":  "af17623c6ceaf2dcf8e2c408905d0e5878b8da8bf1438584ee77f7fc34444bc2",
+                                   "size":  52428800
+                               },
+                               {
+                                   "name":  "NaviDnD-macOS-payload.009",
+                                   "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-payload.009",
+                                   "sha256":  "edccaacb004dfee12d9395ba8727b1bce5a036a9ec5e6ad3b36c0e86bb02ad5a",
+                                   "size":  35339054
+                               }
+                           ]
+             },
+    "installer":  null,
+    "patches":  [
+
+                ]
+}
