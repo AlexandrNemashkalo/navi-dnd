@@ -358,6 +358,96 @@ public class EncounterTriggerTests
         Assert.Empty(Move(storage, "MoveNorth"));
     }
 
+    // ── Тело убитого ─────────────────────────────────────────────────────────
+
+    // Патч по id заменяет объект существа новым: по ссылке живая крыса после шага выглядела убитой — на её клетке
+    // появлялось тело, а вид попадал в бестиарий.
+    [Fact]
+    public void EnemyMovingInCombat_LeavesNoBodyAndStaysOutOfBestiary()
+    {
+        var storage = MakeStorage();
+        var rat = MakeEnemy("RT1", 6, 2);
+        rat.MonsterKey = "Крыса";
+        storage.WorldState.Map.Entities = [rat, MakeEnemy("RT2", 7, 2)];
+        StartCombat(storage, "RT1", "RT2");
+
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"position":[3,2],"movePath":[[6,2],[5,2],[4,2],[3,2]]}]}}""");
+
+        Assert.DoesNotContain(storage.WorldState.Map.Objects ?? [], o => o.Name?.Contains("RT1") == true || o.Symbol == "(†)");
+        Assert.DoesNotContain("Крыса", storage.WorldState.Narrative?.KnownMonsters ?? []);
+        Assert.Equal([3, 2], storage.WorldState.Map.Entities![0].Position);
+    }
+
+    // Погиб — хиты 0: игра сама снимает существо с карты, оставляет тело и пополняет бестиарий — и вне боя тоже.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void EnemyAtZeroHp_IsRemovedLeavesBodyAndJoinsBestiary(bool inCombat)
+    {
+        var storage = MakeStorage();
+        var rat = MakeEnemy("RT1", 6, 2);
+        rat.MonsterKey = "Крыса";
+        rat.Hp = "4/4";
+        storage.WorldState.Map.Entities = [rat, MakeEnemy("RT2", 7, 2)];
+        if (inCombat) StartCombat(storage, "RT1", "RT2");
+
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"hp":"0/4"}]}}""");
+
+        Assert.True(storage.WorldState.Map.Entities![0].Deleted);
+        Assert.Equal("RT2", storage.WorldState.Map.Entities[1].Symbol);
+        var body = Assert.Single(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+        Assert.Equal([6, 2], body.Position);
+        Assert.Contains("Крыса", storage.WorldState.Narrative?.KnownMonsters ?? []);
+    }
+
+    // Сбежал, ушёл, развеялся — мастер убирает существо с хитами выше 0: тела нет, в бестиарий не попадает.
+    [Fact]
+    public void FledEnemy_LeavesNoBody()
+    {
+        var storage = MakeStorage();
+        var rat = MakeEnemy("RT1", 6, 2);
+        rat.MonsterKey = "Крыса";
+        rat.Hp = "2/4";
+        storage.WorldState.Map.Entities = [rat, MakeEnemy("RT2", 7, 2)];
+        StartCombat(storage, "RT1", "RT2");
+
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"deleted":true}]}}""");
+
+        Assert.DoesNotContain(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+        Assert.DoesNotContain("Крыса", storage.WorldState.Narrative?.KnownMonsters ?? []);
+    }
+
+    // Хиты 0, но «Без сознания» — оглушён, жив: остаётся на карте, тела нет.
+    [Fact]
+    public void KnockedOutEnemy_StaysOnMap()
+    {
+        var storage = MakeStorage();
+        var bandit = MakeEnemy("BN1", 6, 2);
+        bandit.Hp = "5/11";
+        storage.WorldState.Map.Entities = [bandit];
+        StartCombat(storage, "BN1");
+
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"hp":"0/11","effects":[{"name":"Без сознания"}]}]}}""");
+
+        Assert.NotEqual(true, storage.WorldState.Map.Entities![0].Deleted);
+        Assert.DoesNotContain(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+    }
+
+    // Хиты до 0 сведены только механикой в тексте («[… RT1 3→0]») — та же смерть, что и патчем.
+    [Fact]
+    public void EnemyKilledByMechanicsText_LeavesBody()
+    {
+        var storage = MakeStorage();
+        var rat = MakeEnemy("RT1", 6, 2);
+        rat.Hp = "3/4";
+        storage.WorldState.Map.Entities = [rat];
+
+        Assert.True(storage.ReconcileMechanics("Крыса падает. [Атака 15, урон 5, RT1 3→0]"));
+
+        Assert.True(storage.WorldState.Map.Entities![0].Deleted);
+        Assert.Single(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+    }
+
     // ── Патч triggers по подключу ────────────────────────────────────────────
 
     [Fact]

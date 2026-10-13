@@ -273,9 +273,6 @@ public class Storage
     public void ApplyUpdateWorldState(string jsonUpdate)
     {
         using JsonDocument doc = JsonDocument.Parse(jsonUpdate);
-        // Шёл ли бой до патча: убитый последним ударом и «бой окончен» приходят одним патчем, и combat:null может
-        // примениться раньше, чем враг уберётся с карты (LeaveBodies).
-        _combatAtPatchStart = WorldState.Combat?.Active == true;
         // LenientStringListConverter: ИИ иногда шлёт список строк одной строкой ("aiInfo": "текст") —
         // принимаем как список из одного элемента, а не роняем весь ответ.
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new LenientStringListConverter() } };
@@ -423,10 +420,18 @@ public class Storage
             _notices.Add(L.W("[Доступен новый уровень: ПЕРСОНАЖ → «Новый уровень»]"));
     }
 
-    // Существо убрано с карты посреди боя (убито) — на его клетке остаётся тело: объект со всем, что мастер о нём
-    // знал (aiInfo — оберег, письмо, ключ), — иначе добыча и сюжетные зацепки исчезали вместе с врагом.
+    // Погибшее существо — на его клетке остаётся тело: объект со всем, что мастер о нём знал (aiInfo — оберег, письмо,
+    // ключ), — иначе добыча и сюжетные зацепки исчезали вместе с врагом; вид — в бестиарий журнала. Погиб — хиты 0
+    // (мастер ставит hp "0/N" или пишет «→0» в механике): игра сама снимает его с карты. Убран мастером с хитами
+    // выше 0 — сбежал, ушёл, развеялся: тела нет. Хиты 0 с «Без сознания»/«Стабилен» — оглушён, жив, остаётся.
     // Обыск и добычу ведёт мастер (§ Конец боя). Тело, которое мастер поставил сам, не дублируется.
-    private bool _combatAtPatchStart;
+    private static readonly string[] AliveAtZeroHp = ["без сознания", "unconscious", "стабилен", "stable"];
+
+    private static bool AtZeroHp(LivingEntity e) =>
+        e.Hp is { Length: > 0 } hp && int.TryParse(hp.Split('/')[0].Trim(), out int current) && current <= 0;
+
+    private static bool KnockedOut(LivingEntity e) =>
+        e.Effects?.Any(f => f.Deleted != true && AliveAtZeroHp.Any(n => f.Name?.Contains(n, StringComparison.OrdinalIgnoreCase) == true)) == true;
 
     // Страховка от забытого патча: мастер написал изменение хитов в механике записи («[… урон 4, WL2 11→7]»,
     // «HP 12→7»), а `hp` в патче не прислал — существо оставалось целым вопреки тексту. Только формат
@@ -451,14 +456,24 @@ public class Storage
                 target.Hp = parts.Length > 1 ? $"{to}/{parts[1].Trim()}" : to.ToString();
                 changed = true;
             }
+        if (changed) LeaveBodies(WorldState.Map.Entities?.Where(e => e.Deleted != true).ToList() ?? []);
         return changed;
     }
 
     private void LeaveBodies(List<LivingEntity> before)
     {
-        if (WorldState.Combat?.Active != true && !_combatAtPatchStart) return;
+        // Хиты 0 — погиб: снять с карты. Пометкой, а не удалением из списка: дальше в том же ответе мастер обращается
+        // к существам по id — номеру в списке, и он не должен съехать.
+        foreach (var fallen in WorldState.Map.Entities?.Where(e => e.Deleted != true && AtZeroHp(e) && !KnockedOut(e)) ?? [])
+            fallen.Deleted = true;
         var alive = WorldState.Map.Entities?.Where(e => e.Deleted != true).ToHashSet() ?? [];
-        foreach (var dead in before.Where(e => !alive.Contains(e) && e.Position is { Count: >= 2 }))
+        // Патч по id (шаг, хиты) заменяет объект существа новым (MergeInto) — по ссылке живая крыса после шага
+        // выглядела убитой: тело на клетке и вид в бестиарии. Жив — тот же символ на карте (символы уникальны).
+        var aliveSymbols = alive.Select(e => e.Symbol).Where(s => !string.IsNullOrEmpty(s)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        // Хиты — у нынешней версии существа (тот же патч мог свести их к 0), без неё — у прежней.
+        LivingEntity Current(LivingEntity e) => WorldState.Map.Entities?.FirstOrDefault(x => x.Symbol is { Length: > 0 } && string.Equals(x.Symbol, e.Symbol, StringComparison.OrdinalIgnoreCase)) ?? e;
+        foreach (var dead in before.Where(e => !alive.Contains(e) && !(e.Symbol is { Length: > 0 } s && aliveSymbols.Contains(s))
+                                               && AtZeroHp(Current(e)) && e.Position is { Count: >= 2 }))
         {
             if (dead == WorldState.Hero) continue;
             // Убитый вид — в бестиарий журнала (раньше пополнялся только проверкой знаний по просьбе мастера).
