@@ -22,6 +22,7 @@ public class MapSampleTests
         foreach (bool river in new[] { false, true })
         {
             var chunk = new MapChunk { Theme = theme.StartsWith("village") ? "village" : theme == "island" ? "building" : theme, Seed = seed, Style = "tavern" };
+            if (river && !MapChunk.IsOutdoorTheme(chunk.Theme)) continue;
             List<string> terrain;
             List<Room> rooms = [];
             List<Door> doors;
@@ -52,7 +53,7 @@ public class MapSampleTests
                 terrain = DungeonDecorator.Decorate(chunk, rooms, doors);
             }
             var sb = new StringBuilder();
-            sb.AppendLine($"theme={theme}, seed={seed}, river={river} (river applies to outdoor themes)");
+            sb.AppendLine($"theme={theme}, seed={seed}, river={river} ");
             foreach (string row in terrain.AsEnumerable().Reverse()) sb.AppendLine(row);
             sb.AppendLine("Legend (one cell = one character; north above):");
             foreach (char code in terrain.SelectMany(x => x).Distinct().Order())
