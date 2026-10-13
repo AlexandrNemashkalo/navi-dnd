@@ -85,9 +85,12 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         Redraw();
 
         string speechStatus = Speech.Status;
+        if (config.AiProvider != "codex") ClaudeLogin.Check(config);
+        string loginStatus = ClaudeLogin.Status;
         while (true)
         {
             if (speechStatus != Speech.Status) { speechStatus = Speech.Status; Redraw(); }
+            if (loginStatus != ClaudeLogin.Status) { loginStatus = ClaudeLogin.Status; Redraw(); }
             var (move, click, _) = ConsoleMouseReader.DrainMouseEvents();
             if (move is { } m)
             {
@@ -401,6 +404,14 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         OnlyFor("claude");
         Model(L.T("МОДЕЛЬ ГЕРОЯ"), L.T("Модель для создания героя по анкете: статы, снаряжение, способности.") + opusNote,
             () => config.ClaudeCreateNewGameModel, v => config.ClaudeCreateNewGameModel = v);
+        OnlyFor("claude");
+        // Вход — кнопкой: Enter открывает вход в браузере, состояние — справа (ClaudeLogin).
+        _items.Add(new Item(L.T("ВХОД В CLAUDE"), Kind.Toggle,
+            L.T("Enter — войти в аккаунт Claude: откроется браузер, войди и разреши доступ, игра сама проверит вход. Нужна подписка Claude (Pro или Max). Вход сохраняется в самом Claude Code — токен ниже не нужен."))
+        {
+            Get = () => ClaudeLogin.Status,
+            Step = _ => ClaudeLogin.Toggle(config),
+        });
         OnlyFor("claude");
         Text(L.T("ТОКЕН CLAUDE"), L.T("OAuth-токен Claude (claude setup-token). Хранится только у тебя в Storage/settings.json."),
             () => config.ClaudeOAuthToken, v => config.ClaudeOAuthToken = v, secret: true);

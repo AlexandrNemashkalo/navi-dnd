@@ -937,5 +937,14 @@
   "ТИТРЫ": "CREDITS",
   "СОЗДАТЕЛЬ": "CREATOR",
   "СПАСИБО": "THANKS",
-  "{0} — порт на macOS": "{0} — macOS port"
+  "{0} — порт на macOS": "{0} — macOS port",
+  "ВХОД В CLAUDE": "CLAUDE SIGN-IN",
+  "Enter — войти в аккаунт Claude: откроется браузер, войди и разреши доступ, игра сама проверит вход. Нужна подписка Claude (Pro или Max). Вход сохраняется в самом Claude Code — токен ниже не нужен.": "Enter — sign in to your Claude account: the browser opens, sign in and allow access, and the game checks the sign-in itself. A Claude subscription (Pro or Max) is required. The sign-in is kept by Claude Code itself — the token below is not needed.",
+  "вход отменён": "sign-in cancelled",
+  "проверка…": "checking…",
+  "выполнен: {0}": "signed in: {0}",
+  "выполнен": "signed in",
+  "не выполнен — Enter": "not signed in — Enter",
+  "claude не найден — укажи путь ниже": "claude not found — set the path below",
+  "войди в браузере… Enter — отмена": "sign in in the browser… Enter — cancel"
 }
