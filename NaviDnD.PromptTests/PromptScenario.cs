@@ -120,10 +120,13 @@ public static class PromptScenario
 
         using var cts = new CancellationTokenSource();
         var pollTask = AutoAnswerLoopAsync(rollPath, askPath, selectPath, storage, rollValue, askPlayerAnswer, trackerBox, cts.Token);
+        var logger = new AiLogger();
+        int logStart = File.Exists(logger.LogPath) ? File.ReadAllText(logger.LogPath).Length : 0;
         try
         {
             string response = await CallRealAiAsync(ruleSet, action, storage, userMessage, model);
-            return trackerBox.Value with { RawResponse = response };
+            string trace = File.Exists(logger.LogPath) ? File.ReadAllText(logger.LogPath)[logStart..] : "";
+            return trackerBox.Value with { RawResponse = response, ToolTrace = trace };
         }
         finally
         {
@@ -148,7 +151,7 @@ public static class PromptScenario
         {
             while (!ct.IsCancellationRequested)
             {
-                if (!box.Value.RollDiceTriggered && File.Exists(rollPath))
+                if (File.Exists(rollPath))
                 {
                     try
                     {
@@ -156,6 +159,8 @@ public static class PromptScenario
                         var req = JsonSerializer.Deserialize<RollRequest>(json, JsonOptions);
                         if (req != null && !req.Answered)
                         {
+                            ApplyToolHistory(storage, req.History);
+                            storage.Save();
                             req.Answered = true;
                             req.Roll1 = rollValue;
                             req.Answer = rollValue;
@@ -167,7 +172,7 @@ public static class PromptScenario
                     catch { /* файл мог быть в процессе записи MCP-сервером — попробуем на следующем тике */ }
                 }
 
-                if (!box.Value.AskPlayerTriggered && File.Exists(askPath))
+                if (File.Exists(askPath))
                 {
                     try
                     {
@@ -175,6 +180,8 @@ public static class PromptScenario
                         var req = JsonSerializer.Deserialize<AskPlayerRequest>(json, JsonOptions);
                         if (req != null && !req.Answered)
                         {
+                            ApplyToolHistory(storage, req.History);
+                            storage.Save();
                             req.Answered = true;
                             req.Answer = askPlayerAnswer ?? (req.Options is { Length: > 0 } ? req.Options[0] : "Продолжаю");
                             await File.WriteAllTextAsync(askPath, JsonSerializer.Serialize(req, JsonOptions), ct);
@@ -185,7 +192,7 @@ public static class PromptScenario
                 }
 
                 // select_target: выбираем первую допустимую клетку, не занятую героем (без UI — видимым считаем всё).
-                if (!box.Value.SelectTargetTriggered && File.Exists(selectPath))
+                if (File.Exists(selectPath))
                 {
                     try
                     {
@@ -193,6 +200,8 @@ public static class PromptScenario
                         var req = JsonSerializer.Deserialize<TargetSelectionRequest>(json, JsonOptions);
                         if (req != null && !req.Answered)
                         {
+                            ApplyToolHistory(storage, req.History);
+                            storage.Save();
                             var ws = storage.WorldState;
                             var heroPos = ws.Hero?.Position;
                             var cell = TargetGeometry.SelectableCells(ws, req, (_, _) => true, (_, _) => true)
@@ -214,6 +223,14 @@ public static class PromptScenario
             }
         }
         catch (OperationCanceledException) { }
+    }
+
+    // Same order as streamed UI history: patches precede the answer to the tool.
+    internal static void ApplyToolHistory(Storage storage, IEnumerable<RequestHistoryEntry> history)
+    {
+        foreach (var entry in history)
+            if (entry.Patch is { ValueKind: JsonValueKind.Object } patch)
+                storage.ApplyUpdateWorldState(patch.GetRawText());
     }
 
     private static void TryDelete(string path)
@@ -332,4 +349,4 @@ public record PromptResult(string RawResponse, List<string> HistoryTexts, JsonOb
         HistoryTexts.Any(t => t.Contains(substring, StringComparison.OrdinalIgnoreCase));
 }
 
-public record AutoAnswerResult(string RawResponse, bool RollDiceTriggered, bool AskPlayerTriggered, bool SelectTargetTriggered = false);
+public record AutoAnswerResult(string RawResponse, bool RollDiceTriggered, bool AskPlayerTriggered, bool SelectTargetTriggered = false, string ToolTrace = "");

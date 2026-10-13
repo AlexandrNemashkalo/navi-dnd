@@ -264,4 +264,28 @@ public class EffectsPromptTests
     }
 
     private static int ParseHp(string hp) => int.Parse(hp.Split('/')[0]);
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task RestKeepsCurseAndDiseaseAndRemovesOnlyEligibleEffects(bool isLong)
+    {
+        var storage = PromptScenario.LoadUiTestFixture("burning_effect_game.json");
+        storage.WorldState.Hero!.Effects = [
+            new() { Name = "Щит", Description = "Временная магическая защита", ExpiresAtRound = storage.WorldState.Time.TotalRounds + 1 },
+            new() { Name = "Усталость", Description = "Проходит после долгого отдыха", UntilLongRest = true },
+            new() { Name = "Проклятие", Description = "Проклятие чёрного алтаря. Только Снятие проклятия; отдых не помогает." },
+            new() { Name = "Болезнь", Description = "Гниющая лихорадка. До магического исцеления; отдых не лечит." }];
+        string action = isLong ? "разбиваю безопасный лагерь и отдыхаю восемь часов" : "сижу в безопасном лагере и отдыхаю один час";
+        var result = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage,
+            new AiContextBuilder(storage.WorldState).MinimalState(action));
+        _output.WriteLine(result.RawResponse);
+        PromptScenario.ApplyAndParse(storage, result.RawResponse);
+        var effects = storage.WorldState.Hero.Effects ?? [];
+        Assert.DoesNotContain(effects, e => e.Deleted != true && e.Name == "Щит");
+        Assert.Equal(!isLong, effects.Any(e => e.Deleted != true && e.Name == "Усталость"));
+        Assert.Contains(effects, e => e.Deleted != true && e.Name == "Проклятие");
+        Assert.Contains(effects, e => e.Deleted != true && e.Name == "Болезнь");
+        Assert.Contains(isLong ? "long_rest →" : "short_rest →", result.ToolTrace);
+    }
+
 }

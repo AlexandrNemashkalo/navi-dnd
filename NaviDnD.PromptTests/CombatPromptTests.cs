@@ -59,6 +59,8 @@ public class CombatPromptTests
         var parsed = PromptScenario.ApplyAndParse(storage, result.RawResponse);
         Assert.True(parsed.HistoryTexts.Count > 0, "Ход врага должен быть описан в history.");
 
+        Assert.Contains("calculate_movement →", result.ToolTrace);
+        Assert.NotEqual(new List<int> { 5, 3 }, storage.WorldState.Map.Entities![0].Position);
         Assert.Equal(heroSymbol, storage.WorldState.Combat?.CurrentTurn);
         Assert.True(storage.WorldState.Time.TotalRounds > initialRound,
             $"Раунд должен был продвинуться: было {initialRound}, стало {storage.WorldState.Time.TotalRounds}.");
@@ -121,6 +123,58 @@ public class CombatPromptTests
         Assert.True(storage.WorldState.Combat?.Active);
         foreach (string symbol in new[] { "HRO", "OR1", "OR2", "OR3" })
             Assert.Contains(storage.WorldState.Combat!.Initiative!, i => i.Symbol == symbol);
+    }
+
+    [Fact]
+    public async Task ShieldReactionConsumesSlotAndReaction()
+    {
+        var storage = PromptScenario.LoadUiTestFixture("opportunity_attack_game.json");
+        var hero = storage.WorldState.Hero!;
+        hero.Spells = [new() { Name = "Щит", Level = 1, Prepared = true }];
+        hero.Resources = [new() { Name = "Ячейки 1 круга", Value = "2/2", Category = ResourceCategories.Spells }];
+        hero.Stats.Add(new() { Name = "Класс", Key = StatKeys.Class, Value = "Волшебник" });
+        hero.Abilities = [new() { Name = "Щит", Description = "При попадании атаки реакцией потрать ячейку и повысь КД на 5 до начала следующего хода." }];
+        var orc = storage.WorldState.Map.Entities![0];
+        orc.Triggers = new CellTriggers { OnRound = new TriggerEffect { Effect = "Орк атакует героя секирой: итог атаки 17 против КД 15, урон 5 рубящий; предложи доступную реакцию Щит до урона." } };
+        var result = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage,
+            new AiContextBuilder(storage.WorldState).TriggerState([(orc, "onRound")], [], []), askPlayerAnswer: "Щит");
+        _output.WriteLine(result.RawResponse);
+        PromptScenario.ApplyAndParse(storage, result.RawResponse);
+        Assert.Contains("use_reaction →", result.ToolTrace);
+        Assert.Equal("1/2", storage.WorldState.Hero!.Resources[0].Value);
+        Assert.Equal(0, storage.WorldState.Hero.Actions![2].Value);
+        Assert.Equal("10/10", storage.WorldState.Hero.Hp);
+        Assert.Contains(storage.WorldState.Hero.Effects ?? [], e => e.Deleted != true && e.Name.Contains("Щит"));
+    }
+
+    [Fact]
+    public async Task LivingEnemyFleesWithoutLeavingBody()
+    {
+        var storage = PromptScenario.LoadUiTestFixture("opportunity_attack_game.json");
+        var enemy = storage.WorldState.Map.Entities![0];
+        enemy.MonsterKey = "Орк";
+        enemy.Triggers = new CellTriggers { OnRound = new TriggerEffect { Effect = "Орк сдаётся, герой отпускает его. Орк живым уходит из локации, без атаки по возможности; убери его с карты и закончи бой." } };
+        var result = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage,
+            new AiContextBuilder(storage.WorldState).TriggerState([(enemy, "onRound")], [], []));
+        _output.WriteLine(result.RawResponse);
+        PromptScenario.ApplyAndParse(storage, result.RawResponse);
+        Assert.True(storage.WorldState.Map.Entities![0].Deleted);
+        Assert.True(int.Parse(storage.WorldState.Map.Entities[0].Hp.Split('/')[0]) > 0);
+        Assert.DoesNotContain(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+        Assert.NotEqual(true, storage.WorldState.Combat?.Active);
+    }
+
+    [Fact]
+    public async Task AttackingEndsInvisibility()
+    {
+        var storage = PromptScenario.LoadUiTestFixture("opportunity_attack_game.json");
+        storage.WorldState.Hero!.Effects = [new() { Name = "Невидимость", Description = "Заклинание Невидимость: до часа или до атаки/заклинания", ExpiresAtRound = storage.WorldState.Time.TotalRounds + 600 }];
+        var result = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage,
+            new AiContextBuilder(storage.WorldState).MinimalState("атакую орка длинным мечом"), rollValue: 20);
+        _output.WriteLine(result.RawResponse);
+        PromptScenario.ApplyAndParse(storage, result.RawResponse);
+        Assert.True(result.RollDiceTriggered);
+        Assert.DoesNotContain(storage.WorldState.Hero.Effects ?? [], e => e.Deleted != true && e.Name == "Невидимость");
     }
 
 }
