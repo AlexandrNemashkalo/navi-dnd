@@ -1,4 +1,5 @@
 using NaviDnD.Clients;
+using NaviDnD.Data.Models;
 using Xunit.Abstractions;
 
 namespace NaviDnD.PromptTests;
@@ -70,4 +71,56 @@ public class CombatPromptTests
 
         PromptScenario.RecordAsMock(result.RawResponse, mockResponsesFolder: "EnemyAttack", action: "SendAction");
     }
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task MeleeFinisher_DeathOrKnockoutChangesState(bool nonlethal)
+    {
+        var storage = PromptScenario.LoadUiTestFixture("opportunity_attack_game.json");
+        var enemy = storage.WorldState.Map.Entities![0];
+        enemy.Hp = "1/10";
+        enemy.MonsterKey = "Орк";
+        string request = nonlethal ? "бью орка мечом плашмя, хочу оглушить, а не убить" : "бью орка длинным мечом, чтобы убить";
+        var result = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage,
+            new AiContextBuilder(storage.WorldState).MinimalState(request), rollValue: 20);
+        _output.WriteLine(result.RawResponse);
+        Assert.True(result.RollDiceTriggered);
+        PromptScenario.ApplyAndParse(storage, result.RawResponse);
+        enemy = storage.WorldState.Map.Entities![0];
+        Assert.Equal(0, int.Parse(enemy.Hp.Split('/')[0]));
+        if (nonlethal)
+        {
+            Assert.NotEqual(true, enemy.Deleted);
+            Assert.Contains(enemy.Effects ?? [], e => e.Deleted != true);
+            Assert.DoesNotContain(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+        }
+        else
+        {
+            Assert.True(enemy.Deleted);
+            Assert.Contains(storage.WorldState.Map.Objects ?? [], o => o.Name == L.WF("Тело: {0}", enemy.Name));
+            Assert.Contains("Орк", storage.WorldState.Narrative?.KnownMonsters ?? []);
+            Assert.NotEqual(true, storage.WorldState.Combat?.Active);
+        }
+    }
+
+    [Fact]
+    public async Task CombatStartsWithThreeHostilesWhenOnlyOneSeesHero()
+    {
+        var storage = PromptScenario.LoadUiTestFixture("opportunity_attack_game.json");
+        storage.WorldState.Combat = null;
+        var watcher = storage.WorldState.Map.Entities![0];
+        watcher.Symbol = "OR1";
+        watcher.VisionFt = 60;
+        watcher.Triggers = new CellTriggers { Spotted = new TriggerEffect { Effect = "Три орка одной шайки нападают на героя." } };
+        storage.WorldState.Map.Entities.Add(new LivingEntity { Symbol = "OR2", Name = "Орк-лучник", Hp = "10/10", Position = [5, 5], VisionFt = 5, MonsterKey = "Орк", Triggers = watcher.Triggers });
+        storage.WorldState.Map.Entities.Add(new LivingEntity { Symbol = "OR3", Name = "Орк-копейщик", Hp = "10/10", Position = [5, 1], VisionFt = 5, MonsterKey = "Орк", Triggers = watcher.Triggers });
+        var result = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage,
+            new AiContextBuilder(storage.WorldState).TriggerState([(watcher, "spotted")], [], []));
+        _output.WriteLine(result.RawResponse);
+        PromptScenario.ApplyAndParse(storage, result.RawResponse);
+        Assert.True(storage.WorldState.Combat?.Active);
+        foreach (string symbol in new[] { "HRO", "OR1", "OR2", "OR3" })
+            Assert.Contains(storage.WorldState.Combat!.Initiative!, i => i.Symbol == symbol);
+    }
+
 }

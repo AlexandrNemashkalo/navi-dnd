@@ -562,6 +562,20 @@ public class AiContextBuilder
             sb.AppendLine($"  {listKey}: {node.ToJsonString(_json)}");
         }
 
+        // Данные возможных участников, а не только существа, первым увидевшего героя.
+        if (triggers.Any(t => t.triggerType == "spotted"))
+        {
+            var sent = triggers.Select(t => t.entity).ToHashSet();
+            foreach (var (entity, id) in (_ws.Map.Entities ?? []).Select((e, i) => (e, i)))
+            {
+                if (entity.Deleted == true || sent.Contains(entity)
+                    || (entity.Triggers?.Spotted == null && _ws.Combat?.Initiative?.Any(i => i.Symbol == entity.Symbol) != true)) continue;
+                var node = JsonSerializer.SerializeToNode(entity, entity.GetType(), _json)!.AsObject();
+                node["id"] = id;
+                sb.AppendLine($"  Возможный участник (не отдельный триггер), map.entities: {node.ToJsonString(_json)}");
+            }
+        }
+
         foreach (var area in areaTriggers)
         {
             sb.AppendLine($"- onExplored");

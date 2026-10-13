@@ -491,4 +491,21 @@ public class EncounterTriggerTests
         Move(storage, "MoveEast");
         Assert.Equal(["BRN"], Types(Move(storage, "MoveEast"), "spotted"));
     }
+    [Fact]
+    public void CombatTriggerIncludesOtherHostilesEvenWhenTheyCannotSeeHero()
+    {
+        var storage = MakeStorage();
+        var watcher = MakeEnemy("GB1", 6, 2);
+        var other = MakeEnemy("GB2", 9, 9);
+        other.VisionFt = 5;
+        other.Hp = "7/7";
+        storage.WorldState.Map.Entities = [watcher, other];
+        Assert.False(MovementCalculator.EntitySeesHero(storage.WorldState, other));
+        string context = new NaviDnD.Clients.AiContextBuilder(storage.WorldState)
+            .TriggerState([(watcher, "spotted")], [], []);
+        Assert.Contains("GB2", context);
+        Assert.Contains("7/7", context);
+        Assert.Contains("\"id\":1", context);
+    }
+
 }
