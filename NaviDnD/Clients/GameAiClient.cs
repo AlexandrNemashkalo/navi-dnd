@@ -358,7 +358,7 @@ public class GameAiClient
     {
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(PopulateChunk));
         var ctx = new AiContextBuilder(_settings, _storage.VisibleCells);
-        string userMessage = ctx.MinimalState("(новый блок локации — наполни его)") + "\n\n" + ctx.LocationPlan(chunk) + "\n" + ctx.ChunkState(chunk);
+        string userMessage = "## Текущее состояние\n" + ctx.PopulationState() + "\n" + ctx.LocationPlan(chunk) + "\n" + ctx.ChunkState(chunk);
         string response = "";
         try
         {

@@ -345,6 +345,41 @@ public class AiContextBuilder
                 yield return (side, n);
     }
 
+    // Наполнение блока: замысел мастера, а не лист героя. Сюжетные нити и NPC — с dmNotes: без них блок наполнялся
+    // в разрез с задуманным при старте (головоломка «свет и сталь» превращалась в «воду и огонь»). От героя —
+    // уровень для силы врагов и пассивное Восприятие для скрытности ловушек.
+    public string PopulationState()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"round:{_ws.Time.TotalRounds} day:{_ws.Time.Day} timeOfDay:{_ws.Time.PartOfDay}");
+        if (_ws.Hero is { } hero)
+        {
+            string who = string.Join(", ", new[] { hero.Stat(StatKeys.Race)?.Value, hero.Stat(StatKeys.Class)?.Value, LevelText(hero) }
+                .Where(x => !string.IsNullOrEmpty(x)));
+            var perception = hero.Skills?.FirstOrDefault(s => s.Deleted != true && SkillNames.IsPerception(s.Name));
+            int passive = 10 + System.Text.RegularExpressions.Regex.Matches(perception?.Value ?? "", @"[+\-−]?\d+")
+                .Sum(m => int.TryParse(m.Value.Replace('−', '-'), out int v) ? v : 0);
+            sb.AppendLine($"hero: {hero.Name}{(who.Length > 0 ? $" ({who})" : "")} symbol:{hero.Symbol} position:{(hero.Position is { Count: >= 2 } hp ? $"[{hp[0]},{hp[1]}]" : "?")} пассивное Восприятие:{passive}");
+        }
+        if (WorldLine() is { } worldLine) sb.AppendLine(worldLine);
+        if (_ws.Narrative is { } n)
+        {
+            if (n.Style is { Length: > 0 } style) sb.AppendLine($"style: {style}");
+            if (n.CurrentArc is { Length: > 0 } arc) sb.AppendLine($"arc: {arc}");
+            if (n.World is { Length: > 0 } world) sb.AppendLine($"world: {world}");
+            foreach (var t in n.PlotThreads?.Where(x => x.Deleted != true) ?? [])
+                sb.AppendLine($"нить «{t.Name}» ({t.Status}): {t.Description}{(t.DmNotes is { Length: > 0 } dm ? $" | мастер: {dm}" : "")}");
+            foreach (var npc in n.Npcs?.Where(x => x.Deleted != true) ?? [])
+                sb.AppendLine($"npc «{npc.Name}» ({npc.Attitude}): {npc.Notes}{(npc.DmNotes is { Length: > 0 } dm ? $" | мастер: {dm}" : "")}");
+        }
+        // Уникальное, что уже есть на карте, — чтобы не повторить NPC и сюжетные предметы.
+        if (_ws.Map.Entities is { Count: > 0 } ent)
+            sb.AppendLine($"map.entities: {Join(ent.Where(x => x.Deleted != true).Select(x => x.Name).Distinct())}");
+        if (_ws.Map.Objects is { Count: > 0 } obj)
+            sb.AppendLine($"map.objects: {Join(obj.Where(x => x.Deleted != true).Select(x => x.Name).Distinct())}");
+        return sb.ToString();
+    }
+
     public string LocationPlan(MapChunk? current = null)
     {
         if (_ws.Map.Chunks is not { Count: > 0 } chunks) return "";
