@@ -25,3 +25,6 @@ dotnet test NaviDnD.Tests/NaviDnD.Tests.csproj
 Выбирай сценарий через `--filter`. Для Codex задай `NAVIDND_PROMPT_PROVIDER=codex`, `NAVIDND_CODEX_MODEL` и при необходимости `NAVIDND_CODEX_REASONING`; по умолчанию используется Claude. Пример: [codex.md](codex.md).
 
 `PromptScenario.ApplyAndParse` применяет ответ по протоколу движка. Проверяются игровые последствия: экипировка, хиты, цели и вызовы инструментов. Автоответчик имитирует броски и выбор игрока. `NAVIDND_RECORD_PROMPTS=1` обновляет моки — включай намеренно и проверяй ответ перед коммитом.
+## Образцы тактических карт
+
+`dotnet test NaviDnD.Tests/NaviDnD.Tests.csproj --filter FullyQualifiedName~MapSampleTests` создаёт 70 текстовых карт с легендой и мебелью в `artifacts/map-samples/` (пять сидов каждого варианта, без нейронки). `MapConnectivityTests` проверяет выходы/двери и броды, `MapCompatibilityTests` — отпечатки старых building/village без новых опций. План `plan_location` поддерживает `moat: true` для building на земле и `layout: road|square|river|palisade` для village; параметры влияют на готовую геометрию, дополнительных полей сохранения нет.
