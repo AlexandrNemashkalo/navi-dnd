@@ -124,6 +124,18 @@ public class SpeechTests
         Assert.Contains("*стражник*", ssml);
         Assert.DoesNotContain("HP", ssml);
     }
+    // Ударение «+» — только для озвучки: на экране его нет и в обычном тексте (без <speak>), в том числе после
+    // ударной гласной; плюсы механики (+3, 1к8+3) остаются.
+    [Theory]
+    [InlineData("Принято: впредь — Ге+ндальф.", "Принято: впредь — Гендальф.")]
+    [InlineData("Г+ендальф и з+амок", "Гендальф и замок")]
+    [InlineData("+Эльда кивает. [Сила +3, урон 1к8+3, КД 13+2]", "Эльда кивает. [Сила +3, урон 1к8+3, КД 13+2]")]
+    public void DisplayTextDropsStressMarksOutsideSsml(string raw, string expected)
+    {
+        var speech = typeof(AppConfig).Assembly.GetType("NaviDnD.Helpers.Speech")!;
+        Assert.Equal(expected, (string)speech.GetMethod("DisplayText", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [raw])!);
+    }
+
     [Theory]
     [InlineData("**Гоблин** атакует! [Атака 15, урон 4]", "Гоблин атакует!")]
     [InlineData("Впереди\n\rтёмный   лес.", "Впереди тёмный лес.")]

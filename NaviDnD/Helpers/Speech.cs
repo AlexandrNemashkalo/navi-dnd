@@ -190,12 +190,15 @@ internal static class Speech
 
     internal static string DisplayText(string text)
     {
+        // Ударение «+» нужно только озвучке — на экране его нет, и в SSML, и в обычном тексте (мастер, поправив
+        // произношение по просьбе игрока, пишет «Ге+ндальф» и без <speak>; знак бывает и после ударной гласной).
+        // Только внутри русского слова: «+3», «1к8+3» в механике остаются.
+        text = Regex.Replace(text, @"(?<=^|[^\p{L}\p{N}]|\p{IsCyrillic})\+(?=\p{IsCyrillic})", "");
         if (!text.TrimStart().StartsWith("<speak", StringComparison.OrdinalIgnoreCase)) return text;
         // Сохраняем механические пометки на экране, но убираем теги и маркеры произношения.
         string plain = Regex.Replace(text, @"<(?:break\b[^>]*|/(?:p|s))>", " ", RegexOptions.IgnoreCase);
         plain = Regex.Replace(plain, "<[^>]*>", "");
         plain = System.Net.WebUtility.HtmlDecode(plain);
-        plain = Regex.Replace(plain, @"\+(?=[аеёиоуыэюяАЕЁИОУЫЭЮЯ])", "");
         return plain.Replace("*", "");
     }
 
