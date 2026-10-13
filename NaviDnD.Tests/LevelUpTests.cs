@@ -1,4 +1,4 @@
-using NaviDnD.Data.Models;
+﻿using NaviDnD.Data.Models;
 using NaviDnD.Helpers;
 
 namespace NaviDnD.Tests;
@@ -331,4 +331,38 @@ public class LevelUpTests
         Assert.Contains(after.Spells!, sp => sp.Name == "Щит");
         Assert.Equal("28/36", after.Hp);
     }
+    [Theory]
+    [InlineData("Воин", 2, 10)]
+    [InlineData("Воин", 3, 10)]
+    [InlineData("Воин", 4, 10)]
+    [InlineData("Воин", 5, 10)]
+    [InlineData("Волшебник", 2, 6)]
+    [InlineData("Волшебник", 3, 6)]
+    [InlineData("Волшебник", 4, 6)]
+    [InlineData("Волшебник", 5, 6)]
+    public void LevelsTwoToFiveApplyNumbersResourcesAndAbilitiesWithoutRepeatedPreviewGrowth(string cls, int level, int die)
+    {
+        var hero = Fighter(level - 1, LevelRules.Current.NextXp(level - 1)!.Value);
+        hero.Stat(StatKeys.Class)!.Value = cls;
+        var up = new LevelUp(hero, LevelRules.Current);
+        up.ChooseAverage();
+        string ability = cls == "Воин" ? (level == 2 ? "Всплеск действий" : level == 3 ? "Улучшенный критический удар" : level == 5 ? "Дополнительная атака" : "Улучшение характеристик") : "Магические исследования";
+        int[] slots = level switch { 2 => [3, 0, 0], 3 => [4, 2, 0], 4 => [4, 3, 0], _ => [4, 3, 2] };
+        var patch = System.Text.Json.JsonSerializer.Serialize(new { hero = new {
+            abilities = new[] { new { name = ability, description = "Новая способность" } },
+            resources = cls == "Волшебник" ? slots.Select((n, i) => new { name = $"Ячейки {i+1} круга", value = $"{n}/{n}", category = ResourceCategories.Spells }).ToArray() : []
+        } });
+        var after = up.Apply(patch);
+        var again = up.Apply(patch);
+        Assert.Equal(level, after.Level);
+        Assert.Equal($"{20+die/2+1+2}/{28+die/2+1+2}", after.Hp);
+        Assert.Equal(level == 5 ? "+3" : "+2", AbilityNames.Proficiency(after)!.Value);
+        Assert.Single(after.Abilities, a => a.Name == ability);
+        Assert.Equal(System.Text.Json.JsonSerializer.Serialize(after), System.Text.Json.JsonSerializer.Serialize(again));
+        Assert.Single(hero.Abilities); // исходный лист не меняется
+        if (cls == "Волшебник")
+            for (int i = 0; i < slots.Length; i++) Assert.Equal($"{slots[i]}/{slots[i]}", after.Resources[i].Value);
+    }
+
 }
+
