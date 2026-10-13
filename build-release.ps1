@@ -159,7 +159,7 @@ function WriteReleaseMetadata($updates) {
     if (Test-Path -LiteralPath $macUpdatesPath) {
         $macBase = (Get-Content -LiteralPath $macUpdatesPath -Raw -Encoding UTF8 | ConvertFrom-Json).base.version
         $links = @($links[0]) + @(
-            [ordered]@{ name = [regex]::Unescape('🍎 Скачать для macOS (Apple Silicon)'); url = "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/packages/generic/NaviDnD-macOS/$macBase/NaviDnD-macOS-arm64-$macBase.zip"; link_type = 'package' }
+            [ordered]@{ name = [regex]::Unescape('\ud83c\udf4e \u0421\u043a\u0430\u0447\u0430\u0442\u044c \u0434\u043b\u044f macOS (Apple Silicon)'); url = "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/packages/generic/NaviDnD-macOS/$macBase/NaviDnD-macOS-arm64-$macBase.zip"; link_type = 'package' }
             [ordered]@{ name = 'NaviDnD-macOS-updates.json'; url = (RawUrl "v$version" 'releases-macos/NaviDnD-macOS-updates.json') }
         ) + @($links | Select-Object -Skip 1)
     }
