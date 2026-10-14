@@ -820,7 +820,10 @@ public class AiContextBuilder
         if (set.Contains("history"))
             root["history"] = _ws.History?.TakeLast(MaxHistoryForAi).Select(m => new { m.Author, m.Text });
 
-        return JsonSerializer.Serialize(root, _json);
+        var serialized = JsonSerializer.SerializeToNode(root, _json)!;
+        if (serialized["narrative"]?["npcs"] is JsonArray npcs)
+            foreach (var npc in npcs.OfType<JsonObject>()) npc.Remove("speechVoice");
+        return serialized.ToJsonString(_json);
     }
 
     // ─── Filter helpers ────────────────────────────────────────────────────

@@ -100,6 +100,7 @@ class Program
         Music.Volume = config.MusicVolume / 100f;
 
         var storage = new Storage { SaveExploredCells = config.SaveExploredCells };
+        Speech.WorldProvider = () => storage.WorldState;
         string? testStatePath = Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE");
         Func<bool> hasSave = testStatePath != null ? () => File.Exists(testStatePath) : Storage.HasSave;
         // Игры, начатые до карты мира, при загрузке привязываются к активному миру (GameWorld.EnsureLink).

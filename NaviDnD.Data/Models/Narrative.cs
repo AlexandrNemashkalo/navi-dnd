@@ -56,6 +56,10 @@ public class NpcRecord : IPatchable
 
     public string Name { get; set; }
 
+    // Stable keys; gender is supplied as a fact, voice and pitch are assigned only by the engine.
+    public string? Gender { get; set; } // male | female | null
+    public NpcSpeechVoice? SpeechVoice { get; set; }
+
     /// <summary>Отношение к герою: дружелюбный / нейтральный / враждебный / неизвестно</summary>
     public string Attitude { get; set; }
 
@@ -73,4 +77,11 @@ public class NpcRecord : IPatchable
     /// Движок только дописывает новые строки (Storage.MergeInto), старые не теряются при перезаписи notes.
     /// </summary>
     public List<string>? Memory { get; set; }
+}
+
+public class NpcSpeechVoice
+{
+    public string Language { get; set; } = "ru";
+    public string Speaker { get; set; } = "eugene";
+    public string Pitch { get; set; } = "medium";
 }

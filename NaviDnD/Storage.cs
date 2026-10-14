@@ -384,6 +384,7 @@ public class Storage
         NormalizeKeys();
         L.SetWorld(WorldState.Language);
         FillMissingStats();
+        NpcVoices.Assign(WorldState);
     }
 
     // Apply aliases once per reference; sequential replacement would corrupt symbol swaps.
@@ -1065,7 +1066,11 @@ public class Storage
                     WorldState.Narrative.PlotThreads = PatchByIndex(WorldState.Narrative.PlotThreads, prop.Value, options);
                     break;
                 case "npcs":
-                    WorldState.Narrative.Npcs = PatchByIndex(WorldState.Narrative.Npcs, prop.Value, options);
+                    var npcs = JsonNode.Parse(prop.Value.GetRawText())!.AsArray();
+                    if (!_fromSave)
+                        foreach (var npc in npcs.OfType<JsonObject>())
+                            foreach (var key in npc.Select(p => p.Key).Where(k => k.Equals("speechVoice", StringComparison.OrdinalIgnoreCase)).ToList()) npc.Remove(key);
+                    WorldState.Narrative.Npcs = PatchByIndex(WorldState.Narrative.Npcs, JsonSerializer.SerializeToElement(npcs), options);
                     break;
                 // Бестиарий только растёт: список от мастера — добавка к известному (виды, внесённые движком после
                 // убийства, иначе стирались бы его следующим «весь список»). Знание не забывается — null не чистит.

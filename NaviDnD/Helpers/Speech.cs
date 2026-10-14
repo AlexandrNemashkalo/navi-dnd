@@ -1,3 +1,4 @@
+using NaviDnD.Data.Models;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
 using System.Xml;
@@ -17,6 +18,7 @@ internal static class Speech
     private static CancellationTokenSource session = new();
     private static readonly CancellationTokenSource Lifetime = new();
     private static AppConfig? config;
+    public static Func<WorldState?>? WorldProvider { get; set; }
     private static string status = L.T("Выключена");
     private static int started;
     private static volatile bool _windowMinimized;
@@ -108,7 +110,7 @@ internal static class Speech
 
     // Английские голоса модели v3_en (по высоте тона: en_57/en_31/en_20 — мужские, en_21/en_11 — женские).
     public static readonly string[] EnglishVoices = ["en_57", "en_31", "en_20", "en_21", "en_11"];
-    private const string EnglishNpcMale = "en_23", EnglishNpcFemale = "en_6";
+    private const string EnglishNpcMale = "en_23";
 
     public static void Speak(string text, string? author = null, string? speechText = null)
     {
@@ -117,8 +119,9 @@ internal static class Speech
         if (text.Length == 0) return;
         string? ssml = ValidateSsml(speechText);
         // Голос — языка игры (рассказ мастера на нём): русская или английская модель.
-        string voice = SelectVoice(author, ssml, L.WorldIsEnglish ? config.SileroVoiceEn : config.SileroVoice, L.WorldIsEnglish);
-        ssml = ApplyVoiceStyle(text, ssml, author);
+        var assigned = NpcVoices.Find(WorldProvider?.Invoke(), author);
+        string voice = SelectVoice(author, ssml, L.WorldIsEnglish ? config.SileroVoiceEn : config.SileroVoice, L.WorldIsEnglish, assigned);
+        ssml = ApplyVoiceStyle(text, ssml, author, assigned);
         lock (Gate)
             if (!_windowMinimized) Queue.Writer.TryWrite((text, ssml, voice, false, session.Token));
     }
@@ -128,29 +131,28 @@ internal static class Speech
     {
         if (config?.SpeechEnabled != true) return;
         lock (Gate)
-            if (!_windowMinimized) Queue.Writer.TryWrite((text, ApplyVoiceStyle(text, null, null), voice, false, session.Token));
+            if (!_windowMinimized) Queue.Writer.TryWrite((text, ApplyVoiceStyle(text, null, null, null), voice, false, session.Token));
     }
 
     private static bool IsNarrator(string? author) => string.IsNullOrWhiteSpace(author)
         || author.Equals("DM", StringComparison.OrdinalIgnoreCase) || author is "Мастер" or "Рассказчик" or "Narrator";
 
-    internal static string SelectVoice(string? author, string? ssml, string narratorVoice, bool english = false)
+    internal static string SelectVoice(string? author, string? ssml, string narratorVoice, bool english = false, NpcSpeechVoice? assigned = null)
     {
         if (IsNarrator(author)) return narratorVoice;
-        string? kind = ssml == null ? null : XElement.Parse(ssml).Attribute("voice")?.Value;
-        return english ? kind == "female" ? EnglishNpcFemale : EnglishNpcMale : kind == "female" ? "baya" : "eugene";
+        return assigned?.Speaker ?? (english ? EnglishNpcMale : "eugene");
     }
 
-    internal static string ApplyVoiceStyle(string text, string? ssml, string? author)
+    internal static string ApplyVoiceStyle(string text, string? ssml, string? author, NpcSpeechVoice? assigned = null)
     {
         var root = ssml == null ? new XElement("speak", text) : XElement.Parse(ssml);
         root.Attribute("voice")?.Remove(); // служебный выбор голоса обрабатывается приложением
-        if (IsNarrator(author))
+        if (IsNarrator(author) || assigned != null)
         {
             foreach (var prosody in root.Descendants("prosody")) prosody.Attribute("pitch")?.Remove();
             var nodes = root.Nodes().ToList();
             root.RemoveNodes();
-            root.Add(new XElement("prosody", new XAttribute("pitch", "low"), nodes));
+            root.Add(new XElement("prosody", new XAttribute("pitch", IsNarrator(author) ? "low" : assigned!.Pitch), nodes));
         }
         return root.ToString(SaveOptions.DisableFormatting);
     }

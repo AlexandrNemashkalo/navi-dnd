@@ -168,7 +168,7 @@ public static class StorageMigration
         Func<JsonObject, JsonObject> World,
         Action<JsonObject> Location);
 
-    private static readonly Step[] Steps = [Migration1.Step, Migration2.Step];
+    private static readonly Step[] Steps = [Migration1.Step, Migration2.Step, Migration3.Step];
 
     private static class Migration1
     {
@@ -307,6 +307,24 @@ public static class StorageMigration
             if (level != null && Get(hero, "level") is null) Set(hero, "level", level.Value, "level");
             if (xp != null && Get(hero, "xp") is null) Set(hero, "xp", xp.Value, "xp");
             return hero;
+        }
+    }
+
+    private static class Migration3
+    {
+        // 2 → 3: persisted NPC voice and pitch; assignment is deterministic and never changes personal settings.
+        public static readonly Step Step = new(SaveFile, notes => notes, hero => hero, world => world, _ => { });
+        private static JsonObject SaveFile(JsonObject save)
+        {
+            if (Get(save,"narrative") is not JsonObject narrative || Get(narrative,"npcs") is not JsonArray npcs) return save;
+            string language=Get(save,"language")?.ToString()??"ru";
+            foreach(var npc in npcs.OfType<JsonObject>())
+            {
+                if(Get(npc,"speechVoice")!=null || Get(npc,"name") is not { } name) continue;
+                var voice=NpcVoices.Create(name.ToString(),Get(npc,"gender")?.ToString(),language);
+                Set(npc,"speechVoice",new JsonObject { ["language"]=voice.Language,["speaker"]=voice.Speaker,["pitch"]=voice.Pitch });
+            }
+            return save;
         }
     }
 

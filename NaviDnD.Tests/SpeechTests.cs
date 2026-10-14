@@ -9,16 +9,16 @@ public class SpeechTests
 {
     [Theory]
     [InlineData("DM", "<speak voice=\"female\">Текст.</speak>", "eugene", false)]
-    [InlineData("Анна", "<speak voice=\"female\">Текст.</speak>", "baya", false)]
+    [InlineData("Анна", "<speak voice=\"female\">Текст.</speak>", "eugene", false)]
     [InlineData("Борис", "<speak voice=\"male\">Текст.</speak>", "eugene", false)]
-    // Английская игра — голоса английской модели: рассказчик — выбранный, персонажи — по полю voice.
+    // Without a stored NPC record, use a language-specific fallback and ignore model voice markers.
     [InlineData("DM", "<speak voice=\"female\">Text.</speak>", "eugene", true)]
-    [InlineData("Anna", "<speak voice=\"female\">Text.</speak>", "en_6", true)]
+    [InlineData("Anna", "<speak voice=\"female\">Text.</speak>", "en_23", true)]
     [InlineData("Boris", "<speak voice=\"male\">Text.</speak>", "en_23", true)]
-    public void NarratorKeepsSelectedVoiceAndCharactersUseTheirVoiceMarker(string author, string ssml, string expected, bool english)
+    public void NarratorKeepsSelectedVoiceAndCharactersIgnoreModelVoiceMarker(string author, string ssml, string expected, bool english)
     {
         var speech = typeof(AppConfig).Assembly.GetType("NaviDnD.Helpers.Speech")!;
-        Assert.Equal(expected, speech.GetMethod("SelectVoice", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [author, ssml, "eugene", english]));
+        Assert.Equal(expected, speech.GetMethod("SelectVoice", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, [author, ssml, "eugene", english, null]));
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public class SpeechTests
     {
         var speech = typeof(AppConfig).Assembly.GetType("NaviDnD.Helpers.Speech")!;
         var style = speech.GetMethod("ApplyVoiceStyle", BindingFlags.NonPublic | BindingFlags.Static)!;
-        string result = (string)style.Invoke(null, ["Текст.", "<speak voice=\"male\"><prosody pitch=\"high\" rate=\"slow\">Текст.</prosody></speak>", "DM"])!;
+        string result = (string)style.Invoke(null, ["Текст.", "<speak voice=\"male\"><prosody pitch=\"high\" rate=\"slow\">Текст.</prosody></speak>", "DM", null])!;
         Assert.Contains("pitch=\"low\"", result);
         Assert.Contains("rate=\"slow\"", result);
         Assert.DoesNotContain("pitch=\"high\"", result);
