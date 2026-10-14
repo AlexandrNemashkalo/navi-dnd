@@ -103,11 +103,39 @@ public class ThirdPassPromptTests(ITestOutputHelper output)
     {
         var s=Scene();
         s.WorldState.Narrative.Npcs=[new(){Name="Мира",Met=true,Attitude="нейтральная",Notes="Трактирщица",Memory=["Герой сказал: пароль — Синяя сова"]}];
-        await Act(s,"Мира, напомни мой пароль. Обещаю завтра принести тебе лекарство.");
+        var result=await Act(s,"Мира, напомни мой пароль. Обещаю завтра принести тебе лекарство.");
         var npc=s.WorldState.Narrative.Npcs.Single();
         Assert.Contains(npc.Memory!,m=>m.Contains("Синяя сова"));
         Assert.Contains(npc.Memory!,m=>m.Contains("лекарств",StringComparison.OrdinalIgnoreCase));
-        Assert.Contains(s.WorldState.History!,h=>h.Text.Contains("Синяя сова",StringComparison.OrdinalIgnoreCase));
+        Assert.Contains("Синяя сова",result.RawResponse);
+    }
+
+    [Fact]
+    public async Task HiddenAmbusherRevealsItselfAndSurprisesHero()
+    {
+        var s=Scene();s.WorldState.Hero.Light=new(){On=true,Ft=30};
+        s.WorldState.Hero.Skills=[new(){Name="Восприятие",Value="-2"}];
+        var enemy=new LivingEntity{Name="Гоблин",Symbol="GOB",Hp="7/7",Position=[4,3],Hidden=true,DarkvisionFt=60,AiInfo=["Засада: Скрытность 20 против пассивного Восприятия героя 8"],Triggers=new(){Spotted=new(){Effect="Нападает из засады"}}};
+        s.WorldState.Map.Entities=[enemy];
+        var result=await Act(s,"жду",new AiContextBuilder(s.WorldState).TriggerState([(enemy,"spotted")],[],[]));
+        Assert.False(s.WorldState.Map.Entities[0].Hidden);
+        Assert.True(s.WorldState.Combat?.Active);
+        Assert.True(result.RollDiceTriggered);
+        Assert.Contains(s.WorldState.Hero.Effects??[],e=>e.Deleted!=true && e.Name.Contains("врасплох",StringComparison.OrdinalIgnoreCase));
+        Assert.Equal(0,s.WorldState.Hero.SpeedLeft);
+    }
+
+    [Fact]
+    public async Task MatchingKeyOpensRevealedSecretDoorWithoutConsumingKey()
+    {
+        var s=Scene();
+        s.WorldState.Hero.Light=new(){On=true,Ft=30};
+        s.WorldState.Hero.Inventory=[new(){Name="Латунный ключ",Quantity=1,Description="От секретной двери с совой"}];
+        s.WorldState.Map.Doors=[new(){From=[3,3],To=[4,3],IsDoor=true,Hidden=true,IsDoorOpen=false,AiInfo=["Секретная дверь уже найдена героем под тканью. Заперта обычным замком; латунный ключ героя точно подходит. Ловушек нет."]}];
+        await Act(s,"отодвигаю ткань, показываю найденную секретную дверь, отпираю её латунным ключом и открываю");
+        Assert.False(s.WorldState.Map.Doors[0].Hidden);
+        Assert.True(s.WorldState.Map.Doors[0].IsDoorOpen);
+        Assert.Contains(s.WorldState.Hero.Inventory,i=>i.Name=="Латунный ключ" && i.Deleted!=true);
     }
 
     [Fact]
