@@ -274,12 +274,12 @@ public class MovementHandler
 
         if (fromCol != toCol && fromRow != toRow)
         {
-            // Diagonal: allow if at least one intermediate cardinal step is terrain-passable.
-            // Entities on intermediate cells don't block — only walls do.
-            bool path1 = IsTerrainCrossable(fromCol, fromRow, toCol,   fromRow)  // hero → E/W
-                      && IsTerrainCrossable(toCol,   fromRow, toCol,   toRow);   // E/W → target
-            bool path2 = IsTerrainCrossable(fromCol, fromRow, fromCol, toRow)    // hero → N/S
-                      && IsTerrainCrossable(fromCol, toRow,   toCol,   toRow);   // N/S → target
+            // Diagonal: squeeze between terrain obstacles; room walls still require an open route.
+            // Intermediate terrain and entities do not occupy the destination cell.
+            bool path1 = IsBoundaryCrossable(fromCol, fromRow, toCol,   fromRow)  // hero → E/W
+                      && IsBoundaryCrossable(toCol,   fromRow, toCol,   toRow);   // E/W → target
+            bool path2 = IsBoundaryCrossable(fromCol, fromRow, fromCol, toRow)    // hero → N/S
+                      && IsBoundaryCrossable(fromCol, toRow,   toCol,   toRow);   // N/S → target
             if (!path1 && !path2)
                 return L.T("Путь преграждён.");
         }
@@ -296,13 +296,10 @@ public class MovementHandler
         return null;
     }
 
-    // Checks terrain passability between two adjacent cells, ignoring entities.
-    private bool IsTerrainCrossable(int fromCol, int fromRow, int toCol, int toRow)
+    // Checks room boundaries between adjacent cells, ignoring terrain and entities.
+    private bool IsBoundaryCrossable(int fromCol, int fromRow, int toCol, int toRow)
     {
         if (toCol < 1 || toCol > _world.Map.Cols || toRow < 1 || toRow > _world.Map.Rows)
-            return false;
-        // Диагональ между двумя деревьями/скалами не протиснуться.
-        if (_world.Map.TerrainAt(toCol, toRow) is { BlocksMove: true })
             return false;
         var fromRoom = GetRoom(fromCol, fromRow);
         var toRoom   = GetRoom(toCol,   toRow);

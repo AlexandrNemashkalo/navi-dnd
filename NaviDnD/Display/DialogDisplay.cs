@@ -690,7 +690,8 @@ public class DialogDisplay
                 {
                     await AnimateMovePathsInPatch(patchNode);
                     _storage.ApplyUpdateWorldState(patchNode.ToJsonString());
-                    _display.OnMapRedraw?.Invoke();
+                    // A streamed patch updates the visible tab; drawing the map alone leaves its old mouse handler active.
+                    _display.RedrawCurrentContent?.Invoke();
                 }
             }
 
@@ -748,7 +749,7 @@ public class DialogDisplay
                     if (pos.Count >= 2)
                     {
                         entity.Position = pos;
-                        _display.OnMapRedraw?.Invoke();
+                        _display.RedrawCurrentContent?.Invoke();
                         await PollingDelay(500);
                     }
                 }
