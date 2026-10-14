@@ -42,6 +42,37 @@ public class ThirdPassMechanicsTests
         Assert.False(MovementCalculator.IsCellLit(s.WorldState, 6,3));
     }
 
+    [Fact]
+    public void RemovedLightSourceDoesNotRevealCellsOnMap()
+    {
+        var s=Scene();var ws=s.WorldState;
+        ws.Time.PartOfDay=PartsOfDay.Night;ws.Hero.DarkvisionFt=0;
+        ws.Map.Rooms=[];
+        ws.Map.Chunks=[new(){Theme="forest",Terrain=Enumerable.Repeat(new string('.',MapChunk.Cols),MapChunk.Rows).ToList()}];
+        ws.Map.Objects=[new(){Name="Extinguished torch",Symbol="(L)",Position=[8,3],Deleted=true,Light=new(){On=true,Ft=30}}];
+        new MapObjectsProvider(ws,new DisplayConfig(),s).Refresh();
+        Assert.DoesNotContain((8,3),s.VisibleCells);
+    }
+
+    [Fact]
+    public void NightVisibilityAndEnemySightRespondToTorchAndDarkvision()
+    {
+        var s=Scene();var ws=s.WorldState;
+        ws.Time.PartOfDay=PartsOfDay.Night;ws.Hero.DarkvisionFt=0;
+        ws.Map.Rooms=[];
+        ws.Map.Chunks=[new(){Theme="forest",Terrain=Enumerable.Repeat(new string('.',MapChunk.Cols),MapChunk.Rows).ToList()}];
+        var e=new LivingEntity{Name="Watcher",Symbol="WCH",Position=[8,3],VisionFt=60,DarkvisionFt=0};ws.Map.Entities=[e];
+        var provider=new MapObjectsProvider(ws,new DisplayConfig(),s);
+        provider.Refresh();Assert.DoesNotContain((8,3),s.VisibleCells);
+        Assert.False(MovementCalculator.EntitySeesHero(ws,e));
+        ws.Hero.Light=new(){On=true,Ft=30};provider.Refresh();
+        Assert.Contains((8,3),s.VisibleCells);Assert.True(MovementCalculator.EntitySeesHero(ws,e));
+        ws.Hero.Light.On=false;ws.Hero.DarkvisionFt=30;e.DarkvisionFt=30;provider.Refresh();
+        Assert.Contains((8,3),s.VisibleCells);Assert.True(MovementCalculator.EntitySeesHero(ws,e));
+        ws.Hero.DarkvisionFt=0;e.DarkvisionFt=0;provider.Refresh();
+        Assert.DoesNotContain((8,3),s.VisibleCells);Assert.False(MovementCalculator.EntitySeesHero(ws,e));
+    }
+
     [Theory]
     [InlineData("cone")]
     [InlineData("sphere")]

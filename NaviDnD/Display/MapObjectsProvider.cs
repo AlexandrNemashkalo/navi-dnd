@@ -121,12 +121,12 @@ public class MapObjectsProvider
 
         foreach (var e in _settings.Map.Entities)
         {
-            if (_config.RevealMap || e.Hidden != true)
+            if (e.Deleted != true && e.Position is { Count: >= 2 } && (_config.RevealMap || e.Hidden != true))
                 _entities[(e.Position[0], e.Position[1])] = e;
         }
         foreach (var o in _settings.Map.Objects)
         {
-            if (_config.RevealMap || o.Hidden != true)
+            if (o.Deleted != true && o.Position is { Count: >= 2 } && (_config.RevealMap || o.Hidden != true))
                 _objects[(o.Position[0], o.Position[1])] = o;
         }
         // Без тактической карты (герой на карте мира) позиции может не быть — рисовать на местности нечего.
