@@ -16,4 +16,16 @@ public class PromptScenarioTests
          new() { Text = "Второй удар", Patch = JsonDocument.Parse("""{"hero":{"hp":"5/10"}}""").RootElement }]);
         Assert.Equal("5/10", storage.WorldState.Hero!.Hp);
     }
+    [Fact]
+    public void StreamedHistoryIsAvailableToSubsequentWorldStateQueries()
+    {
+        var storage = new Storage();
+        storage.ApplySavedState("""{"hero":{"symbol":"HRO","hp":"10/10"}}""");
+        PromptScenario.ApplyToolHistory(storage,
+        [new() { Text = "<speak>Орк атакует.</speak> [17 vs КД15]", Author = "DM" }]);
+        var message = Assert.Single(storage.WorldState.History);
+        Assert.Equal("DM", message.Author);
+        Assert.Equal("Орк атакует. [17 vs КД15]", message.Text);
+    }
+
 }

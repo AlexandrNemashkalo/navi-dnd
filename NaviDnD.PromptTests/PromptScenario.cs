@@ -229,8 +229,15 @@ public static class PromptScenario
     internal static void ApplyToolHistory(Storage storage, IEnumerable<RequestHistoryEntry> history)
     {
         foreach (var entry in history)
+        {
             if (entry.Patch is { ValueKind: JsonValueKind.Object } patch)
                 storage.ApplyUpdateWorldState(patch.GetRawText());
+            if (string.IsNullOrEmpty(entry.Text)) continue;
+            string text = entry.Text.Replace("\r", "").Replace("\n", "");
+            if (text.Length == 0) continue;
+            (storage.WorldState.History ??= []).Add(new NaviDnD.Data.Models.DialogMessage {
+                Author = entry.Author ?? "DM", Text = Speech.DisplayText(text), SpeechText = Speech.ValidateSsml(text) });
+        }
     }
 
     private static void TryDelete(string path)
