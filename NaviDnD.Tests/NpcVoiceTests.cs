@@ -51,6 +51,23 @@ public class NpcVoiceTests
     }
 
     [Fact]
+    public void MigrationKeepsKnownGenderFromExistingNpcSpeech()
+    {
+        string dir=Path.Combine(Path.GetTempPath(),"navidnd-voice-"+Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            string path=Path.Combine(dir,"game1.json");
+            File.WriteAllText(path,"""{"formatVersion":2,"language":"ru","narrative":{"npcs":[{"name":"Анна"}]},"history":[{"author":"Анна","text":"Привет","speechText":"<speak voice=\"female\">Привет</speak>"}]}""");
+            Assert.True(StorageMigration.Run(dir).Ok);
+            var npc=JsonNode.Parse(File.ReadAllText(path))!["narrative"]!["npcs"]![0]!;
+            Assert.Equal("female",(string?)npc["gender"]);
+            Assert.Contains((string)npc["speechVoice"]!["speaker"]!,NpcVoices.RussianFemale);
+        }
+        finally { Directory.Delete(dir,true); }
+    }
+
+    [Fact]
     public void MigrationAssignsVoicesWithoutChangingNpcMemoryOrPersonalSettings()
     {
         string dir=Path.Combine(Path.GetTempPath(),"navidnd-voice-"+Guid.NewGuid().ToString("N"));

@@ -321,7 +321,19 @@ public static class StorageMigration
             foreach(var npc in npcs.OfType<JsonObject>())
             {
                 if(Get(npc,"speechVoice")!=null || Get(npc,"name") is not { } name) continue;
-                var voice=NpcVoices.Create(name.ToString(),Get(npc,"gender")?.ToString(),language);
+                string? gender=Get(npc,"gender")?.ToString();
+                if (gender == null && Get(save,"history") is JsonArray history)
+                    foreach (var message in history.OfType<JsonObject>().Reverse())
+                    {
+                        if (!string.Equals(Get(message,"author")?.ToString(),name.ToString(),StringComparison.OrdinalIgnoreCase)) continue;
+                        string? markup=Helpers.Speech.ValidateSsml((Get(message,"speechText")??Get(message,"text"))?.ToString());
+                        string? previous=markup==null?null:System.Xml.Linq.XElement.Parse(markup).Attribute("voice")?.Value;
+                        if (previous is not ("male" or "female")) continue;
+                        gender=previous;
+                        Set(npc,"gender",gender);
+                        break;
+                    }
+                var voice=NpcVoices.Create(name.ToString(),gender,language);
                 Set(npc,"speechVoice",new JsonObject { ["language"]=voice.Language,["speaker"]=voice.Speaker,["pitch"]=voice.Pitch });
             }
             return save;
