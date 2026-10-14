@@ -624,6 +624,8 @@ public class EncounterTriggerTests
         storage.WorldState.Map.Entities = [MakeEnemy("GB1", 6, 2), MakeEnemy("GB2", 7, 2)];
         StartCombat(storage, "GB1", "GB2");
         storage.WorldState.Combat!.CurrentTurn = "GB1";
+        storage.WorldState.Combat.Initiative!.Single(i => i.Symbol == "GB1").Score = 13;
+        storage.WorldState.Combat.Initiative!.Single(i => i.Symbol == "GB2").Score = 7;
         int firstScore = storage.WorldState.Combat.Initiative!.Single(i => i.Symbol == "GB1").Score;
         int secondScore = storage.WorldState.Combat.Initiative!.Single(i => i.Symbol == "GB2").Score;
         storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"symbol":"GB2"},{"id":1,"symbol":"GB1"}]}}""");

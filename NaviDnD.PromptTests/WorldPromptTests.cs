@@ -45,7 +45,7 @@ public class WorldPromptTests(ITestOutputHelper output)
             var world = WorldGenerator.Generate(new WorldGenerator.Options(5, WorldSizes.Large));
             var storage = new Storage();
             var config = PromptScenario.TestConfig();
-            var client = new GameAiClient(storage.WorldState, storage, new SwitchableAiProvider(config), config);
+            var client = new GameAiClient(storage.WorldState, storage, new SwitchableAiProvider(config, new AiLogger()), config);
             bool ok = await client.CreateWorld(world, "суровый север, викинги и древние руины на юге");
             var chron = world.Chronicle;
             output.WriteLine($"{chron.Name}: {chron.Description} | {chron.DmNotes}");
@@ -79,7 +79,7 @@ public class WorldPromptTests(ITestOutputHelper output)
             string heroJson = System.Text.Json.JsonSerializer.Serialize(source, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
             var storage = new Storage();
             var config = PromptScenario.TestConfig();
-            var client = new GameAiClient(storage.WorldState, storage, new SwitchableAiProvider(config), config);
+            var client = new GameAiClient(storage.WorldState, storage, new SwitchableAiProvider(config, new AiLogger()), config);
             await client.ReuseHero(new NewGameData { Name = source.Name, Symbol = source.Symbol ?? "HRO", Description = "", Setting = "DnD 5e", SettingWish = "" }, heroJson);
             var hero = storage.WorldState.Hero!;
             string Stat(Data.Models.Hero h, string n) => h.Stats?.FirstOrDefault(s => s.Name == n)?.Value?.ToString() ?? "";
@@ -110,7 +110,7 @@ public class WorldPromptTests(ITestOutputHelper output)
             WorldSize = WorldSizes.Small,
         };
         var config = PromptScenario.TestConfig();
-        var client = new GameAiClient(storage.WorldState, storage, new SwitchableAiProvider(config), config);
+        var client = new GameAiClient(storage.WorldState, storage, new SwitchableAiProvider(config, new AiLogger()), config);
         var ws = storage.WorldState;
 
         // 1. Начало игры.
