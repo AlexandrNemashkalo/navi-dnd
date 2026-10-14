@@ -235,8 +235,9 @@ public static class PromptScenario
             if (string.IsNullOrEmpty(entry.Text)) continue;
             string text = entry.Text.Replace("\r", "").Replace("\n", "");
             if (text.Length == 0) continue;
-            (storage.WorldState.History ??= []).Add(new NaviDnD.Data.Models.DialogMessage {
-                Author = entry.Author ?? "DM", Text = Speech.DisplayText(text), SpeechText = Speech.ValidateSsml(text) });
+            storage.ApplyUpdateWorldState(JsonSerializer.Serialize(new {
+                history = new[] { new { author = entry.Author ?? "DM", text } }
+            }, JsonOptions));
         }
     }
 
