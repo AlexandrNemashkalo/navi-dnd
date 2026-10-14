@@ -56,6 +56,29 @@ public class MapConnectivityTests
         }
     }
 
+
+    [Theory]
+    [InlineData("house")]
+    [InlineData("tavern")]
+    [InlineData("shop")]
+    [InlineData("temple")]
+    [InlineData("manor")]
+    [InlineData("barracks")]
+    [InlineData("tower")]
+    public void IslandApproachWorksForEveryBuildingStyle(string style)
+    {
+        for (int seed = 1; seed <= 30; seed++)
+        {
+            var chunk = new MapChunk { Theme = "building", Style = style, Seed = seed };
+            var result = BuildingGenerator.Generate(chunk, MapSampleTests.Exits, seed, true,
+                new Dictionary<ChunkSide, char>(), [], moat: true);
+            chunk.Terrain = result.Terrain;
+            var map = new MapConfig { Chunks = [chunk], Rooms = result.Rooms, Doors = result.Doors, Furniture = result.Furniture };
+            Check(map, chunk);
+            Assert.Equal(1, result.Terrain.Sum(row => row.Count(c => c == '~')));
+        }
+    }
+
     private static void Check(MapConfig map, MapChunk chunk)
     {
         var roomOf = (map.Rooms ?? []).SelectMany((r, i) => r.Positions.Select(p => (p, i)))
