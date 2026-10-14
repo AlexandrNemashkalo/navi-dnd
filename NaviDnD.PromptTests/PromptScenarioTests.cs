@@ -7,6 +7,18 @@ namespace NaviDnD.PromptTests;
 public class PromptScenarioTests
 {
     [Fact]
+    public void AreaSelectionAnswerIncludesAffectedCreaturesAndCells()
+    {
+        var storage = new Storage();
+        storage.ApplySavedState("""{"hero":{"symbol":"HRO","position":[2,2]},"map":{"entities":[{"name":"Ally","symbol":"ALY","position":[3,2]}]}}""");
+        var result = PromptScenario.BuildTargetResult(storage.WorldState, new TargetSelectionRequest { Shape="sphere",SizeFt=5 },(3,2));
+        var target = Assert.Single(result.Targets);
+        Assert.Contains(target.InArea!,e=>e.Symbol=="HRO");
+        Assert.Contains(target.InArea!,e=>e.Symbol=="ALY");
+        Assert.NotEmpty(target.AreaCells!);
+    }
+
+    [Fact]
     public void StreamedToolHistoryAppliesPatchesInOrder()
     {
         var storage = new Storage();

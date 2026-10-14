@@ -102,7 +102,7 @@ public static class PromptScenario
     // вопрос) — без автоответчика вызов провис бы на реальный таймаут MCP-инструмента (50с).
     public static async Task<AutoAnswerResult> CallRealAiWithAutoAnswersAsync(
         string ruleSet, string action, Storage storage, string userMessage,
-        int rollValue = 15, string? askPlayerAnswer = null, string? model = null)
+        int rollValue = 15, string? askPlayerAnswer = null, string? model = null, (int col, int row)? targetPoint = null)
     {
         if (DraftActions.Contains(action)) storage.SaveDraft(); else storage.Save();
 
@@ -119,7 +119,7 @@ public static class PromptScenario
         var trackerBox = new AutoAnswerBox(tracker);
 
         using var cts = new CancellationTokenSource();
-        var pollTask = AutoAnswerLoopAsync(rollPath, askPath, selectPath, storage, rollValue, askPlayerAnswer, trackerBox, cts.Token);
+        var pollTask = AutoAnswerLoopAsync(rollPath, askPath, selectPath, storage, rollValue, askPlayerAnswer, trackerBox, cts.Token, targetPoint);
         var logger = new AiLogger();
         int logStart = File.Exists(logger.LogPath) ? File.ReadAllText(logger.LogPath).Length : 0;
         try
@@ -145,7 +145,7 @@ public static class PromptScenario
 
     private static async Task AutoAnswerLoopAsync(
         string rollPath, string askPath, string selectPath, Storage storage,
-        int rollValue, string? askPlayerAnswer, AutoAnswerBox box, CancellationToken ct)
+        int rollValue, string? askPlayerAnswer, AutoAnswerBox box, CancellationToken ct, (int col, int row)? targetPoint)
     {
         try
         {
@@ -206,11 +206,12 @@ public static class PromptScenario
                             var heroPos = ws.Hero?.Position;
                             var cell = TargetGeometry.SelectableCells(ws, req, (_, _) => true, (_, _) => true)
                                 .Where(c => heroPos is not { Count: >= 2 } || c != (heroPos[0], heroPos[1]))
-                                .OrderBy(c => c.col).ThenBy(c => c.row)
+                                .OrderBy(c => targetPoint.HasValue ? Math.Abs(c.col - targetPoint.Value.col) + Math.Abs(c.row - targetPoint.Value.row) : 0)
+                                .ThenBy(c => c.col).ThenBy(c => c.row)
                                 .Cast<(int col, int row)?>().FirstOrDefault();
                             req.Answered = true;
                             req.Result = cell is { } p
-                                ? new TargetSelectionResult { Targets = [TargetGeometry.Describe(ws, p.col, p.row)] }
+                                ? BuildTargetResult(ws, req, p)
                                 : new TargetSelectionResult { Cancelled = true };
                             await File.WriteAllTextAsync(selectPath, JsonSerializer.Serialize(req, JsonOptions), ct);
                             box.Value = box.Value with { SelectTargetTriggered = true };
@@ -223,6 +224,19 @@ public static class PromptScenario
             }
         }
         catch (OperationCanceledException) { }
+    }
+
+    internal static TargetSelectionResult BuildTargetResult(WorldState ws, TargetSelectionRequest request, (int col, int row) p)
+    {
+        var target = TargetGeometry.Describe(ws, p.col, p.row);
+        if (request.Shape != null)
+        {
+            var area = TargetGeometry.AreaCells(ws, p.col, p.row, request.Shape, request.SizeFt);
+            target.AreaCells = area.OrderBy(c => c.col).ThenBy(c => c.row).Select(c => new List<int> { c.col, c.row }).ToList();
+            target.InArea = TargetGeometry.CreaturesIn(ws, area);
+            target.ObjectsInArea = TargetGeometry.ObjectsIn(ws, area);
+        }
+        return new TargetSelectionResult { Targets = [target] };
     }
 
     // Same order as streamed UI history: patches precede the answer to the tool.
