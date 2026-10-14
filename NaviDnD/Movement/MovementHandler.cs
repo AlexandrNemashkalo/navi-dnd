@@ -73,6 +73,9 @@ public class MovementHandler
             {
                 _passAttempt = null;
                 bool diag = dirNow.dcol != 0 && dirNow.drow != 0;
+                int passCost = GetStepCost(newCol, newRow, diag)
+                    + MovementCalculator.GetStepCost(_world, behindCol, behindRow, diag, _storage.DiagonalUsed > 0 || diag);
+                if (!HasMovementBudget(passCost)) return false;
                 activatedTriggers.AddRange(GetOpportunityAttackTriggers(heroCol, heroRow, behindCol, behindRow));
                 _storage.ApplyClientMovement(GetStepCost(newCol, newRow, diag), diag);
                 hero.Position = [behindCol, behindRow];
@@ -102,9 +105,10 @@ public class MovementHandler
         }
 
         bool isDiagonal = dir.Value.dcol != 0 && dir.Value.drow != 0;
+        int stepCost = GetStepCost(newCol, newRow, isDiagonal);
+        if (!HasMovementBudget(stepCost)) return false;
         activatedTriggers.AddRange(GetOpportunityAttackTriggers(heroCol, heroRow, newCol, newRow));
         hero.Position = [newCol, newRow];
-        int stepCost = GetStepCost(newCol, newRow, isDiagonal);
         _storage.ApplyClientMovement(stepCost, isDiagonal);
         // Шаг на лестницу — сразу на связанную клетку соседнего этажа (стоимость — обычный шаг).
         if (_world.Map.StairTarget(newCol, newRow) is var (stairCol, stairRow))
@@ -355,19 +359,19 @@ public class MovementHandler
         }
     }
 
-    private int GetStepCost(int col, int row, bool isDiagonal = false)
+    private int GetStepCost(int col, int row, bool isDiagonal = false) =>
+        MovementCalculator.GetStepCost(_world, col, row, isDiagonal, _storage.DiagonalUsed > 0);
+
+    private bool HasMovementBudget(int cost)
     {
-        int baseCost = _world.Map.TerrainAt(col, row)?.StepCostFt ?? 5;
-        foreach (var area in _world.Map.AreasAt(col, row))
+        if (_world.Combat?.Active != true || (_world.Hero?.SpeedLeft ?? 0) >= cost) return true;
+        string message = L.T("Недостаточно скорости для этого шага — [F10] конец хода.");
+        if (_world.History?.LastOrDefault()?.Text != message)
         {
-            if (area.Deleted == true || area.StepCostFt == null) continue;
-            baseCost = area.StepCostFt.Value;
-            break;
+            _world.History?.Add(new DialogMessage { Text = message });
+            _storage.Save();
         }
-        // First diagonal per turn is free; each subsequent costs +5ft
-        if (isDiagonal && _storage.DiagonalUsed >= 1)
-            baseCost += 5;
-        return baseCost;
+        return false;
     }
 
     private IEnumerable<Area> GetExploredTriggers()
