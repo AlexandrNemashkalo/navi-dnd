@@ -564,11 +564,8 @@ public static class MovementCalculator
         // Открытая местность не ночью — дневной свет.
         if (ws.Time.PartOfDay != PartsOfDay.Night && ws.Map.TerrainAt(col, row) is { Indoor: false }) return true;
 
-        if (ws.Hero is { Light.On: true, Position: { Count: >= 2 } heroPos }
-            && heroPos[0] == col && heroPos[1] == row)
-            return true;
-
         IEnumerable<CellEntity> sources = (ws.Map.Entities ?? []).Cast<CellEntity>().Concat(ws.Map.Objects ?? []);
+        if (ws.Hero is { } hero) sources = sources.Prepend(hero);
         foreach (var src in sources)
         {
             if (src.Deleted == true || src.Light is not { On: true } light) continue;
