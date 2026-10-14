@@ -10,6 +10,7 @@ public class ThirdPassPromptTests(ITestOutputHelper output)
     private static Storage Scene()
     {
         var s=PromptScenario.LoadLocalFixture("door_interaction_game.json");
+        s.WorldState.Narrative=new();
         s.WorldState.Hero.Position=[3,3];
         s.WorldState.Hero.DarkvisionFt=0;
         s.WorldState.Map.Doors=[];
@@ -42,6 +43,7 @@ public class ThirdPassPromptTests(ITestOutputHelper output)
     public async Task LightCantripCreatesLightWithoutSpendingSpellSlot()
     {
         var s=Scene();
+        s.WorldState.Hero.Inventory=[new(){Name="Посох",EquipmentedSlot=["П Рука"]}];
         s.WorldState.Hero.Spells=[new(){Name="Свет",Level=0,Prepared=true}];
         s.WorldState.Hero.Resources=[new(){Name="Ячейки 1 ур.",Value="2/2",Category=ResourceCategories.Spells}];
         await Act(s,"накладываю Свет на навершие своего посоха и держу его в руке");
