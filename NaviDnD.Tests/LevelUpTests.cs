@@ -364,5 +364,26 @@ public class LevelUpTests
             for (int i = 0; i < slots.Length; i++) Assert.Equal($"{slots[i]}/{slots[i]}", after.Resources[i].Value);
     }
 
+    [Fact]
+    public void ExistingAbilityGrowthIsRetainedAndRequiresMasterWithoutProficiencyChange()
+    {
+        var hero = Fighter(level: 10, xp: 85000);
+        hero.Stat(StatKeys.Class)!.Value = "Монах";
+        hero.Abilities.Add(new() { Name = "Боевые искусства", Description = "Безоружный удар наносит 1d6 урона." });
+        var up = new LevelUp(hero, LevelRules.Current);
+        Assert.True(up.LoadPlan("""{"gains":[{"name":"Боевые искусства","description":"Кость урона растёт до d8","value":"Безоружный удар наносит 1d8 урона."}],"choices":[]}"""));
+        Assert.Single(up.Gains);
+        Assert.True(up.NeedsMaster);
+        Assert.Contains("Безоружный удар наносит 1d8 урона.", up.ApplyRequest());
+        var preview = up.Preview();
+        Assert.Equal("Безоружный удар наносит 1d8 урона.", preview.Abilities.Single(a => a.Name == "Боевые искусства").Description);
+        Assert.Single(preview.Abilities, a => a.Name == "Боевые искусства");
+        Assert.Equal("Безоружный удар наносит 1d6 урона.", hero.Abilities[1].Description);
+        up.SaveDraft();
+        var restored = new LevelUp(hero, LevelRules.Current);
+        Assert.Single(restored.Gains);
+        Assert.True(restored.NeedsMaster);
+    }
+
 }
 

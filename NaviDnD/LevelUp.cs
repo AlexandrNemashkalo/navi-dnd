@@ -202,7 +202,9 @@ public sealed class LevelUp
             var has = Hero.Abilities.Select(a => a.Name).Concat((Hero.Spells ?? []).Select(sp => sp.Name))
                 .Select(n => n?.Trim().ToLowerInvariant()).ToHashSet();
             Gains = root["gains"]?.Deserialize<List<Option>>(options)?
-                .Where(g => g.Name.Trim().Length > 0 && (g.Resource != null || g.Stat != null || !has.Contains(g.Name.Trim().ToLowerInvariant())))
+                .Where(g => g.Name.Trim().Length > 0 && (g.Resource != null || g.Stat != null || !has.Contains(g.Name.Trim().ToLowerInvariant())
+                    || !string.IsNullOrWhiteSpace(g.Value) && Hero.Abilities.Any(a => a.Deleted != true
+                        && string.Equals(a.Name?.Trim(), g.Name.Trim(), StringComparison.OrdinalIgnoreCase))))
                 .ToList() ?? [];
             Choices = root["choices"]?.Deserialize<List<Choice>>(options)?
                 .Where(c => c.Options is { Count: > 0 } && c.Count > 0)
@@ -236,15 +238,18 @@ public sealed class LevelUp
         {
             $"Повышение уровня: {ClassName} {From} → {To}. Бонус мастерства: {AbilityNames.Signed(Rules.ProficiencyAt(From))} → {AbilityNames.Signed(Rules.ProficiencyAt(To))}.",
         };
-        if (Gains.Count > 0) lines.Add("Получено: " + string.Join("; ", Gains.Select(g => $"{g.Name} — {g.Description}")));
+        if (Gains.Count > 0) lines.Add("Получено: " + string.Join("; ", Gains.Select(OptionText)));
         foreach (var c in VisibleChoices)
-            lines.Add($"Выбрано ({c.Title}): " + string.Join("; ", c.Picked.Order().Select(i => $"{c.Options[i].Name} — {c.Options[i].Description}")));
+            lines.Add($"Выбрано ({c.Title}): " + string.Join("; ", c.Picked.Order().Select(i => OptionText(c.Options[i]))));
         if (Asi is AsiMode.Plus2 or AsiMode.Plus1x2)
             lines.Add("Улучшение характеристик (значения ставит движок): " + string.Join(", ", AsiPicks.Distinct()
                 .Select(a => $"{AbilityNames.Find(Hero, a)?.Name ?? a} {Score(a)} → {NewScore(a)}")));
         lines.Add($"Герой (до повышения):\n{HeroSheet()}");
         return string.Join("\n", lines);
     }
+
+    private static string OptionText(Option option) => $"{option.Name} — {option.Description}"
+        + (option.Value is { Length: > 0 } value ? $" (value: {value})" : "");
 
     // ── Итог ────────────────────────────────────────────────────────────────
 
@@ -312,6 +317,14 @@ public sealed class LevelUp
                     && (string.Equals(x.Name?.Trim(), option.Stat.Trim(), StringComparison.OrdinalIgnoreCase) || key != null && x.Key == key));
                 if (stat != null) stat.Value = option.Value;
                 else hero.Stats.Add(new HeroStat { Name = option.Stat, Value = option.Value, Key = key });
+                continue;
+            }
+            // Existing ability growth uses Value for its complete new description.
+            if (option.Resource == null && !string.IsNullOrWhiteSpace(option.Value)
+                && hero.Abilities.FirstOrDefault(a => a.Deleted != true
+                    && string.Equals(a.Name?.Trim(), option.Name.Trim(), StringComparison.OrdinalIgnoreCase)) is { } ability)
+            {
+                ability.Description = option.Value;
                 continue;
             }
             // Рост ресурса — новое значение в его строке (новый ресурс — новой строкой), не умение.
