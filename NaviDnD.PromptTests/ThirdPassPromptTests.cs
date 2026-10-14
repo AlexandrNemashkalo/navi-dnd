@@ -139,6 +139,80 @@ public class ThirdPassPromptTests(ITestOutputHelper output)
     }
 
     [Fact]
+    public async Task HideThenActiveSearchClearsStealth()
+    {
+        var s=Scene();
+        s.WorldState.Hero.Skills=[new(){Name="Скрытность",Value="+3"}];
+        s.WorldState.Map.Objects=[new(){Name="Большие ящики",Symbol="[C]",Position=[4,3],AiInfo=["Дают герою полное укрытие для скрытности, наблюдателей пока нет"]}];
+        s.WorldState.Map.Rooms![0].AiInfo=["Тёмный зал, много больших ящиков, за которыми можно спрятаться. Никто сейчас не смотрит на героя."];
+        var hide=await Act(s,"прячусь за большими ящиками в темноте");
+        Assert.True(hide.RollDiceTriggered);
+        Assert.True(s.WorldState.Hero.Stealth>=15);
+        var enemy=new LivingEntity{Name="Ищейка",Symbol="SRH",Position=[5,3],DarkvisionFt=60,Hp="20/20",AiInfo=["Восприятие +30; активно ищет героя, результат проверки заведомо выше его Скрытности"],Triggers=new(){OnRound=new(){Effect="Активно обыскивает ящики и обнаруживает героя успешной проверкой Восприятия"}}};
+        s.WorldState.Map.Entities=[enemy];
+        await Act(s,"жду",new AiContextBuilder(s.WorldState).TriggerState([(enemy,"onRound")],[],[]));
+        Assert.Null(s.WorldState.Hero.Stealth);
+    }
+
+    [Fact]
+    public async Task LootAndDropCoinsDoesNotDuplicateOrLoseThem()
+    {
+        var s=Scene();s.WorldState.Hero.Light=new(){On=true,Ft=30};
+        s.WorldState.Map.Objects=[new(){Name="Тело разбойника",Symbol="(B)",Position=[4,3],AiInfo=["В кошеле ровно 10 золотых монет. Других предметов нет."]}];
+        await Act(s,"беру с тела четыре золотых монеты, из этих четырёх три кладу отдельной кучкой на пол рядом с собой; одну оставляю себе");
+        var coins=s.WorldState.Hero.Inventory.Where(i=>i.Deleted!=true && i.Name.Contains("монет",StringComparison.OrdinalIgnoreCase)).ToList();
+        Assert.Single(coins);Assert.Equal(1,coins[0].Quantity??1);
+        Assert.Equal(2,s.WorldState.Map.Objects!.Count(o=>o.Deleted!=true));
+        Assert.Contains(s.WorldState.Map.Objects,o=>o.Deleted!=true && o.Symbol!="(B)" && o.AiInfo!.Any(n=>n.Contains("3")||n.Contains("три",StringComparison.OrdinalIgnoreCase)));
+        Assert.Contains(s.WorldState.Map.Objects[0].AiInfo!,n=>n.Contains("6")||n.Contains("шесть",StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task PickingLockRequiresRollAndKeepsTools()
+    {
+        var s=Scene();s.WorldState.Hero.Light=new(){On=true,Ft=30};
+        s.WorldState.Hero.Inventory=[new(){Name="Воровские инструменты",Description="Набор отмычек, герой владеет"}];
+        s.WorldState.Hero.Skills=[new(){Name="Ловкость рук",Value="+6"}];
+        s.WorldState.Map.Doors=[new(){From=[3,3],To=[4,3],IsDoor=true,IsDoorOpen=false,AiInfo=["Заперта обычным замком СЛ 10. После удачного взлома может быть открыта. Без ловушек."]}];
+        var result=await Act(s,"вскрываю замок воровскими инструментами, затем открываю дверь");
+        Assert.True(result.RollDiceTriggered);
+        Assert.True(s.WorldState.Map.Doors[0].IsDoorOpen);
+        Assert.Contains(s.WorldState.Hero.Inventory,i=>i.Name=="Воровские инструменты" && i.Deleted!=true);
+    }
+
+    [Fact]
+    public async Task NpcRemembersFirstReplyAndThanksHeroForMedicineInSecondReply()
+    {
+        var s=Scene();s.WorldState.Narrative.Npcs=[new(){Name="Мира",Gender="female",Met=true,Attitude="нейтральная",Notes="Просила лекарство для сына"}];
+        s.WorldState.Narrative.PlotThreads=[new(){Name="Лекарство",Description="Принести Мире лекарство",Status="активна"}];
+        s.WorldState.Hero.Inventory=[new(){Name="Лекарство",Quantity=1}];
+        await Act(s,"Мира, мой любимый цвет — янтарный. Запомни это.");
+        Assert.Contains(s.WorldState.Narrative.Npcs[0].Memory??[],n=>n.Contains("янтар",StringComparison.OrdinalIgnoreCase));
+        await Act(s,"Мира, какой мой любимый цвет? Передаю тебе обещанное лекарство для сына, этим выполняю твою просьбу.");
+        Assert.DoesNotContain(s.WorldState.Hero.Inventory,i=>i.Deleted!=true && i.Name=="Лекарство");
+        Assert.NotEqual("нейтральная",s.WorldState.Narrative.Npcs[0].Attitude);
+        Assert.Equal("завершена",s.WorldState.Narrative.PlotThreads[0].Status);
+        Assert.NotEmpty(s.WorldState.Narrative.PlotThreads[0].Steps??[]);
+        Assert.Contains(s.WorldState.Narrative.Npcs[0].Memory??[],n=>n.Contains("лекарств",StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Theory]
+    [InlineData("sphere","Огненный шар",3,20)]
+    [InlineData("cube","Волна грома",1,15)]
+    public async Task AreaSpellUsesSelectionAndSpendsSlot(string shape,string spell,int level,int size)
+    {
+        var s=Scene();s.WorldState.Hero.Light=new(){On=true,Ft=60};
+        s.WorldState.Hero.Spells=[new(){Name=spell,Level=level,Prepared=true}];
+        s.WorldState.Hero.Resources=[new(){Name=$"Ячейки {level} ур.",Value="2/2",Category=ResourceCategories.Spells}];
+        s.WorldState.Map.Entities=[new(){Name="Разбойник",Symbol="BND",Position=[4,3],Hp="100/100",AiInfo=["КД 12, спасброски +0"]}];
+        var result=await Act(s,$"применяю {spell} в сторону разбойника; согласен, что область может задеть меня",target:(4,3));
+        Assert.True(result.SelectTargetTriggered);
+        Assert.Contains($"shape={shape}",result.ToolTrace);
+        Assert.Equal("1/2",s.WorldState.Hero.Resources[0].Value);
+        Assert.NotEqual("100/100",s.WorldState.Map.Entities[0].Hp);
+    }
+
+    [Fact]
     public async Task UpperFloorPopulationStaysOnRequestedFloor()
     {
         var s=Scene(); s.WorldState.Map.Cols=40;

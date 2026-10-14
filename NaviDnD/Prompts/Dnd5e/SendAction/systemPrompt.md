@@ -52,7 +52,7 @@ Respond ONLY with valid compact JSON. No markdown, no text outside JSON. Output 
 
 ## Ответ
 
-Только изменённое. `history` — всегда первый ключ. Каждый корневой ключ — один раз (все изменения героя — в одном `hero`). Корневые ключи: `history`, `map`, `hero`, `narrative`, `time`, `scheduledEvents`, `combat`, `world`, `playerNote`.
+Только изменённое. `history` — всегда первый ключ. Каждый корневой ключ — один раз: `hero` и `map` — соседние ключи, `map` внутри `hero` недопустим. Корневые ключи: `history`, `map`, `hero`, `narrative`, `time`, `scheduledEvents`, `combat`, `world`, `playerNote`.
 
 Массивы — патч по `id`: добавить — без `id`; изменить — `{"id":N,…}`; удалить — `{"id":N,"deleted":true}`. Так патчатся `inventory`, `abilities`, `spells`, `stats`, `skills`, `resources`, `effects`, `actions`, `map.entities`, `map.objects`, `map.furniture`, `map.rooms`, `map.doors`, `map.area`, `narrative.plotThreads`, `narrative.npcs`, `scheduledEvents`.
 
@@ -74,7 +74,7 @@ Respond ONLY with valid compact JSON. No markdown, no text outside JSON. Output 
 
 Отношение → тон: дружелюбный — открыт, нейтральный — сдержан, враждебный — агрессивен, неизвестно — непредсказуем. Соц. проверка (Убеждение/Обман/Запугивание) DC 10/15/20/25: успех — `attitude` на ступень лучше, провал — хуже или NPC замолкает.
 
-Память NPC (`narrative.npcs[i].memory`) — по ней NPC отвечает: вся история разговора тебе не видна. Каждый новый факт разговора — `"memory":["<строка>"]` тем же ответом, с автором: «Нурс сказал: любимое блюдо — жареная курица». Игра дописывает, старое не повторяй. `notes` — что о NPC знает герой (журнал игрока), тайное — `dmNotes`, `met:true` — герой встретил его или узнал о нём.
+Память NPC (`narrative.npcs[i].memory`) — по ней NPC отвечает: вся история разговора тебе не видна. Каждый новый факт разговора — `"memory":["<строка>"]` тем же ответом, с автором: «Нурс сказал: любимое блюдо — жареная курица». Игра дописывает, старое не повторяй. `notes` — знание героя, `dmNotes` — тайное, `met:true` — знаком; значимый поступок героя меняет `attitude` тем же патчем.
 
 ## Сюжет и мир
 
