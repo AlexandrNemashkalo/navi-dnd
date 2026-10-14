@@ -45,7 +45,8 @@ public class Storage
         public int? LastRound;
     }
     private readonly ConditionalWeakTable<StatusEffect, EffectRuntime> _effectRuntime = new();
-    private readonly HashSet<int> _firedScheduledEventIds = [];
+    private sealed class EventRuntime { public bool Fired; }
+    private readonly ConditionalWeakTable<ScheduledEvent, EventRuntime> _eventRuntime = new();
     private readonly Dictionary<string, int> _oaOnHeroLastRound = [];
     private readonly HashSet<string> _entitiesSeeingHero = [];
     private readonly Dictionary<string, int> _entityRoundFired = [];
@@ -108,7 +109,7 @@ public class Storage
         DiagonalUsed = 0;
         _areaRoundFired.Clear();
         _effectRuntime.Clear();
-        _firedScheduledEventIds.Clear();
+        _eventRuntime.Clear();
         _oaOnHeroLastRound.Clear();
         _entitiesSeeingHero.Clear();
         _entityRoundFired.Clear();
@@ -143,8 +144,12 @@ public class Storage
             {
                 var ev = events[i];
                 if (ev.Deleted == true) continue;
-                if (currentRound >= ev.FireAtRound && _firedScheduledEventIds.Add(i))
+                var runtime = _eventRuntime.GetOrCreateValue(ev);
+                if (currentRound >= ev.FireAtRound && !runtime.Fired)
+                {
+                    runtime.Fired = true;
                     scheduled.Add((i, ev));
+                }
             }
         }
 
@@ -1044,6 +1049,9 @@ public class Storage
             _effectRuntime.Add(newEffect, new EffectRuntime { LastRound = runtime.LastRound,
                 ExpirationFired = runtime.ExpirationFired && oldEffect.ExpiresAtRound == newEffect.ExpiresAtRound });
         }
+        if (existing is ScheduledEvent oldEvent && merged is ScheduledEvent newEvent
+            && oldEvent.FireAtRound == newEvent.FireAtRound && _eventRuntime.TryGetValue(oldEvent, out var eventRuntime))
+            _eventRuntime.Add(newEvent, new EventRuntime { Fired = eventRuntime.Fired });
         return merged;
     }
 

@@ -515,4 +515,41 @@ public class StorageTakeRoundBundleTests
         Assert.Null(storage.TakeRoundBundle());
     }
 
+    [Fact]
+    public void RemovingScheduledEventDoesNotSuppressNextEventAtReusedIndex()
+    {
+        var storage = MakeStorage(10);
+        storage.WorldState.ScheduledEvents = [new() { Name = "Первый", FireAtRound = 10, Effect = "Первый сработал" }];
+        Assert.Single(storage.TakeRoundBundle()!.FiredScheduledEvents);
+        storage.ApplyUpdateWorldState("""{"scheduledEvents":[{"id":0,"deleted":true}]}""");
+        storage.ApplyUpdateWorldState("""{"scheduledEvents":[{"name":"Второй","fireAtRound":10,"effect":"Второй сработал"}]}""");
+        Assert.Equal("Второй", Assert.Single(storage.TakeRoundBundle()!.FiredScheduledEvents).ev.Name);
+    }
+
+    [Fact]
+    public void RemovingEarlierEventDoesNotRefireAlreadyDeliveredLaterEvent()
+    {
+        var storage = MakeStorage(10);
+        storage.WorldState.ScheduledEvents = [new() { Name = "Будущий", FireAtRound = 12, Effect = "Позже" },
+            new() { Name = "Текущий", FireAtRound = 10, Effect = "Сейчас" }];
+        Assert.Single(storage.TakeRoundBundle()!.FiredScheduledEvents);
+        storage.ApplyUpdateWorldState("""{"scheduledEvents":[{"id":0,"deleted":true}]}""");
+        Assert.Null(storage.TakeRoundBundle());
+    }
+
+    [Fact]
+    public void DeliveredEventMetadataPatchDoesNotRefireButChangingDeadlineRearmsIt()
+    {
+        var storage = MakeStorage(10);
+        storage.WorldState.ScheduledEvents = [new() { Name = "Событие", FireAtRound = 10, Effect = "Сработало" }];
+        Assert.Single(storage.TakeRoundBundle()!.FiredScheduledEvents);
+        storage.ApplyUpdateWorldState("""{"scheduledEvents":[{"id":0,"name":"Уточнённое имя"}]}""");
+        Assert.Null(storage.TakeRoundBundle());
+        storage.ApplyUpdateWorldState("""{"scheduledEvents":[{"id":0,"fireAtRound":11}]}""");
+        Assert.Null(storage.TakeRoundBundle());
+        storage.WorldState.Time.TotalRounds = 11;
+        Assert.Single(storage.TakeRoundBundle()!.FiredScheduledEvents);
+        Assert.Null(storage.TakeRoundBundle());
+    }
+
 }
