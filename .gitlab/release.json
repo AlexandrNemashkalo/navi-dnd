@@ -1,12 +1,12 @@
 {
-    "name":  "NaviDnD 2.2.4",
-    "tag_name":  "v2.2.4",
-    "description":  "# NaviDnD 2.2.4\n\n- Игра теперь есть на **macOS** (Apple Silicon): архив «Скачать для macOS» на странице релиза. Распакуйте, перетащите NaviDnD в «Программы» и откройте; macOS один раз попросит разрешение в «Системные настройки → Конфиденциальность и безопасность → Всё равно открыть». Внутри всё готовое, включая озвучку; обновления на Mac приходят патчами из меню, как на Windows.\n- Спасибо **keytonw** за порт игры на macOS — без него версии для Mac не было бы.\n- В конце экрана настроек появились титры.\n\nОбновление распространяется патчем; сохранения и настройки сохраняются.\n\n## English\n\n- NaviDnD now runs on **macOS** (Apple Silicon): get the macOS archive from the release page. Unzip it, drag NaviDnD to Applications and open it; macOS asks once for permission in System Settings → Privacy \u0026 Security → Open Anyway. Everything is included, voice-over too; on a Mac, updates arrive as patches from the menu, just like on Windows.\n- Thanks to **keytonw** for porting the game to macOS — there would be no Mac version without him.\n- Credits are now shown at the bottom of the settings screen.\n\nThe update is delivered as a patch; saves and settings are kept.\n",
+    "name":  "NaviDnD 2.2.5",
+    "tag_name":  "v2.2.5",
+    "description":  "# NaviDnD 2.2.5\n\n- Системные промпты и инструкции игровых инструментов переведены на английский для Claude и Codex. Язык рассказа, имён и описаний определяется языком мира.\n- Английский стал языком исходных строк интерфейса; русский перевод вынесен в словари. Настройки языка интерфейса и мира работают независимо.\n- Улучшены тактика противников и передача их способностей мастеру, контекст встреч, скрытых существ и заметок NPC.\n- Исправлены расход движения на сложной местности и диагоналях, видимость, свет, выбор целей, реакции и учёт раундов.\n- Исправлены обновления эффектов, отдых, повышение уровня, гибель существ, путешествия и генерация карт. Озвучка NPC сохраняет назначенные движком голоса.\n\nОбновление распространяется патчами для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются; необходимые миграции выполняются автоматически.\n\n## English\n\n- System prompts and game tool instructions are now in English for Claude and Codex. Narration, names and descriptions follow the world\u0027s language.\n- English is now the source language for interface strings, with Russian translations in dictionaries. Interface and world language settings remain independent.\n- Improved enemy tactics and ability context, encounter context, hidden creature handling and NPC notes.\n- Fixed movement costs on difficult terrain and diagonals, visibility, lighting, target selection, reactions and round tracking.\n- Fixed effect updates, rest, level advancement, creature deaths, travel and map generation. NPC speech retains engine-assigned voices.\n\nThe update is delivered as patches for Windows and macOS (Apple Silicon). Saves and settings are retained; required migrations run automatically.\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.4/navi-dnd-v2.2.4-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.5/navi-dnd-v2.2.5-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
@@ -16,19 +16,19 @@
                                  },
                                  {
                                      "name":  "NaviDnD-macOS-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases-macos/NaviDnD-macOS-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.5/releases-macos/NaviDnD-macOS-updates.json"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.5/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.5/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases/NaviDnD-Setup-win-x64.exe"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.5/releases/NaviDnD-Setup-win-x64.exe"
                                  },
                                  {
                                      "name":  "NaviDnD-payload.001",
@@ -137,6 +137,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.2.3-2.2.4.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.4/releases/patches/NaviDnD-patch-2.2.3-2.2.4.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.2.4-2.2.5.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.5/releases/patches/NaviDnD-patch-2.2.4-2.2.5.zip"
                                  }
                              ]
                }
