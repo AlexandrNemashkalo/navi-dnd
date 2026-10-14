@@ -13,11 +13,17 @@ public sealed class ChunkPopulationQueue
     public bool HasPending { get { lock(gate) return pending != null; } }
     public bool IsReady { get { lock(gate) return pending?.IsCompleted == true && !claimed; } }
 
+    public bool CanStart(MapConfig map, MapChunk chunk)
+    {
+        lock (gate)
+            return pending == null && !chunk.Populated && map.Chunks?.Contains(chunk) == true && !attempted.Contains(chunk);
+    }
+
     public bool TryStart(MapConfig map, MapChunk chunk, Func<Task<string>> fetch)
     {
         lock(gate)
         {
-            if(pending != null || chunk.Populated || !map.Chunks!.Contains(chunk) || !attempted.Add(chunk)) return false;
+            if (!CanStart(map, chunk) || !attempted.Add(chunk)) return false;
             pending=Fetch();
             return true;
             async Task<Result> Fetch() => new(map,chunk,await fetch());

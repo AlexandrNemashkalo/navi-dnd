@@ -375,7 +375,7 @@ public class GameAiClient
 
     public bool TryPrefetchChunk(MapChunk chunk)
     {
-        if (_requestGate.CurrentCount == 0) return false;
+        if (_requestGate.CurrentCount == 0 || !_population.CanStart(_settings.Map, chunk)) return false;
         var ctx = new AiContextBuilder(_settings, _storage.VisibleCells);
         string message = "## Текущее состояние\n" + ctx.PopulationState() + "\n" + ctx.LocationPlan(chunk) + "\n" + ctx.ChunkState(chunk);
         string snapshot = JsonSerializer.Serialize(_settings, _serializeOptions);
