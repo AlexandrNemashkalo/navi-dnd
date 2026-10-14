@@ -37,7 +37,8 @@ public class Storage
 
     private Dictionary<string, List<int>> _entityColors = [];
     private bool _wasSpeedExhausted = false;
-    private readonly Dictionary<int, int> _areaRoundFired = [];
+    private sealed class RoundRuntime { public int? LastRound; }
+    private readonly ConditionalWeakTable<Area, RoundRuntime> _areaRuntime = new();
     // Runtime identity survives index shifts and patches; removed effects release their entries.
     private sealed class EffectRuntime
     {
@@ -107,7 +108,7 @@ public class Storage
         SeenObjects = null;
         _wasSpeedExhausted = false;
         DiagonalUsed = 0;
-        _areaRoundFired.Clear();
+        _areaRuntime.Clear();
         _effectRuntime.Clear();
         _eventRuntime.Clear();
         _oaOnHeroLastRound.Clear();
@@ -251,9 +252,10 @@ public class Storage
             var area = areas[i];
             if (area.Deleted == true || area.Triggers?.OnRound == null) continue;
             if (area.Positions?.Any(p => p.Count >= 2 && p[0] == heroCol && p[1] == heroRow) != true) continue;
-            if (!_areaRoundFired.TryGetValue(i, out int lastRound) || lastRound < currentRound)
+            var runtime = _areaRuntime.GetOrCreateValue(area);
+            if (runtime.LastRound != currentRound)
             {
-                _areaRoundFired[i] = currentRound;
+                runtime.LastRound = currentRound;
                 result.Add((i, area));
             }
         }
@@ -894,7 +896,7 @@ public class Storage
                     if (nextRound < WorldState.Time.TotalRounds)
                     {
                         _effectRuntime.Clear();
-                        _areaRoundFired.Clear();
+                        _areaRuntime.Clear();
                         _entityRoundFired.Clear();
                         _oaOnHeroLastRound.Clear();
                     }
@@ -1052,6 +1054,8 @@ public class Storage
         if (existing is ScheduledEvent oldEvent && merged is ScheduledEvent newEvent
             && oldEvent.FireAtRound == newEvent.FireAtRound && _eventRuntime.TryGetValue(oldEvent, out var eventRuntime))
             _eventRuntime.Add(newEvent, new EventRuntime { Fired = eventRuntime.Fired });
+        if (existing is Area oldArea && merged is Area newArea && _areaRuntime.TryGetValue(oldArea, out var areaRuntime))
+            _areaRuntime.Add(newArea, areaRuntime);
         return merged;
     }
 
