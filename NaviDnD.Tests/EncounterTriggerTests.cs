@@ -587,4 +587,65 @@ public class EncounterTriggerTests
         Assert.Equal("BR2", Assert.Single(storage.TakeRoundBundle()!.EntityRoundTriggers).entity.Symbol);
     }
 
+    [Fact]
+    public void RenamingCreaturePreservesCombatTurnReactionAndSightTracking()
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Map.Entities = [MakeEnemy("GB1", 6, 2)];
+        StartCombat(storage, "GB1");
+        storage.WorldState.Combat!.CurrentTurn = "GB1";
+        Assert.True(storage.TryMarkOpportunityAttackOnHero("GB1", 5));
+        Assert.True(storage.UpdateEntitySeesHero("GB1", true));
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"symbol":"GB2"}]}}""");
+        Assert.Equal("GB2", storage.WorldState.Combat.CurrentTurn);
+        Assert.Contains(storage.WorldState.Combat.Initiative!, i => i.Symbol == "GB2");
+        Assert.DoesNotContain(storage.WorldState.Combat.Initiative!, i => i.Symbol == "GB1");
+        Assert.False(storage.TryMarkOpportunityAttackOnHero("GB2", 5));
+        Assert.False(storage.UpdateEntitySeesHero("GB2", true));
+    }
+
+    [Fact]
+    public void RenamingHeroPreservesItsCombatTurn()
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Map.Entities = [MakeEnemy("GB1", 6, 2)];
+        StartCombat(storage, "GB1");
+        string old = storage.WorldState.Hero!.Symbol;
+        storage.WorldState.Combat!.CurrentTurn = old;
+        storage.ApplyUpdateWorldState("""{"hero":{"symbol":"NEW"}}""");
+        Assert.Equal("NEW", storage.WorldState.Combat.CurrentTurn);
+        Assert.Contains(storage.WorldState.Combat.Initiative!, i => i.Symbol == "NEW");
+    }
+
+    [Fact]
+    public void SwappingCreatureSymbolsRebindsReferencesSimultaneously()
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Map.Entities = [MakeEnemy("GB1", 6, 2), MakeEnemy("GB2", 7, 2)];
+        StartCombat(storage, "GB1", "GB2");
+        storage.WorldState.Combat!.CurrentTurn = "GB1";
+        int firstScore = storage.WorldState.Combat.Initiative!.Single(i => i.Symbol == "GB1").Score;
+        int secondScore = storage.WorldState.Combat.Initiative!.Single(i => i.Symbol == "GB2").Score;
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"symbol":"GB2"},{"id":1,"symbol":"GB1"}]}}""");
+        Assert.Equal("GB2", storage.WorldState.Combat.CurrentTurn);
+        Assert.Equal(firstScore, storage.WorldState.Combat.Initiative!.Single(i => i.Symbol == "GB2").Score);
+        Assert.Equal(secondScore, storage.WorldState.Combat.Initiative!.Single(i => i.Symbol == "GB1").Score);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ExplicitNewCombatTurnIsNotReboundTwiceWhenSymbolsSwap(bool combatFirst)
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Map.Entities = [MakeEnemy("GB1", 6, 2), MakeEnemy("GB2", 7, 2)];
+        StartCombat(storage, "GB1", "GB2");
+        const string map = "\"map\":{\"entities\":[{\"id\":0,\"symbol\":\"GB2\"},{\"id\":1,\"symbol\":\"GB1\"}]}";
+        const string combat = "\"combat\":{\"currentTurn\":\"GB1\"}";
+        storage.ApplyUpdateWorldState("{" + (combatFirst ? combat + "," + map : map + "," + combat) + "}");
+        Assert.Equal("GB1", storage.WorldState.Combat!.CurrentTurn);
+        Assert.Contains(storage.WorldState.Combat.Initiative!, i => i.Symbol == "GB1");
+        Assert.Contains(storage.WorldState.Combat.Initiative!, i => i.Symbol == "GB2");
+    }
+
 }

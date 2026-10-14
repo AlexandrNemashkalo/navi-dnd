@@ -293,6 +293,7 @@ public class Storage
         // принимаем как список из одного элемента, а не роняем весь ответ.
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new LenientStringListConverter() } };
         var root = doc.RootElement;
+        RebindChangedSymbols(root);
 
         foreach (var prop in root.EnumerateObject())
         {
@@ -383,6 +384,56 @@ public class Storage
         NormalizeKeys();
         L.SetWorld(WorldState.Language);
         FillMissingStats();
+    }
+
+    // Apply aliases once per reference; sequential replacement would corrupt symbol swaps.
+    private void RebindChangedSymbols(JsonElement patch)
+    {
+        string? previousHero = WorldState.Hero?.Symbol, nextHero = previousHero;
+        var previousEntities = (WorldState.Map.Entities ?? []).Select(e => e.Symbol).ToArray();
+        var nextEntities = previousEntities.ToArray();
+        // Rebind inherited references before applying explicit new combat fields, independent of root key order.
+        foreach (var property in patch.EnumerateObject())
+        {
+            if (property.Value.ValueKind != JsonValueKind.Object) continue;
+            if (property.Name.Equals("hero", StringComparison.OrdinalIgnoreCase)
+                && TryPatchProperty(property.Value, "symbol", out var heroSymbol)
+                && heroSymbol.ValueKind is JsonValueKind.String or JsonValueKind.Null)
+                nextHero = NormalizeSymbol(heroSymbol.GetString() ?? "");
+            if (!property.Name.Equals("map", StringComparison.OrdinalIgnoreCase)
+                || !TryPatchProperty(property.Value, "entities", out var entities)
+                || entities.ValueKind != JsonValueKind.Array) continue;
+            foreach (var entity in entities.EnumerateArray())
+            {
+                if (entity.ValueKind != JsonValueKind.Object || !TryPatchProperty(entity, "id", out var id)
+                    || id.ValueKind != JsonValueKind.Number || !id.TryGetInt32(out int index)
+                    || index < 0 || index >= nextEntities.Length || !TryPatchProperty(entity, "symbol", out var symbol)
+                    || symbol.ValueKind is not (JsonValueKind.String or JsonValueKind.Null)) continue;
+                nextEntities[index] = NormalizeSymbol(symbol.GetString() ?? "");
+            }
+        }
+        var aliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        void Track(string? oldSymbol, string? newSymbol)
+        {
+            if (!string.IsNullOrEmpty(oldSymbol) && !string.IsNullOrEmpty(newSymbol) && oldSymbol != newSymbol)
+                aliases[oldSymbol] = newSymbol;
+        }
+        Track(previousHero, nextHero);
+        for (int i = 0; i < previousEntities.Length; i++) Track(previousEntities[i], nextEntities[i]);
+        if (aliases.Count == 0) return;
+        if (WorldState.Combat is { } combat)
+        {
+            if (combat.CurrentTurn != null && aliases.TryGetValue(combat.CurrentTurn, out var turn)) combat.CurrentTurn = turn;
+            foreach (var entry in combat.Initiative ?? [])
+                if (entry.Symbol != null && aliases.TryGetValue(entry.Symbol, out var symbol)) entry.Symbol = symbol;
+        }
+        var reactions = _oaOnHeroLastRound.ToArray();
+        _oaOnHeroLastRound.Clear();
+        foreach (var (symbol, round) in reactions)
+            _oaOnHeroLastRound[aliases.GetValueOrDefault(symbol, symbol)] = round;
+        var seeing = _entitiesSeeingHero.ToArray();
+        _entitiesSeeingHero.Clear();
+        foreach (string symbol in seeing) _entitiesSeeingHero.Add(aliases.GetValueOrDefault(symbol, symbol));
     }
 
     // Слова мастера на любом языке → постоянные ключи (Data/Models/Keys.cs): часть суток, особые статы героя,
