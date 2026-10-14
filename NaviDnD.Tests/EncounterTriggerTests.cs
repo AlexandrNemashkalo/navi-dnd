@@ -550,4 +550,15 @@ public class EncounterTriggerTests
         Assert.Equal(1, context.Split("\"symbol\":\"GB1\"").Length-1);
     }
 
+    [Fact]
+    public void DeathAfterMovementInSamePatchLeavesBodyAtFinalCell()
+    {
+        var storage = MakeStorage();
+        var enemy = MakeEnemy("RT1", 6, 2); enemy.Hp = "3/4"; enemy.MonsterKey = "Крыса";
+        storage.WorldState.Map.Entities = [enemy];
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"position":[7,2],"hp":"0/4"}]}}""");
+        var body = Assert.Single(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+        Assert.Equal([7,2], body.Position);
+    }
+
 }

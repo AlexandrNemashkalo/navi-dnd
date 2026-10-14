@@ -488,27 +488,28 @@ public class Storage
         // Хиты — у нынешней версии существа (тот же патч мог свести их к 0), без неё — у прежней.
         LivingEntity Current(LivingEntity e) => WorldState.Map.Entities?.FirstOrDefault(x => x.Symbol is { Length: > 0 } && string.Equals(x.Symbol, e.Symbol, StringComparison.OrdinalIgnoreCase)) ?? e;
         foreach (var dead in before.Where(e => !alive.Contains(e) && !(e.Symbol is { Length: > 0 } s && aliveSymbols.Contains(s))
-                                               && AtZeroHp(Current(e)) && !KnockedOut(Current(e)) && e.Position is { Count: >= 2 }))
+                                               && AtZeroHp(Current(e)) && !KnockedOut(Current(e)) && Current(e).Position is { Count: >= 2 }))
         {
             if (dead == WorldState.Hero) continue;
+            var corpse = Current(dead);
             // Убитый вид — в бестиарий журнала (раньше пополнялся только проверкой знаний по просьбе мастера).
-            if (dead.MonsterKey is { Length: > 0 } key)
+            if (corpse.MonsterKey is { Length: > 0 } key)
             {
                 var known = (WorldState.Narrative ??= new Narrative()).KnownMonsters ??= [];
                 if (!known.Contains(key, StringComparer.OrdinalIgnoreCase)) known.Add(key);
             }
-            string name = L.WF("Тело: {0}", dead.Name);
+            string name = L.WF("Тело: {0}", corpse.Name);
             var objects = WorldState.Map.Objects ??= [];
-            if (objects.Any(o => o.Deleted != true && o.Position is { Count: >= 2 } p && p[0] == dead.Position[0] && p[1] == dead.Position[1]
-                                 && o.Name?.Contains(dead.Name ?? "\0", StringComparison.OrdinalIgnoreCase) == true)) continue;
+            if (objects.Any(o => o.Deleted != true && o.Position is { Count: >= 2 } p && p[0] == corpse.Position[0] && p[1] == corpse.Position[1]
+                                 && o.Name?.Contains(corpse.Name ?? "\0", StringComparison.OrdinalIgnoreCase) == true)) continue;
             objects.Add(new CellEntity
             {
                 Symbol = "(†)",
                 Name = name,
-                Position = [dead.Position[0], dead.Position[1]],
+                Position = [corpse.Position[0], corpse.Position[1]],
                 Color = [150, 150, 150],
-                Image = dead.Image,
-                AiInfo = [.. dead.AiInfo ?? [], L.WF("Убит в бою ({0})", dead.MonsterKey ?? dead.Name)],
+                Image = corpse.Image,
+                AiInfo = [.. corpse.AiInfo ?? [], L.WF("Убит в бою ({0})", corpse.MonsterKey ?? corpse.Name)],
             });
         }
     }
