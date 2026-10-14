@@ -42,6 +42,18 @@ public class ThirdPassMechanicsTests
         Assert.False(MovementCalculator.IsCellLit(s.WorldState, 6,3));
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void LightRadiusUsesSameDiagonalDistanceAsMapVisibility(bool carried)
+    {
+        var s=Scene();var ws=s.WorldState;ws.Time.PartOfDay=PartsOfDay.Night;
+        if(carried) ws.Hero.Light=new(){On=true,Ft=20};
+        else ws.Map.Objects=[new(){Name="Torch",Symbol="(L)",Position=[3,3],Light=new(){On=true,Ft=20}}];
+        Assert.True(MovementCalculator.IsCellLit(ws,5,5));
+        Assert.False(MovementCalculator.IsCellLit(ws,6,6));
+    }
+
     [Fact]
     public void RemovedLightSourceDoesNotRevealCellsOnMap()
     {

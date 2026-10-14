@@ -570,7 +570,7 @@ public static class MovementCalculator
         {
             if (src.Deleted == true || src.Light is not { On: true } light) continue;
             if (src.Position is not { Count: >= 2 } sp) continue;
-            if (light.Ft > 0 && ChebyshevDist(sp[0], sp[1], col, row) * 5 > light.Ft) continue;
+            if (light.Ft > 0 && TargetGeometry.DistanceFt(sp[0], sp[1], col, row) > light.Ft) continue;
             if (HasLineOfSight(ws, sp[0], sp[1], col, row)) return true;
         }
         return false;
