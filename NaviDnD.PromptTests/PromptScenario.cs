@@ -203,12 +203,7 @@ public static class PromptScenario
                             ApplyToolHistory(storage, req.History);
                             storage.Save();
                             var ws = storage.WorldState;
-                            var heroPos = ws.Hero?.Position;
-                            var cell = TargetGeometry.SelectableCells(ws, req, (_, _) => true, (_, _) => true)
-                                .Where(c => heroPos is not { Count: >= 2 } || c != (heroPos[0], heroPos[1]))
-                                .OrderBy(c => targetPoint.HasValue ? Math.Abs(c.col - targetPoint.Value.col) + Math.Abs(c.row - targetPoint.Value.row) : 0)
-                                .ThenBy(c => c.col).ThenBy(c => c.row)
-                                .Cast<(int col, int row)?>().FirstOrDefault();
+                            var cell = ChooseTarget(ws, req, targetPoint);
                             req.Answered = true;
                             req.Result = cell is { } p
                                 ? BuildTargetResult(ws, req, p)
@@ -224,6 +219,16 @@ public static class PromptScenario
             }
         }
         catch (OperationCanceledException) { }
+    }
+
+    internal static (int col,int row)? ChooseTarget(WorldState ws,TargetSelectionRequest request,(int col,int row)? desired=null)
+    {
+        var heroPos=ws.Hero?.Position;
+        return TargetGeometry.SelectableCells(ws,request,(_,_)=>true,(_,_)=>true)
+            .Where(c=>request.Mode=="point" || heroPos is not {Count:>=2} || c!=(heroPos[0],heroPos[1]))
+            .OrderBy(c=>desired.HasValue?Math.Abs(c.col-desired.Value.col)+Math.Abs(c.row-desired.Value.row):0)
+            .ThenBy(c=>c.col).ThenBy(c=>c.row)
+            .Cast<(int col,int row)?>().FirstOrDefault();
     }
 
     internal static TargetSelectionResult BuildTargetResult(WorldState ws, TargetSelectionRequest request, (int col, int row) p)

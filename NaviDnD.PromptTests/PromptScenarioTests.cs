@@ -7,6 +7,15 @@ namespace NaviDnD.PromptTests;
 public class PromptScenarioTests
 {
     [Fact]
+    public void SelfCenteredCubeCanChooseHeroCell()
+    {
+        var storage=new Storage();
+        storage.ApplySavedState("""{"hero":{"symbol":"HRO","position":[3,3]}}""");
+        var chosen=PromptScenario.ChooseTarget(storage.WorldState,new(){Mode="point",Shape="cube",SizeFt=15,RangeFt=0},(4,3));
+        Assert.Equal((3,3),chosen);
+    }
+
+    [Fact]
     public void AreaSelectionAnswerIncludesAffectedCreaturesAndCells()
     {
         var storage = new Storage();
