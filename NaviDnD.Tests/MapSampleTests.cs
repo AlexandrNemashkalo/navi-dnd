@@ -15,7 +15,12 @@ public class MapSampleTests
     [Fact]
     public void ExportSamples()
     {
-        string root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../artifacts/map-samples"));
+        var project = new DirectoryInfo(AppContext.BaseDirectory);
+        while (project != null && !File.Exists(Path.Combine(project.FullName, "NaviDnD.Tests.csproj"))) project = project.Parent;
+        string repository = project?.Parent?.FullName ?? throw new InvalidOperationException("Test repository not found");
+        string root = Path.Combine(repository, "artifacts", "map-samples");
+        Assert.True(File.Exists(Path.GetFullPath(Path.Combine(root, "..", "..", "NaviDnD.Tests", "NaviDnD.Tests.csproj"))),
+            "Map samples must remain inside the repository even with alternate build output");
         Directory.CreateDirectory(root);
         foreach (string theme in new[] { "forest", "hills", "swamp", "village", "building", "dungeon", "cave", "island", "village-road", "village-river", "village-palisade" })
         for (int seed = 1; seed <= 5; seed++)
