@@ -518,7 +518,7 @@ public static class MovementCalculator
         int baseCost = ws.Map.TerrainAt(col, row)?.StepCostFt ?? 5;
         foreach (var area in ws.Map.AreasAt(col, row))
         {
-            if (area.Deleted == true || area.StepCostFt == null) continue;
+            if (area.Deleted == true || area.StepCostFt is not > 0) continue;
             baseCost = area.StepCostFt.Value;
             break;
         }

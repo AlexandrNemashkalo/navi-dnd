@@ -903,7 +903,7 @@ public class Storage
         }
     }
 
-    public void ApplyClientMovement(int distanceFeet, bool isDiagonal = false)
+    public void ApplyClientMovement(int distanceFeet, bool isDiagonal = false, int? newRoundCostFt = null)
     {
         var hero = WorldState.Hero;
         if (hero == null || !hero.SpeedMax.HasValue) return;
@@ -914,6 +914,8 @@ public class Storage
 
         if (!inCombat && speedLeft < distanceFeet)
         {
+            // The first diagonal in the new round must not retain the previous round's surcharge.
+            distanceFeet = newRoundCostFt ?? distanceFeet;
             WorldState.Time.TotalRounds++;
             speedLeft = speedMax;
             _wasSpeedExhausted = false;

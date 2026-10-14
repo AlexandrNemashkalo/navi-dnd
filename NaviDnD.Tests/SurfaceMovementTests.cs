@@ -53,6 +53,31 @@ public class SurfaceMovementTests
         Assert.Contains(reachable,k=>k.Key.col==3&&k.Key.row==2&&k.Value.cost==expected);
     }
 
+    [Theory]
+    [InlineData('.',5)]
+    [InlineData('"',10)]
+    [InlineData('~',10)]
+    [InlineData(':',10)]
+    [InlineData('g',10)]
+    public void EnemyContinuationCannotSpendSameMovementTwice(char surface,int cost)
+    {
+        var s=Scene(surface);var ws=s.WorldState;ws.Map.Rows=1;
+        ws.Hero!.Position=[10,1];ws.Map.Entities=[new(){Symbol="ENM",Position=[2,1],SpeedMax=30}];
+        var first=MovementCalculator.Calculate(ws,new(){EntityId=0,SpeedFt=cost+2,Intents=[new(){Intent="approach",Target="hero"}]});
+        Assert.Equal(new[]{3,1},first.Steps[^1]);Assert.Equal(2,first.RemainingSpeedFt);
+        var second=MovementCalculator.Calculate(ws,new(){EntityId=0,FromPosition=first.Steps[^1],SpeedFt=first.RemainingSpeedFt,DiagonalsUsed=first.DiagonalsUsed,Intents=[new(){Intent="approach",Target="hero"}]});
+        Assert.Equal(new[]{3,1},second.Steps[^1]);Assert.Equal(2,second.RemainingSpeedFt);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    public void InvalidAreaCostCannotCreateFreeMovementOrNegativePathEdges(int invalid)
+    {
+        var s=Scene('.');s.WorldState.Map.Area=[new(){Positions=[[3,2]],StepCostFt=invalid}];
+        Assert.Equal(5,MovementCalculator.GetStepCost(s.WorldState,3,2));
+    }
+
     [Fact]
     public void MagicAreaCostIsSameForHeroAndEnemyAndDeletedAreaDoesNotApply()
     {
@@ -63,6 +88,17 @@ public class SurfaceMovementTests
         Assert.Equal(20,MovementCalculator.GetStepCost(ws,3,2));
         ws.Map.Area[0].Deleted=true;
         Assert.Equal(5,MovementCalculator.GetStepCost(ws,3,2));
+    }
+
+    [Fact]
+    public void FirstDiagonalAfterAutomaticNewRoundKeepsFiveFootDiscount()
+    {
+        var s=Scene('.',5);s.WorldState.Combat=null;
+        s.ApplyClientMovement(5,true);
+        new MovementHandler(s.WorldState,s,new DisplayConfig()).TryMove("MoveNorthEast",out _,out _,out _,out _);
+        Assert.Equal(2,s.WorldState.Time.TotalRounds);
+        Assert.Equal(25,s.WorldState.Hero!.SpeedLeft);
+        Assert.Equal(1,s.DiagonalUsed);
     }
 
     [Fact]

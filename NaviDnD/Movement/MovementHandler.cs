@@ -77,9 +77,9 @@ public class MovementHandler
                     + MovementCalculator.GetStepCost(_world, behindCol, behindRow, diag, _storage.DiagonalUsed > 0 || diag);
                 if (!HasMovementBudget(passCost)) return false;
                 activatedTriggers.AddRange(GetOpportunityAttackTriggers(heroCol, heroRow, behindCol, behindRow));
-                _storage.ApplyClientMovement(GetStepCost(newCol, newRow, diag), diag);
+                _storage.ApplyClientMovement(GetStepCost(newCol, newRow, diag), diag, MovementCalculator.GetStepCost(_world, newCol, newRow, diag));
                 hero.Position = [behindCol, behindRow];
-                _storage.ApplyClientMovement(GetStepCost(behindCol, behindRow, diag), diag);
+                _storage.ApplyClientMovement(GetStepCost(behindCol, behindRow, diag), diag, MovementCalculator.GetStepCost(_world, behindCol, behindRow, diag));
                 _world.History?.Add(new DialogMessage { Text = L.WF("Ты протискиваешься мимо: {0}.", bystander.Name) });
                 _storage.Save();
                 activatedTriggers.AddRange(GetStepTriggers(behindCol, behindRow));
@@ -109,7 +109,7 @@ public class MovementHandler
         if (!HasMovementBudget(stepCost)) return false;
         activatedTriggers.AddRange(GetOpportunityAttackTriggers(heroCol, heroRow, newCol, newRow));
         hero.Position = [newCol, newRow];
-        _storage.ApplyClientMovement(stepCost, isDiagonal);
+        _storage.ApplyClientMovement(stepCost, isDiagonal, MovementCalculator.GetStepCost(_world, newCol, newRow, isDiagonal));
         // Шаг на лестницу — сразу на связанную клетку соседнего этажа (стоимость — обычный шаг).
         if (_world.Map.StairTarget(newCol, newRow) is var (stairCol, stairRow))
         {
