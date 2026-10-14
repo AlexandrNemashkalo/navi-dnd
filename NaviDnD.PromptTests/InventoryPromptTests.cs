@@ -39,4 +39,22 @@ public class InventoryPromptTests
 
         PromptScenario.RecordAsMock(result.RawResponse, mockResponsesFolder: "Inventory", action: "SendAction");
     }
+    [Fact]
+    public async Task NearbyObjectInspectionUsesProvidedNotesWithoutFetchingWorldState()
+    {
+        var storage = PromptScenario.LoadUiTestFixture("opportunity_attack_game.json");
+        storage.WorldState.Combat = null;
+        storage.WorldState.Map.Entities = [];
+        storage.WorldState.Map.Objects = [new() { Name = "Каменная чаша", Symbol = "(C)", Position = [4,3],
+            AiInfo = ["На дне чаши выгравирована звезда с семью лучами. Чаша сухая, обычный камень, магии нет."] }];
+        var ctx = new NaviDnD.Clients.AiContextBuilder(storage.WorldState, [(3,3), (4,3)]);
+        var result = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage,
+            ctx.MinimalState("осматриваю чашу рядом: что на её дне?"));
+        var parsed = PromptScenario.ApplyAndParse(storage, result.RawResponse);
+        Assert.DoesNotContain("get_world_state →", result.ToolTrace);
+        Assert.Contains(parsed.HistoryTexts, t => t.Contains("звезд", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("звёзд", StringComparison.OrdinalIgnoreCase));
+        Assert.Equal("10/10", storage.WorldState.Hero!.Hp);
+    }
+
 }

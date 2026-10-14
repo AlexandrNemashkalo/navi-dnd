@@ -250,12 +250,14 @@ public class AiContextBuilder
                 nearSb.AppendLine($"map.rooms: {currentRoom.Name}");
 
             var nearObj = _ws.Map.Objects?
-                .Where(o => o.Deleted != true && o.Position is { Count: >= 2 } &&
-                            _visibleCells.Contains((o.Position[0], o.Position[1])) &&
-                            nearbyCells.Contains((o.Position[0], o.Position[1])))
-                .Select(o => o.Hidden == true ? $"{o.Name}(скрыт)" : o.Name);
-            if (nearObj?.Any() == true)
-                nearSb.AppendLine($"map.objects: {Join(nearObj)}");
+                .Select((o, i) => (o, i))
+                .Where(x => x.o.Deleted != true && x.o.Position is { Count: >= 2 }
+                    && _visibleCells.Contains((x.o.Position[0], x.o.Position[1]))
+                    && nearbyCells.Contains((x.o.Position[0], x.o.Position[1])))
+                .Select(x => new { id = x.i, x.o.Name, x.o.Symbol, x.o.Position, x.o.Hidden,
+                    x.o.AiInfo, x.o.Effects, x.o.Triggers, x.o.Light }).ToList();
+            if (nearObj is { Count: > 0 })
+                nearSb.AppendLine($"map.objects: {JsonSerializer.Serialize(nearObj, _json)}");
 
             var nearEnt = _ws.Map.Entities?
                 .Where(e => e.Deleted != true && e.Position is { Count: >= 2 } &&
