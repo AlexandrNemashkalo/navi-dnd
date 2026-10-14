@@ -542,8 +542,15 @@ public class AiContextBuilder
         var sb = new System.Text.StringBuilder();
         sb.AppendLine("Сработали триггеры. Данные объектов полностью включены — MCP по ним не вызывать:");
 
-        foreach (var (entity, triggerType) in triggers)
+        var sent = new HashSet<CellEntity>();
+        foreach (var (source, triggerType) in triggers)
         {
+            int inEntities = source is LivingEntity
+                ? _ws.Map.Entities?.FindIndex(e => ReferenceEquals(e, source)
+                    || !string.IsNullOrEmpty(source.Symbol) && string.Equals(e.Symbol, source.Symbol, StringComparison.OrdinalIgnoreCase)) ?? -1
+                : -1;
+            CellEntity entity = inEntities >= 0 ? _ws.Map.Entities![inEntities] : source;
+            sent.Add(entity);
             string stealthNote = triggerType == "spotted" && _ws.Hero?.Stealth is int st
                 ? $" (герой скрытен: Скрытность {st})"
                 : "";
@@ -552,7 +559,6 @@ public class AiContextBuilder
                 stealthNote += " (героя не видит — заметило идущий бой рядом с союзником, вступает в него)";
             sb.AppendLine($"- {triggerType}{stealthNote}");
 
-            var inEntities = entity is LivingEntity le ? (_ws.Map.Entities?.IndexOf(le) ?? -1) : -1;
             var inObjects = inEntities < 0 ? (_ws.Map.Objects?.IndexOf(entity) ?? -1) : -1;
             int id = inEntities >= 0 ? inEntities : inObjects;
             string listKey = inEntities >= 0 ? "map.entities" : "map.objects";
@@ -565,7 +571,6 @@ public class AiContextBuilder
         // Данные возможных участников, а не только существа, первым увидевшего героя.
         if (triggers.Any(t => t.triggerType == "spotted"))
         {
-            var sent = triggers.Select(t => t.entity).ToHashSet();
             foreach (var (entity, id) in (_ws.Map.Entities ?? []).Select((e, i) => (e, i)))
             {
                 if (entity.Deleted == true || sent.Contains(entity)

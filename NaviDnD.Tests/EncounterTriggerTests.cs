@@ -535,4 +535,19 @@ public class EncounterTriggerTests
         Assert.Contains("Крыса", storage.WorldState.Narrative?.KnownMonsters ?? []);
     }
 
+    [Fact]
+    public void TriggerContextResolvesPatchedCreatureBySymbolAndUsesCurrentData()
+    {
+        var storage = MakeStorage();
+        var watcher = MakeEnemy("GB1", 6, 2); watcher.Hp = "7/7";
+        storage.WorldState.Map.Entities = [watcher];
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"hp":"5/7","position":[5,2]}]}}""");
+        string context = new NaviDnD.Clients.AiContextBuilder(storage.WorldState)
+            .TriggerState([(watcher, "spotted")], [], []);
+        Assert.Contains("5/7", context);
+        Assert.DoesNotContain("7/7", context);
+        Assert.DoesNotContain("\"id\":-1", context);
+        Assert.Equal(1, context.Split("\"symbol\":\"GB1\"").Length-1);
+    }
+
 }
