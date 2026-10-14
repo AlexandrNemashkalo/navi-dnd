@@ -128,11 +128,16 @@ public class WorldPromptTests(ITestOutputHelper output)
 
         // 3. Слух о месте — мастер добавляет его на карту.
         int placesBefore = geo.Chronicle.Places.Count;
+        var knownBefore = (ws.World?.Known ?? []).ToHashSet(StringComparer.OrdinalIgnoreCase);
         historyBefore = ws.History!.Count;
         await client.SendAction("Спрашиваю у первого встречного, где ближайшая деревня или городок, куда он сам держит путь, — как она называется и далеко ли.");
         foreach (var m in ws.History.Skip(historyBefore)) output.WriteLine($"  > {m.Author}: {m.Text}");
         foreach (var p in geo.Chronicle.Places.Skip(placesBefore)) output.WriteLine($"  новое место {p.Name} ({p.Type}) [{p.X},{p.Y}] trail={p.Trail?.Count / 2}: {p.Description} | {p.DmNotes}");
         output.WriteLine($"Знает: {string.Join(", ", ws.World!.Known)}");
-        Assert.True(geo.Chronicle.Places.Count > placesBefore, "мастер не добавил место на карту (add_place)");
+        var discovered = (ws.World?.Known ?? []).Where(name => !knownBefore.Contains(name)).ToList();
+        Assert.True(geo.Chronicle.Places.Count > placesBefore || discovered.Count > 0,
+            "Мастер должен добавить место или раскрыть существующее неизвестное герою место.");
+        var afterWorld = GameWorld.ForMaster(ws)!;
+        Assert.All(discovered, name => Assert.NotNull(WorldAtlas.FindPlace(afterWorld, name)));
     }
 }
