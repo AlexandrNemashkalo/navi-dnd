@@ -914,6 +914,18 @@ public class Storage
     }
 
 
+    private static bool TryPatchProperty(JsonElement patch, string name, out JsonElement value)
+    {
+        if (patch.TryGetProperty(name, out value)) return true;
+        foreach (var property in patch.EnumerateObject())
+            if (property.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+            {
+                value = property.Value;
+                return true;
+            }
+        return false;
+    }
+
     private List<T> PatchByIndex<T>(List<T>? existing, JsonElement patches, JsonSerializerOptions options, bool allowDelete = true, bool retainDeleted = false)
     {
         var result = (existing ?? []).ToList();
@@ -924,15 +936,19 @@ public class Storage
         {
             ValidateKeys<T>(patchEl, "patch");
 
-            if (!patchEl.TryGetProperty("id", out var idEl))
+            if (!TryPatchProperty(patchEl, "id", out var idEl))
             {
                 // нет id → новый элемент, добавить в конец
                 result.Add(JsonSerializer.Deserialize<T>(patchEl.GetRawText(), options)!);
                 continue;
             }
 
-            int id = idEl.GetInt32();
-            bool deleted = patchEl.TryGetProperty("deleted", out var d) && d.GetBoolean();
+            if (idEl.ValueKind != JsonValueKind.Number || !idEl.TryGetInt32(out int id) || id < 0)
+            {
+                Console.Error.WriteLine($"[AI ERROR] Invalid patch index in {typeof(T).Name}, ignoring.");
+                continue;
+            }
+            bool deleted = TryPatchProperty(patchEl, "deleted", out var d) && d.ValueKind == JsonValueKind.True;
 
             if (deleted && retainDeleted)
             {

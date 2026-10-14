@@ -320,4 +320,37 @@ public class StorageApplyUpdateTests
         Assert.Equal(20, storage.WorldState.Map.Cols);
         Assert.Equal(15, storage.WorldState.Map.Rows);
     }
+    [Theory]
+    [InlineData("-1")]
+    [InlineData("\"wrong\"")]
+    [InlineData("null")]
+    [InlineData("1.5")]
+    public void InvalidPatchIndexDoesNotCrashOrChangeExistingItem(string invalidId)
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Hero!.Resources = [new() { Name = "Ячейки", Value = "2/2" }];
+        storage.ApplyUpdateWorldState("""{"hero":{"resources":[{"id":INVALID_ID,"value":"0/2"}]}}""".Replace("INVALID_ID", invalidId));
+        Assert.Equal("2/2", Assert.Single(storage.WorldState.Hero.Resources).Value);
+    }
+
+    [Fact]
+    public void PatchMetadataIsCaseInsensitiveLikeModelProperties()
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Hero!.Resources = [new() { Name = "Ячейки", Value = "2/2" }];
+        storage.ApplyUpdateWorldState("""{"hero":{"resources":[{"ID":0,"VALUE":"1/2"}]}}""");
+        Assert.Equal("1/2", Assert.Single(storage.WorldState.Hero.Resources).Value);
+        storage.ApplyUpdateWorldState("""{"hero":{"resources":[{"Id":0,"Deleted":true}]}}""");
+        Assert.Empty(storage.WorldState.Hero.Resources);
+    }
+
+    [Fact]
+    public void NullableDeletedFlagCanBeClearedInPatch()
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Hero!.Resources = [new() { Name = "Ячейки", Value = "2/2", Deleted = true }];
+        storage.ApplyUpdateWorldState("""{"hero":{"resources":[{"id":0,"deleted":null}]}}""");
+        Assert.Null(Assert.Single(storage.WorldState.Hero.Resources).Deleted);
+    }
+
 }
