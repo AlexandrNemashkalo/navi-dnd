@@ -2,8 +2,8 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD;
 
-// OwnerPath: "hero" или "map.entities". EntityId: индекс в map.entities (null для hero).
-// EffectId: индекс эффекта внутри списка Effects владельца — используется для патча по id.
+// OwnerPath: "hero" or "map.entities". EntityId: index in map.entities (null for hero). EffectId: index of the
+// effect within the owner's list Effects - used for patching by id.
 public record EffectRef(string OwnerPath, int? EntityId, string OwnerName, int EffectId, StatusEffect Effect);
 
 public class RoundBundle

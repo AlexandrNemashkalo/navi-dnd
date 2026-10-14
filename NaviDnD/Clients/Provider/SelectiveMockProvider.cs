@@ -2,27 +2,26 @@ using System.Text;
 
 namespace NaviDnD.Clients;
 
-// Wraps a real provider and intercepts requests for actions listed in mockedActions.
-// If response.json exists next to the system prompt, returns it instead of calling the real provider.
-// Use ["*"] to mock all actions, or specific names like ["SendAction", "CreateNewGame"].
-// mockResponsesDirOverride (опционально) — читать response.json из ДРУГОЙ базовой папки вместо
-// actionPath (реальные Prompts/{RuleSet}/{Action}/) — используется E2E-тестами, чтобы держать
-// свои моки отдельно от git-tracked промптов (см. NaviDnD.UiTests/GameSession.cs).
+// Wraps a real provider and intercepts requests for actions listed in mockedActions. If response.json exists
+// next to the system prompt, returns it instead of calling the real provider. Use ["*"] to mock all actions, or
+// specific names like ["SendAction", "CreateNewGame"]. mockResponsesDirOverride (optional) - read response.json
+// from ANOTHER base folder instead of actionPath (real Prompts/{RuleSet}/{Action}/) - used by E2E- tests to
+// keep their mocks separate from git-tracked prompts (see NaviDnD.UiTests/GameSession.cs).
 internal sealed class SelectiveMockProvider(IAiProvider inner, IReadOnlySet<string> mockedActions, string? mockResponsesDirOverride = null) : IAiProvider
 {
     private const int ChunkSize = 8;
     private const int DelayMs = 10;
 
-    // Сколько раз уже вызывали мок для каждого имени действия — нужно, чтобы РАЗЛИЧАТЬ
-    // последовательные вызовы ОДНОГО и того же действия в рамках одного теста. Например,
-    // FireEnemyTurn использует тот же actionPath ("SendAction"), что и обычное действие игрока —
-    // без нумерации оба вызова получили бы ОДИН и тот же файл ответа, из-за чего в диалоге
-    // дублировался бы один и тот же текст (см. EnemyTurnBehaviorScenarioTests).
+    // The number of times a mock has already been called for each action name is necessary to distinguish
+    // between successive calls of the same action within the same test. For example, FireEnemyTurn uses the
+    // same actionPath ("SendAction") as a normal player action - without numbering, both calls would receive
+    // the SAME response file, causing the same text to be duplicated in the dialogue (see
+    // EnemyTurnBehaviorScenarioTests).
     private readonly Dictionary<string, int> _callCounts = [];
 
-    // Мок отвечает не мгновенно — имитирует реальную задержку сети/модели, чтобы UI ожидания
-    // (Spinner.While — "Создаём персонажа...", "Создаём мир..." и т.п.) реально успевал
-    // отрисоваться и его можно было проверить в E2E-тестах, а не просто предполагать, что он есть.
+    // The mock does not respond instantly - it simulates the real network/model delay so that UI expectations
+    // (Spinner.While - “Creating a character...”, “Creating a world...”, etc.) actually have time to be
+    // rendered and it can be checked in E2E- tests, and not just assume that it exists.
     private const int MockResponseDelayMs = 5000;
 
     public async Task<string> Complete(IReadOnlyList<string> systemBlocks, string userMessage, string actionPath, string model)
@@ -67,11 +66,11 @@ internal sealed class SelectiveMockProvider(IAiProvider inner, IReadOnlySet<stri
             ? Path.Combine(mockResponsesDirOverride, actionName)
             : actionPath;
 
-        // 1й вызов — всегда response.json (совместимо со всеми существующими тестами). 2й и
-        // далее — сперва пробуем responseN.json (различимый ответ для повторного вызова того же
-        // действия, например обычный SendAction игрока → FireEnemyTurn), и только если такого
-        // файла нет — молча повторяем response.json (прежнее поведение для тестов, где второй
-        // вызов не нужно отличать от первого).
+        // 1st call is always response.json (compatible with all existing tests). 2nd and further - first we try
+        // responseN.json (a distinguishable response to call the same action again, for example the player's
+        // usual SendAction → FireEnemyTurn), and only if there is no such file - we silently repeat
+        // response.json (the previous behavior for tests where the second call does not need to be
+        // distinguished from the first).
         string stubPath = callNumber > 1 && File.Exists(Path.Combine(baseDir, $"response{callNumber}.json"))
             ? Path.Combine(baseDir, $"response{callNumber}.json")
             : Path.Combine(baseDir, "response.json");

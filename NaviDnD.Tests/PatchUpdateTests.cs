@@ -6,7 +6,7 @@ using NaviDnD.Installer;
 
 namespace NaviDnD.Tests;
 
-// Обновление патчами: база → цепочка патчей с проверкой исходных файлов, SHA256 и откатом.
+// Update with patches: database → chain of patches with checking source files, SHA256 and rollback.
 public class PatchUpdateTests
 {
     private static readonly Dictionary<string, string> Base = new()
@@ -28,7 +28,7 @@ public class PatchUpdateTests
             Assert.Equal("new", Read(root, "Speech/new.py"));
             Assert.Equal("prompt", Read(root, "Prompts/x.md"));
             Assert.False(File.Exists(Path.Combine(root, "old", "legacy.txt")));
-            Assert.False(Directory.Exists(Path.Combine(root, "old")));   // опустевшая папка убрана
+            Assert.False(Directory.Exists(Path.Combine(root, "old")));   // empty folder removed
             Assert.Equal("private", Read(root, "Storage/settings.json"));
             Assert.Empty(Directory.GetDirectories(root, ".update-*"));
         });
@@ -53,7 +53,7 @@ public class PatchUpdateTests
         var installed = new Dictionary<string, string>(Base) { ["Prompts/x.md"] = "edited" };
         WithGame(installed, (root, temp) =>
         {
-            // Патч не трогает Prompts/x.md, но полная проверка базы ловит повреждённую установку.
+            // The patch does not affect Prompts/x.md, but a full database check catches the damaged installation.
             string zip = MakePatch(temp, "1.0.0", "1.0.1", Base, [("release-version.txt", "1.0.1"), ("NaviDnD.dll", "a2")], []);
             var error = Assert.Throws<InvalidDataException>(() => PatchInstaller.ApplyChain(root, [zip]));
             Assert.Contains("Prompts/x.md", error.Message);
@@ -100,7 +100,7 @@ public class PatchUpdateTests
     {
         WithGame(Base, (root, temp) =>
         {
-            Directory.CreateDirectory(Path.Combine(root, "blocked"));   // на месте нового файла — папка: замена невозможна
+            Directory.CreateDirectory(Path.Combine(root, "blocked"));   // in place of the new file - folder: replacement is not possible
             File.WriteAllText(Path.Combine(root, "blocked", "keep.txt"), "keep");
             string first = MakePatch(temp, "1.0.0", "1.0.1", Base, [("release-version.txt", "1.0.1"), ("NaviDnD.dll", "a2")], ["old/legacy.txt"]);
             var mid = new Dictionary<string, string>(Base) { ["release-version.txt"] = "1.0.1", ["NaviDnD.dll"] = "a2" };
@@ -138,7 +138,7 @@ public class PatchUpdateTests
         Assert.Equal(2, manifest.PatchesFrom("1.1.4")!.Length);
         Assert.Equal("1.1.6", manifest.PatchesFrom("1.1.5")!.Single().To);
         Assert.Empty(manifest.PatchesFrom("1.1.6")!);
-        Assert.Null(manifest.PatchesFrom("1.1.3"));   // старше базы — полная установка
+        Assert.Null(manifest.PatchesFrom("1.1.3"));   // older than the base - full installation
         Assert.Throws<InvalidDataException>(() => UpdateManifest.Parse(Manifest("1.1.6", ("1.1.4", "1.1.5"), ("1.1.4", "1.1.6"))));
         Assert.Throws<InvalidDataException>(() => UpdateManifest.Parse(Manifest("1.1.7", ("1.1.4", "1.1.5"))));
         Assert.Throws<InvalidDataException>(() => UpdateManifest.Parse(
@@ -151,7 +151,7 @@ public class PatchUpdateTests
         var manifest = UpdateManifest.Parse(Manifest("1.1.5", mac: true, ("1.1.4", "1.1.5")), macOS: true);
         Assert.Null(manifest.Installer);
         Assert.Equal("NaviDnD-macOS-payload.001", manifest.Base.Files.Single().Name);
-        // Описание одной системы не принимается за описание другой.
+        // A description of one system is not accepted as a description of another.
         Assert.Throws<InvalidDataException>(() => UpdateManifest.Parse(Manifest("1.1.5", mac: false, ("1.1.4", "1.1.5")), macOS: true));
         Assert.Throws<InvalidDataException>(() => UpdateManifest.Parse(Manifest("1.1.5", mac: true, ("1.1.4", "1.1.5"))));
     }
@@ -162,7 +162,7 @@ public class PatchUpdateTests
         WithGame(new() { ["release-version.txt"] = "0.9.0", ["NaviDnD.dll"] = "edited", ["extra.txt"] = "x" }, (root, temp) =>
         {
             File.WriteAllText(Path.Combine(Directory.CreateDirectory(Path.Combine(root, "Storage")).FullName, "save.json"), "private");
-            // База — ZIP с папкой NaviDnD/, разрезанный на две части, как в релизе.
+            // Base - ZIP with folder NaviDnD/, cut into two parts, as in the release.
             string zip = Path.Combine(temp, "base.zip");
             using (var archive = ZipFile.Open(zip, ZipArchiveMode.Create))
                 foreach (var (name, text) in Base)
@@ -186,7 +186,7 @@ public class PatchUpdateTests
     [Fact]
     public void AppBundlePatchKeepsVersionInsideContents()
     {
-        // NaviDnD.app: корень патча — само приложение, release-version.txt — в Contents/MacOS.
+        // NaviDnD.app: the root of the patch is the application itself, release-version.txt is in Contents/MacOS.
         var app = new Dictionary<string, string>
         {
             ["Contents/MacOS/release-version.txt"] = "1.0.0", ["Contents/MacOS/NaviDnD.dll"] = "a1",
@@ -263,7 +263,7 @@ public class PatchUpdateTests
         {
             string path = Path.Combine(root, name.Replace('/', Path.DirectorySeparatorChar));
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            File.WriteAllText(path, text);   // UTF-8 без BOM — те же байты, что и Hash(text)
+            File.WriteAllText(path, text);   // UTF-8 without BOM - same bytes as Hash(text)
         }
         try { action(root, work); } finally { Directory.Delete(temp, true); }
     }

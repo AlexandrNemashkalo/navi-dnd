@@ -53,21 +53,21 @@ public class GameAiClient
         _appConfig = config;
     }
 
-    // Правила игры (папка промптов и данных правил — Prompts/{RuleSet}).
+    // Game rules (folder of prompts and rules data - Prompts/{RuleSet}).
     public string RuleSet => _ruleSet;
 
     public async Task CreateNewGame(NewGameData newGameData)
     {
         _storage.ResetWorldState();
-        // MCP-сервер требует существующий файл состояния при старте (см. Program.cs) — до этого
-        // CreateNewGame шёл вообще без MCP (allowedTools:null), теперь ей нужен find_icon.
+        // MCP- server requires an existing state file at startup (see Program.cs) - before that CreateNewGame
+        // went without MCP at all (allowedTools:null), now it needs find_icon.
         _storage.SaveDraft();
 
         string input = JsonSerializer.Serialize(newGameData, _serializeOptions);
-        string userMessage = $"Пользовательские пожелания к своему персонажу и правилам:\n{input}";
+        string userMessage = $"Player preferences for the character and rules:\n{input}";
         await CallAction(userMessage, nameof(CreateNewGame), _appConfig.ClaudeCreateNewGameModel);
 
-        // Выбранное игроком в анкете — как есть, поверх ответа нейронки.
+        // The player’s choice in the questionnaire is as is, on top of the AI’s response.
         if (_settings.Hero is { } hero)
         {
             if (int.TryParse(newGameData.Level, out int level) && level > 0)
@@ -75,22 +75,23 @@ public class GameAiClient
                 hero.Level = level;
                 hero.Xp = LevelRules.Current.XpFor(level);
             }
-            hero.VisionFt = null;   // обзор героя — по свету (движок); нейронка ставила «Зрение 5 фт»
+            hero.VisionFt = null;   // hero overview - by light (engine); AI set “Vision 5 ft”
             if (!string.IsNullOrWhiteSpace(newGameData.Image)) hero.Image = newGameData.Image;
             if (newGameData.Color is { Count: 3 }) hero.Color = [.. newGameData.Color];
             if (!string.IsNullOrWhiteSpace(newGameData.Symbol)) hero.Symbol = newGameData.Symbol.Trim();
         }
     }
 
-    // Анкета новой игры: нейронка подбирает портреты героя по имени и описанию (find_icon) — они идут
-    // в начале галереи. Ошибка/пустой ответ — пустой список (галерея остаётся из готового набора).
-    // Новая игра героем из библиотеки: герой как был (уровень, статы, навыки, заклинания, способности), личность —
-    // из анкеты; состояние прошлой игры сбрасывает код (ХП полные, эффекты, вдохновение, место), снаряжение и
-    // деньги под новое приключение выдаёт нейронка одним коротким вызовом (FixHeroForNewGame).
+    // Questionnaire for a new game: the AI selects portraits of the hero by name and description (find_icon) -
+    // they are at the beginning of the gallery. Error/empty answer - empty list (the gallery remains from the
+    // ready set). New game with a hero from the library: the hero as he was (level, stats, skills, spells,
+    // abilities), personality - from the profile; the state of the previous game resets the code (full HP,
+    // effects, inspiration, location), equipment and money for a new one the adventure is revealed by the AI
+    // with one short call (FixHeroForNewGame).
     public async Task ReuseHero(NewGameData data, string heroJson)
     {
         _storage.ResetWorldState();
-        _storage.ApplySavedState("{\"hero\":" + heroJson + "}");   // уровень и опыт — как были
+        _storage.ApplySavedState("{\"hero\":" + heroJson + "}");   // level and experience - as they were
         if (_settings.Hero is not { } hero) return;
         if (hero.Hp is { } hp && hp.Split('/') is [_, var max] && max.Trim().Length > 0) hero.Hp = $"{max.Trim()}/{max.Trim()}";
         hero.Effects = [];
@@ -104,28 +105,28 @@ public class GameAiClient
         hero.Inspiration = null;
         hero.Stealth = null;
         hero.Position = null;
-        hero.VisionFt = null;   // обзор героя — по свету (движок)
+        hero.VisionFt = null;   // hero review - by light (engine)
         if (!string.IsNullOrWhiteSpace(data.Name)) hero.Name = data.Name.Trim();
         if (!string.IsNullOrWhiteSpace(data.Symbol)) hero.Symbol = data.Symbol.Trim();
         if (!string.IsNullOrWhiteSpace(data.Image)) hero.Image = data.Image;
         if (data.Color is { Count: 3 }) hero.Color = [.. data.Color];
         await FixHeroForNewGame(
-            "Этот герой из прошлой игры начинает новое приключение. Уровень, характеристики, навыки, заклинания, " +
-            "способности, раса и класс — НЕ меняй. Замени снаряжение и деньги на обычные стартовые для его класса и " +
-            "уровня (убери уникальные/сюжетные предметы прошлой игры), ресурсы и ячейки заклинаний — полные, скорость — обычная без состояний." +
-            (string.IsNullOrWhiteSpace(data.Description) ? "" : $" Описание героя игрок уточнил: {data.Description}"));
+            "This hero from a previous game is starting a new adventure. Preserve level, ability scores, skills, spells, " +
+            "features, race, and class. Replace equipment and money with normal starting equipment for this class and " +
+            "level (remove unique/quest items from the previous game); refill resources and spell slots; restore normal speed without conditions." +
+            (string.IsNullOrWhiteSpace(data.Description) ? "" : $" Player's revised hero description: {data.Description}"));
     }
 
-    // Анкета героя: описание (внешность, характер, предыстория — не лист персонажа) — придумать по имени/расе/классу
-    // или доработать текущее по запросу игрока. null — не вышло.
+    // Hero profile: description (appearance, character, background - not a character sheet) - create by
+    // name/race/class or modify the current one at the request of the player. null - it didn’t work out.
     public async Task<string?> DescribeHero(string name, string race, string cls, string? current, string? request, string? extra = null)
     {
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(DescribeHero));
         try
         {
-            string userMessage = $"Имя: {name}\nРаса: {race}\nКласс: {cls}" + (string.IsNullOrWhiteSpace(extra) ? "" : $"\n{extra.Trim()}")
-                                 + (string.IsNullOrWhiteSpace(current) ? "" : $"\nТекущее описание (от игрока):\n{current.Trim()}")
-                                 + (string.IsNullOrWhiteSpace(request) ? "" : $"\nЗапрос игрока: {request.Trim()}");
+            string userMessage = $"Name: {name}\nRace: {race}\nClass: {cls}" + (string.IsNullOrWhiteSpace(extra) ? "" : $"\n{extra.Trim()}")
+                                 + (string.IsNullOrWhiteSpace(current) ? "" : $"\nCurrent description (from the player):\n{current.Trim()}")
+                                 + (string.IsNullOrWhiteSpace(request) ? "" : $"\nPlayer request: {request.Trim()}");
             string response = await CompleteConfigured([ReadPrompt(actionPath)], userMessage, actionPath, _appConfig.ClaudeCreateNewGameModel);
             string? text = JsonNode.Parse(ExtractJson(response))?["description"]?.GetValue<string>();
             return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
@@ -137,8 +138,8 @@ public class GameAiClient
         }
     }
 
-    // Окно «Новый уровень»: что класс получает на уровне и группы выбора — JSON для LevelUp.LoadPlan (разбирает окно,
-    // в своём потоке). null — не вышло.
+    // “New Level” window: what the class receives at the level and selection groups - JSON for LevelUp.LoadPlan
+    // (parses the window in its own thread). null - it didn’t work out.
     public async Task<string?> LevelUpOptions(LevelUp levelUp)
     {
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(LevelUpOptions));
@@ -151,12 +152,12 @@ public class GameAiClient
         catch (AiSetupException) { throw; }
         catch (Exception ex)
         {
-            Logger?.LogNote($"LevelUpOptions: {ex}\nОтвет: {response}");
+            Logger?.LogNote($"LevelUpOptions: {ex}\nResponse: {response}");
             return null;
         }
     }
 
-    // Просьба игрока о своём варианте прокачки (поле ввода) — тот же промпт вариантов; JSON для LevelUp.MergeCustom.
+    // The player’s request for his own upgrade option (input field) - the same option prompt; JSON for LevelUp.MergeCustom.
     public async Task<string?> LevelUpCustom(LevelUp levelUp, string request)
     {
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(LevelUpOptions));
@@ -169,13 +170,14 @@ public class GameAiClient
         catch (AiSetupException) { throw; }
         catch (Exception ex)
         {
-            Logger?.LogNote($"LevelUpCustom: {ex}\nОтвет: {response}");
+            Logger?.LogNote($"LevelUpCustom: {ex}\nResponse: {response}");
             return null;
         }
     }
 
-    // Выбор сделан: новый герой (копия текущего) с полученным и выбранным; null — мастер не ответил. Нечего
-    // вносить в лист (ни умений, ни выбора, ни новых чисел) — без вызова нейронки.
+    // The choice is made: a new hero (a copy of the current one) with the received and selected one; null - the
+    // GM did not answer. There is nothing to add to the sheet (no skills, no choices, no new numbers) - without
+    // calling the AI.
     public async Task<Hero?> LevelUpApply(LevelUp levelUp)
     {
         if (!levelUp.NeedsMaster) return levelUp.Apply(null);
@@ -189,7 +191,7 @@ public class GameAiClient
         catch (AiSetupException) { throw; }
         catch (Exception ex)
         {
-            Logger?.LogNote($"LevelUpApply: {ex}\nОтвет: {response}");
+            Logger?.LogNote($"LevelUpApply: {ex}\nResponse: {response}");
             return null;
         }
     }
@@ -205,8 +207,8 @@ public class GameAiClient
             return;
         }
 
-        // Как SendAction: history печатается посимвольно (со звуком) через SequentialHistoryPlayer,
-        // а не появляется целиком одним ApplyUpdateWorldState, как в CallAction.
+        // How SendAction: history is printed character by character (with sound) through
+        // SequentialHistoryPlayer, and does not appear entirely as one ApplyUpdateWorldState, as in CallAction.
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(FixHeroForNewGame));
         string response = "";
         try
@@ -220,19 +222,20 @@ public class GameAiClient
         }
     }
 
-    // Анкета новой игры, шаг «Мир»: концепция нового мира (название, суть, королевства со столицами) — в его
-    // хронику, чтобы игрок увидел мир до начала. Мест не создаёт — их мастер добавит по ходу игры.
-    // description — текущее описание (игрок написал/поправил): нейронка дорабатывает его по запросу, а не пишет заново.
+    // Questionnaire for the new game, step “World”: the concept of the new world (name, essence, kingdoms with
+    // capitals) - in its chronicle, so that the player sees the world before the start. It does not create
+    // places - the GM will add them as the game progresses. description - current description (the player
+    // wrote/corrected): the AI refines it upon request, and does not write it again.
     public async Task<bool> CreateWorld(WorldMap world, string? wish, string? name = null, string? description = null)
     {
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(CreateWorld));
-        L.SetWorld(world.Language);   // описание мира — на его языке
+        L.SetWorld(world.Language);   // description of the world - in its language
         try
         {
             string userMessage = WorldAtlas.TerrainSummary(world)
-                                 + (string.IsNullOrWhiteSpace(name) ? "" : $"\nНазвание мира задано игроком: «{name.Trim()}» — оставь его (name).")
-                                 + (string.IsNullOrWhiteSpace(description) ? "" : $"\nТекущее описание мира (от игрока) — доработай по запросу, сохрани то, что не просят менять:\n{description.Trim()}")
-                                 + (string.IsNullOrWhiteSpace(wish) ? "" : $"\nЗапрос игрока: {wish}");
+                                 + (string.IsNullOrWhiteSpace(name) ? "" : $"\nThe player chose the world name: «{name.Trim()}» — preserve it (name).")
+                                 + (string.IsNullOrWhiteSpace(description) ? "" : $"\nCurrent world description (from the player): revise as requested and preserve everything not requested to change:\n{description.Trim()}")
+                                 + (string.IsNullOrWhiteSpace(wish) ? "" : $"\nPlayer request: {wish}");
             string response = await CompleteConfigured([ReadPrompt(actionPath)], userMessage, actionPath, _appConfig.ClaudeStartNewGameModel);
             using var doc = JsonDocument.Parse(ExtractJson(response));
             bool ok = GameWorld.ApplyChronicle(world, doc.RootElement);
@@ -248,17 +251,20 @@ public class GameAiClient
 
     public async Task StartNewGame(string _)
     {
-        // Нейронка по сюжету планирует локацию инструментом plan_location (сколько блоков, где, что в каждом);
-        // геометрию по плану строит код (LocationGrower.CreatePlanned → ChunkGenerator), инструмент отдаёт
-        // стартовый блок — его нейронка наполняет в этом же ответе, остальные — PopulateChunk при подходе.
+        // According to the plot, AI plans the location using the plan_location tool (how many blocks, where,
+        // what is in each); the geometry according to the plan is built by the code
+        // (LocationGrower.CreatePlanned → ChunkGenerator), the tool gives the starting block - the AI fills it
+        // in the same response, the rest - PopulateChunk when approaching.
         _settings.Map.Chunks = null;
 
-        // Мир игры: код дал только землю (рельеф, королевства, тракты); концепцию мира и королевств, стартовое
-        // место и известные герою места нейронка задаёт в этом же ответе (world, add_place).
-        // Мир из мастера новой игры (выбран или создан на шаге «Мир»; хроника продолжается).
+        // Game world: the code gave only land (terrain, kingdoms, roads); the concept of the world and
+        // kingdoms, the starting place and places known to the hero are specified by the AI in the same answer
+        // (world, add_place). World from the GM of the new game (selected or created at the “World” step; the
+        // chronicle continues).
         if (_storage.NewGameData?.WorldId is { } wid) WorldLibrary.SetActive(wid);
-        // Кто герой (первая фраза описания из анкеты: «худощавая дроу…») — в контекст каждого хода (hero.aiInfo):
-        // без неё мастер обращался к героине в мужском роде. Описание целиком в сохранение не попадает.
+        // Who the hero is (the first phrase of the description from the questionnaire: “thin drow...”) - in the
+        // context of each move (hero.aiInfo): without her, the GM addressed the heroine in the masculine
+        // gender. The entire description does not go into the save.
         if (_settings.Hero is { AiInfo: null or { Count: 0 } } h && _storage.NewGameData?.Description is { Length: > 0 } desc)
         {
             string first = desc.Trim();
@@ -268,45 +274,46 @@ public class GameAiClient
         }
         var world = WorldLibrary.Current;
         _settings.World = new GameWorldLink { Id = world.Id };
-        // Игра — на языке мира (рассказ, история, названия); он же в каждом запросе (lang:).
+        // The game is in the language of the world (story, history, names); it is also in every request (lang:).
         _settings.Language = world.Language;
         L.SetWorld(world.Language);
-        // Мир уже описан в прошлых играх (хроника) — та же концепция и места; новый — только земля.
-        // Королевства уже описаны (прошлые игры или «ПРИДУМАТЬ» в анкете) — концепцию не менять; есть только
-        // название/описание от игрока — взять их и придумать королевства.
+        // The world has already been described in previous games (chronicle) - the same concept and places; the
+        // new one is only earth. The kingdoms have already been described (past games or “IMAGE” in the
+        // questionnaire) - do not change the concept; there is only a name/description from the player - take
+        // them and invent kingdoms.
         bool known = world.Chronicle.Kingdoms.Count > 0;
         string playerConcept = world.Chronicle.Name is { Length: > 0 } || world.Chronicle.Description is { Length: > 0 }
-            ? $"\nМир задал игрок — название «{world.Chronicle.Name ?? world.Name}»{(world.Chronicle.Description is { Length: > 0 } pd ? $", описание: {pd}" : "")}. Используй их (name/description не меняй), королевства придумай в духе описания."
+            ? $"\nThe player defined the world — name «{world.Chronicle.Name ?? world.Name}»{(world.Chronicle.Description is { Length: > 0 } pd ? $", description: {pd}" : "")}. Use these unchanged (name/description); develop kingdoms consistent with the description."
             : "";
         string worldBrief = known
-            ? "\n\nМир уже описан — НЕ меняй концепцию, королевства и места; новое — add_place. Хроника:\n"
+            ? "\n\nThe world is already described: preserve its concept, kingdoms, and places; use add_place for additions. Chronicle:\n"
               + WorldAtlas.Overview(GameWorld.Compose(world, _settings.World, includeHidden: true), withDmNotes: true)
-              + "\nЗемля:\n" + WorldAtlas.TerrainSummary(world)
-            : "\n\nЗемля мира (концепция — в world, места — add_place):\n" + WorldAtlas.TerrainSummary(world) + playerConcept;
-        // Параметры приключения (шаг «Приключение»): жанр, упор, длина, сложность, темп.
+              + "\nGeography:\n" + WorldAtlas.TerrainSummary(world)
+            : "\n\nWorld geography (concept in world, places through add_place):\n" + WorldAtlas.TerrainSummary(world) + playerConcept;
+        // Adventure parameters (Adventure step): genre, emphasis, length, difficulty, tempo.
         if (_storage.NewGameData?.AdventureStyle is { Length: > 0 } style)
-            worldBrief = $"\nПараметры приключения: {style}" + worldBrief;
-        worldBrief += $"\nСейчас: день {_settings.Time.Day}, {PartsOfDay.Normalize(_settings.Time.PartOfDay)} — описывай сцену в это время суток или задай другое в time.";
-        // Место старта, выбранное игроком на карте (шаг «Приключение»).
+            worldBrief = $"\nAdventure parameters: {style}" + worldBrief;
+        worldBrief += $"\nCurrent time: day {_settings.Time.Day}, {PartsOfDay.Normalize(_settings.Time.PartOfDay)} — describe this time of day or explicitly change time.";
+        // The starting location chosen by the player on the map (Adventure step).
         if (_storage.NewGameData?.StartPlace is { Length: > 0 } sp)
-            worldBrief += $"\nИгрок выбрал стартовое место: «{sp}» — начни там (world.place).";
+            worldBrief += $"\nThe player chose the starting place: «{sp}» — start there (world.place).";
         else if (_storage.NewGameData is { StartX: int sx, StartY: int sy })
-            worldBrief += $"\nИгрок выбрал старт на карте: клетка [{sx},{sy}] — {WorldBiomes.Get(world.BiomeAt(sx, sy)).Name.ToLowerInvariant()}, {WorldAtlas.Surroundings(world, sx, sy, named: true)}; стартовое место — add_place рядом (near не нужен: укажи kingdom и terrain по этой клетке) или ровно там.";
+            worldBrief += $"\nThe player chose the starting map cell: [{sx},{sy}] — {WorldBiomes.Get(world.BiomeAt(sx, sy)).Name.ToLowerInvariant()}, {WorldAtlas.Surroundings(world, sx, sy, named: true)}; add_place at or near this cell (near is unnecessary: specify kingdom and terrain from this cell).";
 
-        // Сохраняем героя и карту в файл-черновик до запуска AI — MCP-инструменты читают этот файл.
-        // Боевой worldState.json не трогаем, пока мир не создан успешно.
+        // Save the hero and map to a draft file before running AI - MCP tools read this file. We do not touch
+        // the combat worldState.json until the world is created successfully.
         _storage.SaveDraft();
 
         string userMessage;
         if (_ruleSet == "Dnd5e")
         {
-            userMessage = $"Данные героя: символ: {_settings.Hero?.Symbol}, имя: {_settings.Hero?.Name}, пассивное восприятие: {GetPassivePerception()}" +
-                          $"\n\nПожелания к игре: {_storage.NewGameData?.SettingWish}" + worldBrief;
+            userMessage = $"Hero data: symbol: {_settings.Hero?.Symbol}, name: {_settings.Hero?.Name}, passive Perception: {GetPassivePerception()}" +
+                          $"\n\nGame preferences: {_storage.NewGameData?.SettingWish}" + worldBrief;
         }
         else
         {
-            userMessage = $"Данные героя: символ: {_settings.Hero?.Symbol}, имя: {_settings.Hero?.Name}" +
-                          $"\n\nПожелания к игре: {_storage.NewGameData?.SettingWish}" + worldBrief;
+            userMessage = $"Hero data: symbol: {_settings.Hero?.Symbol}, name: {_settings.Hero?.Name}" +
+                          $"\n\nGame preferences: {_storage.NewGameData?.SettingWish}" + worldBrief;
         }
 
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(StartNewGame));
@@ -316,37 +323,38 @@ public class GameAiClient
         {
             response = await CompleteConfigured([systemPrompt], userMessage, actionPath, _appConfig.ClaudeStartNewGameModel);
 
-            // MCP-инструменты могли дописать черновик — перечитываем, чтобы ничего не потерять.
+            // MCP-tools could have added a draft - we re-read it so as not to lose anything.
             _storage.LoadDraft();
-            // Метка plan_location нужна только посреди игры — здесь карта уже взята из черновика.
+            // The plan_location tag is only needed in the middle of the game - here the map has already been taken from the draft.
             try { File.Delete(Path.Combine(Path.GetDirectoryName(Storage.DraftSavePath) ?? ".", Storage.LocationPlannedFlag)); } catch { }
 
             string json = ExtractJson(response);
-            // Ответ старого формата (полная карта с cols/rows/rooms — моки UI-тестов): применяется как
-            // раньше, поверх пустой карты, без блочной генерации.
+            // Old format answer (full map with cols/rows/rooms - mocks of UI tests): applied as before, on top
+            // of an empty map, without block generation.
             if (JsonNode.Parse(json)?["map"]?["cols"] != null)
             {
                 var map = _settings.Map;
                 map.Rooms = []; map.Doors = []; map.Area = []; map.Entities = []; map.Objects = [];
                 map.Chunks = null;
             }
-            // plan_location не вызван — запасной вариант: один блок, чтобы было где играть.
+            // plan_location not called - fallback option: one block so that there is somewhere to play.
             else if (_settings.Map.Chunks is not { Count: > 0 })
                 LocationGrower.CreateStart(_settings);
             if (_settings.Map.Chunks?.FirstOrDefault(c => c.Exits.Any(e => e.External)) is { } startChunk)
                 startChunk.Populated = true;
-            // Вступление мастера (history) не выводится сразу: его печатает посимвольно, со звуком, экран игры
-            // (PlayIntro — как обычный ответ мастера); остальное — в состояние сразу.
+            // The wizard's introduction (history) is not displayed immediately: it is printed character by
+            // character, with sound, by the game screen (PlayIntro - as a normal response from the wizard); the
+            // rest is displayed immediately.
             if (JsonNode.Parse(json) is JsonObject startRoot && startRoot["history"] is JsonArray intro && intro.Count > 0)
             {
                 startRoot.Remove("history");
                 _pendingIntro = intro.ToJsonString(_serializeOptions);
                 json = startRoot.ToJsonString(_serializeOptions);
             }
-            _settings.History = [];   // разговор в редакторе героя — не часть игры
+            _settings.History = [];   // conversation in the hero editor is not part of the game
             _storage.ApplyUpdateWorldState(json);
 
-            // Мир создан успешно — фиксируем в боевой файл сохранения
+            // The world was created successfully - we record it in the combat save file
             _storage.Save();
             Storage.DeleteDraft();
         }
@@ -356,8 +364,8 @@ public class GameAiClient
         }
     }
 
-    // Блок локации, к которому подошёл герой (LocationGrower.UnpopulatedNearHero) — нейронка называет комнаты и расставляет
-    // существ/объекты. Геометрия уже сгенерирована кодом и лежит в карте.
+    // The location block that the hero approached (LocationGrower.UnpopulatedNearHero) - the AI names the rooms
+    // and places creatures/objects. The geometry is already generated by the code and is in the map.
     public async Task PopulateChunk(
         MapChunk chunk,
         Action<string>? onChunk = null,
@@ -377,7 +385,7 @@ public class GameAiClient
     {
         if (_requestGate.CurrentCount == 0 || !_population.CanStart(_settings.Map, chunk)) return false;
         var ctx = new AiContextBuilder(_settings, _storage.VisibleCells);
-        string message = "## Текущее состояние\n" + ctx.PopulationState() + "\n" + ctx.LocationPlan(chunk) + "\n" + ctx.ChunkState(chunk);
+        string message = "## Current state\n" + ctx.PopulationState() + "\n" + ctx.LocationPlan(chunk) + "\n" + ctx.ChunkState(chunk);
         string snapshot = JsonSerializer.Serialize(_settings, _serializeOptions);
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(PopulateChunk));
         return _population.TryStart(_settings.Map, chunk, async () =>
@@ -434,9 +442,9 @@ public class GameAiClient
         string response = "";
         try
         {
-            _storage.Save(); // MCP (plan_location, add_place, world_query) читает сохранение
-            // Прошлое путешествие мастер не описал (сервер не ответил) — сначала оно, потом действие игрока.
-            string pending = _settings.PendingTravel is { Length: > 0 } pt ? pt + "\n\n## Действие игрока после пути\n" : "";
+            _storage.Save(); // MCP (plan_location, add_place, world_query) reads the save The GM did not describe the past
+            // journey (the server did not respond) - first it, then the player’s action.
+            string pending = _settings.PendingTravel is { Length: > 0 } pt ? pt + "\n\n## Player action after travel\n" : "";
             response = await CompleteWithSpinner(systemBlocks, ctx.MinimalState(pending + playerAction), actionPath, _appConfig.ClaudeModel, onIdle);
             ReloadPlannedLocation();
             _settings.PendingTravel = null;
@@ -449,8 +457,9 @@ public class GameAiClient
         }
     }
 
-    // Путешествие по карте мира (TravelService уже переместил героя и сдвинул время): один вызов мастера —
-    // описать дорогу, привалы, припасы, встречу (если выпала) и прибытие; при нужде он строит сцену (plan_location).
+    // Traveling on the world map (TravelService has already moved the hero and shifted time): one challenge to
+    // the GM - describe the road, rest stops, supplies, meeting (if it happened) and arrival; when necessary,
+    // he builds a stage (plan_location).
     public async Task Travel(
         string travelReport,
         Action<string>? onChunk = null,
@@ -464,9 +473,9 @@ public class GameAiClient
         try
         {
             _storage.Save();
-            // Не описанный мастером прошлый путь — вместе с этим (его итог тоже нужен).
+            // The past path not described by the GM is along with this (its result is also needed).
             if (_settings.PendingTravel is { Length: > 0 } earlier) travelReport = earlier + "\n\n" + travelReport;
-            _settings.PendingTravel = travelReport;   // до ответа мастера путь «не описан»
+            _settings.PendingTravel = travelReport;   // before the wizard's response, the path is “not described”
             response = await CompleteWithSpinner(systemBlocks, ctx.MinimalState(travelReport), actionPath, _appConfig.ClaudeModel, onIdle);
             ReloadPlannedLocation();
             _settings.PendingTravel = null;
@@ -475,14 +484,15 @@ public class GameAiClient
         }
         catch (Exception ex)
         {
-            RecordError(ex, response, L.T("Ошибка в пути"));
-            _settings.History.Add(new DialogMessage { Text = L.T("Мастер не ответил, но путь пройден: дорогу, еду и встречи он опишет со следующим твоим действием.") });
+            RecordError(ex, response, L.T("Travel error"));
+            _settings.History.Add(new DialogMessage { Text = L.T("The DM didn't respond, but the journey is done: the road, food and encounters will be described with your next action.") });
             _storage.Save();
         }
     }
 
-    // Мастер построил локацию посреди игры (MCP plan_location записал её в сохранение и оставил метку) —
-    // перечитать карту и место героя, иначе следующий Save затёр бы её состоянием из памяти.
+    // The GM built a location in the middle of the game (MCP plan_location recorded it in the save and left a
+    // mark) - re-read the map and the hero’s place, otherwise the next Save would have erased its state from
+    // memory.
     private void ReloadPlannedLocation()
     {
         string flag = Path.Combine(Path.GetDirectoryName(Storage.SavePath) ?? ".", Storage.LocationPlannedFlag);
@@ -493,7 +503,7 @@ public class GameAiClient
             _storage.ReloadMapFrom(Storage.SavePath);
             if (_settings.Map.Chunks?.FirstOrDefault(c => c.Exits.Any(e => e.External)) is { } start) start.Populated = true;
         }
-        catch { /* карта не перечиталась — играем на прежней */ }
+        catch { /*the map was not re-read - we play on the old one*/ }
     }
 
     public async Task FireEnemyTurn(
@@ -513,7 +523,7 @@ public class GameAiClient
         }
         catch (Exception ex)
         {
-            RecordError(ex, response, L.T("Ошибка хода врагов"));
+            RecordError(ex, response, L.T("Enemy turn error"));
         }
     }
 
@@ -535,7 +545,7 @@ public class GameAiClient
         }
         catch (Exception ex)
         {
-            RecordError(ex, response, L.T("Ошибка раунда"));
+            RecordError(ex, response, L.T("Round error"));
         }
     }
 
@@ -573,12 +583,12 @@ public class GameAiClient
         }
         catch (Exception ex)
         {
-            RecordError(ex, response, L.T("Ошибка триггера"));
+            RecordError(ex, response, L.T("Trigger error"));
         }
     }
 
-    // Снимается только сработавший под-ключ (Storage.MergeTriggers) — остальные триггеры того же
-    // объекта не трогаем. spotted/opportunity_attack_on_hero — не одноразовые, сюда не попадают.
+    // Only the triggered sub-key is removed (Storage.MergeTriggers) - we do not touch the other triggers of the
+    // same object. spotted/opportunity_attack_on_hero - not one-time, they do not go here.
     private static TriggerEffect? OneShotEffect(CellTriggers? t, string triggerType) => triggerType switch
     {
         "onStep" => t?.OnStep,
@@ -777,7 +787,7 @@ public class GameAiClient
         catch (OperationCanceledException) { }
     }
 
-    // Вступление новой игры — ждёт экрана игры (MapScreenLoop), там печатается посимвольно.
+    // The entry of a new game - waits for the game screen (MapScreenLoop), it is printed there character by character.
     private string? _pendingIntro;
     public bool HasPendingIntro => _pendingIntro != null;
 
@@ -812,31 +822,32 @@ public class GameAiClient
         AddEngineNotices();
     }
 
-    // Сообщения движка (начислен опыт, доступен уровень) — после записей мастера.
+    // Engine messages (experience accrued, level available) - after the GM's notes.
     private void AddEngineNotices()
     {
         foreach (string notice in _storage.TakeNotices())
             (_settings.History ??= []).Add(new DialogMessage { Text = notice });
     }
 
-    // Ответ мастера с битым JSON (лишняя/потерянная кавычка, запятая, обрыв) — разбирается целиком до того, как
-    // что-то применено к игре, поэтому его можно починить, а не терять ход. Не повтор всего запроса: он заново
-    // попросил бы у игрока броски кубиков и ответы. Короткий вызов без инструментов чинит только синтаксис.
-    // В UI-тестах с моками — без починки (там битый ответ проверяется намеренно, а настоящую нейронку звать нельзя).
+    // Reply from the GM with the broken JSON (extra/lost quote, comma, break) - disassembled in its entirety
+    // before anything is applied to the game, so it can be repaired rather than losing a move. Not repeating
+    // the entire request: it would ask the player for dice rolls and answers again. A short call without tools
+    // fixes only the syntax. In UI tests with mocks, there is no repair (where the broken answer is checked
+    // intentionally, but the real AI cannot be called).
     private async Task<string> EnsureValidJson(string json)
     {
         if (IsValidJson(json) || _appConfig.MockedActions.Length > 0) return json;
         try
         {
             string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, "RepairJson");
-            const string repairPrompt = "Ты чинишь синтаксис JSON. Тебе дают сломанный JSON (лишние или пропущенные кавычки, " +
-                "запятые, скобки, неэкранированные символы в строках, обрыв в конце). Верни тот же JSON с исправленным " +
-                "синтаксисом: те же ключи, значения и тексты, ничего не добавляй и не убирай по смыслу. Обрыв — закрой " +
-                "незаконченную строку/массив/объект. Ответ — только JSON, без пояснений и без ```.";
+            const string repairPrompt = "Repair JSON syntax. The input is malformed JSON (extra or missing quotes, " +
+                "commas, brackets, unescaped string characters, or truncation). Return the same JSON with corrected " +
+                "syntax: preserve all keys, values, and text without semantic additions or deletions. If truncated, close the " +
+                "unfinished string/array/object. Return JSON only, without explanations or markdown fences.";
             string fixedJson = ExtractJson(await CompleteConfigured([repairPrompt], json, actionPath, _appConfig.RepairJsonModel));
             if (IsValidJson(fixedJson)) return fixedJson;
         }
-        catch { /* починить не вышло — ошибка разбора ниже, как раньше */ }
+        catch { /*could not be fixed - parsing error below, same as before*/ }
         return json;
     }
 
@@ -846,15 +857,16 @@ public class GameAiClient
         catch (JsonException) { return false; }
     }
 
-    // Лог нейронки (Program): ошибки ИИ пишутся туда целиком — в диалоге игроку коротко.
+    // AI log (Program): AI errors are written there in their entirety - briefly in the player’s dialogue.
     public AiLogger? Logger { get; set; }
 
-    // Подробности — только при настройке «ОШИБКИ ИИ: ПОДРОБНО»; иначе игроку — коротко, что делать. Ошибка настройки
-    // нейронки (CLI не найден) — всегда своим текстом: повтор не поможет. Полностью — в логе нейронки.
+    // Details - only when setting "AI ERRORS: DETAILS"; otherwise the player is given a short summary of what
+    // to do. AI setup error (CLI not found) - always with its own text: repeating will not help. Completely in
+    // the AI log.
     private void RecordError(Exception ex, string response, string? prefix = null)
     {
-        prefix ??= L.T("Ошибка");
-        Logger?.LogNote($"{prefix}: {ex}" + (response.Length > 0 ? $"\nОтвет: {response}" : ""));
+        prefix ??= L.T("Error");
+        Logger?.LogNote($"{prefix}: {ex}" + (response.Length > 0 ? $"\nResponse: {response}" : ""));
         if ((ex as AiSetupException ?? ex.InnerException as AiSetupException) is { } setup)
         {
             _settings.History.Add(new DialogMessage { Text = $"{prefix}: {setup.Message}" });
@@ -865,8 +877,8 @@ public class GameAiClient
         _settings.History.Add(new DialogMessage
         {
             Text = _appConfig.ShowAiErrors || _appConfig.MockedActions.Length > 0
-                ? $"{prefix}: {ex.Message} " + L.T("Ответ: ") + preview
-                : $"{prefix}: " + L.T("мастер запнулся и не смог ответить — повтори действие."),
+                ? $"{prefix}: {ex.Message} " + L.T("Response: ") + preview
+                : $"{prefix}: " + L.T("the DM stumbled and couldn't respond — repeat the action."),
         });
     }
 
@@ -892,7 +904,7 @@ public class GameAiClient
         finally { _requestGate.Release(); WindowControls.NotifyIfMinimized(); }
     }
 
-    // JSON из ответа, со ссылками на справочники уже разрешёнными (CatalogReferences: icon/ref/monster).
+    // JSON from the answer, with links to directories already allowed (CatalogReferences: icon/ref/monster).
     private static string ExtractJson(string text) => CatalogReferences.Resolve(ExtractRawJson(text));
 
     private static string ExtractRawJson(string text)

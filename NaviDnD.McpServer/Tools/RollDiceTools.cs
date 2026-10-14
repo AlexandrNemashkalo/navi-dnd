@@ -22,21 +22,13 @@ public sealed class RollDiceTools(McpServerConfig config)
         Path.Combine(Path.GetDirectoryName(config.WorldStatePath)!, "roll_request.json");
 
     [McpServerTool]
-    [Description("""
-        Запрашивает у игрока бросок d20 (атака, спасбросок, проверка навыка, инициатива, спасбросок
-        от смерти). Вызывай ТОЛЬКО когда по правилам D&D 5e действительно нужен бросок кубика для
-        разрешения действия. НЕ используй для бросков врагов — моделируй их сам.
-        Поля:
-        - history[]: записи перед UI кубика. Каждая: text (1-2 предложения, механика в [...]), text может быть SSML <speak> для озвучки; опционально author, patch. Последняя запись — контекст броска (например "Бросай на инициативу!"), ОБЯЗАТЕЛЬНА, не пустая.
-        - difficulty: DC/КД для показа (не указывать чтобы скрыть). advantage/disadvantage: bool. modifiers: [{"name","value"}].
-         Возвращает { roll, total }. roll = чистое значение d20. Модификаторы ты применяешь сам после получения результата.
-        """)]
+    [Description("Request a hero d20 roll for an attack, saving throw, ability/skill check, initiative, or death save. Call only when D&D 5e rules require it; simulate enemy rolls yourself.\nhistory[]: entries shown before the dice UI, each with text (1–2 sentences, mechanics in [...], optionally SSML <speak>), optional author and patch. The final entry must provide meaningful, nonempty roll context in the game language.\ndifficulty: displayed DC/AC (omit for a hidden check; attacks require target AC). advantage/disadvantage: bool. modifiers:[{name,value}].\nReturns roll (raw d20) and total (roll plus the supplied modifiers). Use roll for natural 1/20 and total for the check; do NOT add modifiers again.")]
     public string RollDice(
-        [Description("Записи диалога перед UI кубика. У каждой text, text может быть SSML <speak> для озвучки; опционально author, patch.")] RequestHistoryEntry[] history,
-        [Description("Класс Сложности (DC) для показа игроку. Не указывать если неизвестен или скрыт.")] int? difficulty,
-        [Description("Бросок с преимуществом (два кубика, берём больший).")] bool advantage,
-        [Description("Бросок с помехой (два кубика, берём меньший).")] bool disadvantage,
-        [Description("Модификаторы броска. Показываются игроку для прозрачности.")] RollModifier[]? modifiers)
+        [Description("History shown before the dice UI: text (optionally SSML <speak>), optional author and patch; use the game language.")] RequestHistoryEntry[] history,
+        [Description("DC/AC shown to the player; omit only if unknown or hidden. Attacks require the target AC.")] int? difficulty,
+        [Description("Advantage: roll two dice and take the higher.")] bool advantage,
+        [Description("Disadvantage: roll two dice and take the lower.")] bool disadvantage,
+        [Description("Roll modifiers shown to the player; already included in the returned total.")] RollModifier[]? modifiers)
     {
         if (history is not { Length: > 0 } || string.IsNullOrWhiteSpace(history[^1].Text))
         {

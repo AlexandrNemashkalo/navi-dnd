@@ -2,11 +2,11 @@ using System.Text;
 
 namespace NaviDnD.Migrations;
 
-// Запуск миграции и отчёт: лог — logs/migrations.log; ошибки — ещё и в Storage/update-error.txt (игра покажет их
-// в «ОБНОВЛЕНИЯ», как и прочие ошибки обновления).
+// Start migration and report: log - logs/migrations.log; errors - also in Storage/update-error.txt (the game
+// will show them in “UPDATES”, like other update errors).
 public static class MigrateCommand
 {
-    // «NaviDnD.exe --migrate <папка игры>» — из помощника обновления, без окна. 0 — всё переведено (или нечего).
+    // “NaviDnD.exe --migrate <game folder>” - from the update assistant, without a window. 0 - everything has been translated (or nothing).
     public static int Run(string root)
     {
         try
@@ -18,19 +18,19 @@ public static class MigrateCommand
         catch (Exception e)
         {
             Log(root, "Сбой миграции: " + e);
-            Error(root, L.T("Не удалось обновить сохранения: ") + e.Message);
+            Error(root, L.T("Could not update the saves: ") + e.Message);
             return 1;
         }
     }
 
-    // Запасной путь при старте игры: файлы всё ещё старого формата (сборка из исходников, сбой обновления).
+    // Fallback path when starting the game: files are still in the old format (build from source, update failed).
     public static void RunIfNeeded(string root)
     {
         try
         {
             if (StorageMigration.Needed(Path.Combine(root, "Storage"))) Run(root);
         }
-        catch { /* не помешать запуску игры */ }
+        catch { /*do not prevent the game from starting*/ }
     }
 
     private static void Report(string root, StorageMigration.Result result)
@@ -39,7 +39,7 @@ public static class MigrateCommand
         Log(root, $"Формат {StorageFormat.Current}: переведено файлов {result.Migrated}, копия — {result.BackupDir ?? "нет"}"
                   + string.Concat(result.Errors.Select(e => "\n  ошибка: " + e)));
         if (!result.Ok)
-            Error(root, L.F("Не все сохранения обновлены ({0}). Прежние файлы — в {1}.", string.Join("; ", result.Errors),
+            Error(root, L.F("Not all saves were updated ({0}). The previous files are in {1}.", string.Join("; ", result.Errors),
                 result.BackupDir ?? "Storage"));
     }
 

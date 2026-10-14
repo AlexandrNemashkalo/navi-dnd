@@ -3,12 +3,12 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: диалог броска кубика и диалог вопроса от ИИ (ask_player) — оба в реальной игре запускает
-// GameAiClient.SpinAsync, который поллит roll_request.json/ask_player_request.json в
-// NaviDnD/Storage/ ПОКА ждёт ответ SendAction (мок или реальный — не важно). Раз это чтение
-// файла, а не сам вызов нейронки, тест может вызвать диалог, просто записав такой файл во время
-// искусственной задержки мок-ответа (SelectiveMockProvider.MockResponseDelayMs, 5с) — без единого
-// реального обращения к AI.
+// E2E: dice roll dialog and AI question dialog (ask_player) - both in a real game are launched by
+// GameAiClient.SpinAsync, which polls roll_request.json/ask_player_request.json into NaviDnD/Storage/ WHILE
+// waiting for a response from SendAction (mock or real - it doesn’t matter). Since this is reading a file, and
+// not the call of the AI itself, the test can cause a dialogue by simply writing such a file during an
+// artificial delay mock response (SelectiveMockProvider.MockResponseDelayMs, 5c) - without a single real call
+// to AI.
 public class InteractiveResponseTests
 {
     private readonly ITestOutputHelper _output;
@@ -49,9 +49,9 @@ public class InteractiveResponseTests
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Ловкость", 2000),
             "Диалог броска кубика не показал модификатор (+4 Ловкость).");
         TestPacing.Step();
-        // "бросить" появляется только в ИНТЕРАКТИВНОМ цикле ПОСЛЕ печати request.History —
-        // до этого момента нажатия клавиш просто сбрасываются (см. DialogDisplay.PlayDiceRollRequest:
-        // `while (Console.KeyAvailable) Console.ReadKey(true);` сразу после стриминга истории).
+        // "abandon" only appears in the INTERACTIVE loop AFTER printing request.History - up to this point,
+        // keystrokes are simply reset (see DialogDisplay.PlayDiceRollRequest: `while (Console.KeyAvailable)
+        // Console.ReadKey(true);` immediately after the story is streamed).
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "бросить", 3000),
             "Не дождались интерактивного приглашения «[Пробел/Enter] бросить».");
@@ -69,7 +69,7 @@ public class InteractiveResponseTests
             "→ ПЕРСОНАЖ ←", 1200), "Character navigation stalled during the dice animation.");
 
 
-        // Исход броска случаен (d20) — ждём любой из 4 возможных вариантов.
+        // The outcome of the roll is random (d20) - we are waiting for any of the 4 possible options.
         string[] outcomes = ["КРИТИЧЕСКИЙ УСПЕХ!", "КРИТИЧЕСКИЙ ПРОВАЛ!", "УСПЕХ", "ПРОВАЛ"];
         string? outcome = GameConsole.WaitForAnyRowContainsAny(
             game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, outcomes, 8000);
@@ -77,8 +77,8 @@ public class InteractiveResponseTests
         _output.WriteLine($"Показан исход: «{outcome}».");
         TestPacing.Step();
 
-        // Критический успех/провал коммитить (80,220,80)/(220,80,80) — общий "успех"/"провал"
-        // красится теми же двумя цветами (см. DialogDisplay.BuildRollPanel: _outcomeColor).
+        // Critical success/failure to commit (80,220,80)/(220,80,80) - the overall “success”/“failure” is
+        // painted in the same two colors (see DialogDisplay.BuildRollPanel: _outcomeColor).
         bool isSuccess = outcome!.Contains("успех", StringComparison.OrdinalIgnoreCase);
         (int r, int g, int b) expectedColor = isSuccess ? (80, 220, 80) : (220, 80, 80);
         (byte r, byte g, byte b) background = (18, 18, 22);
@@ -93,15 +93,16 @@ public class InteractiveResponseTests
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "продолжается", 10000),
             "Не дождались финального сообщения SendAction (мок) после разрешения броска.");
 
-        // Финальный Step() — до Assert, а не после: если проверки провалились, Assert.True ниже
-        // бросит исключение и код после него не выполнится, а пауза для отладки нужна в любом случае.
+        // The final Step() is before Assert, not after: if the checks fail, Assert.True below will throw an
+        // exception and the code after it will not be executed, and a pause for debugging is needed in any
+        // case.
         TestPacing.Step();
         Assert.True(failures.Count == 0, "UI-тест FAIL:\n" + string.Join("\n", failures.Select(f => "  - " + f)));
     }
 
-    // Преимущество/помеха (парный d20 + метка "ПРЕИМУЩЕСТВО"/"ПОМЕХА" — см. DialogDisplay.
-    // BuildRollPanel/PlayDiceRollRequest: isPair = request.Advantage || request.Disadvantage) —
-    // до сих пор проверялся только обычный одиночный бросок (DiceRollRequest_DisplaysAndResolves).
+    // Advantage/Handler (paired d20 + label "ADVANTAGE"/"HANDLE" - see DialogDisplay.
+    // BuildRollPanel/PlayDiceRollRequest: isPair = request.Advantage || request.Disadvantage) - so far only the
+    // normal single throw has been checked (DiceRollRequest_DisplaysAndResolves).
     [Fact]
     public void DiceRollRequest_WithAdvantage_DisplaysPairAndResolves()
     {
@@ -157,12 +158,11 @@ public class InteractiveResponseTests
         TestPacing.Step();
     }
 
-    // Помеха (disadvantage) — тот же парный d20, что и преимущество, но с меткой "ПОМЕХА" и
-    // используется МЕНЬШИЙ из двух бросков (DialogDisplay.PlayDiceRollRequest: usedRoll =
-    // Math.Min(roll1, roll2)). Модификаторов намеренно 3 (а не 1, как в остальных тестах) —
-    // проверяет пошаговую анимацию (BuildRollPanel: подсветка модификатора синхронно с числом на
-    // используемой кости, суммарно ~2.8с на все модификаторы поровну — с тремя модификаторами
-    // каждый короче, чем был бы с одним).
+    // Interference (disadvantage) - the same paired d20 as advantage, but with the label "INTERFERENCE" and the
+    // LESSER of the two throws is used (DialogDisplay.PlayDiceRollRequest: usedRoll = Math.Min(roll1, roll2)).
+    // There are intentionally 3 modifiers (and not 1, as in other tests) - checks step-by-step animation
+    // (BuildRollPanel: modifier highlighting synchronously with the number on the die being used, in total
+    // ~2.8s for all modifiers equally - with three modifiers, each is shorter than it would be with one).
     [Fact]
     public void DiceRollRequest_WithDisadvantage_DisplaysPairAndMultipleModifiers()
     {
@@ -209,8 +209,8 @@ public class InteractiveResponseTests
 
         GameConsole.SendKey(game.Pid, ConsoleKey.Spacebar);
 
-        // Все 3 модификатора должны появиться в панели (BuildRollPanel: footer, Take(3)) —
-        // независимо от того, на какой фазе анимации (подсветка/пауза) их поймает опрос.
+        // All 3 modifiers should appear in the panel (BuildRollPanel: footer, Take(3)) - no matter what phase
+        // of the animation (highlight/pause) the poll catches them.
         foreach (var mod in rollRequest.modifiers)
             Assert.True(
                 GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, mod.name, 6000),
@@ -232,11 +232,11 @@ public class InteractiveResponseTests
         TestPacing.Step();
     }
 
-    // Бросок без сложности (RollRequest.Difficulty == null) — именно так промпт (§ НАЧАЛО БОЯ)
-    // требует бросать инициативу героя: roll_dice с modifiers:[{"name":"Инициатива",...}], БЕЗ
-    // difficulty (враги инициативу не бросают, ИИ придумывает её сам). DialogDisplay.BuildRollPanel
-    // должен просто не показывать строку «СЛ:» и не показывать «Успех»/«Провал» — сам факт того,
-    // что оба поля опциональны (RollRequest.Difficulty — int?), нигде раньше не проверялся.
+    // Throw without difficulty (RollRequest.Difficulty == null) - this is exactly how the prompt (§ START OF
+    // BATTLE) requires throwing the hero’s initiative: roll_dice with modifiers:[{"name":"Initiative",...}],
+    // WITHOUT difficulty (enemies do not throw initiative, the AI comes up with it itself).
+    // DialogDisplay.BuildRollPanel should simply not show the "DC:" line and not show "Success"/"Failure" - the
+    // fact that both fields are optional (RollRequest.Difficulty - int?) has not been tested anywhere before.
     [Fact]
     public void DiceRollRequest_WithoutDifficulty_DisplaysNoDcOrOutcome()
     {
@@ -253,7 +253,7 @@ public class InteractiveResponseTests
         Thread.Sleep(150);
 
         string rollRequestPath = Path.Combine(game.RealStorageDir, "roll_request.json");
-        // "difficulty" сознательно ОТСУТСТВУЕТ — как при реальном броске инициативы.
+        // "difficulty" is deliberately MISSING - as in a real initiative roll.
         var rollRequest = new
         {
             history = new[] { new { text = "Бросай инициативу!" } },
@@ -285,9 +285,9 @@ public class InteractiveResponseTests
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "продолжается", 10000),
             "Не дождались финального сообщения SendAction (мок) после разрешения броска без сложности.");
 
-        // Финальный снимок — СЛ: не должна была появиться НИ на одном этапе анимации броска.
-        // "Успех"/"Провал" не проверяем: критический текст ("Критический успех!"/"...провал!")
-        // всё равно может появиться на нат.1/20 даже без сложности — это не то, что здесь важно.
+        // Final frame - DC: should not have appeared at ANY stage of the roll animation. "Success"/"Failure" is
+        // not checked: critical text ("Critical success!"/"...failure!") can still appear on nat.1/20 even
+        // without difficulty - that's not what's important here.
         var afterRoll = GameConsole.ReadRows(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth);
         Assert.DoesNotContain(afterRoll, r => r.Contains("СЛ:"));
         TestPacing.Step();
@@ -328,14 +328,14 @@ public class InteractiveResponseTests
 
         GameConsole.SendKey(game.Pid, ConsoleKey.Enter);
 
-        // Выбранный вариант должен появиться в истории диалога СРАЗУ (DialogDisplay.
-        // PlayAskPlayerRequest перерисовывает блок диалога немедленно после выбора), а НЕ
-        // только когда весь SendAction (мок, искусственная задержка 5с) полностью завершится.
-        // Таймаут здесь намеренно короткий, а не "с запасом" — широкое окно замаскировало бы
-        // регрессию (тест прошёл бы всё равно, просто дождавшись финального ответа мока).
-        // ВАЖНО: ищем именно "Рустем: <ответ>" (с префиксом автора) — а не голый текст варианта,
-        // который какое-то время ещё виден в самом СПИСКЕ ВАРИАНТОВ (PlayOptionsSelection) и дал
-        // бы ложное срабатывание независимо от того, попал ли ответ в историю диалога.
+        // The selected option should appear in the dialogue history IMMEDIATELY (DialogDisplay.
+        // PlayAskPlayerRequest redraws the dialogue block immediately after selection), and NOT only when the
+        // entire SendAction (mock, artificial delay 5s) is completely completed. The timeout here is
+        // intentionally short, and not “with a margin” - a wide window would mask the regression (the test
+        // would pass anyway, just waiting for the final response of the mock). IMPORTANT: we are looking for
+        // exactly “Rustem: <answer>” (with the author’s prefix) - and not the bare text of the option, which is
+        // still visible for some time in the LIST OF OPTIONS itself (PlayOptionsSelection) and would give a
+        // false positive regardless of whether the answer was included in the dialogue history.
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, $"Рустем: {options[0]}", 2000),
             "Выбранный вариант ответа не появился в истории диалога СРАЗУ после выбора — должен отображаться немедленно, не дожидаясь ответа мока.");
@@ -346,14 +346,14 @@ public class InteractiveResponseTests
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "принят", 10000),
             "Не дождались финального сообщения SendAction (мок) после ответа на вопрос.");
 
-        // Финальный Step() — пауза в конце теста для визуальной проверки итогового состояния
-        // перед тем, как GameSession.Dispose() убьёт процесс игры.
+        // Final Step() - pause at the end of the test to visually check the final state before
+        // GameSession.Dispose() kills the game process.
         TestPacing.Step();
     }
 
-    // Без "options" DialogDisplay.PlayAskPlayerRequest уходит в ДРУГУЮ ветку — PlayFreeTextInput
-    // (открытое текстовое поле "Ввод (Ns): ") вместо выбора из вариантов (PlayOptionsSelection).
-    // Это отдельный, ранее не проверенный путь отображения — со своим полем ввода и курсором.
+    // Without "options" DialogDisplay.PlayAskPlayerRequest goes to ANOTHER branch - PlayFreeTextInput (open
+    // text field "Enter (Ns):") instead of selecting from options (PlayOptionsSelection). This is a separate,
+    // previously untested display path - with its own input field and cursor.
     [Fact]
     public void AskPlayerRequest_FreeText_DisplaysAndResolves()
     {
@@ -370,8 +370,8 @@ public class InteractiveResponseTests
         Thread.Sleep(150);
 
         string askPlayerPath = Path.Combine(game.RealStorageDir, "ask_player_request.json");
-        // "options" сознательно ОТСУТСТВУЕТ в запросе — именно это переключает диалог на
-        // открытый текстовый ввод вместо списка вариантов.
+        // "options" is deliberately MISSING from the request - this is what switches the dialog to open text
+        // input instead of a list of options.
         var askRequest = new { history = new[] { new { text = "Что именно ты ищешь взглядом?" } } };
         _output.WriteLine("Пишу ask_player_request.json (без options) — жду открытое текстовое поле...");
         File.WriteAllText(askPlayerPath, JsonSerializer.Serialize(askRequest));
@@ -380,11 +380,11 @@ public class InteractiveResponseTests
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "взглядом", 4000),
             "Текст вопроса не отобразился.");
-        // ВАЖНО: обычное диалоговое окно (InputBox) само по умолчанию показывает "Ввод: " как
-        // placeholder в простое — просто "Ввод" совпало бы с ним МГНОВЕННО и до того, как реально
-        // откроется интерактивный цикл открытого ввода (PlayFreeTextInput), и набранный текст
-        // ушёл бы в никуда. У PlayFreeTextInput формат другой — "Ввод (Ns): " со скобкой и
-        // таймером — ищем именно "Ввод (", это не совпадает с обычным плейсхолдером InputBox.
+        // IMPORTANT: a regular dialog box (InputBox) itself by default shows "Enter:" as placeholder in idle
+        // time - just "Enter" would coincide with it INSTANTLY and before the interactive open input loop
+        // actually opens (PlayFreeTextInput)), and the typed text would go to nowhere. PlayFreeTextInput has a
+        // different format - "Enter (Ns): "with a bracket and a timer - we are looking for exactly "Input (),
+        // this does not coincide with the usual placeholder InputBox.
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Ввод (", 3000),
             "Открытое текстовое поле ответа («Ввод (Ns): ») не отобразилось.");
@@ -395,14 +395,14 @@ public class InteractiveResponseTests
         GameConsole.SendText(game.Pid, freeTextAnswer);
         GameConsole.SendKey(game.Pid, ConsoleKey.Enter);
 
-        // Введённый ответ должен появиться в истории диалога СРАЗУ (DialogDisplay.
-        // PlayAskPlayerRequest перерисовывает блок диалога немедленно после ввода), а НЕ
-        // только когда весь SendAction (мок, искусственная задержка 5с) полностью завершится.
-        // Таймаут здесь намеренно короткий — широкое окно замаскировало бы регрессию (тест
-        // прошёл бы всё равно, просто дождавшись финального ответа мока). ВАЖНО: ищем именно
-        // "Рустем: <ответ>" (с префиксом автора) — голый текст ответа ещё виден в САМОМ ПОЛЕ
-        // ВВОДА (PlayFreeTextInput рисует его в строке "Ввод (Ns): <текст>") независимо от того,
-        // попал ли ответ в историю диалога, и дал бы ложное срабатывание.
+        // The entered response should appear in the dialogue history IMMEDIATELY (DialogDisplay.
+        // PlayAskPlayerRequest redraws the dialogue block immediately after input), and NOT only when the
+        // entire SendAction (mock, artificial delay 5s) is completely completed. The timeout here is
+        // intentionally short - a wide window would have masked the regression (the test would have passed
+        // anyway, just waiting for the final response from the mock). IMPORTANT: we are looking for exactly
+        // “Rustem: <answer>” (with the author’s prefix) - the bare text of the answer is still visible in the
+        // INPUT FIELD ITSELF (PlayFreeTextInput draws it in the line “Input (Ns): <text>”), regardless of
+        // whether the answer is included in the dialogue history, and would give a false positive.
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, $"Рустем: {freeTextAnswer}", 2000),
             "Введённый свободный текстовый ответ не появился в истории диалога СРАЗУ после ввода — должен отображаться немедленно, не дожидаясь ответа мока.");

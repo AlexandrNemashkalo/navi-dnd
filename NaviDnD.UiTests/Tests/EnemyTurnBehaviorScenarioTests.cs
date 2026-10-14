@@ -2,22 +2,20 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: автоматический ход врага (MapScreenLoop.RunEnemyTurn → GameAiClient.FireEnemyTurn) — после
-// ЛЮБОГО свободного действия игрока движок сам вызывает ход того, чей CombatState.CurrentTurn
-// сейчас активен, если это существо (не герой). FireEnemyTurn использует тот же системный промпт
-// (Prompts/Dnd5e/SendAction), что и обычный SendAction — то есть оба вызова в рамках одного теста
-// перехватываются ОДНИМ мок-именем действия "SendAction". Различаем их через нумерованные файлы
-// ответа SelectiveMockProvider (response.json — 1й вызов, response2.json — 2й) — это даёт РЕАЛЬНО
-// РАЗНЫЙ, а не задублированный контент для "действия игрока" и для "автоматического хода врага".
-//
-// response2.json в обеих папках (EnemyAttack/EnemyMove) написан строго по формату из
-// Prompts/Dnd5e/SendAction/systemPrompt.md § БОЙ "Структура history хода врага": патч НЕ корневой
-// ключ, а вложен в history[].patch, движение — через movePath, а финальная запись хода врагов
-// обязана передать ход обратно герою (combat.currentTurn=hero, totalRounds+1, hero.actions/
-// speedLeft сброшены) — самопроверка промпта, пункт 10.
-//
-// Fixtures/enemy_turn_game.json: герой в [1,3] с УЖЕ потраченными действиями/скоростью (это и
-// есть причина, почему сейчас ход гоблина "GBL" в [5,3]), Combat.Active=true, CurrentTurn="GBL".
+// E2E: automatic move of the enemy (MapScreenLoop.RunEnemyTurn → GameAiClient.FireEnemyTurn) - after ANY free
+// action of the player, the engine itself calls the move of the one whose CombatState.CurrentTurn is currently
+// active, if this is a creature (not a hero). FireEnemyTurn uses the same system prompt
+// (Prompts/Dnd5e/SendAction), as the usual SendAction - that is, both calls within the same test are
+// intercepted by ONE mock action name "SendAction". We distinguish them through numbered response files
+// SelectiveMockProvider (response.json - 1st call, response2.json - 2nd) - this gives REALLY DIFFERENT, not
+// duplicated content for the "player action" and for the "automatic move of the enemy response2.json" in both
+// folders. (EnemyAttack/EnemyMove) is written strictly according to the format from
+// Prompts/Dnd5e/SendAction/systemPrompt.md § BATTLE "Structure history of the enemy's turn": the patch is NOT
+// the root key, but is embedded in history[].patch, movement is through movePath, and the final record of the
+// enemies' move must transfer the move back to the hero (combat.currentTurn=hero, totalRounds+1, hero.actions/
+// speedLeft are reset) - self-test of the prompt, point 10. Fixtures/enemy_turn_game.json: hero at [1,3] with
+// ALREADY spent actions/speed (this is the reason why it is now the goblin's move "GBL" at [5,3]),
+// Combat.Active=true, CurrentTurn="GBL".
 public class EnemyTurnBehaviorScenarioTests
 {
     private readonly ITestOutputHelper _output;
@@ -69,9 +67,9 @@ public class EnemyTurnBehaviorScenarioTests
         if (initiativeRow == null || !initiativeRow.Contains("⚔️HRO"))
             failures.Add($"После хода врага ход должен вернуться герою («⚔️HRO»): «{initiativeRow?.TrimEnd()}»");
 
-        // Скорость сброшена ДО полного максимума (30/30) — ни одна клетка не "потрачена", поэтому
-        // здесь достаточно проверить текст (CheckMovementSquares проверяет ещё и цвет ПОТРАЧЕННОЙ
-        // клетки, а таких при 30/30 попросту нет — сэмплировать было бы нечего).
+        // The speed is reset to the full maximum (30/30) - not a single cell is “wasted”, so here it is enough
+        // to check the text (CheckMovementSquares also checks the color of the SPENT cell, and at 30/30 there
+        // are simply no such cells - there would be nothing to sample).
         var moveRow = rows.FirstOrDefault(r => r.Contains("Движение:"));
         if (moveRow == null || !moveRow.Contains("30/30"))
             failures.Add($"После хода врага скорость должна быть сброшена до 30/30: «{moveRow?.TrimEnd()}»");
@@ -101,9 +99,9 @@ public class EnemyTurnBehaviorScenarioTests
             GameConsole.WaitForRowContains(game.Pid, 1, GameConsole.TitleReadWidth, "→ КАРТА ←", 5000),
             "Не дождались экрана Карты после [F1] в меню.");
         _output.WriteLine("Экран Карты отрисован. Запоминаю исходную колонку гоблина на сетке...");
-        // Легенда с активным боем выше обычной (+7 строк CombatReservedLines) — окну консоли нужен
-        // момент, чтобы дорисовать нижнюю часть после первичной отрисовки заголовка (см. тот же
-        // класс гонки в CombatStateScenarioTests). Ждём «Время:» — рисуется последней строкой блока.
+        // Legend with active battle is higher than usual (+7 lines CombatReservedLines) - the console window
+        // needs a moment to finish drawing the bottom after the initial drawing of the title (see the same race
+        // class in CombatStateScenarioTests). Waiting for “Time:” - drawn by the last line of the block.
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Время:", 5000),
             "Строка «Время:» так и не появилась в легенде.");
@@ -146,9 +144,9 @@ public class EnemyTurnBehaviorScenarioTests
         if (initiativeRow == null || !initiativeRow.Contains("⚔️HRO"))
             failures.Add($"После хода врага ход должен вернуться герою («⚔️HRO»): «{initiativeRow?.TrimEnd()}»");
 
-        // Скорость сброшена ДО полного максимума (30/30) — ни одна клетка не "потрачена", поэтому
-        // здесь достаточно проверить текст (CheckMovementSquares проверяет ещё и цвет ПОТРАЧЕННОЙ
-        // клетки, а таких при 30/30 попросту нет — сэмплировать было бы нечего).
+        // The speed is reset to the full maximum (30/30) - not a single cell is “wasted”, so here it is enough
+        // to check the text (CheckMovementSquares also checks the color of the SPENT cell, and at 30/30 there
+        // are simply no such cells - there would be nothing to sample).
         var moveRow = finalRows.FirstOrDefault(r => r.Contains("Движение:"));
         if (moveRow == null || !moveRow.Contains("30/30"))
             failures.Add($"После хода врага скорость должна быть сброшена до 30/30: «{moveRow?.TrimEnd()}»");
@@ -165,11 +163,11 @@ public class EnemyTurnBehaviorScenarioTests
         Assert.True(failures.Count == 0, "UI-тест FAIL:\n" + string.Join("\n", failures.Select(f => "  - " + f)));
     }
 
-    // Карта и легенда рисуются на ОДНОЙ строке side-by-side, и легенда ТОЖЕ показывает имя/символ
-    // существа текстом ("GBL : Гоблин - ...") — поиск "GBL" по всей строке может найти легенду
-    // вместо самой сетки (они не обязательно на одной физической строке, раз легенда не привязана
-    // к Y-координате существа). Ограничиваем поиск левой частью строки — областью карты, до
-    // внутренней границы с легендой (MapDisplay: mapWidth = cols*(cellWidth+1)+7 = 20*4+7 = 87).
+    // The map and legend are drawn on the SAME line side-by-side, and the legend ALSO shows the creature's
+    // name/symbol in text ("GBL : Goblin - ...") - searching for "GBL" on the entire line may find the legend
+    // instead of the grid itself (they are not necessarily on the same physical line, since the legend is not
+    // tied to the creature's Y- coordinate). We limit the search to the left part of the line - the map area,
+    // to the internal border with the legend (MapDisplay: mapWidth = cols*(cellWidth+1)+7 = 20*4+7 = 87).
     private const int MapContentWidth = 87;
 
     private static int FindGoblinGridColumn(List<string> rows)

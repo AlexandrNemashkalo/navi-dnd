@@ -3,25 +3,25 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.PromptTests;
 
-// РЕАЛЬНЫЕ вызовы Claude — см. класс SendActionPromptTests для общих правил (платно, медленно,
-// запускать редко и осознанно). Проверяет, что промпт реально ВЫЗЫВАЕТ нужный MCP-инструмент
-// (roll_dice / ask_player) для сценариев, где это требуется — без автоответчика
-// (PromptScenario.CallRealAiWithAutoAnswersAsync) вызов завис бы на реальный таймаут инструмента (50с).
+// REAL calls Claude - see class SendActionPromptTests for general rules (paid, slow, run rarely and
+// deliberately). Checks that the prompt actually CALLS the required MCP- tool (roll_dice / ask_player) for
+// scenarios where this is required - without an answering machine
+// (PromptScenario.CallRealAiWithAutoAnswersAsync) the call would hang on the real tool timeout (50s).
 public class InteractiveResponsePromptTests
 {
     private readonly ITestOutputHelper _output;
 
     public InteractiveResponsePromptTests(ITestOutputHelper output) => _output = output;
 
-    // Атака мечом по видимому противнику в бою — должна вызвать roll_dice (см. промпт: "roll_dice —
-    // все d20-броски героя (... атака ...)"). Сценарий — тот же, что и OpportunityAttack (герой и
-    // орк смежны, ход героя, полные ресурсы).
+    // Attack with a sword on a visible enemy in battle - should cause roll_dice (see prompt: "roll_dice - all
+    // d20- throws of the hero (... attack ...)"). The scenario is the same as OpportunityAttack (hero and orc
+    // are adjacent, hero's turn, full resources).
     [Fact]
     public async Task AttackAction_TriggersRollDice()
     {
         var storage = PromptScenario.LoadUiTestFixture("opportunity_attack_game.json");
         var actionResource = storage.WorldState.Hero!.Actions!.First(a => a.Name == "Действие");
-        Assert.Equal(1, actionResource.Value); // предусловие: Действие ещё не потрачено
+        Assert.Equal(1, actionResource.Value); // precondition: Action not yet spent
 
         var ctx = new AiContextBuilder(storage.WorldState);
         string userMessage = ctx.MinimalState("атакую орка мечом");
@@ -37,13 +37,13 @@ public class InteractiveResponsePromptTests
         Assert.Contains(parsed.HistoryTexts, t => t.Contains('[') && t.Contains(']'));
 
         var actionAfter = storage.WorldState.Hero!.Actions!.First(a => a.Name == "Действие");
-        Assert.Equal(0, actionAfter.Value); // "Действие" потрачено на атаку
+        Assert.Equal(0, actionAfter.Value); // "Action" spent on attack
 
         PromptScenario.RecordAsMock(result.RawResponse, mockResponsesFolder: "DiceRoll", action: "SendAction");
     }
 
-    // Два одинаковых врага рядом с героем + неоднозначная команда "атакую врага" — промпт обязан
-    // дать выбрать цель мышью на карте (select_target, см. § MCP), а не спрашивать текстом.
+    // Two identical enemies next to the hero + an ambiguous command “attack the enemy” - the prompt must allow
+    // you to select a target with the mouse on the map (select_target, see § MCP), and not ask in text.
     [Fact]
     public async Task AmbiguousTarget_TriggersSelectTarget()
     {
@@ -59,8 +59,8 @@ public class InteractiveResponsePromptTests
         Assert.True(result.SelectTargetTriggered,
             "Неоднозначная цель (два одинаковых врага рядом) должна была вызвать select_target.");
 
-        // Ответ после уточнения цели должен быть структурно валиден (не проверяем конкретную цель —
-        // модель сама решает и могла добавить дополнительный контекст).
+        // The answer after specifying the goal must be structurally valid (we are not checking a specific goal
+        // - the model decides itself and could add additional context).
         PromptScenario.ApplyAndParse(storage, result.RawResponse);
 
         PromptScenario.RecordAsMock(result.RawResponse, mockResponsesFolder: "AskPlayer", action: "SendAction");

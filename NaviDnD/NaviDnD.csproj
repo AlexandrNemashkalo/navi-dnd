@@ -47,7 +47,7 @@
 	  </None>
 	</ItemGroup>
 
-	<!-- Общий с установщиком код обновлений: описание релиза и патчи (проверка базы перед загрузкой). -->
+	<!-- Update code shared with the installer: release description and patches (checking the database before downloading). -->
 	<ItemGroup>
 	  <Compile Include="../NaviDnD.Installer/UpdateManifest.cs" Link="Updates/UpdateManifest.cs" />
 	  <Compile Include="../NaviDnD.Installer/Patch.cs" Link="Updates/Patch.cs" />

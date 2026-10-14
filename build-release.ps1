@@ -1,13 +1,13 @@
-# Сборка релиза.
-#   (без ключей) — патч-релиз: игра и MCP собираются заново, сравниваются с описанием предыдущей версии
-#                  (releases/manifests/<версия>.json), в releases/patches/ — ZIP только с изменениями и удалениями.
-#                  База (части payload + Silero) и установщик не пересобираются и не отправляются заново: ссылки
-#                  ведут на теги, где они опубликованы. Установщик пересобирается, только если изменились его исходники.
-#   -Base        — новая полная база (части payload с Silero, установщик, описание файлов), цепочка патчей с нуля.
-#   -AdoptBase   — объявить базой уже собранные releases/NaviDnD-payload.* (без пересборки): описание её файлов и
-#                  NaviDnD-updates.json без патчей.
-# Сборка для macOS — своя цепочка в releases-macos/ (build-macos.ps1): патч к ней собирается вместе с релизом, а если
-# её ещё нет — база. -NoMac — без неё (в релизе останутся ссылки на прежнюю).
+# Build release.
+#   (without keys) - patch release: the game and MCP are reassembled, compared with the description of the previous version
+#                  (releases/manifests/<version>.json), in releases/patches/ - ZIP only with changes and deletions.
+#                  The database (parts payload + Silero) and the installer are not rebuilt or sent again: links
+#                  lead to the tags where they are published. The installer is rebuilt only if its sources have changed.
+#   -Base - new complete database (parts payload with Silero, installer, file description), chain of patches from scratch.
+#   -AdoptBase — declare already assembled releases/NaviDnD-payload.* as a base (without rebuilding): description of its files and
+#                  NaviDnD-updates.json without patches.
+# Assembly for macOS - its own chain in releases-macos/ (build-macos.ps1): patch for it is assembled along with the release, and if
+# it doesn’t exist yet - the base. -NoMac - without it (links to the previous one will remain in the release).
 param([switch]$Base, [switch]$AdoptBase, [switch]$NoMac)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
@@ -43,7 +43,7 @@ function Sorted($dictionary) {
     foreach ($key in ([string[]]$dictionary.Keys | Sort-Object -CaseSensitive)) { $result[$key] = $dictionary[$key] }
     $result
 }
-# Файлы установленной игры: путь через «/» → SHA256. Пользовательские Storage/, logs/ и помощник Updater/ — не игра.
+# Installed game files: path via “/” → SHA256. User Storage/, logs/ and assistant Updater/ are not a game.
 function TreeManifest($directory) {
     $prefix = [IO.Path]::GetFullPath($directory).TrimEnd('\') + '\'
     $result = @{}
@@ -54,7 +54,7 @@ function TreeManifest($directory) {
     }
     $result
 }
-# Описание файлов базы прямо из её частей (ZIP): без распаковки на диск.
+# Description of database files directly from its parts (ZIP): without unpacking to disk.
 function PayloadManifest() {
     $parts = Get-ChildItem -LiteralPath $release -Filter 'NaviDnD-payload.*' -File | Sort-Object Name
     if (-not $parts) { throw 'No payload parts in releases/' }
@@ -83,7 +83,7 @@ function BaseParts($tag) {
         [ordered]@{ name = $_.Name; url = (RawUrl $tag "releases/$($_.Name)"); sha256 = (Sha256File $_.FullName); size = $_.Length }
     })
 }
-# Отпечаток исходников установщика (без номера версии): не изменились — установщик не пересобирается.
+# Installer source fingerprint (no version number): unchanged - installer is not rebuilt.
 function InstallerSource() {
     $files = & git -c "safe.directory=$gitRoot" -C $root ls-files -s -- 'NaviDnD.Installer' 'NaviDnD/dnd.ico' 'NaviDnD.Data/L.cs'
     if ($LASTEXITCODE -ne 0) { throw 'Cannot fingerprint installer sources' }
@@ -93,14 +93,14 @@ function InstallerSource() {
     try { ([BitConverter]::ToString($sha.ComputeHash($utf8.GetBytes(($files -join "`n"))))).Replace('-', '').ToLowerInvariant() } finally { $sha.Dispose() }
 }
 function PublishInstaller() {
-    # Вывод сборки — на экран: иначе он попал бы в результат функции вместе с описанием установщика.
+    # Build output is on screen: otherwise it would end up in the function result along with the installer description.
     & dotnet publish "$root/NaviDnD.Installer/NaviDnD.Installer.csproj" -c Release -r win-x64 --self-contained true -o "$work/installer" -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'Installer publish failed' }
     Copy-Item "$work/installer/NaviDnD.Installer.exe" "$release/$installerName" -Force
     $file = Get-Item -LiteralPath "$release/$installerName"
     [ordered]@{ name = $installerName; url = (RawUrl "v$version" "releases/$installerName"); sha256 = (Sha256File $file.FullName); size = $file.Length; source = (InstallerSource) }
 }
-# Игра без Silero: опубликованные проекты, публичные отслеживаемые ресурсы, версия, лицензия, заметки.
+# Game without Silero: published projects, public tracked resources, version, license, notes.
 function BuildGame() {
     New-Item -ItemType Directory -Force -Path $payload | Out-Null
     foreach ($project in @('NaviDnD', 'NaviDnD.McpServer')) {
@@ -131,8 +131,8 @@ function BuildGame() {
     Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination (Join-Path $payload 'LICENSE')
     Copy-Item -LiteralPath (Join-Path $root 'RELEASE_NOTES.md') -Destination (Join-Path $payload 'RELEASE_NOTES.md')
 }
-# Старый формат для клиентов ≤1.1.4 (они понимают только его): установщик + части базы. Новый установщик сам
-# докачает патчи после базы.
+# Old format for clients ≤1.1.4 (they only understand this): installer + database parts. New installer himself
+# will download patches after the database.
 function WriteLegacySums($updates) {
     $lines = @("$($updates.installer.sha256)  $installerName") + @($updates.base.files | ForEach-Object { "$($_.sha256)  $($_.name)" })
     [IO.File]::WriteAllText("$release/SHA256SUMS.txt", (($lines -join "`n") + "`n"), $utf8)
@@ -145,8 +145,8 @@ function BuildMac() {
     if ($LASTEXITCODE -ne 0) { throw 'macOS build failed' }
 }
 function WriteReleaseMetadata($updates) {
-    # Первая ссылка — для людей: «📦 Скачать NaviDnD (все файлы установки)» в группе «Packages» над остальными (архив папки releases/, GitLab собирает его на лету); дальше — служебные,
-    # игра ищет их по имени. Название в \u-escape: скрипт без BOM, Windows PowerShell 5.1 читает его как ANSI.
+    # The first link is for people: “📦 Download NaviDnD (all installation files)” in the “Packages” group above the rest (archive folder releases/, GitLab collects it on the fly); further - official ones,
+    # the game searches for them by name. The name in the \u-escape: script without BOM, Windows PowerShell 5.1 reads it as ANSI.
     $links = @(
         [ordered]@{ name = [regex]::Unescape('\ud83d\udce6 \u0421\u043a\u0430\u0447\u0430\u0442\u044c NaviDnD (\u0432\u0441\u0435 \u0444\u0430\u0439\u043b\u044b \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438)'); url = "https://gitlab.com/navitalevich/navi-dnd/-/archive/v$version/navi-dnd-v$version-releases.zip?path=releases"; link_type = 'package' }
         [ordered]@{ name = 'SHA256SUMS.txt'; url = (RawUrl "v$version" 'releases/SHA256SUMS.txt') }
@@ -154,8 +154,8 @@ function WriteReleaseMetadata($updates) {
         [ordered]@{ name = $installerName; url = $updates.installer.url }
     ) + @($updates.base.files | ForEach-Object { [ordered]@{ name = $_.name; url = $_.url } }) +
         @($updates.patches | ForEach-Object { [ordered]@{ name = $_.name; url = $_.url } })
-    # macOS: архив базы для игроков (CI выкладывает его в Package Registry на теге базы, дальше — патчи из игры) и
-    # описание цепочки, по которому игра на Mac находит патчи. Название — «Скачать для macOS (Apple Silicon)» с яблоком.
+    # macOS: archive of the database for players (CI posts it in Package Registry on the base tag, then - patches from the game) and
+    # description of the chain by which the game on Mac finds patches. The name is “Download for macOS (Apple Silicon)” with apple.
     if (Test-Path -LiteralPath $macUpdatesPath) {
         $macBase = (Get-Content -LiteralPath $macUpdatesPath -Raw -Encoding UTF8 | ConvertFrom-Json).base.version
         $links = @($links[0]) + @(
@@ -181,7 +181,7 @@ if ($AdoptBase) {
     $updates = [ordered]@{
         format = 1; version = $baseInfo.Version
         base = [ordered]@{ version = $baseInfo.Version; files = (BaseParts "v$($baseInfo.Version)") }
-        # Установщик базы патчи не понимает: source 'legacy' — следующий релиз соберёт новый.
+        # The patch database installer does not understand: source 'legacy' - the next release will compile a new one.
         installer = [ordered]@{ name = $installerName; url = (RawUrl "v$($baseInfo.Version)" "releases/$installerName"); sha256 = (Sha256File $setup.FullName); size = $setup.Length; source = 'legacy' }
         patches = @()
     }
@@ -225,7 +225,7 @@ else {
     $previousFiles = ReadDictionary (Join-Path $manifests "$previousVersion.json")
     BuildGame
     $tree = TreeManifest $payload
-    # Комплект озвучки не пересобирается — он из базы, без изменений.
+    # The voice acting set is not rebuilt - it is from the database, without changes.
     foreach ($key in $previousFiles.Keys) { if ($key.StartsWith('Speech/silero/')) { $tree[$key] = $previousFiles[$key] } }
     $changed = @([string[]]$tree.Keys | Where-Object { $previousFiles[$_] -ne $tree[$_] } | Sort-Object -CaseSensitive)
     $removed = @([string[]]$previousFiles.Keys | Where-Object { -not $tree.Contains($_) } | Sort-Object -CaseSensitive)
@@ -246,7 +246,7 @@ else {
     $patchFile = Get-Item -LiteralPath $patchPath
     if ($patchFile.Length -ge 100MB) { throw "Patch is too large ($($patchFile.Length) bytes): consider a new base (-Base)" }
     WriteJson (Join-Path $manifests "$version.json") (Sorted $tree)
-    # Установщик-помощник: пересборка только при изменении его исходников.
+    # Assistant installer: rebuilds only when its sources change.
     $installer = $previous.installer
     if ($previous.installer.source -ne (InstallerSource)) { $installer = PublishInstaller }
     $updates = [ordered]@{

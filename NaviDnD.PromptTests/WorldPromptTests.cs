@@ -6,14 +6,14 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.PromptTests;
 
-// Карта мира с реальной нейронкой (дорого — запускать осознанно, как и остальные тесты проекта):
-// StartNewGame на свежем мире (концепция мира/королевств, стартовое место через add_place, локация по клетке
-// мира), путешествие (TravelService + GameAiClient.Travel), вопрос о руинах (add_place по ходу игры).
-// Миры — в NaviDnD.PromptTests/Storage/Worlds (AppConfig.ProjectRoot этого проекта), боевые не трогаются.
+// World map with a real AI (expensive - run consciously, like other tests of the project): StartNewGame on a
+// fresh world (world/kingdom concept, starting place through add_place, location by world cell), travel
+// (TravelService + GameAiClient.Travel), question about ruins (add_place during the game). Worlds - in
+// NaviDnD.PromptTests/Storage/Worlds (AppConfig.ProjectRoot of this project), the combat ones are not touched.
 public class WorldPromptTests(ITestOutputHelper output)
 {
-    // GameAiClient читает промпты от AppConfig.ProjectRoot (у этого проекта — NaviDnD.PromptTests) — на время
-    // теста кладём туда копию боевых промптов.
+    // GameAiClient reads prompts from AppConfig.ProjectRoot (for this project - NaviDnD.PromptTests) - for the
+    // duration of the test we put a copy of the combat prompts there.
     private static string CopyPrompts()
     {
         string src = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "NaviDnD", "Prompts"));
@@ -35,7 +35,7 @@ public class WorldPromptTests(ITestOutputHelper output)
         finally { try { Directory.Delete(prompts, recursive: true); } catch { } }
     }
 
-    // Мастер новой игры, шаг «Мир» → «ПРИДУМАТЬ»: концепция нового мира (название, суть, все королевства со столицами).
+    // New Game GM, step “World” → “IMAGE”: concept of a new world (name, essence, all kingdoms with capitals).
     [Fact]
     public async Task CreateWorld_GivesConceptForEveryKingdom()
     {
@@ -59,7 +59,7 @@ public class WorldPromptTests(ITestOutputHelper output)
         finally { try { Directory.Delete(prompts, recursive: true); } catch { } }
     }
 
-    // Новая игра героем из библиотеки: уровень/статы/заклинания те же, ХП полные, эффекты сняты, снаряжение — новое.
+    // New game with a hero from the library: the same level/stats/spells, full HP, effects removed, new equipment.
     [Fact]
     public async Task ReuseHero_KeepsLevelAndSkills_RefitsGear()
     {
@@ -113,7 +113,7 @@ public class WorldPromptTests(ITestOutputHelper output)
         var client = new GameAiClient(storage.WorldState, storage, new SwitchableAiProvider(config, new AiLogger()), config);
         var ws = storage.WorldState;
 
-        // 1. Начало игры.
+        // 1. Start of the game.
         await client.StartNewGame("");
         var geo = GameWorld.Geo(ws)!;
         output.WriteLine($"Мир: {geo.Chronicle.Name} — {geo.Chronicle.Description}");
@@ -128,7 +128,7 @@ public class WorldPromptTests(ITestOutputHelper output)
         Assert.NotNull(ws.World?.Place);
         Assert.NotNull(GameWorld.HeroTile(ws));
 
-        // 2. Путешествие в столицу.
+        // 2. Travel to the capital.
         var world = GameWorld.ForMaster(ws)!;
         var capital = world.Places.First(p => p.Type == WorldPlaceTypes.Capital);
         var plan = TravelService.PlanTo(ws, (capital.X, capital.Y));
@@ -142,7 +142,7 @@ public class WorldPromptTests(ITestOutputHelper output)
         Assert.True((ws.History?.Count ?? 0) > historyBefore, "мастер не описал путь");
         Assert.DoesNotContain(ws.History!.Skip(historyBefore), m => m.Text?.StartsWith("Ошибка") == true);
 
-        // 3. Слух о месте — мастер добавляет его на карту.
+        // 3. Rumor about a place - the GM adds it to the map.
         int placesBefore = geo.Chronicle.Places.Count;
         var knownBefore = (ws.World?.Known ?? []).ToHashSet(StringComparer.OrdinalIgnoreCase);
         historyBefore = ws.History!.Count;

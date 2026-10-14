@@ -2,11 +2,11 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: выбор элемента инвентаря наведением мыши (MouseUiHelper.MakeCharacterPollAction — "Inventory
-// item hover" — и HeroDisplay.WriteInvLine, который дорисовывает "←" у выбранной первой строки
-// предмета) — недавно добавленная фича (см. историю коммитов), покрытая только кликовой пагинацией
-// (GameScenarioTests.CheckInventoryPagination), но не самим наведением и не сбросом выбора при
-// уходе мыши.
+// E2E: selection of an inventory item by mouse hover (MouseUiHelper.MakeCharacterPollAction - "Inventory item
+// hover" - and HeroDisplay.WriteInvLine, which adds a "←" to the selected first line of the item) - a recently
+// added feature (see commit history), covered only by clickable pagination
+// (GameScenarioTests.CheckInventoryPagination), but not by itself hovering and not resetting the selection when
+// the mouse moves away.
 public class InventoryHoverScenarioTests
 {
     private readonly ITestOutputHelper _output;
@@ -20,10 +20,11 @@ public class InventoryHoverScenarioTests
         _output.WriteLine($"Игра запущена (pid {game.Pid}).");
 
         Navigation.ToCharacterScreen(game.Pid);
-        // Заголовок экрана и тело карточки (инвентарь) рисуются РАЗНЫМИ вызовами — заголовок мог
-        // смениться раньше, чем дорисовался список инвентаря ниже (та же гонка, что чинили в
-        // GameScenarioTests.FullGameplayScenario). Явно ждём появления предмета, а не полагаемся на
-        // то, что он успел отрисоваться к моменту возврата из Navigation.ToCharacterScreen.
+        // The screen title and the body of the card (inventory) are drawn by DIFFERENT calls - the title could
+        // change before the inventory list below was completed (the same race that was fixed in
+        // GameScenarioTests.FullGameplayScenario). We are clearly waiting for the item to appear, and not
+        // relying on the fact that it managed to be drawn by the time we returned from
+        // Navigation.ToCharacterScreen.
         const string itemMarker = "Длинный меч";
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, itemMarker, 5000),
@@ -31,8 +32,8 @@ public class InventoryHoverScenarioTests
         _output.WriteLine("Экран Персонажа (вкладка Инвентарь) отрисован.");
         TestPacing.Step();
 
-        // "Длинный меч" — первый неэкипированный предмет на первой странице инвентаря (см. также
-        // GameScenarioTests.CheckInventoryPagination) — гарантированно виден без пагинации.
+        // "Long Sword" - the first unequipped item on the first inventory page (see also
+        // GameScenarioTests.CheckInventoryPagination) - guaranteed to be visible without pagination.
         var rows = GameConsole.ReadRows(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth);
         int itemRow = rows.FindIndex(r => r.Contains(itemMarker));
         Assert.True(itemRow >= 0, $"Предмет «{itemMarker}» не найден на первой странице инвентаря.");

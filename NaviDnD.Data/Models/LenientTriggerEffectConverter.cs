@@ -3,8 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace NaviDnD.Data.Models;
 
-// ИИ иногда шлёт onExpire/onRound/spotted строкой («"onExpire": "Снять эффект"») вместо объекта {"effect": "…"} —
-// принимаем как описание эффекта, а не роняем весь ответ мастера (терялись заклинание, ячейка и весь ход).
+// AI sometimes sends onExpire/onRound/spotted with the string (“onExpire”: “Remove effect””) instead of the
+// object {"effect": "..."} - we accept it as a description of the effect, and do not drop the entire answer of
+// the GM (the spell, cell and entire move were lost).
 public class LenientTriggerEffectConverter : JsonConverter<TriggerEffect?>
 {
     public override TriggerEffect? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

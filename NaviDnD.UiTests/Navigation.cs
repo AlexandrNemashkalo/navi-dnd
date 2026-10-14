@@ -1,10 +1,10 @@
 ﻿namespace NaviDnD.UiTests;
 
-// Общая навигация Меню → Карта → Персонаж — переиспользуется тест-кейсами, которым сам переход
-// не важен (он уже отдельно проверяется в GameScenarioTests.FullGameplayScenario).
+// General navigation Menu → Map → Character - reused by test cases for which the transition itself is not
+// important (it is already checked separately in GameScenarioTests.FullGameplayScenario).
 internal static class Navigation
 {
-    // Главное меню без горячих клавиш (MainMenuDisplay): стрелкой ↓ до пункта «→ ИМЯ ←», затем Enter.
+    // Main menu without hotkeys (MainMenuDisplay): arrow ↓ to “→ NAME ←”, then Enter.
     public static void MenuSelect(int gamePid, string item)
     {
         string marker = $"→ {item} ←";
@@ -21,8 +21,8 @@ internal static class Navigation
         throw new InvalidOperationException($"Не удалось выбрать пункт меню «{item}». Экран:\n" + string.Join("\n", screen));
     }
 
-    // Меню → «НОВАЯ ИГРА» → шаг «Мир»: новый мир обязан иметь описание — Enter (без описания — фокус на ввод),
-    // ↑ на описание, текст, [F2] — дальше → анкета героя.
+    // Menu → “NEW GAME” → step “World”: the new world must have a description - Enter (without description -
+    // focus on input), ↑ on description, text, [F2] - further → hero profile.
     public static bool ToAnketa(int gamePid)
     {
         MenuSelect(gamePid, "НОВАЯ ИГРА");
@@ -38,13 +38,13 @@ internal static class Navigation
         return GameConsole.WaitForAnyRowContains(gamePid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "АНКЕТА", 5000);
     }
 
-    // Редактор героя [F4] → шаг «Приключение» → «НАЧАТЬ ИГРУ» (Tab — по полям до кнопки, она последняя; Enter — старт).
+    // Hero editor [F4] → step “Adventure” → “START GAME” (Tab - along the fields to the button, it’s the last one; Enter - start).
     public static bool StartFromEditor(int gamePid)
     {
         GameConsole.SendKey(gamePid, ConsoleKey.F4);
         if (!GameConsole.WaitForAnyRowContains(gamePid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "→ ПРИКЛЮЧЕНИЕ ←", 5000))
         {
-            GameConsole.SendKey(gamePid, ConsoleKey.F4);   // изредка первое [F4] не долетает под нагрузкой
+            GameConsole.SendKey(gamePid, ConsoleKey.F4);   // occasionally the first [F4] does not fly under load
             if (!GameConsole.WaitForAnyRowContains(gamePid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "→ ПРИКЛЮЧЕНИЕ ←", 5000)) return false;
         }
         Thread.Sleep(300);

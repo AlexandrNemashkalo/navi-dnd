@@ -12,21 +12,22 @@ public class Storage
 {
     public HashSet<(int X, int Y)> ExploredCells = [];
 
-    // Предметы карты, которые герой уже видел («имя@кол,ряд»): в тумане они помнятся тусклым символом.
-    // null — после загрузки ещё не засеяно (первый кадр считает виденными предметы на изученных клетках).
+    // Map items that the hero has already seen (“name@number,row”): in the fog they are remembered as a dim
+    // symbol. null - after loading it is not yet seeded (the first frame considers objects on the studied cells
+    // to be visible).
     public HashSet<string>? SeenObjects;
 
     public static string ObjectKey(CellEntity o) => $"{o.Name}@{o.Position[0]},{o.Position[1]}";
 
-    // Предмет (не существо) помнится героем: лежит на изученной клетке и герой его уже видел.
+    // The object (not a creature) is remembered by the hero: it lies on the studied cell and the hero has already seen it.
     public bool IsRemembered(CellEntity o) =>
         o is not LivingEntity && o.Position is { Count: >= 2 } p && ExploredCells.Contains((p[0], p[1]))
         && SeenObjects?.Contains(ObjectKey(o)) == true;
     public HashSet<(int, int)> VisibleCells = [];
 
-    // Сохранять ли ExploredCells между запусками (см. AppConfig.SaveExploredCells) — выставляется
-    // владельцем Storage (Program.cs); по умолчанию true, чтобы прочие места (MCP-тулы, тесты),
-    // создающие Storage() без этого шага, не теряли поведение по умолчанию.
+    // Whether to save ExploredCells between runs (see AppConfig.SaveExploredCells) - set by the owner of
+    // Storage (Program.cs); default true, so that other places (MCP-tools, tests) that create Storage() without
+    // this step do not lose the default behavior.
     public bool SaveExploredCells { get; set; } = true;
 
     public NewGameData NewGameData { get; set; }
@@ -52,7 +53,7 @@ public class Storage
     private readonly HashSet<string> _entitiesSeeingHero = [];
     private readonly ConditionalWeakTable<LivingEntity, RoundRuntime> _entityRuntime = new();
 
-    // Одна атака по возможности на существо за раунд (реакция существа). Возвращает true при первом срабатывании.
+    // One attack of opportunity on a creature per round (creature reaction). Returns true when first fired.
     public bool TryMarkOpportunityAttackOnHero(string symbol, int round)
     {
         if (_oaOnHeroLastRound.TryGetValue(symbol, out int last) && last == round) return false;
@@ -60,9 +61,9 @@ public class Storage
         return true;
     }
 
-    // Состояние живёт здесь, а не в MovementHandler: тот пересоздаётся после каждого AI-вызова,
-    // и дедуп на нём фактически не работал (spotted летел на каждом шаге).
-    // Возвращает true только на переходе «не видел → видит».
+    // The state lives here, and not in MovementHandler:; it is recreated after each AI- call, and the dedupe
+    // did not actually work on it (spotted flew at every step). Returns true only on the “did not see → sees”
+    // transition.
     public bool UpdateEntitySeesHero(string symbol, bool sees)
     {
         if (!sees)
@@ -91,7 +92,7 @@ public class Storage
 
     public void ResetWorldState()
     {
-        // Новая игра — на языке выбранного мира (L.World ставит мастер новой игры при выборе мира).
+        // New game - in the language of the selected world (L.World is set by the new game wizard when choosing a world).
         WorldState.Language = L.World;
         WorldState.FormatVersion = StorageFormat.Current;
         WorldState.Hero = null;
@@ -172,8 +173,8 @@ public class Storage
         };
     }
 
-    // triggers.onRound у существ — раз в раунд, только если существо видит героя и не в инициативе
-    // (в бою оно и так действует в свой ход).
+    // triggers.onRound for creatures - once per round, only if the creature sees the hero and is not in the
+    // initiative (in battle it already acts on its turn).
     private List<(int, LivingEntity)> CollectEntityRoundTriggers(int currentRound)
     {
         var result = new List<(int, LivingEntity)>();
@@ -224,8 +225,8 @@ public class Storage
                 }
                 else
                 {
-                    // Истёк, но сообщать ИИ нечего (нет onExpire) — не оставлять "призрак" в списке
-                    // эффектов навсегда с замороженной просроченной длительностью.
+                    // Expired, but nothing to report to AI (no onExpire) - do not leave "ghost" in the list of
+                    // effects forever with a frozen expired duration.
                     e.Deleted = true;
                 }
             }
@@ -263,11 +264,12 @@ public class Storage
         return result;
     }
 
-    // Применяется сохранение (своё, а не ответ мастера): поля, которые ведёт только движок (hero.level/xp), берутся
-    // из файла. Ответ мастера их не меняет — опыт он начисляет патчем xpAward.
+    // Saving is applied (your own, not the wizard’s response): fields that are maintained only by the engine
+    // (hero.level/xp), taken from the file. The wizard’s response does not change them - he awards experience
+    // with the xpAward. patch
     private bool _fromSave;
 
-    // Сохранение или карточка героя библиотеки — как ApplyUpdateWorldState, но с полями движка.
+    // Save or library hero card - like ApplyUpdateWorldState, but with engine fields.
     public void ApplySavedState(string json)
     {
         _fromSave = true;
@@ -275,8 +277,8 @@ public class Storage
         finally { _fromSave = false; }
     }
 
-    // Сообщения движка для истории (начислен опыт, доступен новый уровень) — после записей ответа мастера:
-    // GameAiClient забирает их, когда ответ показан.
+    // Engine messages for history (experience accrued, new level available) - after the GM's response records:
+    // GameAiClient picks them up when the response is shown.
     private readonly List<string> _notices = [];
 
     public List<string> TakeNotices()
@@ -289,8 +291,8 @@ public class Storage
     public void ApplyUpdateWorldState(string jsonUpdate)
     {
         using JsonDocument doc = JsonDocument.Parse(jsonUpdate);
-        // LenientStringListConverter: ИИ иногда шлёт список строк одной строкой ("aiInfo": "текст") —
-        // принимаем как список из одного элемента, а не роняем весь ответ.
+        // LenientStringListConverter: AI sometimes sends a list of strings in one line ("aiInfo": "text") - we
+        // accept it as a list of one element, and do not drop the entire response.
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new LenientStringListConverter() } };
         var root = doc.RootElement;
         RebindChangedSymbols(root);
@@ -311,8 +313,8 @@ public class Storage
                     ApplyNarrativeUpdate(prop.Value, options);
                     break;
 
-                // Запись в заметки игрока от мастера: только дописывается в отдельный файл (PlayerNotes),
-                // в WorldState не попадает — прочитать заметки ИИ не может.
+                // Entry in the player's notes from the GM: only added to a separate file (PlayerNotes), does
+                // not go to WorldState - the AI cannot read the notes.
                 case "playernote":
                     foreach (var text in prop.Value.ValueKind == JsonValueKind.Array
                                  ? prop.Value.EnumerateArray().Select(e => e.GetString()) : [prop.Value.GetString()])
@@ -324,13 +326,13 @@ public class Storage
                     ApplyTimeUpdate(prop.Value);
                     break;
 
-                // Не описанное мастером путешествие (из сохранения) — уйдёт со следующим действием.
+                // Journey not described by the GM (from save) - will leave with the next action.
                 case "pendingtravel":
                     WorldState.PendingTravel = prop.Value.ValueKind == JsonValueKind.String ? prop.Value.GetString() : null;
                     break;
 
-                // Мир игры: из сохранения (есть id) — как есть; от мастера — патч (концепция, королевства,
-                // места хроники, где сейчас герой — GameWorld.Apply).
+                // Game world: from the save (there is id) - as is; from the GM - patch (concept, kingdoms,
+                // places in the chronicle, where the hero is now - GameWorld.Apply).
                 case "world":
                     if (prop.Value.ValueKind == JsonValueKind.Object
                         && prop.Value.EnumerateObject().Any(p => p.Name.Equals("id", StringComparison.OrdinalIgnoreCase)))
@@ -371,7 +373,7 @@ public class Storage
                         : prop.Value.GetString();
                     break;
 
-                // Из файла сохранения (мастер их не присылает): формат и язык игры.
+                // From the save file (the GM does not send them): format and language of the game.
                 case "formatversion":
                     if (prop.Value.ValueKind == JsonValueKind.Number) WorldState.FormatVersion = prop.Value.GetInt32();
                     break;
@@ -437,16 +439,16 @@ public class Storage
         foreach (string symbol in seeing) _entitiesSeeingHero.Add(aliases.GetValueOrDefault(symbol, symbol));
     }
 
-    // Слова мастера на любом языке → постоянные ключи (Data/Models/Keys.cs): часть суток, особые статы героя,
-    // категории ресурсов. Код сравнивает только ключи.
+    // GM's words in any language → permanent keys (Data/Models/Keys.cs): part of the day, special hero stats,
+    // resource categories. The code compares only the keys.
     private void NormalizeKeys()
     {
         WorldState.Time.PartOfDay = PartsOfDay.Normalize(WorldState.Time.PartOfDay);
         if (WorldState.Hero is not { } hero) return;
         foreach (var stat in hero.Stats ?? []) stat.Key ??= StatKeys.FromName(stat.Name);
         foreach (var resource in hero.Resources ?? []) resource.Category = ResourceCategories.Normalize(resource.Category);
-        // «Воин 3 ур» → «Воин»: уровень — hero.level. Уровень из стата берётся только у героя без уровня (создание
-        // героя); у героя с уровнем мастер его так не поднимет.
+        // “Warrior lvl 3” → “Warrior”: level - hero.level. The level from the stat is taken only from a hero
+        // without a level (hero creation); a hero with a GM level will not raise it that way.
         if (hero.Stat(StatKeys.Class) is { } cls && ClassLevel.Split(cls.Value) is (var name, int level))
         {
             cls.Value = name;
@@ -458,8 +460,9 @@ public class Storage
         }
     }
 
-    // Опыт от мастера: {"monsters":["Гоблин",…], "xp":N, "reason":"…"} — монстры справочника считаются по уровню
-    // опасности (LevelRules), xp — за прочее (задание, находка). Итог — в историю после ответа мастера.
+    // Experience from the GM: {"monsters":["Goblin",...], "xp":N, "reason":"..."} - monsters in the directory
+    // are counted according to the level of danger (LevelRules), xp - for other things (task, find). The result
+    // - in the story after the GM's answer.
     private void ApplyXpAward(JsonElement el)
     {
         if (el.ValueKind != JsonValueKind.Object || WorldState.Hero is not { } hero) return;
@@ -483,16 +486,18 @@ public class Storage
         if (total <= 0) return;
         bool could = rules.CanLevelUp(hero);
         hero.Xp = (hero.Xp ?? 0) + total;
-        _notices.Add(string.IsNullOrWhiteSpace(reason) ? L.WF("[+{0} опыта]", total) : L.WF("[+{0} опыта: {1}]", total, reason.Trim()));
+        _notices.Add(string.IsNullOrWhiteSpace(reason) ? L.WF("[+{0} XP]", total) : L.WF("[+{0} XP: {1}]", total, reason.Trim()));
         if (!could && rules.CanLevelUp(hero))
-            _notices.Add(L.W("[Доступен новый уровень: ПЕРСОНАЖ → «Новый уровень»]"));
+            _notices.Add(L.W("[Level up available: CHARACTER → “Level up”]"));
     }
 
-    // Погибшее существо — на его клетке остаётся тело: объект со всем, что мастер о нём знал (aiInfo — оберег, письмо,
-    // ключ), — иначе добыча и сюжетные зацепки исчезали вместе с врагом; вид — в бестиарий журнала. Погиб — хиты 0
-    // (мастер ставит hp "0/N" или пишет «→0» в механике): игра сама снимает его с карты. Убран мастером с хитами
-    // выше 0 — сбежал, ушёл, развеялся: тела нет. Хиты 0 с «Без сознания»/«Стабилен» — оглушён, жив, остаётся.
-    // Обыск и добычу ведёт мастер (§ Конец боя). Тело, которое мастер поставил сам, не дублируется.
+    // A dead creature - a body remains on its cell: an object with everything that the GM knew about it (aiInfo
+    // - amulet, letter, key) - otherwise the loot and plot clues disappeared along with the enemy; view - in
+    // the bestiary of the magazine. Killed - hit points 0 (the GM puts hp "0/N" or writes "→0" in the
+    // mechanics): the game itself removes him from the map. Removed by a GM with hit points above 0 - escaped,
+    // left, dissipated: no body. Hits 0 with "Unconscious"/"Stable" - stunned, alive, remains. The search and
+    // extraction is carried out by the GM (§ End of the battle). The body, which the GM created himself, is not
+    // duplicated.
     private static readonly string[] AliveAtZeroHp = ["без сознания", "unconscious", "стабилен", "stable"];
 
     private static bool AtZeroHp(LivingEntity e) =>
@@ -501,9 +506,10 @@ public class Storage
     private static bool KnockedOut(LivingEntity e) =>
         e.Effects?.Any(f => f.Deleted != true && AliveAtZeroHp.Any(n => f.Name?.Contains(n, StringComparison.OrdinalIgnoreCase) == true)) == true;
 
-    // Страховка от забытого патча: мастер написал изменение хитов в механике записи («[… урон 4, WL2 11→7]»,
-    // «HP 12→7»), а `hp` в патче не прислал — существо оставалось целым вопреки тексту. Только формат
-    // «СИМВОЛ (или HP/ХП — герой) было→стало» внутри [...] и только если сейчас у него ровно «было».
+    // Guard against a missing patch: the GM describes an HP change in an entry's mechanics ("[... damage 4, WL2
+    // 11→7]", "HP 12→7") but omits `hp` from the patch, leaving the creature unharmed despite the text. Accept
+    // only "SYMBOL (or HP for the hero) before→after" inside [...] and only when current HP exactly matches
+    // "before".
     public bool ReconcileMechanics(string text)
     {
         bool changed = false;
@@ -533,8 +539,8 @@ public class Storage
 
     private void LeaveBodies(List<(LivingEntity Entity, int Index)> before)
     {
-        // Хиты 0 — погиб: снять с карты. Пометкой, а не удалением из списка: дальше в том же ответе мастер обращается
-        // к существам по id — номеру в списке, и он не должен съехать.
+        // At 0 HP, the creature is dead: remove it from the map by marking it, without deleting the list entry.
+        // Later in the same response the GM references creatures by id (list index), which must remain stable.
         foreach (var fallen in WorldState.Map.Entities?.Where(e => e.Deleted != true && AtZeroHp(e) && !KnockedOut(e)) ?? [])
             fallen.Deleted = true;
         // Entity slots survive death and departure, so metadata changes do not lose identity.
@@ -543,13 +549,13 @@ public class Storage
             var corpse = WorldState.Map.Entities is { } entities && index < entities.Count ? entities[index] : previous;
             if (corpse == WorldState.Hero || corpse.Deleted != true || !AtZeroHp(corpse) || KnockedOut(corpse)
                 || corpse.Position is not { Count: >= 2 }) continue;
-            // Убитый вид — в бестиарий журнала (раньше пополнялся только проверкой знаний по просьбе мастера).
+            // Add the killed species to the journal bestiary (previously populated only by knowledge checks requested by the GM).
             if (corpse.MonsterKey is { Length: > 0 } key)
             {
                 var known = (WorldState.Narrative ??= new Narrative()).KnownMonsters ??= [];
                 if (!known.Contains(key, StringComparer.OrdinalIgnoreCase)) known.Add(key);
             }
-            string name = L.WF("Тело: {0}", corpse.Name);
+            string name = L.WF("Body: {0}", corpse.Name);
             var objects = WorldState.Map.Objects ??= [];
             if (objects.Any(o => o.Deleted != true && o.Position is { Count: >= 2 } p && p[0] == corpse.Position[0] && p[1] == corpse.Position[1]
                                  && o.Name?.Contains(corpse.Name ?? "\0", StringComparison.OrdinalIgnoreCase) == true)) continue;
@@ -560,23 +566,22 @@ public class Storage
                 Position = [corpse.Position[0], corpse.Position[1]],
                 Color = [150, 150, 150],
                 Image = corpse.Image,
-                AiInfo = [.. corpse.AiInfo ?? [], L.WF("Убит в бою ({0})", corpse.MonsterKey ?? corpse.Name)],
+                AiInfo = [.. corpse.AiInfo ?? [], L.WF("Killed in battle ({0})", corpse.MonsterKey ?? corpse.Name)],
             });
         }
     }
 
-    // Чего мастер не задал, а без этого бой и обзор врут:
-    //  - хиты существа из бестиария (monsterKey): среднее из справочника («22 (3d8+9)» → «22/22») — иначе урон врагу
-    //    нечем вести между ответами, и раненый враг в следующем вызове снова «свежий»;
-    //  - тёмное зрение героя из его характеристик («Тёмное зрение 60 фт») — старые герои создавались без darkvisionFt,
-    //    и эльф ночью видел на 10 футов.
-    // Мастер поставил героя за край локации, в скалу/дерево/мебель или в пустоту между комнатами — герой «за картой»
-    // или застрял. Ближайшая подходящая клетка (до 6 клеток вокруг). Существ — только из пустоты/за краем: в воде или
-    // чаще они могут быть по замыслу (утопленник в прибое).
+    // What the GM did not ask, and without this the battle and review lie: - hit points of the creature from
+    // the bestiary (monsterKey): average from the reference book (“22 (3d8+9)” → “22/22”) - otherwise the
+    // damage to the enemy has nothing to carry between answers, and the wounded enemy in the next challenge is
+    // “fresh” again; - dark vision of the hero from his characteristics (“Dark vision 60 ft”) - old heroes were
+    // created without darkvisionFt, and the elf saw 10 feet at night. The GM placed the hero beyond the edge of
+    // the location, into a rock/tree/furniture or into the void between rooms - the hero is “behind the map” or
+    // stuck.
     private void KeepOnWalkableCells()
     {
         var map = WorldState.Map;
-        if (map.Chunks is not { Count: > 0 }) return;   // карты старого формата — как есть
+        if (map.Chunks is not { Count: > 0 }) return;   // old format maps - as is
         bool OnField(int c, int r) => c >= 1 && r >= 1 && c <= map.Cols && r <= map.Rows && map.ChunkAt(c, r) != null
                                       && (map.TerrainAt(c, r) != null || map.RoomAt(c, r) != null || map.AreasAt(c, r).Count > 0);
         bool Walkable(int c, int r) => OnField(c, r) && map.TerrainAt(c, r) is not { BlocksMove: true };
@@ -605,7 +610,7 @@ public class Storage
     private void FillMissingStats()
     {
         KeepOnWalkableCells();
-        // Убитые/ушедшие с карты не остаются в очереди боя (кроме героя).
+        // Those killed/left the map do not remain in the battle queue (except for the hero).
         if (WorldState.Combat?.Initiative is { Count: > 0 } init)
         {
             var onMap = WorldState.Map.Entities?.Where(e => e.Deleted != true).Select(e => e.Symbol).ToHashSet() ?? [];
@@ -617,9 +622,9 @@ public class Storage
             if (e.Deleted == true || Helpers.MonsterDatabase.Find(e.MonsterKey) is not { } m) continue;
             if (string.IsNullOrWhiteSpace(e.Hp) && System.Text.RegularExpressions.Regex.Match(m.Hp, @"^\s*(\d+)") is { Success: true } hp)
                 e.Hp = $"{hp.Groups[1].Value}/{hp.Groups[1].Value}";
-            // Скорость пешком — первое число в справочнике («4 клетки, летая 10 клеток» — клетка 5 фт; или «20 фт.»):
-            // иначе calculate_movement вёл всех по 30 фт, и зомби бегали наравне с героем.
-            // «0 клеток, полет 20 клеток» (только летает) — первая ненулевая.
+            // Walking speed is the first number in the reference book (“4 squares, flying 10 squares” is a 5 ft
+            // square; or “20 ft.”): otherwise calculate_movement led everyone at 30 ft, and the zombies ran
+            // along with the hero. “0 cells, flight 20 cells” (only flies) - the first non-zero.
             if (e.SpeedMax == null && System.Text.RegularExpressions.Regex.Matches(m.Speed, @"(\d+)\s*(\S*)")
                     .FirstOrDefault(x => x.Groups[1].Value != "0") is { } sp)
                 e.SpeedMax = int.Parse(sp.Groups[1].Value) * (sp.Groups[2].Value.StartsWith("клет", StringComparison.OrdinalIgnoreCase) ? 5 : 1);
@@ -651,9 +656,10 @@ public class Storage
                 case "currentturn":
                     string prevTurn = WorldState.Combat.CurrentTurn;
                     WorldState.Combat.CurrentTurn = prop.Value.GetString() ?? "";
-                    // Ход перешёл к герою от другого участника — его действия, реакция и скорость восстанавливаются
-                    // в начале своего хода (а не на границе раунда: реакция, потраченная после начала раунда на
-                    // чужом ходу, иначе пропадала на весь свой ход). Загрузка сохранения (prevTurn пуст) — не ход.
+                    // The turn was transferred to the hero from another participant - his actions, reactions
+                    // and speed are restored at the beginning of his turn (and not at the end of the round: the
+                    // reaction spent after the start of the round on someone else’s turn would otherwise be
+                    // lost for his entire turn). Loading a save (prevTurn is empty) is not a move.
                     if (prevTurn.Length > 0 && prevTurn != WorldState.Combat.CurrentTurn && WorldState.Combat.CurrentTurn == WorldState.Hero?.Symbol)
                     {
                         ResetActionsForNewRound();
@@ -729,18 +735,18 @@ public class Storage
                     WorldState.Map.TriggerCells = JsonSerializer.Deserialize<List<TriggerCell>>(prop.Value.GetRawText(), options);
                     break;
 
-                // Блоки локации — служебные данные движка (LocationGrower), ИИ их не патчит; целиком.
+                // Location blocks are engine service data (LocationGrower), AI does not patch them; entirely.
                 case "chunks":
                     WorldState.Map.Chunks = prop.Value.ValueKind == JsonValueKind.Null
                         ? null : JsonSerializer.Deserialize<List<MapChunk>>(prop.Value.GetRawText(), options);
                     break;
 
-                // Мебель: как objects — по id (сломать deleted, перевернуть state, сдвинуть positions, новая — без id).
+                // Furniture: as objects - by id (break deleted, turn over state, move positions, new - without id).
                 case "furniture":
                     WorldState.Map.Furniture = PatchByIndex(WorldState.Map.Furniture, prop.Value, options);
                     break;
 
-                // Лестницы между этажами — тоже служебные данные движка; целиком.
+                // Stairs between floors are also engine service data; entirely.
                 case "stairs":
                     WorldState.Map.Stairs = prop.Value.ValueKind == JsonValueKind.Null
                         ? null : JsonSerializer.Deserialize<List<StairLink>>(prop.Value.GetRawText(), options);
@@ -811,7 +817,7 @@ public class Storage
                 case "dead":
                     WorldState.Hero.Dead = prop.Value.ValueKind == JsonValueKind.True ? true : null;
                     break;
-                // Ведёт движок: только из сохранения; мастер — через xpAward.
+                // Drives the engine: only from saving; GM - via xpAward.
                 case "level" when _fromSave:
                     WorldState.Hero.Level = prop.Value.ValueKind == JsonValueKind.Number ? prop.Value.GetInt32() : null;
                     break;
@@ -992,7 +998,7 @@ public class Storage
 
             if (!TryPatchProperty(patchEl, "id", out var idEl))
             {
-                // нет id → новый элемент, добавить в конец
+                // no id → new element, add to the end
                 result.Add(JsonSerializer.Deserialize<T>(patchEl.GetRawText(), options)!);
                 continue;
             }
@@ -1074,8 +1080,9 @@ public class Storage
                             foreach (var key in npc.Select(p => p.Key).Where(k => k.Equals("speechVoice", StringComparison.OrdinalIgnoreCase)).ToList()) npc.Remove(key);
                     WorldState.Narrative.Npcs = PatchByIndex(WorldState.Narrative.Npcs, JsonSerializer.SerializeToElement(npcs), options);
                     break;
-                // Бестиарий только растёт: список от мастера — добавка к известному (виды, внесённые движком после
-                // убийства, иначе стирались бы его следующим «весь список»). Знание не забывается — null не чистит.
+                // The bestiary is only growing: the list from the GM is an addition to the known (species
+                // entered by the engine after the murder, otherwise the “entire list” would be erased by the
+                // next one). Knowledge is not forgotten - null does not clean.
                 case "knownmonsters":
                     if (prop.Value.ValueKind == JsonValueKind.Array
                         && JsonSerializer.Deserialize<List<string>>(prop.Value.GetRawText(), options) is { } incoming)
@@ -1100,7 +1107,7 @@ public class Storage
                  || prop.Name.Equals("steps", StringComparison.OrdinalIgnoreCase))
                 && prop.Value.ValueKind is JsonValueKind.Array or JsonValueKind.String)
             {
-                // Одна строка вместо массива (частая ошибка ИИ) — дописывается так же, как массив из неё.
+                // One line instead of an array (a common AI error) - appended in the same way as an array from it.
                 var items = prop.Value.ValueKind == JsonValueKind.Array
                     ? prop.Value
                     : JsonDocument.Parse($"[{prop.Value.GetRawText()}]").RootElement;
@@ -1140,7 +1147,7 @@ public class Storage
         return merged;
     }
 
-    // Патч triggers по подключам сохраняет остальные триггеры владельца.
+    // Patch triggers saves other owner triggers across connections.
     private static void MergeTriggers(JsonObject baseNode, JsonElement patch)
     {
         var existing = baseNode["triggers"] as JsonObject;
@@ -1156,8 +1163,8 @@ public class Storage
             baseNode["triggers"] = existing;
     }
 
-    // Списки-«журналы» (aiInfo, npcs[i].memory, plotThreads[i].steps): патч только дописывает строки, а не заменяет список.
-    // Дубли (ИИ повторил уже записанное) не добавляются.
+    // “Journal” lists (aiInfo, npcs[i].memory, plotThreads[i].steps): the patch only adds lines, and does not
+    // replace the list. Duplicates (AI repeated what was already written) are not added.
     private static void AppendList(JsonObject baseNode, string patchKey, JsonElement newItems)
     {
         string? existingKey = null;
@@ -1214,11 +1221,10 @@ public class Storage
         }
     }
 
-    // ── Несколько игр (экран «МОИ ИГРЫ») ─────────────────────────────────────
-    // Каждая игра — Storage/game{N}.json (+ game{N}.explored.json), N = 1..MaxGames; в той же папке, что
-    // и раньше, — файлы запросов MCP (roll_request.json и др.) лежат рядом с сохранением, как и были.
-    // Активная игра — Storage/activeGame.txt. UI-тесты (NAVIDND_TEST_WORLDSTATE) по-прежнему пишут в
-    // worldState.json — его GameSession бэкапит и восстанавливает.
+    // ── Multiple games (MY GAMES screen) Every game - Storage/game{N}.json (+ game{N}.explored.json), N =
+    // 1..MaxGames; in the same folder as before - the request files MCP (roll_request.json, etc.) are located
+    // next to the save, as they were. Active game - Storage/activeGame.txt. UI-tests (NAVIDND_TEST_WORLDSTATE)
+    // is still written in worldState.json - his GameSession backups and restores.
     public const int MaxGames = 6;
     private static readonly string StorageDir = Path.Combine(AppConfig.DataRoot, "Storage");
     private static readonly string LegacySavePath = Path.Combine(StorageDir, "worldState.json");
@@ -1230,11 +1236,11 @@ public class Storage
     public static string SavePath => TestMode ? LegacySavePath : SlotPath(ActiveSlot);
     public static string SlotPath(int slot) => Path.Combine(StorageDir, $"game{slot}.json");
     public static bool SlotExists(int slot) => File.Exists(SlotPath(slot));
-    // В UI-тестах игра пишет в свой файл (SavePath), места игр не занимает — новая игра всегда возможна.
+    // In UI tests, the game writes to its own file (SavePath), it does not take up the space of games - a new game is always possible.
     public static int? FreeSlot() => TestMode ? 1 : Enumerable.Range(1, MaxGames).Cast<int?>().FirstOrDefault(s => !SlotExists(s!.Value));
 
-    // При старте игры: прежнее единственное сохранение (worldState.json) → игра 1 (копия, оригинал
-    // остаётся), активная игра — из activeGame.txt; если её нет — последняя по времени.
+    // When starting the game: the previous only save (worldState.json) → game 1 (copy, the original remains),
+    // the active game is from activeGame.txt; if it is not there, the last one in time.
     public static void InitGames()
     {
         Directory.CreateDirectory(StorageDir);
@@ -1258,7 +1264,7 @@ public class Storage
             }
             if (!File.Exists(ActiveGamePath)) File.WriteAllText(ActiveGamePath, ActiveSlot.ToString());
         }
-        catch { /* не критично — играем в игру 1 */ }
+        catch { /*not critical - play game 1*/ }
     }
 
     public static void SetActiveSlot(int slot)
@@ -1281,8 +1287,8 @@ public class Storage
         catch { }
     }
 
-    // Черновик для CreateNewGame/FixHeroForNewGame/StartNewGame — MCP-инструменты читают/пишут сюда,
-    // пока новая игра не создана успешно. Боевой SavePath не трогаем до финального Save() в StartNewGame.
+    // Draft for CreateNewGame/FixHeroForNewGame/StartNewGame - MCP-tools read/write here until a new game is
+    // created successfully. We do not touch combat SavePath until the final Save() in StartNewGame.
     public static readonly string DraftSavePath = Path.Combine(AppConfig.DataRoot, "Storage", "newGameState.json");
 
     private static readonly JsonSerializerOptions _saveOptions = new()
@@ -1317,8 +1323,8 @@ public class Storage
         SaveExploredCellsTo(path);
     }
 
-    // Отдельный файл рядом с worldState.json/newGameState.json — ExploredCells не часть WorldState
-    // (ИИ его никогда не видит и не патчит), поэтому не смешиваем с JSON-diff протоколом.
+    // A separate file next to worldState.json/newGameState.json - ExploredCells is not part of WorldState (AI
+    // never sees it and does not patch it), so we do not mix it with the JSON-diff protocol.
     private static string ExploredCellsPath(string worldStatePath) =>
         Path.Combine(Path.GetDirectoryName(worldStatePath)!, Path.GetFileNameWithoutExtension(worldStatePath) + ".explored.json");
 
@@ -1351,7 +1357,7 @@ public class Storage
             foreach (var cell in cells)
                 if (cell.Length == 2) ExploredCells.Add((cell[0], cell[1]));
         }
-        catch { /* повреждён/неполон — начинаем с пустого тумана войны, не роняем загрузку */ }
+        catch { /*damaged/incomplete - we start with an empty fog of war, do not drop the load*/ }
     }
 
     private static void RetryOnIo(Action action, int attempts = 5, int delayMs = 30)
@@ -1367,13 +1373,13 @@ public class Storage
 
     public void LoadDraft() => LoadFrom(DraftSavePath);
 
-    // Публичный — используется тестами (NAVIDND_TEST_WORLDSTATE) для подстановки
-    // тестового состояния вместо боевого worldState.json. Общий путь загрузки не меняется.
-    // Метка MCP plan_location (рядом с сохранением): мастер построил локацию посреди игры — карту и место героя
-    // надо перечитать из сохранения до применения его ответа (GameAiClient.ReloadPlannedLocation).
+    // Public - used by tests (NAVIDND_TEST_WORLDSTATE) to substitute a test state instead of a combat one
+    // worldState.json. The general loading path does not change. Label MCP plan_location (next to the save):
+    // the GM built a location in the middle of the game - the map and place of the hero must be re-read from
+    // the save before applying his answer (GameAiClient.ReloadPlannedLocation).
     public const string LocationPlannedFlag = "location_planned.flag";
 
-    // Перечитать из сохранения только карту и позицию героя (после plan_location в MCP-процессе).
+    // Reread only the map and hero's position from the save (after plan_location in the MCP- process).
     public void ReloadMapFrom(string path)
     {
         var root = JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8)) as JsonObject;
@@ -1407,8 +1413,8 @@ public class Storage
         WorldState.ActiveImageKey = null;
         WorldState.World = null;
         WorldState.PendingTravel = null;
-        // Сохранение применяется как патч, а у его элементов нет id — PatchByIndex дописал бы их
-        // к уже загруженным: повторная загрузка (Меню → Продолжить) удваивала scheduledEvents.
+        // The save is applied as a patch, and its elements do not have id - PatchByIndex would add them to
+        // those already loaded: re-loading (Menu → Continue) doubled scheduledEvents.
         WorldState.ScheduledEvents = null;
         WorldState.Combat = null;
         WorldState?.History?.Clear();

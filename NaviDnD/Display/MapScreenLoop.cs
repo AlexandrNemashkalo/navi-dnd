@@ -38,23 +38,24 @@ internal class MapScreenLoop
         _display.MapDrawTop = mapDrawTop;
         bool firstMapDraw = true;
         var mapObjectsProvider = new MapObjectsProvider(_settings, _display, _storage, _config);
-        // Камера следует за героем, только когда он сдвинулся — иначе после перетаскивания карты мышью
-        // камера сразу прыгала бы обратно к нему.
+        // The camera only follows the hero when he moves - otherwise, after dragging the map with the mouse,
+        // the camera would immediately jump back to him.
         List<int>? followedHeroPos = null;
-        // Последнее наведение на карте мира (место, клетка) — UpdateWorldHover.
+        // Last pointing on the world map (location, cell) - UpdateWorldHover.
         (int place, int x, int y)? lastWorldHit = null;
         void FollowHeroIfMoved()
         {
             var hp = _settings.Hero?.Position;
             if (hp == null || (followedHeroPos != null && hp.SequenceEqual(followedHeroPos))) return;
             bool first = followedHeroPos == null;
-            // Лестница на другой этаж (он на поле в другом месте): камера сразу к герою.
+            // Stairs to another floor (he is on the field in a different place): the camera goes straight to the hero.
             bool jumped = !first && hp.Count >= 2
                 && _settings.Map.FloorAt(hp[0], hp[1]) != _settings.Map.FloorAt(followedHeroPos![0], followedHeroPos[1]);
             if (jumped)
             {
-                // Этажи одного здания (общий контур): камера сдвигается на сдвиг блока — здание стоит на месте
-                // экрана, меняется только содержимое. Подвал-подземелье/пещера (другая планировка) — герой в центр.
+                // Floors of one building (general outline): the camera shifts by block shift - the building
+                // stands in place of the screen, only the content changes. Basement dungeon/cave (different
+                // layout) - hero in the center.
                 var from = _settings.Map.ChunkAt(followedHeroPos![0], followedHeroPos[1]);
                 var to = _settings.Map.ChunkAt(hp[0], hp[1]);
                 if (_mapDisplay.LockToFloorIfFits()) { }
@@ -69,7 +70,7 @@ internal class MapScreenLoop
             }
             followedHeroPos = [.. hp];
             if (first) _mapDisplay.CenterOnHeroIfNeeded();
-            // После лестницы — без «догоняния» у края окна: шаг на лестницу у стены иначе сдвигал карту на клетку.
+            // After the stairs - without “catching up” at the edge of the window: a step on the stairs near the wall would otherwise move the map onto a square.
             if (!jumped) _mapDisplay.FollowHero();
         }
 
@@ -121,7 +122,7 @@ internal class MapScreenLoop
         };
         DateTime? hoverSince = null;
         (int col, int row)? pendingHoverCell = null;
-        // Мебель/лестница под курсором, чья картинка сейчас в блоке картинок (наведение на клетку без существа).
+        // Furniture/stairs under the cursor, whose picture is currently in the picture block (pointing at a cell without a creature).
         object? shownFurniture = null;
         Door? pendingHoverDoor = null;
         (int col, int row)? mouseHoverCandidate = null;
@@ -183,7 +184,7 @@ internal class MapScreenLoop
                 var clickedTabKey = MouseUiHelper.GetHoveredTabKey(clickPos.Value.x, clickPos.Value.y, activeTabs);
                 if (clickedTabKey != null) { Sound.PlayClick(); _display.PendingCommand = clickedTabKey; return; }
                 if (clickPos.Value.y is >= 0 and <= 2) { ConsoleMouseReader.StartWindowDrag(); return; }
-                // Кнопка «[F10] КОНЕЦ ХОДА» в строке «Порядок боя» легенды.
+                // Button “[F10] END OF TURN” in the “Battle order” line of the legend.
                 if (_display.MapLevel == MapLevel.Location && _legendDisplay.IsHeroTurn && _legendDisplay.EndTurnButton is { x0: >= 0 } eb
                     && clickPos.Value.y == _display.MapDrawTop + 1 + _legendDisplay.CombatLineIndex
                     && clickPos.Value.x >= _mapDisplay.LegendX + eb.x0 && clickPos.Value.x <= _mapDisplay.LegendX + eb.x1)
@@ -192,17 +193,17 @@ internal class MapScreenLoop
                     _display.PendingCommand = "F10";
                     return;
                 }
-                // Карта мира: клик по переключателю фильтра в легенде.
+                // World map: click on the filter switch in the legend.
                 if (_display.MapHoverEnabled && activeDialog != null && _display.MapLevel == MapLevel.World)
                 {
                     var zones = _mapDisplay.WorldLegendHitZones();
                     int zi = Array.FindIndex(zones, z => clickPos.Value.y == z.row && clickPos.Value.x >= z.x0 && clickPos.Value.x <= z.x1);
                     if (zi == 0)
                     {
-                        // Отладка этапа 1: новый мир другого размера.
+                        // Stage 1 debugging: new world of different size.
                         var cur = _mapDisplay.WorldView.World;
                         var made = WorldLibrary.Create(cur.Size == WorldSizes.Large ? WorldSizes.Small : WorldSizes.Large, new Random().Next());
-                        if (_settings.World != null) _settings.World = new GameWorldLink { Id = made.Id };   // отладка: игра — на новый мир
+                        if (_settings.World != null) _settings.World = new GameWorldLink { Id = made.Id };   // debugging: game - to a new world
                         lastWorldHit = null;
                         RedrawWorldKeepCursor();
                         return;
@@ -210,8 +211,8 @@ internal class MapScreenLoop
                     if (zi == 1) { ToggleWorldFilter(null); return; }
                     if (zi >= 2) { ToggleWorldFilter(WorldMapView.Categories[zi - 2].key); return; }
                 }
-                // Карта мира: зажал и тянешь — изображение едет за курсором (как карта в браузере); клик без
-                // сдвига по месту — выбрать его.
+                // World map: hold and drag - the image follows the cursor (like a map in a browser); Click
+                // without shifting on a place to select it.
                 if (_display.MapHoverEnabled && activeDialog != null && _display.MapLevel == MapLevel.World
                     && _mapDisplay.IsInMapArea(clickPos.Value))
                 {
@@ -232,7 +233,7 @@ internal class MapScreenLoop
                         if (worldPanned) RedrawWorldKeepCursor();
                         if (!worldPanned)
                         {
-                            // Клик — цель пути (место или любая клетка, в т.ч. в неизведанное); по месту — ещё и выбрать его.
+                            // Click - the destination of the path (a place or any cell, including into the unknown); by location - also choose it.
                             var hit = _mapDisplay.WorldHit(clickPos.Value);
                             if (clickedPlace >= 0) _display.SelectedWorldPlace = clickedPlace;
                             Sound.PlayClick();
@@ -244,7 +245,7 @@ internal class MapScreenLoop
                     });
                     return;
                 }
-                // Локация — поле до 100×100: зажал и тянешь — камера едет. Отпустил, не сдвинув, — обычный клик.
+                // Location - field up to 100x100: hold and pull - the camera moves. I let go without moving it - a regular click.
                 if (_display.MapHoverEnabled && activeDialog != null && _display.MapLevel == MapLevel.Location
                     && _mapDisplay.IsInMapArea(clickPos.Value))
                 {
@@ -254,7 +255,7 @@ internal class MapScreenLoop
                     ConsoleMouseReader.BeginDrag(clickPos.Value, (dx, dy) =>
                     {
                         _mapDisplay.PanCamera(startCol, startRow, dx, dy);
-                        // Мышь сдвинулась меньше, чем на клетку, — камера та же, кадр не перерисовываем.
+                        // The mouse has moved less than a square - the camera is the same, we do not redraw the frame.
                         if (_display.CameraCol == lastCol && _display.CameraRow == lastRow) return;
                         lastCol = _display.CameraCol;
                         lastRow = _display.CameraRow;
@@ -263,7 +264,7 @@ internal class MapScreenLoop
                         bool vis = Term.CursorVisible;
                         int sl = Term.CursorLeft, st = Term.CursorTop;
                         Term.CursorVisible = false;
-                        _mapDisplay.RedrawLocationViewport(mapObjectsProvider, refreshLegend: false); // только область карты, одной записью
+                        _mapDisplay.RedrawLocationViewport(mapObjectsProvider, refreshLegend: false); // map area only, one entry
                         Term.SetCursorPosition(sl, st);
                         Term.CursorVisible = vis;
                     }, () =>
@@ -281,12 +282,13 @@ internal class MapScreenLoop
                 if (_display.MapHoverEnabled) HandleMapClick(clickPos.Value);
             }
 
-            // Карта мира: колесо мыши — приблизить (от себя) / отдалить, относительно точки под курсором.
-            // Прокрутку забираем всегда — иначе накопленная на других видах сработала бы позже.
+            // World map: mouse wheel - zoom in (away from you) / zoom out, relative to the point under the
+            // cursor. We always take away the scrolling - otherwise the accumulated scrolling on other views
+            // would have worked later.
             int wheel = ConsoleMouseReader.TakeWheel(out var wheelPos, out int sideWheel);
-            if (MouseUiHelper.HandleDialogWheel(activeDialog, wheel, wheelPos)) { }   // над диалогом — листать историю
-            // macOS: на тачпаде щипка терминал не передаёт, а свайп двумя пальцами приходит прокруткой — над картой
-            // она двигает карту, как перетаскивание (масштаб — ⌘/Ctrl и «+»/«−»).
+            if (MouseUiHelper.HandleDialogWheel(activeDialog, wheel, wheelPos)) { }   // above the dialogue - scrolling through the history of macOS: on the touchpad does not transmit a
+            // pinch, but swiping with two fingers comes with a scroll - above the map it moves the map, like
+            // dragging (scale - ⌘/Ctrl and “+”/“−”).
             else if ((wheel != 0 || sideWheel != 0) && OperatingSystem.IsMacOS() && _display.MapHoverEnabled && activeDialog != null
                 && _mapDisplay.IsInMapArea(wheelPos) && !(_display.MapLevel == MapLevel.Location && wheelPos.x >= _mapDisplay.LegendX))
             {
@@ -297,7 +299,7 @@ internal class MapScreenLoop
                 }
                 else
                 {
-                    // Клетка — на прокрутку: столько же, сколько при перетаскивании на одну клетку.
+                    // Cell - scrollable: the same as when dragging one cell.
                     _mapDisplay.PanCamera(_display.CameraCol, _display.CameraRow, -(_display.CellWidth + 1) * sideWheel, 2 * wheel);
                     _display.HoveredCell = null;
                     bool panVisible = Term.CursorVisible;
@@ -314,7 +316,7 @@ internal class MapScreenLoop
                 _mapDisplay.ZoomWorld(wheel, wheelPos);
                 RedrawWorldKeepCursor();
             }
-            // Местность: колесо над легендой — прокрутка списка (от себя — вверх).
+            // Terrain: wheel above the legend - scroll the list (from yourself - up).
             else if (wheel != 0 && activeDialog != null && _display.MapLevel == MapLevel.Location
                 && wheelPos.x >= _mapDisplay.LegendX && wheelPos.y > _display.MapDrawTop
                 && wheelPos.y <= _display.MapDrawTop + _legendDisplay.SeparatorLineIndex)
@@ -346,7 +348,7 @@ internal class MapScreenLoop
                     else
                     {
                         var (isOnUp, isOnDown) = MouseUiHelper.DialogArrowHover(mousePos.Value, activeDialog);
-                        // Карту мира можно тянуть — над ней курсор-«рука».
+                        // You can drag the world map - there is a “hand” cursor above it.
                         bool overWorld = _display.MapHoverEnabled && activeDialog != null
                             && _display.MapLevel == MapLevel.World && _mapDisplay.IsInMapArea(mousePos.Value);
                         if (_display.MapLevel == MapLevel.World && activeDialog != null) UpdateWorldHover(overWorld ? mousePos.Value : null);
@@ -397,9 +399,9 @@ internal class MapScreenLoop
                 pendingHoverDoor = null;
                 doorHoverSince = null;
                 var committedDoor = _display.HoveredDoor!;
-                string doorLabel = committedDoor.IsWorldExit == true ? L.T("Выход на карту мира")
-                    : committedDoor.IsWindow == true ? ((committedDoor.IsDoorOpen ?? false) ? L.T("Окно открыто") : L.T("Окно"))
-                    : (committedDoor.IsDoorOpen ?? false) ? L.T("Дверь открыта") : L.T("Дверь закрыта");
+                string doorLabel = committedDoor.IsWorldExit == true ? L.T("Exit to the world map")
+                    : committedDoor.IsWindow == true ? ((committedDoor.IsDoorOpen ?? false) ? L.T("Window open") : L.T("Window"))
+                    : (committedDoor.IsDoorOpen ?? false) ? L.T("Door open") : L.T("Door closed");
                 SetMapImage(MouseUiHelper.DoorImage(committedDoor, _settings.Map), doorLabel, committedDoor.Color);
                 bool visDoor = Term.CursorVisible;
                 Term.CursorVisible = false;
@@ -447,7 +449,7 @@ internal class MapScreenLoop
                     _display.HoveredCell = null;
                     pendingHoverCell = null;
                     hoverSince = null;
-                    shownFurniture = null; // блок картинок теперь занят дверью — мебель при возврате показать заново
+                    shownFurniture = null; // the block of pictures is now occupied by the door - show the furniture again when returning
 
                     if (oldSelectedIdx >= 0)
                     {
@@ -548,8 +550,8 @@ internal class MapScreenLoop
             int newEntityIdx = cell.HasValue
                 ? _legendDisplay.GetSelectableIndexForCell(cell.Value.col, cell.Value.row)
                 : -1;
-            // Навели на существо/объект — показываем его; пустая клетка или курсор вне карты —
-            // закреплённое кликом (если есть), иначе ничего.
+            // Point at a creature/object - show it; empty cell or cursor outside the map - pinned by click (if
+            // any), otherwise nothing.
             int desiredIdx = cell.HasValue && newEntityIdx >= 0 ? newEntityIdx : PinnedIndex();
 
             if (desiredIdx == _display.SelectedMapItemIndex)
@@ -570,7 +572,7 @@ internal class MapScreenLoop
             }
             else
             {
-                // Пустая клетка или курсор ушёл с карты — вернуть закреплённое (или снять выбор).
+                // An empty cell or the cursor has left the map - return the pinned one (or deselect it).
                 pendingHoverCell = null;
                 hoverSince = null;
                 RestorePinnedOrClear();
@@ -585,7 +587,7 @@ internal class MapScreenLoop
             Term.SetCursorPosition(sl, st);
             Term.CursorVisible = vis;
 
-            // Мебель или лестница под курсором (на клетке нет существа/объекта) — картинка и название в блоке картинок.
+            // Furniture or stairs under the cursor (there is no creature/object on the cell) - a picture and name in the picture block.
             void SyncHoverImage()
             {
                 var cell = _display.HoveredCell;
@@ -594,7 +596,7 @@ internal class MapScreenLoop
                 var furnitureHere = knownCell ? _settings.Map.FurnitureAt(cell!.Value.col, cell.Value.row) : null;
                 var terrainHere = knownCell && furnitureHere == null ? _settings.Map.TerrainAt(cell!.Value.col, cell.Value.row) : null;
                 var stairHere = terrainHere != null && TerrainCatalog.IsStair(terrainHere.Code) ? terrainHere : null;
-                // Рельеф — по виду (соседние клетки того же вида картинку не перерисовывают).
+                // Terrain - by type (neighboring cells of the same type do not redraw the picture).
                 object? hoverThing = (object?)furnitureHere ?? (stairHere != null ? cell : terrainHere);
                 if (!Equals(hoverThing, shownFurniture))
                 {
@@ -641,14 +643,14 @@ internal class MapScreenLoop
         var capturedMapPollAction = _display.PollAction;
         _display.MapPollActionFactory = _ => capturedMapPollAction;
 
-        // Клетка под курсором «интерактивна» (рука + подсветка + подсказки), только если герой её
-        // видит или уже исследовал — нащупывать мышью то, чего не видел, нельзя.
+        // The cell under the cursor is “interactive” (hand + highlight + hints), only if the hero sees it or
+        // has already explored it - you cannot feel with the mouse for something you haven’t seen.
         (int col, int row)? KnownCellOrNull((int col, int row)? c) =>
             c is { } k && _display.MapLevel == MapLevel.Location
             && (_config.RevealMap || _storage.ExploredCells.Contains(k) || _storage.VisibleCells.Contains(k)) ? c : null;
 
-        // Наведение на карте мира: место — подсветка значка и карточка (картинка, название, тип, королевство),
-        // иначе — рельеф клетки и чья земля.
+        // Hover on the world map: place - icon highlight and card (picture, name, type, kingdom), otherwise -
+        // cell terrain and whose land.
         void UpdateWorldHover((short x, short y)? pos)
         {
             (int place, int x, int y)? hit = pos is { } p ? _mapDisplay.WorldHit(p) : null;
@@ -671,22 +673,22 @@ internal class MapScreenLoop
             {
                 char b = world.BiomeAt(h.x, h.y);
                 int own = world.OwnerAt(h.x, h.y);
-                string land = WorldBiomes.IsWater(b) ? "" : own >= 0 && own < world.Kingdoms.Count ? world.Kingdoms[own].Name : L.T("ничьи земли");
-                // Река или дорога на клетке — главное (своя картинка и название), рельеф — во второй строке.
+                string land = WorldBiomes.IsWater(b) ? "" : own >= 0 && own < world.Kingdoms.Count ? world.Kingdoms[own].Name : L.T("unclaimed lands");
+                // A river or road on a square is the main thing (its own picture and name), the terrain is in the second line.
                 int road = world.RoadAt(h.x, h.y);
                 var biome = WorldBiomes.Get(b);
                 string biomeName = L.T(biome.Name);
-                var (title, image, color) = world.RiverAt(h.x, h.y) > 0 && road > 0 ? (L.T("Мост"), road == 2 ? "delapouite/stone-bridge" : "delapouite/arch-bridge", new List<int> { 150, 108, 70 })
-                    : world.RiverAt(h.x, h.y) > 0 ? (L.T("Река"), "delapouite/river", new List<int> { 72, 122, 178 })
-                    : road == 2 ? (L.T("Тракт"), "delapouite/stone-path", new List<int> { 176, 148, 102 })
-                    : road == 1 ? (L.T("Тропа"), "delapouite/trail", new List<int> { 146, 128, 96 })
+                var (title, image, color) = world.RiverAt(h.x, h.y) > 0 && road > 0 ? (L.T("Bridge"), road == 2 ? "delapouite/stone-bridge" : "delapouite/arch-bridge", new List<int> { 150, 108, 70 })
+                    : world.RiverAt(h.x, h.y) > 0 ? (L.T("River"), "delapouite/river", new List<int> { 72, 122, 178 })
+                    : road == 2 ? (L.T("Highway"), "delapouite/stone-path", new List<int> { 176, 148, 102 })
+                    : road == 1 ? (L.T("Path"), "delapouite/trail", new List<int> { 146, 128, 96 })
                     : (biomeName, WorldMapView.BiomeImage(b), biome.Color);
                 string terrain = title == biomeName ? "" : biomeName.ToLowerInvariant();
-                // Клетка героя — «Вы здесь» его портретом.
+                // Hero's cell - “You are here” with his portrait.
                 if (GameWorld.HeroTile(_settings) == (h.x, h.y))
                 {
                     terrain = title == biomeName ? biomeName.ToLowerInvariant() : title.ToLowerInvariant();
-                    (title, image, color) = (L.T("Вы здесь"), _settings.Hero?.Image ?? image, _settings.Hero?.Color ?? color);
+                    (title, image, color) = (L.T("You are here"), _settings.Hero?.Image ?? image, _settings.Hero?.Color ?? color);
                 }
                 string second = string.Join(" · ", new[] { terrain, land }.Where(t => t.Length > 0));
                 SetMapImage(image, title + (second.Length > 0 ? "\n" + second : ""), color);
@@ -695,7 +697,7 @@ internal class MapScreenLoop
             RerenderRightPanelKeepCursor();
         }
 
-        // Карточка места мира в блоке картинок (наведение или выбор).
+        // World place card in the picture block (hover or select).
         void ShowWorldPlaceCard(int place)
         {
             var world = _mapDisplay.WorldView.World;
@@ -716,8 +718,8 @@ internal class MapScreenLoop
             Term.CursorVisible = vis;
         }
 
-        // Tab / Shift+Tab на карте мира — следующее/предыдущее место из тех, что в окне карты (как в легенде);
-        // карта не двигается, набор мест не меняется.
+        // Tab / Shift+Tab on the world map - the next/previous place from those in the map window (as in the
+        // legend); the map does not move, the set of places does not change.
         void SelectWorldPlace(int delta)
         {
             var list = _mapDisplay.VisibleWorldPlaces();
@@ -731,13 +733,13 @@ internal class MapScreenLoop
             RerenderRightPanelKeepCursor();
         }
 
-        // Цель пути на карте мира: маршрут от героя (клик по клетке героя — снять цель).
+        // The goal of the path on the world map: the route from the hero (click on the hero’s cell to remove the goal).
         void SetTravelTarget((int x, int y) target)
         {
             bool heroTile = GameWorld.HeroTile(_settings) == target;
             var plan = heroTile ? null : TravelService.PlanTo(_settings, target);
             if (plan == null && !heroTile && GameWorld.HeroTile(_settings) != null)
-                SetMapImage("lorc/waves", L.T("Пешком не дойти\nвода или горные пики на пути"), [110, 150, 200]);
+                SetMapImage("lorc/waves", L.T("Unreachable on foot\nwater or mountain peaks in the way"), [110, 150, 200]);
             _display.WorldTarget = plan != null ? target : null;
             _display.WorldRoute = plan?.Route.Path;
             var w = _mapDisplay.WorldView.World;
@@ -745,26 +747,26 @@ internal class MapScreenLoop
                 : (plan.TargetPlace ?? NaviDnD.MapGen.Generators.WorldAtlas.TileName(w, target.x, target.y), plan.Route.Days, plan.Route.RoadShare);
         }
 
-        // В путь: код ведёт героя по маршруту (дни, встречи), мастер одним вызовом описывает дорогу.
+        // On the road: the code leads the hero along the route (days, meetings), the GM describes the road with one call.
         async Task StartTravel(DialogDisplay dialog)
         {
             _settings.History ??= [];
             if (_display.WorldTarget is not { } target || TravelService.PlanTo(_settings, target) is not { } plan)
             {
-                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Выбери цель пути кликом по карте мира, затем [F10] — в путь.") });
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Pick a destination by clicking the world map, then [F10] to travel.") });
                 _storage.Save();
                 return;
             }
             if (_settings.Combat?.Active == true)
             {
-                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Идёт бой — уйти в путь нельзя.") });
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Combat is on — you can't travel now.") });
                 _storage.Save();
                 return;
             }
             var pace = (TravelService.Pace)_display.TravelPace;
-            string dest = plan.TargetPlace ?? (GameWorld.ForMaster(_settings) is { } tw ? NaviDnD.MapGen.Generators.WorldAtlas.TileName(tw, target.x, target.y) : L.W("неизведанное"));
+            string dest = plan.TargetPlace ?? (GameWorld.ForMaster(_settings) is { } tw ? NaviDnD.MapGen.Generators.WorldAtlas.TileName(tw, target.x, target.y) : L.W("the unknown"));
             string report = TravelService.Go(_settings, plan, pace, new Random());
-            // Пришёл в место с сохранённой локацией — «всё как было», герой у входа.
+            // I came to a place with a saved location - “everything is as it was,” the hero is at the entrance.
             if (plan.TargetPlace != null && _settings.World?.Place == plan.TargetPlace && GameWorld.Geo(_settings) is { } geo
                 && GameWorld.SavedLocationJson(geo, plan.TargetPlace) is { } json)
             {
@@ -775,12 +777,12 @@ internal class MapScreenLoop
             _display.WorldRoute = null;
             _display.WorldRouteInfo = null;
             if (GameWorld.HeroTile(_settings) is { } h) { _display.WorldCenterX = h.x + 0.5; _display.WorldCenterY = h.y + 0.5; }
-            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = L.WF("В путь: {0} (темп {1}).", dest, L.W(TravelService.PaceName(pace))) });
+            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = L.WF("Setting off: {0} ({1} pace).", dest, L.W(TravelService.PaceName(pace))) });
             _storage.Save();
             _display.DialogScrollOffset = 0;
             _aiClient.ActiveDialog = dialog;
             dialog.PrepareStreaming();
-            MusicDirector.Traveling = true;   // пока мастер описывает дорогу — музыка пути
+            MusicDirector.Traveling = true;   // while the GM describes the road - the music of the path
             try { await _aiClient.Travel(report, dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, null); }
             finally { MusicDirector.Traveling = false; }
             dialog.FinalizeStreaming();
@@ -789,7 +791,7 @@ internal class MapScreenLoop
             RedrawWorldKeepCursor();
         }
 
-        // key == null — «Все»: включить все категории (если уже все — выключить все).
+        // key == null - “All”: enable all categories (if already all, disable all).
         void ToggleWorldFilter(string? key)
         {
             if (key == null)
@@ -820,16 +822,16 @@ internal class MapScreenLoop
             Term.CursorVisible = vis;
         }
 
-        // Подсказка при наведении — строка блока боя: дистанция, а в бою в ход героя — путь; подсветка
-        // комнаты/зоны под курсором (панель картинок не трогаем, там только картинка выбранного).
-        // Перерисовываются только изменившиеся строки легенды.
+        // Hover tooltip - battle block line: distance, and in battle on the hero's turn - path; illumination of
+        // the room/zone under the cursor (we do not touch the picture panel, there is only the picture of the
+        // selected one). Only changed legend lines are redrawn.
         void UpdateHoverInfo((int col, int row)? c)
         {
             _display.HoverPath = ComputeHoverPath(c);
             _mapDisplay.RefreshLegend();
         }
 
-        // Дистанция до клетки всегда; в бою в ход героя — ещё и путь (до соседней с существом клетки, если курсор на нём).
+        // The distance to the cell is always; in battle, on the hero’s turn, there is also a path (to the cell adjacent to the creature, if the cursor is on it).
         HoverPathInfo? ComputeHoverPath((int col, int row)? c)
         {
             if (c is not { } t || _settings.Hero?.Position is not { Count: >= 2 } hp || (hp[0], hp[1]) == t) return null;
@@ -863,7 +865,7 @@ internal class MapScreenLoop
             return new HoverPathInfo(distanceFt, true, toNeighbour, occupant.Symbol);
         }
 
-        // Курсор ушёл с карты: вернуть закреплённый кликом (если он ещё на карте и виден) или снять выбор.
+        // The cursor has left the map: return the pinned one by clicking (if it is still on the map and visible) or deselect it.
         void RestorePinnedOrClear()
         {
             var pinned = _display.PinnedMapEntity;
@@ -888,9 +890,9 @@ internal class MapScreenLoop
         int PinnedIndex() => _display.PinnedMapEntity?.Position is { Count: >= 2 } p
             ? _legendDisplay.GetSelectableIndexForCell(p[0], p[1]) : -1;
 
-        // Клик на карте: ◄ ► карточки монстра в панели картинки — листание (стрелки клавиатуры на карте
-        // заняты движением); существо/объект — закрепить его картинку (повторный клик ничего не меняет);
-        // пустая изученная клетка — открепить.
+        // Click on the map: ◄ ► monster cards in the picture panel - scrolling (keyboard arrows on the map are
+        // busy with movement); creature/object - pin its picture (repeat click does not change anything); empty
+        // studied cell - unpin.
         void HandleMapClick((short x, short y) click)
         {
             var na = hoverDialog?.NotePageArrowPositions;
@@ -925,14 +927,14 @@ internal class MapScreenLoop
             _display.SelectedMapItemIndex = idx;
             var entity = _legendDisplay.GetSelectedEntity();
             if (entity == null) return;
-            if (entity != _display.PinnedMapEntity) Sound.PlayClick(); // уже закреплён — повторный клик ничего не меняет
+            if (entity != _display.PinnedMapEntity) Sound.PlayClick(); // is already pinned - clicking again does not change anything
             _display.PinnedMapEntity = entity;
             if (!selectionChanged) return;
             SetMapEntityImage();
             RedrawSelection(true);
         }
 
-        // Выбор элемента карты сменился: легенда (маркер «←» выбранного — полная перерисовка карты) и панель картинки.
+        // The selection of a map element has changed: the legend (marker “←” of the selected one - complete redrawing of the map) and the picture panel.
         void RedrawSelection(bool redrawMap)
         {
             bool vis = Term.CursorVisible;
@@ -985,15 +987,15 @@ internal class MapScreenLoop
             Term.FlushKeys();
         }
 
-        // spotted проверяется не только на шаге героя (TryMove): ответ ИИ мог открыть дверь или убрать
-        // преграду, а враги в бою — подойти к ещё не вступившему союзнику. Без этой проверки увидевшие
-        // героя враги молчали до его следующего шага, и он успевал уйти.
-        // Наполнение локации по блокам (LocationGrower): геометрия всех блоков плана уже есть, один запрос к
-        // нейронке наполняет блок, когда герой подходит к нему — до того, как он туда войдёт.
+        // spotted is checked not only at the hero’s step (TryMove): the AI’s response could open a door or
+        // remove an obstacle, and enemies in battle could approach an ally who had not yet joined. Without this
+        // check, the enemies who saw the hero were silent until his next step, and he managed to leave. Filling
+        // the location by blocks (LocationGrower): the geometry of all blocks of the plan is already there, one
+        // request to the AI fills block when the hero approaches it - before he enters there.
         async Task<bool> GrowLocationIfNeeded()
         {
             if (_display.MapLevel != MapLevel.Location || _config.DisableTriggers) return false;
-            // Одна попытка на блок за запуск: если ответ ИИ упал, не долбить запросами на каждом шаге.
+            // One attempt per block per run: if the AI response fails, do not hammer with requests at each step.
             if (await _aiClient.FlushPopulationAsync()) return true;
             var chunk = LocationGrower.UnpopulatedNearHero(_settings);
             if (chunk == null)
@@ -1008,8 +1010,9 @@ internal class MapScreenLoop
             await _aiClient.PopulateChunk(chunk, dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, redrawAction);
             dialog.FinalizeStreaming();
             _aiClient.ActiveDialog = null;
-            // Буфер клавиш не чистим: наполнение запустил не игрок, и набранное за это время — его следующее
-            // действие (раньше текст молча пропадал, и ход в бою уходил впустую).
+            // We do not clear the key buffer: it was not the player who started the filling, and what was typed
+            // during this time is his next action (previously, the text silently disappeared, and a turn in
+            // battle was wasted).
             return chunk.Populated;
         }
 
@@ -1028,10 +1031,10 @@ internal class MapScreenLoop
             Term.FlushKeys();
         }
 
-        // Финальная запись хода врагов тоже может продвинуть раунд (totalRounds+1, см. § БОЙ) —
-        // то же напоминание об onRound/onExpire эффектах должно сработать и здесь через тот же
-        // дедуплицированный путь, иначе периодические эффекты (например, горящий враг) никогда не
-        // тикают во время боя — тот же класс бага, что чинили для SendAction вне боя.
+        // The final recording of enemies' turns can also advance the round (totalRounds+1, see § COMBAT) - the
+        // same reminder about onRound/onExpire effects should work here too through the same deduplicated path,
+        // otherwise periodic effects (for example, a burning enemy) never tick during combat - the same class
+        // of bug that was fixed for SendAction outside of combat.
         async Task RunEnemyTurnAndCheckRoundEnd()
         {
             await RunEnemyTurn();
@@ -1075,7 +1078,7 @@ internal class MapScreenLoop
             Term.CursorVisible = false;
             if (_display.MapLevel == MapLevel.World)
             {
-                // Карта мира: Y растёт вниз, шаг — несколько символов экрана.
+                // World map: Y grows down, step is a few screen symbols.
                 _mapDisplay.PanWorld(_display.WorldCenterX, _display.WorldCenterY, -dx * 6, dy * 3);
                 _mapDisplay.RedrawWorldViewport();
             }
@@ -1095,7 +1098,7 @@ internal class MapScreenLoop
         bool movedFrameDrawn = false;
         int downTurnRound = -1;
 
-        // Служебная строка в диалоге без повтора (игрок жмёт одно и то же).
+        // Service line in dialogue without repetition (the player presses the same thing).
         void AddNoteOnce(string text)
         {
             _settings.History ??= [];
@@ -1104,7 +1107,7 @@ internal class MapScreenLoop
             _storage.Save();
         }
 
-        // Ход героя закончен — следующему живому участнику по инициативе (по кругу). false — передавать некому.
+        // The hero's turn is over - to the next living participant on the initiative (in a circle). false - there is no one to pass on.
         bool PassTurnToNext()
         {
             if (_settings.Combat is not { Active: true, Initiative: { Count: > 0 } init } combat) return false;
@@ -1114,7 +1117,7 @@ internal class MapScreenLoop
                 && _settings.Map.Entities?.Any(e => e.Deleted != true && e.Symbol == i.Symbol) == true);
             if (next == null) return false;
             _settings.History ??= [];
-            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = L.W("Завершаю ход.") });
+            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = L.W("I end my turn.") });
             combat.CurrentTurn = next.Symbol;
             _storage.Save();
             return true;
@@ -1130,8 +1133,9 @@ internal class MapScreenLoop
                 Term.SetCursorPosition(0, mapDrawTop);
             firstMapDraw = false;
 
-            // Герой сдвинулся / ИИ поменял мир — путь до клетки под курсором пересчитать.
-            // После простого шага кадр уже нарисован быстрым путём (RedrawAfterMove) — второй раз не нужно.
+            // The hero has moved / the AI has changed the world - recalculate the path to the cell under the
+            // cursor. After a simple step, the frame is already drawn in a quick way (RedrawAfterMove) - no
+            // need for a second time.
             if (!movedFrameDrawn)
             {
                 hoverReachability = null;
@@ -1144,7 +1148,7 @@ internal class MapScreenLoop
                 Term.SetCursorPosition(_mapDisplay.DrawEndLeft, _mapDisplay.DrawEndTop);
             movedFrameDrawn = false;
 
-            // Новая игра: вступление мастера — посимвольно, со звуком, как обычный ответ.
+            // New game: GM's introduction - character by character, with sound, like a regular answer.
             if (_aiClient.HasPendingIntro)
             {
                 var introDialog = new DialogDisplay(_settings, _display, _storage);
@@ -1157,34 +1161,36 @@ internal class MapScreenLoop
                 continue;
             }
 
-            // Герой подошёл к выходу к ещё не созданному блоку — код его генерирует, нейронка наполняет.
+            // The hero approached the exit to a block that had not yet been created - the code generates it, the AI fills it.
             if (await GrowLocationIfNeeded()) continue;
 
             var mapHistory = new DialogDisplay(_settings, _display, _storage);
             hoverDialog = mapHistory;
-            // Ход героя, а он без сознания (0 хитов): сам он не действует — мастер ведёт его ход (спасбросок от
-            // смерти и т.п. по правилам НРИ), раз в раунд, игроку писать нечего.
+            // The hero’s turn, but he is unconscious (0 hit points): he himself does not act - the GM leads his
+            // turn (death saving throw, etc. according to the TTRPG rules), once per round, the player has
+            // nothing to write.
             string? downTurn = null;
-            if (_settings.Hero?.Dead == true) AddNoteOnce(L.F("{0} погиб. Игра окончена — [Esc] меню.", _settings.Hero.Name));
+            if (_settings.Hero?.Dead == true) AddNoteOnce(L.F("{0} is dead. Game over — [Esc] menu.", _settings.Hero.Name));
             if (_settings.Combat is { Active: true } dc && dc.CurrentTurn == _settings.Hero?.Symbol
                 && _settings.Hero is { IsDown: true, Dead: not true } && downTurnRound != _settings.Time.TotalRounds)
             {
                 downTurnRound = _settings.Time.TotalRounds;
-                downTurn = L.WF("[{0} без сознания — его ход ведёт мастер]", _settings.Hero.Name);
+                downTurn = L.WF("[{0} is unconscious — the DM plays the turn]", _settings.Hero.Name);
             }
             var mapInput = downTurn ?? mapHistory.Draw();
             hoverDialog = null;
 
-            // Герой погиб — игра окончена: действия и движение не принимаются (вкладки и меню — как обычно).
+            // The hero died - the game is over: actions and movement are not accepted (tabs and menus - as usual).
             if (_settings.Hero?.Dead == true && mapInput is { Length: > 0 } && !mapInput.StartsWith('F') && mapInput != "Esc")
             {
-                AddNoteOnce(L.F("{0} погиб. Игра окончена — [Esc] меню.", _settings.Hero.Name));
+                AddNoteOnce(L.F("{0} is dead. Game over — [Esc] menu.", _settings.Hero.Name));
                 continue;
             }
 
-            // [F10] (или кнопка в блоке боя) — конец хода героя: ход следующему по инициативе, ходы врагов — обычным
-            // вызовом «ход врагов». Раньше уходил текст «Завершаю ход» от героя, и мастер дописывал за него
-            // незаявленное («отступаешь на полшага», «переводишь дух»).
+            // [F10] (or button in the battle block) - end of the hero’s turn: move to the next one on the
+            // initiative, enemy moves - with the usual call “enemies move”. Previously, the text “I’m finishing
+            // my move” was left from the hero, and the GM would add what was not stated for him (“you retreat
+            // half a step”, “take a breath”).
             if (mapInput == "F10" && _display.MapLevel == MapLevel.Location)
             {
                 if (!_legendDisplay.IsHeroTurn) continue;
@@ -1193,7 +1199,7 @@ internal class MapScreenLoop
                     await RunEnemyTurnAndCheckRoundEnd();
                     break;
                 }
-                mapInput = L.W("Завершаю ход.");
+                mapInput = L.W("I end my turn.");
             }
             if (mapInput == "F9" && _display.MapLevel == MapLevel.Location) {
                 var braille = File.ReadAllText(Path.Combine(AppConfig.DataRoot, "Storage", "test.txt"));
@@ -1204,14 +1210,14 @@ internal class MapScreenLoop
                 continue;
             } // DEBUG
 
-            // Карта мира: [F10] — в путь к выбранной цели, [F5] — темп.
+            // World map: [F10] - on the way to the selected goal, [F5] - temp.
             if (_display.MapLevel == MapLevel.World && mapInput == "F10")
             {
                 await StartTravel(mapHistory);
                 if (_display.PendingCommand != null) break;
                 continue;
             }
-            // [F12] — темп пути (медленный / обычный / быстрый).
+            // [F12] - path pace (slow / normal / fast).
             if (_display.MapLevel == MapLevel.World && mapInput == "F12")
             {
                 _display.TravelPace = (_display.TravelPace + 1) % 3;
@@ -1234,10 +1240,10 @@ internal class MapScreenLoop
                 movedFrameDrawn = true;
                 continue;
             }
-            if (mapInput is "F6" or "F7" or "F8" or "NoteLeft" or "NoteRight") continue;   // служебные команды — не текст мастеру
+            if (mapInput is "F6" or "F7" or "F8" or "NoteLeft" or "NoteRight") continue;   // service commands - not text to the GM
 
-            // Ctrl+стрелки — сдвиг камеры без движения героя (как перетаскивание мышью).
-            // Ctrl+«+»/«−» — масштаб карты мира (на карте локации масштаба нет).
+            // Ctrl+arrows - camera shift without hero movement (like dragging with the mouse). Ctrl+“+”/“−” —
+            // scale of the world map (there is no scale on the location map).
             if (mapInput is "ZoomIn" or "ZoomOut")
             {
                 if (_display.MapLevel == MapLevel.World)
@@ -1257,11 +1263,11 @@ internal class MapScreenLoop
             if (mapInput.StartsWith("Pan"))
             {
                 PanByKey(mapInput);
-                movedFrameDrawn = true; // кадр уже перерисован — полный DrawMap не нужен
+                movedFrameDrawn = true; // frame has already been redrawn - full DrawMap is not needed
                 continue;
             }
-            // Alt+←/→ — листание карточки в панели картинки (обычные стрелки на карте — движение).
-            // Без карточки команда просто игнорируется, а не уходит нейронке как текст действия.
+            // Alt+←/→ - leafing through the card in the picture panel (regular arrows on the map - movement).
+            // Without a card, the command is simply ignored and does not go to the AI as an action text.
             if (mapInput is "Left" or "Right")
             {
                 int page = Math.Clamp(_display.NotePage + (mapInput == "Left" ? -1 : 1), 0, Math.Max(0, _display.NotePageCount - 1));
@@ -1290,7 +1296,7 @@ internal class MapScreenLoop
                 continue;
             }
 
-            // На карте мира стрелки двигают карту, а не героя (он на локации).
+            // On the world map, arrows move the map, not the hero (he is on the location).
             if (_display.MapLevel == MapLevel.World && mapInput.StartsWith("Move"))
             {
                 if (mapInput.Contains("North")) PanByKey("PanUp");
@@ -1304,12 +1310,12 @@ internal class MapScreenLoop
             var moved = movementHandler.TryMove(mapInput, out var aiInput, out var activatedTriggers, out var activatedAreaTriggers, out var activatedDoorTriggers);
             if (movementHandler.LeaveRequested)
             {
-                // Шаг через выход на карту мира: локация сохраняется за местом, вкладка «Карта» — мир.
+                // Step through the exit to the world map: the location is saved by location, the “Map” tab is the world.
                 movementHandler.LeaveRequested = false;
-                string where = _settings.World?.Place ?? L.T("локацию");
+                string where = _settings.World?.Place ?? L.T("the location");
                 GameWorld.LeaveLocation(_settings);
                 _settings.History ??= [];
-                _settings.History.Add(new Data.Models.DialogMessage { Text = L.F("Ты покидаешь {0} — карта мира: выбери цель кликом, [F10] — в путь.", where) });
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.F("You leave {0} — world map: click a destination, [F10] to travel.", where) });
                 _storage.Save();
                 _display.PendingCommand = "F2";
                 break;
@@ -1324,7 +1330,7 @@ internal class MapScreenLoop
                 await _aiClient.SendAction(aiInput, mapHistory.AppendStreamChunk, mapHistory.NewStreamingMessage, mapHistory.TickSpinner, redrawAction);
                 mapHistory.FinalizeStreaming();
                 Term.FlushKeys();
-                // Мастер построил сцену (plan_location) — на карту местности; тактическая карта пропала — на мир.
+                // The GM built a scene (plan_location) - on the area map; the tactical map has disappeared - on the world.
                 if ((_display.MapLevel == MapLevel.World) == GameWorld.HasLocation(_settings))
                 {
                     _display.PendingCommand = GameWorld.HasLocation(_settings) ? "F1" : "F2";
@@ -1332,11 +1338,10 @@ internal class MapScreenLoop
                 }
                 await FireEncounterTriggers(mapHistory);
 
-                // SendAction сам может продвинуть раунд (истощение ресурсов действия вне боя) —
-                // напоминание об onRound/onExpire эффектах должно идти тем же дедуплицированным
-                // путём, что и после движения, а не полагаться на то, что AI сам сообразит
-                // применить их внутри своего же ответа (было причиной повторного/самовольного
-                // урона от периодических эффектов).
+                // SendAction himself can advance the round (depleting action resources outside of combat) - the
+                // reminder of onRound/onExpire effects should go the same deduplicated path as after the
+                // movement, and not rely on AI himself figuring out to apply them inside his own response (was
+                // the cause of repeated/unauthorized damage from periodic effects).
                 var sendActionRoundBundle = _storage.TakeRoundBundle();
                 if (sendActionRoundBundle != null && !_config.DisableTriggers && !_config.RevealMap)
                 {
@@ -1388,10 +1393,10 @@ internal class MapScreenLoop
                 await RunEnemyTurnAndCheckRoundEnd();
                 break;
             }
-            // Local move: loop back for in-place redraw.
-            // Зажатая стрелка: автоповтор клавиатуры копит события быстрее, чем идёт шаг с перерисовкой, —
-            // без сброса герой «доезжал» по накопленному буферу уже после отпускания (как раньше с Tab).
-            // Пока клавиша зажата, новые повторы продолжают приходить — движение не прерывается.
+            // Local move: loop back for in-place redraw. Pressed arrow: keyboard auto-repeat accumulates events
+            // faster than the redraw step - without resetting, the hero “reached” the accumulated buffer after
+            // releasing it (as before with Tab). Bye the key is held down, new repetitions continue to come -
+            // the movement is not interrupted.
             Term.FlushKeys();
         }
 

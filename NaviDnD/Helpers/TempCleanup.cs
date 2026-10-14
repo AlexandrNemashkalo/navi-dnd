@@ -2,9 +2,10 @@ using System.Text.RegularExpressions;
 
 namespace NaviDnD.Helpers;
 
-// Временные папки игры в %TEMP%, которые не удалились сразу: копия установщика после обновления (помощник запущен из
-// неё и сам себя удалить не может), прерванная загрузка, рабочая папка Claude/Codex CLI, которую держал зависший
-// MCP-сервер. При запуске удаляются только старше суток: свежие может использовать вторая копия игры или помощник.
+// Temporary game folders in %TEMP% that were not deleted immediately: a copy of the installer after the update
+// (the assistant was launched from it and cannot delete itself), an interrupted download, the working folder
+// Claude/Codex CLI, which was kept by the frozen MCP- server. At startup, only those older than a day are
+// deleted: fresh ones can be used by a second copy of the game or an assistant.
 internal static class TempCleanup
 {
     private static readonly Regex Owned = new(
@@ -28,7 +29,7 @@ internal static class TempCleanup
                     else item.Delete();
                     removed++;
                 }
-                catch (Exception error) when (error is IOException or UnauthorizedAccessException) { }   // занято — в следующий раз
+                catch (Exception error) when (error is IOException or UnauthorizedAccessException) { }   // busy - next time
             }
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException) { }

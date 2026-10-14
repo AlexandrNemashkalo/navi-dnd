@@ -1,112 +1,112 @@
 {
   "races": [
     {
-      "name": "Человек"
+      "name": "Human"
     },
     {
-      "name": "Высший эльф",
+      "name": "High elf",
       "portrait": "delapouite/woman-elf-face"
     },
     {
-      "name": "Лесной эльф",
+      "name": "Wood elf",
       "portrait": "delapouite/woman-elf-face"
     },
     {
-      "name": "Тёмный эльф (дроу)",
+      "name": "Dark elf (drow)",
       "portrait": "delapouite/woman-elf-face"
     },
     {
-      "name": "Горный дварф",
+      "name": "Mountain dwarf",
       "portrait": "delapouite/dwarf-face"
     },
     {
-      "name": "Холмовой дварф",
+      "name": "Hill dwarf",
       "portrait": "delapouite/dwarf-face"
     },
     {
-      "name": "Полурослик"
+      "name": "Halfling"
     },
     {
-      "name": "Гном"
+      "name": "Gnome"
     },
     {
-      "name": "Полуэльф",
+      "name": "Half-elf",
       "portrait": "kier-heyl/elf-helmet"
     },
     {
-      "name": "Полуорк",
+      "name": "Half-orc",
       "portrait": "delapouite/orc-head"
     },
     {
-      "name": "Драконорождённый",
+      "name": "Dragonborn",
       "portrait": "faithtoken/dragon-head"
     },
     {
-      "name": "Тифлинг"
+      "name": "Tiefling"
     },
     {
-      "name": "Орк",
+      "name": "Orc",
       "portrait": "delapouite/orc-head"
     },
     {
-      "name": "Гоблин",
+      "name": "Goblin",
       "portrait": "delapouite/goblin-head"
     },
     {
-      "name": "Кенку",
+      "name": "Kenku",
       "portrait": "delapouite/kenku-head"
     },
     {
-      "name": "Ящеролюд",
+      "name": "Lizardfolk",
       "portrait": "lorc/lizardman"
     }
   ],
   "classes": [
     {
-      "name": "Воин",
+      "name": "Fighter",
       "portrait": "delapouite/closed-barbute"
     },
     {
-      "name": "Варвар",
+      "name": "Barbarian",
       "portrait": "delapouite/barbarian"
     },
     {
-      "name": "Бард"
+      "name": "Bard"
     },
     {
-      "name": "Жрец",
+      "name": "Cleric",
       "portrait": "cathelineau/nun-face"
     },
     {
-      "name": "Друид",
+      "name": "Druid",
       "portrait": "lorc/cowled"
     },
     {
-      "name": "Монах",
+      "name": "Monk",
       "portrait": "delapouite/monk-face"
     },
     {
-      "name": "Паладин",
+      "name": "Paladin",
       "portrait": "lorc/visored-helm"
     },
     {
-      "name": "Следопыт",
+      "name": "Ranger",
       "portrait": "delapouite/archer"
     },
     {
-      "name": "Плут",
+      "name": "Rogue",
       "portrait": "delapouite/bandit"
     },
     {
-      "name": "Чародей",
+      "name": "Sorcerer",
       "portrait": "cathelineau/witch-face"
     },
     {
-      "name": "Колдун",
+      "name": "Warlock",
       "portrait": "lorc/cultist"
     },
     {
-      "name": "Волшебник",
+      "name": "Wizard",
       "portrait": "delapouite/wizard-face"
     }
   ],
@@ -117,15 +117,15 @@
     "4"
   ],
   "alignments": [
-    "Законопослушный добрый",
-    "Нейтральный добрый",
-    "Хаотичный добрый",
-    "Законопослушный нейтральный",
-    "Нейтральный",
-    "Хаотичный нейтральный",
-    "Законопослушный злой",
-    "Нейтральный злой",
-    "Хаотичный злой"
+    "Lawful good",
+    "Neutral good",
+    "Chaotic good",
+    "Lawful neutral",
+    "True neutral",
+    "Chaotic neutral",
+    "Lawful evil",
+    "Neutral evil",
+    "Chaotic evil"
   ],
   "names": [
     "Элиан",
@@ -169,55 +169,96 @@
     "Ардан",
     "Селеста"
   ],
-  "namesEn": ["Aldric", "Brenna", "Cedric", "Dara", "Elowen", "Finn", "Gwen", "Halden", "Isolde", "Jarek", "Kael", "Lyra", "Marek", "Nessa", "Orin", "Petra", "Quinn", "Rowan", "Sable", "Tamsin", "Ulric", "Vera", "Wren", "Xander", "Yara", "Zane", "Alaric", "Briar", "Corin", "Delia", "Eamon", "Fiona", "Garrick", "Hilde", "Ivo", "Juna", "Kestrel", "Lorne", "Mira", "Torvald"],
+  "namesEn": [
+    "Aldric",
+    "Brenna",
+    "Cedric",
+    "Dara",
+    "Elowen",
+    "Finn",
+    "Gwen",
+    "Halden",
+    "Isolde",
+    "Jarek",
+    "Kael",
+    "Lyra",
+    "Marek",
+    "Nessa",
+    "Orin",
+    "Petra",
+    "Quinn",
+    "Rowan",
+    "Sable",
+    "Tamsin",
+    "Ulric",
+    "Vera",
+    "Wren",
+    "Xander",
+    "Yara",
+    "Zane",
+    "Alaric",
+    "Briar",
+    "Corin",
+    "Delia",
+    "Eamon",
+    "Fiona",
+    "Garrick",
+    "Hilde",
+    "Ivo",
+    "Juna",
+    "Kestrel",
+    "Lorne",
+    "Mira",
+    "Torvald"
+  ],
   "backgrounds": [
-    "Прислужник",
-    "Артист",
-    "Беспризорник",
-    "Благородный",
-    "Гильдейский ремесленник",
-    "Моряк",
-    "Мудрец",
-    "Народный герой",
-    "Отшельник",
-    "Пират",
-    "Преступник",
-    "Солдат",
-    "Чужеземец",
-    "Шарлатан",
-    "Шпион",
-    "Гладиатор",
-    "Рыцарь",
-    "Гильдейский торговец",
-    "Городской стражник",
-    "Дальний странник",
-    "Клановый ремесленник",
-    "Затворник-учёный",
-    "Придворный",
-    "Агент фракции",
-    "Наследник",
-    "Рыцарь ордена",
-    "Наёмник-ветеран",
-    "Член племени",
-    "Охотник за головами",
-    "Знатный горожанин",
-    "Археолог",
-    "Преследуемый",
-    "Бывший культист",
-    "Цирковой артист",
-    "Контрабандист",
-    "Ведьмин подкидыш",
-    "Корабельный лекарь",
-    "Лесоруб",
-    "Кузнец",
-    "Травник",
-    "Беглый раб",
-    "Храмовый страж",
-    "Охотник на чудовищ",
-    "Картограф",
-    "Странствующий монах",
-    "Ветеран войны",
-    "Изгнанник",
-    "Сирота из приюта"
+    "Acolyte",
+    "Entertainer",
+    "Urchin",
+    "Noble",
+    "Guild artisan",
+    "Sailor",
+    "Sage",
+    "Folk hero",
+    "Hermit",
+    "Pirate",
+    "Criminal",
+    "Soldier",
+    "Outlander",
+    "Charlatan",
+    "Spy",
+    "Gladiator",
+    "Knight",
+    "Guild merchant",
+    "City watch",
+    "Far traveler",
+    "Clan crafter",
+    "Cloistered scholar",
+    "Courtier",
+    "Faction agent",
+    "Inheritor",
+    "Knight of the order",
+    "Mercenary veteran",
+    "Tribe member",
+    "Bounty hunter",
+    "Wealthy townsfolk",
+    "Archaeologist",
+    "Haunted one",
+    "Former cultist",
+    "Circus performer",
+    "Smuggler",
+    "Witch's foundling",
+    "Ship's surgeon",
+    "Woodcutter",
+    "Blacksmith",
+    "Herbalist",
+    "Escaped slave",
+    "Temple guard",
+    "Monster hunter",
+    "Cartographer",
+    "Wandering monk",
+    "War veteran",
+    "Exile",
+    "Orphan"
   ]
 }

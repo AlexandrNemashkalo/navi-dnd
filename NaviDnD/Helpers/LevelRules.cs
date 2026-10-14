@@ -3,9 +3,10 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.Helpers;
 
-// Таблица уровней правил (GameData/DnD5e_levels.json): пороги опыта, бонус мастерства, кости хитов классов, уровни
-// улучшения характеристик, опыт за монстра по уровню опасности. Читается один раз за процесс (Lazy). Это
-// детерминированная часть повышения уровня — без нейронки; что получает класс на уровне, решает мастер (LevelUp).
+// Table of rules levels (GameData/DnD5e_levels.json): experience thresholds, proficiency bonus, class hit dice,
+// stat improvement levels, experience for a monster by danger level. Read once per process (Lazy). This is a
+// deterministic part of leveling up - without a AI; what a class receives at a level is decided by the GM
+// (LevelUp).
 public sealed class LevelRules
 {
     public sealed class ClassRule
@@ -31,7 +32,7 @@ public sealed class LevelRules
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             return JsonSerializer.Deserialize<LevelRules>(File.ReadAllText(FilePath), options) ?? new LevelRules();
         }
-        catch { return new LevelRules(); }   // нет файла — уровней нет (MaxLevel 1), игра идёт как раньше
+        catch { return new LevelRules(); }   // no file - no levels (MaxLevel 1), the game runs as before
     });
 
     public static LevelRules Current => Loaded.Value;
@@ -40,30 +41,30 @@ public sealed class LevelRules
 
     public static int LevelOf(Hero hero) => Math.Max(1, hero.Level ?? 1);
 
-    // Опыт для уровня (порог); за пределами таблицы — последний.
+    // Experience for level (threshold); outside the table - the last one.
     public int XpFor(int level) => Xp[Math.Clamp(level, 1, MaxLevel) - 1];
 
-    // Порог следующего уровня; null — уровень максимальный.
+    // Next level threshold; null - maximum level.
     public int? NextXp(int level) => level < MaxLevel ? Xp[level] : null;
 
     public int ProficiencyAt(int level) => Proficiency.Length == 0 ? 2 : Proficiency[Math.Clamp(level, 1, Proficiency.Length) - 1];
 
-    // Опыта хватает на следующий уровень (вне боя — решает экран).
+    // There is enough experience for the next level (outside of combat - the screen decides).
     public bool CanLevelUp(Hero hero) => NextXp(LevelOf(hero)) is int next && (hero.Xp ?? 0) >= next;
 
-    // Класс героя по стату «Класс» (на любом языке; подкласс в скобках не мешает); незнакомый — null.
+    // Hero class according to the “Class” stat (in any language; subclass in parentheses does not interfere); stranger - null.
     public ClassRule? ClassOf(Hero hero)
     {
         string cls = ClassLevel.Split(hero.Stat(StatKeys.Class)?.Value).cls.ToLowerInvariant();
         return Classes.FirstOrDefault(c => c.Names.Any(n => cls.StartsWith(n.ToLowerInvariant())));
     }
 
-    // Кость хитов класса; незнакомый класс — d8 (средняя).
+    // Class hit dice; unfamiliar class - d8 (average).
     public int HitDie(Hero hero) => ClassOf(hero)?.HitDie ?? 8;
 
     public bool IsAsiLevel(Hero hero, int level) => (ClassOf(hero)?.AsiLevels ?? AsiLevels).Contains(level);
 
-    // Опыт за монстра справочника (monsterKey) по его уровню опасности; не нашёлся — 0.
+    // Experience for a reference monster (monsterKey) according to its danger level; not found - 0.
     public int MonsterXp(string? monsterKey) =>
         MonsterDatabase.Find(monsterKey) is { } m && CrXp.TryGetValue(m.Cr.Trim(), out int xp) ? xp : 0;
 }

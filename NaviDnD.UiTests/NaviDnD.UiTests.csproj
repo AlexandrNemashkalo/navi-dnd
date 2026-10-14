@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Для захвата окна консоли (PrintWindow) и сэмплинга пикселей — реальная проверка
-         24-битного ANSI-цвета, которую легаси Windows Console API не отражает. -->
+    <!-- To capture the console window (PrintWindow) and pixel sampling - real test
+         24-bit ANSI- color, which the legacy Windows Console API does not reflect. -->
     <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />

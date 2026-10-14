@@ -1,16 +1,16 @@
 namespace NaviDnD.Data.Models;
 
-// Постоянные значения данных — не зависят от языка мира. Модель пишет слова на языке игры («Утро», «Morning»,
-// «Класс Доспеха», «Armor Class») — Storage после каждого патча приводит их к ключам, миграция переводит старые
-// сохранения. Код сравнивает только ключи; на экран и мастеру — подпись на нужном языке.
+// Stable data keys do not depend on the world language. The model uses localized names (such as Morning or
+// Armor Class); Storage normalizes them to keys after each patch, and migration converts old saves.
+// Code compares keys; the UI and GM receive labels in the appropriate language.
 
-// Часть суток: 4 по кругу night → morning → day → evening.
+// Part of the day: 4 in a circle night → morning → day → evening.
 public static class PartsOfDay
 {
     public const string Night = "night", Morning = "morning", Day = "day", Evening = "evening";
     public static readonly string[] Cycle = [Night, Morning, Day, Evening];
 
-    // Слово на любом языке → ключ; незнакомое (мастер придумал своё) — как есть.
+    // Word in any language → key; unfamiliar (the GM came up with his own) - as it is.
     public static string Normalize(string? value) => value?.Trim().ToLowerInvariant() switch
     {
         null or "" => Morning,
@@ -21,21 +21,21 @@ public static class PartsOfDay
         _ => value!.Trim(),
     };
 
-    // Русская подпись (ключ перевода L): L.T — для экрана, L.W — мастеру и в историю.
-    public static string Russian(string? key) => key switch
+    // English label (translation key L): L.T - for the screen, L.W - for the GM and for history.
+    public static string Label(string? key) => key switch
     {
-        Night => "Ночь", Morning => "Утро", Day => "День", Evening => "Вечер", _ => key ?? "",
+        Night => "Night", Morning => "Morning", Day => "Day", Evening => "Evening", _ => key ?? "",
     };
 }
 
-// Особые характеристики героя (hero.stats), которые читает код. Остальные статы — без ключа, просто текст.
+// Special characteristics of the hero (hero.stats), which the code reads. The rest of the stats are without a key, just text.
 public static class StatKeys
 {
     public const string Race = "race", Class = "class", Alignment = "alignment", Background = "background",
         ArmorClass = "armorClass", Darkvision = "darkvision", SpellAbility = "spellAbility", SpellSave = "spellSave",
         SpellAttack = "spellAttack", SpellsPrepared = "spellsPrepared", SpellsKnown = "spellsKnown";
 
-    // Названия на обоих языках (без регистра). Длинные — раньше коротких: «Класс Доспеха» — не «Класс».
+    // Names in both languages (no case). Long ones come before short ones: “Armor Class” is not “Class”.
     private static readonly (string key, string name)[] Names = new (string key, string[] names)[]
     {
         (ArmorClass, ["класс доспеха", "класс защиты", "кд", "armor class", "armour class", "ac"]),
@@ -51,7 +51,7 @@ public static class StatKeys
         (Class, ["класс", "class"]),
     }.SelectMany(k => k.names.Select(n => (k.key, n))).OrderByDescending(p => p.n.Length).ToArray();
 
-    // Ключ по названию стата: точное совпадение или название с уточнением в скобках («Класс Доспеха (щит)»).
+    // Key by stat name: exact match or name with clarification in brackets (“Armor Class (shield)”).
     public static string? FromName(string? name)
     {
         string n = name?.Trim().ToLowerInvariant() ?? "";
@@ -62,8 +62,8 @@ public static class StatKeys
     }
 }
 
-// Стат «Класс» — только класс (и подкласс в скобках): уровень — поле hero.level. Мастер по старой привычке пишет
-// «Воин 3 ур», «Wizard (level 2)» — Storage и миграция отрезают уровень.
+// Stat “Class” - only class (and subclass in brackets): level - field hero.level. The GM, according to the old
+// habit, writes “Warrior 3 lvl”, “Wizard (level 2)” - Storage and migration cuts off the level.
 public static class ClassLevel
 {
     private static readonly System.Text.RegularExpressions.Regex Pattern = new(
@@ -72,10 +72,10 @@ public static class ClassLevel
 
     private static readonly string[] ExperienceNames = ["опыт", "experience", "xp", "exp"];
 
-    // Прежний стат «Опыт: 900/2700» — теперь поле hero.xp.
+    // The previous stat “Experience: 900/2700” is now the field hero.xp.
     public static bool IsExperienceStat(string? name) => ExperienceNames.Contains(name?.Trim().ToLowerInvariant());
 
-    // «Воин (Чемпион) 3 ур» → («Воин (Чемпион)», 3); без уровня — (как есть, null).
+    // “Warrior (Champion) lvl 3” → (“Warrior (Champion)”, 3); without level - (as is, null).
     public static (string cls, int? level) Split(string? value)
     {
         string v = value?.Trim() ?? "";
@@ -86,8 +86,8 @@ public static class ClassLevel
     }
 }
 
-// Характеристики героя — обычные hero.stats без ключа («+2 (15)»): код находит их по названию на обоих языках
-// (хиты и улучшение характеристик при повышении уровня).
+// Hero stats are regular hero.stats without a key (“+2 (15)”): the code finds them by name in both languages
+// (hits and stat improvements when leveling up).
 public static class AbilityNames
 {
     public const string Str = "str", Dex = "dex", Con = "con", Int = "int", Wis = "wis", Cha = "cha";
@@ -108,7 +108,7 @@ public static class AbilityNames
     private static HeroStat? FindByNames(Hero hero, string[] names) =>
         hero.Stats?.FirstOrDefault(s => s.Deleted != true && names.Contains(s.Name?.Trim().ToLowerInvariant()));
 
-    // «+2 (15)» → 15, «15» → 15; не разобрать — null.
+    // “+2 (15)” → 15, “15” → 15; can't make it out - null.
     public static int? Score(HeroStat? stat)
     {
         string v = stat?.Value ?? "";
@@ -121,18 +121,18 @@ public static class AbilityNames
 
     public static string Signed(int n) => n >= 0 ? $"+{n}" : n.ToString();
 
-    // Значение стата характеристики в формате героя: «+3 (17)».
+    // Characteristic stat value in hero format: “+3 (17).”
     public static string Format(int score) => $"{Signed(Modifier(score))} ({score})";
 }
 
-// Размер и тип существа героя (обычные статы без ключа) — карточка показывает их одной строкой.
+// The size and type of the hero's creature (regular stats without a key) - the card shows them in one line.
 public static class CreatureNames
 {
     public static bool IsSize(string? name) => name?.Trim().ToLowerInvariant() is "размер" or "size";
     public static bool IsType(string? name) => name?.Trim().ToLowerInvariant() is "тип существа" or "тип" or "creature type" or "type";
 }
 
-// Подвкладка карточки героя, где показывается ресурс (hero.resources[].category).
+// Subtab of the hero card, where the resource is shown (hero.resources[].category).
 public static class ResourceCategories
 {
     public const string Abilities = "abilities", Spells = "spells";
@@ -146,7 +146,7 @@ public static class ResourceCategories
     };
 }
 
-// Навыки героя: код ищет только Восприятие (пассивное восприятие).
+// Hero Skills: The code only looks for Perception (passive perception).
 public static class SkillNames
 {
     public static bool IsPerception(string? name) =>

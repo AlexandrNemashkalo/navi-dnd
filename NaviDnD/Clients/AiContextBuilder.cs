@@ -8,8 +8,8 @@ using System.Text.Unicode;
 namespace NaviDnD.Clients;
 
 /// <summary>
-/// Нарезает WorldState на кэш-блоки для Claude API.
-/// Каждый блок кэшируется независимо — блоки выше по списку инвалидируют блоки ниже.
+///Slices WorldState into cache blocks for Claude API.
+///Each block is cached independently - blocks higher in the list invalidate blocks below.
 /// </summary>
 public class AiContextBuilder
 {
@@ -32,20 +32,20 @@ public class AiContextBuilder
         _visibleCells = visibleCells;
     }
 
-    // ─── System blocks (кэшируются) ────────────────────────────────────────
+    // ─── System blocks (cached) ──────────────────── ────────────────────
     public string Instructions(string promptText) => promptText;
 
-    // ─── User message (не кэшируется) ──────────────────────────────────────
+    // ─── User message (not cached) ──────────────────────────────────────
 
     /// <summary>
-    /// Шаг 1: минимальный контекст (~400-500 токенов).
-    /// Только hp/state/position + краткий нарратив + индекс имён + последние события.
+    ///Step 1: minimal context (~400-500 tokens).
+    ///Only hp/state/position + short narrative + index of names + recent events.
     /// </summary>
     public string MinimalState(string playerAction)
     {
         var sb = new System.Text.StringBuilder();
 
-        // ── Герой ──────────────────────────────────────────────────────────
+        // ── Hero ───────────────────────────── ─────────────────────────────
         sb.AppendLine($"round:{_ws.Time.TotalRounds} day:{_ws.Time.Day} timeOfDay:{_ws.Time.PartOfDay}");
 
         if (_ws.Hero != null)
@@ -61,7 +61,7 @@ public class AiContextBuilder
             var noOaStr = (_ws.Hero.NoOpportunityAttacksRound >= _ws.Time.TotalRounds ? " disengaged:true" : "")
                           + (_ws.Hero.Dead == true ? " dead:true" : "");
             var lightStr = _ws.Hero.Light is { On: true } l ? $" light:{l.Ft}ft" : "";
-            // Кто герой — имя, раса, класс и заметка о нём: обращаться к нему в верном роде и характере.
+            // Who is the hero - name, race, class and a note about him: address him in the correct gender and character.
             string who = string.Join(", ", new[] { _ws.Hero.Stat(StatKeys.Race)?.Value, _ws.Hero.Stat(StatKeys.Class)?.Value, LevelText(_ws.Hero) }
                 .Where(x => !string.IsNullOrEmpty(x)));
             sb.AppendLine($"hero: {_ws.Hero.Name}{(who.Length > 0 ? $" ({who})" : "")}"
@@ -86,9 +86,10 @@ public class AiContextBuilder
             if (equipped?.Any() == true)
                 sb.AppendLine($"equipped: {string.Join(", ", equipped)}");
 
-            // Характеристики и навыки — сразу в контексте (#id — для патча): за ними мастер чаще всего ходил в
-            // get_world_state, а это лишний круг модели (~10 с и полный контекст заново) на каждую проверку.
-            // Раса, класс и КД уже в строках hero/HP, мировоззрение и предыстория броскам не нужны.
+            // Characteristics and skills - immediately in context (#id - for the patch): for them the GM most
+            // often went to get_world_state, and this is an extra circle of the model (~10 s and the full
+            // context again) for each check. Race, class and AC are already in the hero/HP lines; alignment and
+            // background are not needed for the rolls.
             string[] known = [StatKeys.Race, StatKeys.Class, StatKeys.ArmorClass, StatKeys.Alignment, StatKeys.Background];
             if (Indexed(_ws.Hero.Stats, s => s.Deleted == true || known.Contains(StatKeys.FromName(s.Name)),
                     (s, i) => $"{s.Name}#{i} {s.Value}") is { } stats)
@@ -97,7 +98,7 @@ public class AiContextBuilder
                 sb.AppendLine($"hero.skills: {skills}");
         }
 
-        // ── Нарратив ───────────────────────────────────────────────────────
+        // ── Narrative ─────────────────────────── ────────────────────────────
         if (_ws.Narrative != null)
         {
             if (!string.IsNullOrEmpty(_ws.Narrative.CurrentArc))
@@ -106,22 +107,22 @@ public class AiContextBuilder
                 sb.AppendLine($"world: {_ws.Narrative.World}");
         }
 
-        // ── Индекс имён (для поиска по name через MCP); у героя — с #id для патча без запроса ──────
+        // ── Name index (for searching by name via MCP); for the hero - with #id for a patch without a request ──────
         if (Indexed(_ws.Hero?.Inventory, x => x.Deleted == true,
                 (x, i) => x.Quantity is > 1 ? $"{x.Name}#{i} ×{x.Quantity}" : $"{x.Name}#{i}") is { } inv)
             sb.AppendLine($"hero.inventory: {inv}");
         if (Indexed(_ws.Hero?.Abilities, x => x.Deleted == true, (x, i) => $"{x.Name}#{i}") is { } abl)
             sb.AppendLine($"hero.abilities: {abl}");
         if (Indexed(_ws.Hero?.Spells, x => x.Deleted == true,
-                (x, i) => $"{x.Name}#{i} (lvl {x.Level}{(x.Prepared == true && x.Level > 0 ? ", подгот." : "")})") is { } spl)
+                (x, i) => $"{x.Name}#{i} (lvl {x.Level}{(x.Prepared == true && x.Level > 0 ? ", prepared" : "")})") is { } spl)
             sb.AppendLine($"hero.spells: {spl}");
         if (Indexed(_ws.Hero?.Resources, x => x.Deleted == true, (x, i) => $"{x.Name}#{i} {x.Value}") is { } res)
             sb.AppendLine($"hero.resources: {res}");
-        // Действие каждый раунд (onRound) — тоже: от него зависит, можно ли отдыхать, а других полей эффекта тут нет.
+        // Action every round (onRound) - too: it determines whether you can rest, and there are no other effect fields here.
         if (Indexed(_ws.Hero?.Effects, x => x.Deleted == true, (x, i) =>
                 $"{x.Name}#{i} ({x.ExpiresAtRound})"
                 + (x.Description is { Length: > 0 } d ? $": {d}" : "")
-                + (x.OnRound?.Effect is { Length: > 0 } tick ? $" [каждый раунд: {tick}]" : "")) is { } eff)
+                + (x.OnRound?.Effect is { Length: > 0 } tick ? $" [each round: {tick}]" : "")) is { } eff)
             sb.AppendLine($"hero.effects: {eff}");
         if (_ws.Map.Rooms is { Count: > 0 } rooms)
         {
@@ -142,8 +143,8 @@ public class AiContextBuilder
         {
             var physIds = string.Join("; ", allDoors.Select((d, i) => (d, i)).Where(x => x.d.IsDoor == true && x.d.IsWindow != true).Select(x => x.i));
             var passIds = string.Join("; ", allDoors.Select((d, i) => (d, i)).Where(x => x.d.IsDoor != true).Select(x => x.i));
-            if (physIds.Length > 0) sb.AppendLine($"map.doors (двери): {physIds}");
-            if (passIds.Length > 0) sb.AppendLine($"map.doors (проходы): {passIds}");
+            if (physIds.Length > 0) sb.AppendLine($"map.doors (doors): {physIds}");
+            if (passIds.Length > 0) sb.AppendLine($"map.doors (passages): {passIds}");
         }
         if (_ws.Narrative?.PlotThreads is { Count: > 0 } threads)
             sb.AppendLine($"narrative.plotThreads: {Join(threads.Where(x => x.Deleted != true).Select(x => x.Name))}");
@@ -153,23 +154,24 @@ public class AiContextBuilder
             sb.AppendLine($"scheduledEvents: {Join(sched.Where(x => x.Deleted != true).Select(x => $"{x.Name} ({x.FireAtRound})"))}");
 
 
-        // ── Бой ────────────────────────────────────────────────────────────
+        // ── Fight ────────────────────────────── ──────────────────────────────
         if (_ws.Combat?.Active == true)
         {
             var initiative = _ws.Combat.Initiative?
                 .Where(e => e.Deleted != true)
                 .Select(e => $"{e.Symbol}({e.Score})");
-            // Кто из участников боя может видеть героя сейчас (дистанция, линия обзора, свет/тёмное
-            // зрение) — факт для решений «преследовать/искать/бросить» и конца боя при бегстве.
+            // Which of the combatants can see the hero now (distance, line of sight, light/dark vision) is a
+            // fact for the “pursue/search/throw” decisions and the end of the battle when fleeing.
             var seesHero = _ws.Combat.Initiative?
                 .Where(e => e.Deleted != true && e.Symbol != _ws.Hero?.Symbol)
                 .Select(e => _ws.Map.Entities?.FirstOrDefault(x => x.Deleted != true && x.Symbol == e.Symbol))
                 .Where(x => x != null && MovementCalculator.EntitySeesHero(_ws, x))
                 .Select(x => x!.Symbol);
             sb.AppendLine($"combat: currentTurn={_ws.Combat.CurrentTurn} initiative=[{string.Join(", ", initiative ?? [])}] seesHero=[{string.Join(", ", seesHero ?? [])}]");
-            if (TurnQueue() is { } queue) sb.AppendLine($"  очередь ходов до героя: {queue}");
-            // Участники боя: хиты (что уже нанесено), КД из бестиария, клетка, состояния — без этого мастер вёл урон
-            // врагам по памяти, и раненый враг в следующем вызове оказывался целым.
+            if (TurnQueue() is { } queue) sb.AppendLine($"  turn order until hero: {queue}");
+            // Participants in the battle: hit points (what has already been dealt), AC from the bestiary, cell,
+            // conditions - without this, the GM dealt damage to enemies from memory, and the wounded enemy
+            // turned out to be unharmed in the next call.
             foreach (var e in _ws.Combat.Initiative?.Where(x => x.Deleted != true && x.Symbol != _ws.Hero?.Symbol) ?? [])
             {
                 int idx = _ws.Map.Entities?.FindIndex(x => x.Deleted != true && x.Symbol == e.Symbol) ?? -1;
@@ -180,17 +182,17 @@ public class AiContextBuilder
                 string fx = who.Effects?.Where(f => f.Deleted != true).Select(f => f.Name).ToList() is { Count: > 0 } list ? $" effects:{string.Join("; ", list)}" : "";
                 string pos = who.Position is { Count: >= 2 } p ? $" [{p[0]},{p[1]}]" : "";
                 if (who.Position is { Count: >= 2 } wp && _ws.Hero?.Position is { Count: >= 2 } hp2)
-                    pos += $" до героя {TargetGeometry.DistanceFt(wp[0], wp[1], hp2[0], hp2[1])} фт";
-                if (e.Ally == true) pos += " союзник";
+                    pos += $" to hero {TargetGeometry.DistanceFt(wp[0], wp[1], hp2[0], hp2[1])} ft";
+                if (e.Ally == true) pos += " ally";
                 sb.AppendLine($"  {who.Symbol} map.entities id:{idx} {who.Name}{(who.MonsterKey != null ? $" ({who.MonsterKey})" : "")} hp:{(string.IsNullOrEmpty(who.Hp) ? "?" : who.Hp)}{ac}{pos}{fx}");
             }
         }
 
-        // ── История ────────────────────────────────────────────────────────
-        // Хвост последних реплик — без него ИИ не помнит, что уже сказал сам/что ответил игрок
-        // внутри одного разговора с NPC (только narrative.npcs.notes переживает между вызовами).
-        // skipLast: текущее действие игрока уже добавлено в _ws.History ДО вызова SendAction
-        // (см. MouseUiHelper.HandleGameScreen) — не показываем его тут же вторым разом.
+        // ── History ──────────────────────────── ──────────────────────────── The tail of the last remarks -
+        // without it, the AI does not remember what it has already said/what the player answered within the
+        // same conversation with NPC (only narrative.npcs.notes worries between calls). skipLast: the player's
+        // current action has already been added to _ws.History BEFORE calling SendAction (see
+        // MouseUiHelper.HandleGameScreen) - do not show it immediately a second time.
         var all = _ws.History ?? [];
         var skipLast = all.LastOrDefault()?.Text == playerAction ? 1 : 0;
         var history = all.SkipLast(skipLast).TakeLast(MaxHistoryForAi);
@@ -202,7 +204,7 @@ public class AiContextBuilder
                 : $"• {msg.Text}");
         }
 
-        // ── Ближайшие клетки героя ─────────────────────────────────────────
+        // ── Nearest hero cells ──────────────────── ─────────────────────
         int heroCol = 0, heroRow = 0;
         HashSet<(int, int)>? nearbyCells = null;
         if (_ws.Hero?.Position is { Count: >= 2 } heroPos)
@@ -215,31 +217,32 @@ public class AiContextBuilder
                     nearbyCells.Add((heroCol + dc, heroRow + dr));
         }
 
-        // ── Видимое ────────────────────────────────────────────────────────
+        // ── Visible ──────────────────────────── ────────────────────────────
         var visSb = new System.Text.StringBuilder();
         if (_visibleCells != null)
         {
-            // Видимое — с #id и клеткой (у существ ещё хиты): для атаки, разговора и патча не нужен запрос.
+            // Visible - with #id and a cell (creatures still have hit points): no request is needed to attack, talk and patch.
             if (Indexed(_ws.Map.Objects, o => o.Deleted == true || o.Position is not { Count: >= 2 } || !_visibleCells.Contains((o.Position[0], o.Position[1])),
-                    (o, i) => $"{o.Name}#{i} [{o.Position![0]},{o.Position[1]}]{(o.Hidden == true ? "(скрыт)" : "")}") is { } visObj)
+                    (o, i) => $"{o.Name}#{i} [{o.Position![0]},{o.Position[1]}]{(o.Hidden == true ? "(hidden)" : "")}") is { } visObj)
                 visSb.AppendLine($"map.objects: {visObj}");
 
             if (Indexed(_ws.Map.Entities, e => e.Deleted == true || e.Position is not { Count: >= 2 } || !_visibleCells.Contains((e.Position[0], e.Position[1])),
-                    (e, i) => $"{e.Name}#{i} [{e.Position![0]},{e.Position[1]}]{(string.IsNullOrEmpty(e.Hp) ? "" : $" hp:{e.Hp}")}{(e.Hidden == true ? "(скрыт)" : "")}") is { } visEnt)
+                    (e, i) => $"{e.Name}#{i} [{e.Position![0]},{e.Position[1]}]{(string.IsNullOrEmpty(e.Hp) ? "" : $" hp:{e.Hp}")}{(e.Hidden == true ? "(hidden)" : "")}") is { } visEnt)
                 visSb.AppendLine($"map.entities: {visEnt}");
 
             AppendDoorIds(visSb, _ws.Map.Doors, withState: true, isVisible: d =>
                 d.From is { Count: >= 2 } && d.To is { Count: >= 2 } &&
                 (_visibleCells.Contains((d.From[0], d.From[1])) || _visibleCells.Contains((d.To[0], d.To[1]))));
 
-            // Рельеф в поле зрения (вода, кусты, обломки) — иначе мастер дописывал окружение по плану локации:
-            // «лесной подход у реки» превращался в реку у входа, которой на карте нет.
+            // Terrain in the field of view (water, bushes, debris) - otherwise the GM added the environment
+            // according to the location plan: the “forest approach by the river” turned into a river at the
+            // entrance, which is not on the map.
             var ground = _visibleCells.Select(c => _ws.Map.GroundAt(c.Item1, c.Item2)?.Name).Where(n => !string.IsNullOrEmpty(n))
                 .GroupBy(n => n).OrderByDescending(g => g.Count()).Select(g => g.Key!).ToList();
-            if (ground.Count > 0) visSb.AppendLine($"рельеф: {Join(ground)}");
+            if (ground.Count > 0) visSb.AppendLine($"terrain: {Join(ground)}");
         }
 
-        // ── Рядом ──────────────────────────────────────────────────────────
+        // ── Nearby ───────────────────────────── ─────────────────────────────
         var nearSb = new System.Text.StringBuilder();
         if (_visibleCells != null && nearbyCells != null)
         {
@@ -263,7 +266,7 @@ public class AiContextBuilder
                 .Where(e => e.Deleted != true && e.Position is { Count: >= 2 } &&
                             _visibleCells.Contains((e.Position[0], e.Position[1])) &&
                             nearbyCells.Contains((e.Position[0], e.Position[1])))
-                .Select(e => e.Hidden == true ? $"{e.Name}(скрыт)" : e.Name);
+                .Select(e => e.Hidden == true ? $"{e.Name}(hidden)" : e.Name);
             if (nearEnt?.Any() == true)
                 nearSb.AppendLine($"map.entities: {Join(nearEnt)}");
 
@@ -273,13 +276,14 @@ public class AiContextBuilder
                 (nearbyCells.Contains((d.From[0], d.From[1])) || nearbyCells.Contains((d.To[0], d.To[1]))));
         }
 
-        var visSection  = visSb.Length  > 0 ? $"\n## Видимое\n{visSb}"  : "";
-        var nearSection = nearSb.Length > 0 ? $"\n## Рядом\n{nearSb}"   : "";
-        return $"## Текущее состояние\n{sb}{visSection}{nearSection}{NpcMemorySection()}\n## Действие игрока\n{playerAction}";
+        var visSection  = visSb.Length  > 0 ? $"\n## Visible\n{visSb}"  : "";
+        var nearSection = nearSb.Length > 0 ? $"\n## Nearby\n{nearSb}"   : "";
+        return $"## Current state\n{sb}{visSection}{nearSection}{NpcMemorySection()}\n## Player action\n{playerAction}";
     }
 
-    // Память NPC, которых герой сейчас видит: хвост истории короткий, а разговор с NPC должен
-    // переживать его — факты из npcs[i].memory идут в контекст сразу, без отдельного MCP-запроса.
+    // Memory of NPC, whom the hero now sees: the tail of the story is short, and the conversation with NPC
+    // should survive it - facts from npcs[i].memory go into context immediately, without a separate MCP-
+    // request.
     private string NpcMemorySection()
     {
         if (_visibleCells == null || _ws.Narrative?.Npcs is not { Count: > 0 } npcs) return "";
@@ -292,30 +296,30 @@ public class AiContextBuilder
         var sb = new System.Text.StringBuilder();
         foreach (var npc in npcs.Where(n => n.Deleted != true && n.Memory is { Count: > 0 } && visibleNames.Contains(n.Name)))
             sb.AppendLine($"{npc.Name}: {string.Join(" | ", npc.Memory!)}");
-        return sb.Length > 0 ? $"\n## Память NPC\n{sb}" : "";
+        return sb.Length > 0 ? $"\n## NPC memory\n{sb}" : "";
     }
 
     /// <summary>
-    /// Минимальный контекст для редактирования героя до начала игры.
-    /// Только hp/state/name + индекс имён — данные AI получает через MCP.
+    ///Minimal context for editing a hero before the game starts.
+    ///Only hp/state/name + name index - AI receives data via MCP.
     /// </summary>
-    // Блок локации для наполнения нейронкой (StartNewGame, PopulateChunk): геометрию сгенерировал код,
-    // нейронке — комнаты с id и клетками (свёрнуты по строкам в диапазоны), двери/проходы и выходы с id.
-    // План локации (plan_location): все блоки с назначением — чтобы наполнение блока вязалось с остальными.
-    // Где герой: блок локации (тип, назначение, этаж), комната или снаружи, соседние блоки — чтобы ИИ учитывал окружение.
-    // Строка о мире: «world: Мир «X»; место: Y — город, королевство Z, северо-запад; окружение» (подробнее —
-    // MCP world_query). Нет мира игры (старые сохранения) — нет строки.
+    // Location block for filling with a AI (StartNewGame, PopulateChunk): the geometry was generated by the
+    // code, the AI - rooms with id and cells (collapsed by rows into ranges), doors/passages and exits with id.
+    // Location plan (plan_location): all blocks with a purpose - so that the filling of the block is linked
+    // with the rest. Where hero: location block (type, purpose, floor), room or outside, neighboring blocks -
+    // so that the AI takes into account the environment. Line about the world: “world: World “X”; location: Y -
+    // city, kingdom Z, environment" (more details - MCP world_query). No game world (old saves) - no line.
     public string? WorldLine()
     {
         if (_ws.World is not { } link || GameWorld.ForMaster(_ws) is not { } world) return null;
-        string line = $"world: «{world.Name}»" + (GameWorld.HasLocation(_ws) ? "" : " — без тактической карты (сцена текстом)");
+        string line = $"world: «{world.Name}»" + (GameWorld.HasLocation(_ws) ? "" : " — no tactical map (text scene)");
         if (link.Place is { Length: > 0 } name && MapGen.Generators.WorldAtlas.FindPlace(world, name) is { } p)
-            line += $"; место: {p.Name} — {WorldPlaceTypes.Label(p.Type)}, {MapGen.Generators.WorldAtlas.KingdomName(world, p)}, " +
+            line += $"; place: {p.Name} — {WorldPlaceTypes.Label(p.Type)}, {MapGen.Generators.WorldAtlas.KingdomName(world, p)}, " +
                     MapGen.Generators.WorldAtlas.Surroundings(world, p.X, p.Y, named: true);
         else if (link.X is int x && link.Y is int y)
         {
             int own = world.OwnerAt(x, y);
-            line += $"; в пути: [{x},{y}] {(own >= 0 && own < world.Kingdoms.Count ? "королевство " + world.Kingdoms[own].Name : "ничья земля")}, "
+            line += $"; traveling: [{x},{y}] {(own >= 0 && own < world.Kingdoms.Count ? "kingdom " + world.Kingdoms[own].Name : "no man's land")}, "
                     + MapGen.Generators.WorldAtlas.Surroundings(world, x, y, named: true);
         }
         return line;
@@ -325,31 +329,32 @@ public class AiContextBuilder
     {
         if (_ws.Hero?.Position is not { Count: >= 2 } hp || _ws.Map.ChunkAt(hp[0], hp[1]) is not { } chunk) return null;
         var room = (_ws.Map.Rooms ?? []).FirstOrDefault(r => r.Deleted != true && r.Positions?.Any(p => p.Count >= 2 && p[0] == hp[0] && p[1] == hp[1]) == true);
-        string place = room != null ? $"в комнате «{room.Name}»" : "снаружи, под открытым небом";
+        string place = room != null ? $"in room «{room.Name}»" : "outside, under the open sky";
         string floor = _ws.Map.HasFloors ? $", {MapConfig.FloorName(chunk.Z)}" : "";
-        var line = $"where: {place}; блок {ChunkLabel(chunk)}{floor}: {chunk.Purpose ?? "—"}";
+        var line = $"where: {place}; chunk {ChunkLabel(chunk)}{floor}: {chunk.Purpose ?? "—"}";
         var furniture = _ws.Map.Furniture ?? [];
         var nearFurniture = furniture.Select((f, i) => (f, i)).Where(x => x.f.Deleted != true
                 && x.f.Positions?.Any(p => p.Count >= 2 && Math.Max(Math.Abs(p[0] - hp[0]), Math.Abs(p[1] - hp[1])) <= 1) == true)
             .Select(x => $"{FurnitureCatalog.DisplayName(x.f)}(furniture id:{x.i})").ToList();
-        if (nearFurniture.Count > 0) line += $"; рядом мебель: {string.Join(", ", nearFurniture)}";
+        if (nearFurniture.Count > 0) line += $"; nearby furniture: {string.Join(", ", nearFurniture)}";
         var near = Neighbors(chunk).Select(n => $"{n.side} — {ChunkLabel(n.chunk)}: {n.chunk.Purpose ?? "—"}").ToList();
-        return near.Count > 0 ? $"{line}; рядом: {string.Join("; ", near)}" : line;
+        return near.Count > 0 ? $"{line}; nearby: {string.Join("; ", near)}" : line;
     }
 
     private static string ChunkLabel(MapChunk c) => c.Style != null ? $"{c.Theme}/{c.Style}" : c.Theme;
 
-    // Соседние блоки того же этажа по сторонам (на поле этажи разнесены — сосед по полю того же Z = сосед по плану).
+    // Adjacent blocks of the same floor on the sides (floors are spaced apart on the field - neighbor on the field of the same Z = neighbor according to the plan).
     private IEnumerable<(string side, MapChunk chunk)> Neighbors(MapChunk chunk)
     {
-        foreach (var (side, dx, dy) in new[] { ("север", 0, 1), ("юг", 0, -1), ("восток", 1, 0), ("запад", -1, 0) })
+        foreach (var (side, dx, dy) in new[] { ("north", 0, 1), ("south", 0, -1), ("east", 1, 0), ("west", -1, 0) })
             if ((_ws.Map.Chunks ?? []).FirstOrDefault(c => c.X == chunk.X + dx && c.Y == chunk.Y + dy && c.Z == chunk.Z) is { } n)
                 yield return (side, n);
     }
 
-    // Наполнение блока: замысел мастера, а не лист героя. Сюжетные нити и NPC — с dmNotes: без них блок наполнялся
-    // в разрез с задуманным при старте (головоломка «свет и сталь» превращалась в «воду и огонь»). От героя —
-    // уровень для силы врагов и пассивное Восприятие для скрытности ловушек.
+    // Filling the block: the GM's plan, not the hero sheet. Plot threads and NPC - with dmNotes: without them,
+    // the block was filled in the way intended at the start (the “light and steel” puzzle turned into “water
+    // and fire”). From the hero - level for the strength of enemies and passive Perception for stealth of
+    // traps.
     public string PopulationState()
     {
         var sb = new System.Text.StringBuilder();
@@ -361,7 +366,7 @@ public class AiContextBuilder
             var perception = hero.Skills?.FirstOrDefault(s => s.Deleted != true && SkillNames.IsPerception(s.Name));
             int passive = 10 + System.Text.RegularExpressions.Regex.Matches(perception?.Value ?? "", @"[+\-−]?\d+")
                 .Sum(m => int.TryParse(m.Value.Replace('−', '-'), out int v) ? v : 0);
-            sb.AppendLine($"hero: {hero.Name}{(who.Length > 0 ? $" ({who})" : "")} symbol:{hero.Symbol} position:{(hero.Position is { Count: >= 2 } hp ? $"[{hp[0]},{hp[1]}]" : "?")} пассивное Восприятие:{passive}");
+            sb.AppendLine($"hero: {hero.Name}{(who.Length > 0 ? $" ({who})" : "")} symbol:{hero.Symbol} position:{(hero.Position is { Count: >= 2 } hp ? $"[{hp[0]},{hp[1]}]" : "?")} passive Perception:{passive}");
         }
         if (WorldLine() is { } worldLine) sb.AppendLine(worldLine);
         if (_ws.Narrative is { } n)
@@ -370,11 +375,11 @@ public class AiContextBuilder
             if (n.CurrentArc is { Length: > 0 } arc) sb.AppendLine($"arc: {arc}");
             if (n.World is { Length: > 0 } world) sb.AppendLine($"world: {world}");
             foreach (var t in n.PlotThreads?.Where(x => x.Deleted != true) ?? [])
-                sb.AppendLine($"нить «{t.Name}» ({t.Status}): {t.Description}{(t.DmNotes is { Length: > 0 } dm ? $" | мастер: {dm}" : "")}");
+                sb.AppendLine($"thread «{t.Name}» ({t.Status}): {t.Description}{(t.DmNotes is { Length: > 0 } dm ? $" | GM: {dm}" : "")}");
             foreach (var npc in n.Npcs?.Where(x => x.Deleted != true) ?? [])
-                sb.AppendLine($"npc «{npc.Name}» ({npc.Attitude}): {npc.Notes}{(npc.DmNotes is { Length: > 0 } dm ? $" | мастер: {dm}" : "")}");
+                sb.AppendLine($"npc «{npc.Name}» ({npc.Attitude}): {npc.Notes}{(npc.DmNotes is { Length: > 0 } dm ? $" | GM: {dm}" : "")}");
         }
-        // Уникальное, что уже есть на карте, — чтобы не повторить NPC и сюжетные предметы.
+        // Unique things that are already on the map, so as not to repeat NPC and story items.
         if (_ws.Map.Entities is { Count: > 0 } ent)
             sb.AppendLine($"map.entities: {Join(ent.Where(x => x.Deleted != true).Select(x => x.Name).Distinct())}");
         if (_ws.Map.Objects is { Count: > 0 } obj)
@@ -385,12 +390,12 @@ public class AiContextBuilder
     public string LocationPlan(MapChunk? current = null)
     {
         if (_ws.Map.Chunks is not { Count: > 0 } chunks) return "";
-        var sb = new System.Text.StringBuilder("## План локации (блоки 20×15, x — восток, y — север)\n");
+        var sb = new System.Text.StringBuilder("## Location plan (20×15 chunks, x east, y north)\n");
         foreach (var c in chunks)
         {
-            string state = c == current ? "ЭТОТ БЛОК" : c.Populated ? "наполнен" : "не наполнен";
+            string state = c == current ? "THIS CHUNK" : c.Populated ? "populated" : "unpopulated";
             string floor = _ws.Map.HasFloors ? $", {MapConfig.FloorName(c.Z)}" : "";
-            sb.AppendLine($"- блок x:{c.X} y:{c.Y} {ChunkLabel(c)}{floor} [{state}]: {c.Purpose ?? "—"}");
+            sb.AppendLine($"- chunk x:{c.X} y:{c.Y} {ChunkLabel(c)}{floor} [{state}]: {c.Purpose ?? "—"}");
         }
         return sb.ToString();
     }
@@ -398,15 +403,15 @@ public class AiContextBuilder
     public string ChunkState(MapChunk chunk)
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"## Блок локации ({ChunkLabel(chunk)}): клетки {chunk.OriginCol + 1}–{chunk.OriginCol + MapChunk.Cols} × {chunk.OriginRow + 1}–{chunk.OriginRow + MapChunk.Rows}");
-        if (!string.IsNullOrEmpty(chunk.Purpose)) sb.AppendLine($"Назначение по плану: {chunk.Purpose}");
-        if (_ws.Map.HasFloors) sb.AppendLine($"Этаж: {MapConfig.FloorName(chunk.Z)}");
+        sb.AppendLine($"## Location chunk ({ChunkLabel(chunk)}): cells {chunk.OriginCol + 1}–{chunk.OriginCol + MapChunk.Cols} × {chunk.OriginRow + 1}–{chunk.OriginRow + MapChunk.Rows}");
+        if (!string.IsNullOrEmpty(chunk.Purpose)) sb.AppendLine($"Planned purpose: {chunk.Purpose}");
+        if (_ws.Map.HasFloors) sb.AppendLine($"Floor: {MapConfig.FloorName(chunk.Z)}");
         var neighbors = Neighbors(chunk).Select(n => $"{n.side} — {ChunkLabel(n.chunk)}: {n.chunk.Purpose ?? "—"}").ToList();
-        if (neighbors.Count > 0) sb.AppendLine($"Соседние блоки (учитывай при наполнении): {string.Join("; ", neighbors)}");
+        if (neighbors.Count > 0) sb.AppendLine($"Neighboring chunks (account for these when populating): {string.Join("; ", neighbors)}");
 
         if (MapChunk.IsOutdoorTheme(chunk.Theme) && chunk.Terrain is { } terrain)
         {
-            // Открытая местность: комнат нет, ставить можно на любую проходимую клетку рельефа.
+            // Open area: there are no rooms, you can place it on any passable terrain square.
             var walkable = new List<List<int>>();
             var kinds = new Dictionary<string, int>();
             for (int r = 0; r < terrain.Count; r++)
@@ -416,25 +421,25 @@ public class AiContextBuilder
                     kinds[kind.Name] = kinds.GetValueOrDefault(kind.Name) + 1;
                     if (!kind.BlocksMove) walkable.Add([chunk.OriginCol + c + 1, chunk.OriginRow + r + 1]);
                 }
-            sb.AppendLine($"Открытая местность, комнат нет. Рельеф (клеток): {string.Join(", ", kinds.OrderByDescending(k => k.Value).Select(k => $"{k.Key} {k.Value}"))}");
-            sb.AppendLine($"Проходимые клетки (позиции существ/объектов — только эти): {CompactCells(walkable)}");
+            sb.AppendLine($"Open terrain, no rooms. Terrain (cells): {string.Join(", ", kinds.OrderByDescending(k => k.Value).Select(k => $"{k.Key} {k.Value}"))}");
+            sb.AppendLine($"Passable cells (creature/object positions must use these): {CompactCells(walkable)}");
         }
         else
         {
             var rooms = _ws.Map.Rooms ?? [];
-            sb.AppendLine("Комнаты (позиции существ/объектов — только эти клетки):");
+            sb.AppendLine("Rooms (creature/object positions must use these cells):");
             for (int i = 0; i < rooms.Count; i++)
             {
                 var room = rooms[i];
                 if (room.Deleted == true || room.Positions is not { Count: > 0 } || !chunk.Contains(room.Positions[0][0], room.Positions[0][1])) continue;
-                // Колонны/завалы (рельеф пола) заняты — их клетки не предлагаем.
+                // Columns/blockages (floor topography) are occupied - we do not offer their cells.
                 var free = room.Positions.Where(p => _ws.Map.TerrainAt(p[0], p[1]) is not { BlocksMove: true }).ToList();
                 var features = room.Positions.Select(p => _ws.Map.TerrainAt(p[0], p[1]))
                     .Where(k => k != null && TerrainCatalog.InLegend(k)).Select(k => k!.Name).Distinct().ToList();
                 string extra = features.Count > 0 ? $" [{string.Join(", ", features)}]" : "";
-                sb.AppendLine($"- rooms id:{i} \"{room.Name}\"{extra} ({free.Count} клеток): {CompactCells(free)}");
+                sb.AppendLine($"- rooms id:{i} \"{room.Name}\"{extra} ({free.Count} cells): {CompactCells(free)}");
             }
-            // Двор здания (первый этаж) / улицы поселения: проходимые клетки вне комнат.
+            // Building courtyard (ground floor) / settlement streets: passable cells outside the rooms.
             if (chunk.Theme is MapChunk.Building or MapChunk.Village && chunk.Terrain is { } yardRows)
             {
                 var roomCells = rooms.SelectMany(r => r.Positions ?? []).Where(p => p.Count >= 2).Select(p => (p[0], p[1])).ToHashSet();
@@ -445,7 +450,7 @@ public class AiContextBuilder
                         int col = chunk.OriginCol + c + 1, row = chunk.OriginRow + r + 1;
                         if (!roomCells.Contains((col, row)) && TerrainCatalog.Get(yardRows[r][c]) is { BlocksMove: false }) yard.Add([col, row]);
                     }
-                if (yard.Count > 0) sb.AppendLine($"{(chunk.Theme == MapChunk.Village ? "Улицы и дворы" : "Двор вокруг здания")} ({yard.Count} клеток): {CompactCells(yard)}");
+                if (yard.Count > 0) sb.AppendLine($"{(chunk.Theme == MapChunk.Village ? "Streets and courtyards" : "Building courtyard")} ({yard.Count} cells): {CompactCells(yard)}");
             }
         }
 
@@ -458,11 +463,11 @@ public class AiContextBuilder
                 return $"id:{x.i} {FurnitureCatalog.DisplayName(x.f)} {cells}";
             }).ToList();
         if (pieces.Count > 0)
-            sb.AppendLine($"Мебель (map.furniture, уже на карте — объектами не дублировать, клетки заняты): {string.Join("; ", pieces)}");
+            sb.AppendLine($"Furniture (map.furniture, already on the map; do not duplicate as objects, cells occupied): {string.Join("; ", pieces)}");
 
         var external = chunk.Exits.Where(e => e.External).Select(e => e.AnchorCell(chunk)).ToHashSet();
         var doors = _ws.Map.Doors ?? [];
-        sb.AppendLine("Двери и проходы:");
+        sb.AppendLine("Doors and passages:");
         var windows = new List<int>();
         for (int i = 0; i < doors.Count; i++)
         {
@@ -470,31 +475,31 @@ public class AiContextBuilder
             if (d.From is not { Count: >= 2 } f || d.To is not { Count: >= 2 } t || !chunk.Contains(f[0], f[1])) continue;
             if (d.IsWindow == true) { windows.Add(i); continue; }
             string kind = d.IsEntry == true
-                ? external.Contains((f[0], f[1])) ? "вход снаружи (выход из локации)" : "переход в соседний блок"
-                : (d.IsDoor ?? d.Color?.Count == 3) ? (d.IsDoorOpen == true ? "дверь (открыта)" : "дверь") : "проход";
+                ? external.Contains((f[0], f[1])) ? "outside entrance (location exit)" : "transition to a neighboring chunk"
+                : (d.IsDoor ?? d.Color?.Count == 3) ? (d.IsDoorOpen == true ? "door (open)" : "door") : "passage";
             sb.AppendLine($"- doors id:{i} [{f[0]},{f[1]}]→[{t[0]},{t[1]}] {kind}");
         }
 
         foreach (var s in _ws.Map.Stairs ?? [])
             foreach (var (here, there) in new[] { (s.A, s.B), (s.B, s.A) })
                 if (here is { Count: >= 2 } && there is { Count: >= 2 } && chunk.Contains(here[0], here[1]))
-                    sb.AppendLine($"Лестница [{here[0]},{here[1]}] → {MapConfig.FloorName(_ws.Map.FloorAt(there[0], there[1]))} (клетку не занимать)");
+                    sb.AppendLine($"Stairs [{here[0]},{here[1]}] → {MapConfig.FloorName(_ws.Map.FloorAt(there[0], there[1]))} (keep cell clear)");
 
-        if (windows.Count > 0) sb.AppendLine($"Окна (doors id, видно насквозь, пройти нельзя): {string.Join(" ", windows)}");
+        if (windows.Count > 0) sb.AppendLine($"Windows (doors id; transparent but impassable): {string.Join(" ", windows)}");
 
         if (_ws.Hero?.Position is { Count: >= 2 } hp && chunk.Contains(hp[0], hp[1]))
-            sb.AppendLine($"Герой: [{hp[0]},{hp[1]}], {HeroWhereabouts()?["where: ".Length..].Split(';')[0]} — описание начала строго по этому месту");
+            sb.AppendLine($"Hero: [{hp[0]},{hp[1]}], {HeroWhereabouts()?["where: ".Length..].Split(';')[0]} — describe the opening at this exact position");
 
         var usedSymbols = (_ws.Map.Entities ?? []).Where(e => e.Deleted != true).Select(e => e.Symbol)
             .Concat((_ws.Map.Objects ?? []).Where(o => o.Deleted != true).Select(o => o.Symbol))
             .Append(_ws.Hero?.Symbol ?? "")
             .Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList();
         if (usedSymbols.Count > 0)
-            sb.AppendLine($"Занятые символы существ/объектов (не повторяй): {string.Join(", ", usedSymbols)}");
+            sb.AppendLine($"Occupied creature/object symbols (do not reuse): {string.Join(", ", usedSymbols)}");
         return sb.ToString();
     }
 
-    // [[41,46],[42,46],[43,46],[47,46],…] → "ряд 46: 41–43, 47; ряд 45: …" (строки сверху вниз).
+    // [[41,46],[42,46],[43,46],[47,46],...] → "row 46: 41–43, 47; row 45: ..." (lines from top to bottom).
     private static string CompactCells(List<List<int>> cells) =>
         string.Join("; ", cells.Where(p => p.Count >= 2).GroupBy(p => p[1]).OrderByDescending(g => g.Key).Select(g =>
         {
@@ -507,10 +512,10 @@ public class AiContextBuilder
                 ranges.Add(i == j ? $"{cols[i]}" : $"{cols[i]}–{cols[j]}");
                 i = j + 1;
             }
-            return $"ряд {g.Key}: {string.Join(", ", ranges)}";
+            return $"row {g.Key}: {string.Join(", ", ranges)}";
         }));
 
-    // «lvl 3, xp 1200/2700» — уровень и опыт героя (ведёт движок).
+    // “lvl 3, xp 1200/2700” - level and experience of the hero (driven by the engine).
     public static string LevelText(Hero hero)
     {
         var rules = Helpers.LevelRules.Current;
@@ -536,13 +541,13 @@ public class AiContextBuilder
         if (_ws.Hero?.Spells is { Count: > 0 } spl)
             sb.AppendLine($"hero.spells: {Join(spl.Where(x => x.Deleted != true).Select(x => $"{x.Name} (lvl {x.Level})"))}");
 
-        return $"## Герой\n{sb}\n## Запрос игрока\n{request}";
+        return $"## Hero\n{sb}\n## Player request\n{request}";
     }
 
     public string TriggerState(List<(CellEntity entity, string triggerType)> triggers, List<Area> areaTriggers, List<(Door door, string triggerType)> doorTriggers)
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine("Сработали триггеры. Данные объектов полностью включены — MCP по ним не вызывать:");
+        sb.AppendLine("Triggers fired. Full object data is included; do not request it again through MCP:");
 
         var sent = new HashSet<CellEntity>();
         foreach (var (source, triggerType) in triggers)
@@ -554,11 +559,11 @@ public class AiContextBuilder
             CellEntity entity = inEntities >= 0 ? _ws.Map.Entities![inEntities] : source;
             sent.Add(entity);
             string stealthNote = triggerType == "spotted" && _ws.Hero?.Stealth is int st
-                ? $" (герой скрытен: Скрытность {st})"
+                ? $" (hero is hidden: Stealth {st})"
                 : "";
             if (triggerType == "spotted" && _ws.Combat?.Active == true && entity is LivingEntity watcher
                 && !MovementCalculator.EntitySeesHero(_ws, watcher))
-                stealthNote += " (героя не видит — заметило идущий бой рядом с союзником, вступает в него)";
+                stealthNote += " (cannot see the hero; noticed ongoing combat near an ally and is joining)";
             sb.AppendLine($"- {triggerType}{stealthNote}");
 
             var inObjects = inEntities < 0 ? (_ws.Map.Objects?.IndexOf(entity) ?? -1) : -1;
@@ -570,7 +575,7 @@ public class AiContextBuilder
             sb.AppendLine($"  {listKey}: {node.ToJsonString(_json)}");
         }
 
-        // Данные возможных участников, а не только существа, первым увидевшего героя.
+        // Data from possible participants, not just the creature that first saw the hero.
         if (triggers.Any(t => t.triggerType == "spotted"))
         {
             foreach (var (entity, id) in (_ws.Map.Entities ?? []).Select((e, i) => (e, i)))
@@ -579,7 +584,7 @@ public class AiContextBuilder
                     || (entity.Triggers?.Spotted == null && _ws.Combat?.Initiative?.Any(i => i.Symbol == entity.Symbol) != true)) continue;
                 var node = JsonSerializer.SerializeToNode(entity, entity.GetType(), _json)!.AsObject();
                 node["id"] = id;
-                sb.AppendLine($"  Возможный участник (не отдельный триггер), map.entities: {node.ToJsonString(_json)}");
+                sb.AppendLine($"  Potential participant (not a separate trigger), map.entities: {node.ToJsonString(_json)}");
             }
         }
 
@@ -612,9 +617,10 @@ public class AiContextBuilder
         return MinimalState(sb.ToString());
     }
 
-    // Кто ходит дальше — от текущего (не героя: от следующего за героем) по кругу до героя, с границей раунда:
-    // «WL1 → WL2 → [новый раунд: advance_round] WL3 → КАД». Без неё мастер, дойдя до конца списка, отдавал ход
-    // герою и пропускал врагов с инициативой выше героя в новом раунде.
+    // Who goes next - from the current (not the hero: from the next after the hero) in a circle to the hero,
+    // with the round boundary: “WL1 → WL2 → [new round: advance_round] WL3 → KAD.” Without it, the GM, having
+    // reached the end of the list, gave the turn to the hero and let enemies with initiative higher than the
+    // hero pass in the new round.
     private string? TurnQueue()
     {
         if (_ws.Combat is not { Active: true, Initiative: { Count: > 1 } init } c || _ws.Hero?.Symbol is not { } hero) return null;
@@ -625,7 +631,7 @@ public class AiContextBuilder
         var parts = new List<string>();
         for (int k = 0, i = at; k < order.Count; k++, i = (i + 1) % order.Count)
         {
-            if (i == 0 && k > 0) parts.Add("[новый раунд: advance_round]");
+            if (i == 0 && k > 0) parts.Add("[new round: advance_round]");
             parts.Add(order[i]);
             if (order[i] == hero) break;
         }
@@ -635,7 +641,7 @@ public class AiContextBuilder
     public string CombatTurnState()
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine("Наступает ход врагов. Вызови calculate_movement для нужных сущностей, сформируй полный план всех ходов одним history-массивом.");
+        sb.AppendLine("Enemies' turn begins. Call calculate_movement for creatures that need movement; return every turn in one history array.");
         if (_ws.Combat != null)
         {
             var initiative = _ws.Combat.Initiative?
@@ -653,7 +659,7 @@ public class AiContextBuilder
             sb.AppendLine($"{enemy.Symbol} speedFt:{enemy.SpeedMax ?? 30} notes:{string.Join("; ", enemy.AiInfo ?? [])}");
             var monster = Helpers.MonsterDatabase.Find(enemy.MonsterKey);
             if (monster == null || !sent.Add(monster.Name)) continue;
-            sb.AppendLine($"## Возможности {monster.Name} (только этот набор, ограничения и перезарядки соблюдай)");
+            sb.AppendLine($"## Abilities of {monster.Name} (only these abilities; respect limits and recharge)");
             if (!string.IsNullOrWhiteSpace(monster.Spells)) sb.AppendLine($"spells: {monster.Spells}");
             foreach (var ability in monster.Traits.Concat(monster.Actions).Concat(monster.Reactions))
                 sb.AppendLine($"{ability.Name}: {ability.Text}");
@@ -664,39 +670,39 @@ public class AiContextBuilder
     public string RoundTransitionState(RoundBundle bundle)
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"Начался раунд {bundle.NewRound}. Обработай всё одним JSON-ответом.");
-        sb.AppendLine("Патчи ниже (`hero`/`map`/`scheduledEvents`) — КОРНЕВЫЕ ключи ответа, наравне с `history`, а не вложенные в history[].patch (тот формат только для хода врагов в бою). Объедини изменения от всех событий ниже в один `hero`/`map` объект.");
+        sb.AppendLine($"Round {bundle.NewRound} begins. Process everything in one JSON response.");
+        sb.AppendLine("The patches below (`hero`/`map`/`scheduledEvents`) are ROOT response keys alongside `history`, not nested in history[].patch (that format is only for enemy combat turns). Merge all events below into one `hero`/`map` object.");
 
         if (bundle.OnRoundEffects.Count > 0)
         {
-            sb.AppendLine("\n## Периодические эффекты");
+            sb.AppendLine("\n## Recurring effects");
             foreach (var r in bundle.OnRoundEffects)
             {
-                string until = r.Effect.ExpiresAtRound.HasValue ? $"до раунда {r.Effect.ExpiresAtRound}" : "бессрочно";
+                string until = r.Effect.ExpiresAtRound.HasValue ? $"until round {r.Effect.ExpiresAtRound}" : "indefinite";
                 sb.AppendLine($"- {EffectPath(r)} id:{r.EffectId} ({r.OwnerName}) \"{r.Effect.Name}\" ({until}): {r.Effect.OnRound!.Effect}");
             }
         }
         if (bundle.ExpiredEffects.Count > 0)
         {
-            sb.AppendLine("\n## Истекли эффекты");
+            sb.AppendLine("\n## Expired effects");
             foreach (var r in bundle.ExpiredEffects)
-                sb.AppendLine($"- {EffectPath(r)} id:{r.EffectId} ({r.OwnerName}) \"{r.Effect.Name}\": {r.Effect.OnExpire!.Effect} → удали: {EffectDeletePatch(r)}");
+                sb.AppendLine($"- {EffectPath(r)} id:{r.EffectId} ({r.OwnerName}) \"{r.Effect.Name}\": {r.Effect.OnExpire!.Effect} → delete: {EffectDeletePatch(r)}");
         }
         if (bundle.FiredScheduledEvents.Count > 0)
         {
-            sb.AppendLine("\n## Запланированные события");
+            sb.AppendLine("\n## Scheduled events");
             foreach (var (id, ev) in bundle.FiredScheduledEvents)
-                sb.AppendLine($"- scheduledEvents id:{id} \"{ev.Name}\" (fireAtRound:{ev.FireAtRound}): {ev.Effect} → удали: {{\"id\":{id},\"deleted\":true}}");
+                sb.AppendLine($"- scheduledEvents id:{id} \"{ev.Name}\" (fireAtRound:{ev.FireAtRound}): {ev.Effect} → delete: {{\"id\":{id},\"deleted\":true}}");
         }
         if (bundle.AreaRoundTriggers.Count > 0)
         {
-            sb.AppendLine("\n## Зональные эффекты (onRound)");
+            sb.AppendLine("\n## Area effects (onRound)");
             foreach (var (areaId, area) in bundle.AreaRoundTriggers)
                 sb.AppendLine($"- map.area id:{areaId} \"{area.Name}\": {area.Triggers!.OnRound!.Effect}");
         }
         if (bundle.EntityRoundTriggers.Count > 0)
         {
-            sb.AppendLine("\n## Существа (onRound)");
+            sb.AppendLine("\n## Creatures (onRound)");
             foreach (var (entityId, entity) in bundle.EntityRoundTriggers)
                 sb.AppendLine($"- map.entities id:{entityId} \"{entity.Name}\": {entity.Triggers!.OnRound!.Effect}");
         }
@@ -738,7 +744,7 @@ public class AiContextBuilder
 
     private static string Join(IEnumerable<string> items) => string.Join("; ", items);
 
-    // Элементы списка с их индексом (он же id для патча), без удалённых; null — показывать нечего.
+    // List elements with their index (aka id for the patch), without deleted ones; null - nothing to show.
     private static string? Indexed<T>(List<T>? items, Func<T, bool> skip, Func<T, int, string> format)
     {
         if (items is not { Count: > 0 }) return null;
@@ -746,32 +752,32 @@ public class AiContextBuilder
         return parts.Count > 0 ? Join(parts) : null;
     }
 
-    // withState — у дверей ещё «открыта/закрыта» (что видит герой; действие с дверью — door_action по id).
+    // withState - the doors are still “open/closed” (what the hero sees; action with the door - door_action to id).
     private static void AppendDoorIds(System.Text.StringBuilder sb, List<Door>? doors, Func<Door, bool> isVisible, bool withState = false)
     {
         if (doors is not { Count: > 0 }) return;
         var matching = doors.Select((d, i) => (d, i)).Where(x => isVisible(x.d)).ToList();
-        string State(Door d) => withState ? (d.IsDoorOpen == true ? " открыта" : " закрыта") : "";
+        string State(Door d) => withState ? (d.IsDoorOpen == true ? " open" : " closed") : "";
         var phys = string.Join("; ", matching.Where(x => x.d.IsDoor == true && x.d.IsWindow != true)
-            .Select(x => x.d.Hidden == true ? $"{x.i}(скрыт)" : $"{x.i}{State(x.d)}"));
+            .Select(x => x.d.Hidden == true ? $"{x.i}(hidden)" : $"{x.i}{State(x.d)}"));
         var pass = string.Join("; ", matching.Where(x => x.d.IsDoor != true)
-            .Select(x => x.d.Hidden == true ? $"{x.i}(скрыт)" : x.i.ToString()));
-        if (phys.Length > 0) sb.AppendLine($"map.doors (двери): {phys}");
-        if (pass.Length > 0) sb.AppendLine($"map.doors (проходы): {pass}");
+            .Select(x => x.d.Hidden == true ? $"{x.i}(hidden)" : x.i.ToString()));
+        if (phys.Length > 0) sb.AppendLine($"map.doors (doors): {phys}");
+        if (pass.Length > 0) sb.AppendLine($"map.doors (passages): {pass}");
     }
 
-    // ─── Универсальная сериализация ─────────────────────────────────────────
+    // ─── Universal serialization ──────────────────── ─────────────────────
 
     /// <summary>
-    /// Собирает JSON из указанных полей WorldState.
-    /// Ключи задаются в формате "hero.hp", "map.rooms", "map.doors", "narrative", "history".
+    ///Collects JSON from the specified fields WorldState.
+    ///Keys are specified in the format "hero.hp", "map.rooms", "map.doors", "narrative", "history".
     /// </summary>
     public string Serialize(params string[] fields) => Serialize(fields, null);
 
     /// <summary>
-    /// Собирает JSON из указанных полей WorldState с опциональными фильтрами по имени.
-    /// filters: ключ поля → массив подстрок (OR-логика, case-insensitive).
-    /// Для WithIds-массивов оригинальные id сохраняются — патчинг остаётся корректным.
+    ///Collects JSON from the specified WorldState fields with optional filters by name.
+    ///filters: field key → array of substrings (OR-logic, case-insensitive).
+    ///For WithIds- arrays, the original id are preserved - patching remains correct.
     /// </summary>
     public string Serialize(string[] fields, Dictionary<string, string[]>? filters)
     {
@@ -852,9 +858,9 @@ public class AiContextBuilder
     }
 
     /// <summary>
-    /// Сериализует список в JsonArray с id = оригинальный индекс.
-    /// При фильтрации пропускает не подходящие элементы, но id у оставшихся остаётся оригинальным
-    /// — это критично для корректного патчинга.
+    ///Serializes the list to JsonArray with id = original index.
+    ///When filtering, it skips unsuitable elements, but id for the remaining ones remains original
+    ///- this is critical for correct patching.
     /// </summary>
     private static JsonArray WithIds<T>(List<T>? list, string[]? filterTerms, Func<T, string?> getName)
     {

@@ -29,34 +29,9 @@ public sealed class CalculateMovementTools(McpServerConfig config)
     private static readonly object _logLock = new();
 
     [McpServerTool]
-    [Description("""
-        Считает путь движения для одной сущности по приоритетному списку intent. Возвращает первый
-        достижимый intent с полным путём и триггерами вдоль него.
-
-        Схема запроса:
-          entityId: int                   — индекс в map.entities
-          reachFt?: int                   — досягаемость героя в футах для определения атаки по возможности (по умолчанию 5)
-          fromPosition?: [col, row]       — переопределяет текущую позицию сущности (для повторного вызова после частичного пути)
-          speedFt?: int                   — переопределяет SpeedMax сущности (передай remainingSpeedFt из предыдущего вызова для повторного вызова)
-          skipOpportunityAttack?: bool    — true на втором вызове после того как атака по возможности уже разрешена (по умолчанию false)
-          intents: [
-            { intent: "approach",          target: "hero" }
-            { intent: "maintain_distance", target: "hero", minFt: int, maxFt: int }
-            { intent: "flee",              from: "hero" | "[col,row]" }
-            { intent: "stay" }
-          ]
-
-        Всегда включай { intent: "stay" } последним элементом — он всегда достижим.
-
-        Ответ:
-          usedIntent: string           — какой intent из списка использован
-          steps: [[col,row], ...]      — полный путь, включая стартовую позицию
-          remainingSpeedFt: int        — остаток скорости после этого хода (передай как speedFt для повторного вызова)
-          triggers: [{ atStep, type, pausePosition?, objectName?, effect? }, ...]
-            types: "opportunity_attack" | "onStep" | "area_enter"
-        """)]
+    [Description("Calculate movement for one entity using a prioritized list of intents. Return the first reachable intent, its path, and triggers along it.\nRequest: entityId (index in map.entities); optional reachFt (hero reach for opportunity attacks, default 5), fromPosition:[col,row] (override after a partial path), speedFt (override SpeedMax; pass remainingSpeedFt when resuming), skipOpportunityAttack (true after resolving the opportunity attack, default false).\nintents: [{intent:\"approach\",target:\"hero\"},{intent:\"maintain_distance\",target:\"hero\",minFt:N,maxFt:N},{intent:\"flee\",from:\"hero\"|\"[col,row]\"},{intent:\"stay\"}]. Always end with stay, which is always reachable.\nResponse: usedIntent; steps:[[col,row],...] including the starting position; remainingSpeedFt (pass as speedFt to resume); triggers:[{atStep,type,pausePosition?,objectName?,effect?}], types opportunity_attack|onStep|area_enter. Use returned visibility, remaining movement, and diagonal count when resolving or continuing movement.")]
     public string CalculateMovement(
-        [Description("MovementRequest в виде JSON-строки")]
+        [Description("MovementRequest as a JSON string.")]
         string requestJson)
     {
         Log($"calculate_movement → {requestJson}");

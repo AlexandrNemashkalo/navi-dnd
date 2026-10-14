@@ -28,16 +28,16 @@ internal static class MouseUiHelper
         }
     }
 
-    // Колесо мыши над диалоговым окном (ниже его заголовка) — прокрутка истории по строкам: от себя — к более
-    // ранним, на себя — к новым. true — колесо ушло диалогу.
+    // The mouse wheel above the dialog box (below its title) - scrolls the history line by line: from itself to
+    // the earlier ones, to itself to the new ones. true - the wheel has gone to dialogue.
     internal static bool HandleDialogWheel(DialogDisplay? dialog, int notches, (short x, short y) pos)
     {
-        if (dialog == null || notches == 0 || dialog.ArrowPositions.titleY <= 0 || pos.y <= dialog.ArrowPositions.titleY) return false;   // диалог ещё не нарисован — не его колесо
-        dialog.ScrollLines(notches * 2);   // по 2 строки на щелчок колеса
+        if (dialog == null || notches == 0 || dialog.ArrowPositions.titleY <= 0 || pos.y <= dialog.ArrowPositions.titleY) return false;   // the dialogue has not yet been drawn - not his wheel
+        dialog.ScrollLines(notches * 2);   // 2 lines per wheel click
         return true;
     }
 
-    // Колесо, накопленное с прошлого опроса, — диалогу, если крутили над ним (экраны без своего колеса).
+    // The wheel accumulated from the last survey is given to the dialogue if it was spun over it (screens without their own wheel).
     internal static void HandleDialogWheel(DialogDisplay? dialog)
     {
         int notches = ConsoleMouseReader.TakeWheel(out var pos);
@@ -64,14 +64,14 @@ internal static class MouseUiHelper
                 mousePos.x == si.rightX && si.canScrollRight);
     }
 
-    // disabled=true — затемнить сегменты "[Fx]" (тем же ColorHelper.Darker, что и остальные
-    // неактивные стрелки в проекте): визуально показывает, что кнопки сейчас некликабельны
-    // (например пока крутится кубик и ввод намеренно игнорируется).
-    // Ширина строки заголовка (внутри рамки) — для «[Esc]…» у правого края (BorderDrawer задаёт при создании).
+    // disabled=true - darken the segments "[Fx]" (with the same ColorHelper.Darker as the rest of the inactive
+    // arrows in the project): visually shows that the buttons are now unclickable (for example, while the cube
+    // is spinning and the input is deliberately ignored). The width of the title line (inside the frame) is for
+    // “[Esc]...” at the right edge (BorderDrawer is set during creation).
     internal static int TitleWidth;
 
-    // «[Esc]МЕНЮ» / «[Esc]НАЗАД» — всегда у правого края заголовка на любом экране. Та же раскладка и для
-    // отрисовки, и для зон наведения/клика (ComputeTitleTabs, SetTabHighlight).
+    // “[Esc]MENU” / “[Esc]BACK” - always at the right edge of the title on any screen. Same layout for both
+    // rendering and hover/click zones (ComputeTitleTabs, SetTabHighlight).
     internal static string AlignTitle(string title)
     {
         if (TitleWidth < WindowControls.Buttons.Length + 3) return title;
@@ -94,7 +94,7 @@ internal static class MouseUiHelper
         int aStart = title.IndexOf('→');
         int aEnd   = aStart >= 0 ? title.IndexOf('←', aStart) : -1;
 
-        // Название окна (« МОИ ИГРЫ»… — до первой тройки пробелов) — ярким текстом, без подложки.
+        // The title of the window (“MY GAMES”... - up to the first three spaces) - in bright text, without background.
         int i = 0;
         int nameEnd = title.IndexOf("   ", StringComparison.Ordinal);
         if (title.StartsWith(' ') && nameEnd > 1 && (aStart < 0 || nameEnd < aStart))
@@ -102,7 +102,7 @@ internal static class MouseUiHelper
             ColorHelper.WriteColored(title[..(nameEnd + 1)], bright);
             i = nameEnd + 1;
         }
-        // Шаги новой игры (ScreenRegistry.NewGameTitle): приглушённо, текущий «…» — ярко (кавычки — пробелами).
+        // Steps of the new game (ScreenRegistry.NewGameTitle): is muted, the current “..." is bright (quotes are spaces).
         int stepsStart = title.IndexOf("1 МИР", StringComparison.Ordinal);
         int stepsEnd = stepsStart >= 0 ? title.IndexOf("ПРИКЛЮЧЕНИЕ", stepsStart, StringComparison.Ordinal) : -1;
         if (stepsEnd >= 0) stepsEnd += "ПРИКЛЮЧЕНИЕ".Length + (stepsEnd + 11 < title.Length && title[stepsEnd + 11] == '»' ? 1 : 0);
@@ -132,7 +132,7 @@ internal static class MouseUiHelper
                 ColorHelper.WriteColored(title[aStart..(aEnd + 1)], bright);
                 i = aEnd + 1;
             }
-            // Недоступная вкладка «{F1}ИМЯ» — подсказка клавиши как обычно «[F1]», название тёмным (почти фон).
+            // Inaccessible tab “{F1}NAME” - key hint as usual “[F1]”, the name is dark (almost background).
             else if (title[i] == '{' && title.IndexOf('}', i) is int ce and > 0)
             {
                 WriteKeyHint("[" + title[(i + 1)..ce] + "]", display);
@@ -141,7 +141,7 @@ internal static class MouseUiHelper
                 ColorHelper.WriteColored(title[(ce + 1)..ne], DisabledTabColor(display));
                 i = ne;
             }
-            // «›» между шагами новой игры — цветом названий вкладок; перед недоступным шагом «{Fn}» — тёмная, как он.
+            // “›” between the steps of a new game - the color of the tab names; before the inaccessible step “{Fn}” is dark, like him.
             else if (title[i] == '›')
             {
                 int next = i + 1;
@@ -172,18 +172,18 @@ internal static class MouseUiHelper
         }
     }
 
-    // Подсказки клавиш «[F1]», «[Esc]» — приглушённым цветом, чтобы не спорили с названиями вкладок.
-    // Подсказка клавиши: приглушённо, а если подсказки выключены в настройках — пробелы той же длины.
+    // Key hints “[F1]”, “[Esc]” – in muted color so as not to conflict with the names of the tabs. Key hint:
+    // muted, and if key hints are turned off in the settings, spaces of the same length.
     internal static void WriteKeyHint(string hint, DisplayConfig display)
     {
         if (display.ShowKeyHints) ColorHelper.WriteColored(hint, KeyHintColor(display));
         else Console.Write(new string(' ', hint.Length));
     }
 
-    // Линии рамок — приглушённый основной цвет (как рамки блоков новой игры): текст на их фоне читается лучше.
+    // Frame lines are a muted primary color (like the frames of the blocks of the new game): the text against their background is easier to read.
     internal static List<int> FrameColor(DisplayConfig display) => ColorHelper.Darker(display.MainForeground, 0.5);
 
-    // Недоступная вкладка/шаг — почти фон.
+    // Inaccessible tab/step - almost background.
     internal static List<int> DisabledTabColor(DisplayConfig display) => ColorHelper.MixWith(display.MainForeground, display.MainBackground, 0.68);
 
     internal static List<int> KeyHintColor(DisplayConfig display) => ColorHelper.MixWith(display.MainForeground, display.MainBackground, 0.9);
@@ -198,8 +198,8 @@ internal static class MouseUiHelper
             if (idx < 0) continue;
             int end = idx + prefix.Length;
             while (end < title.Length && title[end] != ' ') end++;
-            // Отступ слева + рамка(1) до начала текста заголовка. Зона наведения/клика — только название:
-            // подсказка клавиши «[F1]» не подсвечивается и курсор над ней не меняется.
+            // Left padding + border(1) to the beginning of the title text. Hover/click zone - name only: the
+            // "[F1]" key tip is not highlighted and the cursor above it does not change.
             int titleStart = DisplayConfig.LeftMargin + 1;
             tabs.Add(new TitleTab(titleStart + idx + prefix.Length, titleStart + end, key));
         }
@@ -224,13 +224,13 @@ internal static class MouseUiHelper
         Term.CursorVisible = false;
         int sl = Term.CursorLeft, st = Term.CursorTop;
         Term.SetCursorPosition(tab.StartX, 1);
-        // tab.StartX/EndX — экранные колонки (уже с учётом отступа); title — исходная строка без
-        // отступа, поэтому для индекса в title его нужно вычесть обратно.
+        // tab.StartX/EndX - screen columns (including indentation); title is the original line without
+        // indentation, so to index into title it must be subtracted back.
         string tabText = title.Substring(tab.StartX - 1 - DisplayConfig.LeftMargin, tab.EndX - tab.StartX);
         var fg = highlighted ? ColorHelper.Pale(display.MainForeground, 0.75) : display.MainForeground;
         int keyEnd = tabText.StartsWith('[') ? tabText.IndexOf(']') + 1 : 0;
         if (keyEnd > 0)
-            ColorHelper.WriteColored(tabText[..keyEnd], fgColor: KeyHintColor(display), bgColor: display.MainBackground); // клавиша не подсвечивается
+            ColorHelper.WriteColored(tabText[..keyEnd], fgColor: KeyHintColor(display), bgColor: display.MainBackground); // key is not backlit
         ColorHelper.WriteColored(tabText[keyEnd..], fgColor: fg, bgColor: display.MainBackground);
         Term.SetCursorPosition(sl, st);
         Term.CursorVisible = vis;
@@ -249,7 +249,7 @@ internal static class MouseUiHelper
         int hoveredInvItem = -1;
         int hoveredSpellItem = -1;
 
-        // x < splitX[0] → колонка 0, x < splitX[1] → колонка 1, x < splitX[2] → колонка 2, иначе 3.
+        // x < splitX[0] → column 0, x < splitX[1] → column 1, x < splitX[2] → column 2, otherwise 3.
         static int SpellColumnIndex(short x, int[] splitX)
         {
             if (x < splitX[0]) return 0;
@@ -275,7 +275,7 @@ internal static class MouseUiHelper
 
             var (mousePos, clickPos, clickCount) = ConsoleMouseReader.DrainMouseEvents();
 
-            // Обрезанное значение карточки под мышью — бегущая строка (тикает и без движения мыши).
+            // The truncated value of the card under the mouse is a creeping line (ticking even without mouse movement).
             heroDisplay?.UpdateMarquee(mousePos);
 
             HandleDialogArrowClick(clickPos, dialog);
@@ -287,14 +287,14 @@ internal static class MouseUiHelper
                 if (clickedTabKey != null) { Sound.PlayClick(); display.PendingCommand = clickedTabKey; return; }
                 if (clickPos.Value.y is >= 0 and <= 2) { ConsoleMouseReader.StartWindowDrag(); return; }
 
-                // Кнопка «Новый уровень» в строке уровня карточки — то же, что F10.
+                // “New level” button in the card level line - the same as F10.
                 if (heroDisplay.IsOnLevelUp(clickPos.Value)) { Sound.PlayClick(); display.PendingCommand = "F10"; return; }
 
                 var si = heroDisplay.SubTabInfo;
                 if (si.titleY >= 0 && clickPos.Value.y == si.titleY)
                 {
-                    // Sub-tab label clicks → switch sub-tab (звук только если реально переключает —
-                    // клик по УЖЕ активной вкладке ничего не меняет, как и недоступная стрелка)
+                    // Sub-tab label clicks → switch sub-tab (sound only if it actually switches - clicking on
+                    // an ALREADY active tab does not change anything, just like the inaccessible arrow)
                     if (clickPos.Value.x >= si.invStartX && clickPos.Value.x < si.invEndX)
                         { if (display.CharacterSubTab != CharacterSubTab.Inventory) Sound.PlayClick(); display.PendingCommand = "F6"; return; }
                     if (clickPos.Value.x >= si.abilStartX && clickPos.Value.x < si.abilEndX)
@@ -335,11 +335,10 @@ internal static class MouseUiHelper
                     }
                 }
 
-                // Клик по стрелкам страниц записки (◄ N/M ►) в панели картинки. Не return — тот же
-                // DrainMouseEvents() иногда отдаёт clickPos ВМЕСТЕ со свежим mousePos (клик и
-                // следующее движение мыши успевают встать в очередь до одного poll-тика); ранний
-                // return здесь молча терял mousePos этого тика — наведение переставало отслеживаться
-                // до следующего клика.
+                // Click on the arrows of the note pages (◄ N/M ►) in the picture panel. Not return - the same
+                // DrainMouseEvents() sometimes gives clickPos TOGETHER with a fresh mousePos (click and the
+                // next mouse movement manage to queue up before one poll- tick); the early return here silently
+                // lost mousePos this tick - the hover ceased to be tracked until the next click.
                 bool clickHandled = false;
                 var na = dialog.NotePageArrowPositions;
                 if (na.arrowY >= 0 && clickPos.Value.y == na.arrowY)
@@ -351,10 +350,10 @@ internal static class MouseUiHelper
                     var select = isSpellTab ? onSpellSelect : onInventorySelect;
                     if (effectiveIdx >= 0 && select != null)
                     {
-                        // clickCount: быстрые повторные клики по стрелке успевают встать в очередь
-                        // между poll-тиками — DrainMouseEvents() отдаёт только последнюю позицию клика,
-                        // но считает все нажатия, иначе часть кликов молча терялась бы (пролистывало на 1
-                        // вместо N при быстром клике).
+                        // clickCount: fast repeated clicks on the arrow manage to queue up between poll- ticks
+                        // - DrainMouseEvents() gives only the last click position, but counts all clicks,
+                        // otherwise some of the clicks would be silently lost (scrolled to 1 instead of N with
+                        // a quick click).
                         int steps = Math.Max(1, clickCount);
                         if (clickPos.Value.x == na.leftX)
                         {
@@ -373,7 +372,7 @@ internal static class MouseUiHelper
                     }
                 }
 
-                // Клик по строке инвентаря — закрепить предмет (жёлтая стрелка, переживает уход мыши)
+                // Click on the inventory line - pin the item (yellow arrow, survives mouse departure)
                 if (!clickHandled && display.CharacterSubTab == CharacterSubTab.Inventory && onInventorySelect != null)
                 {
                     var hi = heroDisplay.InventoryHitInfo;
@@ -387,7 +386,7 @@ internal static class MouseUiHelper
                                 : (rowOffset < hi.col2Map.Length ? hi.col2Map[rowOffset] : -1);
                             if (clickedIdx >= 0)
                             {
-                                // Клик по уже закреплённому предмету ничего не меняет — звука не даёт.
+                                // Clicking on an already pinned item does not change anything - it does not produce sound.
                                 if (display.PinnedInventoryIndex != clickedIdx) Sound.PlayClick();
                                 display.SelectedInventoryIndex = clickedIdx;
                                 display.PinnedInventoryIndex = clickedIdx;
@@ -399,7 +398,7 @@ internal static class MouseUiHelper
                     }
                 }
 
-                // Клик по строке заклинания — закрепить (аналог клика по инвентарю, но на 4 колонки).
+                // Click on the spell line - pin (similar to clicking on inventory, but on 4 columns).
                 if (!clickHandled && display.CharacterSubTab == CharacterSubTab.Spells && onSpellSelect != null)
                 {
                     var shi = heroDisplay.SpellsHitInfo;
@@ -496,7 +495,7 @@ internal static class MouseUiHelper
                 if (needRedraw) RedrawAll();
             }
 
-            // Spell item hover (аналог инвентаря, но на 4 колонки)
+            // Spell item hover (analogous to inventory, but with 4 columns)
             int newHoveredSpell = -1;
             if (display.CharacterSubTab == CharacterSubTab.Spells)
             {
@@ -561,15 +560,15 @@ internal static class MouseUiHelper
         if (dialog == null) return (false, false);
         var na = dialog.NotePageArrowPositions;
         if (na.arrowY < 0 || mousePos.y != na.arrowY) return (false, false);
-        // Недоступная (потускневшая) стрелка не должна давать курсор-руку — как и остальные
-        // disabled-стрелки в проекте.
+        // An inaccessible (faded) arrow should not produce a hand cursor - like the rest of the disabled-
+        // arrows in the project.
         bool onLeft  = mousePos.x == na.leftX  && display.NotePage > 0;
         bool onRight = mousePos.x == na.rightX && display.NotePage < display.NotePageCount - 1;
         return (onLeft, onRight);
     }
 
-    // Журнал: вкладки заголовка и стрелки диалога — как у остальных экранов, плюс мышь по книге
-    // (закладки, ◄ ►, наведение на запись → подробности в блоке картинок).
+    // Journal: title tabs and dialogue arrows - like other screens, plus mouse over the book (bookmarks, ◄ ►,
+    // pointing to the entry → details in the picture block).
     internal static Action MakeJournalPollAction(DialogDisplay dialog, NaviDnD.Display.JournalDisplay journal, string title, DisplayConfig display)
     {
         var titleTabs = ComputeTitleTabs(title);
@@ -637,19 +636,19 @@ internal static class MouseUiHelper
         };
     }
 
-    // Заглушка d20 без картинки: кубик — по центру области НАД именем, имя — фиксированной
-    // предпоследней строкой (совпадает с тем, где заканчивается footer у заглушки, если бы
-    // была картинка). Раньше кубик стоял прямо в начале массива (строка 0) — короткая заглушка
-    // визуально "прилипала" к верху панели вместо того чтобы стоять по центру над именем.
+    // Stub d20 without a picture: the cube is in the center of the area ABOVE the name, the name is a fixed
+    // penultimate line (coincides with where footer ends in the stub if there was a picture). Previously, the
+    // cube stood right at the beginning of the array (line 0) - the short stub visually “stuck” to the top of
+    // the panel instead of being centered above the name.
     private static List<string> BuildCenteredArtWithName(IReadOnlyList<string> art, string name, int totalLines)
     {
         int end = art.Count;
         while (end > 0 && string.IsNullOrEmpty(art[end - 1])) end--;
 
         var lines = new List<string>();
-        // Центр считаем от ВСЕЙ высоты панели (totalLines), а не только от области над именем —
-        // иначе имя+пустая строка внизу "перетягивают" центр кубика на 1 строку выше настоящей
-        // середины панели.
+        // We count the center from the ENTIRE height of the panel (totalLines), and not just from the area
+        // above the name - otherwise the name + empty line below “drags” the center of the cube 1 line above
+        // the real middle of the panel.
         int artStart = Math.Max(0, (totalLines - end) / 2);
         for (int i = 0; i < artStart; i++) lines.Add("");
         for (int i = 0; i < end; i++) lines.Add(art[i]);
@@ -658,22 +657,22 @@ internal static class MouseUiHelper
         return lines;
     }
 
-    // Без картинки (не задана или файл не найден) — заглушка d20 вместо пустой панели: иначе
-    // BuildRightPanelLines молча провалился бы к DefaultImageLines (портрет ГЕРОЯ), что выглядело
-    // бы так, будто у наведённого предмета есть картинка героя, а не "картинки нет".
+    // No picture (not specified or file not found) - placeholder d20 instead of an empty panel: otherwise
+    // BuildRightPanelLines would silently fall to DefaultImageLines (HERO'S portrait), which would look like
+    // the hovered item has a hero's picture, and not "no picture".
     private static string[] BuildDefaultIconLines(string? name, int totalLines)
     {
         if (string.IsNullOrEmpty(name)) return DiceArt.D20.Split('\n');
         var lines = BuildCenteredArtWithName(DiceArt.D20.Split('\n'), name, totalLines);
-        lines.Add(""); // последняя строка пустая — индикатора страниц здесь нет
+        lines.Add(""); // last line is empty - there is no page indicator here
         return lines.ToArray();
     }
 
-    // Единая точка выбора элемента карты (мышь/Tab на MapScreenLoop) — известный вид монстра
-    // (narrative.knownMonsters содержит его monsterKey) показывает карточку статов, иначе как
-    // раньше — просто картинка+имя. Герой/объекты/неопознанные существа под это не попадают
-    // (GetSelectedLivingEntity возвращает null для объектов, MonsterKey может быть не задан).
-    // page — страница карточки монстра (листание ◄ ► на карте, MapScreenLoop).
+    // Single point for selecting a map element (mouse/Tab on MapScreenLoop) - a known type of monster
+    // (narrative.knownMonsters contains it monsterKey) shows a stat card, otherwise as before - just a picture
+    // + name. Hero / objects / unidentified creatures do not fall under this (GetSelectedLivingEntity returns
+    // null for objects, MonsterKey can not be specified). page - monster card page (scrolling ◄ ► on the map,
+    // MapScreenLoop).
     internal static void SetSelectedMapEntity(DisplayConfig display, LegendDisplay legendDisplay, WorldState settings, int page = 0)
     {
         var entity = legendDisplay.GetSelectedLivingEntity();
@@ -691,8 +690,8 @@ internal static class MouseUiHelper
         display.NotePageCount = 0;
     }
 
-    // Картинка двери: своя (ИИ задаёт только особым дверям) или фиксированная — по состоянию и типу
-    // местности блока, где дверь (рядовые двери нейронка не ищет через find_icon).
+    // Door picture: its own (AI assigns only special doors) or fixed - depending on the state and type of
+    // terrain of the block where the door is (the AI does not search for ordinary doors via find_icon).
     internal static string DoorImage(NaviDnD.Data.Models.Door door, NaviDnD.Data.Models.MapConfig map)
     {
         if (!string.IsNullOrEmpty(door.Image)) return door.Image;
@@ -718,7 +717,7 @@ internal static class MouseUiHelper
         return open ? "lorc/doorway" : "delapouite/door";
     }
 
-    // Подпись под картинкой в одну строку: длинное название не влезало в ширину панели и ломало рамку.
+    // Caption under the picture in one line: the long title did not fit into the width of the panel and broke the frame.
     private static string? FitPanelName(DisplayConfig display, string? name)
     {
         int width = Math.Max(4, display.DialogRightPanelWidth - 2);
@@ -749,9 +748,9 @@ internal static class MouseUiHelper
         display.DefaultImageColor = color;
     }
 
-    // Предмет с читаемым текстом (item.Text): страница 0 — картинка+название (как обычный предмет),
-    // страницы 1..N — сам текст, порезанный на страницы под высоту панели. Без текста — тот же
-    // SetSelectedImage, что и раньше, NotePageCount=0 (стрелок листания нет).
+    // An item with readable text (item.Text): page 0 - picture + title (like a regular item), pages 1..N - the
+    // text itself, cut into pages to fit the height of the panel. Without text - the same SetSelectedImage as
+    // before, NotePageCount=0 (no paging arrows).
     private sealed class PendingPicture
     {
         public Task? Ready;
@@ -799,12 +798,12 @@ internal static class MouseUiHelper
         }
 
         int total = display.MaxHistoryLines;
-        // Отступ 1 символ от рамки панели слева и справа — PadRight держит все строки текста одной
-        // длины, поэтому центрирующий leftPad в BuildRightPanelLines у них у всех одинаковый (не
-        // "по факту центр каждой строки", а ровный левый край с полями).
+        // Indentation of 1 character from the panel frame on the left and right - PadRight keeps all lines of
+        // text of the same length, so the centering leftPad in BuildRightPanelLines is the same for all of them
+        // (not “in fact the center of each line”, but an even left edge with margins).
         int textWidth = Math.Max(1, display.DialogRightPanelWidth - 2);
-        // Название и индикатор страниц всегда внизу (как на странице с картинкой) — текст начинается
-        // с первой строки: область текста + пустая + название + индикатор.
+        // The title and indicator of pages are always at the bottom (as on a page with a picture) - the text
+        // starts from the first line: text area + empty + title + indicator.
         int textAreaLines = Math.Max(1, total - 3);
         var textPages = BuildNotePages(item.Text, textWidth, textAreaLines);
         int pageCount = 1 + textPages.Count;
@@ -813,14 +812,14 @@ internal static class MouseUiHelper
         List<string> lines;
         if (page == 0)
         {
-            // Название всегда зафиксировано на предпоследней строке панели — высота самой картинки
-            // (18 строк у настоящей иконки, 9 у заглушки d20) не должна на это влиять, иначе у
-            // маленькой картинки название/индикатор всплывали бы выше нужного.
+            // The title is always fixed on the penultimate line of the panel - the height of the image itself
+            // (18 lines for a real icon, 9 for the d20) stub) should not affect this, otherwise the
+            // title/indicator for a small image would pop up higher than necessary.
             var realArt = string.IsNullOrEmpty(item.Image) ? null : SvgToBrailleConverter.Convert(item.Image, "");
             if (realArt != null)
             {
-                // Настоящая иконка занимает почти всю высоту панели — верхний паддинг не нужен,
-                // центрирование заметно только у короткой заглушки d20 (см. BuildCenteredArtWithName).
+                // The real icon occupies almost the entire height of the panel - top padding is not needed,
+                // centering is noticeable only on the short plug d20 (see BuildCenteredArtWithName).
                 lines = [.. realArt];
                 while (lines.Count < total - 2) lines.Add("");
                 lines.Add(FitPanelName(display, item.Name) ?? "");
@@ -857,12 +856,11 @@ internal static class MouseUiHelper
         return pages;
     }
 
-    // Карточка монстра — по раскладке как записка в инвентаре (SetSelectedInventoryItem): страница 0
-    // — картинка+имя, дальше — статы постранично. В отличие от карточки заклинания (шапка
-    // зафиксирована, листается только текст) тут шапки нет вообще — весь statblock просто один
-    // длинный текст, порезанный на страницы, картинка всегда первая.
-    // info == null — вид не опознан (или monsterKey не задан у гомбрю-существа): обычная картинка
-    // без статов, как у любой другой сущности без текста.
+    // Monster card - laid out like a note in the inventory (SetSelectedInventoryItem): page 0 - picture + name,
+    // then - stats page by page. Unlike the spell card (the header is fixed, only the text is scrolled), there
+    // is no header at all - all statblock is just one long text cut into pages, the picture is always first.
+    // info == null - species is not identified (or monsterKey is not set for the gombyu creature): a regular
+    // picture without stats, like any other entity without text.
     internal static void SetSelectedMonster(DisplayConfig display, LivingEntity entity, MonsterInfo? info, int page)
     {
         if (info == null)
@@ -903,8 +901,9 @@ internal static class MouseUiHelper
         }
         else
         {
-            // Многоцветный текст статов: строки-заглушки той же ширины (для выравнивания панели) +
-            // отрезки с цветами (DialogDisplay рисует их вместо заглушек). Имя внизу — цветом существа.
+            // Multi-colored stat text: placeholder lines of the same width (to align the panel) + segments with
+            // colors (DialogDisplay draws them instead of placeholders). The name below is in the creature's
+            // color.
             lines = [];
             var segs = new List<List<(string, List<int>?)>?>();
             foreach (var l in textPages[page - 1])
@@ -931,8 +930,8 @@ internal static class MouseUiHelper
         display.NotePageCount = pageCount;
     }
 
-    // Абзацы → перенос слов построчно, между абзацами пустая строка (как WrapSpellText, только без
-    // разбора <br> — тут абзацы уже разложены заранее списком).
+    // Paragraphs → word transfer line by line, between paragraphs there is an empty line (like WrapSpellText,
+    // only without parsing <br> - here the paragraphs are already laid out in advance in a list).
     private static List<string> WrapParagraphs(List<string> paragraphs, int width)
     {
         var lines = new List<string>();
@@ -943,21 +942,21 @@ internal static class MouseUiHelper
             if (lines.Count > 0) lines.Add("");
             lines.AddRange(TextWrapper.WrapText(trimmed, width));
         }
-        return lines.Count > 0 ? lines : [L.T("Нет данных.")];
+        return lines.Count > 0 ? lines : [L.T("No data.")];
     }
 
-    // Ширина колонки лейблов в блоке время/дистанция/компоненты/длительность — все значения
-    // выравниваются под самый длинный лейбл ("Длительность"), по аналогии с колонкой статов
-    // персонажа (HeroDisplay.DrawHeroCard: key.PadRight(leftKeyMax) + разделитель).
+    // Width of the label column in the time/distance/components/duration block - all values are aligned to
+    // the longest label (“Duration”), similar to the character stats column (HeroDisplay.DrawHeroCard:
+    // key.PadRight(leftKeyMax) + separator).
     private static int SpellFieldLabelWidth =>
-        new[] { L.T("Время"), L.T("Дистанция"), L.T("Компоненты"), L.T("Длительность") }.Max(l => l.Length);
+        new[] { L.T("Casting time"), L.T("Range"), L.T("Components"), L.T("Duration") }.Max(l => l.Length);
 
-    // Карточка заклинания: шапка (название, круг+школа, время/дистанция/компоненты/длительность)
-    // остаётся неизменной на каждой странице, листается только текст описания — в отличие от
-    // предмета с запиской (там первая страница — картинка, а текст с самого начала).
-    // Круг/школа/время и т.д. берутся из SpellDatabase (файл GameData/DnD5e_spells_BD.dtn) по имени
-    // заклинания; если имя не нашлось в базе (например, придуманное ИИ заклинание не из справочника),
-    // показываем то немногое, что есть у самого героя (имя, круг), без остальных полей.
+    // Spell card: the header (name, circle + school, time/distance/components/duration) remains unchanged on
+    // each page, only the description text is scrolled - unlike the item with a note (there the first page is a
+    // picture, and the text is from the very beginning). Circle/school/time etc. are taken from SpellDatabase
+    // (file GameData/DnD5e_spells_BD.dtn) by name of the spell; if the name is not found in the database (for
+    // example, the spell invented by the AI is not from the reference book), we show what little the hero
+    // himself has (name, circle), without other fields.
     internal static void SetSelectedSpell(DisplayConfig display, HeroSpell spell, int page)
     {
         CancelPreparedPicture(display);
@@ -965,7 +964,7 @@ internal static class MouseUiHelper
         int total = display.MaxHistoryLines;
         int textWidth = Math.Max(1, display.DialogRightPanelWidth - 2);
 
-        string levelText = spell.Level <= 0 ? L.T("Заговор") : L.F("{0} круг", LevelToRoman(spell.Level));
+        string levelText = spell.Level <= 0 ? L.T("Cantrip") : L.F("level {0}", LevelToRoman(spell.Level));
         string schoolText = Capitalize(info?.School);
         string subtitle = schoolText.Length == 0 ? levelText : $"{levelText}, {schoolText}";
 
@@ -974,10 +973,10 @@ internal static class MouseUiHelper
             spell.Name.ToUpperInvariant(),
             subtitle,
             new string('─', textWidth),
-            SpellField(L.T("Время"), info?.CastingTime, textWidth),
-            SpellField(L.T("Дистанция"), info?.Range, textWidth),
-            SpellField(L.T("Компоненты"), info?.Components, textWidth),
-            SpellField(L.T("Длительность"), info?.Duration, textWidth),
+            SpellField(L.T("Casting time"), info?.CastingTime, textWidth),
+            SpellField(L.T("Range"), info?.Range, textWidth),
+            SpellField(L.T("Components"), info?.Components, textWidth),
+            SpellField(L.T("Duration"), info?.Duration, textWidth),
             new string('─', textWidth),
         };
 
@@ -1009,11 +1008,11 @@ internal static class MouseUiHelper
         return text.PadRight(width);
     }
 
-    // "<br>" в тексте базы разделяет абзацы (не буквальный перенос строки) — раскладываем каждый
-    // абзац отдельным TextWrapper.WrapText, между абзацами пустая строка.
+    // "<br>" in the base text separates paragraphs (not a literal line break) - we lay out each paragraph as a
+    // separate TextWrapper.WrapText, with an empty line between the paragraphs.
     private static List<string> WrapSpellText(string? raw, int width)
     {
-        if (string.IsNullOrEmpty(raw)) return [L.T("Нет описания.")];
+        if (string.IsNullOrEmpty(raw)) return [L.T("No description.")];
         var paragraphs = raw.Replace("<br/>", "<br>").Replace("<br />", "<br>").Split("<br>");
         var lines = new List<string>();
         foreach (var p in paragraphs)
@@ -1023,7 +1022,7 @@ internal static class MouseUiHelper
             if (lines.Count > 0) lines.Add("");
             lines.AddRange(TextWrapper.WrapText(trimmed, width));
         }
-        return lines.Count > 0 ? lines : [L.T("Нет описания.")];
+        return lines.Count > 0 ? lines : [L.T("No description.")];
     }
 
     private static string Capitalize(string? s) =>
@@ -1062,7 +1061,7 @@ internal static class MouseUiHelper
             var history = new DialogDisplay(settings, display, storage);
             if (pollFactory != null)
             {
-                // Свой опрос мыши экрана (журнал): он же — во время ответа ИИ (DialogDisplay.SwitchTab).
+                // Your screen mouse poll (log): aka - during AI response (DialogDisplay.SwitchTab).
                 display.PollAction = pollFactory(history);
                 display.JournalPollActionFactory = dlg => pollFactory((DialogDisplay)dlg);
                 display.OnTabKey = onTab;
@@ -1110,10 +1109,10 @@ internal static class MouseUiHelper
                 return;
             }
 
-            // Звук только если реально что-то листает — как у мыши (недоступная стрелка молчит).
+            // Sound only if you are actually scrolling through something - like a mouse (the inaccessible arrow is silent).
             if (input == "Up" && onScrollUp != null) { display.PollAction = null; onScrollUp(); return; }
             if (input == "Down" && onScrollDown != null) { display.PollAction = null; onScrollDown(); return; }
-            // Журнал листается анимацией на месте (звук — в самом перелистывании), экран не перестраивается.
+            // The magazine is flipped through animation on the spot (the sound is in the flipping itself), the screen does not rearrange.
             if (pollFactory != null && input is "Left" or "Right")
             {
                 (input == "Left" ? onScrollLeft : onScrollRight)?.Invoke();
@@ -1150,9 +1149,9 @@ internal static class MouseUiHelper
             if (input == "F9" && onF9 != null) { onF9(); continue; }
             if (input == "F10" && onF10 != null) { onF10(); continue; }
             if (input == "Delete" && onDelete != null) { onDelete(); continue; }
-            // Текст, который экран забирает себе (заметки журнала), мастеру не уходит.
+            // The text that the screen takes for itself (journal notes) does not go to the GM.
             if (!string.IsNullOrEmpty(input) && onTextInput != null && onTextInput(input)) continue;
-            // F-клавиша, которая на этом экране ничего не делает, — игнорируется, а не уходит мастеру текстом.
+            // F- a key that does nothing on this screen is ignored and does not go to the GM as a text.
             if (input is not null && input.Length is 2 or 3 && input[0] == 'F' && char.IsDigit(input[1]) && input[1..].All(char.IsDigit)) continue;
             if (input is "Left" or "Right" or "Up" or "Down" or "Tab" or "ShiftTab" or "NoteLeft" or "NoteRight" or "Delete") continue;
 

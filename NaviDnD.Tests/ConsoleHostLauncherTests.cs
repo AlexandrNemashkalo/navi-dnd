@@ -21,7 +21,7 @@ public class ConsoleHostLauncherTests
         Assert.Equal(new[] { "dotnet.exe", "NaviDnD.dll", "arg", ConsoleHostLauncher.RelaunchFlag }, start.ArgumentList);
     }
 
-    // Временный выбор классической консоли возвращает прежние настройки игрока как были (в том числе «не задано»).
+    // Temporarily selecting the classic console returns the player's previous settings as they were (including "not configured").
     [Fact]
     public void ForcedConhostDelegationIsRestored()
     {
@@ -43,7 +43,7 @@ public class ConsoleHostLauncherTests
         Assert.Equal(before, (Read("DelegationConsole"), Read("DelegationTerminal")));
     }
 
-    // Перезапущенная игра возвращает настройки из файла, оставленного первым запуском, и удаляет файл.
+    // A restarted game returns the settings from the file left by the first launch and deletes the file.
     [Fact]
     public void PendingRestoreReturnsSettingsAndRemovesFile()
     {

@@ -3,8 +3,7 @@ using NaviDnD.MapGen.Models;
 
 namespace NaviDnD.MapGen.Generators;
 
-// Временная заглушка: возвращает фиксированную пещеру из 3 зон.
-// Заменить на процедурный алгоритм на следующем этапе.
+// Temporary Muffler: Brings back a fixed 3-zone cave. Replace with a procedural algorithm in the next step.
 public class HardcodedCaveGenerator : IMapGenerator
 {
     public MapConfig Generate(MapGenRequest request)
@@ -18,7 +17,7 @@ public class HardcodedCaveGenerator : IMapGenerator
                 new Room
                 {
                     Name = "Entrance Cave",
-                    Color = [101, 67, 33],   // тёмно-коричневый
+                    Color = [101, 67, 33],   // dark brown
                     Positions =
                     [
                         [2, 2], [3, 2], [4, 2],
@@ -31,7 +30,7 @@ public class HardcodedCaveGenerator : IMapGenerator
                 new Room
                 {
                     Name = "Narrow Passage",
-                    Color = [70, 70, 80],    // серо-синий
+                    Color = [70, 70, 80],    // gray-blue
                     Positions =
                     [
                         [7, 4], [8, 4],
@@ -42,7 +41,7 @@ public class HardcodedCaveGenerator : IMapGenerator
                 new Room
                 {
                     Name = "Inner Chamber",
-                    Color = [60, 30, 80],    // тёмно-фиолетовый
+                    Color = [60, 30, 80],    // dark purple
                     Positions =
                     [
                         [11, 5], [12, 5], [13, 5],
@@ -55,9 +54,9 @@ public class HardcodedCaveGenerator : IMapGenerator
             ],
             Doors =
             [
-                // Проход из Entrance Cave в Narrow Passage (открытый, без двери)
+                // Passage from Entrance Cave to Narrow Passage (open, without door)
                 new Door { From = [6, 4], To = [7, 4], Color = null },
-                // Проход из Narrow Passage во Inner Chamber
+                // Passage from Narrow Passage to Inner Chamber
                 new Door { From = [10, 6], To = [11, 6], Color = null },
             ],
             Area = [],

@@ -3,8 +3,8 @@ using NaviDnD.Helpers;
 
 namespace NaviDnD.Tests;
 
-// Опыт и уровни: движок ведёт hero.level/xp (мастер — только xpAward), окно «Новый уровень» собирает героя из выбора
-// игрока и патча мастера (LevelUp) — без нейронки.
+// Experience and levels: the engine is driven by hero.level/xp (GM - only xpAward), the "New Level" window
+// collects the hero from the player's choice and the GM's patch (LevelUp) - without AI.
 public class LevelUpTests
 {
     private static Hero Fighter(int level = 3, int xp = 2700) => new()
@@ -77,8 +77,8 @@ public class LevelUpTests
         storage.ApplyUpdateWorldState("""{"hero":{"xpAward":{"monsters":["Гоблин","Goblin","Неведомая тварь"],"xp":25,"reason":"засада у моста"}}}""");
         Assert.Equal(2600 + 50 + 50 + 25, storage.WorldState.Hero!.Xp);
         var notices = storage.TakeNotices();
-        Assert.Equal(L.WF("[+{0} опыта: {1}]", 125, "засада у моста"), notices[0]);
-        Assert.Equal(2, notices.Count);   // порог 4-го уровня (2700) пройден
+        Assert.Equal(L.WF("[+{0} XP: {1}]", 125, "засада у моста"), notices[0]);
+        Assert.Equal(2, notices.Count);   // level 4 threshold (2700) passed
         Assert.Empty(storage.TakeNotices());
     }
 
@@ -120,7 +120,7 @@ public class LevelUpTests
         Assert.True(rules.CanLevelUp(Fighter(xp: 2700)));
         Assert.False(rules.CanLevelUp(Fighter(xp: 2699)));
         Assert.Equal(10, rules.HitDie(Fighter()));
-        Assert.True(rules.IsAsiLevel(Fighter(), 6));         // у воина — лишнее улучшение на 6-м
+        Assert.True(rules.IsAsiLevel(Fighter(), 6));         // for a warrior - extra improvement at 6th
         Assert.Equal(3, rules.ProficiencyAt(5));
     }
 
@@ -148,9 +148,9 @@ public class LevelUpTests
         up.Choices[0].Toggle(1);
         up.SetAsi(LevelUp.AsiMode.Plus1x2);
         up.ToggleAsi(AbilityNames.Str);
-        Assert.False(up.Ready);                              // нужно две характеристики
+        Assert.False(up.Ready);                              // two characteristics needed
         up.ToggleAsi(AbilityNames.Con);
-        Assert.True(up.Ready);                               // черта скрыта — не нужна
+        Assert.True(up.Ready);                               // trait hidden - not needed
         Assert.DoesNotContain(up.VisibleChoices, c => c.Id == LevelUp.FeatId);
         up.SetAsi(LevelUp.AsiMode.Feat);
         Assert.False(up.Ready);
@@ -173,9 +173,9 @@ public class LevelUpTests
         var up = new LevelUp(Fighter(), LevelRules.Current);
         Assert.Equal(10 / 2 + 1 + 2, up.HpAverage);
         int first = up.RollHp(new Random(1));
-        Assert.Equal(first, up.RollHp(new Random(2)));       // повтора нет
+        Assert.Equal(first, up.RollHp(new Random(2)));       // no repeat
         up.ChooseAverage();
-        Assert.True(up.HpRoll);                              // после броска на среднее не переключить
+        Assert.True(up.HpRoll);                              // cannot switch to medium after throwing
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public class LevelUpTests
         up.ChooseAverage();
         up.SetAsi(LevelUp.AsiMode.Plus1x2);
         up.ToggleAsi(AbilityNames.Str);
-        up.ToggleAsi(AbilityNames.Con);                       // 15 → 16: модификатор +2 → +3
+        up.ToggleAsi(AbilityNames.Con);                       // 15 → 16: modifier +2 → +3
 
         var after = up.Apply("""
             {"hero":{"abilities":[{"name":"Стойкость","description":"…"}],"skills":[{"id":0,"value":"+6"}],
@@ -196,15 +196,14 @@ public class LevelUpTests
 
         Assert.Equal(4, after.Level);
         Assert.Equal(2700, after.Xp);
-        // Среднее d10 с прежним Тел: 6+2; модификатор Тел вырос на 1 — ещё +1 за каждый из 4 уровней.
+        // Average d10 with the same Tel: 6+2; The Tel modifier increased by 1 - another +1 for each of 4 levels.
         Assert.Equal(8 + 4, up.HpGain);
         Assert.Equal("32/40", after.Hp);
         Assert.Equal("+3 (17)", AbilityNames.Find(after, AbilityNames.Str)!.Value);
         Assert.Equal("+3 (16)", AbilityNames.Find(after, AbilityNames.Con)!.Value);
         Assert.Equal("+6", after.Skills[0].Value);
-        Assert.Contains(after.Abilities, a => a.Name == "Стойкость" && a.Color is [220, 220, 220]);   // без цвета от мастера — утилитарный
-        Assert.Single(after.Inventory);                       // инвентарь мастер тут не трогает
-        // Исходный герой не изменился до «Принять».
+        Assert.Contains(after.Abilities, a => a.Name == "Стойкость" && a.Color is [220, 220, 220]);   // without color from the GM - utilitarian
+        Assert.Single(after.Inventory);                       // the GM does not touch the inventory here. The original hero has not changed to “Accept”.
         Assert.Equal(3, hero.Level);
         Assert.Equal("+3 (16)", hero.Stats[0].Value);
         Assert.Single(hero.Abilities);
@@ -250,7 +249,7 @@ public class LevelUpTests
         int die = up.RollHp(new Random(3));
         up.SaveDraft();
 
-        // Сохранение → загрузка: черновик на месте, мастер своим патчем его не меняет.
+        // Save → load: the draft is in place, the GM does not change it with his patch.
         var saved = System.Text.Json.JsonSerializer.Serialize(new { hero },
             new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
         var storage = new Storage();
@@ -262,7 +261,7 @@ public class LevelUpTests
         Assert.Contains(again.Choices[0].Options, o => o.Name == "Мистический рыцарь" && o.Custom);
         Assert.Equal(die, again.HpDie);
         Assert.True(again.HpRoll);
-        Assert.Null(again.Apply(null).LevelUpDraft);   // уровень получен — черновик не нужен
+        Assert.Null(again.Apply(null).LevelUpDraft);   // level received - no draft needed
     }
 
     [Fact]
@@ -359,7 +358,7 @@ public class LevelUpTests
         Assert.Equal(level == 5 ? "+3" : "+2", AbilityNames.Proficiency(after)!.Value);
         Assert.Single(after.Abilities, a => a.Name == ability);
         Assert.Equal(System.Text.Json.JsonSerializer.Serialize(after), System.Text.Json.JsonSerializer.Serialize(again));
-        Assert.Single(hero.Abilities); // исходный лист не меняется
+        Assert.Single(hero.Abilities); // source sheet does not change
         if (cls == "Волшебник")
             for (int i = 0; i < slots.Length; i++) Assert.Equal($"{slots[i]}/{slots[i]}", after.Resources[i].Value);
     }

@@ -28,11 +28,11 @@ public class Door
     // One of From/To will have a coordinate outside the grid bounds.
     public bool? IsEntry { get; set; }
 
-    // true = выход из локации на карту мира (вход снаружи стартового блока). Рисуется дверью своего
-    // цвета (LocationGrower.WorldExitColor); шаг наружу через неё — герой уходит на карту мира.
+    // true = exit from the location to the world map (entrance outside the starting block). Draws a door of its
+    // own color (LocationGrower.WorldExitColor); step outside through it - the hero goes to the world map.
     public bool? IsWorldExit { get; set; }
 
-    // true = окно (IsDoor = true): видно насквозь всегда, пройти — только если открыто (IsDoorOpen).
+    // true = window (IsDoor = true): always visible through, pass through only if open (IsDoorOpen).
     public bool? IsWindow { get; set; }
 
     public string? Image { get; set; }

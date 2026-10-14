@@ -4,15 +4,16 @@ using System.Text.Json;
 
 namespace NaviDnD.Helpers;
 
-// Вызывается единственным потребителем Speech (по одному запросу за раз). На каждую модель — свой процесс, он остаётся в
-// памяти между репликами: голос «en_*» — английская (v3_en — файл игры Speech/models), остальные — русская (v5_5_ru —
-// в комплекте Silero). Обе можно загрузить заранее (Speech.WarmUp), переключение языка не перезагружает модель.
+// Called by a single consumer Speech (one request at a time). Each model has its own process, it remains in
+// memory between replicas: the voice “en_*” is English (v3_en - game file Speech/models), the rest are Russian
+// (v5_5_ru - included Silero). Both can be loaded in advance (Speech.WarmUp), switching the language does not
+// reload the model.
 internal static class SileroSpeech
 {
     private sealed record Worker(Process Process, Task<string> Errors);
 
     private static readonly Dictionary<string, Worker> Workers = [];
-    // NaviDnD.app на macOS: комплект — архивом в приложении (Resources/Speech/silero.zip), распакованный в DataRoot.
+    // NaviDnD.app on macOS: kit - archived in the application (Resources/Speech/silero.zip), unpacked in DataRoot.
     private static string BundledRoot => Path.Combine(AppConfig.InMacApp ? AppConfig.DataRoot : AppConfig.ProjectRoot, "Speech", "silero");
     private static string BundledZip => Path.Combine(AppConfig.ProjectRoot, "Speech", "silero.zip");
     private static readonly SemaphoreSlim UnpackGate = new(1, 1);
@@ -25,9 +26,10 @@ internal static class SileroSpeech
 
     public static bool IsEnglishVoice(string voice) => voice.StartsWith("en_", StringComparison.Ordinal);
 
-    // NaviDnD.app: Python и PyTorch нельзя держать внутри подписанного приложения как папку (подпись macOS принимает
-    // папки вида python3.12 и *.dist-info за вложенные приложения) — они лежат там архивом и распаковываются сюда при
-    // первом запуске и после обновления, сменившего архив (метка .source — размер и время архива).
+    // NaviDnD.app: Python and PyTorch cannot be kept inside a signed application as a folder (the macOS
+    // label accepts folders like python3.12 and *.dist-info as nested applications) - they are stored there
+    // as an archive and are unpacked here upon first launch and after an update that replaces the archive
+    // (label .source - size and time archive).
     public static async Task UnpackBundledAsync(Action<string>? status = null, CancellationToken token = default)
     {
         await UnpackGate.WaitAsync(token);
@@ -38,7 +40,7 @@ internal static class SileroSpeech
             string source = $"{zip.Length}:{zip.LastWriteTimeUtc.Ticks}";
             string marker = Path.Combine(BundledRoot, ".source");
             if (File.Exists(marker) && File.ReadAllText(marker) == source && HasBundle) return;
-            status?.Invoke(L.T("Распаковка озвучки"));
+            status?.Invoke(L.T("Unpacking voice-over"));
             string parent = Path.GetDirectoryName(BundledRoot)!;
             string fresh = BundledRoot + ".new";
             Directory.CreateDirectory(parent);
@@ -51,7 +53,7 @@ internal static class SileroSpeech
         finally { UnpackGate.Release(); }
     }
 
-    // Silero уже установлен (готовая сборка — всегда): заранее загружать модель можно, ничего не скачивая.
+    // Silero is already installed (ready assembly - always): you can download the model in advance without downloading anything.
     public static bool Installed => File.Exists(Path.Combine(Root, ".ready"));
 
     public static async Task SynthesizeAsync(string text, string? ssmlText, string voice, string wav, string python,
@@ -60,7 +62,7 @@ internal static class SileroSpeech
         if (AppConfig.InMacApp && File.Exists(BundledZip)) await UnpackBundledAsync(status, token);
         if (!Installed)
         {
-            status(L.T("Установка Silero и PyTorch"));
+            status(L.T("Installing Silero and PyTorch"));
             var setup = CreateStart(OperatingSystem.IsWindows() ? "powershell.exe" : "/bin/bash");
             string[] setupArguments = OperatingSystem.IsWindows()
                 ? ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
@@ -69,7 +71,7 @@ internal static class SileroSpeech
             foreach (var arg in setupArguments)
                 setup.ArgumentList.Add(arg);
             if (!OperatingSystem.IsWindows()) setup.Environment["PATH"] = UnixTools.ChildPath(null);
-            using var process = Process.Start(setup) ?? throw new IOException(L.T("Не удалось начать установку Silero"));
+            using var process = Process.Start(setup) ?? throw new IOException(L.T("Could not start Silero installation"));
             using var kill = token.Register(() => Kill(process));
             var stdout = process.StandardOutput.ReadToEndAsync(token);
             var stderr = process.StandardError.ReadToEndAsync(token);
@@ -79,32 +81,33 @@ internal static class SileroSpeech
             await File.WriteAllTextAsync(Path.Combine(AppConfig.DataRoot, "logs", "silero-setup.log"),
                 stdout.Result + stderr.Result, token);
             if (process.ExitCode != 0) throw new IOException(OperatingSystem.IsWindows()
-                ? L.T("Установка Silero не удалась. Нужен Python 3.10–3.12 x64; проверь путь к Python и интернет.")
-                : L.T("Установка Silero не удалась. Нужен Python 3.10–3.12 (например: brew install python@3.12); проверь путь к Python и интернет."));
+                ? L.T("Silero installation failed. Python 3.10–3.12 x64 is required; check the Python path and your internet connection.")
+                : L.T("Silero installation failed. Python 3.10–3.12 is required (for example: brew install python@3.12); check the Python path and your internet connection."));
         }
         string model = IsEnglishVoice(voice) ? EnglishModelPath : Path.Combine(Root, "v5_5_ru.pt");
-        if (!File.Exists(model)) throw new FileNotFoundException(L.T("Нет файла модели озвучки — переустанови игру."), model);
+        if (!File.Exists(model)) throw new FileNotFoundException(L.T("The voice model file is missing — reinstall the game."), model);
         var worker = await WorkerFor(model, status, token);
         try
         {
-            status(L.T("Синтез Silero"));
-            // Английская модель v3 на 48 кГц синтезирует вдвое дольше 24 кГц (а втрое — дольше русской v5.5); для речи 24 кГц хватает.
+            status(L.T("Silero synthesis"));
+            // The English model v3 at 48 kHz synthesizes twice as long as 24 kHz (and three times longer than the Russian v5.5); 24 kHz is enough for speech.
             int rate = IsEnglishVoice(voice) ? 24000 : 48000;
             string request = JsonSerializer.Serialize(new { text, ssml_text = ssmlText, voice, output = wav, sample_rate = rate });
             await worker.Process.StandardInput.WriteLineAsync(request.AsMemory(), CancellationToken.None);
             await worker.Process.StandardInput.FlushAsync(CancellationToken.None);
-            // Реплику остановили — синтез не обрываем (убитый процесс пришлось бы загружать заново, это дольше):
-            // ждём ответа, чтобы протокол не сбился, но не дольше 10 с — дальше процесс считается зависшим.
+            // The replica was stopped - we do not interrupt the synthesis (the killed process would have to be
+            // loaded again, it would take longer): we wait for a response so that the protocol does not go
+            // astray, but no longer than 10 s - then the process is considered frozen.
             var read = worker.Process.StandardOutput.ReadLineAsync();
             await Task.WhenAny(read, Task.Delay(Timeout.Infinite, token)).ConfigureAwait(false);
             if (!read.IsCompleted && await Task.WhenAny(read, Task.Delay(TimeSpan.FromSeconds(10))) != read)
-                throw new TimeoutException(L.T("Silero завершился без ответа"));
-            string response = await read ?? throw new IOException(L.T("Silero завершился без ответа"));
+                throw new TimeoutException(L.T("Silero exited without a response"));
+            string response = await read ?? throw new IOException(L.T("Silero exited without a response"));
             token.ThrowIfCancellationRequested();
             using var result = JsonDocument.Parse(response);
-            if (!result.RootElement.GetProperty("ok").GetBoolean()) throw new LineFailedException(L.T("Silero не смог озвучить реплику"));
+            if (!result.RootElement.GetProperty("ok").GetBoolean()) throw new LineFailedException(L.T("Silero could not voice the line"));
         }
-        // Процесс сломан (не отвечает, вышел, протокол сбит) — закрыть; остановленная или неудачная реплика — процесс цел.
+        // Process broken (not responding, exited, protocol broken) - close; a stopped or unsuccessful replica means the process is intact.
         catch (Exception e) when (e is not OperationCanceledException and not LineFailedException)
         {
             Close(model);
@@ -118,29 +121,30 @@ internal static class SileroSpeech
     {
         if (Workers.TryGetValue(model, out var alive) && !alive.Process.HasExited) return alive;
         Close(model);
-        status(L.T("Загрузка модели Silero"));
+        status(L.T("Loading the Silero model"));
         var start = CreateStart(Python);
         start.Environment["PYTHONIOENCODING"] = "utf-8";
         foreach (var arg in new[] { "-u", Path.Combine(AppConfig.ProjectRoot, "Speech", "silero_worker.py"), model })
             start.ArgumentList.Add(arg);
-        var process = Process.Start(start) ?? throw new IOException(L.T("Не удалось запустить Silero"));
+        var process = Process.Start(start) ?? throw new IOException(L.T("Could not start Silero"));
         var worker = new Worker(process, process.StandardError.ReadToEndAsync());
         Workers[model] = worker;
         try
         {
             using var kill = token.Register(() => Kill(process));
             string? ready = await process.StandardOutput.ReadLineAsync(token);
-            if (ready == null) throw new IOException(L.T("Silero не загрузил модель"));
+            if (ready == null) throw new IOException(L.T("Silero did not load the model"));
             using var handshake = JsonDocument.Parse(ready);
             if (!handshake.RootElement.TryGetProperty("ready", out var readyValue) || !readyValue.GetBoolean())
-                throw new IOException(L.T("Silero не загрузил модель"));
+                throw new IOException(L.T("Silero did not load the model"));
             return worker;
         }
         catch { Close(model); throw; }
     }
 
-    // macOS/Linux: указанный в настройках интерпретатор, если он есть, иначе самый новый подходящий python3.1x (у PyTorch 2.6 и
-    // numpy 1.26 есть сборки для 3.10–3.12) из PATH, Homebrew, python.org или pyenv; версию проверяет скрипт установки.
+    // macOS/Linux: interpreter specified in the settings, if any, otherwise the newest suitable python3.1x
+    // (PyTorch 2.6 and numpy 1.26 have assemblies for 3.10–3.12) from PATH, Homebrew, python.org or pyenv; The
+    // installation script checks the version.
     [System.Runtime.Versioning.UnsupportedOSPlatform("windows")]
     internal static string FindPython(string configured)
     {

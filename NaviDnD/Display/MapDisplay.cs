@@ -33,8 +33,8 @@ public class MapDisplay
 
         string Delimetr(int n) => new string(_display.Delimetr, n);
 
-        // Окно просмотра (камера): на экране vc×vr клеток, левая нижняя — (c0, r0) в координатах карты.
-        // Провайдеру отдаются координаты карты, номера по краям — тоже они.
+        // Viewing window (camera): on the screen there are vc×vr cells, the bottom left - (c0, r0) in map
+        // coordinates. The provider is given the map coordinates, the numbers on the edges are also them.
         ClampCamera();
         int cols = _display.ViewCols(settings.Map), rows = _display.ViewRows(settings.Map);
         var cellWidth = _display.CellWidth;
@@ -68,10 +68,10 @@ public class MapDisplay
                 : () => { };
         }
 
-        // Draws one legend row: separator with ├┤ when at separatorIndex (над блоком боя), normal content otherwise.
-        // Мир: та же раскладка строк, вместо клеток — тестовая карта мира (WriteWorldRow).
+        // Draws one legend row: separator with ├┤ when at separatorIndex (above the combat block), normal
+        // content otherwise. World: same row layout, instead of cells — test map of the world (WriteWorldRow).
         bool worldMap = _display.MapLevel == MapLevel.World;
-        int gridRow = 0; // номер строки области карты (0 — номера колонок, 1 — верхняя граница, …)
+        int gridRow = 0; // line number of the map area (0 - column numbers, 1 - upper limit, ...)
 
         void DrawRow(Action leftContent)
         {
@@ -84,7 +84,7 @@ public class MapDisplay
             }
             else if (li == terrainSeparator)
             {
-                // Над блоком рельефа: ├────┬────┤ — ┬ там, где вниз уходит линия между его колонками.
+                // Above the terrain block: ├────┬────┤ — ┬ where the line between its columns goes down.
                 li++;
                 borderDrawer.DrawContentLine2ColumnsRightSeparator(leftContent, mapWidth, legendWidth,
                     _legendDisplay.SeparatorJunction, BorderDrawer.JunctionDown);
@@ -98,7 +98,7 @@ public class MapDisplay
         // Separator with 2-column divider
         borderDrawer.DrawSeparatorWith2Parts('┬', mapWidth, legendWidth);
 
-        // Строки области карты: номера колонок, рамки, клетки (BuildLocationRows); на Мире — WriteWorldRow.
+        // Lines of the map area: column numbers, frames, cells (BuildLocationRows); on the World - WriteWorldRow.
         var mapRows = worldMap ? null : BuildLocationRows(provider);
         for (int i = 0; i < MapAreaHeight; i++)
             DrawRow(mapRows?[i] ?? (() => { }));
@@ -122,7 +122,7 @@ public class MapDisplay
         DrawEndLeft = Term.CursorLeft;
         DrawEndTop = Term.CursorTop;
 
-        // Снимок легенды — RedrawAfterMove перерисует только изменившиеся строки.
+        // Legend Snapshot - RedrawAfterMove will only redraw lines that have changed.
         _legendSnapshot = worldMap ? null : legendLines.Select(CaptureOutput).ToList();
         _legendSnapshotSeparator = separatorIndex;
         _legendRowsDrawn = gridRow;
@@ -132,7 +132,7 @@ public class MapDisplay
 
     private int _terrainSeparatorSnapshot = -1;
 
-    // Где остался курсор после DrawMap — оттуда рисуется всё, что ниже карты.
+    // Where the cursor remains after DrawMap - everything below the map is drawn from there.
     public int DrawEndLeft { get; private set; }
     public int DrawEndTop { get; private set; }
 
@@ -150,9 +150,9 @@ public class MapDisplay
         return sw.ToString();
     }
 
-    // Шаг героя / сдвиг камеры: область карты одной записью (как при перетаскивании) + только изменившиеся
-    // строки легенды. Полный DrawMap на каждый шаг — тысячи мелких записей в консоль, камера «дёргалась».
-    // Раскладка легенды сменилась (начался бой, другое число строк) — полная перерисовка.
+    // Hero step / camera shift: map area with one entry (as if dragging) + only changed legend lines. Full
+    // DrawMap for every step - thousands of small entries into the console, the camera “twitched”. The layout
+    // of the legend has changed (the battle has begun, the number of lines has changed) - a complete redrawing.
     public void RedrawAfterMove(MapObjectsProvider provider)
     {
         var lines = _legendDisplay.GetLegendLines();
@@ -168,8 +168,8 @@ public class MapDisplay
         RedrawChangedLegendLines(lines);
     }
 
-    // Только изменившиеся строки легенды (наведение: подсветка комнаты, путь). Раскладка поменялась —
-    // ничего: её перерисует ближайший полный DrawMap.
+    // Only changed legend lines (hover: room highlight, path). The layout has changed - nothing: it will be
+    // redrawn by the nearest complete DrawMap.
     public void RefreshLegend()
     {
         var lines = _legendDisplay.GetLegendLines();
@@ -186,8 +186,8 @@ public class MapDisplay
             if (text != _legendSnapshot![i]) RedrawLegendLine(i, lines);
         }
 
-        // Разделитель над блоком рельефа сместился/появился/пропал: прежняя строка — снова обычная строка
-        // легенды (RedrawLegendLine возвращает её рамки │ │), новая — ├──┬──┤.
+        // The separator above the terrain block has moved/appeared/disappeared: the old line is again a regular
+        // legend line (RedrawLegendLine returns its frames │ │), the new one is ├──┬──┤.
         int terrainSep = _legendDisplay.TerrainSeparatorIndex;
         if (terrainSep != _terrainSeparatorSnapshot)
         {
@@ -203,7 +203,7 @@ public class MapDisplay
             }
         }
 
-        // Рельеф появился/пропал над разделителем блока боя — перерисовать стык (┴) на разделителе.
+        // The terrain appeared/disappeared above the battle block divider - redraw the joint (┴) on the divider.
         var junction = _legendDisplay.SeparatorJunction;
         int sep = _legendDisplay.SeparatorLineIndex;
         if (junction != _junctionSnapshot && sep >= 0 && sep < _legendRowsDrawn)
@@ -217,14 +217,14 @@ public class MapDisplay
 
     private int? _junctionSnapshot;
 
-    // Строки области карты локации сверху вниз (MapAreaHeight штук): номера колонок, верхняя рамка,
-    // клетки/линии сетки, нижняя рамка, номера колонок. Одни и те же для DrawMap и быстрой перерисовки
-    // при перетаскивании (RedrawLocationViewport).
+    // Lines of the location map area from top to bottom (MapAreaHeight pieces): column numbers, top frame,
+    // cells/grid lines, bottom frame, column numbers. The same for DrawMap and fast redraw when dragging
+    // (RedrawLocationViewport).
     private List<Action> BuildLocationRows(MapObjectsProvider provider)
     {
         ClampCamera();
         var mainBg = _display.MainBackground;
-        var mainFg = MouseUiHelper.FrameColor(_display);   // номера клеток по краям — цветом рамок
+        var mainFg = MouseUiHelper.FrameColor(_display);   // cell numbers at the edges - the color of the frames
         int cellWidth = _display.CellWidth;
         int c0 = _display.CameraCol, r0 = _display.CameraRow;
         int topRow = TopRow, rightCol = RightCol;
@@ -238,13 +238,13 @@ public class MapDisplay
                 ColorHelper.WriteColored(c.ToString(), fgColor: mainFg, bgColor: mainBg);
                 if (c < rightCol)
                 {
-                    int spaces = cellWidth - (c.ToString().Length - 1); // 1–3 цифры, шаг колонки неизменен
+                    int spaces = cellWidth - (c.ToString().Length - 1); // 1–3 digits, column spacing unchanged
                     ColorHelper.WriteColored(Delimetr(spaces), fgColor: mainFg, bgColor: mainBg);
                 }
             }
         }
 
-        // Горизонтальная линия сетки на высоте y (между строками карты) с углами.
+        // Horizontal grid line at height y (between map lines) with corners.
         void GridLine(double y, CornerType left, CornerType middle, CornerType right, bool trailingPad)
         {
             ColorHelper.WriteColored(Delimetr(cellWidth), fgColor: mainFg, bgColor: mainBg);
@@ -288,9 +288,9 @@ public class MapDisplay
         return rows;
     }
 
-    // Только область карты (без легенды/рамок экрана) — на каждый шаг перетаскивания. Каждая строка
-    // рисуется в память, весь кадр уходит в консоль ОДНОЙ записью (позиции строк — ANSI CUP):
-    // при обычном выводе каждый цветной кусочек — отдельная запись в консоль, тысячи на кадр.
+    // Map area only (no legend/screen borders) - per drag step. Each line is drawn into memory, the entire
+    // frame goes to the console in ONE record (line positions are ANSI CUP): with normal output, each colored
+    // piece is a separate record to the console, thousands per frame.
     private static readonly System.Text.RegularExpressions.Regex AnsiEscape =
         new(@"\x1b\[[0-9;]*[A-Za-z]", System.Text.RegularExpressions.RegexOptions.Compiled);
 
@@ -330,29 +330,31 @@ public class MapDisplay
     {
         if (_display.MapLevel != MapLevel.Location) return;
         WriteRowsBatched(BuildLocationRows(provider));
-        if (refreshLegend) RefreshLegend(); // легенда — то, что в окне карты: после сдвига камеры меняется
+        if (refreshLegend) RefreshLegend(); // legend - what is in the map window: after moving the camera it changes
     }
 
-    // ── Камера ────────────────────────────────────────────────────────────────
+    // ── Camera ──────────────────────────────── ────────────────────────────────
     private int ViewCols => _display.ViewCols(_settings.Map);
     private int ViewRows => _display.ViewRows(_settings.Map);
     private int TopRow => _display.CameraRow + ViewRows - 1;
     private int RightCol => _display.CameraCol + ViewCols - 1;
 
-    // Камера не выходит за поле локации 1..MapConfig.MaxSize — дальше тянуть нельзя.
+    // The camera does not go beyond the field of location 1..MapConfig.MaxSize - you cannot drag it further.
     public void ClampCamera()
     {
         _display.CameraCol = Math.Clamp(_display.CameraCol, 1, NaviDnD.Data.Models.MapConfig.MaxSize - ViewCols + 1);
         _display.CameraRow = Math.Clamp(_display.CameraRow, 1, NaviDnD.Data.Models.MapConfig.MaxSize - ViewRows + 1);
     }
 
-    // Герой не ближе FollowMargin клеток к краю окна — иначе камера сдвигается за ним.
+    // The hero is no closer than FollowMargin cells to the edge of the window - otherwise the camera will move behind him.
     private const int FollowMargin = 2;
-    // Герой в центре окна — при первом показе карты после запуска игры и когда герой вне окна
-    // (новая игра, загрузка). Дальше камера только следует за ним (FollowHero) или её тянут мышью.
+    // The hero is in the center of the window - when the map is first shown after starting the game and when
+    // the hero is outside the window (new game, loading). Then the camera just follows him (FollowHero) or it
+    // is dragged with the mouse.
     private bool _centeredOnce;
-    // Этаж героя целиком влезает в окно (локация из одного блока) — камера стоит на нём целиком, не сдвигается
-    // за героем; герой — где стоит, не обязательно по центру. true — камера поставлена.
+    // The hero’s entire floor fits into the window (location from one block) - the camera stands entirely on it
+    // and does not move behind the hero; the hero stands where he stands, not necessarily in the center. true -
+    // the camera is installed.
     public bool LockToFloorIfFits()
     {
         if (_settings.Hero?.Position is not { Count: >= 2 } hp || _settings.Map.Chunks is not { Count: > 0 } chunks) return false;
@@ -392,14 +394,15 @@ public class MapDisplay
         if (hp[1] < _display.CameraRow + my) _display.CameraRow = hp[1] - my;
         if (hp[1] > TopRow - my) _display.CameraRow = hp[1] - (ViewRows - 1 - my);
         ClampCamera();
-        // Камера сдвинулась за героем — встать туда, где в окне больше всего карты (без пустоты вне блоков).
+        // The camera moved behind the hero - stand where there is most of the map in the window (without emptiness outside the blocks).
         if (_display.CameraCol != oldCol || _display.CameraRow != oldRow) MoveToMostMap(hp, keepCurrent: true);
     }
 
-    // Окно карты — там, где в него попадает больше всего сгенерированных блоков этажа героя (пустоту вне блоков не
-    // показывать), но герой виден и не ближе FollowMargin к краю. Окно может стоять на стыке двух блоков. Из равных —
-    // ближе к нынешнему положению камеры (keepCurrent: следование, без прыжков) или к герою по центру. Карты старого
-    // формата (без блоков) — как есть.
+    // The map window is where most of the generated blocks of the hero's floor fall into it (do not show the
+    // void outside the blocks), but the hero is visible and no closer than FollowMargin to the edge. The window
+    // can stand at the junction of two blocks. Of equals - closer to the current camera position (keepCurrent:
+    // following, without jumping) or to the hero in the center. Maps of the old format (without blocks) - as
+    // is.
     private void MoveToMostMap(List<int> hp, bool keepCurrent)
     {
         if (_settings.Map.Chunks is not { Count: > 0 } chunks) return;
@@ -430,8 +433,8 @@ public class MapDisplay
         if (best is { } b) { _display.CameraCol = b.col; _display.CameraRow = b.row; }
     }
 
-    // Перетаскивание камеры мышью: символы → клетки (клетка = CellWidth+1 символов × 2 строки).
-    // Тянешь вправо/вниз — карта едет за курсором (камера влево/вверх; строки карты растут снизу вверх).
+    // Dragging the camera with the mouse: symbols → cells (cell = CellWidth+1 characters × 2 lines). If you
+    // pull right/down, the map follows the cursor (camera left/up; map lines grow from bottom to top).
     public void PanCamera(int startCol, int startRow, int dxChars, int dyChars)
     {
         _display.CameraCol = startCol - (int)Math.Round(dxChars / (double)(_display.CellWidth + 1));
@@ -439,7 +442,7 @@ public class MapDisplay
         ClampCamera();
     }
 
-    // Мышь → клетка/стена карты: ConsoleMouseReader считает в клетках окна (1..ViewCols), сдвигаем камерой.
+    // Mouse → map cell/wall: ConsoleMouseReader counts windows in the cells (1..ViewCols), move with camera.
     public (int col, int row)? ScreenToCell(short x, short y) =>
         _display.ScreenCellToWorld(ConsoleMouseReader.ScreenToMapCell(x, y, _display.MapDrawTop, ViewCols, ViewRows, _display.CellWidth));
 
@@ -455,7 +458,7 @@ public class MapDisplay
 
     public void RedrawVerticalWall(int leftCol, int row, MapObjectsProvider provider)
     {
-        if (_display.MapLevel != MapLevel.Location) return; // на карте мира клеток нет
+        if (_display.MapLevel != MapLevel.Location) return; // there are no cells on the world map
         if (row < _display.CameraRow || row > TopRow || leftCol < _display.CameraCol - 1 || leftCol > RightCol) return;
         int cellW = _display.CellWidth + 1;
         int screenY = _display.MapDrawTop + 3 + (TopRow - row) * 2;
@@ -489,11 +492,11 @@ public class MapDisplay
         ColorHelper.SetForegroundColor(_display.MainForeground);
     }
 
-    // Экранная колонка начала правой части (легенды): отступ + рамка + ширина карты (baseMapWidth в DrawMap) + разделитель.
+    // Screen column of the beginning of the right part (legend): indent + frame + map width (baseMapWidth in DrawMap) + separator.
     public int LegendX => DisplayConfig.LeftMargin + 1 + (ViewCols * (_display.CellWidth + 1) + 7) + 1;
 
-    // Одна строка легенды (правая колонка) без перерисовки карты — для подсказок при наведении.
-    // Строка легенды i рисуется в строке экрана MapDrawTop + 1 + i (DrawMap: разделитель ┬, затем DrawRow на каждую).
+    // One legend line (right column) without map redrawing - for hover tooltips. The legend line i is drawn in
+    // the screen line MapDrawTop + 1 + i (DrawMap: separator ┬, then DrawRow for each).
     public void RedrawLegendLine(int index) => RedrawLegendLine(index, _legendDisplay.GetLegendLines());
 
     private void RedrawLegendLine(int index, List<Action> lines)
@@ -504,7 +507,7 @@ public class MapDisplay
 
         int x = LegendX;
         int width = _display.GetLegendWidth(ViewCols);
-        // Рамки строки (│ слева и справа) — на месте бывшего разделителя рельефа там стояли ├ ┤.
+        // Row frames (│ left and right) - in place of the former terrain divider there were ├ ┤.
         Term.SetCursorPosition(x - 1, _display.MapDrawTop + 1 + index);
         ColorHelper.WriteColored("│", fgColor: MouseUiHelper.FrameColor(_display), bgColor: _display.MainBackground);
         ColorHelper.SetBackgroundColor(_display.MainBackground);
@@ -517,8 +520,8 @@ public class MapDisplay
         ColorHelper.WriteColored("│", fgColor: MouseUiHelper.FrameColor(_display), bgColor: _display.MainBackground);
     }
 
-    // Клетка вместе с рамкой: обе вертикальные линии, горизонтальные линии сверху/снизу и 4 угла.
-    // Нужна, когда подсветка зависит от соседей (select_target красит и линии между клетками).
+    // Check with frame: both vertical lines, horizontal lines at top/bottom and 4 corners. It is needed when
+    // the highlighting depends on the neighbors (select_target also colors the lines between cells).
     public void RedrawCellFrame(int col, int row, MapObjectsProvider provider)
     {
         if (_display.MapLevel != MapLevel.Location || !InView(col, row)) return;
@@ -528,7 +531,7 @@ public class MapDisplay
         RedrawBoundarySegment(col, row - 0.5, provider);
     }
 
-    // Отрезок горизонтальной линии сетки над/под клеткой вместе с углами по краям.
+    // A section of the horizontal grid line above/below the cell along with the corners at the edges.
     private void RedrawBoundarySegment(int col, double y, MapObjectsProvider provider)
     {
         int cellW = _display.CellWidth + 1;
@@ -547,7 +550,7 @@ public class MapDisplay
         ColorHelper.SetForegroundColor(_display.MainForeground);
     }
 
-    // Тот же выбор типа угла, что и в DrawMap, по положению в окне просмотра.
+    // Same angle type selection as DrawMap by position in the viewport.
     private CornerType CornerTypeAt(double x, double y)
     {
         bool top = y > TopRow, bottom = y < _display.CameraRow;
@@ -589,15 +592,15 @@ public class MapDisplay
         ColorHelper.SetForegroundColor(_display.MainForeground);
     }
 
-    // ── Карта мира (WorldMapView по WorldLibrary.Current), таскается мышью, масштаб колесом ─────
-    // Область карты на экране: ширина левой колонки DrawMap и все её строки (номера, рамки, клетки).
+    // ── World map (WorldMapView by WorldLibrary.Current), dragged with the mouse, scale wheel ───── Map area
+    // on the screen: the width of the left column DrawMap and all its lines (numbers, frames, cells).
     public int MapAreaWidth => ViewCols * (_display.CellWidth + 1) + 7;
     public int MapAreaHeight => ViewRows * 2 + 3;
 
     private WorldMapView? _worldView;
 
-    // Вид мира игры (GameWorld: геометрия + места, известные герою); сменился мир — камера на весь мир,
-    // добавилось место — камера остаётся.
+    // View of the game world (GameWorld: geometry + places known to the hero); the world has changed - a camera
+    // for the whole world, a place has been added - the camera remains.
     public WorldMapView WorldView
     {
         get
@@ -611,7 +614,7 @@ public class MapDisplay
                 _display.SelectedWorldPlace = -1;
                 if (!sameWorld)
                 {
-                    // Новый мир на экране: есть герой — камера на нём, крупно (клетка = пиксель); нет — весь мир.
+                    // New world on the screen: there is a hero - the camera is on him, large (cell = pixel); no - the whole world.
                     _display.WorldTarget = null;
                     _display.WorldRoute = null;
                     if (GameWorld.HeroTile(_settings) is { } h)
@@ -628,9 +631,9 @@ public class MapDisplay
                     }
                 }
             }
-            // Герой и маршрут — поверх карты (кадр перестраивается, если они изменились).
+            // The hero and route are on top of the map (the frame is rebuilt if they have changed).
             _worldView.Hero = GameWorld.HeroTile(_settings);
-            _worldView.HeroColor = WorldMapView.MarkerColor;   // как отметка старта при создании игры
+            _worldView.HeroColor = WorldMapView.MarkerColor;   // as a start mark when creating a game
             _worldView.Route = _display.WorldRoute;
             return _worldView;
         }
@@ -639,7 +642,7 @@ public class MapDisplay
     public void ClampWorldCamera()
     {
         var w = WorldView.World;
-        // Дальше «мир во всё окно» не отдаляем, и камера не выходит за край мира.
+        // We do not zoom out further from the “world in the entire window”, and the camera does not go beyond the edge of the world.
         _display.WorldZoomStep = Math.Clamp(_display.WorldZoomStep, WorldMapView.MinZoom, WorldView.MaxZoom);
         var (pc, pr) = WorldScale;
         double halfW = MapAreaWidth / 2.0 * pc, halfH = MapAreaHeight / 2.0 * pr;
@@ -647,13 +650,13 @@ public class MapDisplay
         _display.WorldCenterY = halfH * 2 >= w.Height ? w.Height / 2.0 : Math.Clamp(_display.WorldCenterY, halfH, w.Height - halfH);
     }
 
-    // Клеток мира на символ по горизонтали / на строку по вертикали.
+    // World cells per character horizontally / per line vertically.
     private (double perCol, double perRow) WorldScale
     {
         get { double s = WorldView.Scale(_display.WorldZoomStep); return (s, 2 * s); }
     }
 
-    // Перетаскивание: сдвиг курсора в символах → сдвиг камеры в клетках мира.
+    // Drag: shift cursor in characters → shift camera in world cells.
     public void PanWorld(double startCenterX, double startCenterY, int dxChars, int dyChars)
     {
         var (pc, pr) = WorldScale;
@@ -662,8 +665,8 @@ public class MapDisplay
         ClampWorldCamera();
     }
 
-    // Колесо: шаг ±1, точка мира под курсором остаётся под курсором (как масштаб в картах браузера).
-    // Масштаб с клавиатуры (Ctrl+«+»/«−») — относительно центра области карты.
+    // Wheel: step ±1, the world point under the cursor remains under the cursor (like the scale in browser
+    // maps). Keyboard scale (Ctrl+"+"/"−") - relative to the center of the map area.
     public void ZoomWorldAtCenter(int notches) =>
         ZoomWorld(notches, ((short)(DisplayConfig.LeftMargin + 1 + MapAreaWidth / 2), (short)(_display.MapDrawTop + 1 + MapAreaHeight / 2)));
 
@@ -672,7 +675,7 @@ public class MapDisplay
         int oldZoom = _display.WorldZoomStep;
         int newZoom = Math.Clamp(oldZoom - notches, WorldMapView.MinZoom, WorldView.MaxZoom);
         if (newZoom == oldZoom) return;
-        double sx = cursor.x - (DisplayConfig.LeftMargin + 1) - MapAreaWidth / 2.0;   // символов от центра
+        double sx = cursor.x - (DisplayConfig.LeftMargin + 1) - MapAreaWidth / 2.0;   // characters from center
         double sy = cursor.y - (_display.MapDrawTop + 1) - MapAreaHeight / 2.0;
         var (pc0, pr0) = WorldScale;
         double wx = _display.WorldCenterX + sx * pc0, wy = _display.WorldCenterY + sy * pr0;
@@ -683,25 +686,25 @@ public class MapDisplay
         ClampWorldCamera();
     }
 
-    // Зоны клика в легенде мира (см. LegendDisplay.AddWorldLegendLines): 0 — последняя строка (новый мир другого
-    // размера, отладка), 1 — «Все», 2..4 — категории фильтра.
+    // Click zones in the world legend (see LegendDisplay.AddWorldLegendLines): 0 - last line (new world of a
+    // different size, debugging), 1 - “All", 2..4 - filter categories.
     public (int row, int x0, int x1)[] WorldLegendHitZones()
     {
         int w = _display.GetLegendWidth(ViewCols), half = w / 2;
         int top = _display.MapDrawTop + 1;
         return
         [
-            (-100, 0, -1),   // бывшая отладка «мир другого размера» — внизу теперь строки пути
+            (-100, 0, -1),   // former "world of a different size" debug - path lines are now at the bottom
             (top, LegendX, LegendX + half - 1), (top, LegendX + half, LegendX + w - 1),
             (top + 1, LegendX, LegendX + half - 1), (top + 1, LegendX + half, LegendX + w - 1),
         ];
     }
 
-    // Места в окне карты под фильтром (порядок легенды) — для Tab.
+    // Places in the map window under the filter (legend order) - for Tab.
     public List<int> VisibleWorldPlaces() =>
         WorldView.VisiblePlaces(MapAreaWidth, MapAreaHeight, _display.WorldCenterX, _display.WorldCenterY, _display.WorldZoomStep, _display.WorldFilter);
 
-    // Место мира под курсором мыши или -1; клетка мира — для подсказки о рельефе.
+    // Place of the world under the mouse cursor or -1; world cell - for a hint about the terrain.
     public (int place, int x, int y) WorldHit((short x, short y) pos)
     {
         int col = pos.x - (DisplayConfig.LeftMargin + 1), row = pos.y - (_display.MapDrawTop + 1);
@@ -718,18 +721,18 @@ public class MapDisplay
             _display.WorldCenterX, _display.WorldCenterY, _display.WorldZoomStep, _display.HoveredWorldPlace,
             _display.SelectedWorldPlace, _display.WorldFilter);
         Console.Write(line);
-        // Строка писала цвета напрямую — вернуть цвета карты, которых ждёт остальная отрисовка.
+        // The line wrote colors directly - return the map colors that the rest of the rendering expects.
         ColorHelper.SetBackgroundColor(_settings.Map.Colors.MapBackground ?? _display.MainBackground);
         ColorHelper.SetForegroundColor(_settings.Map.Colors.MapForeground ?? _display.MainForeground);
     }
 
-    // Только область карты (без легенды и рамок) — на каждый шаг перетаскивания.
+    // Map area only (no legend or borders) - for each drag step.
     public void RedrawWorldViewport(bool refreshLegend = true)
     {
         if (_display.MapLevel != MapLevel.World) return;
         WriteRowsBatched(Enumerable.Range(0, MapAreaHeight).Select(i => (Action)(() => WriteWorldRow(i))).ToList());
         if (!refreshLegend) return;
-        // Легенда мира — места в окне: сдвиг/масштаб/наведение её меняют.
+        // World legend - places in the window: shift/zoom/hover changes it.
         var lines = _legendDisplay.GetLegendLines();
         for (int i = 0; i < Math.Min(lines.Count, MapAreaHeight); i++) RedrawLegendLine(i, lines);
     }
@@ -738,7 +741,7 @@ public class MapDisplay
         pos.x >= DisplayConfig.LeftMargin + 1 && pos.x < DisplayConfig.LeftMargin + 1 + MapAreaWidth
         && pos.y >= _display.MapDrawTop + 1 && pos.y < _display.MapDrawTop + 1 + MapAreaHeight;
 
-    // Поле номера строки — 3 символа: " 7 ", " 42", "100" (карта до MapConfig.MaxSize = 100).
+    // Line number field - 3 characters: "7", "42", "100" (map up to MapConfig.MaxSize = 100).
     private void WriteRowNumbers(int row, int cellWidth, List<int> mainBg, List<int> mainFg)
     {
         string n = row.ToString();

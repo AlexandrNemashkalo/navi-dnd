@@ -157,8 +157,9 @@ public static class AiCliDiscovery
         return null;
     }
 
-    // macOS/Linux: родной установщик (~/.local/bin), старая локальная установка (~/.claude/local), Homebrew, npm (любой префикс, nvm,
-    // volta, bun, pnpm). Запускатель из npm — скрипт, который выполняет `node`; провайдеры ставят его папку первой в PATH дочернего процесса.
+    // macOS/Linux: native installer (~/.local/bin), old local installer (~/.claude/local), Homebrew, npm (any
+    // prefix, nvm, volta, bun, pnpm). Launcher from npm - script that executes `node`; providers put its folder
+    // first in the PATH child process.
     [UnsupportedOSPlatform("windows")]
     private static string? FindUnix(string name)
     {
@@ -201,7 +202,7 @@ public static class AiCliDiscovery
                 string pattern = name == "codex" ? "openai.chatgpt-*" : "anthropic.claude-code-*";
                 foreach (string extension in Directory.EnumerateDirectories(root, pattern).OrderByDescending(Directory.GetLastWriteTimeUtc))
                 {
-                    // Только один уровень папок платформ: bin/<платформа>/codex, resources/native-binary[/<платформа>]/claude.
+                    // Only one platform folder level: bin/<platform>/codex, resources/native-binary[/<platform>]/claude.
                     string parent = name == "codex" ? Path.Combine(extension, "bin") : Path.Combine(extension, "resources", "native-binary");
                     if (!Directory.Exists(parent)) continue;
                     var candidates = Directory.EnumerateDirectories(parent).Select(platform => Path.Combine(platform, name)).Prepend(Path.Combine(parent, name));
@@ -215,12 +216,13 @@ public static class AiCliDiscovery
         return null;
     }
 
-    // Терминалы вроде cmux ставят в начало PATH скрипты-обёртки на сеанс (~/.cmuxterm/cmux-cli-shims/<сеанс>/claude): они
-    // добавляют к каждому вызову настройки и хуки терминала и исчезают вместе с сеансом — игре нужен настоящий CLI.
+    // Terminals like cmux put wrapper scripts for the session at the beginning of PATH
+    // (~/.cmuxterm/cmux-cli-shims/<session>/claude): they add terminal settings and hooks to each call and
+    // disappear along with the session - the game needs a real CLI.
     public static bool IsTerminalShim(string directory) =>
         directory.Replace('\\', '/').Contains("/.cmuxterm/", StringComparison.Ordinal);
 
-    // Глобальный префикс npm без запуска npm: окружение, потом ~/.npmrc.
+    // Global prefix npm without starting npm: environment, then ~/.npmrc.
     [UnsupportedOSPlatform("windows")]
     private static IEnumerable<string> NpmPrefixes(string home)
     {
@@ -236,7 +238,7 @@ public static class AiCliDiscovery
         }
     }
 
-    // ~/.nvm/versions/node/<версия>/bin, сначала новые.
+    // ~/.nvm/versions/node/<version>/bin, new ones first.
     private static IEnumerable<string> NvmBinDirectories(string home)
     {
         string root = Path.Combine(Environment.GetEnvironmentVariable("NVM_DIR") is { Length: > 0 } nvm ? nvm : Path.Combine(home, ".nvm"), "versions", "node");
@@ -250,7 +252,7 @@ public static class AiCliDiscovery
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return []; }
     }
 
-    // PATH для дочернего процесса CLI на macOS/Linux (см. UnixTools.ChildPath).
+    // PATH for child process CLI on macOS/Linux (see UnixTools.ChildPath).
     public static string ChildPath(string executable) => OperatingSystem.IsWindows()
         ? Environment.GetEnvironmentVariable("PATH") ?? "" : UnixTools.ChildPath(executable);
 }

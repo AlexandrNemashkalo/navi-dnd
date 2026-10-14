@@ -2,20 +2,17 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: легенда карты (LegendDisplay.GetLegendLines) должна показывать ТОЛЬКО то, что герой реально
-// видит (совпадает с фильтром отрисовки MapObjectsProvider — Hidden!=true && VisibleCells), и НЕ
-// показывать скрытые (hidden:true) объекты вроде ловушек, которые герой ещё не обнаружил.
-//
-// Исключение: сетка рисует только ОДИН символ на клетку (сущности всегда перекрывают объекты —
-// MapObjectsProvider.WriteCellEntity проверяет entities раньше objects, а герой перекрывает всё на
-// своей клетке). Если объект оказался в той же клетке, что герой или другая сущность, легенда всё
-// равно должна его перечислять (сам факт видимости уже отдельно проверен), но с координатами — иначе
-// игрок не поймёт, где именно этот объект находится, раз его символ не виден на сетке.
-//
-// Fixtures/legend_visibility_game.json: герой в [1,3] стоит на "Свиток" (объект перекрыт героем);
-// НПС "Стражник" в [5,3] стоит на "Кольцо" (объект перекрыт другой сущностью); "Факел" в [2,3] —
-// обычный видимый предмет, ничем не перекрыт (контрольная проверка, что для него координаты НЕ
-// дописываются); "Ловушка" в [3,3] — hidden:true (герой её не обнаружил, не должна быть в легенде).
+// E2E: map legend (LegendDisplay.GetLegendLines) should show ONLY what the hero actually sees (matches the
+// rendering filter MapObjectsProvider - Hidden!=true && VisibleCells), and NOT show hidden (hidden:true)
+// objects like traps that the hero has not yet discovered. Exception: the grid draws only ONE symbol per cell
+// (entities always overlap objects - MapObjectsProvider.WriteCellEntity checks entities before objects, and the
+// hero overlaps everything on his cell). If the object is in the same cell as the hero or another entity, the
+// legend should still list it (the fact of visibility has already been checked separately), but with
+// coordinates - otherwise the player will not understand where exactly this object is located, since its symbol
+// is not visible on the Fixtures/legend_visibility_game.json: hero grid. [1,3] is on “Scroll” (the object is
+// blocked by the hero); NPC “Guard” in [5,3] is on “Ring” (the object is blocked by another entity); “Torch” in
+// [2,3] is an ordinary visible object, not blocked by anything (check that the coordinates are NOT added for
+// it); “Trap” in [3,3] - hidden:true (the hero did not find it, should not be in it); legend).
 public class LegendVisibilityScenarioTests
 {
     private readonly ITestOutputHelper _output;

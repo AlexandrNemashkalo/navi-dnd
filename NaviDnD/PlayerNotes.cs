@@ -3,10 +3,10 @@ using System.Text.Json;
 
 namespace NaviDnD;
 
-// Свои заметки игрока (журнал → [F10] ЗАМЕТКИ). Лежат ОТДЕЛЬНЫМ файлом рядом с игрой
-// (game{N}.notes.json), не в WorldState: ни контекст ИИ (AiContextBuilder), ни MCP-сервер (читает только
-// файл игры) их не видят и увидеть не могут. Добавляются и удаляются без нейронки; мастер может только
-// дописать запись (ключ ответа "playerNote", Storage) — прочитать их он не может.
+// Your player notes (journal → [F10] NOTES). They lie in a SEPARATE file next to the game (game{N}.notes.json),
+// not in WorldState:; neither the AI context (AiContextBuilder), nor the MCP- server (reads only the game
+// file)) see them and cannot be seen. They are added and deleted without a AI; the GM can only add an entry
+// (answer key "playerNote", Storage) - he cannot read them.
 public static class PlayerNotes
 {
     public sealed class Note
@@ -15,10 +15,10 @@ public static class PlayerNotes
         public int Day { get; set; }
         public string? PartOfDay { get; set; }
         public DateTime Created { get; set; }
-        public bool ByMaster { get; set; } // запись добавил мастер (ИИ) — сам он заметки не читает
+        public bool ByMaster { get; set; } // the entry was added by the GM (AI) - he himself does not read the notes
     }
 
-    // Файл: { formatVersion, notes: [...] } (StorageFormat; прежний голый массив переписывает миграция).
+    // File: { formatVersion, notes: [...] } (StorageFormat; the former bare array is rewritten by migration).
     public sealed class NotesFile
     {
         public int FormatVersion { get; set; } = StorageFormat.Current;
@@ -40,7 +40,7 @@ public static class PlayerNotes
 
     private static string CurrentPath => PathFor(Storage.SavePath);
 
-    // Заметки текущей игры (перечитываются при смене игры).
+    // Notes for the current game (re-read when changing games).
     public static List<Note> All
     {
         get
@@ -55,7 +55,7 @@ public static class PlayerNotes
             }
             catch
             {
-                // Не прочитался (повреждён, не переведён миграцией) — копия рядом, чтобы следующая запись не стёрла заметки.
+                // Unreadable (damaged, not translated by migration) - a copy is nearby so that the next entry does not erase the notes.
                 _notes = [];
                 try { File.Copy(CurrentPath, CurrentPath + ".unreadable", overwrite: false); } catch { }
             }
@@ -82,6 +82,6 @@ public static class PlayerNotes
         {
             File.WriteAllText(CurrentPath, JsonSerializer.Serialize(new NotesFile { Notes = All }, _json), Encoding.UTF8);
         }
-        catch { /* не сохранилось — заметки живут до конца сеанса */ }
+        catch { /*not saved - notes live until the end of the session*/ }
     }
 }

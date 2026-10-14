@@ -35,16 +35,16 @@ public class MonsterInfo
     public string LegendaryIntro { get; init; } = "";
     public List<(string Name, string Text)> Legendary { get; init; } = [];
 
-    // Название на языке игры (L.World); статья справочника — только по-русски.
+    // Name in the game language (L.World); directory article - only in Russian.
     public string LocalizedName => L.WorldIsEnglish && NameEn.Length > 0 ? NameEn : Name;
 }
 
-// Справочник монстров DnD5e (GameData/DnD5e_monsters_BD.dtn). По аналогии с SpellDatabase: файл
-// читается и парсится один раз за процесс (Lazy), дальше только поиск по кэшу. В отличие от
-// заклинаний, ru/en имя тут не разделены — одно поле "Гоблин (Goblin)", парсим сами. "trait"/
-// "action" в исходнике то объект, то массив объектов — нормализуем к списку в обоих случаях.
-// Урезанный набор полей — механика боя + краткое описание, без "fiction" (лор), "legendary"/"lair"
-// (боссовая механика, пока не нужна).
+// Monster Directory DnD5e (GameData/DnD5e_monsters_BD.dtn). By analogy with SpellDatabase:, the file is read
+// and parsed once per process (Lazy), then only search in the cache. Unlike spells, ru/en names are not
+// separated here - one field “Goblin (Goblin)), we parse ourselves. “trait” / "action" in the source code is
+// either an object or an array of objects - we normalize it to a list in both cases. A stripped-down set of
+// fields - combat mechanics + a brief description, without "fiction" (lore), "legendary" / "lair" (boss
+// mechanics, not needed yet).
 public static class MonsterDatabase
 {
     private static readonly string FilePath =
@@ -55,7 +55,7 @@ public static class MonsterDatabase
 
     public static IReadOnlyList<MonsterInfo> AllMonsters => All.Value;
 
-    // Точный поиск по имени на любом языке (monsterKey мастер пишет на языке игры) — полные статы для карты.
+    // Exact search by name in any language (monsterKey the GM writes in the game language) - full stats for the map.
     public static MonsterInfo? Find(string? name)
     {
         if (string.IsNullOrWhiteSpace(name)) return null;
@@ -109,7 +109,7 @@ public static class MonsterDatabase
                 Traits = ReadNamedList(entry, "trait"),
                 Actions = ReadNamedList(entry, "action"),
                 Reactions = ReadNamedList(entry, "reaction"),
-                // "legendary": { text: вступление, list: [{name,text}] }
+                // "legendary": { text: intro, list: [{name,text}] }
                 LegendaryIntro = entry.TryGetProperty("legendary", out var leg) && leg.ValueKind == JsonValueKind.Object
                     ? GetStr(leg, "text") : "",
                 Legendary = entry.TryGetProperty("legendary", out var leg2) && leg2.ValueKind == JsonValueKind.Object
@@ -122,7 +122,7 @@ public static class MonsterDatabase
         return result;
     }
 
-    // "Гоблин (Goblin)" → ("Гоблин", "Goblin"). Нет скобок (редкие статьи без перевода) — en пустой.
+    // "Goblin (Goblin)" → ("Goblin", "Goblin") No parentheses (rare articles without translation) - en is empty.
     private static (string ru, string en) SplitName(string rawName)
     {
         int open = rawName.IndexOf('(');
@@ -133,7 +133,7 @@ public static class MonsterDatabase
         return (ru, en);
     }
 
-    // "trait"/"action" в исходнике — то один объект {name,text}, то массив таких объектов.
+    // "trait"/"action" in the source - either one object {name,text}, or an array of such objects.
     private static List<(string Name, string Text)> ReadNamedList(JsonElement parent, string prop)
     {
         var result = new List<(string, string)>();
@@ -159,7 +159,7 @@ public static class MonsterDatabase
         result.Add((name, text));
     }
 
-    // "text" тоже то строка, то массив строк (несколько абзацев) — склеиваем через перенос строки.
+    // “text” is also either a string or an array of strings (several paragraphs) - we glue it together using a line break.
     private static string ReadTextField(JsonElement el)
     {
         if (!el.TryGetProperty("text", out var text)) return "";

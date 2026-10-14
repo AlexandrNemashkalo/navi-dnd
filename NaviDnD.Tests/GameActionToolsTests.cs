@@ -3,15 +3,15 @@ using NaviDnD.McpServer;
 
 namespace NaviDnD.Tests;
 
-// Юнит-тесты MCP-инструмента door_action без обращения к нейронке — проверяют саму геометрию
-// смежности. Реальный баг: игрок стоял "через одну клетку" от двери (Chebyshev-дистанция 1 до
-// ближайшего конца From/To) и door_action всё равно её открыл — код разрешал dist<=1, хотя дверь
-// это граница МЕЖДУ From и To, а не отдельная клетка: герой должен стоять ровно в одной из них.
+// Unit tests MCP- of the door_action tool without accessing the AI - they check the adjacency geometry itself.
+// Real bug: the player stood “one cell” from the door (Chebyshev-distance 1 to the nearest end From/To) and
+// door_action still opened it - the code allowed dist<=1, although the door is the border BETWEEN From and To,
+// and not a separate cell: the hero must stand exactly in one of them.
 public class GameActionToolsTests : IDisposable
 {
     private readonly List<string> _files = [];
 
-    // Файлы состояния и всё, что инструмент кладёт рядом с ними (navidnd_test_<guid>*), — после каждого теста.
+    // State files and everything the tool puts next to them (navidnd_test_<guid>*) - after each test.
     public void Dispose()
     {
         foreach (string path in _files)
@@ -63,15 +63,15 @@ public class GameActionToolsTests : IDisposable
         Assert.True(result.RootElement.GetProperty("success").GetBoolean());
     }
 
-    // Реальный баг: герой на [7,5] — на одну клетку ДАЛЬШЕ конца двери To:[6,5] (Chebyshev-дистанция
-    // до ближайшего конца = 1). Между героем и дверью — целая клетка [6,5], он до неё не дошёл.
+    // Real bug: the hero is at [7,5] - one cell FURTHER than the end of the door To:[6,5] (Chebyshev-distance
+    // to the nearest end = 1). There is a whole cell [6,5] between the hero and the door; he did not reach it.
     [Fact]
     public void DoorAction_HeroOneCellPastDoor_Fails()
     {
         var tools = CreateTools("[7,5]", OneDoor);
         var result = Parse(tools.DoorAction(0, "open"));
         Assert.False(result.RootElement.GetProperty("success").GetBoolean());
-        Assert.Contains("далеко", result.RootElement.GetProperty("reason").GetString());
+        Assert.Contains("too far away", result.RootElement.GetProperty("reason").GetString());
     }
 
     [Fact]
@@ -82,8 +82,8 @@ public class GameActionToolsTests : IDisposable
         Assert.False(result.RootElement.GetProperty("success").GetBoolean());
     }
 
-    // hide/reveal — не физическое взаимодействие (ДМ помечает секрет / раскрывает найденное),
-    // смежность не требуется.
+    // hide/reveal - non-physical interaction (DM marks secret / reveals what was found), adjacency is not
+    // required.
     [Fact]
     public void DoorAction_HideAndReveal_DoNotRequireAdjacency()
     {
@@ -96,8 +96,7 @@ public class GameActionToolsTests : IDisposable
         Assert.True(revealResult.RootElement.GetProperty("success").GetBoolean());
     }
 
-    // break — физическое действие (герой рубит/выбивает дверь), требует такой же смежности, как
-    // open/close.
+    // break - physical action (the hero chops/knocks down a door), requires the same adjacency as open/close.
     [Fact]
     public void DoorAction_Break_RequiresAdjacency()
     {
@@ -154,7 +153,7 @@ public class GameActionToolsTests : IDisposable
         Assert.Equal(30, hero.SpeedLeft);
         Assert.Equal(1, hero.Actions![0].Value);
         Assert.Equal(isLong ? "morning" : "night", storage.WorldState.Time.PartOfDay);
-        Assert.Equal(5, int.Parse(hero.Hp.Split('/')[0])); // лечение и ресурсы — отдельный патч мастера
+        Assert.Equal(5, int.Parse(hero.Hp.Split('/')[0])); // healing and resources - separate wizard patch
     }
 
 }

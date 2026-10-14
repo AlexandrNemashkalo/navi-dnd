@@ -3,25 +3,24 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.PromptTests;
 
-// РЕАЛЬНЫЕ вызовы Claude — платно и медленно (секунды на тест), поэтому проект НЕ входит в общий
-// прогон решения. Запускать осознанно и РЕДКО — только когда меняешь конкретный systemPrompt.md и
-// хочешь проверить/обновить мок под изменение, не как часть обычной работы:
-//   dotnet test NaviDnD.PromptTests
-// Чтобы обновить канонический мок для NaviDnD.UiTests из этого же прогона:
-//   NAVIDND_RECORD_PROMPTS=1 dotnet test NaviDnD.PromptTests --filter OnStepTrap
+// REAL calls Claude - paid and slow (seconds per test), so the project is NOT included in the overall run of
+// the solution. Run consciously and RARELY - only when you change a specific systemPrompt.md and want to
+// check/update the mock for the change, not as part of normal work: dotnet test NaviDnD.PromptTests To update
+// the canonical mock for NaviDnD.UiTests from the same run: NAVIDND_RECORD_PROMPTS=1 dotnet test
+// NaviDnD.PromptTests --filter OnStepTrap
 public class SendActionPromptTests
 {
     private readonly ITestOutputHelper _output;
 
     public SendActionPromptTests(ITestOutputHelper output) => _output = output;
 
-    // Тот же сценарий, что и NaviDnD.UiTests.TriggersScenarioTests.OnStepTrap_MovingOntoIt_FiresAiTrigger —
-    // герой наступает на "Капкан" (triggers.onStep, once:true).
+    // The same scenario as NaviDnD.UiTests.TriggersScenarioTests.OnStepTrap_MovingOntoIt_FiresAiTrigger - the
+    // hero steps on the “Trap” (triggers.onStep, once:true).
     [Fact]
     public async Task OnStepTrap_DealsDamageAndRemovesTrap()
     {
         var storage = PromptScenario.LoadUiTestFixture("trap_game.json");
-        var trap = storage.WorldState.Map.Objects![0]; // "Капкан" — единственный объект в фикстуре
+        var trap = storage.WorldState.Map.Objects![0]; // "Trap" is the only object in the fixture
         int initialHp = ParseHp(storage.WorldState.Hero!.Hp);
 
         var ctx = new AiContextBuilder(storage.WorldState);
@@ -43,13 +42,13 @@ public class SendActionPromptTests
         PromptScenario.RecordAsMock(response, mockResponsesFolder: "Triggers", action: "SendAction");
     }
 
-    // Тот же сценарий, что и NaviDnD.UiTests.TriggersScenarioTests.HiddenObjectOnVisible... — герой
-    // приближается на дистанцию видимости к скрытому объекту (triggers.onVisible, once:true).
+    // Same scenario as NaviDnD.UiTests.TriggersScenarioTests.HiddenObjectOnVisible... - the hero approaches
+    // within visibility distance of a hidden object (triggers.onVisible, once:true).
     [Fact]
     public async Task HiddenObjectOnVisible_RevealsTheObject()
     {
         var storage = PromptScenario.LoadUiTestFixture("hidden_object_game.json");
-        var hiddenObject = storage.WorldState.Map.Objects![0]; // "Тайный символ"
+        var hiddenObject = storage.WorldState.Map.Objects![0]; // "Secret Symbol"
 
         var ctx = new AiContextBuilder(storage.WorldState);
         string userMessage = ctx.TriggerState([(hiddenObject, "onVisible")], [], []);
@@ -61,9 +60,10 @@ public class SendActionPromptTests
 
         Assert.True(result.HistoryTexts.Count > 0, "Ответ не содержит ни одной записи history — обнаружение скрытого объекта должно быть описано.");
 
-        // Объект либо помечен видимым (hidden:false), либо удалён из списка целиком — оба варианта
-        // валидны согласно промпту ("hidden: снять — {id,hidden:false}"), лишь бы объект больше не
-        // оставался Hidden:true (иначе триггер по факту не сработал с точки зрения игрока).
+        // The object is either marked visible (hidden:false)), or removed from the list entirely - both options
+        // are valid according to the prompt ("hidden: remove - {id,hidden:false}"), as long as the object no
+        // longer remains Hidden:true (otherwise the trigger would not actually work from the player's point of
+        // view).
         var stillHidden = storage.WorldState.Map.Objects?.Any(o => o.Name == "Тайный символ" && o.Hidden == true) ?? false;
         Assert.False(stillHidden, "Скрытый объект должен был раскрыться (hidden:false) или быть удалён — но остался Hidden:true.");
 

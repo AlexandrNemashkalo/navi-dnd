@@ -2,20 +2,17 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E-регрессия: вне боя обычное свободное действие (не движение по сетке) само может продвинуть
-// раунд — герой тратит "Действие", AI патчит time.totalRounds+1 в том же ответе (см. SendAction
-// systemPrompt § ДЕЙСТВИЯ И РАУНДЫ). До фикса MapScreenLoop.RunAsync вызывал Storage.TakeRoundBundle()
-// только после движения по сетке (стрелками) — после свободного действия (SendAction) периодические
-// эффекты (hero.effects[].onRound) НЕ проверялись вообще, и ничего не напоминало AI применить тик
-// «Горящего» эффекта на этом раунде. Теперь TakeRoundBundle() проверяется и после SendAction —
-// это должно вызвать ВТОРОЙ вызов "SendAction" (FireRoundTransition использует тот же системный
-// промпт) с тиком эффекта.
-//
-// Fixtures/burning_effect_game.json: герой вне боя, hp 10/10, один активный эффект «Горящий» с
-// onRound (без onExpire/expiresAtRound — бессрочный, снимается только вручную). Мок SendAction:
-// response.json (1й вызов, действие игрока) тратит "Действие" и сам продвигает totalRounds → 2, БЕЗ
-// изменения HP — это доказывает, что AI-мок не обязан сам бить себя огнём, движок должен напомнить
-// отдельным вызовом; response2.json (2й вызов, FireRoundTransition) наносит 1 урон от «Горящего».
+// E2E- regression: outside of combat, a normal free action (not moving on the grid) can advance the round
+// itself - the hero spends an "Action", AI patches time.totalRounds+1 in the same answer (see SendAction
+// systemPrompt § ACTIONS AND ROUNDS). Before the fix, MapScreenLoop.RunAsync called Storage.TakeRoundBundle()
+// only after moving on the grid (with arrows) - after a free action (SendAction) periodic effects
+// (hero.effects[].onRound) were NOT checked at all, and nothing reminded AI to apply the "Burning" effect tick
+// this round. Now TakeRoundBundle() is checked after SendAction - this should cause a SECOND call "SendAction"
+// (FireRoundTransition uses the same system prompt) with an effect tick Fixtures/burning_effect_game.json: hero
+// out of battle, hp 10/10, one active effect "Burning" with onRound (without onExpire/expiresAtRound -
+// indefinite, removed only manually). (1st call, player action) spends “Action” and advances totalRounds → 2,
+// WITHOUT changing HP - this proves that AI- does not have to hit itself with fire, the engine should remind
+// response2.json with a separate call (2nd call, FireRoundTransition) deals 1 damage from “Burning”.
 public class BurningEffectRoundTransitionTests
 {
     private readonly ITestOutputHelper _output;
@@ -51,10 +48,11 @@ public class BurningEffectRoundTransitionTests
             "Раунд не продвинулся до 2 — 1й мок-ответ (действие игрока) не применился как ожидалось.");
         _output.WriteLine("Раунд продвинулся до 2.");
 
-        // Не ждать просто текст "Горящий" — он и так виден в легенде с самого начала (имя активного
-        // эффекта героя рисуется постоянно), это условие выполнилось бы мгновенно и ничего не
-        // доказало бы. Ждём именно текст ВТОРОГО мок-ответа (response2.json) — он появляется только
-        // если Storage.TakeRoundBundle() после SendAction реально сработал и вызвал FireRoundTransition.
+        // Don’t just wait for the text “Burning” - it is already visible in the legend from the very beginning
+        // (the name of the hero’s active effect is drawn constantly), this condition would be fulfilled
+        // instantly and would not prove anything. We are waiting for the text of the SECOND mock response
+        // (response2.json) - it appears only if Storage.TakeRoundBundle() after SendAction actually worked and
+        // called FireRoundTransition.
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "снова прихватывает кожу", 20000),
             "Не дождались текста 2го мок-ответа (тик эффекта «Горящий») — Storage.TakeRoundBundle() не сработал после свободного действия.");

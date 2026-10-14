@@ -4,13 +4,14 @@ using System.Runtime.InteropServices;
 
 namespace NaviDnD.Helpers;
 
-// Запросы к нейронке — отдельные процессы (Claude CLI, а он запускает свои: node, MCP-сервер). Чтобы они не
-// оставались висеть, когда игру закрыли (крестик, Esc из меню, падение), каждый такой процесс кладётся в
-// Windows Job Object с KILL_ON_JOB_CLOSE: игра завершилась как угодно — система закрывает её дескриптор job,
-// и всё дерево процессов запроса завершается само (их дочерние процессы попадают в job автоматически).
-// На macOS/Linux job нет: процессы запоминаются, и их деревья завершаются при обычном выходе из игры, при
-// необработанном исключении и по SIGHUP (закрыли окно терминала) / SIGTERM / SIGINT. SIGKILL игры не перехватить —
-// тогда MCP-сервер всё равно завершится, когда закроются каналы CLI.
+// Requests to the AI are separate processes (Claude CLI, and it launches its own: node, MCP-server). So that
+// they do not remain hanging when the game is closed (cross, Esc from the menu, crash), each such process is
+// placed in Windows Job Object with KILL_ON_JOB_CLOSE: the game ended in any way - the system closes its handle
+// job, and the entire tree of request processes ends itself (their child processes end up in job
+// automatically). On macOS/Linux job there is no: processes are remembered, and their trees are terminated when
+// exiting the game normally, with an unhandled exception and by SIGHUP (close the terminal window) / SIGTERM /
+// SIGINT. SIGKILL games cannot be intercepted - then the MCP- server will still end when the channels are
+// closed CLI.
 public static class ChildProcessJob
 {
     private const int JobObjectExtendedLimitInformation = 9;
@@ -50,7 +51,7 @@ public static class ChildProcessJob
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
 
-    // Дескриптор job живёт до конца процесса игры (не закрываем — его закроет система при выходе).
+    // The job descriptor lives until the end of the game process (we don’t close it - the system will close it upon exit).
     private static readonly Lazy<IntPtr> _job = new(Create);
 
     private static IntPtr Create()
@@ -64,7 +65,7 @@ public static class ChildProcessJob
         return job;
     }
 
-    // Процесс запроса — в job (не вышло — просто живёт как раньше).
+    // The request process is in job (it didn’t work out - it just lives as before).
     public static void Add(Process process)
     {
         if (!OperatingSystem.IsWindows()) { AddUnix(process); return; }
@@ -72,10 +73,10 @@ public static class ChildProcessJob
         {
             if (_job.Value != IntPtr.Zero) AssignProcessToJobObject(_job.Value, process.Handle);
         }
-        catch { /* процесс уже завершился или нет прав — не мешаем запросу */ }
+        catch { /*the process has already completed or you do not have rights - do not interfere with the request*/ }
     }
 
-    // pid → время старта: провайдеры освобождают свои Process, а время старта защищает от переиспользованного pid.
+    // pid → start time: providers release their Process, and the start time protects against overused pid.
     private static readonly ConcurrentDictionary<int, DateTime> _unixChildren = new();
     private static readonly Lazy<PosixSignalRegistration[]> _unixHooks = new(InstallUnixHooks);
 
@@ -97,12 +98,12 @@ public static class ChildProcessJob
     {
         AppDomain.CurrentDomain.ProcessExit += (_, _) => KillUnixChildren();
         AppDomain.CurrentDomain.UnhandledException += (_, _) => KillUnixChildren();
-        // Хранится в статическом поле: собранная сборщиком регистрация перестаёт ловить сигнал. Действие по умолчанию (выход) всё равно выполняется.
+        // Stored in a static field: the registration collected by the collector stops picking up the signal. The default action (exit) is still executed.
         return [.. new[] { PosixSignal.SIGHUP, PosixSignal.SIGTERM, PosixSignal.SIGINT }
             .Select(signal => PosixSignalRegistration.Create(signal, _ => KillUnixChildren()))];
     }
 
-    // Перед перезапуском после обновления (macOS): процессы запросов не переживут замену процесса игры.
+    // Before restarting after update (macOS):), request processes will not survive the replacement of the game process.
     internal static void KillAll()
     {
         if (!OperatingSystem.IsWindows()) KillUnixChildren();

@@ -4,14 +4,14 @@ using NaviDnD.McpServer;
 
 namespace NaviDnD.Tests;
 
-// Реальный лог: use_reaction был вызван с пустой history/вопросом ("" [free-text]) — диалог всё
-// равно открылся бы игроку и ждал 50с ответа ни на что. Проверяем отказ БЕЗ реального ожидания
-// (валидный путь блокируется до 50с/ответа файла — не для юнит-теста).
+// Real log: use_reaction was called with an empty history/question ("" [free-text]) - the dialogue would still
+// open to the player and wait 50s for a response to nothing. We check the failure WITHOUT a real wait (valid
+// path is blocked until 50s/file response - not for unit test).
 public class UseReactionToolsTests : IDisposable
 {
     private readonly List<string> _files = [];
 
-    // Файлы состояния и всё, что инструмент кладёт рядом с ними (navidnd_test_<guid>*), — после каждого теста.
+    // State files and everything the tool puts next to them (navidnd_test_<guid>*) - after each test.
     public void Dispose()
     {
         foreach (string path in _files)

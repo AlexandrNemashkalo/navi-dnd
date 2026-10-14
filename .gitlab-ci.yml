@@ -7,7 +7,7 @@ publish-release:
         - .gitlab-ci.yml
         - .gitlab/release.json
   script:
-    # macOS: архив базы для игроков (ссылка «macOS» в релизе) — склеенные части releases-macos/, один раз на версию базы.
+    # macOS: archive of the base for players (link “macOS” in the release) - glued parts of releases-macos/, once per version of the base.
     - |
       if [ -f releases-macos/base-version.txt ]; then
         version=$(tr -d ' \r\n' < releases-macos/base-version.txt)

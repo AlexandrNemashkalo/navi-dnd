@@ -1,6 +1,6 @@
-# Терминал NaviDnD.app (Alacritty 0.17): окно без кнопок macOS ровно под сетку игры 150 × 63; прозрачная полоса
-# заголовка (Buttonless) — за неё окно перетаскивается. Шрифт, весь экран, фон и положение окна игра подставляет при
-# запуске (MacApp.TerminalArguments) — из своих настроек и по размеру экрана.
+# Terminal NaviDnD.app (Alacritty 0.17): window without buttons macOS exactly under the game grid 150 × 63; transparent strip
+# header (Buttonless) - the window is dragged behind it. The game substitutes the font, entire screen, background and window position when
+# startup (MacApp.TerminalArguments) - from your settings and according to screen size.
 
 [general]
 live_config_reload = false
@@ -38,8 +38,8 @@ style = { shape = "Block", blinking = "Never" }
 hide_when_typing = false
 
 [keyboard]
-# Лишнее для игры: новые окна и вкладки, поиск, очистка, смена кегля и весь экран (сетка игры фиксирована).
-# ⌘ или Ctrl с «+»/«−» — масштаб карты мира: терминал передал бы просто «=»/«-», поэтому — как Ctrl+«=»/«-» (CSI u).
+# Extras for the game: new windows and tabs, search, cleaning, changing the size and the whole screen (the game grid is fixed).
+# ⌘ or Ctrl with “+”/“−” - world map scale: the terminal would simply transmit “=”/“-”, therefore - as Ctrl+ “=”/“-” (CSI u).
 bindings = [
   { key = "N", mods = "Command", action = "None" },
   { key = "T", mods = "Command", action = "None" },

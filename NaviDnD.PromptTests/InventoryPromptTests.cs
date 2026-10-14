@@ -3,16 +3,16 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.PromptTests;
 
-// РЕАЛЬНЫЕ вызовы Claude — см. класс SendActionPromptTests для общих правил (платно, медленно,
-// запускать редко и осознанно).
+// REAL calls Claude - see class SendActionPromptTests for general rules (paid, slow, run rarely and
+// deliberately).
 public class InventoryPromptTests
 {
     private readonly ITestOutputHelper _output;
 
     public InventoryPromptTests(ITestOutputHelper output) => _output = output;
 
-    // Тот же сценарий, что и NaviDnD.UiTests.InventoryScenarioTests — герой убирает лук и берёт меч
-    // в руку. Обычное (не триггерное) действие — MinimalState, как это реально шлёт игра.
+    // The same scenario as NaviDnD.UiTests.InventoryScenarioTests - the hero puts away the bow and takes the
+    // sword in his hand. The normal (non-trigger) action is MinimalState, as the game actually sends it.
     [Fact]
     public async Task EquipSword_UnequipsBow_AndEquipsSwordInHand()
     {

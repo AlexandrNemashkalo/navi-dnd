@@ -4,18 +4,18 @@ public class DungeonRequest
 {
     public List<RoomRequest> Rooms { get; set; } = [];
     public List<PassageRequest> Passages { get; set; } = [];
-    /// <summary>Выходы/входы на другую карту — коридор к краю сетки.</summary>
+    /// <summary>Exits/entrances to another map - corridor to the edge of the grid.</summary>
     public List<MapTransition> Transitions { get; set; } = [];
 }
 
 public class MapTransition
 {
     /// <summary>
-    /// Координата за пределами сетки, указывает направление перехода.
-    /// Север: [col, 0], Юг: [col, 16], Запад: [0, row], Восток: [21, row].
+    ///An off-grid coordinate that indicates the direction of the transition.
+    ///North: [col, 0], South: [col, 16], West: [0, row], East: [21, row].
     /// </summary>
     public List<int> EdgePoint { get; set; } = [];
-    /// <summary>Имя комнаты, к которой тянуть коридор.</summary>
+    /// <summary>The name of the room to which the corridor extends.</summary>
     public string Room { get; set; } = "";
     public int Width { get; set; } = 1;
     public CorridorShape Shape { get; set; } = CorridorShape.Straight;
@@ -34,29 +34,29 @@ public class PassageRequest
 {
     public string From { get; set; } = "";
     public string To { get; set; } = "";
-    /// <summary>Opening = прямое соприкосновение комнат; Corridor = коридорный Room.</summary>
+    /// <summary>Opening = direct contact of rooms; Corridor = bellhop Room.</summary>
     public PassageType Type { get; set; } = PassageType.Corridor;
-    /// <summary>Ширина коридора в клетках (1–3). Для Opening игнорируется.</summary>
+    /// <summary>Width of the corridor in cells (1–3). For Opening it is ignored.</summary>
     public int Width { get; set; } = 1;
-    /// <summary>Форма коридора. Для Opening игнорируется.</summary>
+    /// <summary>Corridor shape. For Opening it is ignored.</summary>
     public CorridorShape Shape { get; set; } = CorridorShape.LShaped;
-    /// <summary>Нарисовать дверь на входе в целевую комнату.</summary>
+    /// <summary>Draw a door at the entrance to the target room.</summary>
     public bool HasDoor { get; set; } = false;
 }
 
 public enum PassageType
 {
-    /// <summary>Прямой проём между двумя соприкасающимися комнатами, без коридора.</summary>
+    /// <summary>A straight opening between two adjoining rooms, without a corridor.</summary>
     Opening,
-    /// <summary>Коридорный Room, соединяющий комнаты.</summary>
+    /// <summary>Corridor Room connecting rooms.</summary>
     Corridor,
 }
 
 public enum CorridorShape
 {
-    Straight,  // минимум поворотов (H→V или V→H)
-    LShaped,   // BFS-кратчайший путь (обычно один поворот)
-    Winding,   // петляющий случайный путь
+    Straight,  // minimum turns (H→V or V→H)
+    LShaped,   // BFS-shortest path (usually one turn)
+    Winding,   // winding random path
 }
 
 public enum RoomShape

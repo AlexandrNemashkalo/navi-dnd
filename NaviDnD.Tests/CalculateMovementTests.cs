@@ -80,7 +80,7 @@ public class CalculateMovementTests
         var result = MovementCalculator.Calculate(ws,
             Req(id, ("approach", "hero", null, null, null), ("stay", null, null, null, null)));
 
-        // Не стоит на месте: идёт к герою, сколько хватает скорости (вторая диагональ — 10 фт, в 10 фт влезает одна).
+        // Does not stand still: goes to the hero as fast as he can (the second diagonal is 10 feet, one can fit into 10 feet).
         Assert.Equal("approach", result.UsedIntent);
         Assert.Equal([9, 9], result.Steps[^1]);
         Assert.True(result.RemainingSpeedFt >= 0);
@@ -136,10 +136,10 @@ public class CalculateMovementTests
         SetHero(ws, 5, 5);
         int id = AddEntity(ws, 6, 5, speedMax: 30); // dist=1 cell=5ft, want 15-30ft
 
-        // Начиная позиция в пределах досягаемости героя (5ft) — уход из неё честно провоцирует
-        // атаку по возможности (см. OA_TriggeredWhenLeavingHeroReach) и обрезает путь по границе
-        // досягаемости. Здесь проверяется именно выбор целевой клетки Dijkstra, поэтому провокацию
-        // отключаем явно, а не полагаемся на дефолт.
+        // Starting a position within the hero’s reach (5ft) - leaving it honestly provokes an attack of
+        // opportunity (see OA_TriggeredWhenLeavingHeroReach) and cuts off the path along the reach boundary.
+        // Here, it is the choice of the target cell Dijkstra that is checked, so we turn off the provocation
+        // explicitly, and do not rely on default.
         var req = Req(id, ("maintain_distance", "hero", 15, 30, null));
         req.SkipOpportunityAttack = true;
         var result = MovementCalculator.Calculate(ws, req);
@@ -187,9 +187,9 @@ public class CalculateMovementTests
         SetHero(ws, 5, 5);
         int id = AddEntity(ws, 6, 5, speedMax: 30);
 
-        // Начиная позиция в пределах досягаемости героя — см. комментарий в
-        // MaintainDistance_TooClose_MovesAway: провокацию атаки по возможности отключаем явно,
-        // чтобы проверить именно выбор целевой клетки, а не обрезку пути (это отдельно покрыто
+        // Starting a position within the hero’s reach - see comment in MaintainDistance_TooClose_MovesAway:, if
+        // possible, we explicitly disable the attack provocation in order to check the choice of the target
+        // cell, and not the cutting of the path (this is separately covered by
         // OA_TriggeredWhenLeavingHeroReach).
         var req = Req(id, ("flee", null, null, null, "hero"));
         req.SkipOpportunityAttack = true;

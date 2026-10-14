@@ -19,8 +19,8 @@ public class LegendDisplay
         _config = config;
     }
 
-    // Separator index: totalRows - CombatReservedLines - 1, where totalRows = rows*2 + 3.
-    // На экране Мира блока боя нет — и разделителя над ним тоже (-1).
+    // Separator index: totalRows - CombatReservedLines - 1, where totalRows = rows*2 + 3. There is no battle
+    // block on the World screen - and there is no separator above it either (-1).
     public int SeparatorLineIndex => _display.MapLevel == MapLevel.World ? -1
         : _display.ViewRows(_storage.WorldState.Map) * 2 + 2 - _display.CombatReservedLines;
 
@@ -28,27 +28,28 @@ public class LegendDisplay
     /// Builds legend lines for side-panel display.
     /// Each Action writes the legend content without borders or newlines.
     /// </summary>
-    // Элемент легенды: его строки, приоритет (при переполнении первыми уходят низкие) и «закреплён»
-    // (под курсором/выбран — не убирается никогда).
+    // Legend element: its lines, priority (when overflowing, the low ones go first) and “pinned” (under the
+    // cursor/selected - never removed).
     private sealed record LegendItem(List<Action> Lines, int Priority, bool Pinned);
 
     private const int PriorityKeep = 9, PriorityHero = 5, PriorityEntity = 4, PriorityRoom = 3, PriorityArea = 2, PriorityTerrain = 1;
 
-    // Легенда текущей локации: «Место», герой, существа/объекты, комнаты/зоны — список с прокруткой (колесо мыши над
-    // легендой, полоса справа ┃│ — как у описания мира), рельеф — блоком внизу, к блоку боя. Рельефу места мало
-    // (меньше 4 строк списку) — он уступает списку. Выбранное (Tab/наведение) прокручивается в окно само.
+    // Legend of the current location: “Place”, hero, creatures/objects, rooms/zones - scrolling list (mouse
+    // wheel above the legend, bar on the right ┃│ - like the world description), terrain - block below, to the
+    // battle block. There is not enough space for the terrain (less than 4 lines for the list) - it is inferior
+    // to the list. The selected one (Tab/hover) scrolls into the window itself.
     private int _lastLegendSelected = int.MinValue;
 
     private void AddLocationLegendLines(List<Action> lines, WorldState settings, int legendWidth)
     {
         var items = new List<LegendItem>();
-        BuildLocationLegendItems(items, settings, legendWidth - 1);   // правый столбец — под полосу прокрутки
+        BuildLocationLegendItems(items, settings, legendWidth - 1);   // right column - under the scroll bar
 
         int capacity = SeparatorLineIndex;
         var bottom = items.Where(i => i.Priority == PriorityTerrain).SelectMany(i => i.Lines).ToList();
-        if (bottom.Count <= 1) bottom.Clear(); // остался только разделитель без строк рельефа
+        if (bottom.Count <= 1) bottom.Clear(); // only the separator remains without terrain lines
         var top = items.Where(i => i.Priority != PriorityTerrain).ToList();
-        // «Место» и герой (с пустой строкой после него) — закреплены сверху, не прокручиваются.
+        // “Place” and hero (with an empty line after it) are fixed at the top, do not scroll.
         int fixedCount = top.TakeWhile(i => i.Priority >= PriorityHero).Count();
         var head = top.Take(fixedCount).SelectMany(i => i.Lines).ToList();
         top = top.Skip(fixedCount).ToList();
@@ -58,14 +59,14 @@ public class LegendDisplay
         topCap = Math.Max(1, topCap);
         lines.AddRange(head);
 
-        // Выбор сменился — выбранная запись (не «Место»/герой: они всегда сверху) в окно прокрутки.
+        // The selection has changed - the selected entry (not "Location" / hero: they are always on top) in the scroll window.
         if (_display.SelectedMapItemIndex != _lastLegendSelected)
         {
             _lastLegendSelected = _display.SelectedMapItemIndex;
             int at = 0;
             foreach (var item in top)
             {
-                if (item.Pinned && item.Priority < PriorityHero)   // выбранное существо/комната/зона, не разделитель
+                if (item.Pinned && item.Priority < PriorityHero)   // selected creature/room/zone, not a separator
                 {
                     if (at < _display.LegendScroll) _display.LegendScroll = at;
                     else if (at + item.Lines.Count > _display.LegendScroll + topCap) _display.LegendScroll = at + item.Lines.Count - topCap;
@@ -87,7 +88,7 @@ public class LegendDisplay
                 int start = Term.CursorLeft;
                 line();
                 if (on is not { } isThumb) return;
-                // Полоса — в последнем столбце легенды (снимок CaptureOutput пишет в строку — курсор не движется).
+                // The bar is in the last column of the legend (the image CaptureOutput writes in the line - the cursor does not move).
                 if (Console.Out is not StringWriter)
                 {
                     int used = Term.CursorLeft - start;
@@ -96,15 +97,15 @@ public class LegendDisplay
                 ColorHelper.WriteColored(isThumb ? "┃" : "│", isThumb ? thumb : frame, _display.MainBackground);
             });
         }
-        // Вертикальная линия колонок рельефа упирается в сплошные разделители — без стыков ┬/┴ (SeparatorJunction = null).
+        // The vertical line of the terrain columns rests on solid dividers - without joints ┬/┴ (SeparatorJunction = null).
         while (lines.Count + bottom.Count < capacity)
             lines.Add(() => Console.Write(new string(' ', legendWidth)));
-        if (bottom.Count > 0 && lines.Count < capacity) TerrainSeparatorIndex = lines.Count; // первая строка блока
+        if (bottom.Count > 0 && lines.Count < capacity) TerrainSeparatorIndex = lines.Count; // first line of block
         lines.AddRange(bottom);
         if (lines.Count > capacity) lines.RemoveRange(capacity, lines.Count - capacity);
     }
 
-    // Карта мира: (мир, видимые места по приоритету) — даёт MapDisplay (камера мира — его).
+    // World map: (world, visible places by priority) - gives MapDisplay (world camera - his).
     public Func<(WorldMap world, List<int> places)>? WorldLegend { get; set; }
 
     private void AddWorldLegendLines(List<Action> lines, int legendWidth)
@@ -117,8 +118,8 @@ public class LegendDisplay
         void Line(string text, List<int> color) =>
             lines.Add(() => ColorHelper.WriteColored((" " + text).PadRight(legendWidth)[..legendWidth], color, bg));
 
-        // Фильтр в две строки: «■ Все [F6]  ■ Поселения [F7]» / «■ Приключения [F8]  ■ Природа [F9]»
-        // (■ ярко — показано, тускло — скрыто; подсказка клавиши — после названия), затем пустая строка.
+        // Two-line filter: "■ All [F6] ■ Settlements [F7]" / "■ Adventures [F8] ■ Nature [F9]" (■ bright -
+        // shown, dim - hidden; key hint - after the name), then an empty line.
         int half = legendWidth / 2;
         bool all = WorldMapView.Categories.All(c => _display.WorldFilter.Contains(c.key));
         void Toggle(string label, string fkey, bool on, int width)
@@ -133,7 +134,7 @@ public class LegendDisplay
         var cats = WorldMapView.Categories;
         lines.Add(() =>
         {
-            Toggle(L.T("Все"), "F6", all, half);
+            Toggle(L.T("All"), "F6", all, half);
             Toggle(cats[0].label, cats[0].fkey, _display.WorldFilter.Contains(cats[0].key), legendWidth - half);
         });
         lines.Add(() =>
@@ -142,19 +143,19 @@ public class LegendDisplay
             Toggle(cats[2].label, cats[2].fkey, _display.WorldFilter.Contains(cats[2].key), legendWidth - half);
         });
         lines.Add(() => Console.Write(new string(' ', legendWidth)));
-        // Где герой: место (или рельеф) и чья земля.
+        // Where is the hero: place (or terrain) and whose land.
         var ws = _storage.WorldState;
         if (GameWorld.HeroTile(ws) is { } ht)
         {
             string here = ws.World?.Place is { Length: > 0 } pl ? pl : L.T(WorldBiomes.Get(world.BiomeAt(ht.x, ht.y)).Name).ToLowerInvariant();
             int own = world.OwnerAt(ht.x, ht.y);
-            string land = own >= 0 && own < world.Kingdoms.Count ? world.Kingdoms[own].Name : L.T("ничьи земли");
+            string land = own >= 0 && own < world.Kingdoms.Count ? world.Kingdoms[own].Name : L.T("unclaimed lands");
             lines.Add(() =>
             {
                 Console.Write(" ");
-                // Тот же значок, что у героя на карте мира.
+                // The same icon as the hero on the world map.
                 ColorHelper.WriteColored(WorldMapView.MarkerGlyph.ToString(), WorldMapView.MarkerColor, bg);
-                string t = " " + L.F("Вы: {0} · {1}", here, land);
+                string t = " " + L.F("You: {0} · {1}", here, land);
                 t = t.Length > legendWidth - 2 ? t[..(legendWidth - 3)] + "…" : t.PadRight(legendWidth - 2);
                 ColorHelper.WriteColored(t, _display.MainForeground, bg);
             });
@@ -168,8 +169,8 @@ public class LegendDisplay
             });
         lines.Add(() => Console.Write(new string(' ', legendWidth)));
 
-        // Список мест в окне — в две колонки « ● Название │ ○ Название », по строкам; выбранное (Tab) всегда в
-        // видимой части списка.
+        // List of places in the window - in two columns “● Title │ ○ Title ”, by lines; selected (Tab) is
+        // always in the visible part of the list.
         int room = capacity - lines.Count - 3;
         int fit = Math.Max(0, room) * 2;
         int selPos = places.IndexOf(_display.SelectedWorldPlace);
@@ -183,7 +184,7 @@ public class LegendDisplay
             bool hovered = i == _display.HoveredWorldPlace || i == _display.SelectedWorldPlace;
             Console.Write(" ");
             ColorHelper.WriteColored(icon.ToString(), color, bg);
-            int w = width - 3;   // пробел, значок, последний символ — «←»
+            int w = width - 3;   // space, icon, last character - “←”
             string text = " " + p.Name;
             text = text.Length > w ? text[..(w - 1)] + "…" : text.PadRight(w);
             ColorHelper.WriteColored(text, hovered ? ColorHelper.Pale(_display.MainForeground, 0.6) : _display.MainForeground, bg);
@@ -195,28 +196,28 @@ public class LegendDisplay
             lines.Add(() =>
             {
                 Cell(left, leftWidth);
-                ColorHelper.WriteColored("│", MouseUiHelper.FrameColor(_display), bg); // цвет как у всех рамок (BorderDrawer)
+                ColorHelper.WriteColored("│", MouseUiHelper.FrameColor(_display), bg); // color like all frames (BorderDrawer)
                 if (right >= 0) Cell(right, rightWidth);
                 else Console.Write(new string(' ', rightWidth));
             });
         }
-        if (places.Count > skip + shown.Count || skip > 0) Line(L.F("… ещё {0}", places.Count - shown.Count), dim);
+        if (places.Count > skip + shown.Count || skip > 0) Line(L.F("… {0} more", places.Count - shown.Count), dim);
         while (lines.Count < capacity - 3) lines.Add(() => Console.Write(new string(' ', legendWidth)));
-        // Время — день и часть дня (путешествие сдвигает их на дни).
+        // Time - day and part of a day (travel shifts them by days).
         var now = _storage.WorldState.Time;
-        Line(L.F("Время: День {0} · {1}", now.Day, GameTime.PartOfDayText(now.PartOfDay)), _display.MainForeground);
-        // Путь: цель кликом по карте, [F10] — в путь, [F5] — темп.
+        Line(L.F("Time: Day {0} · {1}", now.Day, GameTime.PartOfDayText(now.PartOfDay)), _display.MainForeground);
+        // Path: target by clicking on the map, [F10] - go, [F5] - temp.
         string pace = L.T(TravelService.PaceName((TravelService.Pace)_display.TravelPace));
         if (_display.WorldTarget != null && _display.WorldRouteInfo is { } info)
         {
             double days = TravelService.DaysAt(info.days, (TravelService.Pace)_display.TravelPace);
-            Line(L.F("Путь: {0} — {1}, дорогой {2:P0}", info.dest, TravelService.DaysLabel(days), info.road), _display.MainForeground);
-            Line(L.F("[F10] в путь · [F12] темп: {0}", pace), ColorHelper.Pale(_display.MainForeground, 0.3));
+            Line(L.F("Route: {0} — {1}, by road {2:P0}", info.dest, TravelService.DaysLabel(days), info.road), _display.MainForeground);
+            Line(L.F("[F10] travel · [F12] pace: {0}", pace), ColorHelper.Pale(_display.MainForeground, 0.3));
         }
         else
         {
-            Line(L.T("Клик по карте — цель пути · Tab — места"), dim);
-            Line(L.F("[F12] темп: {0}", pace), dim);
+            Line(L.T("Click the map — destination · Tab — places"), dim);
+            Line(L.F("[F12] pace: {0}", pace), dim);
         }
     }
 
@@ -230,7 +231,7 @@ public class LegendDisplay
         return positions.Any(p => p.Count >= 2 && p[0] >= c0 && p[0] <= c1 && p[1] >= r0 && p[1] <= r1 && map.FloorAt(p[0], p[1]) == floor);
     }
 
-    // Этаж героя — легенда показывает только его (остальные этажи на поле лежат в других местах).
+    // Hero's floor - the legend only shows it (the rest of the floors on the field are in other places).
     private int HeroFloor() => _storage.WorldState.Hero?.Position is { Count: >= 2 } hp
         ? _storage.WorldState.Map.FloorAt(hp[0], hp[1]) : 0;
 
@@ -299,8 +300,8 @@ public class LegendDisplay
         }
         items.Add(new LegendItem([() => Console.Write(new string(' ', legendWidth))], PriorityKeep, true));
 
-        // Комнаты/зоны/рельеф — только то, что сейчас в окне карты (легенда — расшифровка экрана).
-        // Коридоры/лазы не подписываются — их и так видно.
+        // Rooms/zones/terrain - only what is currently in the map window (legend - screen transcript). The
+        // corridors/holes are not marked - they are already visible.
         if (settings.Map.Rooms != null && settings.Map.Rooms.Count > 0)
         {
             var rooms = settings.Map.Rooms
@@ -331,7 +332,7 @@ public class LegendDisplay
             }
         }
 
-        // Рельеф — одна строка на вид из исследованных клеток окна карты (не каждая клетка).
+        // Terrain - one line per view from the explored cells of the map window (not every cell).
         if (settings.Map.Chunks?.Any(c => c.Terrain != null) == true)
         {
             var seen = new HashSet<char>();
@@ -341,10 +342,10 @@ public class LegendDisplay
                     if ((_config.RevealMap || _storage.ExploredCells.Contains((c, r))) && settings.Map.FloorAt(c, r) == floor && settings.Map.TerrainAt(c, r) is { } k)
                         seen.Add(k.Code);
             var hoveredKind = _display.HoveredCell is { } h ? settings.Map.TerrainAt(h.col, h.row) : null;
-            // Компактно: две колонки «символ название» (у трудной местности «×2»), без длинных описаний.
+            // Compact: two columns “symbol name” (for difficult terrain “×2”), without long descriptions.
             var kinds = TerrainCatalog.Kinds.Values.Where(k => seen.Contains(k.Code) && TerrainCatalog.InLegend(k)).ToList();
-            // Место под горизонтальный разделитель над блоком рельефа (рисует MapDisplay — с ├ ┬ ┤ в стыках
-            // с рамками); при переполнении уходит последним из рельефа.
+            // Place for a horizontal divider above the terrain block (draws MapDisplay - with ├ ┬ ┤ at the
+            // junctions with the frames); when overfilled, it is the last to leave the terrain.
             if (kinds.Count > 0)
                 items.Add(new LegendItem([() => { }], PriorityTerrain, false));
             for (int i = 0; i < kinds.Count; i += 2)
@@ -355,24 +356,24 @@ public class LegendDisplay
         }
     }
 
-    // Строка легенды с двумя видами рельефа: « ♣  : Деревья      │ ∙∙∙ : Кусты ×2     ←».
-    // Стрелка наведения — в последнем символе колонки (у разделителя / у рамки легенды).
+    // Legend line with two types of terrain: “♣ : Trees │ ∙∙∙ : Bushes ×2 ←.” The guidance arrow is in the last
+    // character of the column (at the separator / at the legend frame).
     private void WriteTerrainPair(List<TerrainKind> pair, TerrainKind? hovered, int legendWidth)
     {
         var bg = _display.MainBackground;
-        int inner = legendWidth - 1;           // после ведущего пробела
-        int leftWidth = (inner - 1) / 2;       // -1 — разделитель
+        int inner = legendWidth - 1;           // after leading space
+        int leftWidth = (inner - 1) / 2;       // -1 - separator
         int rightWidth = inner - 1 - leftWidth;
         Console.Write(" ");
         WriteTerrainColumn(pair[0], hovered, leftWidth, bg);
-        // Разделитель на всю высоту блока — и в последней строке с одним видом (нечётное количество).
-        ColorHelper.WriteColored("│", MouseUiHelper.FrameColor(_display), bg); // цвет как у всех рамок (BorderDrawer)
+        // Separator for the entire height of the block - and in the last line with one view (odd number).
+        ColorHelper.WriteColored("│", MouseUiHelper.FrameColor(_display), bg); // color like all frames (BorderDrawer)
         Console.Write(" ");
         if (pair.Count > 1) WriteTerrainColumn(pair[1], hovered, rightWidth - 1, bg);
         else Console.Write(new string(' ', rightWidth - 1));
     }
 
-    // «ГГГ : Название» шириной width; последний символ — «←» под курсором, иначе пробел.
+    // "YYY : Title" width width; the last character is “←” under the cursor, otherwise a space.
     private static void WriteTerrainColumn(TerrainKind kind, TerrainKind? hovered, int width, List<int> bg)
     {
         bool isHovered = kind == hovered;
@@ -381,7 +382,7 @@ public class LegendDisplay
         string name = L.T(kind.Name) + (kind.StepCostFt > 5 ? $" ×{kind.StepCostFt / 5}" : "");
         int nameWidth = width - kind.LegendGlyph.Length - 3 - 1;
         if (name.Length > nameWidth) name = name[..Math.Max(0, nameWidth - 1)] + "…";
-        // У кровати — подушка (первый символ светлым).
+        // There is a pillow by the bed (the first symbol is light).
         if (FurnitureCatalog.ByCode(kind.Code)?.HeadBg is { } head && kind.LegendGlyph.Length > 1)
         {
             ColorHelper.WriteColored(kind.LegendGlyph[..1], isHovered ? ColorHelper.Pale(head, 0.25) : head, bg);
@@ -395,7 +396,7 @@ public class LegendDisplay
         Console.Write(isHovered ? "←" : " ");
     }
 
-    // Клетка под курсором мыши — в этой комнате/зоне: её строка в легенде подсвечивается.
+    // The cell under the mouse cursor is in this room/zone: its line in the legend is highlighted.
     private bool HoveredIn(List<List<int>>? positions) =>
         _display.HoveredCell is { } h && positions != null && positions.Any(p => p.Count >= 2 && p[0] == h.col && p[1] == h.row);
 
@@ -407,7 +408,7 @@ public class LegendDisplay
         SeparatorJunction = null;
         TerrainSeparatorIndex = -1;
 
-        // Экран Мира: мир, королевства, места в окне карты; без блока боя.
+        // World Screen: world, kingdoms, places in the map window; without a combat block.
         if (_display.MapLevel == MapLevel.World)
         {
             PathLineIndex = MoveLineIndex = -1;
@@ -428,37 +429,38 @@ public class LegendDisplay
         foreach (var combatLine in BuildCombatLines(legendWidth))
             lines.Add(combatLine);
 
-        // Последние строки блока боя: «Путь», «Движение», «Место», «Время» (см. BuildCombatLines).
+        // Last lines of the combat block: “Path”, “Movement”, “Place”, “Time” (see BuildCombatLines).
         PathLineIndex = lines.Count - 4;
         MoveLineIndex = lines.Count - 3;
         return lines;
     }
 
-    // Позиция (в ширине легенды) стыка вертикальной линии колонок рельефа с разделителем над блоком боя
-    // (┴ в BorderDrawer.SeparatorLine) или null — рельефа над разделителем нет.
+    // Position (in the legend width) of the junction of the vertical line of the terrain columns with the
+    // separator above the combat block (┴ in BorderDrawer.SeparatorLine) or null - there is no terrain above the
+    // separator.
     public int? SeparatorJunction { get; private set; }
 
-    // Строка легенды с горизонтальным разделителем над блоком рельефа (├──┬──┤ — MapDisplay) или -1.
+    // Legend line with a horizontal separator above the terrain block (├──┬──┤ - MapDisplay) or -1.
     public int TerrainSeparatorIndex { get; private set; } = -1;
 
-    // Строка «Порядок боя» и кнопка «[F10] КОНЕЦ ХОДА» на ней (смещение от начала строки легенды, -1 — нет кнопки:
-    // не бой или ход не героя).
+    // The “Battle order” line and the “[F10] END OF TURN” button on it (offset from the beginning of the legend
+    // line, -1 - no button: no battle or non-hero’s move).
     public int CombatLineIndex { get; private set; } = -1;
     public (int x0, int x1) EndTurnButton { get; private set; } = (-1, -1);
-    public static string EndTurnText => "[F10] " + L.T("КОНЕЦ ХОДА");
+    public static string EndTurnText => "[F10] " + L.T("END TURN");
 
-    // Ход героя в бою — кнопка конца хода активна.
+    // Hero's turn in battle - the end of turn button is active.
     public bool IsHeroTurn => _storage.WorldState.Combat is { Active: true } c && c.CurrentTurn == _storage.WorldState.Hero?.Symbol;
 
-    // Индексы строк легенды, которые меняются при наведении на клетку (MapDisplay.RedrawLegendLine).
+    // Indexes of legend lines that change when hovering over a cell (MapDisplay.RedrawLegendLine).
     public int PathLineIndex { get; private set; } = -1;
     public int MoveLineIndex { get; private set; } = -1;
 
     private static readonly List<List<int>> _actionColors =
     [
-        [  70, 200,  70 ],  // id:0 Действие
-        [ 160, 100,  50 ],  // id:1 Бон. действие
-        [ 220,  70,  70 ],  // id:2 Реакция
+        [  70, 200,  70 ],  // id:0 Action
+        [ 160, 100,  50 ],  // id:1 Bon. action
+        [ 220,  70,  70 ],  // id:2 Reaction
     ];
     private static readonly string[] _actionSymbols = ["●", "■", "▲"];
 
@@ -472,9 +474,9 @@ public class LegendDisplay
         var fg     = _display.MainForeground;
         var bg     = _display.MainBackground;
 
-        string label1 = L.T("Порядок боя").PadRight(15);
-        string label2 = L.T("Движение:").PadRight(15);
-        string label7 = L.T("Время:").PadRight(15);
+        string label1 = L.T("Initiative").PadRight(15);
+        string label2 = L.T("Movement:").PadRight(15);
+        string label7 = L.T("Time:").PadRight(15);
 
         var hero = _storage.WorldState.Hero;
         var time = _storage.WorldState.Time;
@@ -488,14 +490,14 @@ public class LegendDisplay
         string sqGrayStr  = sqGray  > 0 ? new string('■', sqGray)  : "";
         string speedNum   = speedMax > 0 ? $" {speedLeft}/{speedMax}" : "";
 
-        string timeStr = L.F("День {0} · {1} · Раунд {2}", time.Day, GameTime.PartOfDayText(time.PartOfDay), time.TotalRounds);
+        string timeStr = L.F("Day {0} · {1} · Round {2}", time.Day, GameTime.PartOfDayText(time.PartOfDay), time.TotalRounds);
 
 
         var actions = hero?.Actions?.Where(a => a.Deleted != true).ToList() ?? [];
 
         var lines = new List<Action>
         {
-            // инициатива
+            // initiative
             () =>
             {
                 int lineStart = Term.CursorLeft;
@@ -511,8 +513,9 @@ public class LegendDisplay
                         var color = GetSymbolColor(entry.Symbol);
                         ColorHelper.WriteColored(isCurrent ? $"⚔️{sym}" : $" {sym} ", color, bg);
                     }
-                    // Справа — кнопка конца хода (вместо текста «завершаю ход» мастеру), если влезает.
-                    // Снимок легенды (MapDisplay.CaptureOutput) пишет в строку — курсор не движется, ширина по тексту.
+                    // On the right is the end-of-turn button (instead of the text “I’m ending the GM’s turn”),
+                    // if it fits. A snapshot of the legend (MapDisplay.CaptureOutput) writes to the line - the
+                    // cursor does not move, the width is the same as the text.
                     int used = Console.Out is StringWriter ? 1 + label1.Length + 5 * combat.Initiative.Count(e => e.Deleted != true)
                                                            : Term.CursorLeft - lineStart;
                     int at = width - EndTurnText.Length - 1;
@@ -520,7 +523,7 @@ public class LegendDisplay
                     {
                         Console.Write(new string(' ', at - used));
                         ColorHelper.WriteColored("[F10] ", dim, bg);
-                        ColorHelper.WriteColored(L.T("КОНЕЦ ХОДА"), bright, bg);
+                        ColorHelper.WriteColored(L.T("END TURN"), bright, bg);
                         EndTurnButton = (at, at + EndTurnText.Length - 1);
                     }
                     else EndTurnButton = (-1, -1);
@@ -533,7 +536,7 @@ public class LegendDisplay
             },
         };
 
-        // динамические строки действий
+        // dynamic action strings
         for (int i = 0; i < actions.Count; i++)
         {
             var a = actions[i];
@@ -562,7 +565,7 @@ public class LegendDisplay
             });
         }
 
-        // Путь до клетки под курсором (в ход героя) + сколько квадратов движения он съест.
+        // Path to the cell under the cursor (during the hero’s turn) + how many squares of movement he will eat.
         var hover = _display.HoverPath;
         var path = hover is { ShowPath: true } ? hover : null;
         int pathSquares = path?.CostFt is int pc ? Math.Min(pc / 5, sqWhite) : 0;
@@ -570,27 +573,27 @@ public class LegendDisplay
         var pathColor = new List<int> { 230, 170, 80 };
         var badColor  = new List<int> { 225, 95, 85 };
 
-        // строка пути (пустая, если не наводим) + движение + время — итого CombatReservedLines всего
+        // path line (empty if not directed) + movement + time - total CombatReservedLines total
         lines.Add(() =>
         {
             if (hover == null) return;
             Console.Write(" ");
             if (path == null)
             {
-                ColorHelper.WriteColored(L.T("Дистанция:").PadRight(15), dim, bg);
-                ColorHelper.WriteColored(L.F("{0} фт", hover.DistanceFt), fg, bg);
+                ColorHelper.WriteColored(L.T("Distance:").PadRight(15), dim, bg);
+                ColorHelper.WriteColored(L.F("{0} ft", hover.DistanceFt), fg, bg);
                 return;
             }
-            ColorHelper.WriteColored(L.T("Путь:").PadRight(15), dim, bg);
-            string target = path.TargetSymbol != null ? L.F("до {0}", path.TargetSymbol) + " · " : "";
+            ColorHelper.WriteColored(L.T("Path:").PadRight(15), dim, bg);
+            string target = path.TargetSymbol != null ? L.F("to {0}", path.TargetSymbol) + " · " : "";
             if (path.CostFt is not int cost)
-                ColorHelper.WriteColored(target + L.T("не дойти"), badColor, bg);
+                ColorHelper.WriteColored(target + L.T("unreachable"), badColor, bg);
             else if (cost == 0)
-                ColorHelper.WriteColored(target + L.T("рядом"), fg, bg);
+                ColorHelper.WriteColored(target + L.T("adjacent"), fg, bg);
             else if (cost > speedLeft)
-                ColorHelper.WriteColored(target + L.F("{0} фт · не хватит {1}", cost, cost - speedLeft), badColor, bg);
+                ColorHelper.WriteColored(target + L.F("{0} ft · short by {1}", cost, cost - speedLeft), badColor, bg);
             else
-                ColorHelper.WriteColored(target + L.F("{0} фт · останется {1}", cost, speedLeft - cost), fg, bg);
+                ColorHelper.WriteColored(target + L.F("{0} ft · {1} left", cost, speedLeft - cost), fg, bg);
         });
         lines.Add(() =>
         {
@@ -598,7 +601,7 @@ public class LegendDisplay
             ColorHelper.WriteColored(label2, dim, bg);
             if (sqWhite > 0)
             {
-                // Квадраты, которые уйдут на путь, — в конце белой части; не хватает — вся белая часть красная.
+                // The squares that will go into the path are at the end of the white part; not enough - all the white part is red.
                 int keep = notEnough ? 0 : sqWhite - pathSquares;
                 if (keep > 0) ColorHelper.WriteColored(new string('■', keep), spdOn, bg);
                 if (sqWhite - keep > 0)
@@ -608,11 +611,11 @@ public class LegendDisplay
             if (speedMax == 0) ColorHelper.WriteColored("—", dim, bg);
             if (speedNum.Length > 0) ColorHelper.WriteColored(speedNum, dim, bg);
         });
-        // Где герой: этаж (если есть этажи) и комната / «снаружи» — над временем.
+        // Where is the hero: floor (if there are floors) and room / “outside” - above time.
         lines.Add(() =>
         {
             Console.Write(" ");
-            ColorHelper.WriteColored(L.T("Место:").PadRight(15), dim, bg);
+            ColorHelper.WriteColored(L.T("Place:").PadRight(15), dim, bg);
             ColorHelper.WriteColored(HeroPlace(width - 16), fg, bg);
         });
         lines.Add(() =>
@@ -629,7 +632,7 @@ public class LegendDisplay
     {
         var settings = _storage.WorldState;
         if (settings.Hero?.Position is not { Count: >= 2 } hp) return "—";
-        string place = settings.Map.RoomAt(hp[0], hp[1]) is { Deleted: not true } room ? room.Name : L.T("снаружи");
+        string place = settings.Map.RoomAt(hp[0], hp[1]) is { Deleted: not true } room ? room.Name : L.T("outside");
         if (settings.Map.HasFloors) place = $"{MapConfig.FloorLabel(settings.Map.FloorAt(hp[0], hp[1]))} · {place}";
         return place.Length > maxLen ? place[..Math.Max(0, maxLen - 1)] + "…" : place;
     }
@@ -650,27 +653,27 @@ public class LegendDisplay
         return raw.Length <= 15 ? raw.PadRight(15) : raw[..15];
     }
 
-    // На сетке рисуется только ОДИН символ на клетку — сущности всегда перекрывают объекты
-    // (см. MapObjectsProvider.WriteCellEntity: сперва проверяются entities, потом objects), а
-    // герой перекрывает всё на своей клетке. Если объект оказался в одной клетке с героем или
-    // другой сущностью, его символ никогда не виден на карте — легенда всё равно должна его
-    // перечислять (сам факт видимости уже проверен фильтром выше), но без координат игрок не
-    // поймёт, где именно он находится.
+    // Only ONE symbol per cell is drawn on the grid - entities always overlap objects (see
+    // MapObjectsProvider.WriteCellEntity:, entities is checked first, then objects), and the hero overlaps
+    // everything on his cell. If an object is in the same cell with a hero or another entity, its symbol is
+    // never visible on the map - the legend should still list it (the very fact of visibility is already
+    // checked by the filter above), but without coordinates the player is not will understand exactly where he
+    // is.
     private string CoveragePositionSuffix(IEnumerable<CellEntity> groupMembers, WorldState settings)
     {
         var members = groupMembers as IList<CellEntity> ?? groupMembers.ToList();
-        if (members.Any(x => x is LivingEntity)) return ""; // сущности сюда не подпадают
+        if (members.Any(x => x is LivingEntity)) return ""; // entities are not included here
 
         var positions = members
             .Where(x => x.Position?.Count >= 2)
             .Select(x => (col: x.Position[0], row: x.Position[1]))
             .Distinct()
             .ToList();
-        if (positions.Count != 1) return ""; // несколько разных позиций в группе — неоднозначно
+        if (positions.Count != 1) return ""; // several different positions in the group - ambiguous
         var (col, row) = positions[0];
 
         bool coveredByHero = settings.Hero?.Position is [int hc, int hr] && hc == col && hr == row;
-        // Только видимым сейчас существом: иначе пометка у предмета в тумане выдавала, что на клетке кто-то стоит.
+        // Only a currently visible creature: otherwise the mark on the object in the fog would indicate that someone was standing on the square.
         bool coveredByEntity = settings.Map.Entities?.Any(e =>
             e.Deleted != true && e.Position?.Count >= 2 && e.Position[0] == col && e.Position[1] == row
             && (_config.RevealMap || (e.Hidden != true && _storage.VisibleCells.Contains((col, row))))) == true;
@@ -678,14 +681,13 @@ public class LegendDisplay
         return (coveredByHero || coveredByEntity) ? $" [{col},{row}]" : "";
     }
 
-    // Заменяет прежнее свободнотекстовое поле State: имена активных статус-эффектов сущности,
-    // через запятую — используется как ключ группировки (чтобы, например, отравленный орк не
-    // сливался в легенде со здоровым). Для отображения см. EffectNameSegments — каждое имя красится
-    // в свой StatusEffect.Color.
+    // Replaces the former free-text field State: with names of active status effects of an entity, separated by
+    // commas - used as a grouping key (so that, for example, a poisoned orc does not merge with a healthy one
+    // in the legend). For display, see EffectNameSegments - each name is colored in its own StatusEffect.Color.
     private static string EffectsLabel(CellEntity e) =>
         e.Effects == null ? "" : string.Join(", ", e.Effects.Where(f => f.Deleted != true).Select(f => f.Name));
 
-    // Имена активных эффектов как отдельные цветные сегменты (через ", "), для MakeLegendLines.
+    // Names of active effects as separate colored segments (through ", "), for MakeLegendLines.
     private static List<(string text, List<int>? color)> EffectNameSegments(List<StatusEffect>? effects)
     {
         var segs = new List<(string, List<int>?)>();
@@ -716,11 +718,11 @@ public class LegendDisplay
         return e != null ? (e.Image, e.Name, e.Color) : (null, null, null);
     }
 
-    // Для карточки монстра (MouseUiHelper.SetSelectedMonster) — нужна сама сущность (MonsterKey),
-    // не только тройка картинка/имя/цвет. Объекты (не LivingEntity) сюда не попадают — null.
+    // For the monster card (MouseUiHelper.SetSelectedMonster) - you need the essence itself (MonsterKey), not
+    // just the triple picture/name/color. Objects (not LivingEntity) do not fall here - null.
     public LivingEntity? GetSelectedLivingEntity() => ResolveSelectedEntity() as LivingEntity;
 
-    // Выбранный элемент карты (герой/существо/объект) — для дистанции в подписи правой панели.
+    // Selected map element (hero/creature/object) - for distance in the caption of the right panel.
     public CellEntity? GetSelectedEntity() => ResolveSelectedEntity();
 
     private CellEntity? ResolveSelectedEntity()
@@ -747,8 +749,8 @@ public class LegendDisplay
         return null;
     }
 
-    // В легенде и для наведения: что герой видит сейчас; предметы — ещё и запомненные в тумане (существа — нет:
-    // где они сейчас, неизвестно).
+    // In the legend and for guidance: what the hero sees now; objects are also remembered in the fog (creatures
+    // are not: where they are now is unknown).
     private bool IsShown(CellEntity x) =>
         _config.RevealMap || (x.Hidden != true && (_storage.VisibleCells.Contains((x.Position[0], x.Position[1])) || _storage.IsRemembered(x)));
 
@@ -792,16 +794,16 @@ public class LegendDisplay
         return heroCount + entityCount;
     }
 
-    // symbol+name в цвете сущности (ярче если selected); state — список цветных сегментов
-    // (null-цвет сегмента = цвет строки renderColor) — так у каждого статус-эффекта может быть
-    // свой StatusEffect.Color, не совпадающий с цветом самой сущности.
+    // symbol+name in the color of the entity (brighter if selected); state is a list of colored segments
+    // (null-segment color = line color renderColor) - so each status effect can have its own
+    // StatusEffect.Color, which does not match the color of the entity itself.
     private static List<Action> MakeLegendLines(
         string symbol, string name, List<(string text, List<int>? color)> state,
         List<int> color, int legendWidth, bool selected = false)
     {
         var renderColor = selected ? ColorHelper.Pale(color, 0.25) : color;
         int prefixLen = symbol.Length + 3;
-        // -1: отступ слева перед текстом легенды (Console.Write(" ") ниже).
+        // -1: left indent before legend text (Console.Write(" ") below).
         int contentWidth = legendWidth - prefixLen - 1;
         string indent = new string(' ', prefixLen);
 
@@ -850,8 +852,8 @@ public class LegendDisplay
         return result;
     }
 
-    // Пишет только ту часть каждого сегмента, что попадает в [rangeStart, rangeStart+rangeLen) —
-    // используется, чтобы применить построчный wrap к содержимому, состоящему из разноцветных кусков.
+    // Writes only the part of each segment that falls within [rangeStart, rangeStart+rangeLen) - used to apply
+    // line-by-line wrap to content consisting of multi-colored chunks.
     private static void WriteSegmentsInRange(List<(string text, List<int> color)> segments, int rangeStart, int rangeLen)
     {
         int rangeEnd = rangeStart + rangeLen;
@@ -871,11 +873,11 @@ public class LegendDisplay
         }
     }
 
-    // Для комнат и area — без разделения имени и состояния
+    // For rooms and area - without separation of name and state
     private static List<Action> MakeLegendLines(string prefix, string content, List<int> color, int legendWidth, bool selected = false)
     {
         int prefixLen = prefix.Length + 3;
-        // -1: отступ слева перед текстом легенды (Console.Write(" ") ниже).
+        // -1: left indent before legend text (Console.Write(" ") below).
         int contentWidth = legendWidth - prefixLen - 1;
         string indent = new string(' ', prefixLen);
 

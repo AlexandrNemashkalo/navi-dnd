@@ -103,7 +103,7 @@ public static class SvgToBrailleConverter
         }
     }
 
-    // Рисует SVG, растянутый до width×height, на прозрачном фоне (SkiaSharp: одинаково на всех ОС).
+    // Draws SVG, stretched to width×height, on a transparent background (SkiaSharp: is the same on all OSes).
     private static SKBitmap? RenderSvg(string path, int width, int height)
     {
         using var svg = new SKSvg();
@@ -122,7 +122,7 @@ public static class SvgToBrailleConverter
     private static string[] AppendName(string[] brailleLines, string name, int widthChars)
     {
         if (string.IsNullOrEmpty(name)) return brailleLines;
-        // Подпись может быть в несколько строк через '\n' (название + свойства).
+        // The label can be in several lines using '\n' (name + properties).
         var parts = name.Split('\n');
         var result = new string[brailleLines.Length + 1 + parts.Length];
         brailleLines.CopyTo(result, 0);
@@ -132,16 +132,17 @@ public static class SvgToBrailleConverter
         return result;
     }
 
-    // Свои картинки игрока (анкета новой игры) лежат в Storage/Portraits и хранятся как
-    // "portraits/<файл>" — PNG/JPG/BMP/GIF или SVG. Остальное — слаг game-icons ("author/name").
+    // Your player pictures (new game profile) are in Storage/Portraits and stored as “portraits/<file>” -
+    // PNG/JPG/BMP/GIF or SVG. The rest is the slug game-icons (“author/name”).
     public const string PortraitsPrefix = "portraits/";
     public static string PortraitsDir => Path.Combine(AppConfig.DataRoot, "Storage", "Portraits");
 
     public static bool IsSupportedImageFile(string path) =>
         Path.GetExtension(path).ToLowerInvariant() is ".svg" or ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif";
 
-    // Растровая картинка → браиль: вписываем в квадрат с белым фоном, точки — где темнее среднего
-    // (порог по средней яркости — фото и рисунки с любым фоном дают читаемый силуэт).
+    // Raster image → braille: fit into a square with a white background, the points where darker than average
+    // (threshold based on average brightness - photos and drawings with any background give a readable
+    // silhouette).
     private static string[]? ConvertRaster(string fullPath, int widthChars)
     {
         try

@@ -2,12 +2,12 @@ using System.Runtime.InteropServices;
 
 namespace NaviDnD.Helpers;
 
-// Консоль Windows (conhost) сама обрабатывает Ctrl+колесо мыши — меняет размер шрифта, а с ним и
-// окно игры, ещё до того, как событие дойдёт до приложения. Щипок на тачпаде ноутбука приходит
-// именно как Ctrl+колесо. Окном владеет conhost, изнутри консоли это не отключить — поэтому
-// низкоуровневый перехватчик мыши (WH_MOUSE_LL) на своём потоке: Ctrl+колесо над окном игры гасится
-// (размер не меняется) и передаётся игре обычной прокруткой (ConsoleMouseReader.AddWheel) —
-// например, масштаб карты мира.
+// Console Windows (conhost) itself processes the Ctrl+ mouse wheel - changes the font size, and with it the
+// game window, even before the event reaches the application. A pinch on the laptop touchpad comes exactly as
+// the Ctrl+ wheel. The window is owned by conhost, this cannot be disabled from inside the console - therefore
+// a low-level mouse interceptor (WH_MOUSE_LL) on its stream: Ctrl+ the wheel above the game window is
+// extinguished (the size does not change) and is transmitted to the game by normal scrolling
+// (ConsoleMouseReader.AddWheel) - for example, the scale of the world map.
 internal static class ConsoleZoomBlocker
 {
     private const int WH_MOUSE_LL = 14;
@@ -47,7 +47,7 @@ internal static class ConsoleZoomBlocker
 
     private const uint GA_ROOT = 2;
 
-    private static LowLevelMouseProc? _proc; // держим ссылку — иначе GC соберёт делегат под хуком
+    private static LowLevelMouseProc? _proc; // keep the link - otherwise GC will collect a delegate under the hook
     private static nint _hook;
     private static nint _consoleWindow;
 
@@ -58,7 +58,7 @@ internal static class ConsoleZoomBlocker
         if (_consoleWindow == 0) return;
         _proc = Hook;
 
-        // Низкоуровневому хуку нужен цикл сообщений на том же потоке.
+        // Low-level hook needs a message loop on the same thread.
         var thread = new Thread(() =>
         {
             _hook = SetWindowsHookEx(WH_MOUSE_LL, _proc, GetModuleHandle(null), 0);
@@ -76,7 +76,7 @@ internal static class ConsoleZoomBlocker
             if (GetAncestor(WindowFromPoint(info.pt), GA_ROOT) == _consoleWindow)
             {
                 ConsoleMouseReader.AddWheelDelta((short)(info.mouseData >> 16));
-                return 1; // погасить: conhost не меняет шрифт и размер окна
+                return 1; // extinguish: conhost does not change the font and window size
             }
         }
         return CallNextHookEx(_hook, nCode, wParam, lParam);

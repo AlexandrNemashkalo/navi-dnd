@@ -2,14 +2,14 @@
 
 namespace NaviDnD.UiTests;
 
-// E2E: два реальных бага в редакторе персонажа (Screen.NewGameCharacter) — наведение мышью на
-// предмет инвентаря не показывало картинку, и Tab не листал выбор предмета. Корень обоих: вызов
-// MouseUiHelper.HandleGameScreen в Program.cs для этого экрана не передавал onTab/onShiftTab/
-// onInventoryItemHover (в отличие от точно такого же вызова для геймплейного Screen.Character,
-// где эти колбэки есть) — при null-колбэках HandleGameScreen молча не делает ничего для Tab и
-// не вызывает MouseUiHelper.SetSelectedImage при наведении. Хуже того: непереданный onTab означал,
-// что литеральная строка "Tab" проваливалась в обработку как обычный текстовый ввод игрока и
-// улетала в FixHeroForNewGame как если бы игрок буквально написал "Tab".
+// E2E: two real bugs in the character editor (Screen.NewGameCharacter) - hovering the mouse over an inventory
+// item did not show the picture, and Tab did not scroll through the item selection. The root of both: calling
+// MouseUiHelper.HandleGameScreen in Program.cs for this screen did not transfer onTab/onShiftTab/
+// onInventoryItemHover (unlike the exact same call for gameplay Screen.Character, where these callbacks are) -
+// with null- callbacks, HandleGameScreen silently does nothing for Tab and does not call
+// MouseUiHelper.SetSelectedImage on hover. Worse still: the untransmitted onTab meant that the literal string
+// "Tab" failed to be processed as normal text input from the player and flew away. FixHeroForNewGame as if the
+// player had literally written "Tab".
 public class NewGameCharacterEditorScenarioTests
 {
     private readonly ITestOutputHelper _output;
@@ -23,9 +23,9 @@ public class NewGameCharacterEditorScenarioTests
         Thread.Sleep(150);
     }
 
-    // F2 → анкета (5 полей) → редактор персонажа. Общий заход, дублирует начало
-    // NewGameScenarioTests.CreateHeroAndStartNewGame — свой GameSession на файл, копировать сюда
-    // весь остальной прогон (F3/StartNewGame и т.п.) не нужно, тестируем только редактор.
+    // F2 → profile (5 fields) → character editor. General approach, duplicates the beginning of
+    // NewGameScenarioTests.CreateHeroAndStartNewGame - your own GameSession to the file, there is no need to
+    // copy the rest of the run here (F3/StartNewGame, etc.), we are testing only the editor.
     private void OpenEditor(GameSession game)
     {
         Assert.True(Navigation.ToAnketa(game.Pid),
@@ -34,7 +34,7 @@ public class NewGameCharacterEditorScenarioTests
         TypeField(game.Pid, "Тестовый Герой");
         TypeField(game.Pid, "TST");
         TypeField(game.Pid, "Проверочный герой для e2e-теста.");
-        GameConsole.SendKey(game.Pid, ConsoleKey.F3);   // «ДАЛЕЕ» анкеты — то же, что [F3] (кнопка-плашка без стрелок)
+        GameConsole.SendKey(game.Pid, ConsoleKey.F3);   // “NEXT” of the questionnaire - the same as [F3] (blank button without arrows)
 
         Assert.True(
             GameConsole.WaitForRowContains(game.Pid, 1, GameConsole.TitleReadWidth, "→ РЕДАКТОР ←", 20000),
@@ -42,17 +42,17 @@ public class NewGameCharacterEditorScenarioTests
         Thread.Sleep(200);
     }
 
-    // "Тестовый меч" экипирован (equipmentedSlot:["П Рука"]) — его название встречается на экране
-    // ДВАЖДЫ: в списке слотов экипировки ("П Рука   Тестовый меч") и в самом списке инвентаря
-    // ("• Тестовый меч: ..."). Ищем именно вторую строку — с двоеточием после названия, которого
-    // в строке слота экипировки нет.
+    // "Test Sword" is equipped (equipmentedSlot:[ "P Hand"]) - its name appears on the screen TWICE: in the
+    // list of equipment slots ("P Hand Test Sword") and in the inventory list itself ("• Test Sword: ..."). We
+    // are looking for exactly the second line - with a colon after the name, which is not in the equipment slot
+    // line.
     private static string InventoryLineMarker(string itemName) => itemName + ":";
 
-    // Fixtures/MockResponses/CreateNewGame/response.json: "Тестовый меч" — единственный предмет с
-    // заданным image ("lorc/broadsword"), специально для этого теста. Мок-герой не имеет своего
-    // hero.image, поэтому правая панель до наведения показывает дефолтный D20 (DiceArt.D20,
-    // см. DialogDisplay.GetDefaultRightPanelLines) — любое изменение содержимого панели после
-    // наведения означает, что картинка предмета реально отрисовалась.
+    // Fixtures/MockResponses/CreateNewGame/response.json: "Test Sword" is the only item with image
+    // ("lorc/broadsword") specified specifically for this test. The mock hero does not have his own hero.image,
+    // so the right panel before hovering shows the default D20 (DiceArt.D20, see
+    // DialogDisplay.GetDefaultRightPanelLines) - any change in the contents of the panel after hovering means
+    // that the item’s picture has actually been drawn.
     [Fact]
     public void HoverInventoryItemWithImage_UpdatesRightPanel()
     {
@@ -80,8 +80,8 @@ public class NewGameCharacterEditorScenarioTests
             "Наведение на предмет в редакторе не подсветило строку маркером «←».");
         _output.WriteLine("Строка подсветилась — наведение зарегистрировано движком.");
 
-        // RerenderRightPanel вызывается отдельно от подсветки строки (тот же паттерн, что и
-        // перерисовка карточки после ответа мока в других тестах) — опрашиваем, а не спим фиксированно.
+        // RerenderRightPanel is called separately from highlighting the line (the same pattern as redrawing the
+        // card after the mock response in other tests) - we poll, and do not sleep fixedly.
         bool panelChanged = GameConsole.WaitForRowsMatch(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth,
             afterRows =>
             {
@@ -100,11 +100,11 @@ public class NewGameCharacterEditorScenarioTests
         TestPacing.Step();
     }
 
-    // Tab должен циклически выбирать предметы инвентаря (как на геймплейном экране Персонажа) —
-    // маркер «←» должен переходить с одного предмета на другой. Раньше onTab был не передан:
-    // Tab не делал ВООБЩЕ ничего для выбора, и (хуже) улетал как буквальный текст "Tab" в
-    // FixHeroForNewGame — проверяем и то, что маркер реально движется, и что в истории диалога
-    // не появляется сообщение "Tab" от игрока.
+    // Tab should cycle through inventory items (like in the Character gameplay screen) - the "←" marker should
+    // move from one item to another. Previously, onTab was not transmitted: Tab did not do anything AT ALL for
+    // selection, and (worse) flew away as the literal text "Tab" in FixHeroForNewGame - we check that the
+    // marker is actually moving, and that the message "Tab" from the player does not appear in the dialogue
+    // history.
     [Fact]
     public void TabKey_CyclesInventorySelection_AndIsNotSentAsPlayerText()
     {
@@ -113,9 +113,9 @@ public class NewGameCharacterEditorScenarioTests
         OpenEditor(game);
         _output.WriteLine("Редактор персонажа отрисован.");
 
-        // Меч экипирован (дубль в слотах экипировки — нужен маркер с ":"), факел не экипирован
-        // (equipmentedSlot:[], нет дубля — но у него quantity:3, формат "Тестовый факел ×3:",
-        // поэтому обычное имя без ":" ищем ему, а не InventoryLineMarker).
+        // The sword is equipped (a double in the equipment slots - you need a marker with ":"), the torch is
+        // not equipped (equipmentedSlot:[], there is no double - but it has quantity:3, the format is "Test
+        // torch ×3:", so we are looking for the usual name without ":" for it, not InventoryLineMarker).
         string swordMarker = InventoryLineMarker("Тестовый меч");
         const string torchMarker = "Тестовый факел";
         Assert.True(

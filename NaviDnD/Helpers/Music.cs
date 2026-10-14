@@ -3,20 +3,20 @@ using NAudio.Wave.SampleProviders;
 
 namespace NaviDnD.Helpers;
 
-// Музыка и звуки окружения игры. Одно устройство вывода и микшер — дорожки звучат слоями: у каждой своя громкость и
-// плавное появление/затухание (fade). Что играет — решает MusicDirector (по месту героя, бою, времени суток):
-//  - смена музыки: Play(новая) + Stop(старая) — перекрёстное затухание;
-//  - несколько дорожек вместе (музыка + звуки окружения, позже — слои боя): Play с разными id, громкость — SetLayerVolume.
-// Громкость: слой × «ГРОМКОСТЬ МУЗЫКИ» × общая «ГРОМКОСТЬ» (Sound.Volume); «МУЗЫКА: ВЫКЛ» / «ЗВУКИ ОКРУЖЕНИЯ: ВЫКЛ» —
-// тишина без остановки дорожек. Форматы: wav, mp3, ogg.
+// Music and environmental sounds of the game. One output device and mixer - the tracks sound in layers: each
+// has its own volume and smooth appearance/fading (fade). What plays is decided by MusicDirector (by the place
+// of the hero, battle, time of day): - change of music: Play(new) + Stop(old) - cross-fading;  - several tracks
+// together (music + ambient sounds, later - combat layers): Play with different id, volume - SetLayerVolume.
+// Volume: layer × “MUSIC VOLUME” × total “VOLUME” (Sound.Volume); “MUSIC: OFF” / “AMBIOROUS SOUNDS: OFF” -
+// silence without stopping tracks. Formats: wav, mp3, ogg.
 internal static class Music
 {
     public static string SoundDir => Path.Combine(AppConfig.ProjectRoot, "sound");
 
     public static bool Enabled { get; set; } = true;
     public static bool AmbienceEnabled { get; set; } = true;
-    public static float Volume { get; set; } = 0.4f;   // «ГРОМКОСТЬ МУЗЫКИ», 0..1
-    // Звучит речь мастера (Speech): музыка и окружение плавно притихают до DuckLevel, после — возвращаются.
+    public static float Volume { get; set; } = 0.4f;   // “MUSIC VOLUME”, 0..1 The GM’s speech sounds (Speech): the music and surroundings gradually fade out until
+    // DuckLevel, after which they return.
     public static volatile bool Ducked;
     private const float DuckLevel = 0.3f, DuckDownSec = 0.4f, DuckUpSec = 1.5f;
 
@@ -39,9 +39,9 @@ internal static class Music
     private static MixingSampleProvider? _mixer;
     private static readonly Dictionary<string, Layer> _layers = [];
 
-    // Включить дорожку id (путь от папки sound) с плавным появлением; уже играет — только громкость.
-    // loop — по кругу (звуки окружения, бой); иначе дорожка доигрывает и затихает сама (IsPlaying → false).
-    // ambience — звук окружения: глушится своей настройкой, а не «МУЗЫКА».
+    // Turn on the track id (path from the folder sound) with a smooth appearance; already playing - only
+    // volume. loop - in a circle (ambient sounds, battle); otherwise the track finishes playing and fades out
+    // by itself (IsPlaying → false). ambience - ambient sound: muffled by its setting, not "MUSIC".
     public static void Play(string id, string file, float volume = 1f, int fadeMs = 2000, bool loop = true, bool ambience = false)
     {
         lock (_lock)
@@ -61,28 +61,28 @@ internal static class Music
                 _layers[id] = layer;
                 _mixer!.AddMixerInput(layer);
             }
-            catch (Exception ex) { AudioOutput.Log(ex); /* файл не читается — без него */ }
+            catch (Exception ex) { AudioOutput.Log(ex); /*file cannot be read - without it*/ }
         }
     }
 
-    // Дорожка ещё звучит (не доиграла и не остановлена).
+    // The track is still playing (it has not finished playing and has not stopped).
     public static bool IsPlaying(string id)
     {
         lock (_lock) return _layers.TryGetValue(id, out var layer) && !layer.Ended;
     }
 
-    // Плавно заглушить дорожку и убрать её из микшера.
+    // Smoothly mute the track and remove it from the mixer.
     public static void Stop(string id, int fadeMs = 2000)
     {
         lock (_lock)
         {
             if (!_layers.Remove(id, out var layer)) return;
-            if (layer.Ended) { layer.Dispose(); return; }   // доиграла — микшер её уже убрал
+            if (layer.Ended) { layer.Dispose(); return; }   // finished playing - the mixer has already removed it
             layer.FadeTo(0, fadeMs, then: () => { lock (_lock) _mixer?.RemoveMixerInput(layer); layer.Dispose(); });
         }
     }
 
-    // Громкость слоя (0..1) с плавным переходом — для смешивания нескольких дорожек.
+    // Layer volume (0..1) with fade - for blending multiple tracks.
     public static void SetLayerVolume(string id, float volume, int fadeMs = 1000)
     {
         lock (_lock) if (_layers.TryGetValue(id, out var layer)) layer.FadeTo(volume, fadeMs);
@@ -93,7 +93,7 @@ internal static class Music
         if (_output != null) return true;
         try
         {
-            _mixer = new MixingSampleProvider(Format) { ReadFully = true };   // без дорожек — тишина, устройство не закрывается
+            _mixer = new MixingSampleProvider(Format) { ReadFully = true };   // without tracks - silence, the device does not close
             _output = AudioOutput.Create(200);
             _output.Init(new Ducking(_mixer));
             if (!_paused) _output.Play();
@@ -102,7 +102,7 @@ internal static class Music
         catch (Exception ex) { AudioOutput.Log(ex); _output = null; _mixer = null; return false; }
     }
 
-    // Притихание всего микшера под речь: вниз быстро, обратно — медленно.
+    // Quiet the entire mixer to the speech: down quickly, back down slowly.
     private sealed class Ducking(ISampleProvider source) : ISampleProvider
     {
         private float _gain = 1f;
@@ -123,7 +123,7 @@ internal static class Music
         }
     }
 
-    // Дорожка: файл (wav/mp3/ogg), приведённый к формату микшера, × громкость слоя (с затуханием) × общая.
+    // Track: file (wav/mp3/ogg), reduced to mixer format, × layer volume (with attenuation) × total.
     private sealed class Layer : ISampleProvider, IDisposable
     {
         private readonly WaveStream _reader;
@@ -148,7 +148,7 @@ internal static class Music
 
         public void FadeTo(float volume, int ms, Action? then = null)
         {
-            _target = MathF.Sqrt(Math.Clamp(volume, 0f, 1f));   // переход идёт по «громкости на слух», амплитуда — её квадрат
+            _target = MathF.Sqrt(Math.Clamp(volume, 0f, 1f));   // the transition is based on “loudness by ear”, the amplitude is its square
             int samples = Math.Max(1, ms * Format.SampleRate / 1000 * Format.Channels);
             _step = (_target - _gain) / samples;
             _then = then;
@@ -164,8 +164,8 @@ internal static class Music
                 int n = _source.Read(buffer, offset + read, count - read);
                 if (n == 0)
                 {
-                    if (!_loop || rewound) break;   // доиграла / пустой файл — не крутиться
-                    _reader.Position = 0;           // по кругу
+                    if (!_loop || rewound) break;   // finished playing / empty file - do not spin
+                    _reader.Position = 0;           // in a circle
                     rewound = true;
                     continue;
                 }
@@ -180,11 +180,11 @@ internal static class Music
                     _gain += _step;
                     if ((_step > 0 && _gain >= _target) || (_step < 0 && _gain <= _target)) { _gain = _target; _step = 0; Finish(); }
                 }
-                buffer[offset + i] *= _gain * _gain * master;   // квадрат — нарастание с тишины плавное, без резкого начала
+                buffer[offset + i] *= _gain * _gain * master;   // square - the rise from silence is smooth, without a sharp start
             }
             if (read < count)
             {
-                _ended = true;   // доиграла: вернуть меньше count — микшер убирает дорожку сам
+                _ended = true;   // finished playing: return less count - the mixer removes the track itself
                 Finish();
             }
             return read;
@@ -194,7 +194,7 @@ internal static class Music
         {
             var then = _then;
             _then = null;
-            if (then != null) Task.Run(then);   // не из потока звука: RemoveMixerInput берёт lock микшера
+            if (then != null) Task.Run(then);   // not from the audio stream: RemoveMixerInput takes lock of the mixer
         }
 
         public void Dispose() => _reader.Dispose();

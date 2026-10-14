@@ -1,15 +1,19 @@
-# NaviDnD 2.2.4
+# NaviDnD 2.2.5
 
-- Игра теперь есть на **macOS** (Apple Silicon): архив «Скачать для macOS» на странице релиза. Распакуйте, перетащите NaviDnD в «Программы» и откройте; macOS один раз попросит разрешение в «Системные настройки → Конфиденциальность и безопасность → Всё равно открыть». Внутри всё готовое, включая озвучку; обновления на Mac приходят патчами из меню, как на Windows.
-- Спасибо **keytonw** за порт игры на macOS — без него версии для Mac не было бы.
-- В конце экрана настроек появились титры.
+- Системные промпты и инструкции игровых инструментов переведены на английский для Claude и Codex. Язык рассказа, имён и описаний определяется языком мира.
+- Английский стал языком исходных строк интерфейса; русский перевод вынесен в словари. Настройки языка интерфейса и мира работают независимо.
+- Улучшены тактика противников и передача их способностей мастеру, контекст встреч, скрытых существ и заметок NPC.
+- Исправлены расход движения на сложной местности и диагоналях, видимость, свет, выбор целей, реакции и учёт раундов.
+- Исправлены обновления эффектов, отдых, повышение уровня, гибель существ, путешествия и генерация карт. Озвучка NPC сохраняет назначенные движком голоса.
 
-Обновление распространяется патчем; сохранения и настройки сохраняются.
+Обновление распространяется патчами для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются; необходимые миграции выполняются автоматически.
 
 ## English
 
-- NaviDnD now runs on **macOS** (Apple Silicon): get the macOS archive from the release page. Unzip it, drag NaviDnD to Applications and open it; macOS asks once for permission in System Settings → Privacy & Security → Open Anyway. Everything is included, voice-over too; on a Mac, updates arrive as patches from the menu, just like on Windows.
-- Thanks to **keytonw** for porting the game to macOS — there would be no Mac version without him.
-- Credits are now shown at the bottom of the settings screen.
+- System prompts and game tool instructions are now in English for Claude and Codex. Narration, names and descriptions follow the world's language.
+- English is now the source language for interface strings, with Russian translations in dictionaries. Interface and world language settings remain independent.
+- Improved enemy tactics and ability context, encounter context, hidden creature handling and NPC notes.
+- Fixed movement costs on difficult terrain and diagonals, visibility, lighting, target selection, reactions and round tracking.
+- Fixed effect updates, rest, level advancement, creature deaths, travel and map generation. NPC speech retains engine-assigned voices.
 
-The update is delivered as a patch; saves and settings are kept.
+The update is delivered as patches for Windows and macOS (Apple Silicon). Saves and settings are retained; required migrations run automatically.

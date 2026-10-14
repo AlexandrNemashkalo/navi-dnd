@@ -5,25 +5,17 @@ using NaviDnD.Helpers;
 
 namespace NaviDnD.McpServer;
 
-// Справочник монстров DnD5e (NaviDnD.Helpers.MonsterDatabase, GameData/DnD5e_monsters_BD.dtn) — по
-// аналогии с SpellTools.FindSpell: ИИ ищет по АНГЛИЙСКОМУ названию при расстановке существ на карте
-// (StartNewGame), берёт русское имя буквально как map.entities[].monsterKey. Полные статы (КД/ХП/
-// атаки и т.д.) картa достаёт сама из той же базы по monsterKey — этот тул их не возвращает, только
-// имя, чтобы не тащить весь statblock через ИИ туда-обратно.
+// Directory of monsters DnD5e (NaviDnD.Helpers.MonsterDatabase, GameData/DnD5e_monsters_BD.dtn) - by analogy
+// with SpellTools.FindSpell:, the AI searches for the ENGLISH name when placing creatures on the map
+// (StartNewGame), takes the Russian name literally as map.entities[].monsterKey. Full stats (AC / HP / attacks,
+// etc.) the map itself gets from the same database for monsterKey - this tool does not return them, only the
+// name, so as not to drag the entire statblock back and forth through the AI.
 [McpServerToolType]
 public sealed class MonsterTools(McpServerConfig config)
 {
 
     [McpServerTool]
-    [Description("""
-        Ищет монстра D&D 5e в справочнике по АНГЛИЙСКОМУ названию — НЕ выдумывай статы сам, сначала
-        найди каноничного монстра здесь. query = английское название или его часть ("goblin",
-        "skeleton warrior").
-        Возвращает через запятую названия совпадений на языке игры (lang) по убыванию релевантности —
-        возьмите лучшее и используйте БУКВАЛЬНО как map.entities[].monsterKey (полные статы движок достанет
-        сам по этому имени, отдельно указывать их не нужно). Пустая строка — монстра нет в
-        справочнике: тогда придумайте существо и его статы сами, monsterKey не указывайте.
-        """)]
+    [Description("Find a D&D 5e monster by ENGLISH name or fragment (goblin, skeleton warrior). Use canonical catalog stats rather than inventing them. Returns comma-separated game-language names in relevance order. Copy the best match EXACTLY into map.entities[].monsterKey; the engine retrieves full stats, so do not duplicate them. Empty result means no catalog monster: create the creature/stats yourself and omit monsterKey.")]
     public string FindMonster(string query)
     {
         Log($"find_monster → \"{query}\"");

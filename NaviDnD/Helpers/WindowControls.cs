@@ -10,7 +10,7 @@ public static class WindowControls
     // for the square even when hover gives it a separate foreground-color run.
     private const string ConsolasButtons = "  ━ \u2800▢  ✕ ";
     private const string DejaVuButtons = "  –  ▢  ✕ ";
-    // NaviDnD.app: окном терминала игра не управляет — «весь экран» есть, но неактивен (режим — в настройках).
+    // NaviDnD.app: The game does not control the terminal window - the “full screen” is there, but inactive (the mode is in the settings).
     private static bool FullscreenDisabled => OperatingSystem.IsMacOS();
     public static string Buttons => OperatingSystem.IsMacOS() ? DejaVuButtons : ButtonsForFont(ConsoleSetup.FontFace);
 
@@ -24,7 +24,7 @@ public static class WindowControls
     private static bool _attentionNotified;
     private static DisplayConfig? _display;
 
-    // Кнопки — на Windows и в своём терминале NaviDnD.app; у обычного терминала macOS/Linux свой заголовок.
+    // Buttons - on Windows and in your terminal NaviDnD.app; a regular macOS/Linux terminal has its own header.
     public static bool Available => OperatingSystem.IsWindows() || (OperatingSystem.IsMacOS() && MacApp.InOwnTerminal);
 
     public static void Draw(DisplayConfig display, int hovered = -1)
@@ -42,7 +42,7 @@ public static class WindowControls
         frame.Append(Buttons[0]);
         for (int button = 0; button < 3; button++)
         {
-            var fg = button == 1 && FullscreenDisabled ? ColorHelper.Darker(display.MainForeground, 0.5)   // как неактивные кнопки игры
+            var fg = button == 1 && FullscreenDisabled ? ColorHelper.Darker(display.MainForeground, 0.5)   // as inactive game buttons
                 : button == hovered
                 ? hovered == 2 ? new List<int> { 235, 110, 110 } : ColorHelper.Pale(display.MainForeground, 0.75)
                 : display.MainForeground;
@@ -66,7 +66,7 @@ public static class WindowControls
         if (y != 1 || width < Buttons.Length) return -1;
         int offset = x - (left + width - Buttons.Length);
         int button = offset is >= 1 and < 10 ? (offset - 1) / 3 : -1;
-        return button == 1 && FullscreenDisabled ? -1 : button;   // неактивная кнопка — ни наведения, ни нажатия
+        return button == 1 && FullscreenDisabled ? -1 : button;   // inactive button - neither hover nor click
     }
 
     public static void Start(Action toggle, Action close)
@@ -80,7 +80,7 @@ public static class WindowControls
             {
                 if (!OperatingSystem.IsWindows())
                 {
-                    // macOS: «свёрнута» — приложение скрыто (кнопкой, Cmd+H); показали из Dock — звук снова идёт.
+                    // macOS: “minimized” - the application is hidden (with the button, Cmd+H); shown from Dock - the sound comes on again.
                     if (OperatingSystem.IsMacOS()) SetMinimized(MacApp.IsHidden());
                     return;
                 }

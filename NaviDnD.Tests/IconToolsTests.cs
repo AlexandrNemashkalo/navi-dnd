@@ -3,8 +3,8 @@ using NaviDnD.McpServer;
 
 namespace NaviDnD.Tests;
 
-// Юнит-тесты поиска иконок (find_icon) без нейронки — работают против настоящей папки icons/ на
-// диске (статичный набор файлов game-icons.net, 4173 шт., не меняется во время сессии).
+// Unit tests for searching for icons (find_icon) without a AI - work against the real icons/ folder on disk
+// (static set of files game-icons.net, 4173 pcs., does not change during the session).
 public class IconToolsTests
 {
     private static IconTools CreateTools() => new(new McpServerConfig(WorldStatePath: "unused", LogPath: null));

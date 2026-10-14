@@ -3,8 +3,9 @@ using NaviDnD.Helpers;
 
 namespace NaviDnD.Tests;
 
-// Ссылки на справочники в ответе мастера (icon/ref/monster) — игра подставляет данные сама, без вызова инструмента.
-// Против настоящих справочников и папки icons/ (русская игра — язык по умолчанию).
+// Links to reference books in the wizard's response (icon/ref/monster) - the game substitutes the data itself,
+// without calling the tool. Against real reference books and the icons/ folder (Russian game is the default
+// language).
 public class CatalogReferencesTests
 {
     private static JsonNode Resolve(string json) => JsonNode.Parse(CatalogReferences.Resolve(json))!;
@@ -56,7 +57,7 @@ public class CatalogReferencesTests
         Assert.Equal("Амулет Хравна", items[1]!["name"]!.GetValue<string>());
     }
 
-    // Нестрогий поиск путал похожие: "ink" находил «Ink pen», и бутылочка чернил становилась писчим пером.
+    // A loose search confused similar ones: “ink” found “Ink pen”, and the bottle of ink became a writing pen.
     [Fact]
     public void PartialReferenceKeepsMastersName()
     {

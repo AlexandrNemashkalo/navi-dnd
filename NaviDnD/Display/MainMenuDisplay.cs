@@ -3,18 +3,18 @@ using NaviDnD.Helpers;
 
 namespace NaviDnD.Display;
 
-// Главное меню в стиле остальных экранов: рамка, строка заголовка «ГЛАВНОЕ МЕНЮ» и разделитель
-// (за них, как и везде, тащится окно), ниже по центру — логотип и пункты-«вкладки»: «[F1]ПРОДОЛЖИТЬ»,
-// выбранный — «→ ПРОДОЛЖИТЬ ←» (как активная вкладка в заголовке). Цвета — только игровые
-// (MainForeground и его светлый/тёмный оттенки), по бокам — браиль-картинки приглушённым цветом.
-// Строки ввода и горячих клавиш нет: ↑↓ + Enter, мышь (наведение выбирает, клик подтверждает).
+// The main menu is in the style of other screens: a frame, a title bar “MAIN MENU” and a separator (a window is
+// dragged behind them, as everywhere else), below in the center is a logo and “tabbed” items: “[F1]CONTINUE”,
+// selected - “→ CONTINUE ←” (as the active tab in the header). The colors are only game colors (MainForeground
+// and its light/dark shades), on the sides there are braille pictures in muted colors. There is no input line
+// or hotkeys: ↑↓ + Enter, mouse (hover selects, click confirms).
 internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display)
 {
     public enum Choice { Continue, NewGame, Games, Settings, Updates, Exit }
 
     private sealed record Item(string Name, Choice? Action);
 
-    // Логотип «NAVIDND» шрифтом ANSI Shadow.
+    // Logo “NAVIDND” in font ANSI Shadow.
     private static readonly string[] Logo =
     [
         "███╗   ██╗ █████╗ ██╗   ██╗██╗██████╗ ███╗   ██╗██████╗ ",
@@ -25,8 +25,8 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         "╚═╝  ╚═══╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚═════╝ ╚═╝  ╚═══╝╚═════╝ ",
     ];
 
-    private static string Title => L.T(" ГЛАВНОЕ МЕНЮ");
-    private const int HeaderRows = 3; // верхняя рамка, заголовок, разделитель
+    private static string Title => L.T(" MAIN MENU");
+    private const int HeaderRows = 3; // top frame, header, divider
 
     private List<int> Fg => display.MainForeground;
     private List<int> Bright => ColorHelper.Pale(display.MainForeground, 0.75);
@@ -43,8 +43,8 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     {
         _items =
         [
-            new(L.T("ПРОДОЛЖИТЬ"), null), new(L.T("НОВАЯ ИГРА"), null), new(L.T("МОИ ИГРЫ"), null),
-            new(L.T("НАСТРОЙКИ"), null), new(L.T("ОБНОВЛЕНИЯ"), Choice.Updates), new(L.T("ВЫХОД"), null),
+            new(L.T("CONTINUE"), null), new(L.T("NEW GAME"), null), new(L.T("MY GAMES"), null),
+            new(L.T("SETTINGS"), null), new(L.T("UPDATES"), Choice.Updates), new(L.T("EXIT"), null),
         ];
         _selected = 4;
         Layout();
@@ -55,12 +55,12 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     {
         _items =
         [
-            new(L.T("ПРОДОЛЖИТЬ"), hasSave ? Choice.Continue : null),
-            new(L.T("НОВАЯ ИГРА"), Choice.NewGame),
-            new(L.T("МОИ ИГРЫ"), Choice.Games),
-            new(L.T("НАСТРОЙКИ"), Choice.Settings),
+            new(L.T("CONTINUE"), hasSave ? Choice.Continue : null),
+            new(L.T("NEW GAME"), Choice.NewGame),
+            new(L.T("MY GAMES"), Choice.Games),
+            new(L.T("SETTINGS"), Choice.Settings),
             new(GameUpdates.MenuLabel, Choice.Updates),
-            new(L.T("ВЫХОД"), Choice.Exit),
+            new(L.T("EXIT"), Choice.Exit),
         ];
         _selected = hasSave ? 0 : 1;
 
@@ -83,7 +83,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
             {
                 int hovered = ItemAt(m.x, m.y);
                 ConsoleMouseReader.SetCursorShape(hovered >= 0 && _items[hovered].Action != null);
-                if (hovered >= 0 && hovered != _selected) Select(hovered, sound: false); // наведение — без щелчка
+                if (hovered >= 0 && hovered != _selected) Select(hovered, sound: false); // hover - no click
             }
             if (click is { } c)
             {
@@ -94,7 +94,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
                     ConsoleMouseReader.SetCursorShape(false);
                     return clickAction;
                 }
-                if (c.y is >= 0 and < HeaderRows) ConsoleMouseReader.StartWindowDrag(); // как на остальных экранах
+                if (c.y is >= 0 and < HeaderRows) ConsoleMouseReader.StartWindowDrag(); // as on other screens
             }
 
             ConsoleKey? key = ConsoleMouseReader.TryReadKey()?.Key;
@@ -111,7 +111,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         }
     }
 
-    // Следующий доступный пункт («ПРОДОЛЖИТЬ» без сохранения и «НАСТРОЙКИ» пока пропускаются).
+    // Next available option (“CONTINUE” without saving and “SETTINGS” is skipped for now).
     private void Step(int dir)
     {
         int i = _selected;
@@ -122,7 +122,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         }
     }
 
-    // sound: щелчок при выборе стрелками; при наведении мышью — без звука.
+    // sound: click when selecting with arrows; when hovering with the mouse - no sound.
     private void Select(int index, bool sound = true)
     {
         if (_items[index].Action == null) return;
@@ -142,23 +142,23 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         return -1;
     }
 
-    // ── Раскладка ────────────────────────────────────────────────────────────
+    // ── Layout ────────────────────────────── ──────────────────────────────
     private void Layout()
     {
         _width = display.InnerWidth(display.ViewCols(settings.Map));
-        _height = Math.Max(20, Term.WindowHeight - HeaderRows - 1); // нижняя рамка — в последней строке окна
+        _height = Math.Max(20, Term.WindowHeight - HeaderRows - 1); // bottom frame - in the last line of the window
         _x0 = DisplayConfig.LeftMargin + 1;
         _chars = new char[_height, _width];
         _colors = new List<int>?[_height, _width];
         for (int r = 0; r < _height; r++) for (int c = 0; c < _width; c++) _chars[r, c] = ' ';
 
-        // Центр: логотип, подпись, пункты, подсказка.
+        // Center: logo, label, points, tooltip.
         int blockHeight = Logo.Length + 2 + 3 + _items.Count * 2 + 1;
         int y = Math.Max(1, (_height - blockHeight) / 2);
         for (int i = 0; i < Logo.Length; i++)
             Center(y + i, Logo[i], ColorHelper.MixWith(Bright, Dim, i / (double)(Logo.Length - 1) * 0.6));
         y += Logo.Length + 1;
-        Center(y, L.T("ИИ-МАСТЕР ПОДЗЕМЕЛИЙ"), Dim);
+        Center(y, L.T("AI DUNGEON MASTER"), Dim);
         y += 3;
         _itemPos.Clear();
         foreach (var _ in _items)
@@ -167,9 +167,9 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
             y += 2;
         }
         RenderItems();
-        Center(Math.Min(_height - 2, y), L.T("[↑↓]ВЫБОР     [Enter]ПОДТВЕРДИТЬ"), Dim);
+        Center(Math.Min(_height - 2, y), L.T("[↑↓]SELECT     [Enter]CONFIRM"), Dim);
 
-        // По бокам — картинки приглушённым цветом игры: замок слева, дракон справа.
+        // On the sides are pictures in muted game colors: a castle on the left, a dragon on the right.
         int sideWidth = Math.Min(40, (_width - Logo[0].Length) / 2 - 6);
         if (sideWidth >= 16)
         {
@@ -189,8 +189,8 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
             Put(y0 + r, x0, art[r], color, skipBlankBraille: true);
     }
 
-    // Пункты по центру: «  НОВАЯ ИГРА  » / «→ НОВАЯ ИГРА ←» (одной длины — при выборе пункт не
-    // сдвигается, стрелки встают по бокам); недоступный — тёмным.
+    // Centered items: “NEW GAME” / “→ NEW GAME ←” (same length - when selected, the item does not move, the
+    // arrows appear on the sides); inaccessible - dark.
     private void RenderItems()
     {
         for (int i = 0; i < _items.Count; i++)
@@ -228,7 +228,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         }
     }
 
-    // ── Вывод ────────────────────────────────────────────────────────────────
+    // ── Output ──────────────────────────────── ────────────────────────────────
     private void DrawAll()
     {
         var border = new BorderDrawer(settings, display);

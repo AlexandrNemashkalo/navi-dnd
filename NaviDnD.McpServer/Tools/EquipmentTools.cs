@@ -5,29 +5,20 @@ using NaviDnD.Helpers;
 
 namespace NaviDnD.McpServer;
 
-// Справочник снаряжения DnD5e (NaviDnD.Helpers.EquipmentDatabase, GameData/DnD5e_equipment_BD.dtn +
-// DnD5e_magic_equipment_BD.dtn) — по аналогии с SpellTools.FindSpell: ИИ ищет по АНГЛИЙСКОМУ
-// названию при генерации инвентаря/лута, чтобы не путать похожие предметы (например Dart 1d4 vs
-// Javelin 1d6 — оба "метательное", легко перепутать по памяти). В отличие от заклинаний тут нет
-// отдельной карточки-справочника в игре — hero.inventory[].description ИИ пишет сам один раз,
-// поэтому тул возвращает не только каноничное русское имя, но и саму механику (урон/КД/свойства/
-// вес/цена), перевод в короткую русскую строку description — на ИИ, как обычно.
+// Equipment directory DnD5e (NaviDnD.Helpers.EquipmentDatabase, GameData/DnD5e_equipment_BD.dtn +
+// DnD5e_magic_equipment_BD.dtn) - similar to SpellTools.FindSpell:, the AI searches by ENGLISH name when
+// generating inventory/loot, so as not to confuse similar items (for example Dart 1d4 vs Javelin 1d6 - both
+// “throwing”, easy to confuse from memory). Unlike spells, there is no separate reference card in the game -
+// the AI writes hero.inventory[].description itself once, so the tool returns not only the canonical Russian
+// name, but also the mechanics themselves (damage/AC/properties/weight/price), translation into a short Russian
+// string description - to the AI, as usual.
 [McpServerToolType]
 public sealed class EquipmentTools(McpServerConfig config)
 {
     private static readonly object _logLock = new();
 
     [McpServerTool]
-    [Description("""
-        Ищет снаряжение D&D 5e (обычное И магическое) в справочнике по АНГЛИЙСКОМУ названию — НЕ
-        выдумывай механику похожего предмета по памяти, сначала найди точный здесь. query =
-        английское название или его часть ("javelin", "flame tongue").
-        Возвращает по одной строке на совпадение (по убыванию релевантности): имя на языке игры (lang) —
-        бери БУКВАЛЬНО как inventory[].name — и механика (урон/тип, свойства, КД, вес, цена, для
-        магических — редкость/настройка/эффект). Перепиши механику в короткую строку description
-        на языке игры сам, как и остальной текст. Пустой результат — предмета нет в справочнике:
-        тогда придумай сам, ничего не ищи повторно.
-        """)]
+    [Description("Find ordinary or magical D&D 5e equipment by ENGLISH name. For a catalog lookup, use the exact item rather than inventing similar mechanics from memory. query is an English name or fragment (javelin, flame tongue). Returns one match per line in relevance order: game-language name (copy exactly into inventory[].name) and mechanics (damage/type, properties, AC, weight, price; magic items also rarity, attunement, effect). Summarize those mechanics in a short description in the game language. Empty result means no catalog entry; create the item yourself without repeating the search.")]
     public string FindItem(string query)
     {
         Log($"find_item → \"{query}\"");
@@ -55,11 +46,11 @@ public sealed class EquipmentTools(McpServerConfig config)
         if (i.DamageVal.Length > 0) parts.Add($"{i.DamageVal} {i.DamageType}".Trim());
         if (i.Props.Count > 0) parts.Add(string.Join(", ", i.Props));
         if (i.Ac.Length > 0) parts.Add($"AC {i.Ac}");
-        if (i.Weight.Length > 0) parts.Add($"вес {i.Weight}");
-        if (i.Cost.Length > 0) parts.Add($"цена {i.Cost}");
-        if (i.Rarity.Length > 0) parts.Add($"редкость: {i.Rarity}");
-        if (i.Category == "магическое")
-            parts.Add(i.Attunement.Length > 0 ? $"настройка: {i.Attunement}" : "настройка: не требуется");
+        if (i.Weight.Length > 0) parts.Add($"weight {i.Weight}");
+        if (i.Cost.Length > 0) parts.Add($"price {i.Cost}");
+        if (i.Rarity.Length > 0) parts.Add($"rarity: {i.Rarity}");
+        if (i.Category == "magical")
+            parts.Add(i.Attunement.Length > 0 ? $"attunement: {i.Attunement}" : "attunement: not required");
         if (i.Text.Length > 0) parts.Add(i.Text);
 
         string type = i.TypeAdditions.Length > 0 ? $"{i.Type} {i.TypeAdditions}" : i.Type;

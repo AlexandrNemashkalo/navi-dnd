@@ -90,9 +90,10 @@ internal static class UnixTools
         catch (Exception e) when (e is System.ComponentModel.Win32Exception or IOException or InvalidOperationException) { return null; }
     }
 
-    // macOS: скачанный архив помечен карантином, и macOS проверяет каждый файл, который игра загрузит или запустит
-    // (библиотеки картинок, Python озвучки, MCP-сервер), — а разрешение игрок дал только самой игре. Снимаем пометку
-    // со всей папки игры до первой такой загрузки; признак — пометка на библиотеке SkiaSharp (probe).
+    // macOS: the downloaded archive is marked with quarantine, and macOS checks every file that the game
+    // downloads or launches (picture libraries, Python voiceovers, MCP- server) - and the player gave
+    // permission only to the game itself. Uncheck the entire game folder before the first such download; sign -
+    // mark on the library SkiaSharp (probe).
     internal static void ClearQuarantine(string folder, string? probe = null)
     {
         probe ??= Path.Combine(folder, "libSkiaSharp.dylib");

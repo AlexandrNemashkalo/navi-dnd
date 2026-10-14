@@ -5,30 +5,30 @@ internal static class ScreenRegistry
     private static readonly (Screen screen, string key)[] GameTabs =
         [(Screen.Map, "F1"), (Screen.World, "F2"), (Screen.Journal, "F3"), (Screen.Character, "F4"), (Screen.LevelUp, "F4"), (Screen.Abilities, "F5")];
 
-    // Заголовок игрового экрана: активная вкладка "  → ИМЯ ←", остальные "[Fn]ИМЯ  " — одинаковой длины,
-    // поэтому названия не сдвигаются при переключении (MouseUiHelper.ComputeTitleTabs). Новое в журнале —
-    // «ЖУРНАЛ•» (точка занимает место пробела, длина та же). Нет тактической карты (герой в пути, сцена
-    // текстом) — «{F1}КАРТА»: рисуется серой и не нажимается (MouseUiHelper.WriteColoredTitle/ComputeTitleTabs).
+    // Game screen title: active tab " → NAME ←", the rest "[Fn]NAME " - the same length, so the names do not
+    // shift when switching (MouseUiHelper.ComputeTitleTabs). New in the journal - “JOURNAL•” (the dot takes the
+    // place of the space, the length is the same). There is no tactical map (hero on the way, scene in text) -
+    // "{F1}MAP": drawn in gray and not clickable (MouseUiHelper.WriteColoredTitle/ComputeTitleTabs).
     internal static string GameTitleText(string activeKey, bool journalUnread, bool mapDisabled = false)
     {
         (string key, string name)[] tabs =
-            [("F1", L.T("КАРТА")), ("F2", L.T("МИР")), ("F3", L.T("ЖУРНАЛ")), ("F4", L.T("ПЕРСОНАЖ")), ("F5", L.T("СПУТНИК"))];
+            [("F1", L.T("MAP")), ("F2", L.T("WORLD")), ("F3", L.T("JOURNAL")), ("F4", L.T("CHARACTER")), ("F5", L.T("COMPANION"))];
         return string.Concat(tabs.Select(t => "   " + (t.key == activeKey ? $"  → {t.name} ←"
                    : t.key == "F1" && mapDisabled ? $"{{{t.key}}}{t.name}  "
                    : t.key == "F3" && journalUnread ? $"[{t.key}]{t.name}• " : $"[{t.key}]{t.name}  ")))
-               + "   " + L.T("[Esc]МЕНЮ") + "   ";
+               + "   " + L.T("[Esc]MENU") + "   ";
     }
 
-    // Заголовок новой игры: шаги — как вкладки игры («  → РЕДАКТОР ←», «[F1]МИР  »; ещё недоступный шаг —
-    // «{F4}ПРИКЛЮЧЕНИЕ», тёмный и не нажимается) через «›» — порядок этапов, справа — «[Esc]МЕНЮ».
+    // Heading of the new game: steps - like game tabs (“→ EDITOR ←”, “[F1]WORLD”; not yet accessible step -
+    // “{F4}ADVENTURE”, dark and not clickable) through “›” - the order of stages, on the right - “[Esc]MENU”.
     internal static string NewGameTitle(int step, Func<int, bool>? canGo = null)
     {
-        string[] steps = [L.T("МИР"), L.T("ГЕРОЙ"), L.T("РЕДАКТОР"), L.T("ПРИКЛЮЧЕНИЕ")];
-        return L.T(" НОВАЯ ИГРА") + string.Concat(steps.Select((s, i) => (i == 0 ? "   " : "  ›  ") + (i + 1 == step ? $"  → {s} ←"
-                   : canGo?.Invoke(i + 1) ?? i == 0 ? $"[F{i + 1}]{s}  " : $"{{F{i + 1}}}{s}  "))) + "   " + L.T("[Esc]МЕНЮ") + "   ";
+        string[] steps = [L.T("WORLD"), L.T("HERO"), L.T("EDITOR"), L.T("ADVENTURE")];
+        return L.T(" NEW GAME") + string.Concat(steps.Select((s, i) => (i == 0 ? "   " : "  ›  ") + (i + 1 == step ? $"  → {s} ←"
+                   : canGo?.Invoke(i + 1) ?? i == 0 ? $"[F{i + 1}]{s}  " : $"{{F{i + 1}}}{s}  "))) + "   " + L.T("[Esc]MENU") + "   ";
     }
 
-    // Заголовки шагов новой игры — по тому, какие шаги уже доступны.
+    // New game step titles based on which steps are already available.
     internal static void RefreshNewGameTitles(Dictionary<Screen, ScreenConfig> screens, NewGameSession ng)
     {
         foreach (var s in new[] { Screen.NewGame, Screen.NewGameHero, Screen.NewGameCharacter, Screen.NewGameAbilities, Screen.NewGameAdventure })
@@ -36,7 +36,7 @@ internal static class ScreenRegistry
         screens[Screen.NewGameExit].Title = NewGameTitle(NewGameSession.StepOf(ng.ReturnTo), ng.CanGo);
     }
 
-    // Обновить заголовки игровых экранов (метка нового в журнале, серая «Карта» без тактической карты).
+    // Update game screen titles (new label in journal, gray "Map" without tactical map).
     internal static void RefreshGameTitles(Dictionary<Screen, ScreenConfig> screens, bool journalUnread, bool mapDisabled = false)
     {
         foreach (var (screen, key) in GameTabs)
@@ -63,7 +63,7 @@ internal static class ScreenRegistry
             Title = title,
             Commands =
             {
-                // Карта (местность) — только когда она есть; иначе вкладка серая, F1 не открывает её.
+                // Map (terrain) - only when it is available; otherwise the tab is gray, F1 does not open it.
                 ["F1"] = () => { if (hasLocation()) state.CurrentScreen = Screen.Map; },
                 ["F2"] = () => state.CurrentScreen = Screen.World,
                 ["F3"] = () => state.CurrentScreen = Screen.Journal,
@@ -73,11 +73,11 @@ internal static class ScreenRegistry
             }
         };
 
-        // Заголовок игрового экрана: активная вкладка "  → ИМЯ ←", остальные "[Fn]ИМЯ  " — одинаковой
-        // длины, поэтому названия не сдвигаются при переключении (MouseUiHelper.ComputeTitleTabs).
+        // Game screen title: active tab " → NAME ←", the rest "[Fn]NAME " - the same length, so the names do
+        // not shift when switching (MouseUiHelper.ComputeTitleTabs).
         string GameTitle(string activeKey) => GameTitleText(activeKey, journalUnread: false);
 
-        // «Персонаж»: F10 (или кнопка на карточке) — окно «Новый уровень», когда опыта хватает и нет боя.
+        // “Character”: F10 (or a button on the card) – the “New Level” window, when there is enough experience and there is no battle.
         ScreenConfig CharacterScreen()
         {
             var cfg = GameScreen(GameTitle("F4"));
@@ -85,7 +85,7 @@ internal static class ScreenRegistry
             return cfg;
         }
 
-        // Шаг новой игры (F1–F4), если он уже доступен; Esc — выход в меню с предупреждением.
+        // New game step (F1–F4), if it is already available; Esc — exit to the menu with a warning.
         void GoStep(int step)
         {
             if (state.NewGame is { } ng && ng.CanGo(step)) state.CurrentScreen = NewGameSession.StepScreen(step);
@@ -104,7 +104,7 @@ internal static class ScreenRegistry
             {
                 ["F1"] = () => GoStep(1),
                 ["F2"] = () => GoStep(2),
-                ["F4"] = () => GoStep(4),   // шаг «Приключение», потом старт
+                ["F4"] = () => GoStep(4),   // step “Adventure”, then start
                 ["Esc"] = ExitNewGame,
             }
         };
@@ -116,11 +116,11 @@ internal static class ScreenRegistry
             [Screen.Journal]  = GameScreen(GameTitle("F3")),
             [Screen.Character]= CharacterScreen(),
             [Screen.LevelUp]  = GameScreen(GameTitle("F4")),
-            [Screen.Abilities]= GameScreen(GameTitle("F5")), // вкладка «Спутник» (пока заглушка)
+            [Screen.Abilities]= GameScreen(GameTitle("F5")), // “Satellite” tab (stub for now)
 
             [Screen.Menu] = new ScreenConfig
             {
-                Title = L.T(" МЕНЮ   [F1]ПРОДОЛЖИТЬ     [F2]НОВАЯ ИГРА     [Esc]ВЫЙТИ"),
+                Title = L.T(" MENU   [F1]CONTINUE     [F2]NEW GAME     [Esc]QUIT"),
                 Commands =
                 {
                     ["F1"] = () =>
@@ -136,14 +136,15 @@ internal static class ScreenRegistry
                 }
             },
 
-            // Шаг «Приключение» мастера новой игры (после редактора героя): пожелания и место старта.
-            // Шаги новой игры: свой экран у каждого, переходы — сами экраны (Program) и команды редактора.
+            // Step “Adventure” of the new game GM (after the hero editor): wishes and starting place. Steps of
+            // the new game: each has its own screen, transitions are the screens themselves (Program) and
+            // editor commands.
             [Screen.NewGameAdventure] = new ScreenConfig { Title = NewGameTitle(4), Commands = { ["Start"] = StartGame } },
             [Screen.NewGame] = new ScreenConfig { Title = NewGameTitle(1) },
             [Screen.NewGameHero] = new ScreenConfig { Title = NewGameTitle(2) },
             [Screen.NewGameExit] = new ScreenConfig { Title = NewGameTitle(1) },
 
-            // Редактор — шаг «РЕДАКТОР» новой игры: в заголовке только шаги (без вкладок персонаж/спутник).
+            // Editor - "EDIT" step of a new game: only steps in the header (no character/companion tabs).
             [Screen.NewGameCharacter] = EditorScreen(NewGameTitle(3)),
             [Screen.NewGameAbilities] = EditorScreen(NewGameTitle(3)),
         };

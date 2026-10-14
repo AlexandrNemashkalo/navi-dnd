@@ -3,30 +3,31 @@ using System.Runtime.Versioning;
 
 namespace NaviDnD.Helpers;
 
-// NaviDnD.app на macOS. Finder запускает приложение без терминала — тогда игра заменяет себя своим терминалом
-// (Alacritty из Contents/MacOS, настройки — Contents/Resources/alacritty.toml): значок NaviDnD в Dock, окно без кнопок
-// macOS ровно под сетку игры или весь экран, размер шрифта — из настроек игры. В нём игра запускается снова — с TerminalFlag.
-// Окно терминала после запуска не изменить — смена режима и шрифта в настройках перезапускает его (Relaunch).
+// NaviDnD.app on macOS. Finder launches the application without a terminal - then the game replaces itself with
+// its terminal (Alacritty from Contents/MacOS, settings - Contents/Resources/alacritty.toml): icon NaviDnD in
+// Dock, window without buttons macOS exactly under the game grid or the entire screen, font size - from the
+// game settings. In it starts the game again - with TerminalFlag. The terminal window cannot be changed after
+// launch - changing the mode and font in the settings restarts it (Relaunch).
 [SupportedOSPlatform("macos")]
 internal static class MacApp
 {
     internal const string TerminalFlag = "--navidnd-terminal";
     private const string SettingsFlag = "--navidnd-settings=";
-    // release-version.txt от корня приложения: патчи обновляют NaviDnD.app целиком, вместе с подписью.
+    // release-version.txt from application root: patches update NaviDnD.app in its entirety, along with the label.
     internal const string VersionFile = "Contents/Resources/" + Installer.Patch.DefaultVersionFile;
     private const int Columns = 150, Rows = 63;
 
-    // Шрифт — Menlo (есть на любом Mac): с ним сетка игры ровная. Ширина клетки и высота строки — в долях кегля.
+    // Font - Menlo (available on any Mac): with it the game grid is even. The width of the cell and the height of the line are in fractions of a point.
     private const string Font = "Menlo";
     private const double CellWidth = 0.602, CellHeight = 1.164;
     private const string TopFlag = "--navidnd-top=";
 
     internal static string BundlePath => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", ".."));
 
-    // Игра идёт в своём терминале: кнопки окна рисует она сама (свернуть — скрыть приложение, закрыть — выход).
+    // The game runs in its own terminal: it draws the window buttons itself (minimize - hide the application, close - exit).
     internal static bool InOwnTerminal { get; private set; }
 
-    // Пункт настроек, на который вернуться после перезапуска окна; null — обычный запуск. Берётся один раз.
+    // Settings item to return to after restarting the window; null - normal launch. Take it once.
     private static int? SettingsFocus { get; set; }
 
     internal static int? TakeSettingsFocus()
@@ -36,7 +37,7 @@ internal static class MacApp
         return focus;
     }
 
-    // true — этот процесс своё сделал: терминал запущен вместо него или приложение открыто заново с настоящего места.
+    // true - this process has done its job: the terminal is launched instead of it or the application is opened again from the real place.
     internal static bool Launch(string[] args)
     {
         if (!AppConfig.InMacApp) return false;
@@ -49,10 +50,11 @@ internal static class MacApp
                 && int.TryParse(top[TopFlag.Length..], out int rows)) UnixTerminal.ReservedTopRows = rows;
             return false;
         }
-        if (!Console.IsInputRedirected) return false;   // запущено из терминала вручную — играем в нём
+        if (!Console.IsInputRedirected) return false;   // launched from the terminal manually - play in it
         string bundle = BundlePath;
-        // Скачанное приложение, открытое прямо из «Загрузок», macOS запускает из временной копии только для чтения
-        // (App Translocation) — обновления туда не записать. Снимаем карантин с настоящего приложения и открываем его.
+        // macOS launches the downloaded application, opened directly from “Downloads”, from a temporary
+        // read-only copy (App Translocation) - updates cannot be written there. We remove quarantine from the
+        // real application and open it.
         if (bundle.Contains("/AppTranslocation/", StringComparison.Ordinal) && OriginalPath(bundle) is { } original && original != bundle)
         {
             UnixTools.Run("/usr/bin/xattr", ["-dr", "com.apple.quarantine", original], TimeSpan.FromMinutes(1));
@@ -64,10 +66,10 @@ internal static class MacApp
         config.LoadUserSettings();
         string?[] argv = [.. TerminalArguments(config, args), null];
         execv(argv[0]!, argv);
-        return false;   // терминал не запустился — играем без него (окна не будет видно, но и падать незачем)
+        return false;   // the terminal did not start - we play without it (the window will not be visible, but there is no need to fall)
     }
 
-    // Новое окно с текущими настройками и возврат в настройки на тот же пункт; это окно закрывается вместе с игрой.
+    // New window with current settings and return to settings to the same item; this window closes with the game.
     internal static void Relaunch(AppConfig config, int settingsItem)
     {
         var arguments = TerminalArguments(config, [SettingsFlag + settingsItem]);
@@ -82,15 +84,15 @@ internal static class MacApp
         Environment.Exit(0);
     }
 
-    // Размеры шрифта для настроек: авто и те, при которых игра помещается на экран в выбранном режиме.
+    // Font sizes for settings: auto and those at which the game fits on the screen in the selected mode.
     internal static int[] FontSizes(AppConfig config)
     {
         double fit = Fit(config.Fullscreen, Screen());
         return [0, .. new[] { 10, 11, 12, 13, 14, 15, 16, 18, 20, 22 }.Where(size => size <= fit)];
     }
 
-    // Самый крупный кегль, при котором 150 × 63 клеток помещаются: весь экран — кроме выреза сверху (MacBook с
-    // «чёлкой»), окно — под полосой меню и с отступом.
+    // The largest typeface, in which 150 × 63 cells are placed: the entire screen - except for the cutout at
+    // the top (MacBook with a “bang”), the window - under the menu bar and with an indent.
     private static double Fit(bool fullscreen, (double Width, double Height, double Scale, double Notch) screen)
     {
         double width = screen.Width - (fullscreen ? 0 : 16), height = screen.Height - (fullscreen ? screen.Notch : 48);
@@ -99,7 +101,7 @@ internal static class MacApp
         return 8;
     }
 
-    // Клетка Alacritty — в целых физических пикселях.
+    // Cell Alacritty - in whole physical pixels.
     private static double Cell(double size, double factor, double scale) => Math.Ceiling(size * factor * scale) / scale;
 
     private static List<string> TerminalArguments(AppConfig config, IEnumerable<string> gameArguments)
@@ -119,14 +121,15 @@ internal static class MacApp
         var game = new List<string> { Path.Combine(AppContext.BaseDirectory, "NaviDnD"), TerminalFlag };
         if (config.Fullscreen)
         {
-            // Терминал — на весь экран, фон вокруг игры — её фон (как «весь экран» на Windows). Игра сама встаёт по
-            // центру сетки (UnixTerminal), строки под вырезом пропускает; остаток пикселей Alacritty делит поровну.
+            // The terminal is full screen, the background around the game is its background (like “full screen”
+            // on Windows). The game itself stands in the center of the grid (UnixTerminal), skips lines under
+            // the cutout; Alacritty divides the rest of the pixels equally.
             arguments.AddRange(["-o", "window.startup_mode=\"SimpleFullscreen\"", "-o", "window.dynamic_padding=true"]);
             if (screen.Notch > 0) game.Add(TopFlag + (int)Math.Ceiling(screen.Notch / cellHeight));
         }
         else
         {
-            // Окно — по центру экрана под полосой меню; позиция для Alacritty — в физических пикселях.
+            // Window - in the center of the screen below the menu bar; position for Alacritty - in physical pixels.
             double windowWidth = Columns * cellWidth, windowHeight = Rows * cellHeight;
             int x = (int)Math.Max(0, (screen.Width - windowWidth) / 2 * screen.Scale);
             int y = (int)Math.Max(0, (40 + (screen.Height - 40 - windowHeight) / 2) * screen.Scale);
@@ -138,7 +141,7 @@ internal static class MacApp
         return arguments;
     }
 
-    // Размер главного экрана в точках, их масштаб (Retina — 2) и высота выреза сверху (безопасная зона экрана).
+    // The size of the main screen in pixels, their scale (Retina - 2) and the height of the cutout at the top (safe area of the screen).
     private static (double Width, double Height, double Scale, double Notch) Screen()
     {
         double width = 1440, height = 900, scale = 2, notch = 0;
@@ -163,7 +166,7 @@ internal static class MacApp
         return (width, height, scale, notch);
     }
 
-    // Путь настоящего приложения для временной копии (Security.framework).
+    // Real application path for temporary copy (Security.framework).
     private static string? OriginalPath(string translocated)
     {
         try
@@ -188,10 +191,10 @@ internal static class MacApp
         catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException) { return null; }
     }
 
-    // Терминал игры — родительский процесс; скрыть или проверить его можно без особых разрешений (NSRunningApplication).
+    // Game terminal is the parent process; you can hide or check it without special permissions (NSRunningApplication).
     internal static void Hide() => SendToTerminal("hide");
 
-    internal static bool IsHidden() => (SendToTerminal("isHidden") & 0xFF) != 0;   // BOOL — младший байт
+    internal static bool IsHidden() => (SendToTerminal("isHidden") & 0xFF) != 0;   // BOOL - low byte
 
     private static nint SendToTerminal(string selector)
     {

@@ -5,20 +5,22 @@ using NaviDnD.MapGen.Generators;
 
 namespace NaviDnD;
 
-// Мир конкретной игры: файл мира (WorldLibrary) — геометрия (рельеф, реки, королевства, тракты, заготовки мест)
-// и хроника (лор и места мастера, общие для всех игр мира); игра (GameWorldLink) — что знает её герой и где он.
-// Карта и ИИ видят наложение: столицы — всегда, остальные места хроники — герою только известные, мастеру — все.
+// World of a specific game: world file (WorldLibrary) - geometry (terrain, rivers, kingdoms, roads, place
+// settings) and chronicle (lore and places of the GM, common to all games in the world); game (GameWorldLink) -
+// what its hero knows and where he is. The map and AI see the overlay: capitals - always, other places in the
+// chronicle - only known to the hero, everything to the GM.
 public static class GameWorld
 {
     private static (GameWorldLink link, int version, bool hidden, WorldMap geo, WorldMap result)? _cacheHidden, _cacheVisible;
     private static readonly GameWorldLink _noGame = new();
 
-    // Есть ли тактическая карта (локация): нет — герой в пути или сцена без карты, вкладка «Карта» показывает мир.
+    // Is there a tactical map (location): no - the hero is on the road or a scene without a map, the “Map” tab shows the world.
     public static bool HasLocation(WorldState ws) =>
         ws.Map.Chunks is { Count: > 0 } || ws.Map.Rooms is { Count: > 0 } || ws.Map.Area is { Count: > 0 } || ws.Map.Doors is { Count: > 0 };
 
-    // Игра, начатая до карты мира (нет WorldState.World): привязать к активному миру, герой — в столице первого
-    // королевства (известна всем). Без этого у старой игры нет героя на карте мира и пути.
+    // A game started before the world map (there is no WorldState.World): attached to the active world, the
+    // hero is in the capital of the first kingdom (known to everyone). Without this, the old game does not have
+    // a hero on the world map and path.
     public static void EnsureLink(WorldState ws)
     {
         if (ws.World != null || ws.Hero == null) return;
@@ -38,16 +40,16 @@ public static class GameWorld
 
     public static WorldMap? Geo(WorldState ws) => ws.World is { } link ? WorldLibrary.Get(link.Id) : null;
 
-    // Мир для карты героя (только известные места); у старых сохранений без мира игры — активный мир, одни столицы.
+    // World for the hero map (known places only); Old saves without a game world have an active world, only capitals.
     public static WorldMap ForDisplay(WorldState ws) =>
         ws.World is { } link && WorldLibrary.Get(link.Id) is { } geo ? Compose(geo, link, includeHidden: false)
             : Compose(WorldLibrary.Current, _noGame, includeHidden: false);
 
-    // Мир для мастера (все места хроники; неизвестные герою помечены Hidden; тайны dmNotes).
+    // The world for the GM (all places in the chronicle; those unknown to the hero are marked Hidden; secrets dmNotes).
     public static WorldMap? ForMaster(WorldState ws) =>
         ws.World is { } link && WorldLibrary.Get(link.Id) is { } geo ? Compose(geo, link, includeHidden: true) : null;
 
-    // Клетка героя на карте мира: своя позиция или его место; нет — null.
+    // Hero’s cell on the world map: its own position or its place; no – null.
     public static (int x, int y)? HeroTile(WorldState ws)
     {
         if (ws.World is not { } link) return null;
@@ -83,7 +85,7 @@ public static class GameWorld
             int cap = -1;
             if (gk.Capital >= 0 && gk.Capital < geo.Places.Count)
             {
-                // Столица — известна всем: из хроники (имя от мастера) или имя генератора.
+                // Capital - known to everyone: from the chronicle (name from the GM) or the name of the generator.
                 var slot = geo.Places[gk.Capital];
                 cap = places.FindIndex(p => p.X == slot.X && p.Y == slot.Y);
                 if (cap < 0)
@@ -119,10 +121,12 @@ public static class GameWorld
         return result;
     }
 
-    // Патч «world» от мастера: name/description/dmNotes мира, kingdoms[] (по id; capital — имя столицы), places[]
-    // (по имени: новое — в хронику, есть — дополнить; hidden:true — герой не знает, false/новое — знает; deleted —
-    // убрать из хроники; без x/y — клетку подберёт код рядом с героем), place — где сейчас герой. Хроника — в файл
-    // мира (её видят и другие игры этого мира), знания героя — в игре. Ставшим известными местам — тропа к дороге.
+    // Patch “world” from the GM: name/description/dmNotes of the world, kingdoms[] (by id; capital - the name
+    // of the capital), places[] (by name: new - to the chronicle, there is - to add; hidden:true - the hero
+    // does not know, false/new - knows; deleted - remove from chronicles; without x/y - the code will select
+    // the cell next to the hero), place - where the hero is now. The chronicle is in the world file (other
+    // games of this world also see it), the hero’s knowledge is in the game. To the places that have become
+    // famous there is a path to the road.
     public static void Apply(WorldState ws, JsonElement patch)
     {
         if (patch.ValueKind != JsonValueKind.Object) return;
@@ -163,7 +167,7 @@ public static class GameWorld
                 if (Str(pe, "description") is { } d) gp!.Description = d;
                 if (Str(pe, "dmNotes") is { } dm) gp!.DmNotes = dm;
                 chronChanged = true;
-                // Знает ли герой: hidden:true — нет; hidden:false или новое место без hidden — да.
+                // Does the hero know: hidden:true - no; hidden:false or a new place without hidden - yes.
                 bool? hidden = Get(pe, "hidden") is { ValueKind: JsonValueKind.True or JsonValueKind.False } h ? h.GetBoolean() : null;
                 if (hidden == true) link.Known.RemoveAll(n => n.Equals(name, StringComparison.OrdinalIgnoreCase));
                 else if ((hidden == false || isNew) && !link.Knows(gp!.Name)) Reveal(geo, link, gp!);
@@ -184,8 +188,9 @@ public static class GameWorld
         if (chronChanged) WorldLibrary.Save(geo);
     }
 
-    // Концепция мира в хронике: name/description/dmNotes мира, kingdoms[] (по id/K-номеру; capital — имя столицы).
-    // Из ответа мастера (патч world) и из CreateWorld (анкета новой игры, шаг «Мир»). true — хроника изменилась.
+    // The concept of the world in the chronicle: name/description/dmNotes of the world, kingdoms[] (by id/K-
+    // number; capital - the name of the capital). From the GM’s answer (patch world) and from CreateWorld (new
+    // game questionnaire, step “World”). true - the chronicle has changed.
     public static bool ApplyChronicle(WorldMap geo, JsonElement patch)
     {
         if (patch.ValueKind != JsonValueKind.Object) return false;
@@ -220,7 +225,7 @@ public static class GameWorld
         return chronChanged;
     }
 
-    // Герой узнал о месте: в известные, тропа к ближайшей дороге (одна на место — общая для всех игр мира).
+    // The hero learned about the place: in the famous, path to the nearest road (one per place - common to all games in the world).
     public static void Reveal(WorldMap geo, GameWorldLink link, GamePlace gp)
     {
         if (!link.Knows(gp.Name)) link.Known.Add(gp.Name);
@@ -233,7 +238,7 @@ public static class GameWorld
         }
     }
 
-    // Клетка для места без координат: рядом (≈2 дня) с героем.
+    // Cell for a place without coordinates: next to (≈2 days) the hero.
     private static (int x, int y, int slot)? PlaceNear(WorldState ws, WorldMap geo, GameWorldLink link, string type)
     {
         var all = Compose(geo, link, includeHidden: true);
@@ -243,10 +248,11 @@ public static class GameWorld
             all.Places.Select(p => (p.X, p.Y)).ToList(), geo.Chronicle.Places.Select(p => p.Slot).Where(s => s >= 0).ToHashSet());
     }
 
-    // ── Тактическая карта по карте мира ──
+    // ── Tactical map on the world map ──
 
-    // Клетка мира → местность локации: тема открытых блоков по биому, река (если течёт по клетке — ось по
-    // соседним клеткам реки, ширина по величине), стороны с морем/озером (север мира — верх локации).
+    // World cell → location terrain: theme of open blocks according to the biome, river (if it flows through
+    // the cell - the axis is along the neighboring river cells, width in size), sides with the sea/lake (north
+    // of the world - top of the location).
     public static LocationGrower.WorldSite SiteAt(WorldMap geo, int x, int y)
     {
         string theme = geo.BiomeAt(x, y) switch
@@ -276,7 +282,7 @@ public static class GameWorld
         return new LocationGrower.WorldSite(theme, riverH, width, water);
     }
 
-    // ── Локации мест: «всё как было» при возвращении (общие для игр мира) ──
+    // ── Locations of places: “everything is as it was” when returning (common for games in the world) ──
 
     private static readonly JsonSerializerOptions _mapJson = new()
     {
@@ -285,12 +291,13 @@ public static class GameWorld
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
     };
 
-    // Герой покидает локацию (уходит на карту мира): локация сохраняется за местом, где он (если он в месте
-    // хроники), тактическая карта очищается (на месте — её объект держат отрисовка и движение).
+    // The hero leaves the location (goes to the world map): the location is saved for the place where he is (if
+    // he is in the chronicle location), the tactical map is cleared (in place - its object is kept by drawing
+    // and movement).
     public static void LeaveLocation(WorldState ws)
     {
         if (!HasLocation(ws)) return;
-        // Столица из генератора (ещё не в хронике) — внести, чтобы локации было за кем сохраниться.
+        // Capital from the generator (not yet in the chronicle) - add it so that the location has someone to save.
         if (Geo(ws) is { } g0 && ws.World?.Place is { } h0 && !g0.Chronicle.Places.Any(p => p.Name.Equals(h0, StringComparison.OrdinalIgnoreCase)))
         {
             int slot = g0.Kingdoms.Select(k => k.Capital).FirstOrDefault(c => c >= 0 && c < g0.Places.Count && g0.Places[c].Name.Equals(h0, StringComparison.OrdinalIgnoreCase), -1);
@@ -308,10 +315,10 @@ public static class GameWorld
                 File.WriteAllText(Path.Combine(dir, gp.Location), JsonSerializer.Serialize(ws.Map, _mapJson), Encoding.UTF8);
                 WorldLibrary.Save(geo);
             }
-            catch { /* не сохранилась — при возвращении мастер построит заново */ }
+            catch { /*was not saved - upon return the GM will build it again*/ }
         }
         ClearMap(ws.Map);
-        if (ws.Hero != null) ws.Hero.Position = [1, 1];   // заглушка: тактической карты нет, отрисовка ждёт позицию
+        if (ws.Hero != null) ws.Hero.Position = [1, 1];   // stub: there is no tactical map, rendering is waiting for position
         ws.Combat = null;
     }
 
@@ -322,7 +329,7 @@ public static class GameWorld
         m.Cols = 20; m.Rows = 15;
     }
 
-    // Сохранённая локация места — JSON карты (патч «map» для Storage), если есть.
+    // Saved location location - JSON maps (patch "map" for Storage), if available.
     public static string? SavedLocationJson(WorldMap geo, string placeName)
     {
         var gp = geo.Chronicle.Places.FirstOrDefault(p => p.Name.Equals(placeName, StringComparison.OrdinalIgnoreCase));

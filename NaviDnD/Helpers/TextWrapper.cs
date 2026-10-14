@@ -5,15 +5,16 @@ namespace NaviDnD.Helpers;
 public static class TextWrapper
 {
     /// <summary>
-    /// Разбивает текст на строки, сохраняя целостность слов, с возможностью задать разную ширину для первой строки.
+    ///Breaks text into lines while maintaining word integrity, with the ability to set different widths for the first line.
     /// </summary>
     public static List<string> WrapText(string text, int maxWidth, int? firstLineWidth = null)
     {
         var lines = new List<string>();
         if (string.IsNullOrEmpty(text) || maxWidth <= 0) return lines;
 
-        // Перевод строки внутри текста (записка, описание предмета от ИИ) — новый абзац, а не символ в «слове»:
-        // иначе он уходил в консоль как настоящий перенос и ломал вёрстку панели.
+        // Newline of a line inside the text (note, description of an item from the AI) is a new paragraph, not
+        // a character in the “word”: otherwise it went to the console as a real translation and broke the
+        // layout of the panel.
         text = text.Replace("\r", "").Replace('\t', ' ');
         if (text.Contains('\n'))
         {

@@ -1,6 +1,6 @@
 namespace NaviDnD.Tests;
 
-// Подсветка текста мастера: урон, лечение, исход броска и имена — в русской и английской игре.
+// GM text highlighting: damage, healing, roll outcome and names - in Russian and English games.
 public class DialogHighlighterTests
 {
     private static readonly List<int> Mech = [1, 1, 1], Bad = [2, 2, 2], Good = [3, 3, 3], Goblin = [4, 4, 4];

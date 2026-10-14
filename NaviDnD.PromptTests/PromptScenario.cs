@@ -4,24 +4,21 @@ using NaviDnD.Clients;
 
 namespace NaviDnD.PromptTests;
 
-// Вызывает РЕАЛЬНОГО Claude (ClaudeCliAiProvider) с настоящим системным промптом игры
-// (NaviDnD/Prompts/{ruleSet}/{action}/systemPrompt.md) на настоящем сценарии WorldState — это и
-// есть "тест системного промпта": проверяем, что для данного сценария промпт производит ответ,
-// который движок реально может применить (Storage.ApplyUpdateWorldState не бросает исключение) И
-// содержит ожидаемые для сценария изменения (см. явные ассерты в конкретных тестах). По флагу
-// NAVIDND_RECORD_PROMPTS=1 записывает "живой" ответ как канонический мок для NaviDnD.UiTests — так
-// UI-тесты остаются быстрыми и детерминированными, но мок для них происходит от реального прогона
-// промпта, а не выдуман руками.
-//
-// ВАЖНО (см. NaviDnD.PromptTests как отдельный проект — НЕ входит в общий прогон решения):
-// - Каждый вызов — реальный запрос к Claude: платно и медленно (секунды на вызов).
-// - Ответ недетерминирован — проверяй СТРУКТУРУ и ключевые ИНВАРИАНТЫ (например "HP уменьшилось",
-//   "объект удалён"), а не точный текст нарратива.
-// - AppConfig.ProjectRoot (использует Storage.SavePath/DraftSavePath) резолвится ОТНОСИТЕЛЬНО ТЕКУЩЕЙ
-//   сборки — для этого проекта это NaviDnD.PromptTests/Storage/, а не боевой NaviDnD/Storage/,
-//   так что реальное сохранение пользователя эти тесты никогда не трогают.
-// - Перед коммитом записанный response.json стоит прочитать глазами, а не доверять вслепую —
-//   недетерминированный вывод модели может один раз получиться некорректным по смыслу (не по JSON).
+// Calls the REAL Claude (ClaudeCliAiProvider) with a real game system prompt
+// (NaviDnD/Prompts/{ruleSet}/{action}/systemPrompt.md) on a real scenario WorldState - this is the “system
+// prompt test”: we check that for a given scenario the prompt produces a response that the engine can actually
+// apply (Storage.ApplyUpdateWorldState does not throw an exception) AND contains the changes expected for the
+// scenario (see explicit assertions in specific tests). By flag, NAVIDND_RECORD_PROMPTS=1 writes a “live”
+// response as a canonical mock for NaviDnD.UiTests - this way UI tests remain fast and deterministic, but the
+// mock for them comes from a real run of the prompt, and is not made up by hand. IMPORTANT (see
+// NaviDnD.PromptTests as a separate project - NOT included in the general run of the solution): - Each call is
+// a real request to. Claude: is paid and slow (seconds per call). - The answer is non-deterministic - check the
+// STRUCTURE and key INVARIANTS (for example, "HP decreased", "object deleted"), and not the exact text of the
+// narrative - AppConfig.ProjectRoot (uses Storage.SavePath/DraftSavePath) resolves RELATIVE TO THE CURRENT
+// assembly - for this project it NaviDnD.PromptTests/Storage/, and not the combat NaviDnD/Storage/, so these
+// tests never touch the actual saving of the user - Before committing, the recorded response.json should be
+// read with your eyes, and not trusted blindly - the non-deterministic output of the model may once turn out to
+// be incorrect in meaning (not according to JSON).).
 public static class PromptScenario
 {
     private static readonly string RealNaviDndDir = Path.GetFullPath(
@@ -30,8 +27,8 @@ public static class PromptScenario
     private static readonly string UiTestsFixturesDir = Path.GetFullPath(
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "NaviDnD.UiTests", "Fixtures"));
 
-    // Путь к исходникам этого проекта (а не bin/Debug/...) — не требует настройки copy-to-output
-    // для Fixtures/, тот же приём, что UiTestsFixturesDir использует для соседнего проекта.
+    // The path to the sources of this project (not bin/Debug/...)) does not require setting copy-to-output for
+    // Fixtures/, the same trick that UiTestsFixturesDir uses for the neighboring project.
     private static readonly string LocalFixturesDir = Path.GetFullPath(
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Fixtures"));
 
@@ -44,8 +41,8 @@ public static class PromptScenario
     public static string ReadSystemPrompt(string ruleSet, string action) =>
         File.ReadAllText(Path.Combine(RealNaviDndDir, "Prompts", ruleSet, action, "systemPrompt.md"));
 
-    // Загружает готовый сценарий из фикстуры NaviDnD.UiTests (те же файлы, что используют E2E UI-
-    // тесты) — так сценарий для проверки промпта и сценарий для UI-теста гарантированно совпадают.
+    // Loads a ready-made script from the NaviDnD.UiTests fixture (the same files that the E2E UI tests use) -
+    // so the script for checking the prompt and the script for the UI- test are guaranteed to match.
     public static Storage LoadUiTestFixture(string fixtureFileName)
     {
         var storage = new Storage();
@@ -53,8 +50,8 @@ public static class PromptScenario
         return storage;
     }
 
-    // Сценарии, специфичные для проверки промпта (не нужны NaviDnD.UiTests) — например, несколько
-    // одинаковых врагов для проверки неоднозначности цели (ask_player).
+    // Scenarios specific to checking the prompt (NaviDnD.UiTests) is not needed - for example, several
+    // identical enemies to check for target ambiguity (ask_player).
     public static Storage LoadLocalFixture(string fixtureFileName)
     {
         var storage = new Storage();
@@ -62,12 +59,13 @@ public static class PromptScenario
         return storage;
     }
 
-    // draftActions — те же, что ClaudeCliAiProvider._draftActions (CreateNewGame/FixHeroForNewGame/
-    // StartNewGame читают/пишут через MCP черновик, не боевой файл).
+    // draftActions - the same as ClaudeCliAiProvider._draftActions (CreateNewGame/FixHeroForNewGame/
+    // StartNewGame read/write via MCP draft, not a combat file).
     private static readonly HashSet<string> DraftActions = ["CreateNewGame", "FixHeroForNewGame", "StartNewGame"];
 
-    // Нейронка проверки: NAVIDND_PROMPT_PROVIDER=codex — Codex CLI (NAVIDND_CODEX_MODEL — модель, NAVIDND_CODEX_PATH —
-    // путь), иначе Claude CLI. Те же промпты и MCP-сервер — так видно, где другая модель отступает от формата.
+    // Verification AI: NAVIDND_PROMPT_PROVIDER=codex - Codex CLI (NAVIDND_CODEX_MODEL - model,
+    // NAVIDND_CODEX_PATH - path), otherwise Claude CLI. The same prompts and MCP-server - so you can see where
+    // the other model deviates from the format.
     public static AppConfig TestConfig()
     {
         var config = new AppConfig();
@@ -79,9 +77,9 @@ public static class PromptScenario
         return config;
     }
 
-    // Сохраняет сценарий в путь, который прочитает MCP-сервер (get_world_state), и вызывает
-    // РЕАЛЬНОГО провайдера. actionPath передаётся для выбора allowedTools/MCP-конфига (см.
-    // ClaudeCliAiProvider.PrepareWorkDir) — значение имеет только имя последнего сегмента (=action).
+    // Saves the script to the path that the MCP-server will read (get_world_state), and calls the REAL
+    // provider. actionPath is passed to select the allowedTools/MCP-config (see
+    // ClaudeCliAiProvider.PrepareWorkDir) - only the name of the last segment matters (=action).
     public static async Task<string> CallRealAiAsync(
         string ruleSet, string action, Storage storage, string userMessage, string? model = null)
     {
@@ -95,11 +93,11 @@ public static class PromptScenario
         return await provider.Complete([promptText], userMessage, actionPath, model ?? config.ClaudeModel);
     }
 
-    // Как CallRealAiAsync, но дополнительно поднимает фоновый "автоответчик" на roll_dice/ask_player
-    // (те же файлы roll_request.json/ask_player_request.json, что в реальной игре поллит
-    // GameAiClient.SpinAsync — здесь без UI, отвечаем сразу же плайсхолдером). Нужно для сценариев,
-    // где промпт ОБЯЗАН вызвать один из этих MCP-инструментов (атака → бросок, неоднозначная цель →
-    // вопрос) — без автоответчика вызов провис бы на реальный таймаут MCP-инструмента (50с).
+    // Like CallRealAiAsync, but additionally raises the background “autoresponder” to roll_dice/ask_player (the
+    // same roll_request.json/ask_player_request.json files that poll GameAiClient.SpinAsync in the real game -
+    // here without UI, we respond immediately with a placeholder). Necessary for scenarios where the prompt
+    // MUST call one of these MCP-tools (attack → throw, ambiguous target → question) - without an answering
+    // machine, the call would hang for the real timeout of the MCP-tool (50s).
     public static async Task<AutoAnswerResult> CallRealAiWithAutoAnswersAsync(
         string ruleSet, string action, Storage storage, string userMessage,
         int rollValue = 15, string? askPlayerAnswer = null, string? model = null, (int col, int row)? targetPoint = null)
@@ -110,7 +108,7 @@ public static class PromptScenario
         string rollPath = Path.Combine(storageDir, "roll_request.json");
         string askPath = Path.Combine(storageDir, "ask_player_request.json");
         string selectPath = Path.Combine(storageDir, "select_target_request.json");
-        // На случай мусора от предыдущего упавшего прогона — своя, не боевая, папка, но лучше не гадать.
+        // In case of debris from a previous crashed run, have your own, non-combat folder, but it’s better not to guess.
         TryDelete(rollPath);
         TryDelete(askPath);
         TryDelete(selectPath);
@@ -169,7 +167,7 @@ public static class PromptScenario
                             box.Value = box.Value with { RollDiceTriggered = true };
                         }
                     }
-                    catch { /* файл мог быть в процессе записи MCP-сервером — попробуем на следующем тике */ }
+                    catch { /*the file could be in the process of being written by the MCP- server - let's try on the next tick*/ }
                 }
 
                 if (File.Exists(askPath))
@@ -191,7 +189,7 @@ public static class PromptScenario
                     catch { }
                 }
 
-                // select_target: выбираем первую допустимую клетку, не занятую героем (без UI — видимым считаем всё).
+                // select_target: select the first valid cell not occupied by the hero (without UI - we consider everything visible).
                 if (File.Exists(selectPath))
                 {
                     try
@@ -265,11 +263,11 @@ public static class PromptScenario
         try { if (File.Exists(path)) File.Delete(path); } catch { }
     }
 
-    // Структурная проверка + разбор для дальнейших ассертов: применяет ответ к ТОМУ ЖЕ Storage
-    // сценария (как это сделал бы реальный движок) — и корневой патч, и вложенные history[].patch
-    // (см. Prompts/.../systemPrompt.md § БОЙ). Бросает исключение, если ИИ вернул невалидный/
-    // неприменимый diff. Возвращает тексты history-записей — по ним удобно проверять, что механика
-    // реально попала в "[...]", как того требует промпт.
+    // Structural check + parsing for further assertions: applies the answer to the SAME Storage script (as a
+    // real engine would do) - both the root patch and nested history[].patch (see Prompts/.../systemPrompt.md §
+    // COMBAT). Throws an exception if the AI returned an invalid/inapplicable diff. Returns the texts of
+    // history- records - it is convenient to use them to check that the mechanics actually ended up in “[...]”,
+    // as required by the prompt.
     public static PromptResult ApplyAndParse(Storage storage, string response)
     {
         string json = ExtractJson(response);
@@ -290,11 +288,11 @@ public static class PromptScenario
                 if (entry["text"]?.GetValue<string>() is { Length: > 0 } text) texts.Add(text);
                 if (entry["patch"] is JsonObject patch)
                 {
-                    // Как SequentialHistoryPlayer.AnimateAndApplyPatch в реальном движке: movePath —
-                    // служебное поле только для анимации, "position" (последний элемент) уже пришёл
-                    // отдельно — снимаем его перед ApplyUpdateWorldState, иначе Storage.ValidateKeys
-                    // залогирует "Unknown field 'movePath'" (не ошибка, но лишний шум, которого в
-                    // реальном движке при этой же схеме не бывает).
+                    // Like SequentialHistoryPlayer.AnimateAndApplyPatch in a real engine: movePath is a service
+                    // field for animation only, "position" (the last element) has already arrived separately -
+                    // remove it before ApplyUpdateWorldState, otherwise Storage.ValidateKeys will log "Unknown
+                    // field 'movePath'" (not an error, but extra noise, which in real engine with the same
+                    // scheme does not happen).
                     if (patch["map"]?["entities"] is JsonArray entities)
                         foreach (var entityNode in entities.OfType<JsonObject>())
                             entityNode.Remove("movePath");
@@ -314,10 +312,9 @@ public static class PromptScenario
         File.WriteAllText(Path.Combine(targetDir, "response.json"), response);
     }
 
-    // Копия SequentialHistoryPlayer.ParseMergingDuplicateRootKeys (private там, реальный движок
-    // мирится с дублями корневых ключей вроде двух "hero": вместо одного объединённого — см. её
-    // комментарий) — тест должен так же не падать на этой опечатке модели, а не отвергать ответ,
-    // который в реальной игре применился бы нормально.
+    // Copy of SequentialHistoryPlayer.ParseMergingDuplicateRootKeys (private there, the real engine tolerates
+    // duplicate root keys like two "hero": instead of one combined - see her comment) - the test should also
+    // not fail on this model typo, and not reject an answer that would be applied normally in a real game.
     private static JsonObject? ParseMergingDuplicateRootKeys(string json)
     {
         using var doc = JsonDocument.Parse(json);
@@ -341,9 +338,9 @@ public static class PromptScenario
         return merged;
     }
 
-    // Копия GameAiClient.ExtractJson (private там) — вырезает первый сбалансированный {...} из
-    // текста ответа модели (на случай обрамляющего текста/markdown, которые ClaudeCliAiProvider
-    // обычно уже снимает сам, но лишняя защита здесь не помешает).
+    // Copy of GameAiClient.ExtractJson (private there) - cuts out the first balanced {...} from the model's
+    // response text (in case of framing text/markdown, which ClaudeCliAiProvider usually already removes
+    // itself, but extra protection won't hurt here).
     private static string ExtractJson(string text)
     {
         int start = text.IndexOf('{');
@@ -368,8 +365,8 @@ public static class PromptScenario
     }
 }
 
-// Тексты всех history-записей ответа (для проверки нарратива/механики) + сырой корневой JsonObject
-// (для точечных точечных проверок нестандартных полей, если понадобится).
+// Texts of all history- response records (for checking narrative/mechanics) + raw root JsonObject (for
+// point-by-point checks of non-standard fields, if necessary).
 public record PromptResult(string RawResponse, List<string> HistoryTexts, JsonObject Root)
 {
     public bool AnyTextContains(string substring) =>

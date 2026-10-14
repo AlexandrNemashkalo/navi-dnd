@@ -5,11 +5,11 @@ using System.Runtime.Versioning;
 
 namespace NaviDnD.UiTests;
 
-// Снимает клиентскую область окна консоли через PrintWindow и сэмплирует пиксель по
-// символьным координатам (col, row) — так проверяется РЕАЛЬНЫЙ отрендеренный цвет,
-// в обход легаси Windows Console API (ReadConsoleOutputAttribute), который не отражает
-// 24-битный ANSI. Вызывать ТОЛЬКО пока консоль игры активна (внутри GameConsole.WithGameConsole) —
-// GetConsoleWindow()/GetStdHandle() возвращают хендлы текущей подключённой консоли.
+// Captures the client area of the console window through PrintWindow and samples the pixel at character
+// coordinates (col, row) - this is how the REAL rendered color is checked, bypassing the legacy Windows Console
+// API (ReadConsoleOutputAttribute), which does not reflect the 24-bit ANSI. Call ONLY while the game console is
+// active (inside GameConsole.WithGameConsole) - GetConsoleWindow()/GetStdHandle() return handles for the
+// currently connected console.
 [SupportedOSPlatform("windows")]
 internal static class ScreenCapture
 {
@@ -39,14 +39,14 @@ internal static class ScreenCapture
     [StructLayout(LayoutKind.Sequential)]
     private struct CONSOLE_FONT_INFO { public int nFont; public COORD dwFontSize; }
 
-    // Возвращает цвет "чернил" символьной ячейки (col, row), 0-based — те же координаты,
-    // что использует ConsoleBufferReader/GameConsole. Сэмплировать один пиксель в центре
-    // ячейки ненадёжно: тонкие штрихи буквы (особенно кириллицы) часто не попадают ровно
-    // в центр, и получаем фон вместо текста. Вместо этого сканируем ВСЮ ячейку и берём
-    // пиксель, максимально непохожий на background, — это и есть настоящий цвет текста,
-    // устойчиво к неточному попаданию и небольшому рассогласованию координат/DPI.
-    // Бросает исключение с точным описанием, на каком шаге не удалось (а не молча null) —
-    // это единственный способ понять причину в среде, которую нельзя увидеть глазами.
+    // Returns the “ink” color of a character cell (col, row), 0-based - the same coordinates that
+    // ConsoleBufferReader/GameConsole. uses. Sampling one pixel in the center of a cell is unreliable: thin
+    // strokes of a letter (especially Cyrillic) often do not fall exactly in the center, and we get a
+    // background instead of text. Instead, we scan the ENTIRE cell and take a pixel that is as different as
+    // possible from background - this is the real color of the text, resistant to inaccurate hits and small
+    // coordinate mismatches / DPI. Throws an exception with a precise description of what step failed (and not
+    // silently null) - this is the only way to understand the reason in an environment that cannot be seen with
+    // the eyes.
     public static (byte r, byte g, byte b) SampleCellColor(int col, int row, (byte r, byte g, byte b) background,
         Action<Bitmap, Rectangle>? inspect = null)
     {

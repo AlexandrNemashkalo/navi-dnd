@@ -3,12 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace NaviDnD.UiTests;
 
-// GetStdHandle(STD_OUTPUT_HANDLE/STD_INPUT_HANDLE) не годится здесь: под "dotnet test"
-// тесthost-процесс запускается с уже перенаправленным stdout/stdin (пайп для перехвата
-// вывода теста), и это перенаправление не сбрасывается AttachConsole() к чужой консоли —
-// GetStdHandle продолжает отдавать старый пайп. CONOUT$/CONIN$ всегда открывают ИМЕННО
-// консоль, к которой процесс подключён ПРЯМО СЕЙЧАС, независимо от того, что было в
-// стандартных хендлах на старте процесса.
+// GetStdHandle(STD_OUTPUT_HANDLE/STD_INPUT_HANDLE) is not suitable here: under "dotnet test" the testhost
+// process is launched with the already redirected stdout/stdin (pipe to intercept the test output), and this
+// redirection is not reset by AttachConsole() to someone else's console - GetStdHandle continues to give the
+// old pipe. CONOUT$/CONIN$ always open EXACTLY the console to which the process is connected RIGHT NOW,
+// regardless of what was in the standard handles at the start of the process.
 internal static class ConsoleHandles
 {
     private const uint GENERIC_READ = 0x80000000;

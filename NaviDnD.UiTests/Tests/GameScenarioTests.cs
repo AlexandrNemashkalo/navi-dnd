@@ -2,26 +2,20 @@
 
 namespace NaviDnD.UiTests;
 
-// Каждый тест-кейс поднимает СВОЙ независимый NaviDnD.exe через GameSession.Launch() —
-// кейсы друг от друга не зависят и не переиспользуют состояние игры.
-//
-// Состояние — из Fixtures/full_game.json, собранного из реального сохранения игры
-// (герой + карта подземелья), а не выдуманное с нуля — чтобы проверки покрывали
-// реалистичный объём данных (полный лист статов/навыков, 9 предметов инвентаря,
-// карта на 6 комнат/10 дверей/4 существа).
-//
-// _output.WriteLine пишет в лог теста (виден в `dotnet test` при -v n/detailed, в Test
-// Explorer — всегда) — так по логу видно, ЧТО именно проверялось, а не только итоговый
-// PASS/FAIL по накопленному списку failures.
+// Each test case raises ITS independent NaviDnD.exe through GameSession.Launch() - cases do not depend on each
+// other and do not reuse the game state.  State - from Fixtures/full_game.json, collected from a real game save
+// (hero + dungeon map), and not made up from scratch - so that checks cover a realistic amount of data (full
+// stats/skills sheet, 9 inventory items, map for 6 rooms/10 doors/4 creatures).  _output.WriteLine writes to
+// the test log (visible in `dotnet test` with -v n/detailed, in Test Explorer - always) - so from the log you
+// can see WHAT exactly was checked, and not just the final PASS/FAIL from the accumulated list failures.
 public class GameScenarioTests
 {
     private readonly ITestOutputHelper _output;
 
     public GameScenarioTests(ITestOutputHelper output) => _output = output;
 
-    // Сценарий: Меню → [F1] → Карта (проверка рамок и вкладок) → клик по [F3] → Персонаж,
-    // вкладка Инвентарь (карточка + диалоговое окно с текстом истории, наведение на вкладку,
-    // пагинация) → [F7] → вкладка Способности (карточка + пагинация).
+    // Scenario: Menu → [F1] → Card (check frames and tabs) → click on [F3] → Character, Inventory tab (card +
+    // dialog box with story text, hovering over tab, pagination) → [F7] → Abilities tab (card + pagination).
     [Fact]
     public void FullGameplayScenario()
     {
@@ -43,18 +37,18 @@ public class GameScenarioTests
 
         string mapTitle = GameConsole.ReadRow(game.Pid, 1, GameConsole.TitleReadWidth);
         var f2Tab = ScreenAssertions.FindTab(mapTitle, "[F4]");
-        Assert.NotNull(f2Tab); // иначе дальше некуда кликать — сообщаем через явный Assert, а не failures
+        Assert.NotNull(f2Tab); // otherwise there is nowhere else to click - we report via explicit Assert, and not failures
 
         _output.WriteLine("Кликаю мышью по вкладке [F4] — жду экран Персонажа...");
         GameConsole.SendLeftClick(game.Pid, f2Tab!.Value.startX, 1);
         Assert.True(
             GameConsole.WaitForRowContains(game.Pid, 1, GameConsole.TitleReadWidth, CharacterActiveMarker, 5000),
             "Не дождались экрана Персонажа после клика мышью по вкладке [F4].");
-        // Заголовок экрана (строка 1) и тело карточки (диалоговое окно, инвентарь) рисуются РАЗНЫМИ
-        // вызовами — заголовок мог смениться раньше, чем дорисовалось диалоговое окно ниже (см. ту же
-        // гонку, что чинили в DialogDisplay.Draw()). Явно ждём тело карточки, а не полагаемся на то,
-        // что оно успело нарисоваться к моменту смены заголовка — иначе CheckCharacterScreen ниже
-        // читает экран раньше времени и не находит "ДИАЛОГОВОЕ ОКНО"/содержимое инвентаря.
+        // The screen title (line 1) and the card body (dialog box, inventory) are drawn by DIFFERENT calls -
+        // the title could have changed before the dialog box below was drawn (see the same race that was fixed
+        // in DialogDisplay.Draw()). We are clearly waiting for the card body, and not relying on the fact that
+        // it had already been drawn by the time the title was changed - otherwise CheckCharacterScreen below
+        // reads the screen ahead of time and does not find the "DIALOG BOX"/inventory contents.
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "ДИАЛОГОВОЕ ОКНО", 5000),
             "Диалоговое окно не отрисовалось после перехода на экран Персонажа.");
@@ -69,9 +63,9 @@ public class GameScenarioTests
 
         _output.WriteLine("Отправляю [F7] — жду подвкладку Способности...");
         GameConsole.SendKey(game.Pid, ConsoleKey.F7);
-        // "→ ПЕРСОНАЖ ←" не меняется при смене подвкладки (это заголовок ЭКРАНА, не подвкладки) —
-        // ждать нужно маркер активной ПОДВКЛАДКИ (рисуется внутри карточки, не в строке 1),
-        // иначе проверка пройдёт мгновенно и без подтверждения, что [F7] вообще был обработан.
+        // "→ CHARACTER ←" does not change when changing the sub-tab (this is the SCREEN title, not the sub-tab)
+        // - you need to wait for the active SUB-TAB marker (drawn inside the card, not in line 1), otherwise
+        // the check will take place instantly and without confirmation that [F7] was processed at all.
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "→ СПОСОБНОСТИ ←", 5000),
             "Подвкладка Способности не активировалась после нажатия [F7].");
@@ -85,8 +79,9 @@ public class GameScenarioTests
         _output.WriteLine(failures.Count == 0
             ? "Все проверки пройдены."
             : $"Провалено проверок: {failures.Count}.");
-        // Финальный Step() — до Assert, а не после: если проверки провалились, Assert.True ниже
-        // бросит исключение и код после него не выполнится, а пауза для отладки нужна в любом случае.
+        // The final Step() is before Assert, not after: if the checks fail, Assert.True below will throw an
+        // exception and the code after it will not be executed, and a pause for debugging is needed in any
+        // case.
         TestPacing.Step();
         Assert.True(failures.Count == 0, "UI-тест FAIL:\n" + string.Join("\n", failures.Select(f => "  - " + f)));
     }
@@ -108,8 +103,9 @@ public class GameScenarioTests
         TestPacing.Step();
 
         _output.WriteLine("[экран карты] Проверяю номера колонок сетки...");
-        // Заголовки колонок карты (подряд идущие номера) — признак того, что сетка реально отрисована,
-        // а не просто пустая рамка. Номера — координаты поля под камерой, не обязательно с 1.
+        // Map column headings (consecutive numbers) are a sign that the grid is actually drawn and not just an
+        // empty frame. Numbers are the coordinates of the field under the camera, not necessarily starting with
+        // 1.
         if (!rows.Any(r => System.Text.RegularExpressions.Regex.Matches(r, @"\b\d{1,3}\b").Count >= 10))
             failures.Add("На экране карты не найдены номера колонок сетки.");
         TestPacing.Step();
@@ -134,8 +130,8 @@ public class GameScenarioTests
         _output.WriteLine($"[{context}] Проверяю имя героя, диалоговое окно и текст истории (реплики ДМ и героя)...");
         bool sawHeroName = rows.Any(r => r.Contains("Рустем"));
         bool sawDialogWindow = rows.Any(r => r.Contains("ДИАЛОГОВОЕ ОКНО"));
-        // Из фикстуры (Fixtures/full_game.json → history) — проверяем, что реальный текст истории
-        // действительно долетает до экрана, а не только рамка диалогового окна.
+        // From the fixture (Fixtures/full_game.json → history) - we check that the real text of the story
+        // actually reaches the screen, and not just the dialog box frame.
         bool sawDmMessage = rows.Any(r => r.Contains("факелы едва потрескивают"));
         bool sawHeroMessage = rows.Any(r => r.Contains("Осматриваюсь"));
 
@@ -148,11 +144,11 @@ public class GameScenarioTests
         if (expectAbilities)
         {
             _output.WriteLine($"[{context}] Проверяю список способностей...");
-            // Из фикстуры (hero.abilities) — несколько разных способностей должны быть видны
-            // одновременно (проверяет, что список не обрезан после одной записи).
-            // "Второе дыхание" сюда намеренно не включено — это ОДНОВРЕМЕННО и способность,
-            // и ресурс (hero.resources), а ресурсы всегда видны в верхней части карточки
-            // независимо от подвкладки — совпадение по этому имени ничего не доказывает.
+            // From the fixture (hero.abilities) - several different abilities should be visible at the same
+            // time (checks that the list is not cut off after one entry). "Second Wind" is deliberately not
+            // included here - it is both an ability and a resource AT THE SAME TIME (hero.resources), and
+            // resources are always visible at the top of the card regardless of the subtab - a match on this
+            // name does not prove anything.
             string[] abilityNames = ["Боевой стиль: Стрельба", "Фейское наследие", "Обострённые чувства"];
             foreach (var name in abilityNames)
                 if (!rows.Any(r => r.Contains(name)))
@@ -164,8 +160,8 @@ public class GameScenarioTests
             if (!rows.Any(r => r.Contains("ИНВЕНТАРЬ")))
                 failures.Add($"[{context}] Подвкладка «ИНВЕНТАРЬ» не найдена.");
 
-            // Из фикстуры (hero.inventory) — несколько разных предметов должны быть видны
-            // одновременно, включая количество (×38 у стрел) — проверяет разметку колонок.
+            // From the fixture (hero.inventory) - several different objects must be visible at the same time,
+            // including the quantity (×38 for arrows) - checks the column markings.
             string[] itemNames = ["Длинный лук", "Кольчуга", "Стрелы"];
             foreach (var name in itemNames)
                 if (!rows.Any(r => r.Contains(name)))
@@ -179,40 +175,40 @@ public class GameScenarioTests
         TestPacing.Step();
     }
 
-    // hero.color из Fixtures/full_game.json — ожидаемый цвет имени героя.
+    // hero.color from Fixtures/full_game.json is the expected color of the hero's name.
     private static readonly (int r, int g, int b) HeroNameColor = (80, 160, 120);
-    // DisplayConfig.MainBackground по умолчанию — с чем сравнивать, чтобы найти "чернила" текста.
+    // DisplayConfig.MainBackground by default - what to compare with to find the “ink” of the text.
     private static readonly (byte r, byte g, byte b) MainBackground = (18, 18, 22);
     private const int ColorTolerance = 60;
 
     private void CheckHeroNameColor(int gamePid, List<string> rows, string context, List<string> failures)
     {
-        if (!rows.Any(r => r.Contains("Рустем"))) return; // сам факт отсутствия текста уже сообщён отдельной проверкой
+        if (!rows.Any(r => r.Contains("Рустем"))) return; // the very fact of missing text is already reported by a separate check
         _output.WriteLine($"[{context}] Проверяю цвет имени героя (скриншот + сэмплинг пикселя)...");
         ScreenAssertions.CheckTextColor(gamePid, rows, "Рустем", HeroNameColor, ColorTolerance, MainBackground, context, failures);
     }
 
-    // Наведение на кликабельный элемент должно менять цвет (MouseUiHelper.SetTabHighlight) —
-    // проверяем на неактивной вкладке [F1] (на экране персонажа эта вкладка сейчас ничего не
-    // делает при наведении кроме подсветки — сравниваем состояние ДО/ПОСЛЕ, а не конкретный
-    // ожидаемый цвет, это надёжнее). Курсор (ConsoleMouseReader.SetCursorShape) не проверяем:
-    // это реальный системный курсор (GetCursorInfo), который зависит от того, где физически
-    // стоит настоящий указатель мыши в ОС, а не от синтетических событий WriteConsoleInput —
-    // подсветка вызывается тем же хэндлером наведения и надёжно подтверждает его срабатывание.
+    // Hovering over a clickable element should change color (MouseUiHelper.SetTabHighlight) - we check on the
+    // inactive tab [F1] (on the character screen this tab now does nothing when hovering except highlighting -
+    // we compare the BEFORE/AFTER state, and not the specific expected color, this is more reliable). Cursor
+    // (ConsoleMouseReader.SetCursorShape) we don’t check: this is a real system cursor (GetCursorInfo), which
+    // depends on where the real mouse pointer is physically located in the OS, and not on synthetic events
+    // WriteConsoleInput - the highlighting is called by the same hover handler and reliably confirms its
+    // firing.
     private const int HoverColorDelta = 10;
 
     private void CheckTopTabHoverEffects(int gamePid, string context, List<string> failures)
     {
         string title = GameConsole.ReadRow(gamePid, 1, GameConsole.TitleReadWidth);
         var tab = ScreenAssertions.FindTab(title, "[F1]");
-        if (tab == null) return; // отсутствие вкладки уже сообщено RequireTab
+        if (tab == null) return; // missing tab already reported RequireTab
 
         _output.WriteLine($"[{context}] Проверяю смену цвета вкладки [F1] при наведении мышью...");
 
         (byte r, byte g, byte b) background = (18, 18, 22);
         int sampleCol = tab.Value.startX + 1;
 
-        // Нейтральная точка подальше от любых вкладок/стрелок — сбрасываем наведение перед замером.
+        // Neutral point away from any tabs/arrows - reset guidance before measuring.
         GameConsole.SendMouseMove(gamePid, 2, 10);
         Thread.Sleep(250);
 
@@ -234,16 +230,15 @@ public class GameScenarioTests
             failures.Add($"[{context}] Цвет вкладки [F1] не изменился при наведении: до ({colorBefore.r},{colorBefore.g},{colorBefore.b}), после ({colorAfter.r},{colorAfter.g},{colorAfter.b}).");
         TestPacing.Step();
 
-        // Уводим мышь, чтобы не мешать следующим шагам сценария.
+        // Move the mouse away so as not to interfere with the next steps of the script.
         GameConsole.SendMouseMove(gamePid, 2, 10);
         Thread.Sleep(150);
     }
 
-    // Фикстура (Fixtures/full_game.json) специально содержит много предметов/способностей
-    // с длинными описаниями — список не помещается на одну страницу, поэтому стрелки
-    // ◄/► должны реально листать. Маркер — первый НЕэкипированный предмет: экипированные
-    // (напр. "Длинный лук") всегда видны в блоке слотов экипировки сверху карточки,
-    // независимо от страницы инвентаря, и как маркер страницы не годятся.
+    // Fixture (Fixtures/full_game.json) specifically contains many items/abilities with long descriptions - the
+    // list does not fit on one page, so the ◄/► arrows must actually scroll through. Marker - the first
+    // UN-equipped item: equipped ones (for example, "Longbow") are always visible in the block of equipment
+    // slots at the top of the card, regardless of the inventory page, and are not suitable as a page marker.
     private void CheckInventoryPagination(int gamePid, string context, List<string> failures) =>
         CheckPagination(gamePid, context, "Длинный меч", "предмет", failures);
 

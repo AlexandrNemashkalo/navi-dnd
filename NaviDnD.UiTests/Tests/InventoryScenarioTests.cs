@@ -2,10 +2,9 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: SendAction (мок) снимает лук, надевает меч, удаляет один предмет и добавляет новый —
-// проверяем, что карточка героя (слоты экипировки + список инвентаря) отражает это корректно.
-// AI-провайдер замокан (Fixtures/MockResponses/Inventory/SendAction/response.json) — реальная
-// нейронка не вызывается.
+// E2E: SendAction (mock) removes a bow, puts on a sword, removes one item and adds a new one - we check that
+// the hero card (equipment slots + inventory list) reflects this correctly. AI-provider is locked
+// (Fixtures/MockResponses/Inventory/SendAction/response.json) - the real AI is not called.
 public class InventoryScenarioTests
 {
     private readonly ITestOutputHelper _output;
@@ -22,31 +21,31 @@ public class InventoryScenarioTests
         Navigation.ToCharacterScreen(game.Pid);
         _output.WriteLine("Экран Персонажа (вкладка Инвентарь) отрисован.");
 
-        // Fixtures/full_game.json: hero.inventory[0]=Длинный лук (Л/П Рука), [1]=Длинный меч
-        // (не экипирован), [6]=Кинжал. Мок-ответ: лук снят, меч надет в [П Рука], кинжал удалён,
-        // добавлено «Волшебное кольцо».
+        // Fixtures/full_game.json: hero.inventory[0]=Longbow (L/R Arm), [1]=Longsword (not equipped),
+        // [6]=Dagger. Mock answer: the bow is removed, the sword is put in [R Hand], the dagger is removed, the
+        // “Magic Ring” is added.
         _output.WriteLine("Отправляю игровое действие — жду ответ SendAction (мок)...");
         GameConsole.SendText(game.Pid, "убираю лук за спину, беру меч в руку — кинжал куда-то делся");
         GameConsole.SendKey(game.Pid, ConsoleKey.Enter);
 
-        // "кольцо" — ПОСЛЕДНЕЕ слово сообщения (см. response.json): пока идёт печать текста
-        // по буквам (SequentialHistoryPlayer, ~25мс/символ), карточка героя слева ещё СТАРАЯ —
-        // она перерисовывается только когда SendAction() полностью завершится и внешний игровой
-        // цикл (Program.cs) перерисует экран заново. Патч на hero.inventory при этом уже применён
-        // (он применяется ДО начала печати истории — см. SequentialHistoryPlayer.PlayAsync), но
-        // экран этого ещё не показывает. Ждём последнее слово + небольшой запас, а не первое
-        // попавшееся слово фразы (иначе поймаем данные ДО применения патча/перерисовки).
+        // “ring” is the LAST word of the message (see response.json): while the text is being printed letter by
+        // letter (SequentialHistoryPlayer, ~25ms/character), the hero card on the left is still OLD - it is
+        // redrawn only when SendAction() is completely completed and the external game loop (Program.cs) will
+        // redraw the screen again. The patch on hero.inventory has already been applied (it is applied BEFORE
+        // the start of printing the history - see SequentialHistoryPlayer.PlayAsync), but the screen does not
+        // show this yet. We are waiting for the last word + a small margin, and not the first word of the
+        // phrase (otherwise we will catch the data BEFORE applying the patch/redrawing).
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth,
                 "кольцо", 15000),
             "Не дождались ответа SendAction (мок) — сообщение из истории не появилось.");
         _output.WriteLine("Ответ применён. Жду перерисовку карточки героя...");
 
-        // НЕ "sleep фиксированное время + один снимок": карточка героя перерисовывается ДРУГИМ
-        // вызовом и в ДРУГОЕ время, чем диалоговая панель — под нагрузкой (весь набор тестов
-        // подряд) фиксированной паузы иногда не хватает. НЕ ищем просто "Длинный меч" —
-        // он УЖЕ виден в обычном списке инвентаря (неэкипирован) ДО патча, простой Contains
-        // дал бы ложное срабатывание на устаревших данных. Ждём именно СЛОТ [П Рука] с мечом.
+        // NOT "sleep fixed time + one snapshot": the hero card is redrawn by a DIFFERENT call and at a
+        // DIFFERENT time than the dialog panel - under load (the entire set of tests in a row), the fixed pause
+        // is sometimes not enough. Do NOT just look for “Long Sword” - it is ALREADY visible in the regular
+        // inventory list (unequipped) BEFORE the patch, a simple Contains would give a false positive on
+        // outdated data. We are waiting for the [P Hand] SLOT with a sword.
         Assert.True(
             GameConsole.WaitForRowsMatch(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth,
                 rows => rows.Any(r => r.Contains("П Рука") && r.Contains("Длинный меч")), 5000),
@@ -71,14 +70,15 @@ public class InventoryScenarioTests
         _output.WriteLine(failures.Count == 0
             ? "Все проверки пройдены."
             : $"Провалено проверок: {failures.Count}.");
-        // Финальный Step() — до Assert, а не после: если проверки провалились, Assert.True ниже
-        // бросит исключение и код после него не выполнится, а пауза для отладки нужна в любом случае.
+        // The final Step() is before Assert, not after: if the checks fail, Assert.True below will throw an
+        // exception and the code after it will not be executed, and a pause for debugging is needed in any
+        // case.
         TestPacing.Step();
         Assert.True(failures.Count == 0, "UI-тест FAIL:\n" + string.Join("\n", failures.Select(f => "  - " + f)));
     }
 
-    // Слот экипировки — строка вида "П Рука   Длинный меч" (см. HeroDisplay.DrawHeroCard —
-    // leftSlots рисует имя слота и имя предмета на ОДНОЙ строке).
+    // Equipment slot - a line like "P Arm Long Sword" (see HeroDisplay.DrawHeroCard - leftSlots draws the slot
+    // name and the item name on ONE line).
     private static void CheckEquipSlot(List<string> rows, string slotName, string expectedItem, List<string> failures)
     {
         var row = rows.FirstOrDefault(r => r.Contains(slotName));
@@ -95,8 +95,8 @@ public class InventoryScenarioTests
             failures.Add($"Слот «{slotName}» должен быть пуст («—»), но: «{row.TrimEnd()}»");
     }
 
-    // Проходит по всем страницам инвентаря (► пока есть), собирая весь текст — чтобы проверить
-    // присутствие/отсутствие предмета независимо от того, на какой странице он оказался.
+    // Goes through all inventory pages (► while there is one), collecting all the text - to check the
+    // presence/absence of an item, regardless of which page it appears on.
     private static List<string> CollectAcrossPages(int gamePid, int maxPages = 10)
     {
         var all = new List<string>();

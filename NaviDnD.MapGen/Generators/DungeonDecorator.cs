@@ -2,10 +2,10 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.MapGen.Generators;
 
-// Пол и детали подземелья (TerrainCatalog, Indoor-виды) — чтобы комнаты не были пустыми прямоугольниками
-// ещё до наполнения нейронкой. У каждой комнаты свой стиль пола (плиты / грубый камень / сырость), плюс
-// трещины, кости, обломки; в больших залах — колонны, иногда завал. Препятствия не ставятся у дверей и
-// не разрывают комнату (проверка связности после каждого).
+// Floor and details of the dungeon (TerrainCatalog, Indoor- views) - so that the rooms are not empty rectangles
+// even before being filled with AI. Each room has its own floor style (slabs/rough stone/damp), plus cracks,
+// bones, debris; in large halls there are columns, sometimes rubble. Obstacles are not placed at doors and do
+// not break up the room (connectivity check after each).
 public static class DungeonDecorator
 {
     private const int W = MapChunk.Cols, H = MapChunk.Rows;
@@ -16,7 +16,7 @@ public static class DungeonDecorator
         var g = new char[W, H];
         for (int c = 0; c < W; c++) for (int r = 0; r < H; r++) g[c, r] = ' ';
 
-        // Клетки у дверей/проходов — без препятствий.
+        // Cells near doors/passages - no obstructions.
         var doorCells = new HashSet<(int, int)>();
         foreach (var d in doors)
             foreach (var p in new[] { d.From, d.To })
@@ -30,17 +30,17 @@ public static class DungeonDecorator
             bool corridor = room.Passage == true;
             bool cave = chunk.Theme == MapChunk.Cave;
 
-            // Стиль пола комнаты (пещера — всегда природный: камень, мох, лужи, осыпь).
+            // Room floor style (cave - always natural: stone, moss, puddles, scree).
             int style = cave ? 3 : corridor ? 1 : rng.Next(3);
             foreach (var (c, r) in cells)
             {
                 double p = rng.NextDouble();
                 g[c, r] = style switch
                 {
-                    0 => p < 0.07 ? 'K' : p < 0.09 ? 'b' : 'p',                                 // плиты
-                    1 => p < 0.05 ? 'r' : p < 0.08 ? 'k' : p < 0.095 ? 'b' : 'q',              // грубый камень
-                    2 => p < 0.14 ? 'm' : p < 0.19 ? 'u' : p < 0.23 ? 'k' : p < 0.25 ? 'b' : 'q', // сырость
-                    _ => p < 0.10 ? 'm' : p < 0.16 ? 'u' : p < 0.24 ? 'r' : p < 0.26 ? 'b' : 'q', // пещера
+                    0 => p < 0.07 ? 'K' : p < 0.09 ? 'b' : 'p',                                 // plates
+                    1 => p < 0.05 ? 'r' : p < 0.08 ? 'k' : p < 0.095 ? 'b' : 'q',              // rough stone
+                    2 => p < 0.14 ? 'm' : p < 0.19 ? 'u' : p < 0.23 ? 'k' : p < 0.25 ? 'b' : 'q', // dampness
+                    _ => p < 0.10 ? 'm' : p < 0.16 ? 'u' : p < 0.24 ? 'r' : p < 0.26 ? 'b' : 'q', // cave
                 };
             }
             if (corridor || cells.Count < 20) continue;
@@ -67,7 +67,7 @@ public static class DungeonDecorator
 
             if (cave)
             {
-                // Сталагмиты россыпью (1 на ~20 клеток зала), иногда обвал.
+                // Scattered stalagmites (1 per ~20 cells in the hall), sometimes a collapse.
                 for (int i = 0; i < cells.Count / 20 + rng.Next(2); i++)
                     TryBlock(cells[rng.Next(cells.Count)], 'S');
                 if (rng.Next(4) == 0) TryBlock(cells[rng.Next(cells.Count)], 'R');
@@ -77,7 +77,7 @@ public static class DungeonDecorator
             int roll = rng.Next(10);
             if (roll < 4 && cells.Count >= 30)
             {
-                // Колонный зал: колонны рядами через клетку, отступив от стен.
+                // Hall of Columns: columns in rows across the cell, moving away from the walls.
                 int minC = cells.Min(x => x.c), minR = cells.Min(x => x.r);
                 int phaseC = rng.Next(2), phaseR = rng.Next(2);
                 foreach (var x in cells.Where(x => (x.c - minC) % 3 == 1 + phaseC % 2 && (x.r - minR) % 3 == 1 + phaseR % 2))
@@ -85,7 +85,7 @@ public static class DungeonDecorator
             }
             else if (roll < 7)
             {
-                // Обрушение: завал и россыпь обломков вокруг.
+                // Collapse: blockage and scattering of debris around.
                 var center = cells[rng.Next(cells.Count)];
                 TryBlock(center, 'R');
                 foreach (var x in cells.Where(x => Math.Abs(x.c - center.c) <= 2 && Math.Abs(x.r - center.r) <= 1 && g[x.c, x.r] != 'R'))
@@ -103,7 +103,7 @@ public static class DungeonDecorator
         return rows;
     }
 
-    // Все проходимые клетки комнаты связаны между собой (по 4 соседям).
+    // All passable cells in the room are connected to each other (4 neighbors).
     private static bool Connected(char[,] g, List<(int c, int r)> cells)
     {
         var free = cells.Where(x => TerrainCatalog.Get(g[x.c, x.r]) is not { BlocksMove: true }).ToHashSet();

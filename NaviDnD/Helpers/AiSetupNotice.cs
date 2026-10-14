@@ -6,21 +6,22 @@ internal static class AiSetupNotice
 {
     internal static void Show()
     {
-        string message = L.T("Claude Code и Codex CLI не найдены.\n\nДля игры нужен один из этих клиентов:\n")
+        string message = L.T("Claude Code and Codex CLI were not found.\n\nThe game needs one of these clients:\n")
             + "• Claude Code: code.claude.com/docs/en/quickstart\n"
             + "• Codex CLI: developers.openai.com/codex/cli\n\n"
             + (OperatingSystem.IsWindows()
-                ? L.T("Установите клиент и войдите в аккаунт. Если он уже установлен, укажите путь к его exe в настройках игры.\n\nНажмите ОК, чтобы открыть настройки.")
-                : L.T("Установите клиент и войдите в аккаунт. Если он уже установлен, укажите в настройках игры полный путь к исполняемому файлу claude или codex (его покажет команда which claude).\n\nНажмите ОК, чтобы открыть настройки."));
+                ? L.T("Install a client and sign in. If it is already installed, set the path to its exe in the game settings.\n\nPress OK to open the settings.")
+                : L.T("Install a client and sign in. If it is already installed, set the full path to the claude or codex executable in the game settings (find it with: which claude).\n\nPress OK to open the settings."));
         if (OperatingSystem.IsWindows())
             // The notification must also be visible above the fullscreen backdrop.
-            MessageBox(IntPtr.Zero, message, L.T("NaviDnD — настройка нейронки"), 0x40 | 0x10000 | 0x40000);
+            MessageBox(IntPtr.Zero, message, L.T("NaviDnD — AI setup"), 0x40 | 0x10000 | 0x40000);
         else
-            ShowUnix(message, L.T("NaviDnD — настройка нейронки"));
+            ShowUnix(message, L.T("NaviDnD — AI setup"));
     }
 
-    // Системное окно, как MessageBox в Windows (macOS: osascript, Linux: zenity). Без него экран настроек, который откроется
-    // следом, сам несёт заголовок «не найдены»; вывод в консоль потерялся бы под перерисованным экраном.
+    // A system window like MessageBox in Windows (macOS: osascript, Linux: zenity).) Without it, the settings
+    // screen that opens next would itself carry the heading “not found”; the console output would be lost under
+    // the redrawn screen.
     [System.Runtime.Versioning.UnsupportedOSPlatform("windows")]
     private static void ShowUnix(string message, string title)
     {

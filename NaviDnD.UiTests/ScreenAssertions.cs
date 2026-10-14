@@ -2,16 +2,16 @@ using NaviDnD.Data;
 
 namespace NaviDnD.UiTests;
 
-// Общие проверки экрана, переиспользуемые между тест-кейсами (GameScenarioTests,
-// NewGameScenarioTests, ...) — рамки и вкладки одинаковы независимо от сценария.
+// Common screen tests reused between test cases (GameScenarioTests, NewGameScenarioTests, ...) - frames and
+// tabs are the same regardless of scenario.
 internal static class ScreenAssertions
 {
     private static readonly char[] LeftBorderChars = ['╭', '╰', '├', '│'];
     private static readonly char[] RightBorderChars = ['╮', '╯', '┤', '│'];
 
-    // Рамка: там, где строка реально что-то содержит (не пустой хвост буфера),
-    // слева и справа должны быть символы рамки на строго ожидаемых колонках,
-    // а не съехавший/переполненный контент.
+    // Frame: where the line actually contains something (not the empty tail of the buffer), there should be
+    // frame symbols on the strictly expected columns on the left and right, and not overflowing/overflowing
+    // content.
     public static void CheckBorders(List<string> rows, string context, List<string> failures)
     {
         for (int i = 0; i < rows.Count; i++)
@@ -19,8 +19,9 @@ internal static class ScreenAssertions
             string line = rows[i];
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            // DisplayConfig.LeftMargin (=1) — колонка перед самой рамкой (BorderDrawer.WriteLeftMargin),
-            // символ рамки стоит СРАЗУ ПОСЛЕ отступа, не в колонке 0.
+            // DisplayConfig.LeftMargin (=1) - the column before the frame itself
+            // (BorderDrawer.WriteLeftMargin), the frame symbol is located IMMEDIATELY AFTER the indent, not in
+            // column 0.
             if (line.Length <= DisplayConfig.LeftMargin) continue;
             char left = line[DisplayConfig.LeftMargin];
             if (!LeftBorderChars.Contains(left))
@@ -35,8 +36,8 @@ internal static class ScreenAssertions
         }
     }
 
-    // Проверяет, что заявленный текст (F1/F2/... + метка) реально есть в заголовке —
-    // и метка идёт сразу после префикса, то есть кнопка не переименована и не пропала.
+    // Checks that the declared text (F1/F2/... + label) is actually in the title - and the label comes
+    // immediately after the prefix, that is, the button has not been renamed or disappeared.
     public static void RequireTab(string title, string prefix, string expectedLabel, string context, List<string> failures)
     {
         int idx = title.IndexOf(prefix, StringComparison.Ordinal);
@@ -51,27 +52,26 @@ internal static class ScreenAssertions
             failures.Add($"[{context}] После «{prefix}» ожидалась метка «{expectedLabel}», заголовок: «{title.TrimEnd()}»");
     }
 
-    // +2: DisplayConfig.LeftMargin(1) + рамка(1) — зеркалит MouseUiHelper.ComputeTitleTabs.
+    // +2: DisplayConfig.LeftMargin(1) + frame(1) - mirrors MouseUiHelper.ComputeTitleTabs.
     public static (int startX, int endX)? FindTab(string title, string prefix)
     {
         int idx = title.IndexOf(prefix, StringComparison.Ordinal);
         if (idx < 0) return null;
         int end = idx + prefix.Length;
         while (end < title.Length && title[end] != ' ') end++;
-        return (2 + idx + prefix.Length, 2 + end); // кликабельно только название, без «[Fn]»
+        return (2 + idx + prefix.Length, 2 + end); // only the name is clickable, without “[Fn]”
     }
 
-    // Реальная проверка цвета текста через скриншот клиентской области окна
-    // (ScreenCapture.SampleCellColor) — легаси-атрибуты консоли (ReadConsoleOutputAttribute)
-    // не отражают 24-битный ANSI, которым красит игра, поэтому единственный надёжный способ —
-    // снять пиксель и сравнить RGB с допуском (антиалиасинг шрифта/масштабирование могут
-    // слегка сдвинуть значение).
+    // Real text color check via a screenshot of the client area of the window (ScreenCapture.SampleCellColor) -
+    // legacy console attributes (ReadConsoleOutputAttribute) does not reflect the 24-bit ANSI that the game
+    // uses, so the only reliable way is to remove a pixel and compare RGB with the tolerance (font
+    // antialiasing/scaling may shift the value slightly).
     public static void CheckTextColor(
         int gamePid, List<string> rows, string searchText, (int r, int g, int b) expected, int tolerance,
         (byte r, byte g, byte b) background, string context, List<string> failures)
     {
         int rowIndex = rows.FindIndex(r => r.Contains(searchText));
-        if (rowIndex < 0) return; // сам факт отсутствия текста уже сообщён отдельной проверкой
+        if (rowIndex < 0) return; // the very fact of missing text is already reported by a separate check
 
         int col = rows[rowIndex].IndexOf(searchText, StringComparison.Ordinal);
         if (col < 0) return;
@@ -92,10 +92,10 @@ internal static class ScreenAssertions
             failures.Add($"[{context}] Цвет «{searchText}»: ожидался ~({expected.r},{expected.g},{expected.b}), получен ({r},{g},{b}) — допуск ±{tolerance}.");
     }
 
-    // Как CheckTextColor, но для одиночного символа в известной (col, row) ячейке — без сдвига +2
-    // (тот сдвиг нужен только чтобы попасть ВНУТРЬ многосимвольного слова, а не на его край).
-    // Используется для символов действий/скорости в легенде (● ■ ▲), которые различаются только
-    // цветом, а не текстом — искать их по подстроке недостаточно.
+    // Like CheckTextColor, but for a single character in a known (col, row) cell) - without +2 shift (that
+    // shift is needed only to get INSIDE a multi-character word, and not on its edge). Used for action/speed
+    // symbols in the legend (● ■ ▲), which differ only in color, not text - search for them by substring not
+    // enough.
     public static void CheckCellColor(
         int gamePid, int col, int row, (int r, int g, int b) expected, int tolerance,
         (byte r, byte g, byte b) background, string context, List<string> failures)

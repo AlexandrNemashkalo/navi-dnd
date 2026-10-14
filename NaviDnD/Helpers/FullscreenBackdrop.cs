@@ -2,9 +2,10 @@ using System.Runtime.InteropServices;
 
 namespace NaviDnD.Helpers;
 
-// Режим «весь экран» (настройка ЭКРАН): окно игры остаётся своего размера и рисуется как обычно, а под ним — окно-
-// подложка на весь монитор (с панелью задач) цвета фона игры; окно игры — по центру монитора, поверх подложки.
-// Подложка — отдельное Win32-окно в своём потоке: не активируется кликом, не видно в панели задач и Alt+Tab.
+// “Full screen” mode (SCREEN setting): the game window remains its size and is drawn as usual, and below it
+// there is a background window covering the entire monitor (with the taskbar) in the game background color; The
+// game window is in the center of the monitor, on top of the background. The background is a separate Win32-
+// window in its own thread: not activated by clicking, not visible in the taskbar and Alt+Tab.
 public static class FullscreenBackdrop
 {
     public static bool Active { get; private set; }
@@ -30,11 +31,11 @@ public static class FullscreenBackdrop
     }
 
     private static IntPtr _backdrop;
-    private static (int x, int y)? _windowedPos;     // где было окно игры до режима — вернуть при выключении
-    private static WndProc? _wndProc;                // держим делегат — иначе его соберёт GC
+    private static (int x, int y)? _windowedPos;     // where the game window was before the mode - return when turned off
+    private static WndProc? _wndProc;                // keep the delegate - otherwise it will be collected by GC
     private static readonly object _lock = new();
 
-    // Включить / выключить (повторный вызов с тем же значением ничего не делает). color — фон игры.
+    // Enable/disable (calling again with the same value does nothing). color - game background.
     public static void Set(bool on, List<int> color)
     {
         if (!OperatingSystem.IsWindows()) return;
@@ -73,8 +74,8 @@ public static class FullscreenBackdrop
         }
     }
 
-    // Без оформления Windows: ни системной рамки, ни скругления углов, ни тени (Windows 11) — остаётся только своя
-    // рамка игры. Выключение — стили и оформление как были.
+    // Without Windows: design, no system frame, no rounded corners, no shadow (Windows 11) - only the game’s
+    // own frame remains. Switching off - styles and design as they were.
     private static (int style, int exStyle)? _savedStyles;
 
     private static void Borderless(IntPtr console, bool on)
@@ -95,12 +96,12 @@ public static class FullscreenBackdrop
         DwmSetWindowAttribute(console, DWMWA_WINDOW_CORNER_PREFERENCE, ref corner, sizeof(int));
         int border = on ? DWMWA_COLOR_NONE : DWMWA_COLOR_DEFAULT;
         DwmSetWindowAttribute(console, DWMWA_BORDER_COLOR, ref border, sizeof(int));
-        int nc = on ? DWMNCRP_DISABLED : DWMNCRP_USEWINDOWSTYLE;   // без неклиентской отрисовки — без тени
+        int nc = on ? DWMNCRP_DISABLED : DWMNCRP_USEWINDOWSTYLE;   // no non-client rendering - no shadow
         DwmSetWindowAttribute(console, DWMWA_NCRENDERING_POLICY, ref nc, sizeof(int));
         SetWindowPos(console, IntPtr.Zero, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     }
 
-    // Окно игры — по центру монитора поверх подложки (после смены размера окна — снова).
+    // The game window is in the center of the monitor on top of the background (after changing the window size - again).
     public static void Recenter()
     {
         if (!Active || !OperatingSystem.IsWindows()) return;
@@ -112,7 +113,7 @@ public static class FullscreenBackdrop
         SetWindowPos(console, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
     }
 
-    // Размер монитора, на котором окно игры (для масштаба во весь экран).
+    // Size of the monitor on which the game window is displayed (for full-screen scaling).
     public static (int width, int height) MonitorSize()
     {
         if (!OperatingSystem.IsWindows()) return (1920, 1080);
@@ -143,7 +144,7 @@ public static class FullscreenBackdrop
                 hCursor = LoadCursor(IntPtr.Zero, IDC_ARROW),
                 lpszClassName = cls,
             };
-            RegisterClassEx(ref wc);   // повторная регистрация после выключения — ошибка, класс уже есть: не мешает
+            RegisterClassEx(ref wc);   // re-registration after shutdown - error, class already exists: does not interfere
             _backdrop = CreateWindowEx(WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, cls, "NaviDnD", WS_POPUP | WS_VISIBLE,
                 mon.Left, mon.Top, mon.Right - mon.Left, mon.Bottom - mon.Top, IntPtr.Zero, IntPtr.Zero, hInstance, IntPtr.Zero);
         }
@@ -160,7 +161,7 @@ public static class FullscreenBackdrop
     {
         switch (msg)
         {
-            case WM_MOUSEACTIVATE: return MA_NOACTIVATE;   // клик по подложке не уводит фокус от игры
+            case WM_MOUSEACTIVATE: return MA_NOACTIVATE;   // clicking on the background does not take focus away from the game
             case WM_CLOSE: DestroyWindow(hWnd); return IntPtr.Zero;
             case WM_DESTROY: PostQuitMessage(0); return IntPtr.Zero;
         }

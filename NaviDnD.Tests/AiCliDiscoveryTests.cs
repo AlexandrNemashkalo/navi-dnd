@@ -50,7 +50,7 @@ public class AiCliDiscoveryTests
         finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
     }
 
-    // macOS/Linux: в папке bin у npm/nvm/Homebrew лежит сам запускатель; он должен быть исполняемым.
+    // macOS/Linux: in the bin folder of npm/nvm/Homebrew there is the launcher itself; it must be executable.
     private static void LauncherInBinFolderIsFoundOnUnix(string name)
     {
         string root = Path.Combine(Path.GetTempPath(), "discovery-" + Guid.NewGuid().ToString("N"));
@@ -59,7 +59,7 @@ public class AiCliDiscoveryTests
         {
             Directory.CreateDirectory(bin);
             File.WriteAllText(Path.Combine(bin, name), "fixture");
-            Assert.Null(AiCliDiscovery.Find(name, [bin], []));   // не исполняемый
+            Assert.Null(AiCliDiscovery.Find(name, [bin], []));   // not executable
             string exe = Fixture(Path.Combine(bin, name));
             Assert.Equal(exe, AiCliDiscovery.Find(name, [bin], []));
             Assert.Null(AiCliDiscovery.Find(name, [Path.Combine(root, "missing")], []));
@@ -67,7 +67,7 @@ public class AiCliDiscoveryTests
         finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
     }
 
-    // Обёртка терминала на сеанс (cmux) раньше в PATH пропускается — берётся настоящий CLI за ней.
+    // The terminal wrapper for the session (cmux) previously in PATH is skipped - the real CLI is taken after it.
     [Fact]
     public void TerminalShimIsSkippedForRealCli()
     {
@@ -83,7 +83,7 @@ public class AiCliDiscoveryTests
         finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
     }
 
-    // Файл для теста; вне Windows помечается исполняемым — там поиск этого требует.
+    // Test file; outside Windows is marked executable - there the search requires it.
     private static string Fixture(string path)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
@@ -92,7 +92,7 @@ public class AiCliDiscoveryTests
         return path;
     }
 
-    // Имя исполняемого файла на этой ОС.
+    // The name of the executable file on this OS.
     private static string Exe(string name) => OperatingSystem.IsWindows() ? name + ".exe" : name;
 
     [Theory]
@@ -182,7 +182,7 @@ public class AiCliDiscoveryTests
     [Fact]
     public void MacDesktopBundledCliIsFoundInsideItsAppBundle()
     {
-        if (OperatingSystem.IsWindows()) return;   // раскладка Windows: DesktopSearchUsesNewestCompleteVersionAndRepairsSavedPath
+        if (OperatingSystem.IsWindows()) return;   // layout Windows: DesktopSearchUsesNewestCompleteVersionAndRepairsSavedPath
         string root = Path.Combine(Path.GetTempPath(), "desktop-discovery-" + Guid.NewGuid().ToString("N"));
         try
         {

@@ -5,8 +5,9 @@ public static class ColorHelper
     private static List<int> _currentForeground;
     private static List<int> _currentBackground;
 
-    // Очистить экран фоном bg: Console.Clear заливает текущим ANSI-фоном — если до этого строка карты мира оставила
-    // свой фон (вода), им залилась бы и строка под рамкой, которую потом никто не перерисовывает.
+    // Clear the screen with background bg: Console.Clear fills with the current ANSI-background - if before
+    // this the line of the world map left its background (water), the line under the frame would also be filled
+    // with it, which then no one redraws.
     public static void ClearScreen(List<int> bg, List<int> fg)
     {
         SetBackgroundColor(bg);
@@ -85,7 +86,7 @@ public static class ColorHelper
         };
     }
 
-    /// <summary>Смешивает цвет с белым, сохраняя оттенок. factor — доля белого (0..1).</summary>
+    /// <summary>Blends color with white while maintaining the hue. factor — white fraction (0..1).</summary>
     public static List<int> Pale(List<int> color, double whiteMix = 0.15)
     {
         if (color == null || color.Count != 3) return color;
@@ -108,7 +109,7 @@ public static class ColorHelper
         ];
     }
 
-    /// <summary>Усиливает насыщенность, удаляя каналы от среднего значения.</summary>
+    /// <summary>Increases saturation by moving channels away from the average.</summary>
     public static List<int> Saturate(List<int> color, double factor = 2.0)
     {
         if (color == null || color.Count != 3) return color;

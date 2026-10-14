@@ -2,27 +2,26 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.MapGen.Generators;
 
-// Генератор карты мира (WorldMap) — целиком кодом, по seed воспроизводимо:
-// 1) рельеф: шум высот + маска материка (малый мир — один материк, большой — 2–3 массива), горные хребты
-//    гребневым шумом; уровень моря — по доле суши;
-// 2) климат: температура от широты (север холоднее) и высоты, влажность — шумом → биомы;
-// 3) реки и озёра: «заливка» от моря (priority flood) даёт сток каждой клетки, накопленный сток — реки,
-//    глубокие котловины — озёра;
-// 4) поселения по удобству места (реки, побережье, равнины): столицы → города → городки → деревни, с отступами;
-// 5) королевства растут от столиц по «стоимости пути» (горы и реки — естественные границы);
-// 6) дороги — кратчайшие пути между поселениями (тракты между крупными, тропы к деревням);
-// 7) места приключений в глуши: руины, подземелья, пещеры, святилища; крепости у границ;
-// 8) природные области (леса, горы, болота, пустыни, озёра) с названиями для подписей.
-// Имена — слоговые, временные: нейронка позже даёт свои (этап 2).
+// World map generator (WorldMap) - entirely in code, reproducible using seed: 1) terrain: height noise +
+// continent mask (small world - one continent, large - 2-3 massifs), mountain ranges with ridge noise; sea
+// level - by land share; 2) climate: temperature from latitude (the north is colder) and altitude, humidity -
+// noise → biomes; 3) rivers and lakes: “filling” from the sea (priority flood) gives the flow of each cell, the
+// accumulated flow is rivers, deep basins are lakes; 4) settlements according to the convenience of the place
+// (rivers, coast, plains): capitals → cities → towns → villages, with indents; 5) kingdoms grow from capitals
+// according to the “cost of travel” (mountains and rivers are natural borders); 6) roads - the shortest routes
+// between settlements (roads between large ones, paths to villages); 7) places of adventure in the wilderness:
+// ruins, dungeons, caves, sanctuaries; fortresses at the borders; 8) natural areas (forests, mountains, swamps,
+// deserts, lakes) with names for captions. Names are syllabic, temporary: the AI later gives its own (stage 2).
 public static class WorldGenerator
 {
-    // Параметры мира (анкета новой игры): Water — вода (-2 очень мало … 0 обычно … 2 очень много), Climate —
-    // -2 ледяной … 0 умеренный … 2 жаркий, Kingdoms — число королевств (0 — по размеру мира), Continents — число
-    // материков (0 — по размеру мира), Mountains/Forests/Deserts/Rivers — -3 нет, -2 очень мало … 0 обычно … 2 очень много.
+    // World parameters (new game questionnaire): Water - water (-2 very little... 0 usually... 2 very much),
+    // Climate - -2 icy... 0 moderate... 2 hot, Kingdoms - number of kingdoms (0 - according to the size of the
+    // world), Continents - number of continents (0 - according to the size of the world),
+    // Mountains/Forests/Deserts/Rivers - -3 no, -2 very little... 0 usually... 2 very much.
     public sealed record Options(int Seed, string Size = WorldSizes.Small, string? Name = null, int Water = 0, int Climate = 0, int Kingdoms = 0,
         int Continents = 0, int Mountains = 0, int Forests = 0, int Deserts = 0, int Rivers = 0, string Language = L.Russian);
 
-    // Имя мира по умолчанию (свой источник случайности — не совпадает с именами столиц этого seed).
+    // Default world name (its own source of randomness - does not match the names of the capitals of this seed).
     public static string DefaultName(int seed, string language) => new NameGen(new Random(seed ^ 0x77a1), language).Proper();
 
     private sealed class Ctx
@@ -31,14 +30,14 @@ public static class WorldGenerator
         public required Random Rng;
         public required int Seed;
         public double[,] Height = null!;      // 0..1
-        public double Sea;                    // уровень моря
+        public double Sea;                    // sea level
         public char[,] Biome = null!;
         public double[,] Moist = null!;
         public int[,] River = null!;          // 0..9
         public int[,] Road = null!;           // 0..2
-        public int[,] Owner = null!;          // -1 / индекс королевства
-        public double[,] Acc = null!;         // накопленный сток
-        public double[,] Wander = null!;      // множитель цены шага дороги (плавный шум) — дороги петляют
+        public int[,] Owner = null!;          // -1 / kingdom index
+        public double[,] Acc = null!;         // accumulated flow
+        public double[,] Wander = null!;      // road step price multiplier (smooth noise) - roads winding
         public bool Large;
         public int Water, Climate, KingdomCount, Continents, Mountains, Forests, Deserts, RiverAmount;
     }
@@ -98,11 +97,12 @@ public static class WorldGenerator
         return map;
     }
 
-    // Острова: отдельные участки суши меньше главного материка — с названием (подпись на карте). Код острова
-    // в WorldFeature.Biome — IslandCode. Можно вызвать и для уже сохранённого мира без островов.
+    // Islands: individual land areas smaller than the main continent - with a name (label on the map). The
+    // island code in WorldFeature.Biome is IslandCode. Can also be called for an already saved world without
+    // islands.
     public const char IslandCode = 'I';
 
-    // Места, стоящие на реке или воде (миры старых версий), — на ближайшую сухую клетку рядом.
+    // Places located on a river or water (worlds of old versions) - to the nearest dry square nearby.
     public static void MovePlacesOffWater(WorldMap map)
     {
         bool Dry(int x, int y) => map.InBounds(x, y) && map.RiverAt(x, y) == 0 && !WorldBiomes.IsWater(map.BiomeAt(x, y));
@@ -143,7 +143,7 @@ public static class WorldGenerator
         int largest = masses.Max(m => m.Count);
         foreach (var mass in masses)
         {
-            // Материки (крупные массивы) — без подписи; острова — от 4 клеток.
+            // Continents (large massifs) - without signature; islands - from 4 cells.
             if (mass.Count < 4 || mass.Count > largest * 0.35) continue;
             double cx = mass.Average(p => p.x), cy = mass.Average(p => p.y);
             var anchor = mass.MinBy(p => Dist(p.x, p.y, cx, cy));
@@ -153,13 +153,13 @@ public static class WorldGenerator
         static bool IsSea(char b) => b is WorldBiomes.Ocean or WorldBiomes.Sea;
     }
 
-    // ── 1. Рельеф ───────────────────────────────────────────────────────────
+    // ── 1. Terrain ───────────────────────────── ──────────────────────────────
     private static void Relief(Ctx c)
     {
         c.Height = new double[c.W, c.H];
         var rng = c.Rng;
-        // Массивы суши (материки): по умолчанию малый мир — один, большой — 2–3; задано — столько, разнесены по
-        // ширине мира (меньше и дальше друг от друга, чтобы не сливались).
+        // Land masses (continents): by default, small world is one, large world is 2–3; given - so many, spaced
+        // across the width of the world (smaller and further from each other, so as not to merge).
         int masses = c.Continents > 0 ? c.Continents : c.Large ? rng.Next(2, 4) : 1;
         var blobs = new List<(double x, double y, double r)>();
         for (int i = 0; i < masses; i++)
@@ -190,7 +190,7 @@ public static class WorldGenerator
         for (int x = 0; x < c.W; x++)
             for (int y = 0; y < c.H; y++)
             {
-                // Искажение координат — берег не круглый.
+                // Distortion of coordinates - the coast is not round.
                 double wx = x + 14 * (Fbm(x / scale, y / scale, s + 11, 3) - 0.5) * (c.Large ? 2 : 1.3);
                 double wy = y + 14 * (Fbm(x / scale, y / scale, s + 13, 3) - 0.5) * (c.Large ? 2 : 1.3);
                 double mask = 0, d1 = double.MaxValue, d2 = double.MaxValue;
@@ -200,10 +200,10 @@ public static class WorldGenerator
                     mask = Math.Max(mask, 1 - d);
                     if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) d2 = d;
                 }
-                // Заданное число материков — между ними пролив (там, где точка почти одинаково близка к двум центрам).
+                // A given number of continents - a strait between them (where the point is almost equally close to the two centers).
                 if (c.Continents > 1 && d2 < double.MaxValue)
                     mask -= 0.9 * Math.Clamp(1 - (d2 - d1) * 3.5, 0, 1);
-                // Края карты всегда море.
+                // The edges of the map are always the sea.
                 double edge = Math.Min(Math.Min(x, c.W - 1 - x) / (c.W * 0.08), Math.Min(y, c.H - 1 - y) / (c.H * 0.08));
                 double e = Math.Clamp(edge, 0, 1);
                 mask = mask * e - (1 - e) * 0.5;
@@ -211,12 +211,12 @@ public static class WorldGenerator
                 double h = 0.55 * n + 0.75 * mask;
                 c.Height[x, y] = h;
             }
-        // Уровень моря — по доле суши.
+        // Sea level - by land share.
         var all = new List<double>(c.W * c.H);
         foreach (var v in c.Height) all.Add(v);
         all.Sort();
         c.Sea = all[(int)(all.Count * Math.Clamp((c.Large ? 0.52 : 0.58) + 0.11 * c.Water, 0.25, 0.82))];
-        // Хребты: гребневой шум на суше.
+        // Ridges: ridge noise on land.
         double max = all[^1];
         for (int x = 0; x < c.W; x++)
             for (int y = 0; y < c.H; y++)
@@ -231,7 +231,7 @@ public static class WorldGenerator
         c.Sea = 0.3;
     }
 
-    // ── 2. Климат → биомы ───────────────────────────────────────────────────
+    // ── 2. Climate → biomes ───────────────────────── ──────────────────────────
     private static void Climate(Ctx c)
     {
         c.Biome = new char[c.W, c.H];
@@ -249,8 +249,9 @@ public static class WorldGenerator
                 double lat = y / (double)c.H;
                 double temp = (c.Large ? 0.08 + 0.85 * lat : 0.32 + 0.42 * lat)
                     + 0.12 * (Fbm(x / scale, y / scale, s + 47, 2) - 0.5) - 0.45 * land + 0.16 * c.Climate;
-                // Пороги сдвигаются параметрами: больше гор — ниже пороги высот, больше лесов/пустынь — шире их полосы;
-                // «нет» (-3) — порог недостижим (гор нет — остаются холмы).
+                // Thresholds are shifted by parameters: more mountains - lower height thresholds, more
+                // forests/deserts - wider range; “no” (-3) - the threshold is unattainable (there are no
+                // mountains - only hills remain).
                 bool noMt = c.Mountains <= -3;
                 double mt = noMt ? -0.23 : 0.12 * c.Mountains, fo = c.Forests <= -3 ? -1 : 0.08 * c.Forests, de = c.Deserts <= -3 ? -1 : 0.09 * c.Deserts;
                 c.Biome[x, y] = land switch
@@ -259,7 +260,7 @@ public static class WorldGenerator
                     _ when !noMt && land > 0.68 - mt => WorldBiomes.Mountains,
                     _ when land > 0.52 - mt => temp < 0.12 ? WorldBiomes.Tundra : WorldBiomes.Hills,
                     _ => temp < 0.06 ? WorldBiomes.Snow
-                        : temp < 0.24 && m > 0.5 - fo ? WorldBiomes.SnowForest   // холодно и влажно — тайга
+                        : temp < 0.24 && m > 0.5 - fo ? WorldBiomes.SnowForest   // cold and humid - taiga
                         : temp < 0.16 ? WorldBiomes.Tundra
                         : temp > 0.62 - de && m < 0.42 + de ? WorldBiomes.Desert
                         : m > 0.7 && land < 0.12 ? WorldBiomes.Swamp
@@ -269,7 +270,7 @@ public static class WorldGenerator
                         : WorldBiomes.Plains,
                 };
             }
-        // Вода у берега — прибрежная; низкий берег — песок/галька.
+        // Water near the shore - coastal; low shore - sand/pebbles.
         var coastDist = DistanceToLand(c);
         for (int x = 0; x < c.W; x++)
             for (int y = 0; y < c.H; y++)
@@ -300,7 +301,7 @@ public static class WorldGenerator
         return d;
     }
 
-    // ── 3. Реки и озёра ─────────────────────────────────────────────────────
+    // ── 3. Rivers and lakes ────────────────────────── ───────────────────────────
     private static void Rivers(Ctx c)
     {
         int W = c.W, H = c.H;
@@ -332,7 +333,7 @@ public static class WorldGenerator
             }
         }
 
-        // Озёра — котловины глубже порога (связные области ≥ 3 клеток).
+        // Lakes are basins deeper than the threshold (connected areas ≥ 3 cells).
         var lakeMask = new bool[W, H];
         for (int x = 0; x < W; x++)
             for (int y = 0; y < H; y++)
@@ -341,7 +342,7 @@ public static class WorldGenerator
             if (region.Count >= 4)
                 foreach (var (x, y) in region) c.Biome[x, y] = WorldBiomes.Lake;
 
-        // Накопленный сток: от верхних клеток к нижним (обратный порядок заливки).
+        // Accumulated drainage: from the top cells to the bottom (reverse filling order).
         c.Acc = new double[W, H];
         for (int i = order.Count - 1; i >= 0; i--)
         {
@@ -359,12 +360,12 @@ public static class WorldGenerator
             {
                 if (WorldBiomes.IsWater(c.Biome[x, y]) || c.Acc[x, y] < threshold) continue;
                 c.River[x, y] = Math.Clamp(1 + (int)(Math.Log(c.Acc[x, y] / threshold, 2) * 1.6), 1, 9);
-                // Река увлажняет берега: сухие равнины у реки — луга.
+                // The river moistens the banks: the dry plains near the river are meadows.
                 if (c.Biome[x, y] == WorldBiomes.Desert && c.River[x, y] >= 3) c.Biome[x, y] = WorldBiomes.Grass;
             }
     }
 
-    // ── 4. Поселения ────────────────────────────────────────────────────────
+    // ── 4. Settlements ──────────────────────────── ────────────────────────────
     private static double Habitability(Ctx c, int x, int y)
     {
         double b = c.Biome[x, y] switch
@@ -395,7 +396,7 @@ public static class WorldGenerator
             for (int y = 1; y < c.H - 1; y++)
             {
                 if (!WorldBiomes.IsWater(c.Biome[x, y])) landArea++;
-                double s = c.River[x, y] > 0 ? 0 : Habitability(c, x, y);   // у реки — да, на самой реке — нет
+                double s = c.River[x, y] > 0 ? 0 : Habitability(c, x, y);   // by the river - yes, on the river itself - no
                 if (s > 0) candidates.Add((x, y, s));
             }
         candidates.Sort((a, b) => b.s.CompareTo(a.s));
@@ -422,7 +423,7 @@ public static class WorldGenerator
         return places;
     }
 
-    // ── 5. Королевства ──────────────────────────────────────────────────────
+    // ── 5. Kingdoms ─────────────────────────── ───────────────────────────
     private static double MoveCost(Ctx c, int x, int y) => c.Biome[x, y] switch
     {
         WorldBiomes.Plains or WorldBiomes.Grass or WorldBiomes.Beach => 1,
@@ -431,7 +432,7 @@ public static class WorldGenerator
         WorldBiomes.Swamp or WorldBiomes.Snow => 4,
         WorldBiomes.Mountains => 9,
         WorldBiomes.Peaks => 25,
-        _ => double.PositiveInfinity, // вода
+        _ => double.PositiveInfinity, // water
     };
 
     private static readonly List<int>[] KingdomColors =
@@ -471,7 +472,7 @@ public static class WorldGenerator
                 if (!In(c, n) || c.Owner[n.x, n.y] >= 0) continue;
                 double step = MoveCost(c, n.x, n.y);
                 if (double.IsInfinity(step)) continue;
-                if (c.River[n.x, n.y] >= 4) step += 2; // большие реки — граница
+                if (c.River[n.x, n.y] >= 4) step += 2; // big rivers - border
                 double nc = cost[x, y] + step;
                 if (nc > maxCost || nc >= cost[n.x, n.y]) continue;
                 cost[n.x, n.y] = nc;
@@ -482,17 +483,17 @@ public static class WorldGenerator
         return kingdoms;
     }
 
-    // ── 6. Дороги ───────────────────────────────────────────────────────────
+    // ── 6. Roads ───────────────────────────── ──────────────────────────────
     private static void RoadsBetween(Ctx c, List<WorldPlace> places)
     {
         c.Road = new int[c.W, c.H];
         c.Wander = new double[c.W, c.H];
         for (int x = 0; x < c.W; x++)
             for (int y = 0; y < c.H; y++)
-                // Координаты шума повёрнуты: у решёточного шума «дешёвые коридоры» вдоль осей — дороги шли бы по ним прямо.
+                // The coordinates of the noise are rotated: the grid noise has “cheap corridors” along the axes - the roads would go straight along them.
                 c.Wander[x, y] = 0.35 + 2.4 * Math.Clamp((Fbm((x * 0.8 + y * 0.6) / 5.0, (y * 0.8 - x * 0.6) / 5.0, c.Seed + 71, 3) - 0.5) * 3 + 0.5, 0, 1);
         var big = places.Where(p => p.Type is WorldPlaceTypes.Capital or WorldPlaceTypes.City or WorldPlaceTypes.Town or WorldPlaceTypes.Port).ToList();
-        // Тракты: остовное дерево по крупным поселениям (по прямой дистанции) — потом прокладка по рельефу.
+        // Roads: spanning tree for large settlements (along a straight line) - then laying out along the terrain.
         var connected = new List<WorldPlace>();
         var rest = big.OrderByDescending(p => p.Type == WorldPlaceTypes.Capital).ToList();
         if (rest.Count > 0) { connected.Add(rest[0]); rest.RemoveAt(0); }
@@ -503,8 +504,8 @@ public static class WorldGenerator
             connected.Add(to);
             rest.Remove(to);
         }
-        // Тропы к деревням и местам приключений — не заранее: прокладываются, когда место появляется в игре
-        // (GameWorld, WorldAtlas.TrailFrom).
+        // Paths to villages and adventure places - not in advance: they are laid when the place appears in the
+        // game (GameWorld, WorldAtlas.TrailFrom).
 
         void Build(WorldPlace a, WorldPlace b, int level)
         {
@@ -514,10 +515,11 @@ public static class WorldGenerator
         }
     }
 
-    // Путь дороги: ходы по сторонам и диагоналям; цена — рельеф × плавный шум (дорога петляет, а не идёт прямой
-    // с поворотом под прямым углом) + подъём (огибает холмы). Готовая дорога дешёвая (дороги сливаются), новая
-    // переправа — дорогая. Диагональный ход в результате раскладывается на два по сторонам через более дешёвую
-    // клетку (дороги на карте связаны по сторонам, лесенка рисуется ровной наклонной линией).
+    // Road path: moves along the sides and diagonals; price - terrain × smooth noise (the road winds, and does
+    // not go straight with a right angle turn) + ascent (goes around the hills). The finished road is cheap
+    // (the roads merge), the new crossing is expensive. As a result, the diagonal move is divided into two on
+    // the sides through a cheaper cell (the roads on the map are connected on the sides, the ladder is drawn as
+    // a straight inclined line).
     private static List<(int x, int y)>? PathFind(Ctx c, (int x, int y) from, (int x, int y) to)
     {
         double Cost(int x, int y, int px, int py)
@@ -546,7 +548,7 @@ public static class WorldGenerator
                 {
                     if (q.Item1 != p.x && q.Item2 != p.y)
                     {
-                        // Диагональ — через более дешёвую из двух клеток по сторонам.
+                        // Diagonal - through the cheaper of the two cells on the sides.
                         (int, int) a = (q.Item1, p.y), b = (p.x, q.Item2);
                         path.Add(Cost(a.Item1, a.Item2, p.x, p.y) <= Cost(b.Item1, b.Item2, p.x, p.y) ? a : b);
                     }
@@ -564,8 +566,8 @@ public static class WorldGenerator
                 bool diag = n.x != p.x && n.y != p.y;
                 if (diag)
                 {
-                    // Срезать угол можно, только если хотя бы одна клетка по сторонам проходима; через реку
-                    // по диагонали — как переправа.
+                    // You can cut a corner only if at least one cell on the sides is passable; across the river
+                    // diagonally - like a crossing.
                     double a = Cost(n.x, p.y, p.x, p.y), b = Cost(p.x, n.y, p.x, p.y);
                     if (double.IsInfinity(a) && double.IsInfinity(b)) continue;
                     step = step * 1.41 + (c.River[n.x, p.y] > 0 && c.River[p.x, n.y] > 0 ? 14 : 0);
@@ -580,7 +582,7 @@ public static class WorldGenerator
         return null;
     }
 
-    // ── 7. Глушь: места приключений и крепости ──────────────────────────────
+    // ── 7. Wilderness: places of adventure and fortresses ──────────────────────────────
     private static void Wilds(Ctx c, List<WorldPlace> places, NameGen names)
     {
         var settlements = places.Where(p => WorldPlaceTypes.IsSettlement(p.Type)).ToList();
@@ -604,7 +606,7 @@ public static class WorldGenerator
             places.Add(new WorldPlace { Type = type, X = x, Y = y, Kingdom = c.Owner[x, y], Name = names.Site(type) });
             total--;
         }
-        // Крепости — на холмах у границ королевств.
+        // Fortresses - on the hills near the borders of the kingdoms.
         int castles = c.Large ? c.Rng.Next(5, 9) : c.Rng.Next(1, 3);
         for (int attempt = 0; attempt < castles * 200 && castles > 0; attempt++)
         {
@@ -621,7 +623,7 @@ public static class WorldGenerator
         }
     }
 
-    // ── 8. Природные области ────────────────────────────────────────────────
+    // ── 8. Natural areas ──────────────────────── ────────────────────────
     private static List<WorldFeature> Features(Ctx c, NameGen names)
     {
         var list = new List<WorldFeature>();
@@ -647,7 +649,7 @@ public static class WorldGenerator
         return list;
     }
 
-    // ── Вспомогательное ────────────────────────────────────────────────────
+    // ── Auxiliary ────────────────────────── ──────────────────────────
     private static IEnumerable<List<(int x, int y)>> Regions(Ctx c, Func<int, int, bool> match)
     {
         var seen = new bool[c.W, c.H];
@@ -712,7 +714,7 @@ public static class WorldGenerator
         return (h & 0xFFFFFF) / (double)0xFFFFFF;
     }
 
-    // ── Имена (временные, слоговые) — на языке мира ──────────────────────────
+    // ── Names (temporal, syllabic) - in the language of the world ──────────────────────────
     private sealed class NameGen(Random rng, string language)
     {
         private readonly HashSet<string> _used = [];

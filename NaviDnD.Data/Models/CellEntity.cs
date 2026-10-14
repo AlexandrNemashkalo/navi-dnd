@@ -28,12 +28,12 @@ public class CellTriggers
     public TriggerEffect? OnStep { get; set; }
     public TriggerEffect? OnVisible { get; set; }
 
-    // Только у существ. Срабатывает в момент, когда существо НАЧИНАЕТ видеть героя (вход в поле
-    // зрения), если оно не в инициативе. Постоянный: не снимается после срабатывания — при
-    // следующей встрече сработает снова.
+    // Only on creatures. Triggers at the moment when the creature STARTS seeing the hero (entering the field of
+    // view), if it is not in the initiative. Permanent: not removed after triggering - will trigger again at
+    // the next meeting.
     public TriggerEffect? Spotted { get; set; }
 
-    // Только у существ. Раз в раунд (через «Начался раунд N»), если существо видит героя.
+    // Only on creatures. Once per round (via "Round N has begun") if the creature sees the hero.
     public TriggerEffect? OnRound { get; set; }
 }
 

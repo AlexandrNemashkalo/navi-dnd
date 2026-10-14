@@ -3,10 +3,11 @@ using System.Text.Json;
 
 namespace NaviDnD.Installer;
 
-// Описание обновлений релиза (releases/NaviDnD-updates.json, ссылка в GitLab Release): неизменная база (полная сборка
-// частями — для первой установки и восстановления), установщик-помощник и цепочка патчей от базы до текущей версии.
-// Каждый файл — со ссылкой на тег, где он опубликован, и SHA256: неизменные части не отправляются заново.
-// У macOS своя цепочка (NaviDnD-macOS-updates.json): файлы игры другие, помощника нет — патчи ставит сама игра.
+// Description of release updates (releases/NaviDnD-updates.json, link in GitLab Release): unchangeable base
+// (complete assembly in parts - for first installation and recovery), assistant installer and chain of patches
+// from the base to the current version. Each file is with a link to the tag where it is published, and SHA256:
+// unchangeable parts are not sent again. macOS has its own chain (NaviDnD-macOS-updates.json): game files are
+// different, there is no assistant - the game itself installs the patches.
 internal sealed record UpdateFile(string Name, string Url, string Sha256, long Size);
 internal sealed record UpdatePatch(string From, string To, string Name, string Url, string Sha256, long Size);
 internal sealed record UpdateBase(string Version, UpdateFile[] Files);
@@ -16,7 +17,7 @@ internal sealed record UpdateManifest(int Format, string Version, UpdateBase Bas
     internal const string MacFileName = "NaviDnD-macOS-updates.json";
     internal const string MacPayloadPrefix = "NaviDnD-macOS-payload.";
     internal const string InstallerName = "NaviDnD-Setup-win-x64.exe";
-    // Помощник обновления в папке игры: копия установщика, запускается из временной папки (файлы игры не заняты).
+    // Update assistant in the game folder: a copy of the installer, launched from a temporary folder (game files are not occupied).
     internal const string HelperPath = "Updater/" + InstallerName;
     private const string UrlPrefix = "https://gitlab.com/navitalevich/navi-dnd/-/raw/";
 
@@ -24,51 +25,51 @@ internal sealed record UpdateManifest(int Format, string Version, UpdateBase Bas
 
     internal static UpdateManifest Parse(string json, bool macOS = false)
     {
-        var manifest = JsonSerializer.Deserialize<UpdateManifest>(json, Json) ?? throw new InvalidDataException(L.T("Пустое описание обновлений."));
+        var manifest = JsonSerializer.Deserialize<UpdateManifest>(json, Json) ?? throw new InvalidDataException(L.T("Empty update description."));
         manifest.Validate(macOS);
         return manifest;
     }
 
     private void Validate(bool macOS)
     {
-        if (Format != 1) throw new InvalidDataException(L.T("Неизвестный формат описания обновлений."));
+        if (Format != 1) throw new InvalidDataException(L.T("Unknown update description format."));
         if (Base?.Files is not { Length: > 0 } || (Installer == null) != macOS || Patches == null)
-            throw new InvalidDataException(L.T("Неполное описание обновлений."));
+            throw new InvalidDataException(L.T("Incomplete update description."));
         ParseVersion(Version);
         ParseVersion(Base.Version);
         for (int i = 0; i < Base.Files.Length; i++)
         {
             Check(Base.Files[i].Name, Base.Files[i].Url, Base.Files[i].Sha256);
-            if (Base.Files[i].Name != (macOS ? MacPayloadPrefix : "NaviDnD-payload.") + $"{i + 1:D3}") throw new InvalidDataException(L.T("Части базы перечислены не по порядку."));
+            if (Base.Files[i].Name != (macOS ? MacPayloadPrefix : "NaviDnD-payload.") + $"{i + 1:D3}") throw new InvalidDataException(L.T("Base parts are listed out of order."));
         }
         if (Installer != null) Check(Installer.Name, Installer.Url, Installer.Sha256);
-        if (Installer != null && Installer.Name != InstallerName) throw new InvalidDataException(L.T("Некорректное имя установщика."));
-        // Цепочка патчей без разрывов: база → … → текущая версия, каждая версия старше предыдущей.
+        if (Installer != null && Installer.Name != InstallerName) throw new InvalidDataException(L.T("Invalid installer name."));
+        // Chain of patches without breaks: base → ... → current version, each version is older than the previous one.
         string at = Base.Version;
         foreach (var patch in Patches)
         {
             Check(patch.Name, patch.Url, patch.Sha256);
             if (patch.From != at || ParseVersion(patch.To) <= ParseVersion(patch.From))
-                throw new InvalidDataException(L.T("Разрыв в цепочке патчей."));
+                throw new InvalidDataException(L.T("Gap in the patch chain."));
             at = patch.To;
         }
-        if (at != Version) throw new InvalidDataException(L.T("Цепочка патчей не доходит до версии релиза."));
+        if (at != Version) throw new InvalidDataException(L.T("The patch chain doesn't reach the release version."));
     }
 
     private static void Check(string name, string url, string sha256)
     {
         if (string.IsNullOrEmpty(name) || name.IndexOfAny(['/', '\\', ':']) >= 0 || name.StartsWith('.'))
-            throw new InvalidDataException(L.T("Некорректное имя файла обновления."));
+            throw new InvalidDataException(L.T("Invalid update file name."));
         if (!url.StartsWith(UrlPrefix, StringComparison.Ordinal) || !Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Host != "gitlab.com")
-            throw new InvalidDataException(L.T("Некорректный адрес обновления."));
-        if (sha256 is not { Length: 64 } || !sha256.All(Uri.IsHexDigit)) throw new InvalidDataException(L.T("Некорректная контрольная сумма."));
+            throw new InvalidDataException(L.T("Invalid update address."));
+        if (sha256 is not { Length: 64 } || !sha256.All(Uri.IsHexDigit)) throw new InvalidDataException(L.T("Invalid checksum."));
     }
 
     internal static Version ParseVersion(string text) =>
         System.Version.TryParse(text, out var version) && version.Build >= 0 && version.Revision < 0
-            ? version : throw new InvalidDataException(L.T("Некорректная версия: ") + text);
+            ? version : throw new InvalidDataException(L.T("Invalid version: ") + text);
 
-    // Патчи от установленной версии до текущей; null — версии нет в цепочке (нужна полная установка базы).
+    // Patches from the installed version to the current one; null - the version is not in the chain (a complete installation of the database is required).
     internal UpdatePatch[]? PatchesFrom(string installed)
     {
         if (installed == Version) return [];

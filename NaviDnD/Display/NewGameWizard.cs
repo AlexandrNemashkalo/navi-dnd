@@ -6,10 +6,11 @@ using NaviDnD.MapGen.Generators;
 
 namespace NaviDnD.Display;
 
-// Новая игра по шагам, в стиле анкеты героя (рамки по центру, поля слева, превью справа): 1 МИР — новый (карта
-// сразу, концепция от нейронки по «ПРИДУМАТЬ») или мир, где уже играли; 2 ГЕРОЙ — анкета (NewGameDisplay: новый
-// или из библиотеки героев); 3 ПРИКЛЮЧЕНИЕ — после редактора: пожелания к сюжету и, по желанию, место старта
-// кликом по карте. Блоки: «МИР»/«ПРИКЛЮЧЕНИЕ» (выбор и поля), «КАРТА» (превью), «О МИРЕ» (концепция).
+// New game step by step, in the style of a hero profile (frames in the center, fields on the left, preview on
+// the right): 1 WORLD - new (map right away, concept from the AI using “IMAGE”) or a world where you have
+// already played; 2 HERO - profile (NewGameDisplay: new or from the library of heroes); 3 ADVENTURE - after the
+// editor: wishes for the plot and, if desired, the starting location by clicking on the map. Blocks:
+// “WORLD”/“ADVENTURE” (selection and fields), “MAP” (preview), “ABOUT THE WORLD” (concept).
 public class NewGameWizard
 {
     private readonly WorldState _settings;
@@ -18,12 +19,12 @@ public class NewGameWizard
     private readonly BorderDrawer _border;
     public int StartTop { get; }
 
-    // Заголовок экрана (шаги «[F1]МИР [F2]ГЕРОЙ …», «[Esc]МЕНЮ») — клики по нему; CanGo — на какой шаг уже можно.
+    // Screen title (steps “[F1]WORLD [F2]HERO ...”, “[Esc]MENU”) - click on it; CanGo - what step is already possible?
     public string Title = "";
     public Func<int, bool> CanGo = _ => false;
-    // Мир, с которым перешли дальше (шаг 1).
+    // The world with which we moved on (step 1).
     public string? ChosenWorldId { get; private set; }
-    // Состояние шага «Мир» между заходами на него (вернулся с другого шага — всё как было).
+    // State of the “World” step between visits to it (returned from another step - everything is as it was).
     private sealed class WorldPick
     {
         public List<WorldEntry> Entries = [];
@@ -32,12 +33,12 @@ public class NewGameWizard
         public string Name = "", DraftKey = "", NewDesc = "", Prompt = "";
         public bool NameEdited;
         public WorldMap? Draft;
-        public string? RegisteredId;   // мир этого создания игры, уже записанный в библиотеку
+        public string? RegisteredId;   // the world of this game creation, already recorded in the library
     }
     private WorldPick? _pick;
     private string? _titleHover;
-    private int _clickCol;   // колонка холста последнего клика (курсор в тексте по клику)
-    // Карта с выбором старта: клетка под курсором, перетаскивание (начало — запомнить камеру, сдвиг в символах).
+    private int _clickCol;   // canvas column of the last click (cursor in the text on click) Map with start selection: cell under the
+    // cursor, dragging (start - remember the camera, shift in characters).
     private (int col, int row)? _mapHover;
     private Action? MapPanBegin;
     private Action<int, int>? MapPan;
@@ -50,7 +51,7 @@ public class NewGameWizard
     private bool _frozen;
     private (int left, int top, int w, int h, WorldMapView view, WorldMap world)? _map;
     private string? _hovered;
-    // Что сейчас нарисовано на месте карты: та же карта (мир, концепция, отметка) — не перерисовывается.
+    // What is currently drawn in place of the map: the same map (world, concept, mark) - is not redrawn.
     private string? _mapDrawn;
     private (int left, int top, int w, int h)? _mapRect;
 
@@ -58,7 +59,7 @@ public class NewGameWizard
     private List<int> Bright => ColorHelper.Pale(_display.MainForeground, 0.75);
     private List<int> Dim => ColorHelper.Darker(_display.MainForeground, 0.5);
 
-    // Раскладка: форма 46, превью 68 (карта до 64×24 — весь мир), промежуток 3.
+    // Layout: form 46, preview 68 (map up to 64x24 - the whole world), gap 3.
     private const int FormWidth = 46, MapBoxWidth = 68, Gap = 3, MapW = 64, MapH = 24;
     private const int LabelCol = 3, ValueCol = 16;
     private const int TopBoxHeight = MapH + 2, InfoHeight = 9;
@@ -72,42 +73,42 @@ public class NewGameWizard
         StartTop = Term.CursorTop;
     }
 
-    // ── Шаг 1: мир ───────────────────────────────────────────────────────────
+    // ── Step 1: peace ───────────────────────────── ──────────────────────────────
 
-    // Мир в листалке: из библиотеки (Id), вариант этого создания игры (Draft — готов, в файл только если выбран)
-    // или новый (оба null).
+    // World in the list: from the library (Id), a variant of this game creation (Draft - ready, to the file
+    // only if selected) or new (both null).
     private sealed record WorldEntry(string? Id, string Label, WorldMap? Draft = null);
 
-    // Параметры нового мира: ←→ на поле — следующий вариант; карта сразу перестраивается (тот же seed).
-    // Сколько чего-то в мире; индекс 3 («обычно») — 0 у генератора, «нет» — -3.
-    private static string[] Amount => [L.T("нет"), L.T("очень мало"), L.T("мало"), L.T("обычно"), L.T("много"), L.T("очень много")];
+    // New world parameters: ←→ on the field - the next option; the map is immediately rebuilt (the same seed).
+    // How much of something is there in the world; index 3 (“usually”) is 0 for the generator, “no” is -3.
+    private static string[] Amount => [L.T("none"), L.T("very few"), L.T("few"), L.T("normal"), L.T("many"), L.T("very many")];
 
-    // def — вариант по умолчанию; для шкал он же «ноль» генератора (значение = индекс - def).
+    // def - default option; for scales it is also the “zero” of the generator (value = index - def).
     private static (string label, string[] options, int def)[] Params =>
     [
-        (L.T("РАЗМЕР"), [L.T("малый"), L.T("большой")], 0),
-        (L.T("КОНТИНЕНТЫ"), [L.T("авто"), "1", "2", "3", "4", "5"], 0),
-        (L.T("ВОДА"), [L.T("очень мало"), L.T("мало"), L.T("обычно"), L.T("много"), L.T("очень много")], 2),
-        (L.T("КЛИМАТ"), [L.T("ледяной"), L.T("холодный"), L.T("умеренный"), L.T("тёплый"), L.T("жаркий")], 2),
-        (L.T("ГОРЫ"), Amount, 3),
-        (L.T("ЛЕСА"), Amount, 3),
-        (L.T("ПУСТЫНИ"), Amount, 3),
-        (L.T("РЕКИ"), Amount, 3),
-        (L.T("КОРОЛЕВСТВ"), [L.T("авто"), "1", "2", "3", "4", "5", "6", "7", "8"], 0),
+        (L.T("SIZE"), [L.T("small"), L.T("large")], 0),
+        (L.T("CONTINENTS"), [L.T("auto"), "1", "2", "3", "4", "5"], 0),
+        (L.T("WATER"), [L.T("very few"), L.T("few"), L.T("normal"), L.T("many"), L.T("very many")], 2),
+        (L.T("CLIMATE"), [L.T("frozen"), L.T("cold"), L.T("temperate"), L.T("warm"), L.T("hot")], 2),
+        (L.T("MOUNTAINS"), Amount, 3),
+        (L.T("FORESTS"), Amount, 3),
+        (L.T("DESERTS"), Amount, 3),
+        (L.T("RIVERS"), Amount, 3),
+        (L.T("KINGDOMS"), [L.T("auto"), "1", "2", "3", "4", "5", "6", "7", "8"], 0),
     ];
 
     private const int DescHeight = 13, DescLines = 9;
 
-    // Смысловые группы параметров (земля / природа / народы) — с каких параметров начинаются; между группами пустая строка.
+    // Semantic groups of parameters (land / nature / peoples) - what parameters start with; There is an empty line between groups.
     private static readonly int[] ParamGroups = [3, 8];
 
     private static int GroupHeading(int p, int y, int left, int lx) => ParamGroups.Contains(p) ? y + 1 : y;
 
-    // Мир для новой игры: id мира библиотеки (новый — сохранён и сделан активным) или null — отмена (в меню).
-    // Слева «МИР» — рельеф и карта (параметры, «ДРУГАЯ КАРТА», «РАНДОМ»); справа «КАРТА»; снизу «ОПИСАНИЕ МИРА» —
-    // свой текст или правка, запрос к нейронке и «ПРИДУМАТЬ» (описание + имена королевств и столиц; до этого —
-    // имена от генератора).
-    // Возвращает шаг, на который перейти (2.. — мир выбран, ChosenWorldId), или 0 — выход в меню.
+    // World for a new game: id of the library world (new - saved and made active) or null - cancel (in the
+    // menu). On the left is “WORLD” - terrain and map (parameters, “OTHER MAP”, “RANDOM”); on the right is
+    // “MAP”; below “DESCRIPTION OF THE WORLD” - your text or edits, a request to the AI and “IMAGE”
+    // (description + names of kingdoms and capitals; before that - names from the generator). Returns the step
+    // to go to (2.. - the world is selected, ChosenWorldId), or 0 - exit to the menu.
     public async Task<int> PickWorld()
     {
         Begin();
@@ -116,7 +117,7 @@ public class NewGameWizard
         {
             _pick = new WorldPick { Seed = rnd.Next(), Param = [.. Params.Select(p => p.def)] };
             _pick.Name = WorldGenerator.DefaultName(_pick.Seed, L.Language);
-            _pick.Entries.Add(new(null, L.T("новый мир")));
+            _pick.Entries.Add(new(null, L.T("new world")));
             string? active = null;
             try { active = WorldLibrary.Current.Id; } catch { }
             foreach (var w in WorldLibrary.All().OrderBy(w => w.id == active ? 0 : 1))
@@ -126,30 +127,30 @@ public class NewGameWizard
         var entries = ps.Entries;
         int sel = Math.Clamp(ps.Sel, 0, entries.Count - 1);
         int seed = ps.Seed;
-        int[] param = ps.Param;   // индексы вариантов Params
+        int[] param = ps.Param;   // variant indexes Params
         string name = ps.Name;
         bool nameEdited = ps.NameEdited;
         WorldMap? draft = ps.Draft;
         string draftKey = ps.DraftKey;
-        // Описание мира (своё или от нейронки) и курсор в нём; запрос к нейронке.
+        // Description of the world (your own or from the AI) and the cursor in it; request to the AI.
         string? descFor = null;
-        string newDesc = ps.NewDesc;   // описание нового мира — хранится, пока листаешь готовые
-        bool descLocked = false;       // готовый мир с описанием — описание только читать
+        string newDesc = ps.NewDesc;   // description of the new world - stored while you flip through the finished ones
+        bool descLocked = false;       // ready-made world with description - read only description
         string desc = "";
         int descCur = 0;
-        int descScroll = 0, descW = 1;   // прокрутка описания (первая видимая строка), ширина текста
-        bool descFollow = true;          // прокрутка — за курсором (после правки); колесо — как прокрутил игрок
-        int lx0 = 0;                     // левый край блоков (для клика по тексту)
+        int descScroll = 0, descW = 1;   // scroll description (first visible line), text width
+        bool descFollow = true;          // scrolling - behind the cursor (after editing); wheel - how the player spun it
+        int lx0 = 0;                     // left edge of blocks (for clicking on text)
         string prompt = ps.Prompt;
-        // Фокус: 0 — мир, 1 — название, 2.. — параметры, FB — кнопки карты, FD — описание, FQ — запрос,
-        // FA — ПРИДУМАТЬ, FN — ДАЛЕЕ.
+        // Focus: 0 - world, 1 - name, 2.. - parameters, FB - map buttons, FD - description, FQ - request, FA -
+        // IMAGINE, FN - NEXT.
         int FB = 2 + Params.Length, FD = FB + 1, FQ = FD + 1, FA = FQ + 1, FN = FA + 1;
         int focus = 0;
         int mapAction = 0;
         Task<bool>? aiTask = null;
         WorldMap? aiWorld = null;
         string message = "";
-        bool confirmDelete = false;   // ждём [Enter] — удалить выбранный мир
+        bool confirmDelete = false;   // wait [Enter] - delete selected world
         int frame = 0;
 
         WorldMap Draft()
@@ -172,7 +173,7 @@ public class NewGameWizard
             var entry = entries[sel];
             bool isNew = entry.Id == null && entry.Draft == null;
             var world = entry.Draft ?? (isNew ? Draft() : WorldLibrary.Get(entry.Id)!);
-            // Описание — своё у каждого выбранного мира (готовый — из хроники).
+            // The description is different for each selected world (the finished one is from the chronicle).
             string worldKey = isNew ? "new" : entry.Id ?? "d:" + entry.Draft!.Id;
             if (descFor != worldKey)
             {
@@ -187,24 +188,24 @@ public class NewGameWizard
             {
                 if (aiTask.IsFaulted)
                     message = aiTask.Exception?.GetBaseException() is AiSetupException setup
-                        ? setup.Message : L.T("Нейронка не ответила — попробуй ещё раз.");
+                        ? setup.Message : L.T("The AI didn't respond — try again.");
                 else if (aiTask.IsCompletedSuccessfully && aiTask.Result && aiWorld == world)
                 {
                     desc = world.Chronicle.Description ?? desc;
                     descCur = desc.Length;
                     descScroll = 0;
-                    descFollow = false;   // новый текст — с начала
-                    if (!isNew) WorldLibrary.Save(world);   // мир из библиотеки — сразу в файл
+                    descFollow = false;   // new text - from the beginning
+                    if (!isNew) WorldLibrary.Save(world);   // world from the library - directly to file
                     message = "";
-                    prompt = "";   // запрос выполнен — строка ввода снова чистая
+                    prompt = "";   // request completed - input line is empty again
                 }
-                else if (!aiTask.IsCompletedSuccessfully || !aiTask.Result) message = L.T("Нейронка не ответила — попробуй ещё раз.");
+                else if (!aiTask.IsCompletedSuccessfully || !aiTask.Result) message = L.T("The AI didn't respond — try again.");
                 aiTask = null;
             }
             if (!Visible(focus)) focus = 0;
 
-            // ── Отрисовка ──
-            _frozen = aiTask != null;   // нейронка думает — ничего не нажимается
+            // ── Rendering ──
+            _frozen = aiTask != null;   // AI thinks - nothing is pressed
             Clear();
             int total = FormWidth + Gap + MapBoxWidth;
             int left = Math.Max(0, (_width - total) / 2);
@@ -212,17 +213,17 @@ public class NewGameWizard
             int blockH = TopBoxHeight + 1 + DescHeight + 1 + 3;
             int top = Math.Max(1, (_height - blockH) / 2);
 
-            // Блок «МИР»: рельеф и карта.
-            DrawBox(top, left, FormWidth, TopBoxHeight, L.T("МИР"));
+            // Block “WORLD”: terrain and map.
+            DrawBox(top, left, FormWidth, TopBoxHeight, L.T("WORLD"));
             int vx = left + ValueCol, lx = left + LabelCol, valueW = FormWidth - ValueCol - 3;
             int y = top + 2;
-            Label(y, lx, L.T("МИР"), focus == 0);
+            Label(y, lx, L.T("WORLD"), focus == 0);
             ChoiceValue(y, vx, valueW, entry.Label, focus == 0, "world", "f:0", $"{sel + 1}/{entries.Count}");
             Hit(y, lx - 2, ValueCol - LabelCol + 2, "f:0");
             y += 2;
             if (isNew)
             {
-                Label(y, lx, L.T("НАЗВАНИЕ"), focus == 1);
+                Label(y, lx, L.T("TITLE"), focus == 1);
                 Put(y, vx, Fit(name + (focus == 1 ? "▌" : ""), valueW), focus == 1 ? Bright : Fg);
                 Hit(y, lx - 2, FormWidth - LabelCol, "f:1");
                 y += 2;
@@ -233,48 +234,48 @@ public class NewGameWizard
                     ChoiceValue(y, vx, valueW, Params[p].options[param[p]], focus == 2 + p, $"p{p}", $"f:{2 + p}");
                     Hit(y, lx - 2, ValueCol - LabelCol + 2, $"f:{2 + p}");
                 }
-                // Кнопки карты — внизу блока, плашками.
+                // Map buttons are at the bottom of the block, in squares.
                 int bx = lx;
-                bx = Button(top + TopBoxHeight - 3, bx, L.T("ДРУГАЯ КАРТА"), focus == FB && mapAction == 0, "regen:0") + 2;
-                Button(top + TopBoxHeight - 3, bx, L.T("РАНДОМ"), focus == FB && mapAction == 1, "regen:1");
+                bx = Button(top + TopBoxHeight - 3, bx, L.T("ANOTHER MAP"), focus == FB && mapAction == 0, "regen:0") + 2;
+                Button(top + TopBoxHeight - 3, bx, L.T("RANDOM"), focus == FB && mapAction == 1, "regen:1");
             }
             else
             {
-                // Готовый мир: те же поля, но только для чтения — без стрелок.
+                // Ready world: the same fields, but read-only - without arrows.
                 string Level(int p, int v) => Params[p].options[Math.Clamp(v + Params[p].def, 0, Params[p].options.Length - 1)];
                 string[] values =
                 [
-                    world.Size == WorldSizes.Large ? L.T("большой") : L.T("малый"),
-                    world.Continents > 0 ? world.Continents.ToString() : L.T("авто"),
+                    world.Size == WorldSizes.Large ? L.T("large") : L.T("small"),
+                    world.Continents > 0 ? world.Continents.ToString() : L.T("auto"),
                     Level(2, world.Water), Level(3, world.Climate),
                     Level(4, world.Mountains), Level(5, world.Forests), Level(6, world.Deserts), Level(7, world.RiverAmount),
                     world.Kingdoms.Count.ToString(),
                 ];
-                ReadOnlyRow(y, lx, vx, valueW, L.T("НАЗВАНИЕ"), world.Chronicle.Name is { Length: > 0 } cn ? cn : world.Name, center: false);
+                ReadOnlyRow(y, lx, vx, valueW, L.T("TITLE"), world.Chronicle.Name is { Length: > 0 } cn ? cn : world.Name, center: false);
                 y += 2;
                 for (int p = 0; p < Params.Length; p++, y++)
                 {
                     y = GroupHeading(p, y, left, lx);
                     ReadOnlyRow(y, lx, vx, valueW, Params[p].label, values[p], center: true);
                 }
-                if (world.Chronicle.Places.Count > 0) ReadOnlyRow(y++, lx, vx, valueW, L.T("МЕСТ"), world.Chronicle.Places.Count.ToString(), center: true);
+                if (world.Chronicle.Places.Count > 0) ReadOnlyRow(y++, lx, vx, valueW, L.T("PLACES"), world.Chronicle.Places.Count.ToString(), center: true);
             }
 
-            // Блок «КАРТА».
+            // Block "MAP".
             int mapBoxLeft = left + FormWidth + Gap;
-            DrawBox(top, mapBoxLeft, MapBoxWidth, TopBoxHeight, L.T("КАРТА"));
+            DrawBox(top, mapBoxLeft, MapBoxWidth, TopBoxHeight, L.T("MAP"));
             var (mw, mh) = MapSize(world, MapW, MapH);
             int mapLeft = mapBoxLeft + (MapBoxWidth - mw) / 2, mapTop = top + 1 + (MapH - mh) / 2;
 
-            // Блок «ОПИСАНИЕ МИРА»: сверху текст (свой или правка, королевства — в нём же), под разделителем — ввод
-            // запроса к нейронке и ПРИДУМАТЬ/ИЗМЕНИТЬ.
+            // Block “DESCRIPTION OF THE WORLD”: at the top is the text (your own or edited, the kingdoms are in
+            // it), under the separator - enter a request to the AI and INVENT/CHANGE.
             int dTop = top + TopBoxHeight + 1;
             string shownName = isNew ? name : world.Chronicle.Name is { Length: > 0 } wn ? wn : world.Name;
-            DrawBox(dTop, left, total, DescHeight, L.T("ОПИСАНИЕ МИРА") + " · " + shownName.ToUpperInvariant());
+            DrawBox(dTop, left, total, DescHeight, L.T("WORLD DESCRIPTION") + " · " + shownName.ToUpperInvariant());
             int dW = total - 6;
             if (descLocked)
             {
-                // Готовый мир: описание на весь блок, без ввода и кнопок.
+                // Ready-made world: description for the entire block, without input or buttons.
                 int rowsL = DescHeight - 2;
                 var all = TextArea.View(desc, 0, ref descScroll, dW, rowsL, false, out _, out _, out int totalL);
                 for (int i = 0; i < rowsL; i++)
@@ -286,10 +287,10 @@ public class NewGameWizard
             }
             else
             {
-            // Текст: перенос по словам, курсор (подсвеченная клетка) и прокрутка — колесом, ↑↓, PgUp/PgDn.
+            // Text: word wrapping, cursor (highlighted cell) and scrolling - wheel, ↑↓, PgUp/PgDn.
             descW = dW;
             bool descEditing = focus == FD;
-            if (desc.Length == 0 && !descEditing) Put(dTop + 1, lx, Fit(L.T("свой текст о мире — или пусть придумает нейронка"), dW), Dim);
+            if (desc.Length == 0 && !descEditing) Put(dTop + 1, lx, Fit(L.T("your own text about the world — or let the AI come up with it"), dW), Dim);
             else
             {
                 var view = TextArea.View(desc, descCur, ref descScroll, dW, DescLines, descEditing && descFollow,
@@ -305,57 +306,57 @@ public class NewGameWizard
             for (int i = 0; i < DescLines; i++) Hit(dTop + 1 + i, left + 1, total - 3, $"desc:{i}");
             int sepY = dTop + DescHeight - 3;
             Put(sepY, left, "├" + new string('─', total - 2) + "┤", Dim);
-            // Ввод запроса и кнопка отправки справа.
+            // Enter a request and submit button on the right.
             int iy = sepY + 1;
-            string goText = desc.Length > 0 ? L.T("ИЗМЕНИТЬ") : L.T("ПРИДУМАТЬ");
+            string goText = desc.Length > 0 ? L.T("CHANGE") : L.T("INVENT");
             int gx = left + total - 3 - (goText.Length + 4);
-            // Нейронка думает — вся строка (без «Ввод:» и кнопки) под статус.
+            // The AI thinks - the entire line (without “Enter:” and the button) is a status.
             if (aiTask != null)
             {
-                Put(iy, lx, Fit(Spinner.Frames[frame++ % Spinner.Frames.Length] + " " + L.T("Нейронка думает: описание, королевства и столицы…"), total - 6), Bright);
+                Put(iy, lx, Fit(Spinner.Frames[frame++ % Spinner.Frames.Length] + " " + L.T("The AI is thinking: description, kingdoms and capitals…"), total - 6), Bright);
             }
             else
             {
-            string inputLabel = L.T("Ввод: ");
+            string inputLabel = L.T("Input: ");
             Put(iy, lx, inputLabel, focus == FQ ? Bright : Fg);
             int px = lx + inputLabel.Length, promptW = gx - 2 - px;
-            // Есть итог (готово / ошибка) и поле пустое — вместо подсказки в строке ввода он.
+            // There is a result (ready / error) and the field is empty - instead of a hint in the input line it.
             string status = message.Split('\n')[0];
             bool showStatus = status.Length > 0 && prompt.Length == 0 && focus != FQ;
             string promptShown = showStatus ? status
-                : prompt.Length == 0 && focus != FQ ? L.T("что придумать или как изменить описание (необязательно)") : TailFit(prompt + (focus == FQ ? "▌" : ""), promptW);
+                : prompt.Length == 0 && focus != FQ ? L.T("what to invent or how to change the description (optional)") : TailFit(prompt + (focus == FQ ? "▌" : ""), promptW);
             Put(iy, px, Fit(promptShown, promptW), showStatus ? Bright : prompt.Length == 0 && focus != FQ ? Dim : focus == FQ ? Bright : Fg);
             Hit(iy, left + 1, gx - 2 - left, $"f:{FQ}");
             Button(iy, gx, goText, focus == FA, "ai");
             }
             }
 
-            // ДАЛЕЕ и подсказка.
+            // NEXT and a hint.
             int by = dTop + DescHeight + 1;
-            string nextText = L.T("ДАЛЕЕ: ГЕРОЙ");
+            string nextText = L.T("NEXT: HERO");
             Button(by, left + (total - nextText.Length - 4) / 2, nextText, focus == FN, "next", disabled: desc.Trim().Length == 0);
-            // Подсказка; вместо неё — подтверждение удаления или сообщение (у готового мира строки ввода нет).
-            if (confirmDelete) CenterIn(by + 2, left, total, L.F("Удалить мир «{0}» со всеми локациями?   [Enter]ДА   [Esc]НЕТ", entry.Label), Bright);
+            // Hint; instead, there is a confirmation of deletion or a message (the ready-made world does not have an input line).
+            if (confirmDelete) CenterIn(by + 2, left, total, L.F("Delete world \"{0}\" with all its locations?   [Enter]YES   [Esc]NO", entry.Label), Bright);
             else if (message.Length > 0)
             {
                 var lines = message.Split('\n');
                 for (int i = 0; i < lines.Length && i < 2; i++)
                     CenterIn(by + 2 + i, left, total, Fit(lines[i], total), Bright);
             }
-            else CenterIn(by + 2, left, total, L.T("[↑↓]ПОЛЕ   [←→]ВЫБОР/КУРСОР   [Enter]ДАЛЕЕ") + (isNew ? "" : "   " + L.T("[Del]УДАЛИТЬ МИР")) + "   " + L.T("[Esc]МЕНЮ"), Dim);
-            // Карта: колесо — масштаб, перетаскивание — сдвиг (клик ничего не делает); другой мир — камера с начала.
+            else CenterIn(by + 2, left, total, L.T("[↑↓]FIELD   [←→]CHOOSE/CURSOR   [Enter]NEXT") + (isNew ? "" : "   " + L.T("[Del]DELETE WORLD")) + "   " + L.T("[Esc]MENU"), Dim);
+            // Map: wheel - scale, drag - shift (click does nothing); another world - camera from the beginning.
             if (_worldCam.For != world.Id) _worldCam.Reset(world.Id);
             Flush(mapLeft, mapTop, mw, mh);
             DrawMapAt(world, mapLeft, mapTop, mw, mh, null, _worldCam);
             SetMapPan(_worldCam, () => DrawMapAt(world, mapLeft, mapTop, mw, mh, null, _worldCam));
 
-            // ── Ввод ──
+            // ── Enter ──
             var input = await WaitInput(aiTask != null ? 200 : 0, MapMode.Pan);
             if (input == null) continue;
             var (key, click) = input.Value;
             if (confirmDelete && (key != null || click != null))
             {
-                // Подтверждение удаления: Enter — да, Esc/любая другая клавиша или клик — нет.
+                // Deletion confirmation: Enter - yes, Esc/any other key or click - no.
                 confirmDelete = false;
                 message = "";
                 if (key is { Key: ConsoleKey.Enter }) DeleteWorld();
@@ -369,15 +370,14 @@ public class NewGameWizard
                 _worldCam.ZoomAt(zm.view, int.Parse(parts[0]), int.Parse(cell[0]), int.Parse(cell[1]), zm.w, zm.h);
                 continue;
             }
-            // Колесо над описанием — прокрутка текста.
+            // Wheel above description - scrolling text.
             if (click is { } wh && wh.StartsWith("wheel:"))
             {
                 var parts = wh.Split(':', 3);
                 if (parts[2].StartsWith("desc")) { descScroll -= int.Parse(parts[1]); descFollow = false; }
                 continue;
             }
-            if (aiTask != null) continue;   // нейронка думает — ввод ждёт
-            // Шаги: дальше — только с выбранным миром (как «ДАЛЕЕ»).
+            if (aiTask != null) continue;   // the AI thinks - input is waiting Steps: further - only with the selected world (as “NEXT”).
             if (click is { } sc && sc.StartsWith("step:"))
             {
                 int to = int.Parse(sc[5..]);
@@ -394,7 +394,7 @@ public class NewGameWizard
                 else if (c.StartsWith("desc:"))
                 {
                     Sound.PlayClick();
-                    // Клик по тексту — курсор в это место.
+                    // Click on the text - the cursor is in this place.
                     focus = FD;
                     descCur = TextArea.CursorAt(desc, descScroll, descW, int.Parse(c[5..]), _clickCol - (lx0 + LabelCol));
                     descFollow = true;
@@ -428,7 +428,7 @@ public class NewGameWizard
                     break;
                 case ConsoleKey.Enter:
                     if (focus == 1 || focus == FD) focus = Move(focus, 1);
-                    else if (focus == FQ) { if (prompt.Trim().Length > 0) { focus = FA; RunAi(); } }   // пустой ввод — не отправлять
+                    else if (focus == FQ) { if (prompt.Trim().Length > 0) { focus = FA; RunAi(); } }   // empty input - do not send
                     else if (focus == FB) RunMap();
                     else if (focus == FA) RunAi();
                     else if (Proceed() != null) return Leave(2);
@@ -447,7 +447,7 @@ public class NewGameWizard
             bool Busy()
             {
                 if (aiTask == null) return false;
-                message = L.T("Подожди — нейронка думает.");
+                message = L.T("Wait — the AI is thinking.");
                 return true;
             }
 
@@ -459,8 +459,8 @@ public class NewGameWizard
                 Sound.PlayClick();
             }
 
-            // Параметр нового мира: другой вариант — новая карта, как «ДРУГАЯ КАРТА» (новый рельеф; название от
-            // генератора — новое, если его не правили; имена королевств — снова от генератора).
+            // New world parameter: another option is a new map, like “OTHER MAP” (new terrain; name from the
+            // generator - new, if not edited; names of the kingdoms - again from the generator).
             void Step(int p, int dir)
             {
                 if (Busy()) return;
@@ -472,7 +472,7 @@ public class NewGameWizard
                 Sound.PlayClick();
             }
 
-            // «ДРУГАЯ КАРТА» — новый рельеф с теми же параметрами; «РАНДОМ» — случайные параметры и название.
+            // “OTHER MAP” - new terrain with the same parameters; “RANDOM” - random parameters and name.
             void RunMap()
             {
                 Sound.PlayClick();
@@ -488,8 +488,9 @@ public class NewGameWizard
                 message = "";
             }
 
-            // Новый мир уже с описанием — перед новой картой он становится готовым вариантом в листалке (только на
-            // время этого создания игры; в библиотеку попадёт, если с него перейти дальше), описание — с чистого листа.
+            // The new world already has a description - before the new map, it becomes a ready-made option in
+            // the leaflet (only for the duration of this creation of the game; it will end up in the library if
+            // you move on from it), the description is from scratch.
             void Archive()
             {
                 if (!isNew || draft == null || desc.Trim().Length == 0) return;
@@ -501,18 +502,18 @@ public class NewGameWizard
                 desc = newDesc = prompt = "";
                 descCur = 0;
                 nameEdited = false;
-                message = L.T("Прежний вариант — в списке миров (◄ ►), пока создаётся эта игра.");
+                message = L.T("The previous version is in the world list (◄ ►) while this game is being created.");
             }
 
-            // [Del] — удалить выбранный мир (с подтверждением). Мир, в котором есть игра, не удаляется.
+            // [Del] - delete the selected world (with confirmation). The world in which the game exists is not deleted.
             void AskDelete()
             {
                 Sound.PlayClick();
                 if (Busy()) return;
-                if (isNew) { message = L.T("Новый мир ещё не сохранён — удалять нечего."); return; }
+                if (isNew) { message = L.T("The new world isn't saved yet — nothing to delete."); return; }
                 if (entry.Id != null && WorldLibrary.GamesUsing(entry.Id) is { Count: > 0 } games)
                 {
-                    message = L.F("Нельзя удалить: в этом мире {0} {1} — сначала удали их в «Мои игры».", games.Count == 1 ? L.T("игра") : L.T("игры"),
+                    message = L.F("Can't delete: this world has {0} {1} — delete them in \"My games\" first.", games.Count == 1 ? L.T("game") : L.T("games"),
                               string.Join(", ", games.Select(g => $"«{g.hero}»")));
                     return;
                 }
@@ -522,28 +523,28 @@ public class NewGameWizard
             void DeleteWorld()
             {
                 Sound.PlayClick();
-                if (entry.Id != null && !WorldLibrary.Delete(entry.Id)) { message = L.T("Не удалось удалить мир."); return; }
+                if (entry.Id != null && !WorldLibrary.Delete(entry.Id)) { message = L.T("Could not delete the world."); return; }
                 entries.RemoveAt(sel);
                 sel = Math.Min(sel, entries.Count - 1);
                 descFor = null;
-                message = L.F("Мир «{0}» удалён.", entry.Label);
+                message = L.F("World \"{0}\" deleted.", entry.Label);
             }
 
             void RunAi()
             {
                 Sound.PlayClick();
                 if (Busy()) return;
-                // Без запроса нейронка только придумывает с нуля; переписывать готовое описание «ни о чём» — нет.
+                // Without a request, the AI just comes up with ideas from scratch; rewriting a ready-made description “about nothing” is a no-no.
                 if (prompt.Trim().Length == 0 && desc.Trim().Length > 0)
                 {
-                    message = L.T("Напиши в «Ввод», что изменить в описании");   // видно в строке ввода
+                    message = L.T("Write in \"Input\" what to change in the description");   // visible in the input line
                     return;
                 }
                 aiWorld = world;
                 aiTask = _ai.CreateWorld(world, prompt, isNew ? name : null, desc);
             }
 
-            // Уйти с шага: запомнить всё заполненное (вернёмся — как было).
+            // Leave the step: remember everything filled in (let's go back - as it was).
             int Leave(int step)
             {
                 ps.Sel = sel; ps.Seed = seed; ps.Param = param; ps.Name = name; ps.NameEdited = nameEdited;
@@ -552,8 +553,9 @@ public class NewGameWizard
                 return step;
             }
 
-            // Мир выбран: в библиотеку/активным. Мир, записанный раньше в этом же создании игры и теперь не выбранный,
-            // удаляется (если в нём нет игр): в библиотеке остаётся только тот, с которым перешли дальше.
+            // World selected: to library/active. A world that was recorded earlier in the same game creation
+            // and is now not selected is deleted (if there are no games in it): only the one with which you
+            // moved on remains in the library.
             string? Proceed()
             {
                 string? id = ProceedCore();
@@ -562,7 +564,7 @@ public class NewGameWizard
                     WorldLibrary.Delete(ps.RegisteredId);
                 ps.RegisteredId = entry.Id == null ? id : null;
                 ChosenWorldId = id;
-                // Герой и приключение — на языке выбранного мира (готовый мир — на своём, новый — языка интерфейса).
+                // The hero and adventure are in the language of the selected world (the ready-made world is in its own language, the new one is in the interface language).
                 L.SetWorld(WorldLibrary.Get(id)?.Language);
                 return id;
             }
@@ -571,10 +573,10 @@ public class NewGameWizard
             {
                 Sound.PlayClick();
                 if (Busy()) return null;
-                // Готовый мир обязан иметь описание.
+                // A finished world must have a description.
                 if (desc.Trim().Length == 0)
                 {
-                    message = L.T("Сначала описание мира: напиши своё или нажми «ПРИДУМАТЬ».");
+                    message = L.T("First the world description: write your own or press \"INVENT\".");
                     focus = FQ;
                     return null;
                 }
@@ -600,13 +602,13 @@ public class NewGameWizard
     private static string TailFit(string text, int width) =>
         text.Length <= width ? text : "…" + text[^(width - 1)..];
 
-    // ── Шаг 3: приключение ───────────────────────────────────────────────────
+    // ── Step 3: adventure ───────────────────────── ──────────────────────────
 
-    // Приключение: пожелания, старт (место или клетка), параметры (индексы вариантов) и они же строкой для мастера.
+    // Adventure: wishes, start (place or cell), parameters (indices of options) and they are also a line for the GM.
     public sealed record Adventure(string Wish, string? StartPlace, (int x, int y)? StartTile, int[]? Params = null, string Style = "");
 
-    // Пожелания к сюжету и место старта (по желанию). null — назад в редактор героя.
-    // Выход из создания игры в меню: предупреждение, что заполненное не сохранится. true — выйти.
+    // Suggestions for the plot and starting place (optional). null - back to the hero editor. Exiting game
+    // creation in the menu: warning that the completed content will not be saved. true - exit.
     public async Task<bool> ConfirmExit()
     {
         Begin();
@@ -615,13 +617,13 @@ public class NewGameWizard
             Clear();
             const int w = 64, h = 7;
             int left = Math.Max(0, (_width - w) / 2), top = Math.Max(1, (_height - h) / 2 - 2);
-            DrawBox(top, left, w, h, L.T("ВЫЙТИ В МЕНЮ?"));
-            CenterIn(top + 2, left, w, L.T("Прогресс создания новой игры не сохранится."), Bright);
-            string quit = L.T("ВЫЙТИ"), stay = L.T("ОСТАТЬСЯ");
+            DrawBox(top, left, w, h, L.T("EXIT TO MENU?"));
+            CenterIn(top + 2, left, w, L.T("New game progress will not be saved."), Bright);
+            string quit = L.T("QUIT"), stay = L.T("STAY");
             int bx = left + (w - quit.Length - stay.Length - 10) / 2;
             bx = Button(top + 4, bx, quit, false, "yes") + 2;
             Button(top + 4, bx, stay, false, "no");
-            CenterIn(top + h + 1, left, w, L.T("[Enter]ВЫЙТИ   [Esc]ОСТАТЬСЯ"), Dim);
+            CenterIn(top + h + 1, left, w, L.T("[Enter]EXIT   [Esc]STAY"), Dim);
             Flush();
             var input = await WaitInput(0);
             if (input == null) continue;
@@ -632,16 +634,16 @@ public class NewGameWizard
         }
     }
 
-    // Создание игры брошено: мир, записанный в библиотеку на этом создании, удаляется (если в нём нет игр).
+    // Game creation abandoned: the world written to the library on this creation is deleted (if there are no games in it).
     public void DiscardWorld()
     {
         if (_pick?.RegisteredId is { } id && WorldLibrary.GamesUsing(id).Count == 0) WorldLibrary.Delete(id);
     }
 
-    // Шаг «Приключение»: возвращает заполненное и куда дальше — StartStep (начать игру), шаг 1–3 или 0 (выход в меню).
+    // Step “Adventure”: returns completed and where next - StartStep (start game), step 1-3 or 0 (exit to menu).
     public const int StartStep = 5;
 
-    // Параметры приключения правил (Prompts/{RuleSet}/adventureOptions.json): группа, подпись, варианты, по умолчанию.
+    // Adventure rules parameters (Prompts/{RuleSet}/adventureOptions.json): group, label, options, default.
     private List<(string group, string label, string[] options, int def)>? _advOptions;
 
     private List<(string group, string label, string[] options, int def)> AdventureOptions()
@@ -658,12 +660,13 @@ public class NewGameWizard
                 _advOptions.Add(((string?)p?["group"] ?? "", (string?)p?["label"] ?? "", opts, Math.Clamp((int?)p?["default"] ?? 0, 0, opts.Length - 1)));
             }
         }
-        catch { /* нет файла — только пожелания и старт */ }
+        catch { /*no file - only wishes and start*/ }
         return _advOptions;
     }
 
-    // Параметры приключения строкой для мастера — на языке мира: «Жанр: тёмное фэнтези; Сложность: сложная; …».
-    // В файле — русские подписи и варианты (ключи перевода): на экране — L.T/L.W, мастеру — L.W.
+    // Adventure parameters in a line for the GM - in the language of the world: “Genre: dark fantasy;
+    // Difficulty: difficult; ..." The file contains Russian signatures and variants (translation keys): on the
+    // screen - L.T/L.W, for the GM - L.W.
     private string StyleText(int[] values)
     {
         var opts = AdventureOptions();
@@ -674,13 +677,14 @@ public class NewGameWizard
         }));
     }
 
-    // Камера карты (масштаб: -1 — весь мир; центр: NaN — середина мира): колесо — масштаб у курсора, перетаскивание —
-    // сдвиг; дальше «мир во всё окно» не отдаляется, за край мира не уходит. Своя у шагов «Мир» и «Приключение».
+    // Map camera (scale: -1 - the whole world; center: NaN - the middle of the world): wheel - scale at the
+    // cursor, dragging - shift; “The world through the whole window” does not move further away, it does not go
+    // beyond the edge of the world. The “World” and “Adventure” steps have their own.
     private sealed class MapCam
     {
         public int Zoom = -1;
         public double Cx = double.NaN, Cy = double.NaN;
-        public string? For;   // мир, для которого камера (другой мир — с начала)
+        public string? For;   // the world for which the camera (another world - from the beginning)
 
         public void Reset(string id) { For = id; Zoom = -1; Cx = Cy = double.NaN; }
 
@@ -693,7 +697,7 @@ public class NewGameWizard
             Cy = halfH * 2 >= world.Height ? world.Height / 2.0 : Math.Clamp(Cy, halfH, world.Height - halfH);
         }
 
-        // Колесо: точка мира под курсором (символ col,row области w×h) остаётся под курсором.
+        // Wheel: world point under the cursor (the col,row area symbol w×h) remains under the cursor.
         public void ZoomAt(WorldMapView v, int notches, int col, int row, int w, int h)
         {
             double sx = col - w / 2.0, sy = row - h / 2.0, s0 = v.Scale(Zoom);
@@ -707,7 +711,7 @@ public class NewGameWizard
 
     private readonly MapCam _advCam = new(), _worldCam = new();
 
-    // Перетаскивание карты (зовёт WaitInput, пока зажата кнопка): запомнить центр, сдвинуть на (dx, dy) символов.
+    // Dragging the map (calls WaitInput while the button is held down): remember the center, move by (dx, dy) characters.
     private void SetMapPan(MapCam cam, Action redraw)
     {
         double px = 0, py = 0;
@@ -722,7 +726,7 @@ public class NewGameWizard
         };
     }
 
-    // Отметка старта на карте — сплошной кружок цвета, которого на карте нет.
+    // The start mark on the map is a solid circle of a color that is not on the map.
     private static readonly List<int> StartMarkColor = WorldMapView.MarkerColor;
 
     public async Task<(int step, Adventure adventure)> PickAdventure(string worldId, Adventure? filled)
@@ -736,11 +740,11 @@ public class NewGameWizard
         (int x, int y)? startTile = filled?.StartTile;
         int wishCur = wish.Length, wishScroll = 0, wishW = 1;
         bool wishFollow = true;
-        // Фокус: 0.. — параметры, FB — кнопки старта (СБРОСИТЬ/РАНДОМ), FW — пожелания, FS — НАЧАТЬ ИГРУ.
+        // Focus: 0.. - parameters, FB - start buttons (RESET / RANDOM), FW - wishes, FS - START GAME.
         int FB = opts.Count, FW = FB + 1, FS = FW + 1;
-        int focus = 0, action = 0;   // action: 0 — СБРОСИТЬ, 1 — РАНДОМ
+        int focus = 0, action = 0;   // action: 0 - RESET, 1 - RANDOM
         const int WishRows = DescHeight - 2;
-        int mw = MapW, mh = MapH;   // что под курсором — в разрыве нижней линии рамки
+        int mw = MapW, mh = MapH;   // what is under the cursor is in the gap in the bottom line of the frame
         (int, Adventure) Leave(int step) => (step, new Adventure(wish.Trim(), startPlace, startTile, [.. values], StyleText(values)));
 
         if (_advCam.For != world.Id) _advCam.Reset(world.Id);
@@ -755,8 +759,8 @@ public class NewGameWizard
             int top = Math.Max(1, (_height - blockH) / 2);
             int vx = left + ValueCol, lx = left + LabelCol, valueW = FormWidth - ValueCol - 3;
 
-            // Блок «ПРИКЛЮЧЕНИЕ»: параметры группами, старт и кнопки.
-            DrawBox(top, left, FormWidth, TopBoxHeight, L.T("ПРИКЛЮЧЕНИЕ"));
+            // Block “ADVENTURE”: parameters in groups, start and buttons.
+            DrawBox(top, left, FormWidth, TopBoxHeight, L.T("ADVENTURE"));
             int y = top + 2;
             for (int p = 0; p < opts.Count; p++, y++)
             {
@@ -766,20 +770,20 @@ public class NewGameWizard
                 Hit(y, lx - 2, ValueCol - LabelCol + 2, $"f:{p}");
             }
             y++;
-            Label(y, lx, L.T("СТАРТ"), false);
-            string start = startPlace ?? (startTile is { } st ? TileText(world, st) : L.T("решит мастер"));
+            Label(y, lx, L.T("START"), false);
+            string start = startPlace ?? (startTile is { } st ? TileText(world, st) : L.T("the DM decides"));
             var startLines = Wrap(start, valueW);
             for (int i = 0; i < startLines.Count && i < 2; i++) Put(y + i, vx, startLines[i], hasStart ? StartMarkColor : Dim);
-            if (!hasStart) Put(y + 1, vx, Fit(L.T("или клик по карте"), valueW), Dim);
+            if (!hasStart) Put(y + 1, vx, Fit(L.T("or click on the map"), valueW), Dim);
             int bx = lx;
-            if (hasStart) bx = Button(top + TopBoxHeight - 3, bx, L.T("СБРОСИТЬ"), focus == FB && action == 0, "reset") + 2;
-            Button(top + TopBoxHeight - 3, bx, L.T("РАНДОМ СТАРТ"), focus == FB && (action == 1 || !hasStart), "random");
+            if (hasStart) bx = Button(top + TopBoxHeight - 3, bx, L.T("RESET"), focus == FB && action == 0, "reset") + 2;
+            Button(top + TopBoxHeight - 3, bx, L.T("RANDOM START"), focus == FB && (action == 1 || !hasStart), "random");
 
-            // Блок карты: колесо — масштаб, перетаскивание — сдвиг, клик — старт.
+            // Map block: wheel - scale, drag - shift, click - start.
             int mapBoxLeft = left + FormWidth + Gap;
-            DrawBox(top, mapBoxLeft, MapBoxWidth, TopBoxHeight, (world.Chronicle.Name is { Length: > 0 } wn ? wn : L.T("КАРТА")).ToUpperInvariant());
+            DrawBox(top, mapBoxLeft, MapBoxWidth, TopBoxHeight, (world.Chronicle.Name is { Length: > 0 } wn ? wn : L.T("MAP")).ToUpperInvariant());
             int mapLeft = mapBoxLeft + (MapBoxWidth - mw) / 2, mapTop = top + 1;
-            string under = "";   // что под курсором
+            string under = "";   // what's under the cursor
             var underColor = Dim;
             if (_map is { } mp && _mapHover is { } hc)
             {
@@ -788,19 +792,19 @@ public class NewGameWizard
                 if (place >= 0) { under = $"{mp.world.Places[place].Name} — {L.T(WorldPlaceTypes.Label(mp.world.Places[place].Type))}"; underColor = Fg; }
                 else if (mp.world.InBounds(t.x, t.y))
                 {
-                    under = WorldBiomes.IsWater(mp.world.BiomeAt(t.x, t.y)) ? L.T("вода — сюда нельзя") : TileText(mp.world, t);
+                    under = WorldBiomes.IsWater(mp.world.BiomeAt(t.x, t.y)) ? L.T("water — can't start here") : TileText(mp.world, t);
                     underColor = Fg;
                 }
             }
             if (under.Length > 0) CenterIn(top + TopBoxHeight - 1, mapBoxLeft, MapBoxWidth, $" {Fit(under, MapBoxWidth - 6)} ", underColor);
 
-            // Блок «ПОЖЕЛАНИЯ К ИСТОРИИ» (необязательно): поле с курсором и прокруткой, как описание мира.
+            // “STORY WISHES” block (optional): a field with a cursor and scrolling, as a description of the world.
             int dTop = top + TopBoxHeight + 1;
-            DrawBox(dTop, left, total, DescHeight, L.T("ПОЖЕЛАНИЯ К ИСТОРИИ"));
+            DrawBox(dTop, left, total, DescHeight, L.T("STORY WISHES"));
             wishW = total - 6;
             bool wishEditing = focus == FW;
             if (wish.Length == 0 && !wishEditing)
-                Put(dTop + 1, lx, Fit(L.T("что хочешь от истории: сюжет, враги, настроение — необязательно, хватит параметров выше"), wishW), Dim);
+                Put(dTop + 1, lx, Fit(L.T("what you want from the story: plot, enemies, mood — optional, the settings above are enough"), wishW), Dim);
             else
             {
                 var view = TextArea.View(wish, wishCur, ref wishScroll, wishW, WishRows, wishEditing && wishFollow,
@@ -816,11 +820,11 @@ public class NewGameWizard
             for (int i = 0; i < WishRows; i++) Hit(dTop + 1 + i, left + 1, total - 3, $"wish:{i}");
 
             int by = dTop + DescHeight + 1;
-            string startText = L.T("НАЧАТЬ ИГРУ");
+            string startText = L.T("START GAME");
             Button(by, left + (total - startText.Length - 4) / 2, startText, focus == FS, "next");
-            CenterIn(by + 2, left, total, L.T("[↑↓]ПОЛЕ   [←→]ВЫБОР   [Enter]НАЧАТЬ   [Esc]МЕНЮ"), Dim);
+            CenterIn(by + 2, left, total, L.T("[↑↓]FIELD   [←→]CHOOSE   [Enter]START   [Esc]MENU"), Dim);
 
-            // Карта: сначала холст (место карты не затирается), потом сама карта с камерой и отметкой старта.
+            // Map: first the canvas (the map area is not erased), then the map itself with the camera and the start mark.
             var marker = startTile ?? (startPlace != null && WorldAtlas.FindPlace(Preview(world), startPlace) is { } sp ? (sp.X, sp.Y) : null);
             Flush(mapLeft, mapTop, mw, mh);
             DrawMapAt(world, mapLeft, mapTop, mw, mh, marker, _advCam);
@@ -909,7 +913,7 @@ public class NewGameWizard
             }
         }
 
-        // «РАНДОМ СТАРТ» — случайная клетка суши (не вода и не пики); карта при приближении — к ней.
+        // “RANDOM START” - a random land cell (not water or spades); map when approaching - to it.
         void Randomize()
         {
             for (int tries = 0; tries < 2000; tries++)
@@ -928,7 +932,7 @@ public class NewGameWizard
 
     private static readonly Random _rnd = new();
 
-    // Карта с камерой (масштаб и сдвиг), отметка старта — кружок.
+    // Map with camera (scale and shift), start mark - circle.
     private void DrawMapAt(WorldMap geo, int left, int top, int w, int h, (int x, int y)? marker, MapCam cam)
     {
         var world = GameWorld.Compose(geo, KnownAll(geo), includeHidden: false);
@@ -957,20 +961,20 @@ public class NewGameWizard
     private static string TileText(WorldMap w, (int x, int y) t)
     {
         int own = w.OwnerAt(t.x, t.y);
-        string land = own >= 0 && own < w.Kingdoms.Count ? (w.Chronicle.Kingdoms.FirstOrDefault(k => k.Id == own)?.Name ?? w.Kingdoms[own].Name) : L.T("ничьи земли");
+        string land = own >= 0 && own < w.Kingdoms.Count ? (w.Chronicle.Kingdoms.FirstOrDefault(k => k.Id == own)?.Name ?? w.Kingdoms[own].Name) : L.T("unclaimed lands");
         return $"{L.T(WorldBiomes.Get(w.BiomeAt(t.x, t.y)).Name).ToLowerInvariant()}, {land} ({L.T(WorldAtlas.Compass(w, t.x, t.y))})";
     }
 
-    // ── Карта ────────────────────────────────────────────────────────────────
+    // ── Map ──────────────────────────────── ────────────────────────────────
 
     private readonly Dictionary<(string id, int w, int h), WorldMapView> _views = [];
 
-    // Хроника видна целиком (игрок выбирает мир/старт — показываем всё, что о мире известно).
+    // The entire chronicle is visible (the player selects the world/start - we show everything that is known about the world).
     private static GameWorldLink KnownAll(WorldMap w) => new() { Id = w.Id, Known = w.Chronicle.Places.Select(p => p.Name).ToList() };
 
     private WorldMap Preview(WorldMap geo) => GameWorld.Compose(geo, KnownAll(geo), includeHidden: false);
 
-    // Превью — весь мир в рамке: w символов × h строк (строка — 2 пикселя) под пропорции мира.
+    // Preview - the whole world in a frame: w characters × h lines (line - 2 pixels) according to the proportions of the world.
     private static (int w, int h) MapSize(WorldMap world, int maxW, int maxH)
     {
         int w = maxW, h = (int)Math.Round(w * world.Height / (double)world.Width / 2);
@@ -978,11 +982,12 @@ public class NewGameWizard
         return (Math.Max(8, w), Math.Max(4, h));
     }
 
-    // ── Ввод ─────────────────────────────────────────────────────────────────
+    // ── Enter ──────────────────────────────── ─────────────────────────────────
 
-    // Ждёт нажатие или клик (клик — id зоны, «map:c,r» — клетка карты). Смена наведения — перерисовка (null).
-    // timeoutMs > 0 — вернуть null по таймауту (анимация ожидания нейронки). mapClicks — карта кликабельна (выбор старта).
-    // Карта в WaitInput: нет / сдвиг и масштаб (Pan) / ещё и клик — выбор клетки, что под курсором (Pick).
+    // Waiting for a press or click (click - id zone, "map:c,r" - map cell). Change of pointing - redraw (null).
+    // timeoutMs > 0 - return null by timeout (animation of AI waiting). mapClicks - map is clickable (start
+    // selection). Map in WaitInput: is not present / shift and scale (Pan) / also click - select the cell under
+    // the cursor (Pick).
     private enum MapMode { None, Pan, Pick }
 
     private async Task<(ConsoleKeyInfo? key, string? click)?> WaitInput(int timeoutMs, MapMode mapMode = MapMode.None)
@@ -996,7 +1001,7 @@ public class NewGameWizard
             {
                 string? h = HitAt(m.x, m.y);
                 var tabs = MouseUiHelper.ComputeTitleTabs(Title);
-                // Нейронка думает — ничего не нажимается: обычный указатель, вкладки заголовка не подсвечиваются.
+                // The AI thinks - nothing is clicked: a regular pointer, header tabs are not highlighted.
                 string? tab = _frozen ? null : MouseUiHelper.GetHoveredTabKey(m.x, m.y, tabs);
                 if (tab != _titleHover)
                 {
@@ -1005,8 +1010,8 @@ public class NewGameWizard
                     _titleHover = tab;
                 }
                 ConsoleMouseReader.SetCursorShape(h != null || tab != null || mapPan && MapCell(m.x, m.y) != null);
-                // Смена наведения — перерисовка; но если в той же пачке есть нажатие — сначала оно (иначе
-                // нажатие с лёгким сдвигом мыши терялось и карта не начинала перетаскиваться).
+                // Change hover - redraw; but if there is a click in the same pack, it comes first (otherwise
+                // the click with a slight mouse shift was lost and the map did not begin to be dragged).
                 var mc = mapClicks ? MapCell(m.x, m.y) : null;
                 bool hoverChanged = h != _hovered || mc != _mapHover;
                 _hovered = h;
@@ -1017,7 +1022,7 @@ public class NewGameWizard
             {
                 if (c.y < _bodyTop)
                 {
-                    // Заголовок: шаг «[Fn]…» или «[Esc]МЕНЮ»; остальное — перетаскивание окна.
+                    // Header: step "[Fn]..." or "[Esc]MENU"; the rest is dragging the window.
                     if (!_frozen && MouseUiHelper.GetHoveredTabKey(c.x, c.y, MouseUiHelper.ComputeTitleTabs(Title)) is { } tk)
                     {
                         if (tk == "Esc") Sound.PlayClick();
@@ -1030,7 +1035,7 @@ public class NewGameWizard
                 if (HitAt(c.x, c.y) is { } id) return (null, id);
                 if (mapPan && MapCell(c.x, c.y) is { } cell)
                 {
-                    // Зажал и тянешь — карта едет за курсором; отпустил, не сдвинув, — клик (выбор старта, если можно).
+                    // If you press and pull, the map follows the cursor; let go without moving - click (select start, if possible).
                     bool panned = false;
                     if (MapPan != null)
                     {
@@ -1041,7 +1046,7 @@ public class NewGameWizard
                     return (null, $"map:{cell.col},{cell.row}");
                 }
             }
-            // Колесо: «wheel:щелчки:зона под курсором» (прокрутка текста; карта колесо не берёт).
+            // Wheel: “wheel:clicks: area under the cursor” (text scrolling; the wheel does not pick up the map).
             if (ConsoleMouseReader.TakeWheel(out var wp) is int notches and not 0)
             {
                 if (mapPan && MapCell(wp.x, wp.y) is { } wc) return (null, $"mapwheel:{notches}:{wc.col},{wc.row}");
@@ -1064,7 +1069,7 @@ public class NewGameWizard
         return col >= 0 && col < m.w && row >= 0 && row < m.h ? (col, row) : null;
     }
 
-    // Текстовое поле: печать, Backspace, вставка. true — клавиша обработана.
+    // Text field: print, Backspace, insert. true - the key has been processed.
     private static bool EditText(ref string value, ConsoleKeyInfo key, int max)
     {
         if (ClipboardText.IsPasteKey(key))
@@ -1078,7 +1083,7 @@ public class NewGameWizard
         return false;
     }
 
-    // ── Холст ────────────────────────────────────────────────────────────────
+    // ── Canvas ──────────────────────────────── ────────────────────────────────
 
     private void Begin()
     {
@@ -1112,8 +1117,8 @@ public class NewGameWizard
         _map = null;
     }
 
-    // Кнопка-плашка «  ТЕКСТ  » на заливке фона (видно, что нажимается); под мышью или в фокусе — заливка ярче,
-    // недоступна — приглушена. Возвращает x правого края.
+    // Button-solid “TEXT” on the background fill (it can be seen that it is pressed); under the mouse or in
+    // focus - the fill is brighter, inaccessible - dimmed. Returns x of the right edge.
     private int Button(int y, int x, string text, bool focused, string id, bool disabled = false)
     {
         disabled |= _frozen;
@@ -1125,7 +1130,7 @@ public class NewGameWizard
         return x + t.Length;
     }
 
-    // Поле только для чтения (параметры готового мира): подпись и значение приглушены, без стрелок.
+    // Read-only field (ready world options): label and value are muted, no arrows.
     private void ReadOnlyRow(int y, int lx, int vx, int width, string label, string value, bool center)
     {
         Put(y, lx, label, Fg);
@@ -1133,8 +1138,8 @@ public class NewGameWizard
         Put(y, center ? vx + 2 + (width - 4 - text.Length) / 2 : vx, text, Fg);
     }
 
-    // Подпись поля как в анкете: «→ ИМЯ» у поля в фокусе.
-    // Полоса прокрутки текста справа: ползунок «┃», дорожка «│»; текст влезает — ничего.
+    // Field label as in the questionnaire: “→ NAME” with the field in focus. Text scroll bar on the right:
+    // slider “┃”, track “│”; the text fits - nothing.
     private void DrawBar(int top, int x, int rows, int total, int scroll)
     {
         if (TextArea.Bar(rows, total, scroll) is not { } bar) return;
@@ -1144,15 +1149,15 @@ public class NewGameWizard
     private void Label(int y, int lx, string label, bool focused) =>
         Put(y, lx - 2, focused ? "→ " + label : "  " + label, focused ? Bright : Fg);
 
-    // Значение-выбор «◄ значение ►» в поле фиксированной ширины: стрелки на месте, значение по центру
-    // (клик по стрелкам — листать).
+    // Value-selection “◄ value ►” in a fixed-width field: arrows in place, value in the center (click on the
+    // arrows - scroll).
     private void ChoiceValue(int y, int vx, int width, string value, bool focused, string id, string focusId, string? counter = null)
     {
         int inner = width - 4;
         int rx = vx + 2 + inner + 1;
         if (counter != null)
         {
-            // «вариант из скольких» — приглушённо у правой стрелки; значение — по центру оставшегося места.
+            // “option of how many” - muted near the right arrow; the value is in the center of the remaining space.
             Put(y, vx + 2 + inner - counter.Length, counter, Dim);
             inner -= counter.Length + 1;
         }
@@ -1165,7 +1170,7 @@ public class NewGameWizard
         Hit(y, vx + 2, inner, focusId);
     }
 
-    // Зона клика; пока экран «заморожен» (ждём нейронку) — зон нет: ни наведения, ни кликов.
+    // Click zone; While the screen is “frozen” (waiting for a AI) there are no zones: no pointing, no clicks.
     private void Hit(int row, int x, int w, string id)
     {
         if (!_frozen) _hits.Add((row, x, w, id));
@@ -1179,11 +1184,11 @@ public class NewGameWizard
         return null;
     }
 
-    // Текст экрана; место карты (если она там же) не затирается — карта не мигает при наведении мыши.
+    // Screen text; the location of the map (if it is there) is not overwritten - the map does not blink when you hover the mouse.
     private void Flush(int mapLeft = -1, int mapTop = -1, int mapW = 0, int mapH = 0)
     {
         Term.CursorVisible = false;
-        if (_mapRect != (mapLeft, mapTop, mapW, mapH)) _mapDrawn = null;   // карта сместилась — нарисовать заново
+        if (_mapRect != (mapLeft, mapTop, mapW, mapH)) _mapDrawn = null;   // map has shifted - draw again
         _mapRect = (mapLeft, mapTop, mapW, mapH);
         bool keepMap = _mapDrawn != null;
         for (int r = 0; r < _height; r++)
@@ -1221,7 +1226,7 @@ public class NewGameWizard
     private static string Fit(string text, int width) =>
         text.Length <= width ? text : text[..Math.Max(0, width - 1)] + "…";
 
-    // Перенос по словам на ширину.
+    // Word wrap to width.
     private static List<string> Wrap(string text, int width)
     {
         var lines = new List<string>();

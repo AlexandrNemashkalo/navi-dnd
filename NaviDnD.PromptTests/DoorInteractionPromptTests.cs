@@ -3,20 +3,20 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.PromptTests;
 
-// РЕАЛЬНЫЕ вызовы Claude — см. класс SendActionPromptTests для общих правил (платно, медленно,
-// запускать редко и осознанно). Проверяет фикс реального бага из продакшен-лога: ИИ описал «подхожу
-// и открываю дверь», хотя герой не двигался и был в двух клетках от двери — движок это никак не
-// проверял, промпт полагался на то, что ИИ сам не будет придумывать несуществующее сближение.
-// Теперь § КАРТА И ОБЪЕКТЫ учит вызывать open_door(id)/close_door(id) — тул сам меряет дистанцию
-// (Chebyshev ≤1 до from/to) и либо возвращает патч, либо причину отказа.
+// REAL calls Claude - see class SendActionPromptTests for general rules (paid, slow, run rarely and
+// deliberately). Checks the fix for a real bug from the production log: the AI described “I come up and open
+// the door,” although the hero did not move and was two cells from the door - the engine did not check this in
+// any way, the prompt relied on the fact that the AI itself would not come up with a non-existent approach. Now
+// § MAP AND OBJECTS teaches you to call open_door(id)/close_door(id) - the tool itself measures the distance
+// (Chebyshev ≤1 to from/to) and either returns a patch or the reason for the failure.
 public class DoorInteractionPromptTests
 {
     private readonly ITestOutputHelper _output;
 
     public DoorInteractionPromptTests(ITestOutputHelper output) => _output = output;
 
-    // Герой на [1,1], дверь между [3,3]/[4,3] — далеко (Chebyshev 2/3). open_door должен отказать,
-    // и ИИ не должен резолвить открытие сам поверх отказа тула.
+    // The hero is at [1,1], the door between [3,3]/[4,3] is far away (Chebyshev 2/3). open_door should refuse,
+    // and the AI should not resolve the discovery itself on top of the tool’s failure.
     [Fact]
     public async Task OpenDoor_WhenHeroIsFar_DoesNotFabricateSuccess()
     {
@@ -38,8 +38,8 @@ public class DoorInteractionPromptTests
         PromptScenario.RecordAsMock(result.RawResponse, mockResponsesFolder: "DoorTooFar", action: "SendAction");
     }
 
-    // Герой стоит вплотную к двери (id:0, from:[3,3]) — open_door должен вернуть патч, ИИ должен
-    // его применить.
+    // The hero is standing close to the door (id:0, from:[3,3]) - open_door must return the patch, the AI
+    // must apply it.
     [Fact]
     public async Task OpenDoor_WhenHeroIsAdjacent_OpensIt()
     {

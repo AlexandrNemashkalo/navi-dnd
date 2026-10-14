@@ -2,10 +2,10 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: статус-эффекты (CellEntity.Effects/StatusEffect) заменили прежнее свободнотекстовое поле
-// State. Fixtures/effects_game.json: герой с тремя эффектами разной длительности (ограничен
-// раундами / до долгого отдыха / бессрочно), видимый гоблин «GB1» с эффектом «Горит» и контрольный
-// здоровый гоблин «GB2» без эффектов.
+// E2E: status effects (CellEntity.Effects/StatusEffect) replaced the previous free-text field State.
+// Fixtures/effects_game.json: hero with three effects of different durations (limited by rounds / until a long
+// rest / indefinitely), a visible goblin "GB1" with the "Burn" effect and a control healthy goblin "GB2" with
+// no effects.
 public class EffectsScenarioTests
 {
     private readonly ITestOutputHelper _output;
@@ -67,10 +67,10 @@ public class EffectsScenarioTests
         var rows = GameConsole.ReadRows(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth);
         var failures = new List<string>();
 
-        // Маркер строки списка на подвкладке Состояния (HeroDisplay.DrawEffectsSection) — просто
-        // пробел, без видимого символа. Ищем по "Имя:" (после имени сразу следует ": <длительность>",
-        // см. InvLine.Rest ниже) — отличает строку списка от краткой сводки имён в карточке героя
-        // выше («Состояния   Отравлен, ...»), где после имени идёт запятая, а не двоеточие.
+        // List line marker on the Conditions subtab (HeroDisplay.DrawEffectsSection) is just a space, no
+        // visible character. Search by "Name:" (the name is immediately followed by ": <duration>", see
+        // InvLine.Rest below) - distinguishes the list line from the summary of names in the hero card above
+        // ("Conditions Poisoned, ..."), where the name is followed by a comma rather than a colon.
         _output.WriteLine("Проверяю эффект с ограничением по раундам («Отравлен» — до раунда 8)...");
         var poisonRow = rows.FirstOrDefault(r => r.Contains("Отравлен:"));
         if (poisonRow == null) failures.Add("Строка списка «Отравлен:» не найдена на подвкладке Состояния.");
@@ -93,7 +93,7 @@ public class EffectsScenarioTests
         TestPacing.Step();
 
         _output.WriteLine("Проверяю, что краткой сводки эффектов в карточке героя больше нет (только на подвкладке Состояния)...");
-        var summaryRow = rows.FirstOrDefault(r => r.Contains("Состояния")); // метка "СОСТОЯНИЯ" вкладки — верхним регистром, не совпадёт
+        var summaryRow = rows.FirstOrDefault(r => r.Contains("Состояния")); // tab “STATUS” label is in upper case, will not match
         if (summaryRow != null)
             failures.Add($"В карточке героя неожиданно осталась строка-метка «Состояния» вне подвкладки: «{summaryRow.TrimEnd()}»");
         TestPacing.Step();
@@ -102,12 +102,11 @@ public class EffectsScenarioTests
         Assert.True(failures.Count == 0, "UI-тест FAIL:\n" + string.Join("\n", failures.Select(f => "  - " + f)));
     }
 
-    // Регрессия: переключение подвкладки КЛИКОМ МЫШИ идёт через отдельный путь
-    // (MouseUiHelper → display.PendingCommand → InputBox.ReadKeyWithPolling), не через прямое
-    // чтение ConsoleKey — у него был свой список известных команд ("F1".."F7","Esc"), не
-    // обновлённый вместе с остальными при добавлении подвкладки Состояний. Клавиатурный [F8]
-    // (см. тест выше) эту ветку не задевает и бага не ловил — процесс падал с необработанным
-    // InvalidOperationException «Unknown pending command: F8» только по клику мышью.
+    // Regression: switching a subtab WITH A MOUSE CLICK goes through a separate path (MouseUiHelper →
+    // display.PendingCommand → InputBox.ReadKeyWithPolling), not through direct reading of ConsoleKey - it had
+    // its own list of known commands ("F1"."F7","Esc"), not updated along with the others when adding the
+    // Status subtab. Keyboard [F8] (see test above) does not affect this branch and did not catch the bug - the
+    // process crashed with the raw Unknown pending command: F8 only on a mouse click.
     [Fact]
     public void CharacterEffectsTab_MouseClick_SwitchesTabWithoutCrashing()
     {

@@ -3,13 +3,15 @@ using System.Runtime.Versioning;
 
 namespace NaviDnD.Helpers;
 
-// Обновление на macOS — без помощника: файлы запущенной программы можно заменять (старые остаются открытыми у неё),
-// а после установки игра перезапускается в том же окне терминала (execv). Storage/ и logs/ не трогаются.
+// Update on macOS - without an assistant: files of the running program can be replaced (old ones remain open in
+// it), and after installation the game restarts in the same terminal window (execv). Storage/ and logs/ are not
+// touched.
 [UnsupportedOSPlatform("windows")]
 internal static class UnixUpdate
 {
-    // Программы игры: «исполняемый» нужен им и после замены. ZIP сборки несёт права сам, это — страховка.
-    // Пути — от папки программ и от папки файлов игры (у NaviDnD.app это Contents/MacOS и Contents/Resources).
+    // Game programs: they still need “executable” after replacement. ZIP assembly bears the rights itself, this
+    // is insurance. Paths - from the programs folder and from the game files folder (for NaviDnD.app these are
+    // Contents/MacOS and Contents/Resources).
     private static readonly string[] Programs = ["NaviDnD", "NaviDnD.McpServer", "alacritty", "createdump", "Speech/setup-silero.sh",
         "Speech/silero/python/bin/python3", "Speech/silero/python/bin/python3.12"];
 
@@ -23,8 +25,9 @@ internal static class UnixUpdate
         }
     }
 
-    // Новая версия — в том же окне: запросы к мастеру и озвучка завершаются, терминал возвращается в обычный режим,
-    // и процесс заменяется программой игры с теми же аргументами. Не вышло — игра просто закрывается.
+    // New version - in the same window: requests to the GM and voice acting are completed, the terminal returns
+    // to normal mode, and the process is replaced by the game program with the same arguments. It didn't work
+    // out - the game just closes.
     internal static void Restart()
     {
         ChildProcessJob.KillAll();

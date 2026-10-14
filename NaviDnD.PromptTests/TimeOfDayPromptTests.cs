@@ -3,27 +3,26 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.PromptTests;
 
-// РЕАЛЬНЫЕ вызовы Claude — см. класс SendActionPromptTests для общих правил (платно, медленно,
-// запускать редко и осознанно). Проверяет § Время/Отдых systemPrompt.md: ИИ сам сбрасывает
-// time.totalRounds на 1 и двигает time.day при смене partOfDay (движок это не отслеживает —
-// см. Storage.ApplyTimeUpdate, там просто присваивание без какой-либо автоматики), а также
-// отказывает в отдыхе, пока активен периодический урон.
+// REAL calls Claude - see class SendActionPromptTests for general rules (paid, slow, run rarely and
+// deliberately). Checks § Time/Rest systemPrompt.md: The AI itself resets time.totalRounds to 1 and moves
+// time.day when changing partOfDay (the engine does not track this - see Storage.ApplyTimeUpdate, there is just
+// an assignment without any automation), and also denies rest while periodic damage is active.
 public class TimeOfDayPromptTests
 {
     private readonly ITestOutputHelper _output;
 
     public TimeOfDayPromptTests(ITestOutputHelper output) => _output = output;
 
-    // Долгий отдых через полночь (Вечер + 2 шага = Ночь → Утро) — цикл проходит через "Ночь", значит
-    // day должен вырасти на 1, а totalRounds сброситься на 1 независимо от того, каким большим было
-    // значение до отдыха (519 — реалистичное "старое" значение, как в разборе продакшен-лога, из-за
-    // которого и появилось это правило).
+    // Long rest after midnight (Evening + 2 steps = Night → Morning) - the cycle goes through "Night", which
+    // means day should increase by 1, and totalRounds should reset by 1, regardless of how large the value was
+    // before the rest (519 is a realistic "old" value, as in the production log analysis, which is why this
+    // rule appeared).
     [Fact]
     public async Task LongRest_ResetsTotalRounds_AndIncrementsDay_WhenCycleCrossesNight()
     {
         var storage = PromptScenario.LoadUiTestFixture("burning_effect_game.json");
-        // id:0 — предзаданный в фикстуре "Горящий", этому сценарию не нужен (горящего героя ИИ
-        // обоснованно не даст спокойно уснуть, см. аналогичную заметку в EffectsPromptTests).
+        // id:0 - predefined in the “Burning” fixture, this scenario is not needed (the AI will reasonably not
+        // allow the burning hero to sleep peacefully, see a similar note in EffectsPromptTests).
         storage.ApplyUpdateWorldState("""
             {"hero":{"hp":"4/10","effects":[{"id":0,"deleted":true}]},
              "time":{"totalRounds":519,"partOfDay":"Вечер","day":3}}
@@ -45,10 +44,10 @@ public class TimeOfDayPromptTests
         PromptScenario.RecordAsMock(result.RawResponse, mockResponsesFolder: "LongRestRoundReset", action: "SendAction");
     }
 
-    // Короткий отдых (Утро + 1 шаг = День, "Ночь" не пересекается — day не меняется). Заодно
-    // проверяет асимметрию finite/untilLongRest эффектов при коротком отдыхе (см. § Отдых): "Ушиб"
-    // с expiresAtRound должен сняться (отдых по длительности перекрывает 2 раунда), "Истощение"
-    // untilLongRest — только на долгом, короткий его не трогает.
+    // Short rest (Morning + 1 step = Day, “Night” does not intersect - day does not change). At the same time,
+    // it checks the asymmetry of finite/untilLongRest effects during a short rest (see § Rest): “Bruise” with
+    // expiresAtRound should be removed (rest duration covers 2 rounds), “Exhaustion” untilLongRest - only on a
+    // long one, a short one does not affect it.
     [Fact]
     public async Task ShortRest_AdvancesOneStep_ResetsRound_KeepsUntilLongRestEffect_RemovesFiniteEffect()
     {
@@ -80,9 +79,9 @@ public class TimeOfDayPromptTests
         PromptScenario.RecordAsMock(result.RawResponse, mockResponsesFolder: "ShortRest", action: "SendAction");
     }
 
-    // Активный периодический урон ("Отравлен", без expiresAtRound — бессрочный, худший случай) — по
-    // явному дизайн-решению отдых должен быть ЗАПРЕЩЁН целиком, а не разрешён с "додумыванием" урона
-    // за пропущенные часы: partOfDay/totalRounds не должны сдвинуться, а сам эффект — остаться.
+    // Active periodic damage ("Poisoned", without expiresAtRound - indefinite, worst case) - according to an
+    // obvious design decision, rest should be PROHIBITED entirely, and not allowed with "rethinking" the damage
+    // for the missed hours: partOfDay/totalRounds should not move, but the effect itself should remain.
     [Fact]
     public async Task Rest_BlockedByActiveDamagingPeriodicEffect_RefusesRest()
     {

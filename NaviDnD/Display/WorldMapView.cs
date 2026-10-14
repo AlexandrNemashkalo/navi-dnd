@@ -5,12 +5,11 @@ using NaviDnD.MapGen.Generators;
 
 namespace NaviDnD.Display;
 
-// Отрисовка карты мира ([F2]) по WorldMap. Масштабы (DisplayConfig.WorldZoomStep):
-//   «пиксели» полублоками ▄: символ = 2 пикселя по вертикали (нижний — цвет символа, верхний — фон);
-//   0 — самый крупный: клетка мира = 4×4 пикселя, 1 — 2×2; дальше пиксель = s×s клеток мира (s = масштаб),
-//   цвет — преобладающий рельеф с отмывкой высот.
-// Поверх — реки, дороги, значки мест и подписи (у поселений — цветом их королевства) по приоритету (не налезают
-// друг на друга; мелкие места — только при приближении). Кадр считается целиком и кэшируется.
+// Drawing a world map ([F2]) by WorldMap. Scales (DisplayConfig.WorldZoomStep): “pixels” in half blocks ▄:
+// symbol = 2 pixels vertically (lower is the color of the symbol, upper is the background); 0 is the largest:
+// world cell = 4×4 pixels, 1 – 2×2; further pixel = s×s of world cells (s = scale), color - the prevailing
+// terrain with a wash of heights. On top - rivers, roads, place icons and signatures (for settlements - in the
+// color of their kingdom) by priority (they do not overlap; small places - only when zoomed in).
 public sealed class WorldMapView
 {
     public const int MinZoom = 0;
@@ -18,8 +17,9 @@ public sealed class WorldMapView
     private readonly WorldMap _w;
     public WorldMap World => _w;
 
-    // Масштабы (клеток мира на пиксель полублока): ¼ (клетка = 4×4 пикселя), ½ (2×2), 1, 2, … и последний — «мир во всё
-    // окно» (дробный: мир ровно закрывает область карты, дальше не отдаляется).
+    // Scales (world cells per half-block pixel): ¼ (cell = 4×4 pixels), ½ (2×2), 1, 2, ... and the last one is
+    // “the world in the entire window” (fractional: the world exactly covers the map area, does not move
+    // further away).
     private readonly List<double> _scales;
     public int MaxZoom => _scales.Count - 1;
     public double Scale(int zoom) => _scales[Math.Clamp(zoom, 0, MaxZoom)];
@@ -33,20 +33,20 @@ public sealed class WorldMapView
         if (fit > _scales[^1]) _scales.Add(fit);
     }
 
-    // ── Кадр ──
+    // ── Frame ──
     private sealed record Frame(string[] Rows, Dictionary<(int col, int row), int> PlaceAt, HashSet<int> TextRows);
 
-    // Строки кадра с подписями (последнего построенного) — над ними MapDisplay перерисовывает строку повторно.
+    // Frame lines with captions (the last one built) - above them MapDisplay redraws the line again.
     public IReadOnlyCollection<int> TextRows => _frame?.TextRows ?? (IReadOnlyCollection<int>)[];
     private Frame? _frame;
     private (double cx, double cy, int z, int w, int h, int hover) _frameKey;
     private string _filterKey = "";
 
-    // Категории фильтра легенды: ключ, подпись, клавиша.
+    // Legend filter categories: key, caption, key.
     public static (string key, string label, string fkey)[] Categories =>
-        [("settlements", L.T("Поселения"), "F7"), ("sites", L.T("Приключения"), "F8"), ("nature", L.T("Природа"), "F9")];
+        [("settlements", L.T("Settlements"), "F7"), ("sites", L.T("Adventures"), "F8"), ("nature", L.T("Nature"), "F9")];
 
-    // Крепости — вместе с поселениями.
+    // Fortresses - together with settlements.
     public static string Category(string type) => type switch
     {
         WorldPlaceTypes.Ruins or WorldPlaceTypes.Dungeon or WorldPlaceTypes.Cave or WorldPlaceTypes.Shrine => "sites",
@@ -56,17 +56,18 @@ public sealed class WorldMapView
     private HashSet<string> _filter = [.. Categories.Select(c => c.key)];
     private int _selected = -1;
 
-    // Герой на карте мира (клетка, цвет) и проложенный маршрут до цели (клетки) — поверх рельефа.
+    // The hero on the world map (cell, color) and the route to the goal (cell) - on top of the terrain.
     public (int x, int y)? Hero { get; set; }
     public List<int> HeroColor { get; set; } = [255, 255, 255];
 
-    // Герой (и отметка старта при создании игры) — пикселями полублоков фиолетового цвета, путь — ярко-розовыми:
-    // таких цветов на карте нет. MarkerGlyph — значок героя в легенде.
+    // The hero (and the start mark when creating the game) is purple half-block pixels, the path is bright
+    // pink: there are no such colors on the map. MarkerGlyph is the hero icon in the legend.
     public const char MarkerGlyph = '■';
-    public static readonly List<int> MarkerColor = [255, 40, 190];   // ярко-розовый, непрозрачный — ярче полупрозрачного пути
-    // Сглаженный рисунок пути по клеткам маршрута (середины клеток): «натянутая нить» — от точки к самой дальней,
-    // до которой все промежуточные клетки лежат не дальше клетки от прямой (ступеньки и L-углы по клеткам уходят),
-    // затем два прохода Чайкина — плавные повороты. Концы — ровно в начале и в цели.
+    public static readonly List<int> MarkerColor = [255, 40, 190];   // bright pink, opaque - brighter than the translucent path Smoothed pattern of the path along the cells of
+    // the route (the middle of the cells): “tight thread” - from the point to the farthest, to which all
+    // intermediate cells lie no further than the cell from the straight line (steps and L- corners along the
+    // cells go away), then two Chaikin passes - smooth turns. The ends are exactly at the beginning and at the
+    // goal.
     private static List<(double x, double y)> SmoothRoute(List<(int x, int y)> route)
     {
         var mid = route.Select(t => (x: t.x + 0.5, y: t.y + 0.5)).ToList();
@@ -88,7 +89,7 @@ public sealed class WorldMapView
             for (int t = a + 1; t < b; t++)
             {
                 var (px, py) = mid[t];
-                double d = Math.Abs((bx - ax) * (ay - py) - (ax - px) * (by - ay)) / len;   // расстояние до прямой
+                double d = Math.Abs((bx - ax) * (ay - py) - (ax - px) * (by - ay)) / len;   // distance to straight line
                 if (d > 1.0) return false;
             }
             return true;
@@ -132,7 +133,7 @@ public sealed class WorldMapView
         return row >= 0 && row < _frame.Rows.Length ? _frame.Rows[row] : "";
     }
 
-    // Места, чьи значки видны в окне при таком масштабе (для легенды), — по приоритету.
+    // Places whose icons are visible in the window at this scale (for the legend) are given priority.
     public List<int> VisiblePlaces(int W, int H, double cx, double cy, int z, HashSet<string> filter)
     {
         var list = new List<int>();
@@ -148,10 +149,10 @@ public sealed class WorldMapView
         return list.OrderBy(i => Priority(_w.Places[i].Type)).ThenBy(i => _w.Places[i].Name).ToList();
     }
 
-    // Место под символом экрана (значок или подпись) — для наведения.
+    // The space below the screen symbol (icon or caption) is for hovering.
     public int PlaceAtCell(int col, int row) => _frame != null && _frame.PlaceAt.TryGetValue((col, row), out int p) ? p : -1;
 
-    // Клетка мира под символом экрана.
+    // World cell under the screen symbol.
     public (int x, int y) TileAt(int col, int row, int widthChars, int heightRows, double cx, double cy, int zoom)
     {
         double s = Scale(zoom);
@@ -166,8 +167,8 @@ public sealed class WorldMapView
         var placeAt = new Dictionary<(int, int), int>();
         var textRows = new HashSet<int>();
 
-        // Пиксель полублока = s×s клеток мира (s = Scale(z)); на самом крупном масштабе s = ½ — клетка мира
-        // занимает 2×2 пикселя (2 символа × 1 строку), рисунок детальнее, тоже полублоками.
+        // Half-block pixel = s×s world cells (s = Scale(z)); on the largest scale s = ½ - a world cell occupies
+        // 2 × 2 pixels (2 characters × 1 line), the drawing is more detailed, also in half blocks.
         double s = Scale(z);
         int block = Math.Max(1, (int)Math.Round(s));
         for (int r = 0; r < H; r++)
@@ -175,10 +176,10 @@ public sealed class WorldMapView
             {
                 int tx = (int)Math.Floor(cx + (c - W / 2) * s);
                 int ty0 = (int)Math.Floor(cy + (2 * r - H) * s), ty1 = (int)Math.Floor(cy + (2 * r + 1 - H) * s);
-                // ▄: цвет символа — нижний пиксель, фон — верхний.
+                // ▄: symbol color - bottom pixel, background - top.
                 if (s < 1)
                 {
-                    // Крупно: клетка мира — k×k пикселей, у каждого свой оттенок (кроны леса, гребни гор, ручьи).
+                    // Large: world cell - k×k pixels, each with its own shade (forest crowns, mountain ridges, streams).
                     int k = (int)Math.Round(1 / s);
                     int px = (int)Math.Floor(k * cx + (c - W / 2)), py0 = (int)Math.Floor(k * cy + (2 * r - H)), py1 = py0 + 1;
                     bg[r, c] = FinePixel(px, py0, k);
@@ -189,13 +190,14 @@ public sealed class WorldMapView
                     bg[r, c] = PixelColor(tx, ty0, block);
                     fg[r, c] = PixelColor(tx, ty1, block);
                 }
-                // Полублок ▄ (а не ▀: у ▀ в консольном шрифте на правом краю каждого символа просвечивали цветные
-                // вертикальные полоски). Близкие цвета верха и низа сливаются в пробел со средним фоном.
+                // Semi-block ▄ (not ▀: in the console font, colored vertical stripes were visible on the right
+                // edge of each character). Similar colors of the top and bottom merge into a gap with the
+                // middle background.
                 if (ColorDistance(fg[r, c], bg[r, c]) < 60) { bg[r, c] = ColorHelper.MixWith(fg[r, c], bg[r, c], 0.5); ch[r, c] = ' '; }
                 else ch[r, c] = '▄';
             }
 
-        // ── Места и подписи ──
+        // ── Places and signatures ──
         var used = new bool[H, W];
         (int col, int row)? Screen(int x, int y)
         {
@@ -206,8 +208,9 @@ public sealed class WorldMapView
             return c >= 0 && c < W && r >= 0 && r < H ? (c, r) : null;
         }
         bool Free(int r, int c0, int len) { for (int c = c0; c < c0 + len; c++) if (c < 0 || c >= W || used[r, c]) return false; return true; }
-        // Подпись — на ровной плашке одного цвета (средний цвет рельефа под ней, чуть темнее), по краям — по пустой клетке
-        // плашки, если там свободно (края не занимают место: значок поверх них ещё встанет).
+        // The label is on a flat plate of the same color (the average color of the terrain underneath, a
+        // little darker), along the edges - on an empty cell of the plate, if there is free space (the edges do
+        // not take up space: the icon will still appear on top of them).
         void Text(int r, int c0, string text, List<int> color, int place, double plate = 0.3)
         {
             int sr = 0, sg = 0, sb = 0;
@@ -236,9 +239,9 @@ public sealed class WorldMapView
             textRows.Add(r);
         }
 
-        // Названия королевств — крупно, по центру земель (на отдалении).
+        // The names of the kingdoms are large, in the center of the lands (at a distance).
         int st = Stage(z);
-        if (st == 0)   // названия королевств — только на самом отдалённом масштабе (весь мир)
+        if (st == 0)   // names of kingdoms - only on the most distant scale (the whole world)
             for (int k = 0; k < _w.Kingdoms.Count; k++)
             {
                 var center = KingdomCenter(k);
@@ -248,20 +251,21 @@ public sealed class WorldMapView
                 if (Free(kr, c0, label.Length)) Text(kr, c0, label, ColorHelper.Pale(_w.Kingdoms[k].Color, 0.45), -1, 0.2);
             }
 
-        // Пиксель полублока (столбец c, строка пикселей p: верхний — фон символа, нижний — его цвет) — своим цветом.
-        // alpha < 1 — полупрозрачно, рельеф просвечивает.
+        // A semi-block pixel (column c, row of pixels p:, the top one is the background of the symbol, the
+        // bottom one is its color) - with its own color. alpha < 1 - translucent, the terrain is translucent.
         void SetPixel(int c, int p, List<int> color, bool overText = false, double alpha = 1)
         {
             if (c < 0 || c >= W || p < 0 || p >= 2 * H) return;
             int r = p / 2;
-            if (used[r, c] && !overText) return;   // подписи (королевства) путь не режет
-            if (ch[r, c] != '▄') { fg[r, c] = bg[r, c]; ch[r, c] = '▄'; }   // слитый в пробел символ — снова полублок
+            if (used[r, c] && !overText) return;   // signatures (kingdoms) do not cut the path
+            if (ch[r, c] != '▄') { fg[r, c] = bg[r, c]; ch[r, c] = '▄'; }   // a character merged into a space is again a half-block
             var under = p % 2 == 0 ? bg[r, c] : fg[r, c];
             var col = alpha >= 1 ? color : ColorHelper.MixWith(under, color, alpha);
             if (p % 2 == 0) bg[r, c] = col; else fg[r, c] = col;
         }
-        // Клетка мира пикселями: на крупном масштабе (клетка — k×k пикселей) — квадрат из доли frac её пикселей по
-        // центру; на отдалении (пиксель — несколько клеток) — тот пиксель, куда она попала (wholeChar — весь символ).
+        // Cell of the world by pixels: on a large scale (cell - k×k pixels) - a square from a fraction of frac
+        // of its pixels in the center; in the distance (a pixel - several cells) - the pixel where it hit
+        // (wholeChar - the entire symbol).
         void PaintTile(int x, int y, List<int> color, double frac, bool wholeChar = false, bool overText = false, double alpha = 1)
         {
             if (s < 1)
@@ -272,23 +276,24 @@ public sealed class WorldMapView
                     for (int dx = 0; dx < n; dx++) SetPixel(c0 + off + dx, p0 + off + dy, color, overText, alpha);
                 return;
             }
-            // Та же клетка экрана, что у значков мест (Screen): иначе герой стоял на символ правее своего города.
+            // The same screen cell as the place icons (Screen): otherwise the hero stood on the symbol to the right of his city.
             int c = (int)Math.Floor((x - cx) / s + W / 2), p = (int)Math.Floor((y - cy) / s + H);
             if (wholeChar) { SetPixel(c, p - p % 2, color, overText, alpha); SetPixel(c, p - p % 2 + 1, color, overText, alpha); }
             else SetPixel(c, p, color, overText, alpha);
         }
 
-        // Маршрут до цели — ярко-розовыми пикселями по клеткам пути (под значками мест).
-        // Путь до цели — пунктиром: пиксель-полублок через один, розовым почти прозрачным (рельеф виден сквозь него).
-        // Рисунок сглажен (SmoothRoute): почти прямые участки — одной линией, повороты — плавно, без ступенек и
-        // прямых углов по клеткам; сам маршрут путешествия не меняется.
+        // The route to the goal is shown in bright pink pixels along the cells of the path (under the place
+        // icons). The path to the goal is dotted: a half-block pixel every other, almost transparent in pink
+        // (the terrain is visible through it). The drawing is smoothed (SmoothRoute): almost straight sections -
+        // one line, turns - smoothly, without steps and right angles in the cells; the travel route itself does
+        // not change.
         if (Route is { Count: > 1 } route)
         {
             const double routeAlpha = 0.35;
             int k = s < 1 ? (int)Math.Round(1 / s) : 1;
-            // Точка мира (середина клетки — x+0.5) → пиксель экрана в той же точке клетки, что значок героя
-            // (PaintTile: пиксель (k−1)/2 внутри клетки; на отдалении — пиксель самой клетки): иначе путь начинался
-            // на пиксель сбоку от героя.
+            // World point (middle of the cell - x+0.5) → screen pixel at the same point on the cell as the hero
+            // icon (PaintTile: pixel (k−1)/2 inside the cell; in the distance - pixel of the cell itself):
+            // otherwise the path began a pixel to the side of the hero.
             (double c, double p) ToPixel((double x, double y) t) => s < 1
                 ? (t.x * k - 0.5 - Math.Floor(k * cx) + W / 2, t.y * k - 0.5 - Math.Floor(k * cy) + H)
                 : ((t.x - 0.5 - cx) / s + W / 2, (t.y - 0.5 - cy) / s + H);
@@ -296,9 +301,9 @@ public sealed class WorldMapView
             if (s >= 1) pts = SmoothRoute(route).Select(ToPixel).ToList();
             else
             {
-                // Крупно: по дорожным клеткам — геометрией самой дороги (центр клетки, выходы к соседям по пути,
-                // поворот — отрезком между выходами, как OnThinLine), чтобы пунктир лёг ровно на её пиксели;
-                // участки без дороги — сглаженной линией.
+                // Large: according to road cells - the geometry of the road itself (the center of the cell,
+                // exits to neighbors along the way, a turn - a segment between exits, like OnThinLine), so that
+                // the dotted line lies exactly on its pixels; areas without a road - a smoothed line.
                 int m = (k - 1) / 2;
                 (double, double) Px(int x, int y, int sx, int sy) =>
                     (x * k - Math.Floor(k * cx) + W / 2 + sx, y * k - Math.Floor(k * cy) + H + sy);
@@ -325,7 +330,7 @@ public sealed class WorldMapView
                     i = j + 1;
                 }
             }
-            int dot = 1;   // сквозной счётчик — пунктир не сбивается на стыках отрезков; с 1 — у героя пустой полублок
+            int dot = 1;   // end-to-end counter - the dotted line does not go astray at the junctions of segments; with 1 - the hero has an empty half-block
             (int c, int p)? last = null;
             for (int i = 1; i < pts.Count; i++)
             {
@@ -356,7 +361,7 @@ public sealed class WorldMapView
             if (selected) bg[pr, pc] = ColorHelper.MixWith(bg[pr, pc], [255, 220, 120], 0.55);
             used[pr, pc] = true;
             placeAt[(pc, pr)] = i;
-            // Поселение нарисовано картой (стена, дома) — наведение на любую его часть, подпись — за стеной.
+            // The settlement is drawn with a map (wall, houses) - pointing at any part of it, the label is behind the wall.
             int art = s < 1 ? ArtRadius(p.Type, (int)Math.Round(1 / s)) : 0;
             for (int dr = -art / 2; dr <= art / 2; dr++)
                 for (int dc = -art; dc <= art; dc++)
@@ -373,15 +378,16 @@ public sealed class WorldMapView
             else if (Free(pr, pc - art - name.Length - 1, name.Length + 1)) Text(pr, pc - art - name.Length - 1, name + " ", labelColor, i);
         }
 
-        // Герой (и отметка старта в мастере новой игры) — поверх всего, ровно один пиксель-полублок на любом масштабе:
-        // при приближении — центр его клетки (раньше квадрат в пол-клетки — целый символ), на отдалении — его пиксель.
+        // The hero (and the start mark in the new game wizard) is on top of everything, exactly one
+        // pixel-half-block on any scale: when approaching, the center of his cell (previously, a half-cell
+        // square was a whole symbol), at a distance, his pixel.
         if (Hero is { } hero && Screen(hero.x, hero.y) is var (hc, hr))
         {
             PaintTile(hero.x, hero.y, HeroColor, 0.01, overText: true);
             used[hr, hc] = true;
         }
 
-        // Природные области — приглушённо, если есть место.
+        // Natural areas - subdued if there is room.
         if (st >= 1 && _filter.Contains("nature"))
             foreach (var f in _w.Features.OrderByDescending(f => f.Size))
             {
@@ -436,15 +442,15 @@ public sealed class WorldMapView
         return sums.ToDictionary(kv => kv.Key, kv => ((int)(kv.Value.sx / kv.Value.n), (int)(kv.Value.sy / kv.Value.n)));
     }
 
-    // ── Цвета клеток ──
+    // ── Cell colors ──
     private static readonly List<int> RiverColor = [72, 122, 178];
     private static readonly List<int> RoadMain = [176, 148, 102];
     private static readonly List<int> RoadPath = [146, 128, 96];
     private static readonly List<int> BridgeColor = [122, 84, 50];
     private static readonly List<int> LabelColor = [236, 230, 210];
 
-    // Цвет подписи места на карте (и картинки в его карточке): принадлежность — название поселения/крепости
-    // цветом его королевства.
+    // Color of the place signature on the map (and the picture in its card): affiliation - the name of the
+    // settlement/fortress in the color of its kingdom.
     public List<int> PlaceLabelColor(WorldPlace p) =>
         p.Kingdom >= 0 && p.Kingdom < _w.Kingdoms.Count && (WorldPlaceTypes.IsSettlement(p.Type) || p.Type == WorldPlaceTypes.Castle)
             ? ColorHelper.Pale(_w.Kingdoms[p.Kingdom].Color, 0.45)
@@ -460,7 +466,7 @@ public sealed class WorldMapView
         var col = biome.Color;
         if (!biome.Water)
         {
-            // Отмывка рельефа: склон к северо-западу светлее.
+            // Shading of the terrain: the slope to the northwest is lighter.
             int dh = _w.HeightAt(x, y) - _w.HeightAt(x - 1, y - 1);
             double f = 1 + 0.07 * dh + 0.035 * (Hash(x, y) - 0.5);
             col = [Math.Clamp((int)(col[0] * f), 0, 255), Math.Clamp((int)(col[1] * f), 0, 255), Math.Clamp((int)(col[2] * f), 0, 255)];
@@ -470,24 +476,24 @@ public sealed class WorldMapView
         return col;
     }
 
-    // Пиксель на крупных масштабах (клетка = k×k пикселей, k = 2 или 4): цвет клетки + фактура по рельефу.
+    // Pixel on large scales (cell = k×k pixels, k = 2 or 4): cell color + terrain texture.
     private List<int> FinePixel(int px, int py, int k)
     {
         int x = FloorDiv(px, k), y = FloorDiv(py, k), sx = px - x * k, sy = py - y * k;
         int road = _w.RoadAt(x, y);
         bool onLine = road > 0 && OnRoadLine(x, y, sx, sy, k);
         int river = _w.RiverAt(x, y);
-        // Поселение крупным планом: стена, дома, улицы (река течёт сквозь него).
+        // Close-up of the settlement: wall, houses, streets (the river flows through it).
         if (TownPixel(px, py, k) is { } town && !(river >= 1 && InRiverBed(x, y, sx, sy, k, river))) return town;
         if (river >= 1)
         {
-            // Мост: дорога через реку — по той же линии, цветом настила.
+            // Bridge: road across the river - along the same line, flooring color.
             if (onLine) return BridgeColor;
             if (InRiverBed(x, y, sx, sy, k, river)) return RiverColor;
             return LandPixel(x, y, px, py, sx, sy, k);
         }
         if (onLine) return road == 2 ? RoadMain : ColorHelper.MixWith(TileColor(x, y), RoadPath, 0.6);
-        // При k = 4 граница рельефов рваная: пиксели у края клетки иногда берут рельеф соседа (не воду-реку).
+        // When k = 4, the border of reliefs is jagged: pixels at the edge of a cell sometimes take on the terrain of a neighbor (not a water river).
         if (k >= 4)
         {
             double e = Hash(px * 31 + 7, py * 17 + 11);
@@ -503,14 +509,16 @@ public sealed class WorldMapView
         return LandPixel(x, y, px, py, sx, sy, k);
     }
 
-    // Пиксель линии дороги в клетке k×k. Линия в один пиксель идёт через «центр» m (при k = 2 — левый верхний
-    // пиксель) к выходам на соседей-дороги по сторонам. Поворот (ровно два соседа под углом) — без угла: прямой
-    // отрезок между выходами, так лесенка из клеток рисуется ровной наклонной линией.
+    // Road line pixel in cell k×k. A line of one pixel goes through the “center” of m (with k = 2 - the upper
+    // left pixel) to the exits to neighboring roads on the sides. Turn (exactly two neighbors at an angle) -
+    // without an angle: a straight segment between the exits, so a ladder of cells is drawn as a straight
+    // inclined line.
     private bool OnRoadLine(int x, int y, int sx, int sy, int k) =>
         OnThinLine(sx, sy, k, _w.RoadAt(x + 1, y) > 0, _w.RoadAt(x - 1, y) > 0, _w.RoadAt(x, y + 1) > 0, _w.RoadAt(x, y - 1) > 0);
 
-    // Русло реки в клетке k×k: ширина по силе реки (уровень 1–9 растёт вниз по течению) — у истока линия в
-    // пиксель, к устью шире, большая река — во всю клетку. Полоса через центр к соседям-рекам и к воде (устье).
+    // The river bed in the cell k×k: width according to the strength of the river (level 1–9 grows downstream)
+    // - at the source the line is a pixel, towards the mouth it is wider, a large river - the entire cell. A
+    // strip through the center to the neighboring rivers and to the water (mouth).
     private bool InRiverBed(int x, int y, int sx, int sy, int k, int level)
     {
         int w = k >= 4 ? Math.Clamp((level + 1) / 2, 1, 4) : level <= 3 ? 1 : 2;
@@ -518,14 +526,14 @@ public sealed class WorldMapView
         bool r = Conn(x + 1, y), l = Conn(x - 1, y), d = Conn(x, y + 1), u = Conn(x, y - 1);
         if (w == 1) return OnThinLine(sx, sy, k, r, l, d, u);
         if (w >= k) return true;
-        int a = (k - w) / 2, b = a + w;   // полоса [a, b)
+        int a = (k - w) / 2, b = a + w;   // band [a, b)
         bool inX = sx >= a && sx < b, inY = sy >= a && sy < b;
         return (inX && inY)
             || (inY && ((sx >= b && r) || (sx < a && l)))
             || (inX && ((sy >= b && d) || (sy < a && u)));
     }
 
-    // Линия в один пиксель через «центр» клетки к выходам r/l/d/u; поворот — прямым отрезком без угла.
+    // One pixel line through the "center" of the cell to the r/l/d/u outputs; turn - a straight segment without an angle.
     private static bool OnThinLine(int sx, int sy, int k, bool r, bool l, bool d, bool u)
     {
         int m = (k - 1) / 2;
@@ -540,7 +548,7 @@ public sealed class WorldMapView
             || (sx == m && sy > m && d) || (sx == m && sy < m && u);
     }
 
-    // Пиксель (px, py) на отрезке (ax, ay)–(bx, by), растеризованном по длинной оси.
+    // Pixel (px, py) on the segment (ax, ay)–(bx, by)), rasterized along the long axis.
     private static bool OnSegment(int ax, int ay, int bx, int by, int px, int py)
     {
         int n = Math.Max(Math.Abs(bx - ax), Math.Abs(by - ay));
@@ -553,8 +561,8 @@ public sealed class WorldMapView
         return false;
     }
 
-    // ── Поселения крупным планом (масштабы 4×4 и 2×2) ──
-    // Радиус рисунка в пикселях (0 — только значок); от стены до центра. Деревня — домики без стены.
+    // ── Close-up of settlements (4×4 and 2×2 scales) ── Picture radius in pixels (0 – icon only); from the
+    // wall to the center. The village is houses without walls.
     public static int ArtRadius(string type, int k) => (type, k >= 4) switch
     {
         (WorldPlaceTypes.Capital, true) => 7,
@@ -594,9 +602,9 @@ public sealed class WorldMapView
                 double h = Hash(px * 13 + 1, py * 29 + 3);
                 if (p.Type == WorldPlaceTypes.Village)
                     return h < 0.4 ? (Hash(px, py) < 0.5 ? RoofRed : RoofBrown) : null;
-                if (d >= R - 0.5) return ox == 0 || oy == 0 ? StreetColor : WallColor;   // стена; ворота — на четыре стороны
+                if (d >= R - 0.5) return ox == 0 || oy == 0 ? StreetColor : WallColor;   // wall; gate - on four sides
                 if (p.Type == WorldPlaceTypes.Castle) return CourtColor;
-                if (ox == 0 || oy == 0) return StreetColor;                                // улицы от ворот к центру
+                if (ox == 0 || oy == 0) return StreetColor;                                // streets from the gate to the center
                 return h < 0.62 ? (Hash(px * 3, py * 5) < 0.6 ? RoofRed : RoofBrown) : StreetColor;
             }
         return null;
@@ -604,7 +612,7 @@ public sealed class WorldMapView
 
     private static int FloorDiv(int a, int b) => a >= 0 ? a / b : -((-a + b - 1) / b);
 
-    // Пиксель рельефа клетки (x, y) с фактурой: кроны леса, склоны гор (свет с северо-запада), гребни холмов.
+    // Cell terrain pixel (x, y) with texture: forest crowns, mountain slopes (light from the northwest), hill ridges.
     private List<int> LandPixel(int x, int y, int px, int py, int sx, int sy, int k)
     {
         var col = TileColor(x, y);
@@ -612,7 +620,7 @@ public sealed class WorldMapView
         return _w.BiomeAt(x, y) switch
         {
             WorldBiomes.Forest or WorldBiomes.DeepForest => h < 0.4 ? ColorHelper.Darker(col, 0.78) : h > 0.85 ? ColorHelper.Pale(col, 0.08) : col,
-            // Тайга: тёмные ели и снег между ними.
+            // Taiga: dark spruce trees and snow between them.
             WorldBiomes.SnowForest => h < 0.45 ? ColorHelper.MixWith(col, [44, 74, 58], 0.7) : h > 0.75 ? ColorHelper.MixWith(col, [232, 238, 242], 0.75) : col,
             WorldBiomes.Mountains or WorldBiomes.Peaks => sx + sy < k - 1 ? ColorHelper.Pale(col, 0.18) : sx + sy >= k ? ColorHelper.Darker(col, 0.82) : col,
             WorldBiomes.Hills => sy < k / 2 && h < 0.5 ? ColorHelper.Pale(col, 0.08) : col,
@@ -632,7 +640,7 @@ public sealed class WorldMapView
             if (roadLevel == 1) return ColorHelper.MixWith(TileColor(tx, ty), RoadPath, 0.6);
             return TileColor(tx, ty);
         }
-        // Блок s×s: крупная река/тракт видны и на отдалении, иначе — преобладающий рельеф.
+        // Block s×s: a large river/tract is visible in the distance, otherwise the prevailing terrain.
         int riverMin = s switch { 2 => 4, 3 => 5, _ => 6 };
         Span<int> counts = stackalloc int[128];
         char best = WorldBiomes.Ocean;
@@ -649,7 +657,7 @@ public sealed class WorldMapView
                 if (n > bestN) { bestN = n; best = b; }
             }
         if (road) return RoadMain;
-        // Цвет — центральной клетки, если она того же рельефа (с отмывкой), иначе — чистый цвет рельефа.
+        // Color - the central cell, if it is the same terrain (with a hillshade), otherwise - the pure color of the terrain.
         int cx = tx + s / 2, cy = ty + s / 2;
         return _w.BiomeAt(cx, cy) == best ? TileColor(cx, cy) : WorldBiomes.Get(best).Color;
     }
@@ -661,12 +669,12 @@ public sealed class WorldMapView
         return ((h ^ (h >> 16)) & 0xFFFF) / 65535.0;
     }
 
-    // ── Места: значки, видимость по масштабу ──
+    // ── Places: icons, visibility by scale ──
     public static (char icon, List<int> color) Icon(string type) => type switch
     {
         WorldPlaceTypes.Capital => ('♦', [255, 214, 96]),
         WorldPlaceTypes.City => ('●', [244, 236, 214]),
-        // Поселения по величине: ● город, ○ городок (порт — голубой ○), • деревня.
+        // Settlements by size: ● city, ○ town (port - blue ○), • village.
         WorldPlaceTypes.Town => ('○', [232, 226, 206]),
         WorldPlaceTypes.Port => ('○', [150, 200, 240]),
         WorldPlaceTypes.Village => ('•', [222, 214, 190]),
@@ -717,8 +725,8 @@ public sealed class WorldMapView
         _ => 5,
     };
 
-    // Ступень детализации от самого дальнего масштаба: 0 — «мир во всё окно» (королевства и столицы),
-    // 1 — + города, крепости, городки и крупные природные области, 2 и ближе — всё.
+    // Detail level from the furthest scale: 0 - “world in full window” (kingdoms and capitals), 1 - + cities,
+    // fortresses, towns and large natural areas, 2 and closer - that’s all.
     private int Stage(int z) => MaxZoom - Math.Clamp(z, 0, MaxZoom);
 
     private static bool VisibleAt(string type, int st) => st switch

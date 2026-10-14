@@ -6,9 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <!-- Перевод интерфейса (L.T): ключ — русская строка, значение — английская. -->
+  <!-- Interface translation (L.T): key - English source text, value - Russian. -->
   <ItemGroup>
-    <EmbeddedResource Include="Localization\en.json" LogicalName="NaviDnD.Localization.en.json" />
+    <EmbeddedResource Include="Localization\ru.json" LogicalName="NaviDnD.Localization.ru.json" />
+    <EmbeddedResource Include="Localization\ru.plurals.json" LogicalName="NaviDnD.Localization.ru.plurals.json" />
   </ItemGroup>
 
 </Project>

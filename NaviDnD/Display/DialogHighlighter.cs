@@ -2,9 +2,10 @@ using System.Text.RegularExpressions;
 
 namespace NaviDnD;
 
-// Подсветка текста нейронки в диалоге: имена существ/объектов их цветом с карты (с учётом падежей),
-// механика в [...] приглушённо, урон/лечение/изменения «A→B» и исход броска — цветом. Слова — на обоих языках игры.
-// Чистая функция над строкой: считается при отрисовке видимых строк, а не при сборке кэша.
+// Highlighting the AI text in the dialogue: names of creatures/objects in their color from the map (including
+// cases), mechanics in [...] muted, damage/healing/changes “A→B” and the outcome of the roll in color. The
+// words are in both game languages. Pure function over a line: counted when drawing visible lines, not when
+// building the cache.
 public sealed class DialogHighlighter
 {
     public sealed record Palette(List<int> Mechanics, List<int> Bad, List<int> Good);
@@ -12,7 +13,7 @@ public sealed class DialogHighlighter
     private readonly List<(Regex regex, List<int> color)> _names;
     private readonly Palette _palette;
 
-    // Число или формула кубиков целиком: «8», «2к4=5», «1d6+2=5», «2к4 + 3».
+    // The whole number or formula of the dice: “8”, “2d4=5”, “1d6+2=5”, “2d4 + 3”.
     private const string Num = @"\d+(?:\s*[кkdд]\s*\d+)?(?:\s*[+\-]\s*\d+(?:\s*[кkdд]\s*\d+)?)*(?:\s*=\s*\d+)?";
 
     private static readonly Regex Damage = new(
@@ -28,10 +29,10 @@ public sealed class DialogHighlighter
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     private const string Vowels = "аяоеёуюыийьАЯОЕЁУЮЫИЙЬ";
-    // Короткая основа («Гул» от «Гуль») сама по себе — обычное слово («гул»), поэтому требуем окончание.
+    // The short stem (“Gul” from “Gul”) is itself a common word (“gul”), so we require the ending.
     private const string ShortStemEndings = "(ь|а|я|у|ю|е|и|ы|й|ой|ей|ом|ем|ам|ям|ами|ями|ах|ях)";
 
-    // symbols — символы с карты («SK1», «NUR»): совпадение точное, с учётом регистра.
+    // symbols - symbols from the map (“SK1”, “NUR”): exact match, case sensitive.
     public DialogHighlighter(IEnumerable<(string name, List<int> color)> names, Palette palette,
         IEnumerable<(string symbol, List<int> color)>? symbols = null)
     {
@@ -39,7 +40,7 @@ public sealed class DialogHighlighter
         _names = names
             .Where(n => !string.IsNullOrWhiteSpace(n.name) && n.color is { Count: 3 })
             .SelectMany(n => PatternsFor(n.name).Select(p => (p, n.color)))
-            .OrderByDescending(x => x.p.Length) // длинные имена раньше: «Скелет Торвина» важнее «Скелет»
+            .OrderByDescending(x => x.p.Length) // long names before: "Torvin's Skeleton" is more important than "Skeleton"
             .Select(x => (new Regex(x.p, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), x.color))
             .Concat((symbols ?? [])
                 .Where(s => !string.IsNullOrWhiteSpace(s.symbol) && s.color is { Count: 3 })
@@ -47,8 +48,9 @@ public sealed class DialogHighlighter
             .ToList();
     }
 
-    // Цвет каждого символа строки (null — цвет по умолчанию). bracketDepth — открыта ли скобка [...]
-    // на начале строки (механика переносится на следующие строки сообщения); обновляется на конец строки.
+    // The color of each character in the string (null is the default color). bracketDepth - whether the bracket
+    // [...] is open at the beginning of the line (the mechanics carry over to the following lines of the
+    // message); updated to the end of the line.
     public List<(string text, List<int>? color)> Segments(string line, ref int bracketDepth)
     {
         var colors = new List<int>?[line.Length];
@@ -76,7 +78,7 @@ public sealed class DialogHighlighter
         foreach (var (regex, color) in _names)
             foreach (Match m in regex.Matches(line))
             {
-                if (named.AsSpan(m.Index, m.Length).Contains(true)) continue; // уже занято более длинным именем
+                if (named.AsSpan(m.Index, m.Length).Contains(true)) continue; // already taken by a longer name
                 Fill(colors, m.Index, m.Length, color);
                 named.AsSpan(m.Index, m.Length).Fill(true);
             }
@@ -102,8 +104,8 @@ public sealed class DialogHighlighter
         for (int i = index; i < index + length; i++) colors[i] = color;
     }
 
-    // Полное имя (все слова по основам) и, для составных имён, первое слово отдельно
-    // («Скелет Торвина» → и «скелету Торвина», и просто «скелет»).
+    // Full name (all words based on the basics) and, for compound names, the first word separately (“Torvin’s
+    // skeleton” → and “Torvin’s skeleton”, and simply “skeleton”).
     private static IEnumerable<string> PatternsFor(string name)
     {
         var words = name.Split([' ', '-', ','], StringSplitOptions.RemoveEmptyEntries);
@@ -117,7 +119,7 @@ public sealed class DialogHighlighter
 
     private static string WordPattern(string word)
     {
-        // Английское имя — без падежей: «Goblin», «Goblins», «Goblin's».
+        // English name - without cases: “Goblin”, “Goblins”, “Goblin's”.
         if (!word.Any(c => c is >= 'Ѐ' and <= 'ӿ')) return Regex.Escape(word) + "(?:'s|s|es)?";
         string stem = word.TrimEnd(Vowels.ToCharArray());
         if (stem.Length >= 4) return Regex.Escape(stem) + @"\p{L}{0,3}";

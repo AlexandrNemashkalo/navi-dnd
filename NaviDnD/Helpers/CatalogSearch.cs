@@ -1,19 +1,19 @@
 namespace NaviDnD.Helpers;
 
-// Поиск по справочникам игры по английскому названию: снаряжение, заклинания, монстры, иконки game-icons.net.
-// Общий для MCP-инструментов (find_item/find_spell/find_monster/find_icon) и для ссылок в ответе мастера
-// (CatalogReferences): одинаковое совпадение — одинаковый результат.
+// Search in game reference books by English name: equipment, spells, monsters, icons game-icons.net. Common for
+// MCP tools (find_item/find_spell/find_monster/find_icon) and for links in the wizard's answer
+// (CatalogReferences):) same match - same result.
 public static class CatalogSearch
 {
     private static readonly string IconsBasePath = Path.Combine(AppConfig.AssetDirectory("icons"), "000000", "ffffff", "1x1");
     private static readonly Lazy<List<string>> IconSlugs = new(LoadIconSlugs);
 
-    // "long-sword_01" → "long sword 01": дефисы, подчёркивания, апострофы и запятые — разделители слов.
+    // "long-sword_01" → "long sword 01": hyphens, underscores, apostrophes and commas are word separators.
     public static string Normalize(string s) =>
         s.ToLowerInvariant().Replace('-', ' ').Replace('_', ' ').Replace('\'', ' ').Replace(',', ' ');
 
-    // 100 — то же название, 80 — все слова запроса есть в названии, 60 — название начинается с запроса,
-    // 40 — все слова запроса встречаются внутри названия, 0 — не подходит.
+    // 100 - the same name, 80 - all query words are in the title, 60 - the name begins with the query, 40 - all
+    // query words are found inside the title, 0 - does not match.
     public static int Score(string name, string query)
     {
         string normalizedName = Normalize(name), normalizedQuery = Normalize(query);
@@ -29,7 +29,7 @@ public static class CatalogSearch
         return 0;
     }
 
-    // Совпадения по убыванию: score, затем по ключу сортировки (стабильный порядок при равенстве).
+    // Matches in descending order: score, then by sort key (stable order for equality).
     public static List<T> Find<T>(IEnumerable<T> items, Func<T, string?> englishName, Func<T, string> order, string query, int take)
     {
         if (string.IsNullOrWhiteSpace(query)) return [];
@@ -52,11 +52,11 @@ public static class CatalogSearch
     public static List<MonsterInfo> Monsters(string query, int take = 15) =>
         Find(MonsterDatabase.AllMonsters, m => m.NameEn, m => m.Name, query, take);
 
-    // Слаги иконок для одного термина ("longsword").
+    // Icon slugs for one term ("longsword").
     public static List<string> Icons(string term, int take = 20) =>
         Find(IconSlugs.Value, slug => slug[(slug.IndexOf('/') + 1)..], slug => slug, term, take);
 
-    // Варианты через запятую от точного к общему ("longsword,sword"): слаги первого термина, у которого они есть.
+    // Comma-separated variants from exact to general ("longsword,sword"): slugs of the first term that has them.
     public static (string? Term, List<string> Slugs) IconsFor(string query)
     {
         foreach (string term in query.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))

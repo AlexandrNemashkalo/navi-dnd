@@ -6,13 +6,14 @@ using Microsoft.Win32;
 
 namespace NaviDnD.Helpers;
 
-// Игра рисует в классической консоли (conhost): Windows Terminal не даёт управлять окном, шрифтом и мышью так, как
-// ей нужно. Любой запуск без RelaunchFlag — перезапуск в conhost.exe с этим флагом (флаг ставит только сама игра).
+// The game draws in the classic console (conhost): Windows Terminal does not allow you to control the window,
+// font and mouse as it needs. Any launch without RelaunchFlag - restarts in conhost.exe with this flag (the
+// flag is set only by the game itself).
 public static class ConsoleHostLauncher
 {
     public const string RelaunchFlag = "--navidnd-conhost";
 
-    // Узел консоли Windows (conhost) — значение «консоль по умолчанию» в HKCU\Console\%%Startup.
+    // Console node Windows (conhost) - default console value in HKCU\Console\%%Startup.
     public const string ConhostDelegation = "{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}";
     private const string StartupKey = @"Console\%%Startup";
     private static readonly string[] DelegationValues = ["DelegationConsole", "DelegationTerminal"];
@@ -26,11 +27,12 @@ public static class ConsoleHostLauncher
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool ShowWindow(nint window, int command);
 
-    // Прежние настройки консоли игрока на время перезапуска: их возвращает уже перезапущенная игра (её консоль к тому
-    // времени создана); не вернула (сбой) — вернёт следующий запуск.
+    // Previous settings of the player’s console at the time of restart: they are returned by the game that has
+    // already been restarted (its console has been created by that time); did not return (failure) - the next
+    // launch will return.
     public static string RestorePath { get; set; } = Path.Combine(Path.GetTempPath(), "navidnd-console-restore.json");
 
-    // Видимое окно классической консоли; у псевдоконсоли терминала — скрытое служебное окно.
+    // Visible Classic Console Window; The terminal pseudo-console has a hidden service window.
     public static bool InClassicConsole()
     {
         nint window = GetConsoleWindow();
@@ -47,15 +49,16 @@ public static class ConsoleHostLauncher
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsIconic(nint window);
 
-    // Одна игра на пользователя: второй запуск (ещё клик по ярлыку, пока игра грузится) не открывает вторую копию —
-    // показывает окно уже запущенной. Без этого каждый клик запускал игру с моделью озвучки, и десяток копий
-    // забивал память. Мьютекс держит игра (с флагом) до выхода; окно — в файле рядом с ним.
+    // One game per user: the second launch (another click on the shortcut while the game is loading) does not
+    // open the second copy - it shows the window of the already launched one. Without this, each click launched
+    // the game with a voice-over model, and a dozen copies clogged up the memory. The mutex is held by the game
+    // (with the flag) until exit; window - in the file next to it.
     private const string InstanceName = @"Local\NaviDnD.Game";
     private const string SwitchName = @"Local\NaviDnD.ConsoleSwitch";
     private static Mutex? _instance;
     public static string WindowPath { get; set; } = Path.Combine(Path.GetTempPath(), "navidnd-window.txt");
 
-    // Must run before ConsoleSetup hides the window or initializes input/sound/storage. true — этому процессу выйти.
+    // Must run before ConsoleSetup hides the window or initializes input/sound/storage. true - exit this process.
     public static bool TryRelaunch(string[] args)
     {
         if (!OperatingSystem.IsWindows() || Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") != null
@@ -63,19 +66,20 @@ public static class ConsoleHostLauncher
         if (args.Contains(RelaunchFlag))
         {
             using (SwitchGate()) RestorePending();
-            // Уже идёт другая игра (два запуска наперегонки) — показать её окно, эту закрыть.
+            // Another game is already running (two starts in a race) - show its window, close this one.
             if (!ClaimInstance()) { ActivateRunning(); return true; }
             nint own = GetConsoleWindow();
-            try { File.WriteAllText(WindowPath, own.ToString()); } catch { /* не важно для запуска */ }
+            try { File.WriteAllText(WindowPath, own.ToString()); } catch { /*not important for startup*/ }
             if (own != 0) SetForegroundWindow(own);
-            // Перезапуск уже был, а окна классической консоли всё равно нет — терминал перехватил и его.
+            // There was already a restart, but the classic console window was still not there - the terminal intercepted it too.
             if (!InClassicConsole()) Log("После перезапуска игра всё ещё не в классической консоли.");
             return false;
         }
-        // Игра уже запущена — её окно вперёд, вторую копию не запускать.
+        // The game is already running - its window is forward, do not launch a second copy.
         if (IsRunning()) { ActivateRunning(); return true; }
-        // Без флага — всегда перезапуск (ярлык, exe, перезапуск после обновления): угадать по окну, кто хозяин
-        // консоли, ненадёжно — на части Windows 11 терминал перехватывает даже явный conhost.exe из ярлыка.
+        // Without flag - always restart (shortcut, exe, restart after update): guessing from the window who is
+        // the owner of the console is unreliable - on part Windows 11 the terminal intercepts even an explicit
+        // conhost.exe from the shortcut.
         string? executable = Environment.ProcessPath;
         if (string.IsNullOrEmpty(executable)) return false;
         try
@@ -84,12 +88,13 @@ public static class ConsoleHostLauncher
                 ? Assembly.GetEntryAssembly()?.Location : null;
             using (SwitchGate())
             {
-                RestorePending();   // прошлый перезапуск не вернул настройки (сбой) — вернуть до новой подмены
-                // На время запуска «консоль по умолчанию» — классическая (иначе Windows 11 с терминалом по умолчанию
-                // может отдать и conhost.exe терминалу); прежние настройки возвращает перезапущенная игра.
+                RestorePending();   // the previous restart did not return the settings (failure) - return before new substitution.
+                // At the time of startup, the “default console” is classic (otherwise Windows 11 with the
+                // default terminal may also give conhost.exe to the terminal); The previous settings are
+                // returned by restarting the game.
                 var saved = ForceConhostDelegation();
                 if (saved.Count > 0) File.WriteAllText(RestorePath, System.Text.Json.JsonSerializer.Serialize(saved));
-                // Новое окно игры получает фокус (иначе Windows может открыть его позади других окон).
+                // New game window gets focus (otherwise Windows might open it behind other windows).
                 AllowSetForegroundWindow(-1);
                 using var child = Process.Start(CreateStartInfo(executable, args, Environment.CurrentDirectory, assembly));
                 if (child == null)
@@ -99,7 +104,7 @@ public static class ConsoleHostLauncher
                     return false;
                 }
             }
-            // Первое окно прячется уже после запуска второго: игра откроется в нём, ждать не нужно.
+            // The first window is hidden after the second is launched: the game will open in it, no need to wait.
             if (GetConsoleWindow() is var own and not 0) ShowWindow(own, 0);
             return true;
         }
@@ -114,15 +119,15 @@ public static class ConsoleHostLauncher
 
     private static bool Dispose(Mutex mutex) { mutex.Dispose(); return true; }
 
-    // Занять место игры; прежняя копия ещё закрывается (перезапуск после обновления) — подождать её немного.
+    // Take the game place; The old copy is still closing (restart after update) - wait for it a little.
     private static bool ClaimInstance()
     {
         _instance = new Mutex(false, InstanceName);
         try { return _instance.WaitOne(TimeSpan.FromSeconds(3)); }
-        catch (AbandonedMutexException) { return true; }   // прошлая игра упала, не отпустив
+        catch (AbandonedMutexException) { return true; }   // last game fell without letting go
     }
 
-    // Окно запущенной игры — развернуть и вперёд.
+    // Window of the running game - expand and go.
     private static void ActivateRunning()
     {
         try
@@ -131,10 +136,10 @@ public static class ConsoleHostLauncher
             if (IsIconic(window)) ShowWindow(window, 9);   // SW_RESTORE
             SetForegroundWindow(window);
         }
-        catch { /* окна нет — просто не дублируем игру */ }
+        catch { /*there is no window - we just don’t duplicate the game*/ }
     }
 
-    // Подмена и возврат настройки консоли — по одному процессу за раз (параллельные запуски не перетирают друг друга).
+    // Replacing and returning console settings - one process at a time (parallel runs do not override each other).
     private static IDisposable SwitchGate()
     {
         var gate = new Mutex(false, SwitchName);
@@ -169,7 +174,7 @@ public static class ConsoleHostLauncher
         return start;
     }
 
-    // Прежние значения «консоль/терминал по умолчанию» (null — значения не было) и запись классической консоли.
+    // Previous default console/terminal values (null - no value) and classic console entry.
     public static Dictionary<string, object?> ForceConhostDelegation()
     {
         var saved = new Dictionary<string, object?>();
@@ -206,7 +211,7 @@ public static class ConsoleHostLauncher
         }
     }
 
-    // Вернуть настройки консоли, сохранённые при перезапуске (файл RestorePath), и удалить файл.
+    // Restore the console settings saved during restart (file RestorePath)) and delete the file.
     public static void RestorePending()
     {
         try
@@ -230,6 +235,6 @@ public static class ConsoleHostLauncher
             Directory.CreateDirectory(dir);
             File.AppendAllText(Path.Combine(dir, "console.log"), $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {message}{Environment.NewLine}");
         }
-        catch { /* лог не важнее запуска */ }
+        catch { /*log is not more important than launch*/ }
     }
 }

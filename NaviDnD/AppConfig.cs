@@ -2,15 +2,17 @@ namespace NaviDnD;
 
 public class AppConfig
 {
-    // Игра запущена из NaviDnD.app на macOS: программы — в Contents/MacOS, остальные файлы игры — в Contents/Resources.
-    // (Объявлено до ProjectRoot: статические свойства инициализируются по порядку.)
+    // The game was launched from NaviDnD.app on the macOS: program - in Contents/MacOS, the rest of the game
+    // files - in Contents/Resources. (Declared before ProjectRoot:, static properties are initialized in
+    // order.)
     public static bool InMacApp { get; } = OperatingSystem.IsMacOS()
         && Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory).EndsWith(".app/Contents/MacOS", StringComparison.Ordinal);
 
     public static string ProjectRoot { get; } = FindProjectRoot();
 
-    // Сохранения, настройки и логи (Storage/, logs/) — рядом с игрой; у NaviDnD.app — в ~/Library/Application Support/NaviDnD:
-    // приложение заменяется целиком и подписано, своим файлам игрока внутри него не место.
+    // Saves, settings and logs (Storage/, logs/) - next to the game; for NaviDnD.app - in ~/Library/Application
+    // Support/NaviDnD: the application is replaced entirely and signed, there is no place for your player files
+    // inside it.
     public static string DataRoot { get; } = InMacApp
         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "NaviDnD")
         : ProjectRoot;
@@ -38,8 +40,9 @@ public class AppConfig
 
     public string RuleSet { get; init; } = "Dnd5e";
 
-    // Язык интерфейса: "ru" или "en" (L.SetLanguage). Язык мира — отдельно, в мире при создании. Новая установка
-    // (файла настроек ещё нет) — английский; настройки прежней версии без поля — русский (LoadUserSettings).
+    // Interface language: "ru" or "en" (L.SetLanguage). World language - separately, in the world when created.
+    // New installation (no settings file yet) - English; settings of the previous version without a field -
+    // Russian (LoadUserSettings).
     public string Language { get; set; } = L.English;
 
     // Claude CLI
@@ -49,20 +52,20 @@ public class AppConfig
     public string ClaudeCreateNewGameModel { get; set; } = "claude-opus-5-5";
     public string ClaudeStartNewGameModel { get; set; } = "claude-opus-5-5";
 
-    // Нейронка: "claude" — Claude CLI (по умолчанию), "codex" — OpenAI Codex CLI (CodexCliAiProvider).
+    // AI: "claude" - Claude CLI (default), "codex" - OpenAI Codex CLI (CodexCliAiProvider).
     public string AiProvider { get; set; } = "claude";
-    // Путь к Codex CLI: «codex» — найти в PATH (из npm-пакета берётся сам codex.exe), иначе — полный путь.
+    // The path to Codex CLI: “codex” is found in PATH (codex.exe) itself is taken from the npm- package, otherwise the full path.
     public string CodexCliPath { get; set; } = "codex";
-    // Модель Codex для всех запросов игры; пусто — модель Codex по умолчанию.
+    // Model Codex for all game requests; empty - default model Codex.
     public string CodexModel { get; set; } = "gpt-6.1-sol";
     public string CodexCreateNewGameModel { get; set; } = "gpt-6.1-sol";
     public string CodexStartNewGameModel { get; set; } = "gpt-6.1-sol";
-    // Отдельно от настроек Codex для разработки: medium — баланс скорости и правил игры.
+    // Separate from the Codex settings for development: medium - balance of speed and game rules.
     public string CodexReasoningEffort { get; set; } = "medium";
 
     public string McpServerPath { get; init; } = FindMcpServer();
 
-    // Запускатель: NaviDnD.McpServer.exe на Windows, NaviDnD.McpServer (без расширения) на macOS/Linux.
+    // Launcher: NaviDnD.McpServer.exe on Windows, NaviDnD.McpServer (without extension) on macOS/Linux.
     private static string FindMcpServer()
     {
         string executable = OperatingSystem.IsWindows() ? "NaviDnD.McpServer.exe" : "NaviDnD.McpServer";
@@ -102,56 +105,54 @@ public class AppConfig
     // Debug
     public bool DisableTriggers { get; set; } = false;
     public bool RevealMap { get; set; } = false;
-    // Ошибки ИИ (кривой ответ, сбой вызова) подробно в диалоге; выключено — короткое «повтори действие».
+    // AI errors (crooked response, call failure) are detailed in the dialogue; off - short “repeat action”.
     public bool ShowAiErrors { get; set; } = false;
-    // Модель для починки сломанного JSON ответа мастера (короткий вызов без инструментов).
+    // Model for fixing broken JSON GM response (short call without tools).
     public string RepairJsonModel { get; set; } = "claude-haiku-4-5-20251001";
 
-    // Сохранять ли исследованные клетки (туман войны) между запусками игры. По умолчанию — сохранять.
+    // Whether to save explored cells (fog of war) between starts of the game. The default is to save.
     public bool SaveExploredCells { get; set; } = true;
-    // Подсказки клавиш «[F1]», «[Esc]» в заголовках и подвкладках; выключено — на их месте пусто.
+    // Key hints "[F1]", "[Esc]" in headers and subtabs; turned off - their place is empty.
     public bool ShowKeyHints { get; set; } = true;
-    // Весь экран: окно игры того же размера по центру монитора, вокруг — фон игры (Helpers/FullscreenBackdrop).
+    // Whole screen: game window of the same size in the center of the monitor, around the game background (Helpers/FullscreenBackdrop).
     public bool Fullscreen { get; set; } = true;
-    // Шрифт консоли (настройка «ТИП ШРИФТА»).
+    // Console font ("FONT TYPE" setting).
     public string FontFace { get; set; } = "Consolas";
-    // Размер шрифта во весь экран: 0 — авто (самый крупный, при котором игра влезает в монитор), иначе размер.
+    // Full screen font size: 0 - auto (the largest at which the game fits into the monitor), otherwise size.
     public int FullscreenFontSize { get; set; } = 0;
-    // Звук клика по кнопкам/стрелкам (Helpers/Sound.cs).
+    // Click sound on buttons/arrows (Helpers/Sound.cs).
     public bool SoundEnabled { get; set; } = true;
-    // Звук печати текста ИИ в диалоге (синтезируется в Sound.PlayTyping, работает только при SoundEnabled).
+    // AI text typing sound in dialogue (synthesized in Sound.PlayTyping, only works with SoundEnabled).
     public bool TypingSoundEnabled { get; set; } = true;
-    // Фоновая музыка (Helpers/Music) и её громкость 0–100 % (умножается на общую громкость).
+    // Background music (Helpers/Music) and its volume 0–100% (multiplied by the total volume).
     public bool MusicEnabled { get; set; } = true;
     public int MusicVolume { get; set; } = 30;
-    public bool AmbienceEnabled { get; set; } = true;   // звуки окружения (птицы, камин, капли)
-    // Общая громкость звуков, 0–100 % (Sound.Volume).
+    public bool AmbienceEnabled { get; set; } = true;   // ambient sounds (birds, fireplace, drops) Overall sound volume, 0–100% (Sound.Volume).
     public int SoundVolume { get; set; } = 20;
     public bool SpeechEnabled { get; set; } = false;
     public int SpeechVolume { get; set; } = 70;
     public string SileroVoice { get; set; } = "baya";
-    // Голос рассказчика английской игры (Speech.EnglishVoices; модель — Speech/models/v3_en.pt).
+    // Voice of the narrator of the English game (Speech.EnglishVoices; model - Speech/models/v3_en.pt).
     public string SileroVoiceEn { get; set; } = "en_57";
     public string SileroPythonPath { get; set; } = "python";
-    // [] = off, ["*"] = all actions, or any subset of:
-    // "CreateNewGame", "FixHeroForNewGame", "StartNewGame", "SendAction"
-    // Через env var NAVIDND_TEST_MOCKED_ACTIONS (запятая-разделённый список) — для E2E-тестов,
-    // чтобы не бить в реальную нейронку (см. NaviDnD.UiTests/GameSession.cs).
+    // [] = off, ["*"] = all actions, or any subset of: "CreateNewGame", "FixHeroForNewGame", "StartNewGame",
+    // "SendAction" Via env var NAVIDND_TEST_MOCKED_ACTIONS (comma-separated list) - for E2E- tests, so as not
+    // to hit a real AI (see NaviDnD.UiTests/GameSession.cs).
     public string[] MockedActions { get; init; } = ParseMockedActions();
 
-    // Переопределяет базовую папку, откуда SelectiveMockProvider берёт response.json —
-    // по умолчанию это Prompts/{RuleSet}/{Action}/, что затронуло бы боевые файлы в репозитории.
+    // Overrides the base folder where SelectiveMockProvider gets response.json from - the default is
+    // Prompts/{RuleSet}/{Action}/, which would affect the battle files in the repository.
     public string? MockResponsesDir { get; init; } = Environment.GetEnvironmentVariable("NAVIDND_TEST_MOCK_RESPONSES_DIR")
         ?? (TestMocksSet ? null : DevMocksDir);
 
-    // Отладка при обычном запуске (без env var тестов): эти действия не зовут нейронку, а отвечают из
-    // Storage/DevMocks/{Action}/response.json. CreateNewGame — готовый герой, чтобы тестировать генерацию
-    // карты/старт игры без создания персонажа каждый раз. [] — выключить.
+    // Debugging during normal startup (without env var tests): these actions do not call the AI, but respond
+    // from Storage/DevMocks/{Action}/response.json. CreateNewGame - a ready-made hero to test map
+    // generation/game start without creating a character every time. [] - turn off.
     public static readonly string[] DevMockedActions = [];
     public static string DevMocksDir => Path.Combine(DataRoot, "Storage", "DevMocks");
 
-    // ── Настройки игрока (экран «НАСТРОЙКИ») ──────────────────────────────────
-    // Сохраняются в Storage/settings.json (в .gitignore — там токен) поверх значений по умолчанию выше.
+    // ── Player settings (SETTINGS screen) ────────────────────────────────── Are saved in
+    // Storage/settings.json (in .gitignore - there is a token) on top of the default values above.
     public static string UserSettingsPath => Path.Combine(DataRoot, "Storage", "settings.json");
 
     private sealed class UserSettings
@@ -227,10 +228,10 @@ public class AppConfig
             Fullscreen = s.Fullscreen ?? Fullscreen;
             FullscreenFontSize = s.FullscreenFontSize ?? FullscreenFontSize;
             FontFace = s.FontFace ?? FontFace;
-            // Нет поля — настройки из версии до выбора языка: игрок играл по-русски, после обновления — тоже.
+            // There is no field - settings from the version before choosing the language: the player played in Russian, after the update - too.
             Language = L.Normalize(s.Language ?? L.Russian);
         }
-        catch { /* битый файл настроек — остаются значения по умолчанию */ }
+        catch { /*broken settings file - default values remain*/ }
     }
 
     public void SaveUserSettings()
@@ -256,7 +257,7 @@ public class AppConfig
             File.WriteAllText(UserSettingsPath, System.Text.Json.JsonSerializer.Serialize(s,
                 new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
         }
-        catch { /* не сохранилось — настройки действуют до конца сеанса */ }
+        catch { /*not saved - settings are valid until the end of the session*/ }
     }
 
     private static bool TestMocksSet => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NAVIDND_TEST_MOCKED_ACTIONS"));

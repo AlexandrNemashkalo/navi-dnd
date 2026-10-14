@@ -2,20 +2,22 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.MapGen.Generators;
 
-// Здания (MapChunk.Theme = building) и поселения (village). Контур здания — не простой прямоугольник
-// (корпус + крылья Г/Т/П/крест, у башни — крест), внутри — комнаты вплотную с общими стенами (стена =
-// граница двух комнат), двери/проёмы (часть открыта), окна во внешних стенах, мебель по назначению комнаты.
-// Планировка — по типу здания (MapChunk.Style): у таверны/лавки/храма/усадьбы/казармы на первом этаже
-// большой зал (стойка/прилавок/алтарь со скамьями прямо в нём) и ряд подсобных комнат у задней стены,
-// на верхних этажах — коридор с комнатами. Контур общий для всех этажей здания (footprintSeed — по
-// месту в плане), этажи стоят друг над другом. Первый этаж — во дворе (тропы от выходов блока к входу);
-// поселение — 3–5 домов вдоль улиц к площади с колодцем, огороды за изгородью.
+// Buildings (MapChunk.Theme = building) and settlements (village).) The outline of the building is not a simple
+// rectangle (body + wings G/T/P/cross, the tower has a cross), inside there are rooms close to common walls
+// (wall = border of two rooms), doors/openings (some are open), windows in the external walls, furniture
+// according to the purpose of the room. Layout - according to the type of building (MapChunk.Style): at the
+// tavern/shop/temple/estate/barracks on the ground floor there is a large hall (counter/counter/altar with
+// benches right in it) and a number of utility rooms near the back wall, on the upper floors there is a
+// corridor with rooms. The outline is common for all floors of the building (footprintSeed - according to the
+// place in the plan), the floors stand on top of each other. The first floor is in the courtyard (paths from
+// the block exits to the entrance); settlement - 3-5 houses along the streets to a square with a well,
+// vegetable gardens behind a fence.
 public static class BuildingGenerator
 {
     public sealed record Result(List<Room> Rooms, List<Door> Doors, List<string> Terrain, List<Furniture> Furniture);
 
     private const int W = MapChunk.Cols, H = MapChunk.Rows;
-    // Контур здания — внутри [MinC..MaxC]×[MinR..MaxR]: вокруг остаётся двор шириной не меньше 2 клеток.
+    // Outline of the building - inside [MinC..MaxC]×[MinR..MaxR]: there is a courtyard at least 2 cells wide around.
     private const int MinC = 2, MaxC = W - 3, MinR = 2, MaxR = H - 3;
 
     public static readonly List<int> WoodFloor = [74, 60, 46];
@@ -25,7 +27,7 @@ public static class BuildingGenerator
     private static readonly List<int> DoorColor = [139, 90, 43];
     public static readonly List<int> WindowColor = [150, 196, 226];
 
-    // Код полосы по краю без соседа: естественная преграда (деревья, чаща, кусты).
+    // Code for a strip along the edge without a neighbor: natural obstacle (trees, thicket, bushes).
     public const char NaturalBand = '*';
 
     private enum Role { Living, Hall, Kitchen, Storage, Bedroom, Workshop, Vestry, Armory, Study, Corridor, Tower }
@@ -44,16 +46,17 @@ public static class BuildingGenerator
     {
         public required HashSet<(int c, int r)> Cells { get; init; }
         public Role Role { get; set; }
-        public string Name { get; set; } = L.W("Комната");
-        public Rect? Box { get; init; }            // зал: прямоугольник и задняя сторона (стойка/алтарь)
+        public string Name { get; set; } = L.W("Room");
+        public Rect? Box { get; init; }            // hall: rectangle and back side (stand/altar)
         public ChunkSide? Back { get; init; }
     }
 
     private static bool HasHall(string? style) => style is "tavern" or "shop" or "temple" or "manor" or "barracks";
 
-    // ── Здание ───────────────────────────────────────────────────────────────
-    // bands — сторона → код преграды по краю двора (только для первого этажа); seamDoorSides — стороны,
-    // где этот блок сам ставит проход через шов к соседнему зданию того же этажа (сосед-подземелье ставит свой).
+    // ── Building ─────────────────────────────── ──────────────────────────────── bands - side → code for the
+    // barrier along the edge of the yard (only for the first floor); seamDoorSides - sides where this block
+    // itself places a passage through the seam to the neighboring building of the same floor (the dungeon
+    // neighbor places his own).
     public static Result Generate(MapChunk chunk, IReadOnlyList<ChunkExit> exits, int footprintSeed, bool ground,
         IReadOnlyDictionary<ChunkSide, char> bands, IReadOnlyCollection<ChunkSide> seamDoorSides, bool moat = false)
     {
@@ -90,14 +93,14 @@ public static class BuildingGenerator
         return b.Result();
     }
 
-    // ── Поселение ────────────────────────────────────────────────────────────
+    // ── Settlement ────────────────────────────── ──────────────────────────────
     public static Result GenerateVillage(MapChunk chunk, IReadOnlyList<ChunkExit> exits, IReadOnlyDictionary<ChunkSide, char> bands, string? layout = null)
     {
         var rng = new Random(chunk.Seed);
         var b = new Builder(chunk, rng);
         b.Ground(bands);
 
-        // Площадь с колодцем в центре и улицы от выходов блока к ней.
+        // A square with a well in the center and streets from the block exits to it.
         int hubC = layout == "road" ? W / 3 : W / 2, hubR = H / 2;
         var street = new HashSet<(int c, int r)>();
         for (int c = hubC - 2; c <= hubC + 2; c++)
@@ -105,7 +108,7 @@ public static class BuildingGenerator
         foreach (var exit in exits)
         {
             var (c, r) = Local(exit.AnchorCell(chunk), chunk);
-            // Сначала вглубь от края, потом к площади — улица не идёт вдоль края.
+            // First inwards from the edge, then towards the square - the street does not go along the edge.
             var (dx, dy) = ChunkExit.Step(exit.Side);
             street.Add((c, r));
             for (int i = 0; i < 2; i++) { c -= dx; r -= dy; street.Add((c, r)); }
@@ -130,7 +133,7 @@ public static class BuildingGenerator
         foreach (var (c, r) in street) b.G[c, r] = b.G[c, r] == 'W' ? '~' : '=';
         b.G[hubC, hubR] = 'V';
 
-        // Дома: прямоугольник или Г, не на улице и не вплотную к другим домам.
+        // Houses: rectangle or L, not on the street and not close to other houses.
         var taken = new HashSet<(int, int)>(street.SelectMany(x => Around8(x).Append(x)));
         var houses = new List<HashSet<(int c, int r)>>();
         for (int attempt = 0; attempt < 300 && houses.Count < (layout == "road" ? 6 : layout == "river" ? 3 : 5); attempt++)
@@ -140,7 +143,7 @@ public static class BuildingGenerator
             var parts = new List<Rect> { new(c0, r0, w, h) };
             if (w >= 6 && h >= 4 && rng.Next(2) == 0)
             {
-                // Г: выемка из угла.
+                // G: corner notch.
                 int nw = rng.Next(2, w / 2 + 1), nh = rng.Next(1, h - 2);
                 bool right = rng.Next(2) == 0, top = rng.Next(2) == 0;
                 parts = top
@@ -155,24 +158,24 @@ public static class BuildingGenerator
             int number = houses.Count;
             var regions = new List<Region>();
             foreach (var part in parts) Split(part, rng, regions, hall: false, minArea: 10);
-            var names = new[] { L.W("кухня"), L.W("спальня"), L.W("кладовая"), L.W("мастерская") };
+            var names = new[] { L.W("kitchen"), L.W("bedroom"), L.W("pantry"), L.W("workshop") };
             Role[] roles = [Role.Kitchen, Role.Bedroom, Role.Storage, Role.Workshop];
             for (int i = 0; i < regions.Count; i++)
             {
                 regions[i].Role = regions.Count == 1 ? Role.Living : roles[i % roles.Length];
-                regions[i].Name = regions.Count == 1 ? L.WF("Дом {0}", number) : L.WF("Дом {0}", number) + ": " + names[i % names.Length];
+                regions[i].Name = regions.Count == 1 ? L.WF("House {0}", number) : L.WF("House {0}", number) + ": " + names[i % names.Length];
             }
             b.AddRooms(regions, WoodFloor);
             b.ConnectRooms(regions, "house");
             var door = b.AddEntrance(cells, null, (hubC, hubR), backDoor: false, street);
-            // Дорожка от двери до улицы.
+            // Path from door to street.
             foreach (var x in b.YardPath(door, street, cells) ?? []) if (b.G[x.c, x.r] != 'V') b.G[x.c, x.r] = '=';
             b.Floor(cells, basement: false);
             b.Windows(regions, cells);
             foreach (var region in regions) b.Furnish(region, basement: false);
         }
 
-        // Огороды за изгородью с калиткой; деревья.
+        // Vegetable gardens behind a fence with a gate; trees.
         var houseCells = houses.SelectMany(x => x).ToHashSet();
         for (int attempt = 0, gardens = 0; attempt < 60 && gardens < 3; attempt++)
         {
@@ -194,9 +197,9 @@ public static class BuildingGenerator
         return b.Result();
     }
 
-    // ── Контур ───────────────────────────────────────────────────────────────
-    // Основной корпус + крылья (Г, Т, П, крест) или выемка из угла — список непересекающихся прямоугольников,
-    // первый — корпус (у зальных зданий — всегда целый: в нём зал). Башня — крест (срезанные углы).
+    // ── Circuit ─────────────────────────────── ──────────────────────────────── The main body + wings (G, T,
+    // P, cross) or a recess from the corner - a list of non-intersecting rectangles, the first - the body (for
+    // hall buildings - always the whole one: there is a hall in it). The tower is a cross (cut corners).
     private static List<Rect> Footprint(Random rng, string? style)
     {
         bool big = style is "tavern" or "manor" or "barracks" or "temple";
@@ -211,7 +214,7 @@ public static class BuildingGenerator
         var parts = new List<Rect> { new(c0, r0, w, h) };
         Rect? Wing(ChunkSide side, double at, int width, int depth)
         {
-            // at — положение крыла вдоль стороны: 0 — у начала, 0.5 — посередине, 1 — у конца.
+            // at — position of the wing along the side: 0 — at the beginning, 0.5 — in the middle, 1 — at the end.
             bool vertical = side is ChunkSide.Left or ChunkSide.Right;
             int len = vertical ? h : w;
             width = Math.Min(width, len);
@@ -233,13 +236,13 @@ public static class BuildingGenerator
         {
             var wings = shape switch
             {
-                0 => [Wing(sides[0], rng.Next(2), rng.Next(3, 5), rng.Next(3, 5))],                       // Г
-                1 => [Wing(sides[0], 0.5, rng.Next(3, 5), rng.Next(3, 5))],                              // Т
-                2 => [Wing(sides[0], 0, 3, rng.Next(3, 5)), Wing(sides[0], 1, 3, rng.Next(3, 5))],       // П
-                3 => [Wing(sides[0], 0.5, 3, 3), Wing(ChunkExit.Opposite(sides[0]), 0.5, 3, 3)],         // крест
+                0 => [Wing(sides[0], rng.Next(2), rng.Next(3, 5), rng.Next(3, 5))],                       // G
+                1 => [Wing(sides[0], 0.5, rng.Next(3, 5), rng.Next(3, 5))],                              // T
+                2 => [Wing(sides[0], 0, 3, rng.Next(3, 5)), Wing(sides[0], 1, 3, rng.Next(3, 5))],       // P
+                3 => [Wing(sides[0], 0.5, 3, 3), Wing(ChunkExit.Opposite(sides[0]), 0.5, 3, 3)],         // cross
                 _ => new Rect?[0],
             };
-            // Крылья не перекрываются (П на короткой стороне — второе крыло пропадает, выходит Г).
+            // The wings do not overlap (P on the short side - the second wing disappears, G comes out).
             foreach (var wing in wings.OfType<Rect>())
                 if (!wing.Cells().Any(x => parts.Any(p => p.Cells().Contains(x)))) parts.Add(wing);
         }
@@ -251,7 +254,7 @@ public static class BuildingGenerator
 
         if (parts.Count == 1 && !HasHall(style))
         {
-            // Выемка из угла: корпус — Г из двух прямоугольников.
+            // Recess from the corner: body - L of two rectangles.
             int nw = rng.Next(3, Math.Max(4, w / 2)), nh = rng.Next(2, Math.Max(3, h - 2));
             bool right = rng.Next(2) == 0, top = rng.Next(2) == 0;
             int keepH = h - nh;
@@ -264,25 +267,25 @@ public static class BuildingGenerator
         return parts;
     }
 
-    // ── Планировка ───────────────────────────────────────────────────────────
+    // ── Layout ───────────────────────────── ──────────────────────────────
     private static List<Region> Layout(List<Rect> parts, string? style, bool ground, bool basement, (int c, int r) front, Random rng)
     {
         var regions = new List<Region>();
         if (basement)
         {
             foreach (var part in parts) Split(part, rng, regions, hall: false, minArea: 12);
-            foreach (var r in regions) { r.Role = Role.Storage; r.Name = L.W("Подвал"); }
+            foreach (var r in regions) { r.Role = Role.Storage; r.Name = L.W("Cellar"); }
             return regions;
         }
         if (style == "tower")
         {
-            regions.Add(new Region { Cells = parts.SelectMany(p => p.Cells()).ToHashSet(), Role = Role.Tower, Name = ground ? L.W("Нижний зал башни") : L.W("Зал башни") });
+            regions.Add(new Region { Cells = parts.SelectMany(p => p.Cells()).ToHashSet(), Role = Role.Tower, Name = ground ? L.W("Lower tower hall") : L.W("Tower hall") });
             return regions;
         }
 
         if (ground && HasHall(style))
         {
-            // Зал — корпус без полосы подсобных комнат у задней стены (дальней от входа).
+            // Hall - a building without a strip of utility rooms at the back wall (farthest from the entrance).
             var main = parts[0];
             var candidates = new List<ChunkSide>();
             if (main.Height >= 7) candidates.AddRange([ChunkSide.Bottom, ChunkSide.Top]);
@@ -302,16 +305,16 @@ public static class BuildingGenerator
                     _ => (new Rect(main.C + main.Width - depth, main.R, depth, main.Height), new Rect(main.C, main.R, main.Width - depth, main.Height)),
                 };
                 hallBox = rest;
-                // Полоса режется поперёк на комнаты по 3–5 клеток.
+                // The strip is cut crosswise into rooms of 3–5 cells.
                 bool alongX = back is ChunkSide.Bottom or ChunkSide.Top;
                 int len = alongX ? strip.Width : strip.Height, pos = 0;
                 string[] backNames = style switch
                 {
-                    "tavern" => [L.W("Кухня"), L.W("Кладовая"), L.W("Комната трактирщика")],
-                    "shop" => [L.W("Склад"), L.W("Мастерская"), L.W("Жильё хозяина")],
-                    "temple" => [L.W("Ризница"), L.W("Келья"), L.W("Келья")],
-                    "manor" => [L.W("Кухня"), L.W("Кабинет"), L.W("Библиотека")],
-                    _ => [L.W("Оружейная"), L.W("Комната командира"), L.W("Кладовая")],
+                    "tavern" => [L.W("Kitchen"), L.W("Pantry"), L.W("Innkeeper's room")],
+                    "shop" => [L.W("Storeroom"), L.W("Workshop"), L.W("Owner's quarters")],
+                    "temple" => [L.W("Vestry"), L.W("Cell"), L.W("Cell")],
+                    "manor" => [L.W("Kitchen"), L.W("Study"), L.W("Library")],
+                    _ => [L.W("Armory"), L.W("Commander's room"), L.W("Pantry")],
                 };
                 Role[] backRoles = style switch
                 {
@@ -332,18 +335,18 @@ public static class BuildingGenerator
             regions.Insert(0, new Region
             {
                 Cells = hallBox.Cells().ToHashSet(), Role = Role.Hall, Box = hallBox, Back = back,
-                Name = style switch { "tavern" => L.W("Общий зал"), "shop" => L.W("Торговый зал"), "temple" => L.W("Святилище"), "manor" => L.W("Холл"), _ => L.W("Казарма") },
+                Name = style switch { "tavern" => L.W("Common room"), "shop" => L.W("Shop floor"), "temple" => L.W("Sanctuary"), "manor" => L.W("Hall"), _ => L.W("Barracks") },
             });
             foreach (var wing in parts.Skip(1))
             {
                 int before = regions.Count;
                 Split(wing, rng, regions, hall: false, minArea: 16);
-                foreach (var r in regions.Skip(before)) { r.Role = Role.Living; r.Name = style == "temple" ? L.W("Часовня") : L.W("Комната"); }
+                foreach (var r in regions.Skip(before)) { r.Role = Role.Living; r.Name = style == "temple" ? L.W("Chapel") : L.W("Room"); }
             }
             return regions;
         }
 
-        // Верхние этажи зальных зданий — коридор с комнатами; дома — несколько комнат.
+        // The upper floors of the hall buildings are a corridor with rooms; at home - several rooms.
         foreach (var part in parts)
         {
             int before = regions.Count;
@@ -353,36 +356,36 @@ public static class BuildingGenerator
             {
                 (r.Role, r.Name) = style switch
                 {
-                    "barracks" => (Role.Hall, L.W("Казарма")),
-                    "tavern" => (Role.Bedroom, L.W("Гостевая комната")),
-                    "manor" => (Role.Bedroom, L.W("Спальня")),
-                    "house" => ground ? (Role.Living, L.W("Комната")) : (Role.Bedroom, L.W("Спальня")),
-                    _ => (Role.Living, L.W("Комната")),
+                    "barracks" => (Role.Hall, L.W("Barracks")),
+                    "tavern" => (Role.Bedroom, L.W("Guest room")),
+                    "manor" => (Role.Bedroom, L.W("Bedroom")),
+                    "house" => ground ? (Role.Living, L.W("Room")) : (Role.Bedroom, L.W("Bedroom")),
+                    _ => (Role.Living, L.W("Room")),
                 };
             }
         }
         if (ground && style is "house" or null && regions.Count(r => r.Role != Role.Corridor) > 1)
         {
             var rooms = regions.Where(r => r.Role != Role.Corridor).ToList();
-            rooms[0].Name = L.W("Горница");
-            rooms[1].Role = Role.Kitchen; rooms[1].Name = L.W("Кухня");
+            rooms[0].Name = L.W("Main room");
+            rooms[1].Role = Role.Kitchen; rooms[1].Name = L.W("Kitchen");
         }
         return regions;
     }
 
-    // BSP: прямоугольник режется на комнаты 3+ клеток по стороне. Длинный корпус — иногда коридор вдоль.
+    // BSP: the rectangle is cut into rooms of 3+ cells along the side. A long building - sometimes a corridor along it.
     private static void Split(Rect rect, Random rng, List<Region> rooms, bool hall, int minArea, bool forceHall = false)
     {
         bool horizontal = rect.Width >= rect.Height;
         int along = horizontal ? rect.Width : rect.Height, across = horizontal ? rect.Height : rect.Width;
         if (hall && along >= 8 && across >= (forceHall ? 5 : 7) && (forceHall || rng.Next(2) == 0))
         {
-            // Коридор посередине, по обе стороны — ряды комнат.
+            // There is a corridor in the middle, with rows of rooms on both sides.
             int mid = across / 2;
             var (a, corridor, b) = horizontal
                 ? (new Rect(rect.C, rect.R, rect.Width, mid), new Rect(rect.C, rect.R + mid, rect.Width, 1), new Rect(rect.C, rect.R + mid + 1, rect.Width, across - mid - 1))
                 : (new Rect(rect.C, rect.R, mid, rect.Height), new Rect(rect.C + mid, rect.R, 1, rect.Height), new Rect(rect.C + mid + 1, rect.R, across - mid - 1, rect.Height));
-            rooms.Add(new Region { Cells = corridor.Cells().ToHashSet(), Role = Role.Corridor, Name = L.W("Коридор") });
+            rooms.Add(new Region { Cells = corridor.Cells().ToHashSet(), Role = Role.Corridor, Name = L.W("Corridor") });
             SplitAlong(a, horizontal, rng, rooms);
             SplitAlong(b, horizontal, rng, rooms);
             return;
@@ -408,7 +411,7 @@ public static class BuildingGenerator
         }
     }
 
-    // Ряд комнат вдоль коридора: режется только поперёк, по 3–4 клетки.
+    // A row of rooms along the corridor: cut only across, 3-4 cells each.
     private static void SplitAlong(Rect rect, bool horizontal, Random rng, List<Region> rooms)
     {
         int len = horizontal ? rect.Width : rect.Height, pos = 0;
@@ -421,7 +424,7 @@ public static class BuildingGenerator
         }
     }
 
-    // ── Построение: комнаты, двери, двор, окна, мебель ────────────────────────
+    // ── Construction: rooms, doors, courtyard, windows, furniture ────────────────────────
     private sealed class Builder(MapChunk chunk, Random rng)
     {
         public readonly char[,] G = Init();
@@ -431,8 +434,9 @@ public static class BuildingGenerator
         private readonly HashSet<(int, int)> _windowCells = [];
         private readonly Dictionary<(int, int), Region> _regionOf = [];
         private (int c, int r)? _backDoorYard;
-        // Поставленная мебель: вид (код рельефа), клетки (первая — «голова»), пол под ними. Пока идёт генерация,
-        // коды лежат в G (для проверок связности), в результате — отдельными предметами, а в рельефе — пол.
+        // Furniture supplied: view (terrain code), cells (the first one is “head”), floor under them. While the
+        // generation is in progress, the codes are in G (for connectivity checks), as a result - as separate
+        // objects, and in the terrain - the floor.
         private readonly List<(char code, List<(int c, int r)> cells, List<char> floor)> _pieces = [];
 
         private static char[,] Init()
@@ -450,7 +454,7 @@ public static class BuildingGenerator
                 for (int i = 0; i < cells.Count; i++) G[cells[i].c, cells[i].r] = floor[i];
                 var kind = FurnitureCatalog.ByCode(code);
                 if (kind == null) continue;
-                furniture.Add(new Furniture { Kind = kind.Kind, Name = kind.Name, Image = kind.Image, Positions = [.. cells.Select(Field)] });
+                furniture.Add(new Furniture { Kind = kind.Kind, Name = L.W(kind.Name), Image = kind.Image, Positions = [.. cells.Select(Field)] });
             }
             var rows = new List<string>(H);
             for (int r = 0; r < H; r++)
@@ -496,8 +500,9 @@ public static class BuildingGenerator
             }
         }
 
-        // Двери между комнатами: зал/коридор соединён со всеми соседями, остальное — остовное дерево + изредка
-        // петля. Часть внутренних дверей открыта; из зала таверны на кухню — проём.
+        // Doors between rooms: the hall/corridor is connected to all neighbors, the rest is a spanning tree +
+        // occasionally a loop. Some of the internal doors are open; There is an opening from the tavern hall to
+        // the kitchen.
         public void ConnectRooms(List<Region> regions, string? style)
         {
             var index = regions.Select((r, i) => (r, i)).ToDictionary(x => x.r, x => x.i);
@@ -539,10 +544,10 @@ public static class BuildingGenerator
             }
         }
 
-        // Клетка у двери (сама дверь или вплотную к ней).
+        // Cell by the door (the door itself or close to it).
         private bool Near((int c, int r) x) => _doorCells.Contains(x) || Around(x).Any(_doorCells.Contains);
 
-        // Двор/улица: трава, по краям без соседа — деревья и чаща, к подземелью — скала.
+        // Yard/street: grass, along the edges without a neighbor - trees and thicket, towards the dungeon - rock.
         public void Ground(IReadOnlyDictionary<ChunkSide, char> bands)
         {
             for (int c = 0; c < W; c++)
@@ -557,15 +562,15 @@ public static class BuildingGenerator
                     {
                         ChunkSide.Left => (0, i), ChunkSide.Right => (W - 1, i), ChunkSide.Bottom => (i, 0), _ => (i, H - 1),
                     };
-                    G[c, r] = code != NaturalBand ? code : rng.Next(10) < 6 ? 'F' : 'T'; // проходимых кустов на краю нет — не замуровывать клетку
+                    G[c, r] = code != NaturalBand ? code : rng.Next(10) < 6 ? 'F' : 'T'; // there are no passable bushes on the edge - do not wall up the cell
                 }
             }
         }
 
         public bool Blocked((int c, int r) x) => TerrainCatalog.Get(G[x.c, x.r]) is { BlocksMove: true } || OnBorder(x);
 
-        // Входная дверь: клетка контура (лучше — зала) на стороне, ближайшей к цели (или к улице); у здания —
-        // иногда чёрный ход.
+        // Entrance door: outline cell (preferably hall) on the side closest to the target (or to the street);
+        // there is sometimes a back door near the building.
         public (int c, int r) AddEntrance(HashSet<(int c, int r)> inside, HashSet<(int c, int r)>? prefer, (int c, int r) target,
             bool backDoor, HashSet<(int c, int r)>? street = null)
         {
@@ -590,7 +595,7 @@ public static class BuildingGenerator
             return main.yard;
         }
 
-        // Тропы двора: от каждого выхода блока к входной двери, от чёрного хода — тоже.
+        // Courtyard paths: from each block exit to the front door, and from the back door too.
         public void Streets(List<(int c, int r)> anchors, (int c, int r) entrance, HashSet<(int c, int r)> inside)
         {
             var trail = new HashSet<(int, int)>();
@@ -601,7 +606,7 @@ public static class BuildingGenerator
             foreach (var (c, r) in trail) G[c, r] = '=';
         }
 
-        // Вход снаружи (откуда пришёл герой) — проход за край блока; LocationGrower.MarkWorldExit делает его дверью мира.
+        // Entrance from outside (where the hero came from) - passage beyond the edge of the block; LocationGrower.MarkWorldExit makes it the door of the world.
         public void ExternalExits(IReadOnlyList<ChunkExit> exits)
         {
             foreach (var exit in exits.Where(e => e.External))
@@ -613,7 +618,7 @@ public static class BuildingGenerator
             }
         }
 
-        // Деревья и кусты — не на тропе и не у домов; двор остаётся связным.
+        // Trees and bushes are not on the path or near houses; the yard remains connected.
         public void Trees(HashSet<(int c, int r)> inside, (int c, int r) start)
         {
             var yard = Enumerable.Range(1, W - 2).SelectMany(c => Enumerable.Range(1, H - 2).Select(r => (c, r)))
@@ -629,7 +634,7 @@ public static class BuildingGenerator
             }
         }
 
-        // Замкнутый ров и единственный брод; выходы сходятся на внешнем берегу.
+        // A closed ditch and a single ford; the outlets converge on the outer bank.
         public void Moat(HashSet<(int c, int r)> inside, (int c, int r) entrance, List<(int c, int r)> anchors)
         {
             int left = inside.Min(x => x.c) - 1, right = inside.Max(x => x.c) + 1;
@@ -665,7 +670,7 @@ public static class BuildingGenerator
                 foreach (var x in Path(anchor, x => x == end, true)) G[x.c, x.r] = '=';
         }
 
-        // Все проходимые клетки вне домов связаны (по 4 соседям).
+        // All passable cells outside houses are connected (by 4 neighbors).
         public bool OutsideConnected(HashSet<(int c, int r)> inside, (int c, int r) start)
         {
             bool Free((int c, int r) x) => !inside.Contains(x) && G[x.c, x.r] != ' ' && TerrainCatalog.Get(G[x.c, x.r]) is not { BlocksMove: true };
@@ -679,7 +684,7 @@ public static class BuildingGenerator
             return seen.Count == total;
         }
 
-        // Кратчайший путь по двору (вне домов, не по краю блока — только начинается с него) до любой из целей.
+        // The shortest path through the yard (outside the houses, not along the edge of the block - just starts from it) to any of the goals.
         public List<(int c, int r)>? YardPath((int c, int r) from, ICollection<(int c, int r)> to, HashSet<(int c, int r)> inside)
         {
             var prev = new Dictionary<(int, int), (int, int)> { [from] = from };
@@ -699,7 +704,7 @@ public static class BuildingGenerator
             return null;
         }
 
-        // Верхние этажи/подвалы: выход к соседнему блоку того же этажа — галерея от края блока до контура.
+        // Upper floors/basements: access to the adjacent block of the same floor - a gallery from the edge of the block to the outline.
         public void Galleries(IReadOnlyList<ChunkExit> exits, HashSet<(int c, int r)> inside, IReadOnlyCollection<ChunkSide> seamDoorSides, bool basement)
         {
             foreach (var exit in exits)
@@ -712,7 +717,7 @@ public static class BuildingGenerator
                 {
                     _rooms.Add(new Room
                     {
-                        Name = L.W("Галерея"),
+                        Name = L.W("Gallery"),
                         Passage = true,
                         Color = Tint(basement ? StoneFloor : WoodFloor),
                         Positions = [.. gallery.Select(Field)],
@@ -735,7 +740,7 @@ public static class BuildingGenerator
                     : _regionOf.TryGetValue(x, out var reg) && reg.Role == Role.Hall && chunk.Style == "temple" ? 'p' : 'w';
         }
 
-        // Окна во внешних стенах: примерно через 3 клетки, не у дверей и не друг рядом с другом.
+        // Windows in outer walls: about 3 squares apart, not at doors or next to each other.
         public void Windows(List<Region> regions, HashSet<(int c, int r)> inside)
         {
             foreach (var reg in regions)
@@ -753,9 +758,10 @@ public static class BuildingGenerator
             }
         }
 
-        // ── Мебель ──────────────────────────────────────────────────────────
-        // У стен (клетка с соседом вне комнаты) — шкафы, кровати, очаг, бочки; в середине — столы. Не у дверей
-        // и окон; комната после каждого предмета остаётся связной. Зал — по типу здания.
+        // ── Furniture ───────────────────────────── ───────────────────────────── Along the walls (a cell with
+        // a neighbor outside the room) there are wardrobes, beds, a fireplace, barrels; in the middle there are
+        // tables. Not at doors and windows; the room remains coherent after each item. Hall - according to the
+        // type of building.
         public void Furnish(Region reg, bool basement)
         {
             var cells = reg.Cells;
@@ -775,7 +781,7 @@ public static class BuildingGenerator
                 Role.Vestry => ['H', 'H'],
                 Role.Armory => ['H', 'H', 'X'],
                 Role.Study => ['H', 'H', 'O'],
-                Role.Hall => ['E', 'E', 'H', 'E', 'E'],   // казарма наверху
+                Role.Hall => ['E', 'E', 'H', 'E', 'E'],   // barracks upstairs
                 Role.Tower => ['H', 'X'],
                 _ => ['H', 'O', 'E'],
             };
@@ -797,7 +803,7 @@ public static class BuildingGenerator
             string? style = chunk.Style;
             bool alongX = back is ChunkSide.Bottom or ChunkSide.Top;
             int along = alongX ? box.Width : box.Height, depthMax = alongX ? box.Height : box.Width;
-            // Клетка зала: i — вдоль задней стены, d — расстояние от неё.
+            // Hall cell: i - along the back wall, d - distance from it.
             (int c, int r) At(int i, int d) => back switch
             {
                 ChunkSide.Bottom => (box.C + i, box.R + d),
@@ -815,8 +821,9 @@ public static class BuildingGenerator
 
             if (style is "tavern" or "shop")
             {
-                // Стойка/прилавок в ряд у задней стены (за ней — хозяин), с проходом с одного конца.
-                // Целиком, без разрывов: перебираем длину и положение, пока весь ряд не встанет (не у дверей и окон).
+                // Counter/counter in a row against the back wall (the owner is behind it), with an aisle at one
+                // end. Entirely, without breaks: we go through the length and position until the entire row
+                // stands (not at the doors and windows).
                 char code = style == "tavern" ? 'B' : 'L';
                 bool placed = false;
                 for (int len = Math.Clamp(along / 2, 3, 5); len >= 2 && !placed; len--)
@@ -831,7 +838,7 @@ public static class BuildingGenerator
             }
             if (style == "temple")
             {
-                // Алтарь у задней стены посередине, скамьи рядами с проходом по центру.
+                // Altar at the back wall in the middle, benches in rows with an aisle in the center.
                 Try(cells, At(along / 2, 1), 'A');
                 for (int d = 3; d < depthMax - 1; d += 2)
                     foreach (var (from, to) in new[] { (1, along / 2 - 1), (along / 2 + 1, along - 2) })
@@ -848,7 +855,7 @@ public static class BuildingGenerator
                 if (middle.Count > 0) Try(cells, middle[0], 'Y');
                 return;
             }
-            // Столы сеткой в зале (не перед стойкой), очаг у боковой стены, шкафы.
+            // Tables in a grid in the hall (not in front of the counter), a fireplace near the side wall, cabinets.
             int phase = rng.Next(3);
             foreach (var x in middle.Where(x => DistBack(x) >= 3).OrderBy(x => x.c).ThenBy(x => x.r))
                 if ((x.c + phase) % 3 == 0 && x.r % 2 == 0 && rng.Next(5) > 0) TryTable(cells, x);
@@ -857,7 +864,7 @@ public static class BuildingGenerator
             foreach (var x in sideWalls.Skip(1).Take(style == "shop" ? 4 : 2)) Try(cells, x, 'H');
         }
 
-        // Все клетки сразу или ничего (сплошная стойка).
+        // All cells at once or none (solid rack).
         private bool TryAll(HashSet<(int c, int r)> cells, List<(int c, int r)> run, char code)
         {
             if (run.Any(x => !cells.Contains(x) || TerrainCatalog.Get(G[x.c, x.r]) is { BlocksMove: true } || Near(x) || _windowCells.Contains(x)))
@@ -880,7 +887,7 @@ public static class BuildingGenerator
             return false;
         }
 
-        // Кровать 1×2: изголовье (подушка) у стены, ножная часть — вглубь комнаты; не вышло — одна клетка.
+        // Bed 1x2: headboard (pillow) against the wall, foot part - deep into the room; it didn’t work out - one cell.
         private bool TryBed(HashSet<(int c, int r)> cells, (int c, int r) x)
         {
             foreach (var n in Around(x).Where(n => !cells.Contains(n)))
@@ -891,7 +898,7 @@ public static class BuildingGenerator
             return Try(cells, x, 'E');
         }
 
-        // Стол на 2 клетки в ряд, иначе на одну.
+        // Table with 2 squares in a row, otherwise one square.
         private bool TryTable(HashSet<(int c, int r)> cells, (int c, int r) x) =>
             TryAll(cells, [x, (x.c + 1, x.r)], 'Y') || Try(cells, x, 'Y');
 
@@ -915,7 +922,7 @@ public static class BuildingGenerator
         }
     }
 
-    // Путь от клетки края блока до клетки рядом с контуром (последняя клетка пути — внутри контура).
+    // Path from the block edge cell to the cell next to the outline (the last cell of the path is inside the outline).
     private static List<(int c, int r)>? PathToFootprint((int c, int r) from, HashSet<(int c, int r)> inside)
     {
         if (inside.Contains(from)) return [from];

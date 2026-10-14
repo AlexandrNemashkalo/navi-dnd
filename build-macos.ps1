@@ -1,21 +1,21 @@
-# Сборка NaviDnD.app для macOS (Apple Silicon) — на Windows. Своя цепочка обновлений в releases-macos/ (файлы не те,
-# что у Windows), устроенная так же, как в build-release.ps1:
-#   (без ключей) — патч: приложение собирается заново и сравнивается с описанием предыдущей версии
-#                  (releases-macos/manifests/<версия>.json); в releases-macos/patches/ — ZIP только с изменениями.
-#                  Патчи ставит сама игра (Обновления в меню) — вместе с подписью приложения.
-#   -Base        — новая база: архив для игроков artifacts/NaviDnD-macOS-arm64-<версия>.zip и он же частями
-#                  releases-macos/NaviDnD-macOS-payload.* (лимит размера файлов); цепочка патчей с нуля. GitLab CI на теге
-#                  версии базы склеивает части и выкладывает архив в Package Registry — по ссылке «macOS» в релизе.
-#   -Test        — только архив в artifacts/ для проверки на Mac; releases-macos/ не трогается.
-# NaviDnD.app по правилам Apple: в Contents/MacOS — только программы (игра и MCP-сервер одним файлом каждый, .NET
-# внутри; библиотеки картинок; терминал Alacritty, в котором игра идёт: окно без рамки, значок NaviDnD в Dock), в
-# Contents/Resources — файлы игры, значок и настройки терминала (macos/). Озвучка (свой Python 3.12 + PyTorch) — архивом
-# Speech/silero.zip: папки Python (python3.12, *.dist-info) подпись принимает за вложенные приложения; игра распаковывает
-# его в ~/Library/Application Support/NaviDnD. Приложение подписывается здесь же локальной подписью (rcodesign): без подписи macOS называет
-# скачанное приложение повреждённым, а подпись на Mac изменила бы файлы и сломала проверку патчей. Подпись одинакова
-# при каждой сборке, поэтому сборка всегда полная (с озвучкой) — в патч попадает только изменившееся.
-# Загрузки (с закреплёнными версиями и хешами) кешируются в artifacts/macos-cache.
-# Нужны: .NET SDK, git, Python 3 с pip (колёса озвучки и ZIP), интернет.
+# Build NaviDnD.app for macOS (Apple Silicon) - on Windows. Its own chain of updates in releases-macos/ (the files are not the same
+# that of Windows), arranged in the same way as in build-release.ps1:
+#   (no keys) - patch: the application is rebuilt and compared with the description of the previous version
+#                  (releases-macos/manifests/<version>.json); in releases-macos/patches/ - ZIP only with changes.
+#                  Patches are installed by the game itself (Updates in the menu) - along with the application label.
+#   -Base - new database: archive for players artifacts/NaviDnD-macOS-arm64-<version>.zip and the same in parts
+#                  releases-macos/NaviDnD-macOS-payload.* (file size limit); a chain of patches from scratch. GitLab CI on tag
+#                  version of the database glues the parts together and uploads the archive to Package Registry - via the link “macOS” in the release.
+#   -Test - only archive in artifacts/ for checking on Mac; releases-macos/ does not move.
+# NaviDnD.app according to the rules of Apple: in Contents/MacOS - only programs (game and MCP-server in one file each, .NET
+# inside; picture libraries; terminal Alacritty, in which the game is played: window without frame, icon NaviDnD in Dock), in
+# Contents/Resources - game files, icon and terminal settings (macos/). Voice acting (own Python 3.12 + PyTorch) - archived
+# Speech/silero.zip: folders Python (python3.12, *.dist-info) the label is taken for embedded applications; the game unpacks
+# it in ~/Library/Application Support/NaviDnD. The application is signed here with a local label (rcodesign): without label macOS calls
+# the downloaded application was corrupted, and the label on Mac would change files and break patch checking. The label is the same
+# with each build, so the build is always complete (with voice acting) - only what has changed gets into the patch.
+# Downloads (with pinned versions and hashes) are cached in artifacts/macos-cache.
+# Needed: .NET SDK, git, Python 3 with pip (voice wheels and ZIP), internet.
 param([switch]$Base, [switch]$Test, [string]$Python = 'python')
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -38,8 +38,8 @@ $rawBase = 'https://gitlab.com/navitalevich/navi-dnd/-/raw/'
 $utf8 = New-Object Text.UTF8Encoding($false)
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
-# Закреплённые загрузки: Python для macOS arm64 (astral-sh/python-build-standalone), русская модель Silero, терминал
-# Alacritty и его лицензия, rcodesign (indygreg/apple-platform-rs) — подпись на Windows, 7-Zip — распаковать .dmg.
+# Pinned downloads: Python for macOS arm64 (astral-sh/python-build-standalone), Russian model Silero, terminal
+# Alacritty and its license, rcodesign (indygreg/apple-platform-rs) - label on Windows, 7-Zip - unpack .dmg.
 $downloads = [ordered]@{
     'python.tar.gz'     = @('https://github.com/astral-sh/python-build-standalone/releases/download/20260924/cpython-3.12.14%2B20260924-aarch64-apple-darwin-install_only.tar.gz', '9763f43db2481a6af36af82ec40302aab7a73632f880129d07a6e81aec846277')
     'v5_5_ru.pt'        = @('https://models.silero.ai/models/tts/ru/v5_5_ru.pt', '50081637b602126ee06cb3bc8a744d25651d2da149ee8864b9a379bfdd934437')
@@ -49,18 +49,18 @@ $downloads = [ordered]@{
     '7zr.exe'           = @('https://github.com/ip7z/7zip/releases/download/26.03/7zr.exe', 'ad4c82fadcbdf93c03b4fc440f300509c7d60c5c2f4d183e35d9d70d6957037d')
     '7z-x64.exe'        = @('https://github.com/ip7z/7zip/releases/download/26.03/7z2603-x64.exe', '0859c524b8a63551848f0c246abddcb1d0b7b656b0fbfe879f8d85e61a9e6edd')
 }
-# Права 755 в ZIP: всё в Contents/MacOS и скрипт установки озвучки; остальное — 644.
+# Rights 755 in ZIP: everything in Contents/MacOS and voiceover installation script; the rest - 644.
 
 function RawUrl($tag, $relative) { $rawBase + $tag + '/' + ((($relative -split '/') | ForEach-Object { [uri]::EscapeDataString($_) }) -join '/') }
 function Sha256File($path) { (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() }
 function WriteJson($path, $value) { [IO.File]::WriteAllText($path, ($value | ConvertTo-Json -Depth 10), $utf8) }
-# Файл из кеша (скачивается, если его нет или хеш не тот).
+# File from cache (downloaded if it is not there or the hash is incorrect).
 function Cached($name) {
     $url, $sha256 = $downloads[$name]
     $path = Join-Path $cache $name
     if ((Test-Path -LiteralPath $path) -and (Sha256File $path) -eq $sha256) { return $path }
     New-Item -ItemType Directory -Force -Path $cache | Out-Null
-    # Модель Silero уже есть у разработчика (озвучка игры из исходников): сайт Silero бывает очень медленным.
+    # The developer already has the Silero model (voice acting for the game from the source): the Silero site can be very slow.
     $local = Join-Path $root "NaviDnD/Storage/Speech/silero/$name"
     if ((Test-Path -LiteralPath $local) -and (Sha256File $local) -eq $sha256) { Copy-Item -LiteralPath $local -Destination $path -Force; return $path }
     & curl.exe --fail --location --silent --show-error --connect-timeout 20 --max-time 900 --retry 2 --output "$path.part" $url
@@ -69,7 +69,7 @@ function Cached($name) {
     Move-Item -LiteralPath "$path.part" -Destination $path -Force
     $path
 }
-# Внешняя программа: ход работы в stderr не считается ошибкой (Windows PowerShell со Stop) — важен код выхода.
+# External program: progress in stderr is not considered an error (Windows PowerShell with Stop) - exit code is important.
 function Native($what) {
     $ErrorActionPreference = 'Continue'
     $output = & $args[0] @($args | Select-Object -Skip 1) 2>&1 | ForEach-Object { "$_" }
@@ -98,7 +98,7 @@ function TreeManifest($directory) {
     $result
 }
 function UnixMode($relative) { if ($relative -like 'Contents/MacOS/*' -or $relative -eq 'Contents/Resources/Speech/setup-silero.sh') { 493 } else { 420 } }   # 0755 / 0644
-# Mach-O (64-бит или универсальный) — по первым байтам.
+# Mach-O (64-bit or universal) - by first bytes.
 function IsMachO($path) {
     $stream = [IO.File]::OpenRead($path)
     try { $head = New-Object byte[] 4; $read = $stream.Read($head, 0, 4) } finally { $stream.Dispose() }
@@ -108,7 +108,7 @@ function IsMachO($path) {
 
 function BuildGame() {
     New-Item -ItemType Directory -Force -Path $programsDir, $game | Out-Null
-    # Одним файлом: в Contents/MacOS не должно быть ничего, кроме программ, а сборки .NET — не программы.
+    # One file: Contents/MacOS should not contain anything other than programs, and .NET assemblies should not be programs.
     $publish = Join-Path $work 'publish'
     foreach ($project in @('NaviDnD', 'NaviDnD.McpServer')) {
         & dotnet publish (Join-Path $root "$project/$project.csproj") -c Release -r osx-arm64 --self-contained true -p:PublishSingleFile=true -o $publish -p:DebugType=None -p:DebugSymbols=false | Out-Host
@@ -122,7 +122,7 @@ function BuildGame() {
         New-Item -ItemType Directory -Force -Path (Split-Path $target -Parent) | Out-Null
         Move-Item -LiteralPath $file.FullName -Destination $target
     }
-    # Только публичные файлы из git — как в build-release.ps1: без Storage, логов и локальных настроек.
+    # Only public files from git - as in build-release.ps1: without Storage, logs and local settings.
     foreach ($asset in @('Prompts', 'sound', 'Fonts', 'GameData', 'icons')) {
         $assetOutput = Join-Path $game $asset
         if (Test-Path -LiteralPath $assetOutput) { Remove-Item -LiteralPath $assetOutput -Recurse -Force }
@@ -136,7 +136,7 @@ function BuildGame() {
         }
     }
     if (Get-ChildItem $game -Recurse -Directory | Where-Object Name -in @('Storage', 'logs', 'Updater')) { throw 'Private data in the app' }
-    # Скрипты — с переводами строк Unix (иначе bash на Mac их не выполнит), до подсчёта хешей.
+    # Scripts - with line breaks Unix (otherwise bash on Mac will not execute them), before hashes are calculated.
     foreach ($script in Get-ChildItem -LiteralPath $game -Recurse -File | Where-Object { $_.Extension -eq '.sh' }) {
         $text = [IO.File]::ReadAllText($script.FullName).Replace("`r`n", "`n")
         [IO.File]::WriteAllText($script.FullName, $text, $utf8)
@@ -145,7 +145,7 @@ function BuildGame() {
     Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination (Join-Path $game 'LICENSE')
     Copy-Item -LiteralPath (Join-Path $root 'RELEASE_NOTES.md') -Destination (Join-Path $game 'RELEASE_NOTES.md')
 
-    # Терминал: alacritty из .dmg (7-Zip — из своего установщика, без установки в систему).
+    # Terminal: alacritty from .dmg (7-Zip - from its installer, without installation into the system).
     $tools = Join-Path $work 'tools'
     New-Item -ItemType Directory -Force -Path $tools | Out-Null
     Native '7-Zip unpack' (Cached '7zr.exe') x -y "-o$tools\7z" (Cached '7z-x64.exe')
@@ -158,7 +158,7 @@ function BuildGame() {
     [IO.File]::WriteAllText((Join-Path $app 'Contents/Info.plist'), $plist, $utf8)
 }
 
-# Озвучка: колёса строго по macos/silero-requirements.txt (версии и хеши).
+# Voice acting: wheels strictly according to macos/silero-requirements.txt (versions and hashes).
 function BuildSpeech() {
     $wheels = Join-Path $work 'wheels'
     New-Item -ItemType Directory -Force -Path $wheels | Out-Null
@@ -174,7 +174,7 @@ function BuildSpeech() {
     if ($LASTEXITCODE -ne 0) { throw 'Cannot pack the speech bundle.' }
 }
 
-# Подпись всего приложения (вложенные программы и библиотеки — тоже), после неё файлы не меняются.
+# Signature of the entire application (embedded programs and libraries too), after which the files do not change.
 function SignApp() {
     $tools = Join-Path $work 'tools'
     Expand-Archive -LiteralPath (Cached 'rcodesign.zip') -DestinationPath "$tools\rcodesign" -Force
@@ -200,7 +200,7 @@ try {
         New-Item -ItemType Directory -Force -Path $release, $manifests | Out-Null
         Get-ChildItem -LiteralPath $release -Filter 'NaviDnD-macOS-payload.*' -File | Remove-Item -Force
         if (Test-Path -LiteralPath $patches) { Get-ChildItem -LiteralPath $patches -Filter 'NaviDnD-macOS-patch-*.zip' -File | Remove-Item -Force }
-        # Части по 50 МБ — как у базы Windows; CI склеивает их обратно в архив для игроков.
+        # Parts of 50 MB - like the Windows base; CI stitches them back into an archive for the players.
         $parts = @()
         $source = [IO.File]::OpenRead($archive)
         try {
@@ -244,7 +244,7 @@ try {
             try { $writer.Write(($description | ConvertTo-Json -Depth 10)) } finally { $writer.Dispose() }
             foreach ($key in $changed) {
                 $entry = [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, (Join-Path $app $key), "files/$key", [IO.Compression.CompressionLevel]::Optimal)
-                # Права Unix: игра на Mac распаковывает с ними — программы остаются исполняемыми.
+                # The rights Unix: game on Mac unpacks with them - the programs remain executable.
                 $entry.ExternalAttributes = ((0x8000 -bor (UnixMode $key)) -shl 16)
             }
         } finally { $zip.Dispose() }

@@ -27,7 +27,7 @@ public static class ConsoleMouseReader
     [DllImport("kernel32.dll")] private static extern bool SetConsoleMode(nint h, uint mode);
     [DllImport("kernel32.dll")] private static extern bool ReadConsoleInput(nint h, [Out] INPUT_RECORD[] buf, int len, out int read);
     [DllImport("kernel32.dll")] private static extern bool PeekConsoleInput(nint h, [Out] INPUT_RECORD[] buf, int len, out int read);
-    // Unicode-версия — для чтения символа клавиши (кириллица): ANSI-вариант отдаёт не тот символ.
+    // Unicode-version - for reading the key symbol (Cyrillic): ANSI-version returns the wrong symbol.
     [DllImport("kernel32.dll", EntryPoint = "ReadConsoleInputW")] private static extern bool ReadConsoleInputW(nint h, [Out] INPUT_RECORD[] buf, int len, out int read);
     [DllImport("kernel32.dll", EntryPoint = "PeekConsoleInputW")] private static extern bool PeekConsoleInputW(nint h, [Out] INPUT_RECORD[] buf, int len, out int read);
     [DllImport("kernel32.dll")] private static extern nint GetConsoleWindow();
@@ -36,7 +36,7 @@ public static class ConsoleMouseReader
     [DllImport("user32.dll")]   private static extern bool GetCursorPos(out POINT pt);
     [DllImport("user32.dll")]   private static extern bool ClientToScreen(nint hwnd, ref POINT pt);
     [DllImport("user32.dll")]   private static extern nint LoadCursor(nint hInstance, int lpCursorName);
-    [DllImport("user32.dll")]   private static extern nint CopyIcon(nint hIcon); // CopyCursor — макрос над CopyIcon
+    [DllImport("user32.dll")]   private static extern nint CopyIcon(nint hIcon); // CopyCursor - macro over CopyIcon
     [DllImport("user32.dll")]   private static extern nint SetCursor(nint hCursor);
     [DllImport("user32.dll")]   private static extern bool SetSystemCursor(nint hCur, uint id);
     [DllImport("user32.dll")]   private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, nint pvParam, uint fWinIni);
@@ -50,17 +50,17 @@ public static class ConsoleMouseReader
 
     [StructLayout(LayoutKind.Sequential)] private struct RECT { public int Left, Top, Right, Bottom; }
 
-    // Окно консоли без WS_CAPTION/WS_SYSMENU (ConsoleSetup.BlockConsoleFullscreen) не умеет
-    // перетаскиваться штатно. Штатный трюк ОС (WM_NCLBUTTONDOWN+HTCAPTION, "как будто схватили
-    // заголовок") здесь ненадёжен: ENABLE_MOUSE_INPUT перехватывает движения мыши для консольного
-    // ввода на том же потоке conhost, что обслуживает и системный цикл перетаскивания — гонка между
-    // ними срабатывает через раз. Вместо этого двигаем окно САМИ: опрашиваем РЕАЛЬНОЕ состояние
-    // кнопки (GetAsyncKeyState — не буферизуется консольным вводом, в отличие от кликов из
-    // DrainMouseEvents) и переносим окно на дельту курсора, пока кнопка физически зажата.
+    // Console window without WS_CAPTION/WS_SYSMENU (ConsoleSetup.BlockConsoleFullscreen) cannot be dragged
+    // normally. The standard OS trick (WM_NCLBUTTONDOWN+HTCAPTION, “as if they grabbed the title”) is
+    // unreliable here: ENABLE_MOUSE_INPUT intercepts mouse movements for console input on the same thread
+    // conhost, which also serves the system drag loop - the race between them is triggered every other time.
+    // Instead, we move the window OURSELVES: poll the REAL state of the button (GetAsyncKeyState - not buffered
+    // by console input, unlike clicks from DrainMouseEvents)) and move the window to the cursor delta while the
+    // button is physically held down.
     public static void StartWindowDrag()
     {
-        if (!OperatingSystem.IsWindows()) return;   // окно терминала двигается за свой заголовок
-        if (FullscreenBackdrop.Active) return;   // весь экран — окно стоит по центру
+        if (!OperatingSystem.IsWindows()) return;   // terminal window moves past its title
+        if (FullscreenBackdrop.Active) return;   // entire screen - the window is centered
         var hwnd = GetConsoleWindow();
         if (hwnd == 0) return;
         if (!GetCursorPos(out var startCursor)) return;
@@ -78,11 +78,12 @@ public static class ConsoleMouseReader
         };
     }
 
-    // Перетаскивание содержимого (карта мира, местность): сообщает смещение курсора в символах от точки нажатия,
-    // пока кнопка зажата. События мыши читаются из очереди по порядку — движения с зажатой кнопкой двигают карту,
-    // первое событие без кнопки — отпустил. Раньше смотрели только на кнопку «сейчас» (GetAsyncKeyState): быстрый
-    // рывок, пока игра ещё рисовала кадр, заканчивался до начала слежения — кнопка уже отпущена, все движения
-    // в очереди пропадали, и рывок считался кликом. Накопленные движения — одним сдвигом (один кадр, а не десять).
+    // Drag content (world map, terrain): reports the cursor offset in characters from the click point while the
+    // button is held down. Mouse events are read from the queue in order - movements with the button held down
+    // move the map, the first event without the button - released. Previously, they only looked at the “now”
+    // button (GetAsyncKeyState): a quick dash, while the game was still drawing a frame, ended before the
+    // tracking began - the button was already released, all movements in the queue were lost, and the dash was
+    // considered a click. The accumulated movements - one shift (one frame, not ten).
     private static Action? _windowDrag;
     private static (short x, short y)? _dragStart;
     private static (short x, short y) _dragLast;
@@ -129,7 +130,7 @@ public static class ConsoleMouseReader
             bool queueEmpty = true;
             while (_enabled && PeekInputAnsi(buf, out int n) && n > 0)
             {
-                if (buf[0].EventType == KEY_EVENT_TYPE && buf[0].KeyDownFlag != 0) { queueEmpty = false; break; }   // клавиша — не наша
+                if (buf[0].EventType == KEY_EVENT_TYPE && buf[0].KeyDownFlag != 0) { queueEmpty = false; break; }   // key is not ours
                 ReadInputAnsi(buf, out _);
                 if (buf[0].EventType != MOUSE_EVENT_TYPE || (buf[0].MouseEvent.dwEventFlags & MOUSE_WHEELED) != 0) continue;
                 moved = (buf[0].MouseEvent.dwMousePosition.X, buf[0].MouseEvent.dwMousePosition.Y);
@@ -145,11 +146,12 @@ public static class ConsoleMouseReader
                 }
             }
             if (released) break;
-            // Отпускание не дошло до очереди (кнопку отпустили вне окна и т.п.) — по реальному состоянию кнопки,
-            // но сначала дать очереди догнать (последние движения ещё в пути).
+            // The release did not reach the queue (the button was released outside the window, etc.) -
+            // according to the real state of the button, but first let the queue catch up (the last movements
+            // are still on the way).
             if (!LeftButtonHeld())
             {
-                if (!queueEmpty) break;   // впереди клавиша — отпускание за ней уже не нужно
+                if (!queueEmpty) break;   // there is a key in front - releasing behind it is no longer necessary
                 Thread.Sleep(20);
                 if (!_enabled || !PeekInputAnsi(buf, out int left) || left == 0) break;
                 continue;
@@ -158,7 +160,7 @@ public static class ConsoleMouseReader
         }
     }
 
-    // Очередь ввода: консоли на Windows, UnixTerminal (те же записи) на macOS/Linux.
+    // Input queue: consoles on Windows, UnixTerminal (same entries) on macOS/Linux.
     private static bool PeekInput(INPUT_RECORD[] buf, out int n)
     {
         if (UnixTerminal.Current is { } u) { n = u.Peek(buf); return true; }
@@ -205,10 +207,10 @@ public static class ConsoleMouseReader
     {
         [FieldOffset(0)]  public ushort EventType;
         [FieldOffset(4)]  public int    KeyDownFlag;    // KEY_EVENT_RECORD.bKeyDown: non-zero = key-down
-        [FieldOffset(8)]  public ushort RepeatCount;    // KEY_EVENT_RECORD.wRepeatCount — консоль склеивает одинаковые нажатия
-        [FieldOffset(10)] public ushort VirtualKeyCode; // KEY_EVENT_RECORD.wVirtualKeyCode
-        // KEY_EVENT_RECORD.uChar (W-версия чтения). ushort, а не char: char в структуре делает её
-        // небиттовой — маршалер в ANSI-вызовах сжимает его до байта и ломает раскладку записи.
+        [FieldOffset(8)]  public ushort RepeatCount;    // KEY_EVENT_RECORD.wRepeatCount - the console glues together identical presses
+        [FieldOffset(10)] public ushort VirtualKeyCode; // KEY_EVENT_RECORD.wVirtualKeyCode KEY_EVENT_RECORD.uChar (W-read version). ushort, and not char: char
+        // in the structure makes it non-bit - the marshaler in ANSI- calls compresses it to a byte and breaks
+        // the record layout.
         [FieldOffset(14)] public ushort UnicodeChar;
         [FieldOffset(16)] public uint   KeyControlState;
         [FieldOffset(4)]  public MOUSE_EVENT_RECORD MouseEvent;
@@ -234,8 +236,9 @@ public static class ConsoleMouseReader
         if (!OperatingSystem.IsWindows()) return;
         _inputHandle = GetStdHandle(STD_INPUT_HANDLE);
         GetConsoleMode(_inputHandle, out _originalMode);
-        // ENABLE_PROCESSED_INPUT снят: с ним conhost перехватывает Shift+стрелки под своё выделение текста
-        // с клавиатуры (строки подсвечивались, ввод игре не доходил). Ctrl+C при этом приходит обычной клавишей.
+        // ENABLE_PROCESSED_INPUT has been removed: with it, conhost intercepts Shift+ arrows for his text
+        // selection from the keyboard (the lines were highlighted, the input did not reach the game). Ctrl+C
+        // comes with a regular key.
         uint newMode = (_originalMode & ~ENABLE_QUICK_EDIT_MODE & ~ENABLE_PROCESSED_INPUT) | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS;
         SetConsoleMode(_inputHandle, newMode);
         _enabled = true;
@@ -299,7 +302,7 @@ public static class ConsoleMouseReader
                 ReadInputAnsi(buf, out _);
                 continue;
             }
-            if (buf[0].EventType == KEY_EVENT_TYPE) break; // KEY_DOWN — оставить для TryReadKeyDown/Term.ReadKey
+            if (buf[0].EventType == KEY_EVENT_TYPE) break; // KEY_DOWN — leave for TryReadKeyDown/Term.ReadKey
             if (buf[0].EventType != MOUSE_EVENT_TYPE)
             {
                 // FOCUS_EVENT, WINDOW_BUFFER_SIZE_EVENT, MENU_EVENT — consume silently
@@ -435,8 +438,8 @@ public static class ConsoleMouseReader
 
     public static (short x, short y)? DrainMouseMoves() => DrainMouseEvents().move;
 
-    // Ожидание (нейронка думает, загрузка): клики не принимаются, но окно по-прежнему тащится за верхний блок
-    // (рамка, заголовок, разделитель — строки 0–2).
+    // Waiting (AI thinks, loading): clicks are not accepted, but the window is still dragged by the top block
+    // (frame, title, separator - lines 0–2).
     public static void DrainWhileWaiting()
     {
         if (DrainMouseEvents().click is { y: >= 0 and <= 2 }) StartWindowDrag();
@@ -448,7 +451,7 @@ public static class ConsoleMouseReader
     private static (short x, short y) _lastMousePos;
     private static readonly object _wheelLock = new();
     private static readonly WheelDeltaAccumulator _wheelDelta = new();
-    // Горизонтальная прокрутка (свайп тачпада вбок): > 0 — вправо. Забирается вместе с вертикальной (TakeWheel).
+    // Horizontal scrolling (touchpad swipe sideways): > 0 - to the right. Climbs together with vertical (TakeWheel).
     private static int _hwheelNotches;
     private static readonly WheelDeltaAccumulator _hwheelDelta = new();
 
@@ -461,9 +464,9 @@ public static class ConsoleMouseReader
         }
     }
 
-    // Прокрутка из консоли (DrainMouseEvents) или из ConsoleZoomBlocker (Ctrl+колесо/щипок тачпада,
-    // перехваченные до консоли — с другого потока, поэтому под замком). pos == null — последняя
-    // известная позиция курсора.
+    // Scrolling from the console (DrainMouseEvents) or from ConsoleZoomBlocker (Ctrl+ wheel/touchpad pinch,
+    // intercepted to the console - from another thread, therefore under lock and key). pos == null - last known
+    // cursor position.
     public static void AddWheel(int notches, (short x, short y)? pos = null)
     {
         if (notches == 0) return;
@@ -475,12 +478,12 @@ public static class ConsoleMouseReader
         }
     }
 
-    /// Накопленная прокрутка колеса (щелчки; > 0 — от себя) и позиция курсора при ней. Копится в
-    /// DrainMouseEvents; забирать после него. Старая прокрутка (> 300 мс — экран её не обработал)
-    /// отбрасывается, чтобы не сработать внезапно на другом экране.
+    ///Accumulated scrolling of the wheel (clicks; > 0 - away from you) and the cursor position during it. Accumulating in
+    ///DrainMouseEvents; pick up after it. Old scrolling (> 300 ms - the screen did not process it)
+    ///is discarded to avoid triggering unexpectedly on another screen.
     public static int TakeWheel(out (short x, short y) pos) => TakeWheel(out pos, out _);
 
-    // То же вместе с горизонтальной прокруткой (horizontal: > 0 — вправо).
+    // The same with horizontal scrolling (horizontal: > 0 - to the right).
     public static int TakeWheel(out (short x, short y) pos, out int horizontal)
     {
         lock (_wheelLock)
@@ -511,10 +514,10 @@ public static class ConsoleMouseReader
             {
                 if (buf[0].KeyDownFlag == 0)
                 {
-                    ReadInputAnsi(buf, out _); // забрать KEY_UP
+                    ReadInputAnsi(buf, out _); // pick up KEY_UP
                     continue;
                 }
-                ReadInputAnsi(buf, out _); // забрать KEY_DOWN
+                ReadInputAnsi(buf, out _); // pick up KEY_DOWN
                 var key = (ConsoleKey)buf[0].VirtualKeyCode;
                 if (key == ConsoleKey.F11) { Speech.Stop(); continue; }
                 if (key is ConsoleKey.Escape or ConsoleKey.Enter) Speech.Stop();
@@ -525,15 +528,15 @@ public static class ConsoleMouseReader
         }
     }
 
-    /// Неблокирующее чтение следующего KEY_DOWN прямо из буфера консоли — код клавиши И символ
-    /// (TryReadKeyDown отдаёт только код). Как TryReadKeyDown: KEY_UP/служебные события съедает,
-    /// на событии мыши останавливается (его заберёт DrainMouseEvents). Мышь выключена — Console.ReadKey.
+    ///Non-blocking read next KEY_DOWN directly from console buffer - key code AND character
+    ///(TryReadKeyDown gives only the code). How TryReadKeyDown: KEY_UP/ eats service events,
+    ///stops at the mouse event (it will be picked up by DrainMouseEvents). Mouse is turned off - Console.ReadKey.
     private static ConsoleKeyInfo _repeatKey;
     private static int _repeatLeft;
 
     public static ConsoleKeyInfo? TryReadKey()
     {
-        if (_repeatLeft > 0) { _repeatLeft--; return _repeatKey; }   // остаток склеенного нажатия («нн», зажатая клавиша)
+        if (_repeatLeft > 0) { _repeatLeft--; return _repeatKey; }   // remainder of the glued press (“nn”, pressed key)
         if (!_enabled) return Term.KeyAvailable ? Term.ReadKey(true) : null;
         var buf = new INPUT_RECORD[1];
         while (true)
@@ -545,7 +548,7 @@ public static class ConsoleMouseReader
             var key = (ConsoleKey)buf[0].VirtualKeyCode;
             if (key == ConsoleKey.F11) { Speech.Stop(); continue; }
             if (key is ConsoleKey.Escape or ConsoleKey.Enter) Speech.Stop();
-            if (key is (ConsoleKey)16 or (ConsoleKey)17 or (ConsoleKey)18 or (ConsoleKey)20 or (ConsoleKey)144 or (ConsoleKey)145 or (ConsoleKey)91 or (ConsoleKey)92) continue; // Shift/Ctrl/Alt, Caps/Num/Scroll Lock, Win — сами по себе (как Term.ReadKey)
+            if (key is (ConsoleKey)16 or (ConsoleKey)17 or (ConsoleKey)18 or (ConsoleKey)20 or (ConsoleKey)144 or (ConsoleKey)145 or (ConsoleKey)91 or (ConsoleKey)92) continue; // Shift/Ctrl/Alt, Caps/Num/Scroll Lock, Win - by themselves (as Term.ReadKey)
             uint s = buf[0].KeyControlState;
             var info = new ConsoleKeyInfo((char)buf[0].UnicodeChar, key,
                 shift: (s & 0x0010) != 0, alt: (s & 0x0003) != 0, control: (s & 0x000C) != 0);
@@ -669,7 +672,7 @@ public static class ConsoleMouseReader
     /// Returns the fractional Y position of the pixel cursor within its character cell (0.0 = top, 1.0 = bottom).
     private static float GetSubCellFraction()
     {
-        if (!OperatingSystem.IsWindows()) return 0.5f;   // терминал сообщает только целые клетки
+        if (!OperatingSystem.IsWindows()) return 0.5f;   // terminal reports only whole cells
         try
         {
             if (!GetCursorPos(out var pt)) return 0.5f;
@@ -695,7 +698,7 @@ public static class ConsoleMouseReader
     /// Returns the fractional X position of the pixel cursor within its character cell (0.0 = left, 1.0 = right).
     private static float GetSubCellFractionX()
     {
-        if (!OperatingSystem.IsWindows()) return 0.5f;   // терминал сообщает только целые клетки
+        if (!OperatingSystem.IsWindows()) return 0.5f;   // terminal reports only whole cells
         try
         {
             if (!GetCursorPos(out var pt)) return 0.5f;

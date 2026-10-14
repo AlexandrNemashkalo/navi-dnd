@@ -34,8 +34,8 @@ public class MovementHandler
 
         if (_world.Combat?.Active == true && (hero.SpeedLeft ?? 0) <= 0)
         {
-            // Подсказка один раз, а не на каждое нажатие стрелки.
-            string noSpeed = L.T("Скорость на этот ход потрачена — действуй или [F10] конец хода.");
+            // Hint appears once, rather than every time the arrow is pressed.
+            string noSpeed = L.T("No movement left this turn — act or press [F10] to end the turn.");
             if (_world.History?.LastOrDefault()?.Text != noSpeed)
             {
                 _world.History?.Add(new DialogMessage { Text = noSpeed });
@@ -49,7 +49,7 @@ public class MovementHandler
         int newCol  = heroCol + dir.Value.dcol;
         int newRow  = heroRow + dir.Value.drow;
 
-        // Шаг наружу через выход на карту мира (вне боя) — покинуть локацию (MapScreenLoop → GameWorld.LeaveLocation).
+        // Step outside through the exit to the world map (outside of combat) - leave the location (MapScreenLoop → GameWorld.LeaveLocation).
         if (_world.Combat?.Active != true && (_world.Map.Doors ?? []).Any(d => d.IsWorldExit == true && d.From is { Count: >= 2 } f && d.To is { Count: >= 2 } t
                 && ((f[0] == heroCol && f[1] == heroRow && t[0] == newCol && t[1] == newRow) || (t[0] == heroCol && t[1] == heroRow && f[0] == newCol && f[1] == newRow))))
         {
@@ -59,8 +59,8 @@ public class MovementHandler
 
         var blockReason = GetBlockReason(heroCol, heroRow, newCol, newRow);
 
-        // Мирное существо на пути: второе быстрое нажатие в ту же сторону — протиснуться мимо него на клетку
-        // за ним (если она свободна), за два шага.
+        // A peaceful creature is on the way: a second quick press in the same direction - squeeze past it onto
+        // the square behind it (if it is free), in two steps.
         var bystander = blockReason != null ? PeacefulEntityAt(newCol, newRow) : null;
         if (bystander != null)
         {
@@ -80,7 +80,7 @@ public class MovementHandler
                 _storage.ApplyClientMovement(GetStepCost(newCol, newRow, diag), diag, MovementCalculator.GetStepCost(_world, newCol, newRow, diag));
                 hero.Position = [behindCol, behindRow];
                 _storage.ApplyClientMovement(GetStepCost(behindCol, behindRow, diag), diag, MovementCalculator.GetStepCost(_world, behindCol, behindRow, diag));
-                _world.History?.Add(new DialogMessage { Text = L.WF("Ты протискиваешься мимо: {0}.", bystander.Name) });
+                _world.History?.Add(new DialogMessage { Text = L.WF("You squeeze past: {0}.", bystander.Name) });
                 _storage.Save();
                 activatedTriggers.AddRange(GetStepTriggers(behindCol, behindRow));
                 activatedTriggers.AddRange(GetVisibleTriggers(behindCol, behindRow));
@@ -90,12 +90,12 @@ public class MovementHandler
                 return activatedTriggers.Count > 0 || activatedAreaTriggers.Count > 0 || activatedDoorTriggers.Count > 0;
             }
             _passAttempt = (dirNow, DateTime.UtcNow, heroCol, heroRow);
-            blockReason = L.F("Путь преграждён: {0}. Нажми ещё раз — протиснуться мимо.", bystander.Name);
+            blockReason = L.F("The way is blocked: {0}. Press again to squeeze past.", bystander.Name);
         }
 
         if (blockReason != null)
         {
-            // Упёрся в то же препятствие ещё раз — без новой строки в диалоге (раньше каждое нажатие — ещё одна строка).
+            // I ran into the same obstacle again - without a new line in the dialogue (previously, each click was another line).
             if (_world.History?.LastOrDefault()?.Text != blockReason)
             {
                 _world.History?.Add(new DialogMessage { Text = blockReason });
@@ -110,7 +110,7 @@ public class MovementHandler
         activatedTriggers.AddRange(GetOpportunityAttackTriggers(heroCol, heroRow, newCol, newRow));
         hero.Position = [newCol, newRow];
         _storage.ApplyClientMovement(stepCost, isDiagonal, MovementCalculator.GetStepCost(_world, newCol, newRow, isDiagonal));
-        // Шаг на лестницу — сразу на связанную клетку соседнего этажа (стоимость — обычный шаг).
+        // Step onto the stairs - immediately onto the connected cell of the adjacent floor (cost - normal step).
         if (_world.Map.StairTarget(newCol, newRow) is var (stairCol, stairRow))
         {
             int fromZ = _world.Map.FloorAt(newCol, newRow), toZ = _world.Map.FloorAt(stairCol, stairRow);
@@ -119,7 +119,7 @@ public class MovementHandler
             string floor = MapConfig.FloorName(toZ);
             _world.History?.Add(new DialogMessage
             {
-                Text = toZ > fromZ ? L.WF("Ты поднимаешься по лестнице: {0}.", floor) : L.WF("Ты спускаешься по лестнице: {0}.", floor),
+                Text = toZ > fromZ ? L.WF("You climb the stairs: {0}.", floor) : L.WF("You go down the stairs: {0}.", floor),
             });
         }
         _storage.Save();
@@ -134,14 +134,14 @@ public class MovementHandler
         return activatedTriggers.Count > 0 || activatedAreaTriggers.Count > 0 || activatedDoorTriggers.Count > 0;
     }
 
-    // Герой шагнул в выход на карту мира — цикл карты уводит его из локации и сбрасывает флаг.
+    // The hero stepped into the exit to the world map - the map cycle takes him away from the location and resets the flag.
     public bool LeaveRequested { get; set; }
 
-    // Последнее упирание в мирное существо: направление, время, откуда.
+    // The last rest against a peaceful creature: direction, time, from.
     private ((int dcol, int drow) dir, DateTime at, int col, int row)? _passAttempt;
     private const int PassWindowMs = 800;
 
-    // Существо на клетке, если оно не враждебно (MovementCalculator.IsPeaceful).
+    // Creature on the square, if it is not hostile (MovementCalculator.IsPeaceful).
     private LivingEntity? PeacefulEntityAt(int col, int row) =>
         MovementCalculator.PeacefulEntityIndex(_world, col, row) is int i ? _world.Map.Entities![i] : null;
 
@@ -151,7 +151,7 @@ public class MovementHandler
         int round = _world.Time.TotalRounds;
         if (_world.Hero?.NoOpportunityAttacksRound >= round) yield break;
 
-        // Только враги-участники боя: дружественный/нейтральный NPC и союзник в бою не бьют герою в спину.
+        // Only enemies participating in the battle: friendly/neutral NPC and an ally in battle do not hit the hero in the back.
         var combatants = CombatantSymbols(enemiesOnly: true);
 
         foreach (var entity in _world.Map.Entities ?? [])
@@ -202,13 +202,14 @@ public class MovementHandler
         }
     }
 
-    // spotted — только у существ с объявленным triggers.spotted (враждебные), и только на фронте
-    // «не видело героя → видит». Нейтральные NPC без триггера не дёргают ИИ вовсе; враг, которого
-    // герой не стал атаковать, не повторяет триггер на каждом шаге, пока не потеряет и снова не найдёт героя.
-    // Видимость обновляется и у тех, кто уже в инициативе — чтобы после конца боя ещё видимый враг
-    // не начал новый бой сразу же. Скрытые (hidden) не пропускаются — это засада, ИИ разрешает её сам.
-    // Во время боя существо замечает и сам бой: союзник-участник рядом (≤ AllyAlertFt, прямая видимость) —
-    // значит, оно тоже вступает, даже если героя пока не видит.
+    // spotted - only for creatures with the declared triggers.spotted (hostile), and only at the front “did not
+    // see the hero → sees.” Neutral NPC without a trigger does not pull the AI at all; the enemy that the
+    // hero did not attack does not repeat the trigger at each step until he loses and finds the hero again.
+    // Visibility is also updated for those who are already in the initiative - so that after the end of the
+    // battle, the still visible enemy does not immediately start a new battle. Hidden ones (hidden) are not
+    // missed - this is an ambush, the AI resolves it itself. During the battle, the creature also notices the
+    // battle itself: an ally-participant is nearby (≤ AllyAlertFt, direct visibility) - which means that it
+    // also enters, even if it does not see the hero yet.
     private IEnumerable<(CellEntity, string)> GetEncounterTriggers()
     {
         var inInitiative = CombatantSymbols();
@@ -228,8 +229,9 @@ public class MovementHandler
         }
     }
 
-    // Проверка встречи вне шага героя: ответ ИИ мог открыть дверь/убрать преграду, а враги в бою —
-    // подойти к ещё не вступившему союзнику. Без неё увидевшие героя враги молчали до его следующего шага.
+    // Checking an encounter outside the hero's step: the AI's response could open a door/remove an obstacle,
+    // and enemies in battle could approach an ally who had not yet joined. Without her, the enemies who saw the
+    // hero remained silent until his next step.
     public List<(CellEntity entity, string triggerType)> CollectEncounterTriggers() => GetEncounterTriggers().ToList();
 
     private const int AllyAlertFt = 30;
@@ -251,30 +253,31 @@ public class MovementHandler
     private string? GetBlockReason(int fromCol, int fromRow, int toCol, int toRow, LivingEntity? ignore = null)
     {
         if (toCol < 1 || toCol > _world.Map.Cols || toRow < 1 || toRow > _world.Map.Rows)
-            return L.T("Путь преграждён.");
+            return L.T("The way is blocked.");
 
-        // Этажи лежат на поле в разных местах: шагнуть с одного на другой нельзя (только лестницей).
+        // The floors lie on the field in different places: you cannot step from one to another (only by stairs).
         if (_world.Map.FloorAt(fromCol, fromRow) != _world.Map.FloorAt(toCol, toRow))
-            return L.T("Путь преграждён.");
+            return L.T("The way is blocked.");
 
-        // Рельеф открытой местности: чаща, скалы, глубокая вода — непроходимы.
+        // The terrain of the open area: thicket, rocks, deep water - impassable.
         var terrain = _world.Map.TerrainAt(toCol, toRow);
         if (terrain is { BlocksMove: true })
-            return L.F("Путь преграждён: {0}.", L.T(terrain.Name).ToLowerInvariant());
+            return L.F("The way is blocked: {0}.", L.T(terrain.Name).ToLowerInvariant());
 
-        // Клетка вне комнат, зон и рельефа — пустота (поле локации 100×100 сгенерировано не целиком): туда нельзя.
-        // Выход из локации (дверь-вход на краю карты) ведёт именно туда — переход в мир пока не сделан.
+        // A cell outside rooms, zones and terrain is empty (the 100x100 location field is not entirely
+        // generated): you cannot go there. The exit from the location (entrance door at the edge of the map)
+        // leads exactly there - the transition to the world has not yet been made.
         if ((_world.Map.Rooms is { Count: > 0 } || _world.Map.Chunks is { Count: > 0 })
             && terrain == null && GetRoom(toCol, toRow) == null && !IsAreaCell(toCol, toRow))
             return IsLocationExit(fromCol, fromRow, toCol, toRow)
-                ? L.T("Здесь выход на карту мира — путь наружу пока недоступен.")
-                : L.T("Путь преграждён.");
+                ? L.T("This is the exit to the world map — the way out isn't available yet.")
+                : L.T("The way is blocked.");
 
         // Target cell blocked by a living entity
         foreach (var entity in _world.Map.Entities ?? [])
             if (entity != ignore && entity.Deleted != true && entity.Position?.Count >= 2
                 && entity.Position[0] == toCol && entity.Position[1] == toRow)
-                return L.T("Путь преграждён.");
+                return L.T("The way is blocked.");
 
         if (fromCol != toCol && fromRow != toRow)
         {
@@ -285,7 +288,7 @@ public class MovementHandler
             bool path2 = IsBoundaryCrossable(fromCol, fromRow, fromCol, toRow)    // hero → N/S
                       && IsBoundaryCrossable(fromCol, toRow,   toCol,   toRow);   // N/S → target
             if (!path1 && !path2)
-                return L.T("Путь преграждён.");
+                return L.T("The way is blocked.");
         }
         else
         {
@@ -294,7 +297,7 @@ public class MovementHandler
             var toRoom   = GetRoom(toCol,   toRow);
             bool crossingRoomBoundary = fromRoom != toRoom && (fromRoom != null || toRoom != null);
             if (crossingRoomBoundary && !HasDoor(fromCol, fromRow, toCol, toRow))
-                return L.T("Путь преграждён.");
+                return L.T("The way is blocked.");
         }
 
         return null;
@@ -365,7 +368,7 @@ public class MovementHandler
     private bool HasMovementBudget(int cost)
     {
         if (_world.Combat?.Active != true || (_world.Hero?.SpeedLeft ?? 0) >= cost) return true;
-        string message = L.T("Недостаточно скорости для этого шага — [F10] конец хода.");
+        string message = L.T("Not enough movement for this step — [F10] end turn.");
         if (_world.History?.LastOrDefault()?.Text != message)
         {
             _world.History?.Add(new DialogMessage { Text = message });

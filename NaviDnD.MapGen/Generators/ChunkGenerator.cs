@@ -3,14 +3,16 @@ using NaviDnD.MapGen.Models;
 
 namespace NaviDnD.MapGen.Generators;
 
-// Генерация блока локации целиком на стороне кода — без нейронки (быстро, бесплатно, по seed
-// воспроизводимо). Код сам составляет план: сколько комнат, какие формы/размеры, в каких зонах блока,
-// как соединены (остовное дерево + иногда петля), где выходы. Геометрию по плану строит DungeonGenerator.
-// Нейронка потом только называет комнаты и расставляет существ/объекты (PopulateChunk/StartNewGame).
+// Generation of a location block entirely on the code side - without a AI (fast, free, reproducible according
+// to seed). The code itself creates a plan: how many rooms, what shapes/sizes, in which areas of the block, how
+// they are connected (spanning tree + sometimes a loop), where are the exits. The geometry according to the
+// plan is built by DungeonGenerator. Neuronka then only names the rooms and places creatures/objects
+// (PopulateChunk/StartNewGame).
 public static class ChunkGenerator
 {
-    // Зоны блока (как в DungeonGenerator.ZoneBounds: "north" — младшие строки сетки, "south" — старшие)
-    // и их центры в сетке 20×15 — для выбора соседей и комнаты, от которой тянется коридор к выходу.
+    // Block zones (as in DungeonGenerator.ZoneBounds: "north" are the low rows of the grid, "south" are the
+    // high ones) and their centers in a 20x15 grid - for selecting neighbors and the room from which the
+    // corridor extends to the exit.
     private static readonly (string Zone, double Col, double Row)[] Zones =
     [
         ("south_west", 3.5, 12.5), ("south", 10.5, 12.5), ("south_east", 17.5, 12.5),
@@ -22,10 +24,10 @@ public static class ChunkGenerator
 
     private const int MaxAttempts = 10;
 
-    // exits — все выходы блока (входы-швы от соседей и новые). Результат — в координатах поля.
-    // Генератор иногда не может проложить коридор (путь перегородила другая комната) и оставляет комнату
-    // изолированной — тогда пробуем другой seed; не вышло за MaxAttempts — берём лучшую попытку и
-    // вырезаем недостижимые клетки, чтобы на карте не было комнат, в которые не попасть.
+    // exits - all block outputs (seam inputs from neighbors and new ones). The result is in field coordinates.
+    // The generator sometimes cannot create a corridor (the path is blocked by another room) and leaves the
+    // room isolated - then we try another seed; it didn’t work out beyond MaxAttempts - we take the best
+    // attempt and cut out unreachable cells so that there are no rooms on the map that cannot be reached.
     public static Result Generate(MapChunk chunk, IReadOnlyList<ChunkExit> exits)
     {
         Result? best = null;
@@ -43,14 +45,14 @@ public static class ChunkGenerator
     private static Result GenerateOnce(MapChunk chunk, IReadOnlyList<ChunkExit> exits, int seed)
     {
         var rng = new Random(seed);
-        // Пещера: залы неровные/округлые, лазы извилистые, дверей нет.
+        // Cave: the halls are uneven/rounded, the manholes are winding, there are no doors.
         bool cave = chunk.Theme == MapChunk.Cave;
 
         int roomCount = rng.Next(3, 6);
         var zones = Zones.OrderBy(_ => rng.Next()).Take(roomCount).ToList();
         var rooms = zones.Select((z, i) => new RoomRequest
         {
-            Name = L.WF("Комната {0}", i + 1),
+            Name = L.WF("Room {0}", i + 1),
             Zone = z.Zone,
             Size = rng.Next(10) switch { < 3 => RoomSize.Small, < 8 => RoomSize.Medium, _ => RoomSize.Large },
             Shape = cave
@@ -61,7 +63,7 @@ public static class ChunkGenerator
                 },
         }).ToList();
 
-        // Остовное дерево по близости зон (каждая новая комната — к ближайшей уже связанной) + иногда петля.
+        // A spanning tree based on the proximity of zones (each new room to the nearest already connected one) + sometimes a loop.
         var passages = new List<PassageRequest>();
         for (int i = 1; i < rooms.Count; i++)
         {
@@ -75,7 +77,7 @@ public static class ChunkGenerator
                 passages.Add(Passage(rooms[a].Name, rooms[b].Name, rng, cave));
         }
 
-        // Выход: коридор от ближайшей к этой стороне комнаты до клетки на краю блока.
+        // Exit: corridor from the room closest to this side to the cell on the edge of the block.
         var transitions = exits.Select(e =>
         {
             var (ec, er) = EdgePoint(e);
@@ -101,15 +103,15 @@ public static class ChunkGenerator
         map.Translate(chunk.OriginCol, chunk.OriginRow);
         foreach (var room in map.Rooms ?? [])
         {
-            if (room.Passage == true) room.Name = cave ? L.W("Лаз") : L.W("Коридор");
+            if (room.Passage == true) room.Name = cave ? L.W("Tunnel") : L.W("Corridor");
             if (cave) room.Color = [.. CaveFloor];
         }
         return new Result(map.Rooms ?? [], map.Doors ?? []);
     }
 
-    // ── Связность ────────────────────────────────────────────────────────────
-    // Обход клеток от первого выхода: внутри комнаты — по соседним клеткам, между разными комнатами —
-    // только через дверь/проход (как ходит герой, MovementCalculator.CanMoveTo; двери считаем открываемыми).
+    // ── Connectivity ────────────────────────────── ────────────────────────────── Bypassing the cells from
+    // the first exit: inside the room - along adjacent cells, between different rooms - only through the
+    // door/passage (as the hero walks, MovementCalculator.CanMoveTo; doors are considered openable).
     private static HashSet<(int, int)> UnreachableCells(MapChunk chunk, IReadOnlyList<ChunkExit> exits, Result result)
     {
         var roomOf = new Dictionary<(int, int), int>();
@@ -129,7 +131,7 @@ public static class ChunkGenerator
 
         var unreachable = roomOf.Keys.ToHashSet();
         if (unreachable.Count == 0) return [];
-        // Без выходов (подвал — связан с остальным только лестницей) — связность от первой комнаты.
+        // No exits (basement - connected to the rest only by stairs) - connectivity from the first room.
         var start = exits.Count > 0 ? exits[0].AnchorCell(chunk) : (result.Rooms[0].Positions[0][0], result.Rooms[0].Positions[0][1]);
         if (!roomOf.ContainsKey(start)) return unreachable;
 
@@ -150,7 +152,7 @@ public static class ChunkGenerator
         return unreachable;
     }
 
-    // Убрать недостижимые клетки (и опустевшие комнаты) и двери, ведущие в них.
+    // Remove unreachable cells (and empty rooms) and doors leading to them.
     private static Result Prune(MapChunk chunk, IReadOnlyList<ChunkExit> exits, Result result)
     {
         var bad = UnreachableCells(chunk, exits, result);
@@ -163,7 +165,7 @@ public static class ChunkGenerator
         return new Result(rooms, doors);
     }
 
-    // Клетка за краем сетки блока, в сторону выхода (как transitions.edgePoint у generate_map).
+    // Cell behind the edge of the block grid, towards the exit (like transitions.edgePoint for generate_map).
     private static (int col, int row) EdgePoint(ChunkExit e) => e.Side switch
     {
         ChunkSide.Left => (0, e.Offset),
@@ -172,7 +174,7 @@ public static class ChunkGenerator
         _ => (e.Offset, MapChunk.Rows + 1),
     };
 
-    // Цвет пола пещеры — землисто-каменный (у рукотворного подземелья — серо-синий цвет генератора).
+    // The color of the cave floor is earthy stone (in the man-made dungeon it is the gray-blue color of the generator).
     public static readonly List<int> CaveFloor = [62, 55, 47];
 
     private static PassageRequest Passage(string from, string to, Random rng, bool cave) => new()

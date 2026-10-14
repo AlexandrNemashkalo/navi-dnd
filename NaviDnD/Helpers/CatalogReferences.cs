@@ -4,15 +4,16 @@ using System.Text.Json.Nodes;
 
 namespace NaviDnD.Helpers;
 
-// Ссылки на справочники в ответе мастера — вместо вызова инструмента на каждый предмет, а каждый вызов — лишний круг
-// модели (~10 с и весь контекст заново). Мастер пишет английское название, игра подставляет данные справочника:
-//  "icon": "longsword,sword" (от точного к общему) → "image": первый найденный слаг game-icons.net;
-//  "ref" в spells[] или с "level" (варианты заклинаний при повышении уровня) → каноничное name заклинания;
-//  "ref" у предмета → каноничное name предмета, а без своей картинки — иконка по тому же названию;
-//  "monster" у существа → monsterKey (полные статы игра берёт из бестиария сама).
-// Название и ключ — только при ТОЧНОМ совпадении английского названия: нестрогий поиск путал похожие ("ink" →
-// «Ink pen», и бутылочка чернил становилась писчим пером). Не совпало — остаётся name мастера (он пишет его всегда),
-// существо — без статов; картинка ищется нестрого (от точного к общему), не нашлась — без неё.
+// Links to reference books in the wizard's response - instead of calling a tool for each item, and each call is
+// an extra circle of the model (~10 s and the whole context again). The GM writes the English name, the game
+// substitutes the directory data: "icon": "longsword,sword" (from exact to general) → "image": the first found
+// slug game-icons.net;  "ref" to spells[] or with "level" (spell options when leveling up) → canonical name
+// spells;  "ref" for an item → the canonical name of the item, and without its own picture - an icon of the
+// same name;  "monster" from the creature → monsterKey (the game takes its full stats from the bestiary
+// itself). The name and key - only with an EXACT match of the English name: a loose search confused similar
+// ones ("ink" → "Ink pen", and the bottle of ink became a writing pen). If it doesn’t match, the GM’s name
+// remains (he always writes it), the creature has no stats; The image is searched loosely (from the exact to
+// the general), but it is not found - without it.
 public static class CatalogReferences
 {
     private static readonly JsonSerializerOptions Output = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
@@ -22,7 +23,7 @@ public static class CatalogReferences
         if (!json.Contains("\"icon\"") && !json.Contains("\"ref\"") && !json.Contains("\"monster\"")) return json;
         JsonNode? root;
         try { root = JsonNode.Parse(json); }
-        catch (JsonException) { return json; }   // битый ответ чинит EnsureValidJson, ссылки — уже в починенном
+        catch (JsonException) { return json; }   // broken answer is repaired by EnsureValidJson, links are already in the repaired one
         if (root == null) return json;
         Walk(root, null);
         return root.ToJsonString(Output);
@@ -44,7 +45,7 @@ public static class CatalogReferences
         }
     }
 
-    // key — имя свойства, в котором лежит объект (или массив с ним): "spells", "inventory", "entities"…
+    // key - name of the property in which the object (or an array with it) lies: "spells", "inventory", "entities"…
     private static void ResolveObject(JsonObject obj, string? key)
     {
         string? icon = Take(obj, "icon");
@@ -63,7 +64,7 @@ public static class CatalogReferences
             obj["image"] = slug;
     }
 
-    // Каноничное название — по нему игра находит текст заклинания для карточки.
+    // Canonical name - the game uses it to find the spell text for the card.
     private static void Spell(JsonObject obj, string reference)
     {
         if (Exact(CatalogSearch.Spells(reference), s => s.NameEn, reference) is not { } spell) return;
@@ -77,7 +78,7 @@ public static class CatalogReferences
             obj["name"] = item.LocalizedName;
     }
 
-    // Совпадение по английскому названию целиком (с точностью до регистра, дефисов и апострофов).
+    // Match the entire English name (up to case, hyphens and apostrophes).
     private static T? Exact<T>(IEnumerable<T> candidates, Func<T, string> englishName, string reference) where T : class =>
         candidates.FirstOrDefault(c => CatalogSearch.Score(englishName(c), reference) == 100);
 

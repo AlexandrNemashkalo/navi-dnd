@@ -2,21 +2,22 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.MapGen.Generators;
 
-// Блок открытой местности (лес, равнина, холмы/горы, болото): без комнат и стен, клетки — рельеф
-// (TerrainCatalog). Рисунок — по шуму от координат поля (соседние блоки стыкуются без шва), края без
-// соседа-местности закрыты естественной преградой (чаща, скалы, вода), от каждого выхода к центру —
-// тропа; недостижимые карманы соединяются бродами/просеками.
+// Block of open terrain (forest, plain, hills/mountains, swamp): without rooms and walls, cells - terrain
+// (TerrainCatalog). Figure - based on noise from field coordinates (adjacent blocks are joined without a seam),
+// edges without a neighboring terrain are closed by a natural barrier (thicket, rocks, water), from each exit
+// to the center there is a path; unreachable pockets are connected by fords/clearings.
 public static class OutdoorGenerator
 {
     public sealed record Result(List<string> Terrain, List<Door> Doors);
 
-    // Река через локацию (по карте мира): поперёк поля по оси, центр — строка/столбец поля, ширина глубокой
-    // воды в клетках (по краям — мелководье); петляет по шуму. Тропы пересекают её бродом.
+    // River through the location (according to the world map): across the field along the axis, center -
+    // row/column of the field, width of deep water in the cells (shallow water along the edges); meanders
+    // through the noise. The paths cross it with a ford.
     public sealed record RiverSpec(bool Horizontal, int Center, int Width, int Seed);
 
     private const int W = MapChunk.Cols, H = MapChunk.Rows;
 
-    // bands: сторона → код преграды по краю (нет стороны — край открыт: там соседний блок местности).
+    // bands: side → code for an obstacle along the edge (no side - the edge is open: there is an adjacent terrain block).
     public static Result Generate(MapChunk chunk, IReadOnlyList<ChunkExit> exits, IReadOnlyDictionary<ChunkSide, char> bands, int noiseSeed,
         RiverSpec? river = null)
     {
@@ -48,7 +49,7 @@ public static class OutdoorGenerator
                 };
             }
 
-        // Края без соседа-местности: полоса преграды 1–3 клетки.
+        // Edges without a terrain neighbor: 1-3 tile obstruction strip.
         foreach (var (side, code) in bands)
         {
             int len = side is ChunkSide.Left or ChunkSide.Right ? H : W;
@@ -65,7 +66,7 @@ public static class OutdoorGenerator
             }
         }
 
-        // Река поперёк поля: глубокая вода посередине, мелководье по краям.
+        // River across a field: deep water in the middle, shallow water at the edges.
         if (river != null)
             for (int i = 0; i < (river.Horizontal ? W : H); i++)
             {
@@ -78,7 +79,7 @@ public static class OutdoorGenerator
                     if (local < 0 || local >= (river.Horizontal ? H : W)) continue;
                     bool edge = k == -river.Width / 2 - 1 || k == (river.Width - 1) / 2 + 1;
                     int c = river.Horizontal ? i : local, r = river.Horizontal ? local : i;
-                    // На закрытой границе русло уходит за карту глубокой водой, без древесной перемычки.
+                    // At the closed border, the channel goes beyond the map with deep water, without a tree bridge.
                     bool closedEdge = (c == 0 && bands.ContainsKey(ChunkSide.Left))
                         || (c == W - 1 && bands.ContainsKey(ChunkSide.Right))
                         || (r == 0 && bands.ContainsKey(ChunkSide.Bottom))
@@ -87,7 +88,7 @@ public static class OutdoorGenerator
                 }
             }
 
-        // Поляна в центре и тропы от выходов к ней.
+        // A clearing in the center and paths from the exits to it.
         const int hubC = W / 2, hubR = H / 2;
         for (int c = hubC - 2; c <= hubC + 2; c++)
             for (int r = hubR - 1; r <= hubR + 1; r++)
@@ -101,7 +102,7 @@ public static class OutdoorGenerator
 
         ConnectPockets(g, hubC, hubR, ground);
 
-        // Вход снаружи — дверь-выход на карту мира на краю (LocationGrower.MarkWorldExit делает её фиолетовой).
+        // Entrance from outside - exit door to the world map at the edge (LocationGrower.MarkWorldExit makes it purple).
         var doors = new List<Door>();
         foreach (var exit in exits.Where(e => e.External))
         {
@@ -122,7 +123,7 @@ public static class OutdoorGenerator
 
     private static TerrainKind Kind(char code) => TerrainCatalog.Get(code) ?? TerrainCatalog.Kinds['.'];
 
-    // Клетка на расстоянии depth внутрь от стороны, i — вдоль стороны (локальные координаты 0-based).
+    // Cell at a distance depth inward from the side, i along the side (local coordinates 0-based).
     private static (int c, int r) SideCell(ChunkSide side, int i, int depth) => side switch
     {
         ChunkSide.Left => (depth, i),
@@ -131,7 +132,7 @@ public static class OutdoorGenerator
         _ => (i, H - 1 - depth),
     };
 
-    // Тропа от (c, r) к (tc, tr): шаг к цели с редкими отклонениями; преграды на пути убираются.
+    // Path from (c, r) to (tc, tr):) step towards the goal with rare deviations; obstacles on the way are removed.
     private static void Carve(char[,] g, int c, int r, int tc, int tr, char trail, Random rng)
     {
         for (int guard = 0; guard < 200; guard++)
@@ -146,7 +147,7 @@ public static class OutdoorGenerator
         }
     }
 
-    // Недостижимые от центра проходимые клетки соединяются просекой/бродом.
+    // Passable cells that are inaccessible from the center are connected by a clearing/ford.
     private static void ConnectPockets(char[,] g, int hubC, int hubR, char ground)
     {
         for (int iteration = 0; iteration < 30; iteration++)
@@ -158,7 +159,7 @@ public static class OutdoorGenerator
                     if (!Kind(g[c, r]).BlocksMove && !reached[c, r]) { pocket = (c, r); break; }
             if (pocket is not var (pc, pr)) return;
 
-            // От кармана к центру, пока не упрёмся в достижимую клетку.
+            // From the pocket to the center until we hit an accessible square.
             while (!reached[pc, pr])
             {
                 if (Kind(g[pc, pr]).BlocksMove) g[pc, pr] = g[pc, pr] == 'W' ? '~' : ground;
@@ -188,7 +189,7 @@ public static class OutdoorGenerator
         return seen;
     }
 
-    // Шум по координатам поля: две октавы сглаженного значения решётки.
+    // Field coordinate noise: two octaves of smoothed grating value.
     private static double Fbm(int x, int y, int seed) => 0.65 * Noise(x / 5.0, y / 5.0, seed) + 0.35 * Noise(x / 2.3, y / 2.3, seed + 1);
 
     private static double Noise(double x, double y, int seed)

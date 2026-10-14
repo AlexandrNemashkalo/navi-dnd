@@ -4,9 +4,10 @@ using System.Text.Json;
 
 namespace NaviDnD.Helpers;
 
-// Вход в Claude из настроек: `claude auth login` открывает вход в браузере и сохраняет его в самом Claude Code
-// (Windows — .claude/.credentials.json, macOS — Связка ключей), `claude auth status` — проверка (JSON). Токен игре
-// не нужен: вход обновляется сам. Всё в фоне: экран настроек показывает состояние и перерисовывается по Status.
+// Login to Claude from the settings: `claude auth login` opens the login in the browser and saves it in the
+// Claude Code itself (Windows - .claude/.credentials.json, macOS - Keychain), `claude auth status` - check
+// (JSON). The game does not need a token: the login updates itself. Everything is in background: the settings
+// screen shows the status and is redrawn by Status.
 internal static class ClaudeLogin
 {
     private static readonly object Gate = new();
@@ -16,7 +17,7 @@ internal static class ClaudeLogin
 
     internal static string Status { get { lock (Gate) return _status; } }
 
-    // Пункт настроек: идёт вход — отменить, иначе — войти.
+    // Settings item: logging in - cancel, otherwise - logging in.
     internal static void Toggle(AppConfig config)
     {
         lock (Gate)
@@ -25,18 +26,18 @@ internal static class ClaudeLogin
             {
                 try { running.Kill(entireProcessTree: true); } catch { }
                 _login = null;
-                _status = L.T("вход отменён");
+                _status = L.T("sign-in cancelled");
                 return;
             }
         }
         Start(config);
     }
 
-    // Проверка входа (открытие настроек и после входа).
+    // Login verification (opening settings and after login).
     internal static void Check(AppConfig config)
     {
         if (Interlocked.Exchange(ref _checking, 1) == 1) return;
-        lock (Gate) if (_login == null) _status = L.T("проверка…");
+        lock (Gate) if (_login == null) _status = L.T("checking…");
         _ = Task.Run(async () =>
         {
             try
@@ -47,12 +48,12 @@ internal static class ClaudeLogin
                 bool loggedIn = root.TryGetProperty("loggedIn", out var value) && value.GetBoolean();
                 string email = root.TryGetProperty("email", out var mail) ? mail.GetString() ?? "" : "";
                 lock (Gate) if (_login == null)
-                    _status = loggedIn ? (email.Length > 0 ? L.F("выполнен: {0}", email) : L.T("выполнен")) : L.T("не выполнен — Enter");
+                    _status = loggedIn ? (email.Length > 0 ? L.F("signed in: {0}", email) : L.T("signed in")) : L.T("not signed in — Enter");
             }
             catch (Exception error) when (error is IOException or JsonException or ArgumentException or InvalidOperationException
                 or System.ComponentModel.Win32Exception or OperationCanceledException)
             {
-                lock (Gate) if (_login == null) _status = L.T("claude не найден — укажи путь ниже");
+                lock (Gate) if (_login == null) _status = L.T("claude not found — set the path below");
             }
             finally { Interlocked.Exchange(ref _checking, 0); }
         });
@@ -64,13 +65,13 @@ internal static class ClaudeLogin
         {
             var start = CreateStart(config, ["auth", "login"]);
             var process = Process.Start(start) ?? throw new IOException();
-            ChildProcessJob.Add(process);   // игру закрыли — вход завершается вместе с ней
+            ChildProcessJob.Add(process);   // the game was closed - the login ends along with it
             lock (Gate)
             {
                 _login = process;
-                _status = L.T("войди в браузере… Enter — отмена");
+                _status = L.T("sign in in the browser… Enter — cancel");
             }
-            // Ссылку для входа CLI пишет в вывод: если браузер не открылся, её видно в логе.
+            // CLI writes the login link to the output: if the browser does not open, it can be seen in the log.
             var output = new StringBuilder();
             process.OutputDataReceived += (_, e) => { if (e.Data != null) lock (output) output.AppendLine(e.Data); };
             process.ErrorDataReceived += (_, e) => { if (e.Data != null) lock (output) output.AppendLine(e.Data); };
@@ -82,7 +83,7 @@ internal static class ClaudeLogin
                 Log(output.ToString());
                 lock (Gate)
                 {
-                    if (_login != process) return;   // отменён
+                    if (_login != process) return;   // canceled
                     _login = null;
                 }
                 Check(config);
@@ -90,7 +91,7 @@ internal static class ClaudeLogin
         }
         catch (Exception error) when (error is IOException or System.ComponentModel.Win32Exception or InvalidOperationException)
         {
-            lock (Gate) _status = L.T("claude не найден — укажи путь ниже");
+            lock (Gate) _status = L.T("claude not found — set the path below");
         }
     }
 
@@ -105,8 +106,8 @@ internal static class ClaudeLogin
         return await output;
     }
 
-    // Тот же claude, что у мастера (путь из настроек, на macOS/Linux — PATH для запускателя из npm), и тот же токен:
-    // проверка показывает вход, которым пользуется игра.
+    // The same claude as the GM (path from settings, on macOS/Linux - PATH for the launcher from npm), and the
+    // same token: check shows the input that the game uses.
     private static ProcessStartInfo CreateStart(AppConfig config, string[] arguments)
     {
         var start = new ProcessStartInfo

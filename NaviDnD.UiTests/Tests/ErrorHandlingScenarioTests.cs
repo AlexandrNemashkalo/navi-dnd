@@ -2,12 +2,11 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: обработка некорректного/необрабатываемого ответа ИИ (GameAiClient.RecordError) — до сих пор
-// ни один тест не скармливал игре битый ответ, чтобы подтвердить, что вместо краха или зависания
-// показывается сообщение об ошибке. Мок-ответ (Fixtures/MockResponses/MalformedResponse/SendAction/
-// response.json) — обычный текст без единого символа JSON, из-за чего SequentialHistoryPlayer.
-// PlayAsync (JsonNode.Parse) бросает исключение, которое ловит GameAiClient.SendAction и добавляет
-// "Ошибка: ..." прямо в историю диалога.
+// E2E: handling incorrect/unprocessed AI response (GameAiClient.RecordError) - so far no test has fed the game
+// a broken response to confirm that an error message is shown instead of crashing or freezing. Mock response
+// (Fixtures/MockResponses/MalformedResponse/SendAction/ response.json) - plain text without a single character
+// JSON, which is why SequentialHistoryPlayer. PlayAsync (JsonNode.Parse) throws an exception, which catches
+// GameAiClient.SendAction and adds "Error: ..." directly to the dialog history.
 public class ErrorHandlingScenarioTests
 {
     private readonly ITestOutputHelper _output;
@@ -35,10 +34,10 @@ public class ErrorHandlingScenarioTests
         _output.WriteLine("Сообщение об ошибке отображено — игра не упала и не зависла.");
         TestPacing.Step();
 
-        // Игра должна остаться в рабочем состоянии — экран персонажа по-прежнему отрисован
-        // (рамки/вкладки на месте), а не застрял в каком-то промежуточном/сломанном состоянии.
-        // Небольшая пауза перед сканированием ВСЕХ строк — сразу после первого появления "Ошибка"
-        // перерисовка диалоговой панели ещё может быть в процессе (построчная отрисовка).
+        // The game should remain working - the character screen is still rendered (frames/tabs in place) and
+        // not stuck in some in-between/broken state. A short pause before scanning ALL lines - immediately
+        // after the first appearance of “Error”, redrawing of the dialog panel may still be in progress
+        // (line-by-line rendering).
         Thread.Sleep(300);
         var rows = GameConsole.ReadRows(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth);
         var failures = new List<string>();

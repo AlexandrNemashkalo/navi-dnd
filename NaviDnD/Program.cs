@@ -11,20 +11,20 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        // Миграция сохранений из помощника обновления: без окна и консоли, код выхода — результат.
+        // Migration of saves from the update assistant: no window and console, exit code - result.
         if (args is ["--migrate", ..])
         {
             var migrateConfig = new AppConfig();
-            migrateConfig.LoadUserSettings();   // язык сообщений об ошибке — как в игре
+            migrateConfig.LoadUserSettings();   // error message language - same as in game
             L.SetLanguage(migrateConfig.Language);
             Environment.ExitCode = Migrations.MigrateCommand.Run(args.Length > 1 ? args[1] : AppConfig.DataRoot);
             return;
         }
         if (ConsoleHostLauncher.TryRelaunch(args)) return;
         if (OperatingSystem.IsMacOS() && MacApp.Launch(args)) return;
-        // Необработанное исключение раньше просто ронял процесс молча (консоль закрывается сразу,
-        // .NET печатает стек в stderr, который никто не видит) — ни строчки в логах. Теперь падение
-        // хотя бы попадает в тот же ai_*.log, где и обычные вызовы ИИ, и его можно разобрать.
+        // An unhandled exception used to simply drop the process silently (the console closes immediately, .NET
+        // prints the stack to stderr, which no one sees) - not a line in the logs. Now the fall at least falls
+        // into the same ai_*.log as the normal AI calls, and can be parsed.
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
             try
@@ -35,34 +35,34 @@ class Program
                 string text = $"=== {DateTime.Now:HH:mm:ss.fff} | UNHANDLED CRASH ===\n{e.ExceptionObject}\n\n";
                 File.AppendAllText(path, text, new UTF8Encoding(false));
             }
-            catch { /* краш-логгер не должен сам уронить обработчик краша */ }
+            catch { /*The crash logger should not drop the crash handler itself*/ }
         };
 
         if (OperatingSystem.IsMacOS() && !AppConfig.InMacApp) UnixTools.ClearQuarantine(AppContext.BaseDirectory);
-        // macOS/Linux: взять терминал под себя (сырой ввод, мышь, альтернативный экран) до того, как что-то рисуется.
+        // macOS/Linux: take control of the terminal (raw input, mouse, alternative screen) before anything is drawn.
         UnixTerminal.Start();
-        // Окно консоли Windows создаёт и показывает ДО первой строчки Main() — прячем сразу же,
-        // всё (без рамки, размер под карту, шрифт/цвета) настраиваем невидимо и показываем готовым.
+        // The console window Windows creates and shows BEFORE the first line Main() - we hide it right away,
+        // set everything (no frame, size for a map, font/colors) invisibly and show it ready.
         Term.CursorVisible = false;
         ConsoleSetup.BlockConsoleFullscreen();
-        ConsoleSetup.LoadBundledFonts();   // шрифты из папки Fonts — до настройки шрифта консоли
+        ConsoleSetup.LoadBundledFonts();   // fonts from the Fonts folder - before setting the console font
         ConsoleSetup.EnableAnsiSupport();
         ConsoleSetup.DisableQuickEdit();
         ConsoleMouseReader.Enable();
-        ConsoleZoomBlocker.Start(); // Ctrl+колесо / щипок тачпада не меняют шрифт и размер окна
+        ConsoleZoomBlocker.Start(); // Ctrl+ touchpad wheel/pinch does not change font and window size
         AppDomain.CurrentDomain.ProcessExit += (_, _) => ConsoleMouseReader.Disable();
 
-        // Сохранения старого формата переводит обновление; здесь — запасной путь (исходники, сбой обновления).
-        // В UI-тестах — нет: там своё тестовое состояние.
+        // Saving the old format translates the update; here is a fallback path (sources, update failure). In UI
+        // tests - no: they have their own test state.
         if (Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null)
             Migrations.MigrateCommand.RunIfNeeded(AppConfig.DataRoot);
 
         var config = new AppConfig();
         bool firstSettings = !File.Exists(AppConfig.UserSettingsPath);
         config.InitializeStorage();
-        // Настройки игрока (экран «НАСТРОЙКИ») — не в UI-тестах: там важны значения по умолчанию.
+        // Player settings (SETTINGS screen) - not in UI tests: default values are important there.
         if (Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null) config.LoadUserSettings();
-        // UI-тесты (настройки не читаются) — на русском, как их ожидания.
+        // UI-tests (settings are not readable) - in Russian, as they expected.
         L.SetLanguage(Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null ? config.Language : L.Russian);
         string initialClaudePath = config.ClaudeCliPath, initialCodexPath = config.CodexCliPath;
         string initialProvider = config.AiProvider;
@@ -94,7 +94,7 @@ class Program
         Sound.TypingEnabled = config.TypingSoundEnabled;
         Music.Enabled = config.MusicEnabled;
         Music.AmbienceEnabled = config.AmbienceEnabled;
-        // NAVIDND_MUTE=1: тишина при разработке (запуск на тестовом состоянии не читает настройки игрока — там звук включён).
+        // NAVIDND_MUTE=1: silence during development (launching in the test state does not read the player settings - the sound is turned on there).
         if (Environment.GetEnvironmentVariable("NAVIDND_MUTE") == "1")
             Sound.Enabled = Sound.TypingEnabled = Music.Enabled = Music.AmbienceEnabled = false;
         Music.Volume = config.MusicVolume / 100f;
@@ -103,18 +103,18 @@ class Program
         Speech.WorldProvider = () => storage.WorldState;
         string? testStatePath = Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE");
         Func<bool> hasSave = testStatePath != null ? () => File.Exists(testStatePath) : Storage.HasSave;
-        // Игры, начатые до карты мира, при загрузке привязываются к активному миру (GameWorld.EnsureLink).
+        // Games started before the world map are linked to the active world when loading (GameWorld.EnsureLink).
         Action loadCurrentState = testStatePath != null ? () => storage.LoadFrom(testStatePath) : () => { storage.LoadSave(); GameWorld.EnsureLink(storage.WorldState); };
-        Storage.InitGames(); // прежнее сохранение → игра 1, активная игра — последняя
+        Storage.InitGames(); // previous save → game 1, active game - last
         if (hasSave()) loadCurrentState();
-        Speech.WarmUp();   // модель языка последней игры — в память заранее (её язык известен после загрузки)
+        Speech.WarmUp();   // language model of the latest game - in memory in advance (its language is known after loading)
         var settings = storage.WorldState;
 
-        ConsoleSetup.ShowWindow(); // без этого не открывается
-        // Весь экран и масштаб (настройки; не в UI-тестах) — до первой настройки окна: шрифт под монитор.
+        ConsoleSetup.ShowWindow(); // Without this, the entire screen and scale (settings; not in UI tests) cannot be opened - until the
+        // first window setting: font for the monitor.
         ConsoleSetup.Fullscreen = config.Fullscreen && testStatePath == null;
         ConsoleSetup.FullscreenFontSize = config.FullscreenFontSize;
-        // Шрифт из настроек (UI-тесты — по умолчанию); убранный из списка (SimSun, MS Gothic, Lucida Console, Cascadia Mono, Courier New, Unifont) — снова Consolas.
+        // Font from settings (UI-tests - default); removed from the list (SimSun, MS Gothic, Lucida Console, Cascadia Mono, Courier New, Unifont) - again Consolas.
         if (testStatePath == null)
             ConsoleSetup.FontFace = config.FontFace = ConsoleSetup.FontFaces.Contains(config.FontFace) ? config.FontFace : "Consolas";
         ConsoleSetup.SetConsoleConfig(settings);
@@ -128,7 +128,7 @@ class Program
         string selectTargetRequestPath = Path.Combine(AppConfig.DataRoot, "Storage", "select_target_request.json");
         if (File.Exists(selectTargetRequestPath)) File.Delete(selectTargetRequestPath);
 
-        // Нейронка — из настроек: Claude CLI или Codex CLI (один и тот же промпт и MCP-сервер игры), меняется сразу.
+        // AI - from the settings: Claude CLI or Codex CLI (the same prompt and MCP game server), changes immediately.
         IAiProvider provider = new SwitchableAiProvider(config, logger);
         if (config.MockedActions.Length > 0)
             provider = new SelectiveMockProvider(provider, config.MockedActions.ToHashSet(), config.MockResponsesDir);
@@ -136,7 +136,7 @@ class Program
         var aiClient = new GameAiClient(settings, storage, provider, config) { Logger = logger };
 
         var display = new DisplayConfig { ShowKeyHints = config.ShowKeyHints };
-        // Весь экран (настройка; не в UI-тестах) — окно уже своего размера: подложка и окно по центру.
+        // The entire screen (setting; not in UI tests) is a window narrower than its size: a background and a window in the center.
         if (config.Fullscreen && testStatePath == null) FullscreenBackdrop.Set(true, display.MainBackground);
         var borderDrawer = new BorderDrawer(settings, display);
         var legendDisplay = new LegendDisplay(storage, display, config);
@@ -145,12 +145,13 @@ class Program
         var abilityDisplay = new AbilityDisplay(settings, display);
         var levelUpDisplay = new LevelUpDisplay(settings, display, aiClient, storage);
         var journalDisplay = new JournalDisplay(settings, display);
-        // Что в журнале уже видели (для метки «ЖУРНАЛ•»): снимок содержимого; новая/другая игра — заново.
+        // What has already been seen in the log (for the “JOURNAL•” label): snapshot of the contents; new/different game - again.
         string? journalSeen = null;
         int journalSeenSlot = -1;
 
-        // Прогреть фон/рамку темы ДО показа окна — иначе пользователь видит кадр с дефолтным
-        // чёрным фоном/белым текстом на месте нашего оформления в момент появления окна.
+        // Warm up the background/frame of the theme BEFORE the window is shown - otherwise the user sees a
+        // frame with the default black background/white text in place of our design at the moment the window
+        // appears.
         Term.CursorVisible = false;
         Console.BackgroundColor = ConsoleColor.Black;
         ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
@@ -183,7 +184,7 @@ class Program
             FullscreenBackdrop.Set(false, display.MainBackground);
             ConsoleSetup.CloseConsoleAndExit();
         });
-        // Музыка и звуки окружения по ситуации (MusicDirector, sound/music, sound/ambience). В UI-тестах — тишина.
+        // Music and environmental sounds depending on the situation (MusicDirector, sound/music, sound/ambience). In UI tests - silence.
         if (testStatePath == null) MusicDirector.Start(state, settings);
         var screens = ScreenRegistry.GetScreens(state, storage, hasSave, loadCurrentState, () => GameWorld.HasLocation(settings));
 
@@ -209,7 +210,7 @@ class Program
 
         display.TabSwitchProvider = tabKey => tabKey switch
         {
-            // Карта (местность) — только когда есть тактическая карта; без неё вкладка серая.
+            // Map (terrain) - only when there is a tactical map; Without it, the tab is gray.
             "F1" => display.OnMapRedraw == null || !GameWorld.HasLocation(settings) ? (null, null) : (() => { display.JournalShown = false; display.MapLevel = MapLevel.Location; display.OnMapRedraw(); }, screens[Screen.Map].Title),
             "F2" => display.OnMapRedraw == null ? (null, null) : (() => { display.JournalShown = false; display.MapLevel = MapLevel.World; display.OnMapRedraw(); }, screens[Screen.World].Title),
             "F3" => (() => { display.JournalShown = true; journalSeen = JournalDisplay.Stamp(settings); journalDisplay.Draw(); }, screens[Screen.Journal].Title),
@@ -227,12 +228,12 @@ class Program
             _    => (null, null)
         };
 
-        // «МОИ ИГРЫ»: выбрать игру (загрузить и в карту) или свободное место (новая игра туда).
+        // “MY GAMES”: select a game (load and into the map) or free space (new game there).
         void ShowGames(string? message)
         {
             ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
             borderDrawer.DrawTopBorder();
-            string gamesTitle = L.T(" МОИ ИГРЫ   [Esc]МЕНЮ");
+            string gamesTitle = L.T(" MY GAMES   [Esc]MENU");
             borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(gamesTitle, display));
             var (action, slot) = new GamesDisplay(settings, display, gamesTitle, message).Show();
             if (action == GamesDisplay.Action.Play)
@@ -244,7 +245,7 @@ class Program
             else if (action == GamesDisplay.Action.NewGame)
             {
                 state.NewGameSlot = slot;
-                state.NewGame = null;   // создание с чистого листа
+                state.NewGame = null;   // creation from scratch
                 state.CurrentScreen = Screen.NewGame;
             }
         }
@@ -256,31 +257,31 @@ class Program
             if (state.PendingStartNewGame)
             {
                 state.PendingStartNewGame = false;
-                // Новая игра сохраняется в выбранное для неё место (Storage.SlotPath) — оно становится текущим.
+                // The new game is saved to the location selected for it (Storage.SlotPath) - it becomes the current one.
                 if (state.NewGameSlot is int newSlot) Storage.SetActiveSlot(newSlot);
                 state.NewGameSlot = null;
                 var startTask = aiClient.StartNewGame("");
-                // Ожидание — отдельным экраном: рамка, заголовок и надпись по центру (а не в углу прежнего экрана).
+                // Waiting - a separate screen: frame, title and inscription in the center (and not in the corner of the previous screen).
                 ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
                 Term.SetCursorPosition(0, 0);
                 borderDrawer.DrawTopBorder();
-                borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(L.T(" НОВАЯ ИГРА"), display));
+                borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(L.T(" NEW GAME"), display));
                 borderDrawer.DrawSeparator();
-                // Рамка до последней строки окна, как на остальных экранах: верх, заголовок, разделитель и низ — 4 строки.
+                // The frame to the last line of the window is the same as on other screens: top, title, separator and bottom - 4 lines.
                 int waitRows = Math.Max(3, Term.WindowHeight - 4);
                 for (int r = 0; r < waitRows; r++) borderDrawer.DrawContentLine(() => { });
                 borderDrawer.DrawBottomBorder();
-                await Helpers.Spinner.WhileCentered(startTask, L.T("Создаём мир"), 3 + waitRows / 2,
+                await Helpers.Spinner.WhileCentered(startTask, L.T("Creating the world"), 3 + waitRows / 2,
                     DisplayConfig.LeftMargin + 1, display.InnerWidth(display.ViewCols(settings.Map)), ColorHelper.Pale(display.MainForeground, 0.75));
                 await startTask;
-                // Параметры приключения — мастеру на каждый ход (narrative.style → строка style: в состоянии).
+                // Adventure parameters - to the GM for each turn (narrative.style → line style: in the state).
                 if (storage.NewGameData?.AdventureStyle is { Length: > 0 } adventureStyle)
                 {
                     (storage.WorldState.Narrative ??= new()).Style = adventureStyle;
                     storage.Save();
                 }
-                // Герой — в библиотеку героев (новая игра им же — шаг «Герой»).
-                // (в UI-тестах — нет: тестовый герой не должен попасть в список игрока)
+                // Hero - to the library of heroes (new game named after him - step “Hero”). (in UI tests - no:
+                // the test hero should not be included in the player’s list)
                 if (testStatePath == null) HeroLibrary.SyncFromSave(Storage.SavePath);
                 logger.LogTriggers(storage.WorldState.Map);
             }
@@ -293,16 +294,17 @@ class Program
             ColorHelper.SetForegroundColor(display.MainForeground);
             Console.OutputEncoding = Encoding.UTF8;
 
-            // Тактической карты нет (герой в пути, сцена текстом) — вместо местности мир (до отрисовки заголовка).
+            // There is no tactical map (the hero is on the way, the scene is in text) - instead of a terrain, there is a world (before the title is drawn).
             if (state.CurrentScreen == Screen.Map && !GameWorld.HasLocation(settings)) state.CurrentScreen = Screen.World;
             var screen = screens[state.CurrentScreen];
 
-            // Главное меню рисует экран целиком само (логотип, пункты, картинки) — без строки заголовка.
-            // F1/F2/Esc — те же команды экрана Menu; ActiveTabKey сброшен, чтобы звук не глушился.
+            // The main menu draws the entire screen itself (logo, items, pictures) - without a title bar.
+            // F1/F2/Esc - the same commands of the Menu screen; ActiveTabKey is reset to prevent the sound from
+            // being muffled.
             if (state.CurrentScreen == Screen.Menu)
             {
                 display.ActiveTabKey = null;
-                // NaviDnD.app после смены экрана или шрифта — сразу в настройки, на тот же пункт.
+                // NaviDnD.app after changing the screen or font - go straight to the settings, to the same item.
                 int? settingsFocus = OperatingSystem.IsMacOS() ? MacApp.TakeSettingsFocus() : null;
                 var choice = settingsFocus != null ? MainMenuDisplay.Choice.Settings : new MainMenuDisplay(settings, display).Show(hasSave());
                 if (choice is MainMenuDisplay.Choice.Continue or MainMenuDisplay.Choice.NewGame)
@@ -312,7 +314,7 @@ class Program
                         AiSetupNotice.Show();
                         ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
                         borderDrawer.DrawTopBorder();
-                        static string SetupTitle() => L.T(" НАСТРОЙКИ: Claude и Codex не найдены   [Esc]МЕНЮ");
+                        static string SetupTitle() => L.T(" SETTINGS: Claude and Codex not found   [Esc]MENU");
                         borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(SetupTitle(), display));
                         new SettingsDisplay(settings, display, config, storage, SetupTitle).Show();
                         continue;
@@ -326,20 +328,20 @@ class Program
                 }
                 if (choice == MainMenuDisplay.Choice.Settings)
                 {
-                    // Настройки — свой экран в рамке с заголовком; выход из них — снова в меню.
+                    // Settings - your screen in a frame with a title; the exit from them is back to the menu.
                     ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
                     borderDrawer.DrawTopBorder();
-                    static string SettingsTitle() => L.T(" НАСТРОЙКИ   [Esc]МЕНЮ");
+                    static string SettingsTitle() => L.T(" SETTINGS   [Esc]MENU");
                     borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(SettingsTitle(), display));
                     new SettingsDisplay(settings, display, config, storage, SettingsTitle) { InitialFocus = settingsFocus }.Show();
                     continue;
                 }
-                // Новая игра — в первое свободное место; все заняты — «МОИ ИГРЫ» с подсказкой освободить.
+                // New game - in the first free space; everyone is busy - “MY GAMES” with a prompt to release.
                 if (choice == MainMenuDisplay.Choice.NewGame)
                 {
-                    state.NewGame = null;   // создание с чистого листа
+                    state.NewGame = null;   // creation from scratch
                     if (Storage.FreeSlot() is int free) state.NewGameSlot = free;
-                    else { ShowGames(L.F("Все {0} места заняты — удали одну из игр [Del], чтобы начать новую", Storage.MaxGames)); continue; }
+                    else { ShowGames(L.F("All {0} slots are taken — delete a game [Del] to start a new one", Storage.MaxGames)); continue; }
                 }
                 if (choice == MainMenuDisplay.Choice.Games) { ShowGames(null); continue; }
                 string command = choice switch
@@ -354,7 +356,7 @@ class Program
 
             borderDrawer.DrawTopBorder();
 
-            // Метка нового в журнале — во всех игровых заголовках.
+            // New log tag - in all game titles.
             if (journalSeenSlot != Storage.ActiveSlot || journalSeen == null)
             {
                 journalSeenSlot = Storage.ActiveSlot;
@@ -362,12 +364,12 @@ class Program
             }
             if (state.CurrentScreen == Screen.Journal) journalSeen = JournalDisplay.Stamp(settings);
             ScreenRegistry.RefreshGameTitles(screens, JournalDisplay.Stamp(settings) != journalSeen, mapDisabled: !GameWorld.HasLocation(settings));
-            // Новая игра: сессия — до отрисовки заголовка (на первом шаге доступен только «МИР»).
+            // New game: session - before the title is drawn (only “WORLD” is available in the first step).
             if (state.CurrentScreen == Screen.NewGame) state.NewGame ??= new NewGameSession();
             if (state.NewGame is { } newGameSession) ScreenRegistry.RefreshNewGameTitles(screens, newGameSession);
 
             string title = state.CurrentScreen == Screen.Menu && !hasSave()
-                ? L.T(" МЕНЮ   [F2]НОВАЯ ИГРА     [Esc]ВЫЙТИ")
+                ? L.T(" MENU   [F2]NEW GAME     [Esc]QUIT")
                 : screen.Title;
 
             borderDrawer.DrawContentLine(() => MouseUiHelper.WriteColoredTitle(title, display));
@@ -375,8 +377,8 @@ class Program
             
             switch (state.CurrentScreen)
             {
-                // Карта (местность) и Мир — тот же цикл карты; тактической карты нет (герой в пути, сцена
-                // текстом) — вместо местности мир.
+                // Map (terrain) and World - the same map cycle; There is no tactical map (the hero is on the
+                // way, the scene is in text) - instead of a terrain, there is a world.
                 case Screen.Map:
                 case Screen.World:
                     if (state.CurrentScreen == Screen.Map && !GameWorld.HasLocation(settings))
@@ -418,7 +420,7 @@ class Program
                     display.JournalShown = false;
                     break;
 
-                // Окно «Новый уровень»: выбор — и обратно на карточку (или на вкладку, нажатую в заголовке).
+                // New Level window: select - and back to the card (or to the tab clicked in the header).
                 case Screen.LevelUp:
                 {
                     display.JournalShown = false;
@@ -627,9 +629,9 @@ class Program
                         setActiveDialog: d => aiClient.ActiveDialog = d);
                     break;
 
-                // Новая игра по шагам: 1 мир → 2 герой (анкета) → 3 редактор → 4 приключение. Заполненное живёт в
-                // state.NewGame (мастер шагов и анкета) — по шагам можно ходить туда-обратно (F1–F4); Esc — выход в
-                // меню с предупреждением (Screen.NewGameExit).
+                // New game step by step: 1 world → 2 hero (questionnaire) → 3 editor → 4 adventure. The
+                // completed one lives in state.NewGame (step wizard and questionnaire) - you can go back and
+                // forth through the steps (F1–F4); Esc - exit to the menu with a warning (Screen.NewGameExit).
                 case Screen.NewGame:
                 {
                     var ng = state.NewGame ??= new NewGameSession();
@@ -644,13 +646,13 @@ class Program
                     break;
                 }
 
-                // Шаг «Герой» — анкета: новый герой или из библиотеки героев (поле ГЕРОЙ сверху).
+                // Step “Hero” - questionnaire: a new hero or from the library of heroes (HERO field at the top).
                 case Screen.NewGameHero:
                 {
                     var ng = state.NewGame;
                     if (ng?.Wizard == null || ng.WorldId == null) { state.CurrentScreen = Screen.NewGame; break; }
                     Term.SetCursorPosition(0, ng.Wizard.StartTop);
-                    // Вернулись и выбрали мир на другом языке — анкета и герой заново (варианты и имена — на языке мира).
+                    // We returned and chose the world in a different language - the questionnaire and the hero again (options and names - in the language of the world).
                     if (ng.Form is { } old && old.Language != L.World) { ng.Form = null; ng.HeroReady = false; }
                     var form = ng.Form ??= new NewGameDisplay(settings, display, screen, aiClient);
                     form.CanGo = ng.CanGo;
@@ -661,11 +663,11 @@ class Program
                         data.WorldId = ng.WorldId;
                         storage.NewGameData = data;
                         ng.HeroReady = true;
-                        // Созданный нейронкой герой — сразу в библиотеку героев (в UI-тестах — нет).
+                        // A hero created by a AI goes straight into the hero library (not in UI tests).
                         if (testStatePath == null)
                         {
                             if (form.CreatedNow) { storage.SaveDraft(); HeroLibrary.SyncFromSave(Storage.DraftSavePath); }
-                            HeroLibrary.SetDescription(data.Name, data.Description);   // описание — с карточкой героя
+                            HeroLibrary.SetDescription(data.Name, data.Description);   // description - with hero card
                         }
                         form.CreatedNow = false;
                     }
@@ -673,7 +675,7 @@ class Program
                     break;
                 }
 
-                // Шаг «Приключение» (после редактора): пожелания и место старта; «НАЧАТЬ ИГРУ» — старт.
+                // Step “Adventure” (after the editor): wishes and starting place; “START GAME” - start.
                 case Screen.NewGameAdventure:
                 {
                     var ng = state.NewGame;
@@ -698,7 +700,7 @@ class Program
                     break;
                 }
 
-                // Выход из создания игры в меню — с предупреждением; «остаться» — назад на тот же шаг.
+                // Exiting game creation in the menu - with a warning; “stay” - back to the same step.
                 case Screen.NewGameExit:
                 {
                     var ng = state.NewGame;

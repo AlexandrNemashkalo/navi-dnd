@@ -5,23 +5,16 @@ using NaviDnD.Helpers;
 
 namespace NaviDnD.McpServer;
 
-// Библиотека иконок game-icons.net на диске: icons/000000/ffffff/1x1/<author>/<name>.svg —
-// см. NaviDnD/Helpers/SvgToBrailleConverter.cs, которая резолвит ТОТ ЖЕ слаг "author/name" в файл
-// для рендера в браиль-арт. Поиск и кеш слагов — CatalogSearch (им же игра разрешает "icon" в ответе мастера).
+// game-icons.net icon library on disk: icons/000000/ffffff/1x1/<author>/<name>.svg - see
+// NaviDnD/Helpers/SvgToBrailleConverter.cs, which resolves the SAME slug "author/name" into a file for
+// rendering in braille art. Search and cache of slugs - CatalogSearch (the game also allows "icon" in the
+// wizard's response).
 [McpServerToolType]
 public sealed class IconTools(McpServerConfig config)
 {
     [McpServerTool]
-    [Description("""
-        Ищет слаги иконок game-icons.net для поля "image". query = варианты через запятую от
-        точного к общему ("longsword,sword") — пробует каждый по очереди, пока не найдётся
-        совпадение; один вызов, не повторяй. Термины: 1-2 обычных английских существительных, тип
-        предмета, а не художественное название ("sword", а не "Blade of Kings"). Общий набор
-        иконок, не заточен под D&D — экзотические предметы может не найти.
-        Возвращает список подходящих слагов через запятую (author/name) — выбери сам, какое
-        название подходит лучше. Пустой результат → совпадений нет, пропусти "image", не угадывай.
-        """)]
-    public string FindIcon([Description("варианты через запятую от точного к общему, например \"longsword,sword\"")] string query)
+    [Description("Search game-icons.net slugs for image. query is comma-separated alternatives from specific to general (longsword,sword), tried in order until a match. Make one call, never repeat it. Use 1–2 ordinary English nouns describing the item type, not a poetic name (sword, not Blade of Kings). This general icon collection is not D&D-specific and may lack exotic items. Returns comma-separated author/name slugs; select the best match. Empty result: omit image, never guess a slug.")]
+    public string FindIcon([Description("Comma-separated terms, specific to general, e.g. \"longsword,sword\".")] string query)
     {
         Log($"find_icon → \"{query}\"");
         try

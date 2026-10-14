@@ -6,10 +6,10 @@ public class GridHelper
     {
         int n = arr.Count;
 
-        // Проверяем все соседние пары
+        // Checking all neighboring pairs
         for (int i = 0; i < n; i++)
         {
-            int next = (i + 1) % n; // Следующий индекс с замыканием на начало
+            int next = (i + 1) % n; // Next index with loop to start
 
             if (arr[i] == 2 && arr[next] == 2)
                 return true;
@@ -20,17 +20,17 @@ public class GridHelper
 
     public static List<int> Transform1112List(List<int> list)
     {
-        // Находим индекс двойки
+        // Finding the index of two
         int twoIndex = list.IndexOf(2);
         if (twoIndex == -1) return list;
 
-        // Копируем список
+        // Copying the list
         List<int> result = new List<int>(list);
 
-        // Проходим по всем индексам
+        // We go through all indexes
         for (int i = 0; i < 4; i++)
         {
-            // Пропускаем двойку и её соседей
+            // We skip the deuce and its neighbors
             if (i == twoIndex ||
                 i == (twoIndex + 1) % 4 ||
                 i == (twoIndex + 3) % 4)  // (twoIndex - 1 + 4) % 4
@@ -38,7 +38,7 @@ public class GridHelper
                 continue;
             }
 
-            // Если нашли единицу не рядом - меняем на 0
+            // If you find the unit is not nearby, change it to 0
             if (result[i] == 1)
             {
                 result[i] = 0;

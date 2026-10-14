@@ -6,9 +6,9 @@ namespace NaviDnD.MapGen.Generators;
 
 public class DungeonGenerator : IMapGenerator
 {
-    // Размер карты из запроса (MapGenRequest.Cols/Rows, до MapConfig.MaxSize). Вся раскладка (зоны,
-    // размещение, коридоры) считается от него. Методы статические — значение на время одного Generate
-    // в поле потока, вне вызова — прежние 20×15.
+    // Size of the map from the request (MapGenRequest.Cols/Rows, up to MapConfig.MaxSize). The entire layout
+    // (zones, placement, corridors) is calculated from it. Static methods - the value for the time of one
+    // Generate in the flow field, outside the call - the previous 20x15.
     [ThreadStatic] private static int _cols;
     [ThreadStatic] private static int _rows;
     private static int MaxCols => _cols > 0 ? _cols : 20;

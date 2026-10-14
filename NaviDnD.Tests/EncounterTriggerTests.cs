@@ -4,12 +4,12 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.Tests;
 
-// Срабатывание триггеров встречи/боя чистой логикой движка, без ИИ: spotted, onRound существ,
-// видимость в темноте (darkvisionFt/light), атака по возможности и Отход, патч triggers по подключу.
-// Save() внутри TryMove пишет в NaviDnD.Tests/Storage (AppConfig.ProjectRoot тестовой сборки), не в боевое сохранение.
+// Triggering of meeting/combat triggers by pure engine logic, without AI: spotted, onRound creatures,
+// visibility in the dark (darkvisionFt/light), attack of opportunity and Withdrawal, patch triggers by plug-in.
+// Save() inside TryMove writes to NaviDnD.Tests/Storage (AppConfig.ProjectRoot test build), not in combat save.
 public class EncounterTriggerTests
 {
-    // Одна комната 10×10 — между всеми клетками внутри есть прямая видимость.
+    // One 10x10 room - there is a direct line of sight between all cells inside.
     private static Room MakeRoom(int fromCol, int toCol, int fromRow = 1, int toRow = 10) => new()
     {
         Name = "Зал",
@@ -103,13 +103,13 @@ public class EncounterTriggerTests
     {
         var storage = MakeStorage();
         var enemy = MakeEnemy("GB1", 6, 2);
-        enemy.VisionFt = 10; // 2 клетки
+        enemy.VisionFt = 10; // 2 cells
         storage.WorldState.Map.Entities = [enemy];
 
-        Assert.Empty(Types(Move(storage, "MoveEast"), "spotted"));          // (3,2): 3 клетки — не видит
-        Assert.Equal(["GB1"], Types(Move(storage, "MoveEast"), "spotted")); // (4,2): видит
-        Assert.Empty(Types(Move(storage, "MoveWest"), "spotted"));          // (3,2): потерял
-        Assert.Equal(["GB1"], Types(Move(storage, "MoveEast"), "spotted")); // (4,2): снова нашёл
+        Assert.Empty(Types(Move(storage, "MoveEast"), "spotted"));          // (3,2): 3 cells - does not see
+        Assert.Equal(["GB1"], Types(Move(storage, "MoveEast"), "spotted")); // (4,2): sees
+        Assert.Empty(Types(Move(storage, "MoveWest"), "spotted"));          // (3,2): lost
+        Assert.Equal(["GB1"], Types(Move(storage, "MoveEast"), "spotted")); // (4,2): found again
     }
 
     [Fact]
@@ -209,7 +209,7 @@ public class EncounterTriggerTests
     [Fact]
     public void EntitySeesHero_Darkvision_SeesInDarkOnlyWithinRange()
     {
-        var storage = MakeStorage(); // герой (2,2), враг (6,2) — 20 фт
+        var storage = MakeStorage(); // hero (2.2), enemy (6.2) - 20 ft.
         var enemy = MakeEnemy("GB1", 6, 2);
 
         enemy.DarkvisionFt = 60;
@@ -242,7 +242,7 @@ public class EncounterTriggerTests
         Assert.True(MovementCalculator.EntitySeesHero(storage.WorldState, enemy));
     }
 
-    // ── Атака по возможности и Отход ─────────────────────────────────────────
+    // ── Opportunity Attack and Retreat ──────────────────── ─────────────────────
 
     [Fact]
     public void OpportunityAttack_LeavingAdjacentEnemyInCombat_Fires()
@@ -301,7 +301,7 @@ public class EncounterTriggerTests
         Assert.Null(hero.Light);
     }
 
-    // ── onRound существ ──────────────────────────────────────────────────────
+    // ── onRound creatures ─────────────────────────── ───────────────────────────
 
     private static LivingEntity MakeTalkativeNpc(int col = 6, int row = 2) => new()
     {
@@ -358,10 +358,10 @@ public class EncounterTriggerTests
         Assert.Empty(Move(storage, "MoveNorth"));
     }
 
-    // ── Тело убитого ─────────────────────────────────────────────────────────
+    // ── The body of the murdered ──────────────────────────── ─────────────────────────────
 
-    // Патч по id заменяет объект существа новым: по ссылке живая крыса после шага выглядела убитой — на её клетке
-    // появлялось тело, а вид попадал в бестиарий.
+    // The patch for id replaces the creature object with a new one: according to the link, a living rat after a
+    // step looked killed - a body appeared on its cell, and the species ended up in the bestiary.
     [Fact]
     public void EnemyMovingInCombat_LeavesNoBodyAndStaysOutOfBestiary()
     {
@@ -378,7 +378,7 @@ public class EncounterTriggerTests
         Assert.Equal([3, 2], storage.WorldState.Map.Entities![0].Position);
     }
 
-    // Погиб — хиты 0: игра сама снимает существо с карты, оставляет тело и пополняет бестиарий — и вне боя тоже.
+    // Killed - hit points 0: the game itself removes the creature from the map, leaves the body and replenishes the bestiary - and outside of battle too.
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -400,7 +400,7 @@ public class EncounterTriggerTests
         Assert.Contains("Крыса", storage.WorldState.Narrative?.KnownMonsters ?? []);
     }
 
-    // Сбежал, ушёл, развеялся — мастер убирает существо с хитами выше 0: тела нет, в бестиарий не попадает.
+    // Escaped, left, dissipated - the GM removes a creature with hit points above 0: there is no body, it does not appear in the bestiary.
     [Fact]
     public void FledEnemy_LeavesNoBody()
     {
@@ -417,7 +417,7 @@ public class EncounterTriggerTests
         Assert.DoesNotContain("Крыса", storage.WorldState.Narrative?.KnownMonsters ?? []);
     }
 
-    // Хиты 0, но «Без сознания» — оглушён, жив: остаётся на карте, тела нет.
+    // Hit points 0, but “Unconscious” - stunned, alive: remains on the map, no body.
     [Fact]
     public void KnockedOutEnemy_StaysOnMap()
     {
@@ -433,7 +433,7 @@ public class EncounterTriggerTests
         Assert.DoesNotContain(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
     }
 
-    // Хиты до 0 сведены только механикой в тексте («[… RT1 3→0]») — та же смерть, что и патчем.
+    // Hit points are reduced to 0 only by the mechanics in the text (“[… RT1 3→0]”) - the same death as the patch.
     [Fact]
     public void EnemyKilledByMechanicsText_LeavesBody()
     {
@@ -448,7 +448,7 @@ public class EncounterTriggerTests
         Assert.Single(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
     }
 
-    // ── Патч triggers по подключу ────────────────────────────────────────────
+    // ── Patch triggers via plug-in ────────────────────── ──────────────────────
 
     [Fact]
     public void TriggersPatch_NullSubKey_RemovesOnlyThatTrigger()

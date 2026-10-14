@@ -2,10 +2,11 @@ using System.Runtime.InteropServices;
 
 namespace NaviDnD.Helpers;
 
-// Текст из буфера обмена Windows (user32, без WinForms) — для вставки Ctrl+V / Shift+Insert в поля
-// анкеты и настроек: консоль сама вставку не делает (ввод читаем напрямую из буфера консоли).
-// macOS: pbpaste; Linux: wl-paste / xclip / xsel, если есть, иначе ничего. Там терминал вставляет и сам
-// (Cmd+V, Ctrl+Shift+V) — текст приходит как набранные символы; Ctrl+V всё равно читает буфер здесь.
+// Text from the clipboard Windows (user32, without WinForms) - for inserting Ctrl+V / Shift+Insert into the
+// fields of the questionnaire and settings: the console itself does not insert (we read the input directly from
+// the console buffer). macOS: pbpaste; Linux: wl-paste / xclip / xsel, if there is, otherwise nothing. There
+// the terminal inserts itself (Cmd+V, Ctrl+Shift+V) - the text comes as typed characters; Ctrl+V still reads
+// the buffer here.
 public static class ClipboardText
 {
     private const uint CF_UNICODETEXT = 13;
@@ -17,14 +18,14 @@ public static class ClipboardText
     [DllImport("kernel32.dll", SetLastError = true)] private static extern IntPtr GlobalLock(IntPtr hMem);
     [DllImport("kernel32.dll", SetLastError = true)] private static extern bool GlobalUnlock(IntPtr hMem);
 
-    // Текст буфера одной строкой (переносы → пробелы) или "" — пусто/не текст/буфер занят.
+    // Buffer text in one line (hyphens → spaces) or "" - empty/not text/buffer busy.
     public static string Get()
     {
         if (!OperatingSystem.IsWindows()) return Flatten(GetUnix());
         if (!IsClipboardFormatAvailable(CF_UNICODETEXT)) return "";
         for (int attempt = 0; attempt < 5; attempt++)
         {
-            if (!OpenClipboard(IntPtr.Zero)) { Thread.Sleep(20); continue; } // буфер занят другим окном
+            if (!OpenClipboard(IntPtr.Zero)) { Thread.Sleep(20); continue; } // buffer is occupied by another window
             try
             {
                 IntPtr handle = GetClipboardData(CF_UNICODETEXT);
@@ -57,14 +58,14 @@ public static class ClipboardText
         foreach (var (tool, arguments) in tools)
         {
             if (UnixTools.Which(tool) is not { } path) continue;
-            // pbpaste отдаёт текст в кодировке локали: без UTF-8-локали (голый запуск) не-ASCII текст теряется.
+            // pbpaste sends text in locale encoding: without UTF-8- locale (bare launch) non-ASCII text is lost.
             var result = UnixTools.Run(path, arguments, TimeSpan.FromSeconds(2), start => start.Environment["LC_ALL"] = "en_US.UTF-8");
             if (result is { ExitCode: 0 } ok) return ok.Output;
         }
         return "";
     }
 
-    // Нажатие — вставка: Ctrl+V или Shift+Insert.
+    // Press - insert: Ctrl+V or Shift+Insert.
     public static bool IsPasteKey(ConsoleKeyInfo key) =>
         (key.Key == ConsoleKey.V && (key.Modifiers & ConsoleModifiers.Control) != 0)
         || (key.Key == ConsoleKey.Insert && (key.Modifiers & ConsoleModifiers.Shift) != 0);

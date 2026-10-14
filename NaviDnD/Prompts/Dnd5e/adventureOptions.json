@@ -1,14 +1,60 @@
 {
   "params": [
-    { "group": "ИСТОРИЯ", "label": "ЖАНР", "default": 0,
-      "options": [ "героическое фэнтези", "тёмное фэнтези", "детектив", "ужасы", "интриги", "исследование неведомого", "весёлое приключение" ] },
-    { "group": "ИСТОРИЯ", "label": "УПОР", "default": 0,
-      "options": [ "сбалансированно", "бои", "исследование", "общение и интриги" ] },
-    { "group": "ИСТОРИЯ", "label": "ДЛИНА", "default": 1,
-      "options": [ "короткое", "среднее", "большая кампания" ] },
-    { "group": "ИГРА", "label": "СЛОЖНОСТЬ", "default": 1,
-      "options": [ "лёгкая", "обычная", "сложная", "смертельная" ] },
-    { "group": "ИГРА", "label": "ТЕМП", "default": 1,
-      "options": [ "неспешный", "обычный", "быстрый" ] }
+    {
+      "group": "STORY",
+      "label": "GENRE",
+      "default": 0,
+      "options": [
+        "heroic fantasy",
+        "dark fantasy",
+        "mystery",
+        "horror",
+        "intrigue",
+        "exploring the unknown",
+        "lighthearted adventure"
+      ]
+    },
+    {
+      "group": "STORY",
+      "label": "FOCUS",
+      "default": 0,
+      "options": [
+        "balanced",
+        "combat",
+        "exploration",
+        "social and intrigue"
+      ]
+    },
+    {
+      "group": "STORY",
+      "label": "LENGTH",
+      "default": 1,
+      "options": [
+        "short",
+        "medium-length",
+        "long campaign"
+      ]
+    },
+    {
+      "group": "GAME",
+      "label": "DIFFICULTY",
+      "default": 1,
+      "options": [
+        "easy",
+        "standard",
+        "hard",
+        "deadly"
+      ]
+    },
+    {
+      "group": "GAME",
+      "label": "PACE",
+      "default": 1,
+      "options": [
+        "relaxed",
+        "regular",
+        "fast"
+      ]
+    }
   ]
 }

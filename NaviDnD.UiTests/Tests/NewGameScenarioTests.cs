@@ -3,10 +3,9 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: создание нового героя (Меню → [F2] → 5 полей анкеты) → редактор персонажа ([F3]НАЧАТЬ)
-// → игра на сгенерированной карте. AI-провайдер замокан (GameSession.LaunchForNewGame) —
-// CreateNewGame/StartNewGame берут канонические ответы из Fixtures/MockResponses/, реальная
-// нейронка не вызывается ни разу за тест.
+// E2E: creating a new hero (Menu → [F2] → 5 profile fields) → character editor ([F3]START) → playing on the
+// generated map. AI-provider is locked (GameSession.LaunchForNewGame) - CreateNewGame/StartNewGame take
+// canonical answers from Fixtures/MockResponses/, the real AI is not called even once during the test.
 public class NewGameScenarioTests
 {
     private static readonly (byte r, byte g, byte b) MainBackground = (18, 18, 22);
@@ -15,11 +14,12 @@ public class NewGameScenarioTests
 
     public NewGameScenarioTests(ITestOutputHelper output) => _output = output;
 
-    // Esc в любой момент анкеты должен отменить создание героя и вернуть в Меню (ScreenRegistry:
-    // Screen.NewGame.Commands["Esc"] → Screen.Menu) — до сих пор не проверялось ни в начале анкеты,
-    // ни (что важнее) посреди неё, после того как часть полей уже заполнена. CreateNewGame при этом
-    // вообще не должен вызываться (NewGameDisplay.GetFieldInput возвращает null сразу, как только
-    // распознаёт "Esc" среди команд экрана, до финального await _aiClient.CreateNewGame(...)).
+    // Esc at any time in the questionnaire must cancel the creation of the hero and return to the Menu
+    // (ScreenRegistry: Screen.NewGame.Commands["Esc"] → Screen.Menu) - has not yet been checked either at the
+    // beginning of the questionnaire, or (more importantly) in the middle of it, after some of the fields have
+    // already been filled in. CreateNewGame should not be called at all (NewGameDisplay.GetFieldInput returns
+    // null as soon as it recognizes "Esc" among the screen commands, before the final await
+    // _aiClient.CreateNewGame(...)).
     [Fact]
     public void EscMidAnketa_CancelsCreation_ReturnsToMenu()
     {
@@ -35,7 +35,7 @@ public class NewGameScenarioTests
         TypeField(game.Pid, "Тестовый Герой Для Отмены");
         TypeField(game.Pid, "ESC");
         GameConsole.SendKey(game.Pid, ConsoleKey.Escape);
-        // Выход из создания игры — с предупреждением, что прогресс не сохранится: [Enter] — выйти.
+        // Exiting game creation - with a warning that progress will not be saved: [Enter] - exit.
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Прогресс создания новой игры не сохранится", 5000),
             "После [Esc] посреди анкеты не появилось предупреждение о выходе в меню.");
@@ -47,14 +47,14 @@ public class NewGameScenarioTests
         _output.WriteLine("Экран Меню отрисован — создание героя отменено, CreateNewGame не должен был вызваться.");
         TestPacing.Step();
 
-        // Повторное открытие анкеты должно начинаться с чистого листа — введённый ранее текст
-        // не должен просочиться в новую попытку (регрессия против утечки состояния между анкетами).
+        // Re-opening a profile should start with a clean slate - previously entered text should not leak into a
+        // new attempt (regression against state leakage between profiles).
         _output.WriteLine("Открываю анкету заново — проверяю, что поля пустые (нет утечки предыдущего ввода)...");
         Assert.True(Navigation.ToAnketa(game.Pid),
             "Не удалось открыть анкету создания персонажа повторно после отмены.");
 
-        // Заголовок (строка 1) обновляется первым — тело анкеты может дорисоваться на один poll-тик
-        // позже (тот же класс гонки, что и в CheckEditorScreen выше) — ждём, а не проверяем один снимок.
+        // The header (line 1) is updated first - the body of the profile can be completed one poll- tick later
+        // (the same race class as in CheckEditorScreen above) - we wait, rather than check one snapshot.
         Assert.True(
             GameConsole.WaitForRowsMatch(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth,
                 r => !r.Any(x => x.Contains("Тестовый Герой Для Отмены")), 3000),
@@ -75,17 +75,17 @@ public class NewGameScenarioTests
             "Не дождались анкеты создания персонажа после нажатия [F2] в меню.");
         _output.WriteLine("Анкета отрисована. Заполняю 5 полей (имя/символ/описание/сеттинг/пожелание)...");
 
-        // AI-ответ замокан и не зависит от введённого текста — но реальная анкета должна
-        // реально принимать ввод (кириллица, Enter между полями), иначе тест не проверяет UI.
+        // AI-the answer is locked and does not depend on the entered text - but a real questionnaire must
+        // actually accept input (Cyrillic, Enter between fields), otherwise the test does not check UI.
         TypeField(game.Pid, "Тестовый Герой");
         TypeField(game.Pid, "TST");
         TypeField(game.Pid, "Проверочный герой для e2e-теста создания игры.");
-        // Анкета не создаёт героя по последнему полю — дальше цвет/портрет и кнопка.
-        GameConsole.SendKey(game.Pid, ConsoleKey.F3);   // «ДАЛЕЕ» анкеты — то же, что [F3] (кнопка-плашка без стрелок)
+        // The profile does not create a hero in the last field - then color/portrait and a button.
+        GameConsole.SendKey(game.Pid, ConsoleKey.F3);   // “NEXT” of the questionnaire - the same as [F3] (blank button without arrows)
 
-        // SelectiveMockProvider намеренно задерживает мок-ответ на 5с (MockResponseDelayMs) —
-        // это единственный способ реально проверить, что спиннер ожидания (Spinner.While) в
-        // течение этого времени отрисован, а не просто предположить, что он есть.
+        // SelectiveMockProvider deliberately delays the mock response by 5s (MockResponseDelayMs)) - this is
+        // the only way to actually check that the wait spinner (Spinner.While)) is drawn during this time, and
+        // not just assume that it is.
         _output.WriteLine("Проверяю, что во время ожидания CreateNewGame (мок, искусственная задержка 5с) виден спиннер «Создаём персонажа»...");
         if (!GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Создаём персонажа", 3000))
             failures.Add("Спиннер «Создаём персонажа» не появился во время ожидания ответа CreateNewGame (мок).");
@@ -94,8 +94,8 @@ public class NewGameScenarioTests
         Assert.True(
             GameConsole.WaitForRowContains(game.Pid, 1, GameConsole.TitleReadWidth, "→ РЕДАКТОР ←", 20000),
             "Не дождались экрана редактора персонажа после заполнения анкеты — CreateNewGame (мок) не отработал.");
-        // Заголовок (строка 1) обновляется первым — карточка героя ниже может дорисоваться
-        // на один poll-тик позже; без паузы здесь ReadRows иногда ловит недорисованную карточку.
+        // The header (line 1) is updated first - the hero card below may be completed one poll- tick later;
+        // without a pause here ReadRows sometimes catches a half-drawn card.
         Thread.Sleep(200);
         _output.WriteLine("Экран редактора персонажа отрисован.");
         CheckEditorScreen(game.Pid, failures);
@@ -108,10 +108,10 @@ public class NewGameScenarioTests
         CheckFixHeroEditWithAskPlayer(game, failures);
         TestPacing.Step();
 
-        // Settle-пауза: FixHeroForNewGame+ask_player только что прогнали SpinAsync/цикл выбора
-        // варианта — внешнему игровому циклу (Program.cs) нужен момент вернуться в состояние
-        // ожидания ввода на экране редактора, прежде чем слать следующую клавишу (тот же класс
-        // гонки, что уже встречался при чтении карточки героя сразу после ответа мока).
+        // Settle-pause: FixHeroForNewGame+ask_player just ran the SpinAsync/ option selection loop - the
+        // external game loop (Program.cs) needs a moment to return to the state of waiting for input on the
+        // editor screen before sending the next key (the same race class that was already encountered when
+        // reading the hero card immediately after the mock answer).
         Thread.Sleep(500);
         _output.WriteLine("Отправляю [F3] (НАЧАТЬ) → шаг «Приключение» → НАЧАТЬ ИГРУ...");
         Assert.True(Navigation.StartFromEditor(game.Pid), "После [F3] в редакторе не открылся шаг «Приключение».");
@@ -120,11 +120,11 @@ public class NewGameScenarioTests
         bool sawSpinner = GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Создаём мир", 3000);
         if (!sawSpinner)
         {
-            // Изредка [F3] не долетает с первого раза — но ТОЛЬКО при прогоне ВСЕГО набора тестов
-            // подряд (5+ поднятых-и-убитых процессов игры перед этим), никогда в изолированном
-            // прогоне; экран при этом стабильно возвращается в корректное состояние редактора
-            // (не куда-то в сторону) — похоже на гонку в самом автоматизаторе (посылка клавиши
-            // через WriteConsoleInput под нагрузкой), а не баг игры. Повторяем нажатие один раз.
+            // Occasionally [F3] does not reach the target the first time - but ONLY when running the ENTIRE set
+            // of tests in a row (5+ raised-and-killed game processes before that), never in an isolated run; At
+            // the same time, the screen stably returns to the correct state of the editor (not somewhere to the
+            // side) - it looks like a race in the automation itself (sending a key through WriteConsoleInput
+            // under load), and not a game bug. Repeat pressing once.
             _output.WriteLine("Спиннер не появился — повторяю Enter на шаге «Приключение»...");
             GameConsole.SendKey(game.Pid, ConsoleKey.Enter);
             sawSpinner = GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Создаём мир", 5000);
@@ -153,8 +153,9 @@ public class NewGameScenarioTests
         _output.WriteLine(failures.Count == 0
             ? "Все проверки пройдены."
             : $"Провалено проверок: {failures.Count}.");
-        // Финальный Step() — до Assert, а не после: если проверки провалились, Assert.True ниже
-        // бросит исключение и код после него не выполнится, а пауза для отладки нужна в любом случае.
+        // The final Step() is before Assert, not after: if the checks fail, Assert.True below will throw an
+        // exception and the code after it will not be executed, and a pause for debugging is needed in any
+        // case.
         TestPacing.Step();
         Assert.True(failures.Count == 0, "UI-тест FAIL:\n" + string.Join("\n", failures.Select(f => "  - " + f)));
     }
@@ -186,12 +187,12 @@ public class NewGameScenarioTests
         TestPacing.Step();
     }
 
-    // ВАЖНО: [F2] в EditorScreen ведёт на Screen.NewGameAbilities/AbilityDisplay — это НАСТОЯЩАЯ
-    // заглушка (см. AbilityDisplay.Draw(): рисует только рамку с заголовком "СПУТНИК", контента
-    // нет вообще — BuildAbilityLines существует, но нигде не вызывается). Реальные подвкладки
-    // Инвентарь/Способности — это F6/F7 ВНУТРИ экрана Screen.NewGameCharacter (HeroDisplay,
-    // тот же механизм, что и в геймплейном экране Персонажа — см. GameScenarioTests). Проверяем
-    // именно их: переключение подвкладки должно менять видимый контент карточки.
+    // IMPORTANT: [F2] in EditorScreen leads to Screen.NewGameAbilities/AbilityDisplay - this is a REAL
+    // placeholder (see AbilityDisplay.Draw(): draws only a frame with the title "SATELLITE", there is no
+    // content at all - BuildAbilityLines exists, but is not called anywhere). The actual Inventory/Abilities
+    // sub-tabs are F6/F7 INSIDE the Screen.NewGameCharacter screen (HeroDisplay, the same mechanism as in the
+    // Character gameplay screen - see GameScenarioTests). These are the ones we are checking: switching the
+    // sub-tab should change the visible content of the card.
     private void CheckEditorTabSwitching(int gamePid, List<string> failures)
     {
         const string context = "редактор персонажа";
@@ -217,10 +218,10 @@ public class NewGameScenarioTests
             failures.Add($"[{context}] После возврата на подвкладку [F6] инвентарь из мок-ответа CreateNewGame не отображается.");
     }
 
-    // Проверяет, что во время редактирования персонажа (FixHeroForNewGame, отдельное от
-    // SendAction действие) механизм ask_player (диалог вопроса от ИИ) работает так же корректно —
-    // GameAiClient.SpinAsync поллит ask_player_request.json одинаково для ЛЮБОГО действия,
-    // не только для геймплейного SendAction (см. InteractiveResponseTests).
+    // Checks that during character editing (FixHeroForNewGame, a separate action from SendAction), the
+    // ask_player mechanism (question dialogue from the AI) works as correctly - GameAiClient.SpinAsync polls
+    // ask_player_request.json the same for ANY action, not just for gameplay SendAction (see
+    // InteractiveResponseTests).
     private void CheckFixHeroEditWithAskPlayer(GameSession game, List<string> failures)
     {
         const string context = "редактирование персонажа (FixHeroForNewGame)";
@@ -245,12 +246,12 @@ public class NewGameScenarioTests
         _output.WriteLine("Вопрос при редактировании отображён — выбираю первый вариант...");
 
         GameConsole.SendKey(game.Pid, ConsoleKey.Enter);
-        // Короткий таймаут намеренно: ответ должен появиться СРАЗУ (DialogDisplay.
-        // PlayAskPlayerRequest перерисовывает диалог немедленно после выбора), а не только
-        // когда FixHeroForNewGame (мок, искусственная задержка 5с) полностью завершится —
-        // широкое окно замаскировало бы регрессию немедленной перерисовки. Ищем именно
-        // "Test Hero: <ответ>" (с префиксом автора) — голый текст варианта ещё виден в САМОМ
-        // СПИСКЕ ВАРИАНТОВ независимо от того, попал ли ответ в историю, и дал бы ложное срабатывание.
+        // The short timeout is intentional: the response should appear IMMEDIATELY (DialogDisplay.
+        // PlayAskPlayerRequest redraws the dialog immediately after selection), and not just when
+        // FixHeroForNewGame (mock, artificial delay 5s) is completely completed - a wide window would mask the
+        // regression of the immediate redraw. We are looking specifically for “Test Hero: <answer>” (with the
+        // author’s prefix) - the bare text of the option is still visible in the LIST OF OPTIONS ITSELF,
+        // regardless of whether the answer was included in the story and would give a false positive.
         if (!GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, $"Test Hero: {options[0]}", 2000))
         {
             failures.Add($"[{context}] Выбранный вариант ответа не появился в истории диалога СРАЗУ после выбора.");
@@ -264,14 +265,14 @@ public class NewGameScenarioTests
             return;
         }
 
-        // НЕ "sleep фиксированное время + один снимок": диалоговая панель (где только что
-        // мелькнуло "плащ" в реплике DM) и карточка героя слева перерисовываются РАЗНЫМИ вызовами
-        // в РАЗНОЕ время — карточка обновляется только на следующей итерации внешнего игрового
-        // цикла. Под нагрузкой (весь набор тестов подряд) фиксированной паузы иногда не хватает —
-        // поэтому опрашиваем экран до появления итогового предмета, а не гадаем с Thread.Sleep.
-        // Только начало названия: слот экипировки в карточке обрезает длинное имя с «...»
-        // (HeroDisplay.FitLine); с заглавной — в реплике ДМ оно со строчной «элегантный плащ».
-        // Ждём долго: патч применяется после того, как реплика ДМ допечатается посимвольно.
+        // NOT "sleep fixed time + one snapshot": the dialog panel (where the "cloak" in the replica DM) just
+        // flashed and the hero card on the left is redrawn by DIFFERENT calls at DIFFERENT times - the card is
+        // updated only at the next iteration of the external game loop. Under load (the entire set of tests in
+        // a row), a fixed pause is sometimes not enough - so we poll the screen until the final item appears,
+        // instead of guessing with Thread.Sleep. Only the beginning of the name: the equipment slot in the card
+        // cuts off the long name with “...” (HeroDisplay.FitLine); with a capital one - in the DM’s replica it
+        // is with a lowercase “elegant cloak”. We wait a long time: the patch is applied after the DM’s replica
+        // is printed character by character.
         if (!GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Элегантный", 20000))
             failures.Add($"[{context}] Предмет «Элегантный плащ», добавленный мок-ответом FixHeroForNewGame, не найден на экране.");
     }
@@ -299,8 +300,8 @@ public class NewGameScenarioTests
             failures.Add($"[{context}] На экране карты не найдены номера колонок сетки.");
         TestPacing.Step();
 
-        // Из мок-ответа StartNewGame (Fixtures/MockResponses/StartNewGame/response.json) —
-        // символ героя, символ и объект должны быть реально отрисованы на сетке.
+        // From the mock answer StartNewGame (Fixtures/MockResponses/StartNewGame/response.json) - the hero
+        // symbol, the symbol and the object must be actually drawn on the mesh.
         _output.WriteLine($"[{context}] Проверяю символы героя (TST), нпс (NPC) и объекта ([C]) на сетке...");
         if (!rows.Any(r => r.Contains("TST")))
             failures.Add($"[{context}] Символ героя «TST» не найден на карте.");
@@ -319,16 +320,16 @@ public class NewGameScenarioTests
         _output.WriteLine($"[{context}] Проверяю, что герой из CreateNewGame (мок) сохранился и виден после StartNewGame (Storage.Save)...");
         CheckMockedHeroCard(gamePid, rows, context, failures);
 
-        // Правка из FixHeroForNewGame (сделана ДО StartNewGame) должна пережить Storage.Save()
-        // и перерисовку на этом экране — иначе редактирование персонажа теряется при старте игры.
+        // Edit from FixHeroForNewGame (made BEFORE StartNewGame) must survive Storage.Save() and redraw on this
+        // screen - otherwise the character edit is lost when the game starts.
         _output.WriteLine($"[{context}] Проверяю, что правка из FixHeroForNewGame (Элегантный плащ) сохранилась...");
         if (!rows.Any(r => r.Contains("Элегантный плащ")))
             failures.Add($"[{context}] Предмет «Элегантный плащ» из FixHeroForNewGame не пережил StartNewGame/Storage.Save().");
         TestPacing.Step();
     }
 
-    // Общие для редактора и экрана персонажа проверки содержимого карточки — оба экрана рисуют
-    // её тем же HeroDisplay.DrawHeroCard над одним и тем же WorldState.Hero.
+    // Common card content checks for the editor and character screen - both screens draw it with the same
+    // HeroDisplay.DrawHeroCard above the same WorldState.Hero.
     private void CheckMockedHeroCard(int gamePid, List<string> rows, string context, List<string> failures)
     {
         if (!rows.Any(r => r.Contains("Test Hero")))
@@ -339,11 +340,12 @@ public class NewGameScenarioTests
             failures.Add($"[{context}] Предмет «Тестовый меч» не найден в инвентаре.");
         if (!rows.Any(r => r.Contains("Тестовый факел")))
             failures.Add($"[{context}] Предмет «Тестовый факел» не найден в инвентаре.");
-        // Способности живут на отдельной подвкладке ([F7]/отдельный экран НовойИгры) —
-        // не проверяются здесь вместе с инвентарём, который открыт по умолчанию.
+        // Abilities live on a separate subtab ([F7]/ separate NewGame screen) - they are not checked here along
+        // with the inventory, which is open by default.
 
-        // Цвет героя выбирается в анкете и переносится поверх ответа CreateNewGame — по умолчанию
-        // первый в палитре NewGameDisplay («ЯНТАРНЫЙ» [220, 170, 60]), а не [100, 200, 255] из мока.
+        // The hero's color is selected in the questionnaire and transferred over the answer CreateNewGame - by
+        // default the first one in the palette is NewGameDisplay ("AMBER" [220, 170, 60]), and not [100, 200,
+        // 255] from the mock.
         ScreenAssertions.CheckTextColor(gamePid, rows, "Test Hero", (220, 170, 60), 60, MainBackground, context, failures);
     }
 }

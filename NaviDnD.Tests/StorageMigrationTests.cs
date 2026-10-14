@@ -4,8 +4,8 @@ using NaviDnD.Migrations;
 
 namespace NaviDnD.Tests;
 
-// Перевод файлов Storage к текущему формату (StorageMigration): старые файлы во временной папке → проверка полей,
-// резервной копии, повторного запуска и загрузки переведённого сохранения игрой.
+// Translation of Storage files to the current format (StorageMigration): old files in a temporary folder →
+// checking fields, backup, re-launching and loading the translated save game.
 public class StorageMigrationTests : IDisposable
 {
     private readonly string _root = Path.Combine(Path.GetTempPath(), "navidnd-migration-" + Guid.NewGuid().ToString("N"));
@@ -58,7 +58,7 @@ public class StorageMigrationTests : IDisposable
         Assert.Equal([ResourceCategories.Abilities, ResourceCategories.Spells], categories);
         var rooms = save["map"]!["rooms"]!.AsArray().Select(r => (bool?)r!["passage"]).ToList();
         Assert.Equal([null, true, true], rooms);
-        // Остальное — без изменений.
+        // The rest is unchanged.
         Assert.Equal("Привет", (string?)save["history"]![0]!["text"]);
     }
 
@@ -166,7 +166,7 @@ public class StorageMigrationTests : IDisposable
         Write("settings.json", """{"Language":"en"}""");
         var result = StorageMigration.Run(Storage);
         Assert.Equal(0, result.Migrated);
-        Assert.Equal("Утро", (string?)Read("game1.json")["time"]!["partOfDay"]);   // уже текущий формат — не трогаем
+        Assert.Equal("Утро", (string?)Read("game1.json")["time"]!["partOfDay"]);   // already the current format - don’t touch it
         Assert.Equal("[[1,2]]", File.ReadAllText(Path.Combine(Storage, "game1.explored.json")));
         Assert.False(Directory.Exists(Path.Combine(Storage, "Backup")));
     }
@@ -178,7 +178,7 @@ public class StorageMigrationTests : IDisposable
         Write("game2.json", "{ не json");
         Write(Path.Combine("Heroes", "битый.json"), """{"Name":"x","HeroJson":"{ сломано"}""");
         var result = StorageMigration.Run(Storage);
-        // Не JSON — не наш файл, пропускается; карточка с битым героем — ошибка, файл остаётся как был.
+        // Not JSON - not our file, skipped; card with a beaten hero - an error, the file remains as it was.
         Assert.Equal(1, result.Migrated);
         Assert.Single(result.Errors);
         Assert.Equal("{ не json", File.ReadAllText(Path.Combine(Storage, "game2.json")));

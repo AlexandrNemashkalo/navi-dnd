@@ -2,16 +2,15 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: движение стрелками и туман войны (MapObjectsProvider.ComputeHeroVisibility/WriteCellEntity)
-// покрыты юнит-тестами логики (CalculateMovementTests), но никогда не прогонялись через реальный
-// игровой цикл/UI — ни один существующий UI-тест не отправляет герою стрелку движения и не
-// проверяет, что видимость сущностей на сетке меняется динамически в зависимости от дистанции.
-//
-// Fixtures/fog_of_war_game.json: герой в [1,3] с visionFt=5 (1 клетка), существо "Скелет" (SK1) в
-// [4,3] с собственным visionFt=0 (никогда не "замечает" героя само — иначе сработал бы encounter-
-// триггер и потребовался бы мок ИИ). Обычное движение без триггеров вообще не вызывает ИИ (см.
-// MapScreenLoop.RunAsync: moved == false → редрим на месте и снова ждём ввод), поэтому здесь не
-// нужен ни один мок — это чистая проверка рендера тумана войны через реальный процесс игры.
+// E2E: arrow movement and fog of war (MapObjectsProvider.ComputeHeroVisibility/WriteCellEntity) are covered in
+// logic unit tests (CalculateMovementTests), but never run through an actual game loop/UI - no existing UI-
+// test sends a movement arrow to the hero and checks that the visibility of entities on the grid changes
+// dynamically depending on distance. Fixtures/fog_of_war_game.json: hero in [1,3] with visionFt=5 (1 cell),
+// creature "Skeleton" (SK1) in [4,3] with its own visionFt=0 (never "notices" the hero itself - otherwise the
+// encounter- trigger would work and an AI mock would be required). Normal movement without triggers does not
+// trigger the AI at all (see MapScreenLoop.RunAsync: moved == false → redream on the spot and wait for input
+// again), so no mock is needed here - this is a pure test of the fog of war rendering through the real game
+// process.
 public class MovementFogOfWarTests
 {
     private readonly ITestOutputHelper _output;

@@ -2,15 +2,13 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: вне боя свободное движение, которое превышает оставшуюся скорость, автоматически
-// продвигает раунд и сбрасывает скорость/действия героя (Storage.ApplyClientMovement /
-// ResetActionsForNewRound) — пока не проверялось ни одним UI-тестом, только то, что легенда вообще
-// умеет рисовать раунд/действия (см. CombatStateScenarioTests, там раунд статичен).
-//
-// Fixtures/round_advance_game.json: speedMax=speedLeft=10фт (2 клетки), все действия уже
-// потрачены (value:0). Шаг 1 и 2 (по 5фт) укладываются ровно в остаток скорости — раунд не
-// меняется. Шаг 3 требует ещё 5фт при остатке 0 — это и есть момент, когда раунд продвигается,
-// скорость и действия сбрасываются на новый максимум.
+// E2E: outside of combat free movement that exceeds the remaining speed automatically advances the round and
+// resets the speed/actions of the hero (Storage.ApplyClientMovement / ResetActionsForNewRound) - has not yet
+// been tested by any UI- test, only that the legend can generally draw a round/actions (see
+// CombatStateScenarioTests, the round is static there). Fixtures/round_advance_game.json:
+// speedMax=speedLeft=10ft (2 cells), all actions have already been spent (value:0). Step 1 and 2 (5ft each) fit
+// exactly into the remainder of the speed - the round does not change. Step 3 requires another 5ft with a
+// remainder of 0 - this is the moment when the round advances, speed and actions are reset to a new maximum.
 public class RoundAndActionEconomyScenarioTests
 {
     private readonly ITestOutputHelper _output;
@@ -74,10 +72,10 @@ public class RoundAndActionEconomyScenarioTests
 
         var finalRows = GameConsole.ReadRows(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth);
 
-        // Новый раунд: полный запас (10фт) минус стоимость текущего шага (5фт) = 5/10.
+        // New round: full supply (10ft) minus current step cost (5ft) = 5/10.
         CombatStateScenarioTests.CheckMovementSquares(game.Pid, finalRows, "5/10", (215, 215, 225), (65, 68, 78), failures);
 
-        // Действия должны были сброситься с "потрачено" на "доступно".
+        // Actions should have been reset from "spent" to "available".
         CombatStateScenarioTests.CheckActionSymbol(game.Pid, finalRows, "Действие", '●', (70, 200, 70), spent: false, failures);
         CombatStateScenarioTests.CheckActionSymbol(game.Pid, finalRows, "Бон. действие", '■', (160, 100, 50), spent: false, failures);
         CombatStateScenarioTests.CheckActionSymbol(game.Pid, finalRows, "Реакция", '▲', (220, 70, 70), spent: false, failures);

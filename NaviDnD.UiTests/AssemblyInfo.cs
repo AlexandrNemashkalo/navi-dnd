@@ -1,7 +1,7 @@
 using Xunit;
 
-// GameConsole.WithGameConsole делает FreeConsole()/AttachConsole() на уровне ПРОЦЕССА
-// (не потока) — если xUnit запустит два теста, управляющих игрой, параллельно в одном
-// test host процессе, они будут рвать друг у друга консоль. Поэтому весь assembly — строго
-// последовательно, независимо от того, сколько независимых GameSession-кейсов появится.
+// GameConsole.WithGameConsole does FreeConsole()/AttachConsole() at the PROCESS (not thread) level - if xUnit
+// runs two tests that control the game in parallel in one test host process, they will tear each other's
+// console. Therefore, the entire assembly is strictly sequential, regardless of how many independent
+// GameSession- cases appear.
 [assembly: CollectionBehavior(DisableTestParallelization = true)]

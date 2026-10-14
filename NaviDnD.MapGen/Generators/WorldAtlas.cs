@@ -3,17 +3,17 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.MapGen.Generators;
 
-// Текстовые сводки карты мира для нейронки: что где, окружение места, путь между местами. Клетка мира ≈ четверть дня
-// пути пешком по дороге; вне дороги — дольше по рельефу.
+// Text summaries of the world map for the AI: what is where, the environment of a place, the path between
+// places. The world cell is a quarter of a day's journey on foot along the road; off-road - longer on terrain.
 public static class WorldAtlas
 {
-    // ── Сводка земли для начала игры (StartNewGame): рельеф, королевства (K-номера), природные области ──
-    // Мест, кроме столиц, нет — нейронка добавляет их сама (add_place).
+    // ── Summary of the land for the start of the game (StartNewGame): terrain, kingdoms (K- numbers), natural
+    // areas ── There are no places other than capitals - the AI adds them itself (add_place).
     public static string TerrainSummary(WorldMap w)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"Мир: {(w.Size == WorldSizes.Large ? "большой континент" : "небольшой материк")}, {w.Width}×{w.Height} клеток (клетка ≈ четверть дня пути), север — вверху.");
-        sb.AppendLine("Королевства (K-номер: площадь, рельеф, где, соседи, столица — где и окружение):");
+        sb.AppendLine($"World: {(w.Size == WorldSizes.Large ? "large continent" : "small continent")}, {w.Width}×{w.Height} cells (one cell is about a quarter-day of travel), north is up.");
+        sb.AppendLine("Kingdoms (K-number: area, terrain, location, neighbors, capital location/surroundings):");
         for (int k = 0; k < w.Kingdoms.Count; k++)
         {
             var area = Tiles(w).Where(t => w.OwnerAt(t.x, t.y) == k).ToList();
@@ -21,22 +21,23 @@ public static class WorldAtlas
             int cap = w.Kingdoms[k].Capital;
             string capInfo = cap >= 0 && cap < w.Places.Count
                 ? $"{Compass(w, w.Places[cap].X, w.Places[cap].Y)}, {Surroundings(w, w.Places[cap].X, w.Places[cap].Y, named: true)}" : "—";
-            sb.AppendLine($"  K{k}: {area.Count} кл., {BiomeMix(w, area)}, {Side(w, area)}; соседи: {string.Join(", ", neighbours.DefaultIfEmpty("нет"))}; столица: {capInfo}");
+            sb.AppendLine($"  K{k}: {area.Count} cells, {BiomeMix(w, area)}, {Side(w, area)}; neighbors: {string.Join(", ", neighbours.DefaultIfEmpty("none"))}; capital: {capInfo}");
         }
-        sb.AppendLine("Природные области (имя: вид, размер, где):");
+        sb.AppendLine("Natural regions (name: type, size, location):");
         foreach (var f in w.Features.OrderByDescending(f => f.Size).Take(24))
         {
-            string kind = f.Biome == WorldGenerator.IslandCode ? "остров" : WorldBiomes.Get(f.Biome).Name.ToLowerInvariant();
-            sb.AppendLine($"  {f.Name}: {kind}, {f.Size} кл., {Compass(w, f.X, f.Y)}");
+            string kind = f.Biome == WorldGenerator.IslandCode ? "island" : WorldBiomes.Get(f.Biome).Name.ToLowerInvariant();
+            sb.AppendLine($"  {f.Name}: {kind}, {f.Size} cells, {Compass(w, f.X, f.Y)}");
         }
         return sb.ToString();
     }
 
-    // ── Новое место (add_place): клетка по пожеланиям мастера ──
+    // ── New place (add_place): cell according to the wishes of the GM ──
     public sealed record SpotRequest(string Type, WorldPlace? Near, string? Direction, double? Days, string? Terrain, int Kingdom = -1);
 
-    // Лучшая клетка: свободная заготовка генератора подходящего вида или своя клетка; учитывает расстояние и
-    // направление от Near, рельеф/реку/море/дорогу/глушь из Terrain, королевство. occupied — места игры.
+    // The best cell: a free generator blank of a suitable type or your own cell; takes into account distance
+    // and direction from Near, terrain/river/sea/road/wilderness from Terrain, kingdom. occupied - game
+    // locations.
     public static (int x, int y, int slot)? FindSpot(WorldMap geo, SpotRequest req, IReadOnlyCollection<(int x, int y)> occupied, ISet<int> usedSlots)
     {
         bool settlement = WorldPlaceTypes.IsSettlement(req.Type) || req.Type == WorldPlaceTypes.Castle;
@@ -72,36 +73,36 @@ public static class WorldAtlas
                 return false;
             }
             bool road = Any(1, (a, c) => geo.RoadAt(a, c) > 0);
-            (string word, Func<bool> ok)[] hints =
+            (string[] words, Func<bool> ok)[] hints =
             [
-                ("лес", () => Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Forest or WorldBiomes.DeepForest or WorldBiomes.SnowForest)),
-                ("чащ", () => Any(1, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.DeepForest)),
-                ("гор", () => Any(2, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Mountains or WorldBiomes.Peaks)),
-                ("холм", () => Any(1, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.Hills)),
-                ("болот", () => Any(1, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.Swamp)),
-                ("пустын", () => Any(1, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.Desert)),
-                ("снег", () => Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Snow or WorldBiomes.Tundra or WorldBiomes.SnowForest)),
-                ("рек", () => Any(1, (a, c) => geo.RiverAt(a, c) > 0)),
-                ("мор", () => Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Sea or WorldBiomes.Ocean)),
-                ("побереж", () => Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Sea or WorldBiomes.Ocean)),
-                ("озер", () => Any(2, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.Lake)),
-                ("дорог", () => road),
-                ("тракт", () => road),
-                ("глуш", () => !Any(4, (a, c) => geo.RoadAt(a, c) > 0)),
+                (["лес", "forest", "woodland"], () => Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Forest or WorldBiomes.DeepForest or WorldBiomes.SnowForest)),
+                (["чащ", "thicket", "deep forest"], () => Any(1, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.DeepForest)),
+                (["гор", "mountain"], () => Any(2, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Mountains or WorldBiomes.Peaks)),
+                (["холм", "hill"], () => Any(1, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.Hills)),
+                (["болот", "swamp", "marsh"], () => Any(1, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.Swamp)),
+                (["пустын", "desert"], () => Any(1, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.Desert)),
+                (["снег", "snow"], () => Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Snow or WorldBiomes.Tundra or WorldBiomes.SnowForest)),
+                (["рек", "river"], () => Any(1, (a, c) => geo.RiverAt(a, c) > 0)),
+                (["мор", "sea", "ocean"], () => Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Sea or WorldBiomes.Ocean)),
+                (["побереж", "coast"], () => Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Sea or WorldBiomes.Ocean)),
+                (["озер", "lake"], () => Any(2, (a, c) => geo.BiomeAt(a, c) == WorldBiomes.Lake)),
+                (["дорог", "road"], () => road),
+                (["тракт", "highway"], () => road),
+                (["глуш", "wilderness"], () => !Any(4, (a, c) => geo.RoadAt(a, c) > 0)),
             ];
-            foreach (var (word, ok) in hints)
-                if (terrain.Contains(word) && !ok()) s += 7;
+            foreach (var (words, ok) in hints)
+                if (words.Any(terrain.Contains) && !ok()) s += 7;
             if (settlement)
             {
                 if (b is WorldBiomes.Mountains or WorldBiomes.Snow) s += 4;
                 if (req.Type is WorldPlaceTypes.City or WorldPlaceTypes.Town or WorldPlaceTypes.Port && !road) s += 4;
                 if (req.Type == WorldPlaceTypes.Port && !Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Sea or WorldBiomes.Ocean)) s += 8;
             }
-            else if (road) s += 2;   // места приключений — в стороне от дорог
+            else if (road) s += 2;   // adventure spots - off the beaten track
             return s + 0.3 * rng.NextDouble();
         }
 
-        // Заготовки генератора подходящего вида (поселение к поселению, логово к логову).
+        // Generator blanks of a suitable type (settlement to settlement, lair to lair).
         for (int i = 0; i < geo.Places.Count; i++)
         {
             var p = geo.Places[i];
@@ -111,7 +112,7 @@ public static class WorldAtlas
             double sc = Score(p.X, p.Y, slot: true);
             if (sc < best) { best = sc; found = (p.X, p.Y, i); }
         }
-        // Своя клетка: около Near — подробно, без Near — по всей карте через клетку.
+        // Own cell: near Near - in detail, without Near - across the entire map through the cell.
         int x0 = 1, y0 = 1, x1 = geo.Width - 2, y1 = geo.Height - 2, step = 2;
         if (req.Near is { } near)
         {
@@ -138,13 +139,20 @@ public static class WorldAtlas
         _ => 4,
     };
 
-    private static double? AngleOf(string dir) =>
-        dir.Contains("северо-вост") || dir == "ne" ? 45 : dir.Contains("северо-зап") || dir == "nw" ? 135
-        : dir.Contains("юго-вост") || dir == "se" ? -45 : dir.Contains("юго-зап") || dir == "sw" ? -135
-        : dir.Contains("север") || dir == "n" ? 90 : dir.Contains("юг") || dir == "s" ? -90
-        : dir.Contains("восток") || dir == "e" ? 0 : dir.Contains("запад") || dir == "w" ? 180 : null;
+    private static double? AngleOf(string dir)
+    {
+        string english = dir.Replace("-", "").Replace(" ", "");
+        return dir.Contains("северо-вост") || english.Contains("northeast") || dir == "ne" ? 45
+            : dir.Contains("северо-зап") || english.Contains("northwest") || dir == "nw" ? 135
+            : dir.Contains("юго-вост") || english.Contains("southeast") || dir == "se" ? -45
+            : dir.Contains("юго-зап") || english.Contains("southwest") || dir == "sw" ? -135
+            : dir.Contains("север") || english.Contains("north") || dir == "n" ? 90
+            : dir.Contains("юг") || english.Contains("south") || dir == "s" ? -90
+            : dir.Contains("восток") || english.Contains("east") || dir == "e" ? 0
+            : dir.Contains("запад") || english.Contains("west") || dir == "w" ? 180 : null;
+    }
 
-    // Тропа от места к ближайшей дороге или видимому месту (по суше, ≤ 40 клеток). Уже у дороги — не нужна.
+    // A path from a location to the nearest road or visible location (overland, ≤ 40 tiles). Already by the road - no need.
     public static List<(int x, int y)>? TrailFrom(WorldMap w, int sx, int sy)
     {
         if (Enumerable.Range(-1, 3).Any(dx => Enumerable.Range(-1, 3).Any(dy => w.RoadAt(sx + dx, sy + dy) > 0))) return null;
@@ -171,7 +179,7 @@ public static class WorldAtlas
                 var path = new List<(int x, int y)>();
                 var q = p;
                 while (prev.TryGetValue(q, out var pr)) { q = pr; path.Add(q); }
-                return path;   // от клетки рядом с целью до самого места
+                return path;   // from the square next to the target to the very place
             }
             foreach (var n in new[] { (p.x + 1, p.y), (p.x - 1, p.y), (p.x, p.y + 1), (p.x, p.y - 1) })
             {
@@ -188,30 +196,30 @@ public static class WorldAtlas
         return null;
     }
 
-    // ── Сводка мира для начала игры: имена, описания, королевства, места ──
+    // ── World summary for the beginning of the game: names, descriptions, kingdoms, places ──
     public static string Overview(WorldMap w, bool withDmNotes)
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"Мир «{w.Name}»{(w.Description is { Length: > 0 } d ? $": {d}" : "")}");
-        if (withDmNotes && w.DmNotes is { Length: > 0 } wn) sb.AppendLine($"  [мастер] {wn}");
+        sb.AppendLine($"World «{w.Name}»{(w.Description is { Length: > 0 } d ? $": {d}" : "")}");
+        if (withDmNotes && w.DmNotes is { Length: > 0 } wn) sb.AppendLine($"  [GM] {wn}");
         foreach (var (k, i) in w.Kingdoms.Select((k, i) => (k, i)))
         {
             string cap = k.Capital >= 0 && k.Capital < w.Places.Count ? w.Places[k.Capital].Name : "—";
-            sb.AppendLine($"Королевство «{k.Name}» (столица {cap}){(k.Description is { Length: > 0 } kd ? $": {kd}" : "")}");
-            if (withDmNotes && k.DmNotes is { Length: > 0 } kn) sb.AppendLine($"  [мастер] {kn}");
+            sb.AppendLine($"Kingdom «{k.Name}» (capital {cap}){(k.Description is { Length: > 0 } kd ? $": {kd}" : "")}");
+            if (withDmNotes && k.DmNotes is { Length: > 0 } kn) sb.AppendLine($"  [GM] {kn}");
         }
-        sb.AppendLine("Места:");
+        sb.AppendLine("Places:");
         foreach (var p in w.Places.OrderBy(p => PlaceRank(p.Type)).ThenBy(p => p.Name))
         {
-            sb.Append($"  {p.Name} — {WorldPlaceTypes.Label(p.Type)}, {KingdomName(w, p)}, {Compass(w, p.X, p.Y)}{(p.Hidden ? " (герой не знает)" : "")}");
+            sb.Append($"  {p.Name} — {WorldPlaceTypes.Label(p.Type)}, {KingdomName(w, p)}, {Compass(w, p.X, p.Y)}{(p.Hidden ? " (unknown to the hero)" : "")}");
             if (p.Description is { Length: > 0 } pd) sb.Append($": {pd}");
-            if (withDmNotes && p.DmNotes is { Length: > 0 } pn) sb.Append($" [мастер] {pn}");
+            if (withDmNotes && p.DmNotes is { Length: > 0 } pn) sb.Append($" [GM] {pn}");
             sb.AppendLine();
         }
         return sb.ToString();
     }
 
-    // ── Запросы world_query ──
+    // ── Requests world_query ──
     public static WorldPlace? FindPlace(WorldMap w, string name)
     {
         string n = name.Trim().Trim('«', '»', '"');
@@ -225,35 +233,36 @@ public static class WorldAtlas
         var sb = new StringBuilder();
         sb.AppendLine($"{p.Name} — {WorldPlaceTypes.Label(p.Type)}, {KingdomName(w, p)}, {Compass(w, p.X, p.Y)}");
         if (p.Description is { Length: > 0 } d) sb.AppendLine(d);
-        if (withDmNotes && p.DmNotes is { Length: > 0 } n) sb.AppendLine($"[мастер] {n}");
-        sb.AppendLine($"Окружение: {Surroundings(w, p.X, p.Y, named: true)}");
+        if (withDmNotes && p.DmNotes is { Length: > 0 } n) sb.AppendLine($"[GM] {n}");
+        sb.AppendLine($"Surroundings: {Surroundings(w, p.X, p.Y, named: true)}");
         return sb.ToString();
     }
 
-    // Места в радиусе radiusDays дней пути (по прямой, клетка = CellDays) — с направлением и временем пути.
+    // Places within a radius of radiusDays travel days (in a straight line, cell = CellDays) - with direction and travel time.
     public static string Near(WorldMap w, WorldPlace from, double radiusDays = 6)
     {
         var list = w.Places.Where(p => p != from)
             .Select(p => (p, d: Math.Sqrt(Sq(p.X - from.X) + Sq(p.Y - from.Y)) * CellDays))
             .Where(t => t.d <= radiusDays).OrderBy(t => t.d).Take(12).ToList();
-        if (list.Count == 0) return $"В {radiusDays} днях пути от «{from.Name}» мест нет.";
-        var sb = new StringBuilder($"Рядом с «{from.Name}»:\n");
+        if (list.Count == 0) return $"Within {radiusDays} days of «{from.Name}» there are no places.";
+        var sb = new StringBuilder($"Near «{from.Name}»:\n");
         foreach (var (p, _) in list)
         {
             var r = Route(w, from, p);
-            sb.AppendLine($"  {p.Name} — {WorldPlaceTypes.Label(p.Type)}, {Direction(p.X - from.X, p.Y - from.Y)}, {r?.Summary ?? "пути нет"}");
+            sb.AppendLine($"  {p.Name} — {WorldPlaceTypes.Label(p.Type)}, {Direction(p.X - from.X, p.Y - from.Y)}, {r?.Summary ?? "no route"}");
         }
         return sb.ToString();
     }
 
     public sealed record RouteInfo(double Days, double RoadShare, List<(int x, int y)> Path, string Summary);
 
-    // Клетка мира по дороге — четверть дня пешком (масштаб времени пути).
+    // World cell on the road - a quarter of a day on foot (travel time scale).
     public const double CellDays = 0.25;
 
-    // Сколько дней пешком входить в клетку: по дороге — быстрее всего (×0.75 CellDays), вне дороги — дольше по рельефу
-    // (×1.5 … ×4); брод +CellDays; вода и пики — нельзя (∞). Дорога в 2,5–5 раз быстрее бездорожья — маршрут держится
-    // её и при заметном обходе (при ×1 путь срезал напрямик через лес).
+    // How many days to enter the cell on foot: on the road - fastest (×0.75 CellDays), off the road - longer on
+    // the terrain (×1.5 ... ×4); ford + CellDays; water and peaks - not allowed (∞). The road is 2.5–5 times
+    // faster than off-road - the route sticks to it even with a noticeable detour (at ×1 the path cut straight
+    // through the forest).
     public static double StepDays(WorldMap w, int x, int y) => CellDays * (w.RoadAt(x, y) > 0 ? 0.75 : w.BiomeAt(x, y) switch
     {
         WorldBiomes.Plains or WorldBiomes.Grass or WorldBiomes.Beach => 1.5,
@@ -265,7 +274,7 @@ public static class WorldAtlas
 
     public static RouteInfo? Route(WorldMap w, WorldPlace a, WorldPlace b) => Route(w, (a.X, a.Y), (b.X, b.Y));
 
-    // Путь пешком между клетками (по сторонам, дешевле — по дорогам).
+    // The path is on foot between the cells (on the sides, cheaper - along the roads).
     public static RouteInfo? Route(WorldMap w, (int x, int y) start, (int x, int y) goal)
     {
         var dist = new Dictionary<(int, int), double> { [start] = 0 };
@@ -287,7 +296,7 @@ public static class WorldAtlas
                 if (dist.TryGetValue(n, out var old) && old <= nd) continue;
                 dist[n] = nd;
                 prev[n] = p;
-                pq.Enqueue(n, nd + (Math.Abs(n.Item1 - goal.x) + Math.Abs(n.Item2 - goal.y)) * CellDays * 0.75);   // ≤ шага по дороге — оценка не завышает
+                pq.Enqueue(n, nd + (Math.Abs(n.Item1 - goal.x) + Math.Abs(n.Item2 - goal.y)) * CellDays * 0.75);   // ≤ a step along the road - the assessment does not overestimate
             }
         }
         if (!dist.TryGetValue(goal, out double days)) return null;
@@ -298,21 +307,21 @@ public static class WorldAtlas
         double road = path.Count(t => w.RoadAt(t.x, t.y) > 0) / (double)Math.Max(1, path.Count);
         var kingdoms = path.Select(t => w.OwnerAt(t.x, t.y)).Where(o => o >= 0 && o < w.Kingdoms.Count).Distinct().Select(o => w.Kingdoms[o].Name).ToList();
         double rounded = Math.Max(0.5, Math.Round(days * 2) / 2);
-        string summary = $"{rounded:0.#} {DaysWord(rounded)} пути, {(road > 0.7 ? "по дороге" : road > 0.25 ? "частью по дороге" : "без дороги")}"
-                         + (kingdoms.Count > 1 ? $", через {string.Join(" → ", kingdoms)}" : "");
+        string summary = $"{rounded:0.#} {DaysWord(rounded)} travel, {(road > 0.7 ? "by road" : road > 0.25 ? "partly by road" : "off road")}"
+                         + (kingdoms.Count > 1 ? $", through {string.Join(" → ", kingdoms)}" : "");
         return new RouteInfo(rounded, road, path, summary);
     }
 
     public static string DaysText(double d) => $"{d:0.#} {DaysWord(d)}";
 
-    // ── Помощники ──
+    // ── Assistants ──
     public static string KingdomName(WorldMap w, WorldPlace p)
     {
         int k = p.Kingdom >= 0 ? p.Kingdom : w.OwnerAt(p.X, p.Y);
-        return k >= 0 && k < w.Kingdoms.Count ? $"королевство {w.Kingdoms[k].Name}" : "ничья земля";
+        return k >= 0 && k < w.Kingdoms.Count ? $"kingdom {w.Kingdoms[k].Name}" : "no man's land";
     }
 
-    // Окружение клетки: рельеф, река/берег, дороги, ближайшая природная область (с именем — если named).
+    // Cell environment: terrain, river/shore, roads, nearest natural area (with a name - if named).
     public static string Surroundings(WorldMap w, int x, int y, bool named)
     {
         var parts = new List<string> { WorldBiomes.Get(w.BiomeAt(x, y)).Name.ToLowerInvariant() };
@@ -327,19 +336,19 @@ public static class WorldAtlas
                 if (b == WorldBiomes.Lake) lake = true;
                 if (b is WorldBiomes.Mountains or WorldBiomes.Peaks) mountains = true;
             }
-        if (river) parts.Add(w.RiverAt(x, y) > 0 ? L.W("у реки") : L.W("река неподалёку"));
-        if (sea) parts.Add(w.BiomeAt(x, y) is WorldBiomes.Sea or WorldBiomes.Ocean ? L.W("у моря") : L.W("море неподалёку"));
-        if (lake) parts.Add(w.BiomeAt(x, y) == WorldBiomes.Lake ? L.W("у озера") : L.W("озеро неподалёку"));
-        if (mountains) parts.Add("у гор");
+        if (river) parts.Add(w.RiverAt(x, y) > 0 ? L.W("by a river") : L.W("river nearby"));
+        if (sea) parts.Add(w.BiomeAt(x, y) is WorldBiomes.Sea or WorldBiomes.Ocean ? L.W("by the sea") : L.W("sea nearby"));
+        if (lake) parts.Add(w.BiomeAt(x, y) == WorldBiomes.Lake ? L.W("by a lake") : L.W("lake nearby"));
+        if (mountains) parts.Add("near mountains");
         int road = Enumerable.Range(-1, 3).SelectMany(dx => Enumerable.Range(-1, 3).Select(dy => w.RoadAt(x + dx, y + dy))).Max();
-        parts.Add(road == 2 ? "на тракте" : road == 1 ? "у тропы" : "в глуши");
+        parts.Add(road == 2 ? "on a highway" : road == 1 ? "near a trail" : "in the wilderness");
         var feature = w.Features.Select((f, i) => (f, i, d: Sq(f.X - x) + Sq(f.Y - y))).Where(t => t.d <= 64).OrderBy(t => t.d).FirstOrDefault();
         if (feature.f != null)
-            parts.Add(named ? $"рядом «{feature.f.Name}»" : $"рядом F{feature.i}");
+            parts.Add(named ? $"near «{feature.f.Name}»" : $"near F{feature.i}");
         return string.Join(", ", parts);
     }
 
-    // Имя клетки для игрока и мастера: «холмы — Холмы Корград» (ближайшая область того же рельефа), иначе рельеф.
+    // The name of the cell for the player and the GM: “hills - Korgrad Hills” (the closest area of the same terrain), otherwise terrain.
     public static string TileName(WorldMap w, int x, int y)
     {
         char b = w.BiomeAt(x, y);
@@ -352,20 +361,20 @@ public static class WorldAtlas
     public static string Compass(WorldMap w, int x, int y)
     {
         double fx = x / (double)w.Width, fy = y / (double)w.Height;
-        string ns = fy < 0.33 ? "север" : fy > 0.67 ? "юг" : "";
-        string ew = fx < 0.33 ? "запад" : fx > 0.67 ? "восток" : "";
-        return ns.Length + ew.Length == 0 ? "центр мира" : ns.Length > 0 && ew.Length > 0 ? $"{ns}о-{ew}" : ns + ew;
+        string ns = fy < 0.33 ? "north" : fy > 0.67 ? "south" : "";
+        string ew = fx < 0.33 ? "west" : fx > 0.67 ? "east" : "";
+        return ns.Length + ew.Length == 0 ? "center of the world" : ns + ew;
     }
 
     public static string Direction(int dx, int dy)
     {
-        double a = Math.Atan2(-dy, dx) * 180 / Math.PI;   // y вниз — юг
-        string[] dirs = ["на восток", "на северо-восток", "на север", "на северо-запад", "на запад", "на юго-запад", "на юг", "на юго-восток"];
+        double a = Math.Atan2(-dy, dx) * 180 / Math.PI;   // y down - south
+        string[] dirs = ["to the east", "to the northeast", "to the north", "to the northwest", "to the west", "to the southwest", "to the south", "to the southeast"];
         return dirs[((int)Math.Round(a / 45) + 8) % 8];
     }
 
     private static string DaysWord(double d) =>
-        d % 1 != 0 ? "дня" : (int)d % 10 == 1 && (int)d % 100 != 11 ? "день" : (int)d % 10 is >= 2 and <= 4 && (int)d % 100 is < 12 or > 14 ? "дня" : "дней";
+        d == 1 ? "day" : "days";
 
     private static int PlaceRank(string type) => type switch
     {

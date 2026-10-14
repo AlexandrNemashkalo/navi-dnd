@@ -22,24 +22,13 @@ public sealed class UseReactionTools(McpServerConfig config)
         Path.Combine(Path.GetDirectoryName(config.WorldStatePath)!, "ask_player_request.json");
 
     [McpServerTool]
-    [Description("""
-        Проверка реакции D&D 5e: у героя есть свободная Реакция, и только что появилась
-        возможность её применить (Атака по возможности, заклинание «Щит» и похожие триггеры
-        реакции) — спроси, хочет ли он её применить, и жди ответа (до 50 секунд).
-        Использовать ТОЛЬКО для этого. НИКОГДА не спрашивай «что делаешь?» — игрок пишет своё
-        следующее действие сам. Вопрос — только настоящий, по сути конкретной ситуации; не
-        заглушка, не тестовый текст. Нет настоящей причины спросить — не вызывай этот тул вообще.
-        Поля:
-        - history[]: записи, показываемые игроку перед вопросом. Каждая: text (1-2 предложения, механика в [...]), text может быть SSML <speak> для озвучки; опционально author, patch. Последняя запись = сам вопрос.
-        - options: 2-4 варианта ответа, каждый не длиннее 2 слов. Больше 4 вариантов или длиннее — не указывать вовсе (свободный текстовый ввод).
-        Возвращает { "answer": "..." } или { "answer": null, "timedOut": true }, если игрок не ответил за 50 секунд.
-        """)]
+    [Description("Ask about a D&D 5e reaction ONLY when the hero has an available Reaction and a real opportunity just arose (opportunity attack, Shield spell, similar trigger). Wait for the answer, up to 50 seconds. Never ask what the hero does next; the player supplies their own actions. No placeholder/test questions or calls without a genuine reaction choice.\nhistory[]: entries shown before the question, each with text (1–2 sentences, mechanics in [...], optionally SSML <speak>), optional author and patch. The last entry is the question in the game language.\noptions: 2–4 choices, at most 2 words each. If more/longer choices are needed, omit options for free text.\nReturns {answer:\"...\"}, or {answer:null,timedOut:true} after 50 seconds.")]
     public string UseReaction(
-        [Description("Записи диалога перед вопросом. У каждой text, text может быть SSML <speak> для озвучки; опционально author, patch.")] RequestHistoryEntry[] history,
-        [Description("Варианты ответа для игрока. Не указывать для свободного текстового ввода.")] string[]? options)
+        [Description("History shown before the question: text (optionally SSML <speak>), optional author and patch; use the game language.")] RequestHistoryEntry[] history,
+        [Description("Player response options; omit for free-text input.")] string[]? options)
     {
-        // Реальный лог: тул вызвали с пустой history/вопросом — диалог всё равно открылся
-        // бы игроку и ждал 50с ответа ни на что. Отклоняем немедленно, не открывая UI.
+        // Real log: the tool was called with an empty history/ question - the dialogue would still open to the
+        // player and wait 50 seconds for an answer to nothing. Reject immediately without opening UI.
         if (history is not { Length: > 0 } || string.IsNullOrWhiteSpace(history[^1].Text))
         {
             Log("use_reaction → (REJECTED) empty history or last entry has no question text");

@@ -176,9 +176,9 @@ internal sealed class UnixTerminal
         {
             string[] lines =
             [
-                L.T("Окно терминала слишком мало для NaviDnD."),
-                L.F("Нужно не меньше {0} × {1} символов, сейчас {2} × {3}.", cols, rows + ReservedTopRows, RealWidth, RealHeight),
-                L.T("Увеличьте окно или уменьшите шрифт (Cmd и минус)."),
+                L.T("The terminal window is too small for NaviDnD."),
+                L.F("It needs at least {0} × {1} characters; now it is {2} × {3}.", cols, rows + ReservedTopRows, RealWidth, RealHeight),
+                L.T("Enlarge the window or make the font smaller (Cmd and minus)."),
             ];
             Clear();
             for (int i = 0; i < lines.Length; i++)

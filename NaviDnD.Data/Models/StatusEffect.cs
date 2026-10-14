@@ -7,11 +7,11 @@ public class StatusEffect : IPatchable
     public string? Description { get; set; }
     public List<int>? Color { get; set; }
 
-    // null = не ограничено раундами (см. UntilLongRest/бессрочно)
+    // null = not limited by rounds (see UntilLongRest/ unlimited)
     public int? ExpiresAtRound { get; set; }
 
-    // true = снимается на долгом отдыхе (движок это не отслеживает — ИИ сам убирает эффект,
-    // когда повествует долгий отдых)
+    // true = removed during a long rest (the engine does not track this - the AI itself removes the effect when
+    // a long rest is indicated)
     public bool? UntilLongRest { get; set; }
 
     public TriggerEffect? OnRound { get; set; }

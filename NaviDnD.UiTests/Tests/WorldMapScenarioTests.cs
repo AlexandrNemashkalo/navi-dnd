@@ -2,20 +2,22 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: карта мира ([F2] Мир) и местность ([F1] Карта). Fixtures/world_game.json — игра без тактической карты (герой в
-// деревне Ключи мира world-uitest, Fixtures/world_uitest.json: хроника — Эрдвальд, Лесогорье, столица Светлоград):
-// «Продолжить» открывает мир («@ Вы: Ключи»), вкладка Карта серая и по F1 не открывается, журнал [F8] «Локации» —
-// известные места, клик по столице — маршрут в легенде, [F10] — путешествие (ответ мастера — мок SendAction).
-// Встреча в пути случайна — проверяется, что герой ушёл из Ключей, а не куда именно пришёл.
+// E2E: world map ([F2] World) and terrain ([F1] Map). Fixtures/world_game.json - a game without a tactical map
+// (hero in the village Keys of the World world-uitest, Fixtures/world_uitest.json: chronicle - Erdwald,
+// Lesogorye, capital Svetlograd): “Continue” opens the world (“@ You: Keys”), the Map tab is gray and does not
+// open according to F1, the magazine [F8] “Locations” - famous places, click on the capital - route in the
+// legend, [F10] - journey (GM's answer - mock SendAction). The meeting on the way is random - it is checked
+// that the hero left the Keys, and not where exactly he came.
 public class WorldMapScenarioTests
 {
     private readonly ITestOutputHelper _output;
 
     public WorldMapScenarioTests(ITestOutputHelper output) => _output = output;
 
-    // Fixtures/world_location_game.json — та же игра в Ключах, но с тактической картой (подход + деревня по
-    // клетке мира, герой у входа снизу). F2 — мир, F1 — местность; шаг вниз через выход на карту мира — герой
-    // уходит в мир, локация сохраняется за Ключами (Worlds/<id>/locations), вкладка Карта становится серой.
+    // Fixtures/world_location_game.json - the same game in the Keys, but with a tactical map (approach +
+    // village along the world cell, hero at the entrance from below). F2 - world, F1 - terrain; step down
+    // through the exit to the world map - the hero goes into the world, the location is saved behind the Keys
+    // (Worlds/<id>/locations), the Map tab becomes gray.
     [Fact]
     public void Location_F1TogglesWorld_StepOutThroughWorldExit_SavesLocation()
     {
@@ -39,7 +41,7 @@ public class WorldMapScenarioTests
                 "F1 не вернул местность.");
             TestPacing.Step();
 
-            // Шаг наружу через выход на карту мира.
+            // Step outside through the exit to the world map.
             GameConsole.SendKey(game.Pid, ConsoleKey.DownArrow);
             bool left = GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Вы: Ключи", 6000);
             if (!left) Dump(game.Pid);
@@ -64,7 +66,7 @@ public class WorldMapScenarioTests
     public void NoLocation_ShowsWorld_JournalPlaces_TravelByClickAndF10()
     {
         using var game = GameSession.Launch(fixtureFileName: "world_game.json", mockedActions: ["SendAction"], mockResponsesFolder: "WorldTravel");
-        // Мир игры — в библиотеке миров рядом с сохранением; после теста убираем.
+        // Game world - in the worlds library next to the save; After the test we remove it.
         string worldDir = Path.Combine(game.RealStorageDir, "Worlds", "world-uitest");
         Directory.CreateDirectory(worldDir);
         File.Copy(Path.Combine(AppContext.BaseDirectory, "Fixtures", "world_uitest.json"), Path.Combine(worldDir, "world.json"), overwrite: true);
@@ -78,12 +80,12 @@ public class WorldMapScenarioTests
             Assert.True(worldShown, "Без тактической карты вкладка Карта должна показывать мир с героем («Вы: Ключи» в легенде).");
             TestPacing.Step();
 
-            // Карта серая — F1 её не открывает.
+            // The map is gray - F1 does not open it.
             GameConsole.SendKey(game.Pid, ConsoleKey.F1);
             Thread.Sleep(600);
             Assert.Contains("→ МИР ←", GameConsole.ReadRow(game.Pid, 1, GameConsole.TitleReadWidth));
 
-            // Журнал → Локации: известные места.
+            // Journal → Locations: famous places.
             GameConsole.SendKey(game.Pid, ConsoleKey.F3);
             Assert.True(GameConsole.WaitForRowContains(game.Pid, 1, GameConsole.TitleReadWidth, "→ ЖУРНАЛ ←", 5000), "Не открылся журнал по [F3].");
             GameConsole.SendKey(game.Pid, ConsoleKey.F8);
@@ -92,13 +94,13 @@ public class WorldMapScenarioTests
                 "В журнале «Локации» нет известных мест (Ключи, Светлоград).");
             TestPacing.Step();
 
-            // Назад в мир.
+            // Back to the world.
             GameConsole.SendKey(game.Pid, ConsoleKey.F2);
             Assert.True(GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Вы: Ключи", 5000),
                 "После [F2] из журнала не открылась карта мира.");
 
-            // Клик по значку столицы на карте (подпись « Светлоград» справа от значка; самая левая — на карте,
-            // правее — список мест в легенде).
+            // Click on the capital icon on the map (the label “Svetlograd” to the right of the icon; the
+            // leftmost one is on the map, to the right is the list of places in the legend).
             var rows = GameConsole.ReadRows(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth);
             var label = rows.Select((r, i) => (row: i, col: r.IndexOf("Светлоград", StringComparison.Ordinal)))
                 .Where(t => t.col > 0).OrderBy(t => t.col).FirstOrDefault();
@@ -109,7 +111,7 @@ public class WorldMapScenarioTests
                 "После клика по столице в легенде нет строки пути.");
             TestPacing.Step();
 
-            // В путь.
+            // Let's go.
             GameConsole.SendKey(game.Pid, ConsoleKey.F10);
             Assert.True(GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "разбиваешь лагерь", 20000),
                 "Не появился рассказ мастера о пути (мок SendAction).");

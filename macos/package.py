@@ -14,13 +14,13 @@ import sys
 import tarfile
 import zipfile
 
-# Из Python — только то, что нужно silero_worker.py: без IDLE, Tk, тестов, pip, заголовков и справки.
+# From Python - only what you need silero_worker.py: without IDLE, Tk, tests, pip, headers and help.
 SKIP_PYTHON = ('python/share/', 'python/include/', 'python/lib/pkgconfig/', 'python/lib/tcl', 'python/lib/tk',
                'python/lib/itcl', 'python/lib/thread', 'python/lib/libtcl', 'python/lib/libtk',
                'python/lib/python3.12/test/', 'python/lib/python3.12/idlelib/', 'python/lib/python3.12/tkinter/',
                'python/lib/python3.12/turtledemo/', 'python/lib/python3.12/ensurepip/',
                'python/lib/python3.12/site-packages/')
-# Как в copy_bundle_dependencies.py: без кешей, заголовков сборки и тестов пакетов.
+# Like copy_bundle_dependencies.py: without caches, build headers and package tests.
 SKIP_PACKAGE_PARTS = {'__pycache__', 'include', 'tests', 'test', 'benchmarks'}
 EXECUTABLE = {'NaviDnD', 'NaviDnD.McpServer', 'alacritty', 'createdump', 'setup-silero.sh'}
 
@@ -38,7 +38,7 @@ def silero(tar_path, wheels, model, notices, dest):
             if '..' in name.split('/') or name.startswith('/'):
                 raise SystemExit(f'Unsafe path in Python archive: {name}')
             write(archive.extractfile(member), os.path.join(dest, *name.split('/')))
-    # bin/python3 в архиве — ссылка на python3.12; игра запускает python3, копия работает так же.
+    # bin/python3 in the archive - link to python3.12; the game launches python3, the copy works the same way.
     shutil.copy2(os.path.join(dest, 'python', 'bin', 'python3.12'), os.path.join(dest, 'python', 'bin', 'python3'))
 
     site = os.path.join(dest, 'python', 'lib', 'python3.12', 'site-packages')
@@ -75,7 +75,7 @@ def make_zip(source, output):
                 path = os.path.join(root, name)
                 entry = top + '/' + os.path.relpath(path, source).replace('\\', '/')
                 info = zipfile.ZipInfo.from_file(path, entry)
-                info.create_system = 3  # Unix: права из external_attr
+                info.create_system = 3  # Unix: rights from external_attr
                 mode = 0o755 if name in EXECUTABLE or '/python/bin/' in entry else 0o644
                 info.external_attr = (0o100000 | mode) << 16
                 info.compress_type = zipfile.ZIP_DEFLATED

@@ -2,20 +2,20 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: движение героя по карте активирует триггеры (MovementHandler.TryMove → GameAiClient.FireTrigger),
-// заявленные в CLAUDE.md как готовая часть "Исследования", но ранее не проверенные через реальный UI —
-// ни один существующий тест не проводил героя через onStep-ловушку или onVisible-триггер скрытого
-// объекта. FireTrigger использует тот же системный промпт (Prompts/Dnd5e/SendAction), что и обычный
-// SendAction (см. GameAiClient.BuildSendActionContext) — поэтому мок с именем действия "SendAction"
-// перехватывает и обычные действия игрока, и срабатывание триггеров одинаково.
+// E2E: the hero's movement across the map activates triggers (MovementHandler.TryMove →
+// GameAiClient.FireTrigger), stated in CLAUDE.md as a ready-made part of the "Research", but not previously
+// tested through the real UI - no existing test has put the hero through a onStep- trap or onVisible- hidden
+// object trigger. FireTrigger uses the same system prompt (Prompts/Dnd5e/SendAction)) as the normal SendAction
+// (see GameAiClient.BuildSendActionContext) - therefore, a mock with the action name "SendAction" intercepts
+// both the player's normal actions and triggers in the same way.
 public class TriggersScenarioTests
 {
     private readonly ITestOutputHelper _output;
 
     public TriggersScenarioTests(ITestOutputHelper output) => _output = output;
 
-    // Fixtures/trap_game.json: герой в [1,3], объект-ловушка "Капкан" в [2,3] с triggers.onStep —
-    // один шаг на восток должен наступить прямо на неё.
+    // Fixtures/trap_game.json: hero at [1,3], trap object "Trap" at [2,3] with triggers.onStep - one step to
+    // the east should step directly on it.
     [Fact]
     public void OnStepTrap_MovingOntoIt_FiresAiTrigger()
     {
@@ -32,10 +32,10 @@ public class TriggersScenarioTests
 
         GameConsole.SendKey(game.Pid, ConsoleKey.RightArrow);
 
-        // Шаг на ловушку должен вызвать FireTrigger (мок SendAction, искусственная задержка 5с) —
-        // спиннер "Ожидание..." доказывает, что реально произошёл AI-вызов, а не просто локальный
-        // рендер новой позиции (обычное движение без триггеров ИИ вообще не вызывает — см.
-        // MovementFogOfWarTests, где силент-шаг проверяется от противного).
+        // A step on a trap should cause FireTrigger (mock SendAction, artificial delay 5s) - the "Waiting..."
+        // spinner proves that a AI- call actually occurred, and not just a local rendering of a new position
+        // (normal movement without AI triggers does not cause at all - see MovementFogOfWarTests, where the
+        // silent step is checked by contradiction).
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Ожидание", 3000),
             "После шага на клетку с onStep-ловушкой не появился спиннер ожидания — FireTrigger не был вызван.");
@@ -49,11 +49,11 @@ public class TriggersScenarioTests
         TestPacing.Step();
     }
 
-    // Fixtures/hidden_object_game.json: герой в [1,3], скрытый объект "Тайный символ" в [5,3]
-    // (hidden:true, triggers.onVisible), зрение героя 10фт (2 клетки). Первый шаг на восток
-    // (дистанция станет 3 клетки) triggers.onVisible ещё не должен сработать — герой не увидел
-    // объект; второй шаг (дистанция 2 клетки) должен его "заметить" и вызвать FireTrigger,
-    // несмотря на то что сам объект никогда не отображается на сетке (hidden:true).
+    // Fixtures/hidden_object_game.json: hero in [1,3], hidden object "Secret Symbol" in [5,3] (hidden:true,
+    // triggers.onVisible), hero's vision 10ft (2 cells). The first step to the east (the distance will be 3
+    // cells) triggers.onVisible should not work yet - the hero has not seen the object; the second step
+    // (distance 2 cells) must "notice" it and call FireTrigger, even though the object itself is never shown on
+    // the mesh (hidden:true).
     [Fact]
     public void HiddenObjectOnVisible_EnteringVisionRange_FiresAiTrigger()
     {
@@ -70,8 +70,8 @@ public class TriggersScenarioTests
 
         GameConsole.SendKey(game.Pid, ConsoleKey.RightArrow);
 
-        // Обычное локальное движение (без триггеров) не должно вызывать ИИ вообще — отсутствие
-        // спиннера в течение короткого окна доказывает, что FireTrigger НЕ был вызван преждевременно.
+        // Normal local movement (without triggers) should not trigger the AI at all - the absence of a spinner
+        // within a short window proves that FireTrigger was NOT triggered prematurely.
         Thread.Sleep(1200);
         var rowsAfterFirstStep = GameConsole.ReadRows(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth);
         Assert.DoesNotContain(rowsAfterFirstStep, r => r.Contains("Ожидание"));

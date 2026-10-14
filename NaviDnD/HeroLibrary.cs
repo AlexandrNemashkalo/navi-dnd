@@ -5,10 +5,10 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD;
 
-// Библиотека героев (Storage/Heroes/*.json): герой целиком (HeroJson — статы, навыки, заклинания, способности,
-// раса, класс, уровень, снаряжение) + личность для анкеты. Обновляется из сохранённых игр (последнее состояние
-// героя — с прогрессом), остаётся, даже если игру удалили. Новая игра тем же героем: уровень и умения
-// сохраняются, снаряжение и состояние — заново (GameAiClient.ReuseHero).
+// Library of heroes (Storage/Heroes/*.json): the entire hero (HeroJson - stats, skills, spells, abilities,
+// race, class, level, equipment) + personality for the profile. Updated from saved games (the last state of the
+// hero - with progress), remains, even if the game is deleted. New game with the same hero: level and skills
+// are saved, equipment and state - again (GameAiClient.ReuseHero).
 public static class HeroLibrary
 {
     public sealed class Card
@@ -17,7 +17,7 @@ public static class HeroLibrary
         public string Name { get; set; } = "";
         public string Symbol { get; set; } = "";
         public string Race { get; set; } = "";
-        public string Class { get; set; } = "";      // без уровня
+        public string Class { get; set; } = "";      // without level
         public string Level { get; set; } = "";      // «3» — hero.level
         public string Description { get; set; } = "";
         public List<int>? Color { get; set; }
@@ -34,7 +34,7 @@ public static class HeroLibrary
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All),
     };
 
-    // Все герои, новые — первыми (перед этим — подтянуть героев из сохранённых игр).
+    // All heroes, new ones - first (before that, pull up heroes from saved games).
     public static List<Card> All()
     {
         for (int slot = 1; slot <= Storage.MaxGames; slot++)
@@ -50,11 +50,11 @@ public static class HeroLibrary
                     list.Add(c);
                 }
             }
-            catch { /* повреждённый файл — пропускаем */ }
+            catch { /*damaged file - skip*/ }
         return list.OrderByDescending(c => c.SavedAt).ToList();
     }
 
-    // Описание героя из анкеты (внешность, характер, предыстория) — в его карточку.
+    // Description of the hero from the profile (appearance, character, background) - in his card.
     public static void SetDescription(string name, string description)
     {
         try
@@ -64,10 +64,10 @@ public static class HeroLibrary
             card.Description = description;
             File.WriteAllText(file, JsonSerializer.Serialize(card, _json), Encoding.UTF8);
         }
-        catch { /* не записалось — описание останется в этой игре */ }
+        catch { /*not registered - the description will remain in this game*/ }
     }
 
-    // Герой сохранённой игры — в библиотеку (по имени; новее — перезаписывает).
+    // Hero of the saved game - to the library (by name; newer - overwrites).
     public static void SyncFromSave(string savePath)
     {
         try
@@ -88,14 +88,14 @@ public static class HeroLibrary
                 Name = name, Symbol = (string?)hero["symbol"] ?? "", Race = Stat(StatKeys.Race),
                 Class = cls,
                 Level = ((int?)hero["level"] ?? clsLevel ?? 1).ToString(),
-                // Описание (предыстория из анкеты) в сохранении игры не хранится — остаётся с карточки.
+                // The description (backstory from the questionnaire) is not stored in the game save - it remains from the card.
                 Description = (string?)hero["description"] ?? old?.Description ?? "", Color = color is { Count: 3 } ? color : null,
                 Image = (string?)hero["image"], HeroJson = hero.ToJsonString(), SavedAt = savedAt,
             };
             Directory.CreateDirectory(Dir);
             File.WriteAllText(file, JsonSerializer.Serialize(card, _json), Encoding.UTF8);
         }
-        catch { /* не прочиталось — герой просто не появится в списке */ }
+        catch { /*not read - the hero simply will not appear in the list*/ }
     }
 
     public static void Delete(Card card)

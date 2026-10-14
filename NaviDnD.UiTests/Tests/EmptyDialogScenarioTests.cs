@@ -3,10 +3,10 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: с пустой историей (DialogDisplay.Draw) диалоговый блок раньше схлопывался до заголовка +
-// разделителя без единой строки контента — вместо фиксированной высоты в MaxHistoryLines строк,
-// как при непустой истории. Fixtures/effects_game.json задаёт "history": [] (и полный hero, включая
-// equipmentSlots, — нужен для безопасного рендера экрана Персонажа).
+// E2E: with empty history (DialogDisplay.Draw) dialog block used to collapse to title + separator without a
+// single line of content - instead of a fixed height in MaxHistoryLines lines, as with a non-empty history.
+// Fixtures/effects_game.json sets "history": [] (and the full hero, including equipmentSlots - needed for safe
+// screen rendering character).
 public class EmptyDialogScenarioTests
 {
     private readonly ITestOutputHelper _output;
@@ -31,7 +31,7 @@ public class EmptyDialogScenarioTests
         var failures = new List<string>();
 
         int titleIdx = rows.FindIndex(r => r.Contains("ДИАЛОГОВОЕ ОКНО"));
-        Assert.True(titleIdx >= 0); // уже проверено WaitForAnyRowContains выше, но нужен индекс
+        Assert.True(titleIdx >= 0); // already checked WaitForAnyRowContains above, but the index is needed
 
         int maxHistoryLines = new DisplayConfig().MaxHistoryLines;
 

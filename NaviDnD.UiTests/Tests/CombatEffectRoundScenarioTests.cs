@@ -2,20 +2,20 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E-регрессия: во время боя раунд продвигает ФИНАЛЬНАЯ ЗАПИСЬ ХОДА ВРАГОВ (totalRounds+1, см.
-// SendAction systemPrompt § БОЙ), а не только SendAction вне боя (см. BurningEffectRoundTransitionTests)
-// и не только движение по сетке. До фикса MapScreenLoop.RunEnemyTurnAndCheckRoundEnd движок вообще
-// не проверял Storage.TakeRoundBundle() после хода врагов — эффект героя (например, «Горящий»)
-// никогда бы не истёк во время боя, пока раунды продвигает исключительно вражеский ход.
-//
-// Fixtures/combat_effect_round_game.json: бой активен, ход гоблина (все действия/скорость героя уже
-// потрачены — типичная причина, почему ход именно у врага); «Горящий» задан с expiresAtRound:1 (а не
-// onRound) — при totalRounds:1 он ЕЩЁ не истёк (currentRound > expiresAtRound строго), поэтому первая
-// же проверка после действия игрока (round ещё 1) не срабатывает — это принципиально, иначе эффект
-// сработал бы ДО хода врага и тест ничего бы не доказал про сам фикс. Три мок-ответа "SendAction":
-// 1) заглушка действия игрока, 2) ход гоблина — атакует и передаёт ход герою с totalRounds+1 (теперь
-// currentRound(2) > expiresAtRound(1) — эффект истёк), 3) round-transition, вызванный ТОЛЬКО если
-// фикс действительно сработал — снимает «Горящий».
+// E2E- regression: during combat, the round advances the FINAL RECORDING OF ENEMIES' MOVE (totalRounds+1, see
+// SendAction systemPrompt § COMBAT), and not just SendAction outside of combat (see
+// BurningEffectRoundTransitionTests) and not only movement on the grid. Before the
+// MapScreenLoop.RunEnemyTurnAndCheckRoundEnd fix, the engine did not check at all Storage.TakeRoundBundle()
+// after the enemies' turn - the hero's effect (for example, "Burning") would never expire during the battle,
+// while the rounds are promoted exclusively by the enemy's turn. Fixtures/combat_effect_round_game.json: the
+// battle is active, the goblin's turn (all actions / speed of the hero have already been spent - a typical
+// reason why the enemy's move is set with expiresAtRound:1 (and not onRound) - with totalRounds:1); It hasn’t
+// expired YET (currentRound > expiresAtRound strictly), so the first check after the player’s action (round 1
+// more) does not work - this is important, otherwise the effect would have worked BEFORE the enemy’s move and
+// the test would not have proved anything about the fix itself. Three mock answers "SendAction": 1) stub the
+// player's action, 2) the goblin's move - attacks and. transfers the turn to the hero with totalRounds+1 (now
+// currentRound(2) > expiresAtRound(1) - the effect has expired), 3) round-transition, called ONLY if the fix
+// actually worked - removes “Burning”.
 public class CombatEffectRoundScenarioTests
 {
     private readonly ITestOutputHelper _output;

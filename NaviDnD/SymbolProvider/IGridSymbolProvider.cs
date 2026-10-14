@@ -20,5 +20,5 @@ public enum CornerType
     LeftMiddle,     // ├
     RightMiddle,    // ┤
     Cross,          // ┼
-    None            // нет угла
+    None            // no angle
 }

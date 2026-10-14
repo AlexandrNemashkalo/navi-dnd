@@ -47,7 +47,7 @@ public class SpeechTests
         config.SpeechEnabled = true;
         await (Task<string>)complete.Invoke(client, [blocks, "action", "path", "model"])!;
         Assert.Equal("lang:ru\nspeechEnabled:true\naction", provider.Message);
-        // Язык игры — язык мира загруженного сохранения.
+        // The language of the game is the language of the world of the loaded save.
         try
         {
             storage.ApplyUpdateWorldState("""{"language":"en"}""");
@@ -124,8 +124,8 @@ public class SpeechTests
         Assert.Contains("*стражник*", ssml);
         Assert.DoesNotContain("HP", ssml);
     }
-    // Ударение «+» — только для озвучки: на экране его нет и в обычном тексте (без <speak>), в том числе после
-    // ударной гласной; плюсы механики (+3, 1к8+3) остаются.
+    // The accent “+” is only for voice acting: it is not on the screen and in regular text (without <speak>),
+    // including after a stressed vowel; the mechanical advantages (+3, 1d8+3) remain.
     [Theory]
     [InlineData("Принято: впредь — Ге+ндальф.", "Принято: впредь — Гендальф.")]
     [InlineData("Г+ендальф и з+амок", "Гендальф и замок")]

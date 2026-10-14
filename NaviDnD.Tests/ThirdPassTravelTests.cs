@@ -28,11 +28,11 @@ public class ThirdPassTravelTests
             Assert.Equal(PartsOfDay.Evening,ws.Time.PartOfDay);
             Assert.Equal(1,ws.Time.TotalRounds);
             Assert.Empty(ws.ScheduledEvents!);
-            Assert.Contains("Еда:",report);
+            Assert.Contains("Food:",report);
             Assert.Contains("id 0",report);
             Assert.Equal(5,ws.Hero.Inventory[0].Quantity); // only the master consumes food from the report
-            Assert.Contains("Привалы:",report);
-            Assert.Equal(encounter,report.Contains("ВСТРЕЧА"));
+            Assert.Contains("Rest stops:",report);
+            Assert.Equal(encounter,report.Contains("ENCOUNTER"));
             Assert.False(GameWorld.HasLocation(ws));
         }
         finally { worlds.Remove(id); }

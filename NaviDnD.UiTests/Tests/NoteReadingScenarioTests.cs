@@ -3,16 +3,16 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: чтение записки в инвентаре (HeroInventory.Text) — MouseUiHelper.SetSelectedInventoryItem
-// (постраничный показ: страница 0 — картинка+название, дальше — сам текст) и механизм "закрепления"
-// выбора (DisplayConfig.PinnedInventoryIndex) поверх обычного наведения (DisplayConfig.
-// SelectedInventoryIndex). Дизайн: клик/Tab закрепляют предмет («←» переживает уход мыши); обычное
-// наведение на ДРУГОЙ предмет временно меняет картинку справа, но НЕ снимает «←» с закреплённого —
-// она переходит на новый предмет только по явному клику/Tab (HeroDisplay.DrawInventorySection:
-// arrow1/arrow2 следуют за pinIdx, а не за hover, пока что-то закреплено). Цвет стрелки одинаковый
-// в обоих случаях (обычный "бледный" цвет выделения) — отличает закрепление не цвет, а то, что
-// стрелка не пропадает при уходе мыши. См. Fixtures/full_game.json: "Длинный меч"
-// (hero.inventory[1]) — единственный предмет с заданным `text`.
+// E2E: reading a note in the inventory (HeroInventory.Text) - MouseUiHelper.SetSelectedInventoryItem
+// (page-by-page display: page 0 - picture + title, then the text itself) and the mechanism for "fixing" the
+// selection (DisplayConfig.PinnedInventoryIndex) on top of normal hovering (DisplayConfig.
+// SelectedInventoryIndex). Design: click / Tab pin the item ("←" experiences moving the mouse); normal pointing
+// to ANOTHER item temporarily changes the picture on the right, but does NOT remove the “←” from the pinned one
+// - it moves to the new item only by explicit click/Tab (HeroDisplay.DrawInventorySection: arrow1/arrow2
+// follows pinIdx, and not hover, while something is pinned the same in both cases (the usual “pale” color).
+// highlight) - what distinguishes the fixing is not the color, but the fact that the arrow does not disappear
+// when the mouse leaves. See Fixtures/full_game.json: "Long Sword" (hero.inventory[1]) is the only item with
+// the given `text`.
 public class NoteReadingScenarioTests
 {
     private readonly ITestOutputHelper _output;
@@ -27,14 +27,15 @@ public class NoteReadingScenarioTests
 
         Navigation.ToCharacterScreen(game.Pid);
         const string noteItem = "Длинный меч";
-        // "Стрелы" (не экипировано) — в отличие от "Длинный лук" (экипирован в обе руки) не дублируется
-        // строкой в слотах экипировки выше списка инвентаря, где FindIndex поймал бы не ту строку.
+        // "Arrows" (not equipped) - unlike "Longbow" (both hands equipped) is not duplicated by a string in the
+        // equipment slots above the inventory list, where FindIndex would catch the wrong string.
         const string otherItem = "Стрелы";
 
-        // HeroDisplay.DrawSubTabTitle рисует СВОЙ индикатор "◄ N/M ►" в строке с ярлыками
-        // ИНВЕНТАРЬ/СПОСОБНОСТИ/СОСТОЯНИЯ (пагинация списка инвентаря) — при 18 предметах в фикстуре
-        // у него тоже 2 страницы, поэтому "◄ 1/2 ►" на экране одновременно с индикатором записки.
-        // Отличаем по строке: у панели записки (DialogDisplay) метки "ИНВЕНТАРЬ" в той же строке нет.
+        // HeroDisplay.DrawSubTabTitle draws HIS indicator "◄ N/M ►" in the line with the
+        // INVENTORY/ABILITIES/CONDITIONS labels (pagination of the inventory list) - with 18 items in the
+        // fixture, it also has 2 pages, so "◄ 1/2 ►" is on the screen at the same time as the note indicator.
+        // We distinguish by line: the note panel (DialogDisplay)) does not have the “INVENTORY” label in the
+        // same line.
         static bool IsNoteIndicatorRow(string line, string marker) => line.Contains(marker) && !line.Contains("ИНВЕНТАРЬ");
         bool NoteIndicatorPresent(List<string> rows, string marker) => rows.Any(r => IsNoteIndicatorRow(r, marker));
 
@@ -51,8 +52,8 @@ public class NoteReadingScenarioTests
         int noteCol = rows[noteRow].IndexOf(noteItem, StringComparison.Ordinal) + 2;
         int otherCol = rows[otherRow].IndexOf(otherItem, StringComparison.Ordinal) + 2;
 
-        // 1. Наведение показывает страницу 1/2 (картинка+название) — до клика без закрепления,
-        // маркер «←» пока просто следует за наведением (как обычный, не-note предмет).
+        // 1. Hover shows page 1/2 (picture+title) - before clicking without pinning, the “←” marker just
+        // follows the hover (like a regular, non-note item).
         _output.WriteLine($"Навожу мышь на «{noteItem}» (есть text в фикстуре)...");
         GameConsole.SendMouseMove(game.Pid, noteCol, noteRow);
         Thread.Sleep(150);
@@ -67,9 +68,9 @@ public class NoteReadingScenarioTests
         _output.WriteLine("Индикатор страниц 1/2 появился при наведении.");
         TestPacing.Step();
 
-        // 2. Клик закрепляет предмет — в отличие от обычного наведения, маркер и индикатор страниц
-        // переживают уход мыши в пустую область (обычное наведение сбросило бы их в null, как
-        // проверяет InventoryHoverScenarioTests).
+        // 2. Clicking locks the item - unlike normal hover, the marker and page indicator survive the mouse
+        // moving into an empty area (normal hover would reset them to null, as InventoryHoverScenarioTests).
+        // checks
         _output.WriteLine($"Кликаю по «{noteItem}» — закрепляю выбор, затем увожу мышь в пустую область...");
         GameConsole.SendLeftClick(game.Pid, noteCol, noteRow);
         Thread.Sleep(150);
@@ -86,9 +87,9 @@ public class NoteReadingScenarioTests
         _output.WriteLine("Закрепление пережило уход мыши.");
         TestPacing.Step();
 
-        // 3. Наведение на ДРУГОЙ предмет временно меняет картинку справа (у него нет text — индикатор
-        // страниц пропадает), но маркер «←» НЕ уходит с закреплённого — только явный клик/Tab
-        // переносит закрепление.
+        // 3. Pointing at ANOTHER item temporarily changes the picture on the right (it does not have text - the
+        // page indicator disappears), but the “←” marker does NOT move away from the pinned one - only an
+        // explicit click/Tab transfers the pinning.
         _output.WriteLine($"Навожу мышь на «{otherItem}» — временный превью, закрепление не должно сняться...");
         GameConsole.SendMouseMove(game.Pid, otherCol, otherRow);
         Thread.Sleep(150);
@@ -103,8 +104,8 @@ public class NoteReadingScenarioTests
         _output.WriteLine("Превью сменился, но закрепление осталось на месте.");
         TestPacing.Step();
 
-        // 4. Уход мыши с B возвращает показ закреплённого A — маркер и так был на месте, но контент
-        // справа должен вернуться к записке.
+        // 4. Mouse leaving B returns the display of the pinned A - the marker was already in place, but the
+        // content on the right should return to the note.
         _output.WriteLine($"Увожу мышь с «{otherItem}» — контент справа должен вернуться к закреплённому «{noteItem}»...");
         GameConsole.SendMouseMove(game.Pid, 2, 2);
         Thread.Sleep(150);
@@ -119,7 +120,7 @@ public class NoteReadingScenarioTests
         _output.WriteLine("Показ закреплённого предмета корректно восстановился.");
         TestPacing.Step();
 
-        // 5. Клик по стрелке ► листает на страницу текста записки.
+        // 5. Click on the arrow ► to scroll to the note text page.
         rows = GameConsole.ReadRows(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth);
         int indicatorRow = rows.FindIndex(r => IsNoteIndicatorRow(r, "◄ 1/2 ►"));
         Assert.True(indicatorRow >= 0, "Индикатор страниц «◄ 1/2 ►» не найден для определения позиции стрелки.");
@@ -137,7 +138,7 @@ public class NoteReadingScenarioTests
         _output.WriteLine("Текст записки отобразился на странице 2/2.");
         TestPacing.Step();
 
-        // 6. Клик по стрелке ◄ возвращает картинку (страница 1/2).
+        // 6. Clicking on the arrow ◄ returns the picture (page 1/2).
         rows = GameConsole.ReadRows(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth);
         indicatorRow = rows.FindIndex(r => r.Contains("◄ 2/2 ►"));
         Assert.True(indicatorRow >= 0, "Индикатор страниц «◄ 2/2 ►» не найден для определения позиции стрелки.");
@@ -151,8 +152,8 @@ public class NoteReadingScenarioTests
         _output.WriteLine("Клик по ◄ вернул картинку (страница 1/2).");
         TestPacing.Step();
 
-        // 7. Клавиатурное листание (RightArrow/LeftArrow при закреплённой записке — InputBox
-        // возвращает "NoteLeft"/"NoteRight" вместо обычного текстового ввода).
+        // 7. Keyboard scrolling (RightArrow/LeftArrow with a pinned note - InputBox returns
+        // "NoteLeft"/"NoteRight" instead of regular text input).
         _output.WriteLine("Проверяю клавиатурное листание (RightArrow/LeftArrow)...");
         GameConsole.SendKey(game.Pid, ConsoleKey.RightArrow);
         Thread.Sleep(150);

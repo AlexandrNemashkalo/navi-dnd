@@ -5,10 +5,10 @@ using NaviDnD.Helpers;
 
 namespace NaviDnD.Display;
 
-// Экран «МОИ ИГРЫ» в стиле анкеты: до Storage.MaxGames игр карточками в две колонки (6 — 2×3). На карточке — портрет цветом
-// героя, имя, раса/класс, HP, сюжетная арка, день/время суток и когда играли. Пустая карточка —
-// «СВОБОДНО» (новая игра в это место). Стрелки — выбор, Enter — играть, Del — удалить (с подтверждением),
-// мышь — наведение выбирает, клик подтверждает. Esc / «[Esc]МЕНЮ» в заголовке — назад.
+// Questionnaire-style "MY GAMES" screen: up to Storage.MaxGames games with cards in two columns (6 - 2x3). On
+// the card there is a portrait of the hero in color, name, race/class, HP, story arc, day/time of day and when
+// played. Blank card - “FREE” (new game in this place). Arrows - select, Enter - play, Del - delete (with
+// confirmation), mouse - hover selects, click confirms. Esc / “[Esc]MENU” in the title - back.
 public class GamesDisplay(WorldState settings, DisplayConfig display, string title, string? message = null)
 {
     public enum Action { Back, Play, NewGame }
@@ -83,13 +83,13 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
             if (ConsoleMouseReader.TryReadKey() is not { } key) { Thread.Sleep(15); continue; }
             if (_confirmDelete)
             {
-                // Подтверждение удаления: Enter — да, Esc/любая другая — нет.
+                // Deletion confirmation: Enter - yes, Esc/any other - no.
                 _confirmDelete = false;
                 if (key.Key == ConsoleKey.Enter)
                 {
                     Storage.DeleteSlot(_cards[_selected].Slot);
                     _cards[_selected] = new GameCard(_cards[_selected].Slot, false);
-                    _message = L.T("Игра удалена");
+                    _message = L.T("Game deleted");
                     Sound.PlayClick();
                 }
                 else _message = "";
@@ -136,7 +136,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         Sound.PlayClick();
     }
 
-    // ── Данные карточки — прямо из файла игры ─────────────────────────────────
+    // ── Card data - directly from the game file ─────────────────────────────────
     private static GameCard ReadCard(int slot)
     {
         string path = Storage.SlotPath(slot);
@@ -149,16 +149,16 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
                 .FirstOrDefault(s => (string?)s?["key"] == key)?["value"]?.ToString() ?? "";
             var color = hero?["color"]?.AsArray().Select(v => (int)v!).ToList();
             var time = root?["time"];
-            string timeText = time == null ? "" : L.F("День {0}", time["day"]) + " · " + GameTime.PartOfDayText((string?)time["partOfDay"]);
+            string timeText = time == null ? "" : L.F("Day {0}", time["day"]) + " · " + GameTime.PartOfDayText((string?)time["partOfDay"]);
             return new GameCard(slot, true,
-                Name: (string?)hero?["name"] ?? L.T("Безымянный"),
+                Name: (string?)hero?["name"] ?? L.T("Nameless"),
                 Symbol: (string?)hero?["symbol"] ?? "",
                 Color: color is { Count: 3 } ? color : null,
                 Image: (string?)hero?["image"],
                 Race: Stat(StatKeys.Race),
-                // «Воин 2 ур» — как на карточке героя (уровень — hero.level).
-                Class: Stat(StatKeys.Class) is { Length: > 0 } cls ? L.F("{0} {1} ур", cls, (int?)hero?["level"] ?? 1) : "",
-                Hp: hero?["dead"]?.GetValue<bool>() == true ? L.T("— погиб") : (string?)hero?["hp"] ?? "",
+                // “Warrior 2 lvl” - as on the hero card (level - hero.level).
+                Class: Stat(StatKeys.Class) is { Length: > 0 } cls ? L.F("{0} {1} lvl", cls, (int?)hero?["level"] ?? 1) : "",
+                Hp: hero?["dead"]?.GetValue<bool>() == true ? L.T("— dead") : (string?)hero?["hp"] ?? "",
                 Arc: (string?)root?["narrative"]?["currentArc"] ?? "",
                 Time: timeText,
                 Played: File.GetLastWriteTime(path),
@@ -166,11 +166,11 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         }
         catch
         {
-            return new GameCard(slot, true, Name: L.T("Повреждённое сохранение"), Played: File.GetLastWriteTime(path));
+            return new GameCard(slot, true, Name: L.T("Corrupted save"), Played: File.GetLastWriteTime(path));
         }
     }
 
-    // ── Мышь ──────────────────────────────────────────────────────────────────
+    // ── Mouse ───────────────────────────────── ─────────────────────────────────
     private (int x, int y) CardOrigin(int index) =>
         (_left + (index % 2) * (CardWidth + Gap), _top + (index / 2) * (CardHeight + 1));
 
@@ -184,7 +184,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         return -1;
     }
 
-    // ── Отрисовка ─────────────────────────────────────────────────────────────
+    // ── Rendering ────────────────────────────── ───────────────────────────────
     private void Redraw()
     {
         _chars = new char[_height, _width];
@@ -199,9 +199,9 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         for (int i = 0; i < _cards.Count; i++) DrawCard(i);
 
         string footer = _confirmDelete
-            ? L.F("Удалить игру «{0}»?   [Enter]ДА   [Esc]НЕТ", _cards[_selected].Name)
+            ? L.F("Delete game \"{0}\"?   [Enter]YES   [Esc]NO", _cards[_selected].Name)
             : _message.Length > 0 ? _message
-            : _cards[_selected].Exists ? L.T("[←→↑↓]ВЫБОР   [Enter]ИГРАТЬ   [Del]УДАЛИТЬ") : L.T("[←→↑↓]ВЫБОР   [Enter]НОВАЯ ИГРА");
+            : _cards[_selected].Exists ? L.T("[←→↑↓]SELECT   [Enter]PLAY   [Del]DELETE") : L.T("[←→↑↓]SELECT   [Enter]NEW GAME");
         CenterIn(_top + CardHeight * Rows + Rows, _left, total, footer, _confirmDelete ? Bright : Dim);
 
         Term.CursorVisible = false;
@@ -214,17 +214,17 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         var (x, y) = CardOrigin(index);
         bool selected = index == _selected;
         bool active = card.Exists && card.Slot == Storage.ActiveSlot;
-        string boxTitle = L.F("ИГРА {0}", card.Slot) + (active ? " · " + L.T("ПОСЛЕДНЯЯ") : "");
-        DrawBox(y, x, CardWidth, CardHeight, boxTitle, selected ? Bright : MouseUiHelper.FrameColor(display), selected); // выбранная — светлой рамкой и стрелками
+        string boxTitle = L.F("GAME {0}", card.Slot) + (active ? " · " + L.T("LATEST") : "");
+        DrawBox(y, x, CardWidth, CardHeight, boxTitle, selected ? Bright : MouseUiHelper.FrameColor(display), selected); // selected - light frame and arrows
 
         if (!card.Exists)
         {
-            CenterIn(y + CardHeight / 2 - 1, x, CardWidth, L.T("СВОБОДНО"), selected ? Bright : Dim);
-            CenterIn(y + CardHeight / 2 + 1, x, CardWidth, L.T("новая игра"), Dim);
+            CenterIn(y + CardHeight / 2 - 1, x, CardWidth, L.T("EMPTY"), selected ? Bright : Dim);
+            CenterIn(y + CardHeight / 2 + 1, x, CardWidth, L.T("new game"), Dim);
             return;
         }
 
-        // Портрет цветом героя слева, сведения справа.
+        // Portrait in color of the hero on the left, information on the right.
         var color = card.Color ?? Fg;
         var art = string.IsNullOrEmpty(card.Image) ? null : SvgToBrailleConverter.Convert(card.Image, "", PortraitWidth);
         if (art != null)
@@ -236,10 +236,10 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         Put(ty, tx, Fit(card.Name, tw), color);
         string who = string.Join(" · ", new[] { card.Race, card.Class }.Where(s => s.Length > 0));
         if (who.Length > 0) Put(ty + 1, tx, Fit(who, tw), Fg);
-        if (card.Hp.Length > 0) Put(ty + 2, tx, Fit(L.T("ХП ") + card.Hp, tw), Fg);
-        if (card.World.Length > 0) Put(ty + 3, tx, Fit(L.F("Мир: {0}", card.World), tw), Fg);
+        if (card.Hp.Length > 0) Put(ty + 2, tx, Fit(L.T("HP ") + card.Hp, tw), Fg);
+        if (card.World.Length > 0) Put(ty + 3, tx, Fit(L.F("World: {0}", card.World), tw), Fg);
 
-        // Сюжет — две строки под миром (ниже — время и когда играли).
+        // Plot - two lines under the world (below - time and when played).
         if (card.Arc.Length > 0)
         {
             var arc = TextWrapper.WrapText(card.Arc, tw);
@@ -247,11 +247,11 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
                 Put(ty + 5 + i, tx, Fit(i == 1 && arc.Count > 2 ? arc[i] + "…" : arc[i], tw), Dim);
         }
         if (card.Time.Length > 0) Put(y + CardHeight - 3, tx, Fit(card.Time, tw), Dim);
-        Put(y + CardHeight - 2, tx, Fit(L.F("Играли {0:dd.MM HH:mm}", card.Played), tw), Dim);
+        Put(y + CardHeight - 2, tx, Fit(L.F("Played {0:dd.MM HH:mm}", card.Played), tw), Dim);
     }
 
-    // Заголовок в разрыве верхней линии: «╭──── ИГРА 1 ────╮», у выбранной вместо части рамки стрелки —
-    // «╭─ → ИГРА 1 ← ─╮» (текст на том же месте, не прыгает).
+    // Heading in the top line break: “╭──── GAME 1 ────╮”, the arrow selected instead of part of the frame is
+    // “╭─ → GAME 1 ← ─╮” (the text is in the same place, does not jump).
     private void DrawBox(int y, int x, int w, int h, string boxTitle, List<int> line, bool arrows = false)
     {
         Put(y, x, arrows ? "╭─ →" : "╭───", line);

@@ -2,11 +2,10 @@ using Xunit.Abstractions;
 
 namespace NaviDnD.UiTests;
 
-// E2E: отрисовка состояния боя в легенде (LegendDisplay.BuildCombatLines) — порядок хода,
-// доступные/потраченные действия, доступная/потраченная скорость, раунд/день. Чисто рендер, без
-// обращения к ИИ (Fixtures/combat_state_game.json задаёт Combat.Active/Initiative/Actions
-// статично) — движок уже показывает всё это на экране, но раньше это не проверялось ни одним
-// UI-тестом.
+// E2E: rendering of the battle state in the legend (LegendDisplay.BuildCombatLines) - turn order,
+// available/spent actions, available/spent speed, round/day. Pure rendering, without recourse to AI
+// (Fixtures/combat_state_game.json sets Combat.Active/Initiative/Actions statically) - the engine already shows
+// all this on the screen, but this has not been checked by any UI- test before.
 public class CombatStateScenarioTests
 {
     internal static readonly (byte r, byte g, byte b) MainBackground = (18, 18, 22);
@@ -29,12 +28,12 @@ public class CombatStateScenarioTests
         _output.WriteLine("Экран Карты отрисован.");
         TestPacing.Step();
 
-        // Легенда с активным боем выше обычной (+7 строк CombatReservedLines) — окну консоли
-        // нужен момент, чтобы досчитать размер и дорисовать нижнюю часть после первичной отрисовки
-        // заголовка. Ждём строку «Время:» — она рисуется ПОСЛЕДНЕЙ в BuildCombatLines, так что её
-        // появление гарантирует, что все строки ВЫШЕ (порядок хода/действия/скорость) уже отрисованы;
-        // ждать первую строку («Порядок боя») недостаточно — сама она может появиться раньше, чем
-        // остальные строки того же блока успеют дорисоваться.
+        // Legend with active battle is higher than usual (+7 lines CombatReservedLines) - the console window
+        // needs a moment to calculate the size and finish drawing the lower part after the initial drawing of
+        // the title. We are waiting for the line “Time:” - it is drawn LAST in BuildCombatLines, so its
+        // appearance guarantees that all lines ABOVE (turn order/actions/speed) are already drawn; wait for the
+        // first the line (“Battle order”) is not enough - it itself may appear before the other lines of the
+        // same block have time to complete the drawing.
         Assert.True(
             GameConsole.WaitForAnyRowContains(game.Pid, 0, GameConsole.ScanRowCount, GameConsole.TitleReadWidth, "Время:", 5000),
             "Строка «Время:» так и не появилась в легенде.");
@@ -76,7 +75,7 @@ public class CombatStateScenarioTests
         Assert.True(failures.Count == 0, "UI-тест FAIL:\n" + string.Join("\n", failures.Select(f => "  - " + f)));
     }
 
-    // Fixture: speedLeft=15, speedMax=30 → 6 квадратов всего (max/5), 3 белых (доступно) + 3 серых (потрачено).
+    // Fixture: speedLeft=15, speedMax=30 → 6 squares in total (max/5), 3 white (available) + 3 gray (spent).
     internal static void CheckMovementSquares(
         int gamePid, List<string> rows, string expectedFraction, (int r, int g, int b) availableColor, (int r, int g, int b) spentColor, List<string> failures)
     {
@@ -90,8 +89,8 @@ public class CombatStateScenarioTests
         int lastSquare = row.LastIndexOf('■');
         if (firstSquare < 0) { failures.Add("Квадраты скорости «■» не найдены в строке движения."); return; }
 
-        // Первый квадрат — доступная скорость, последний — потраченная (если весь остаток доступен,
-        // это одна и та же ячейка — тогда обе проверки просто совпадут, что и ожидается).
+        // The first square is the available speed, the last is the spent speed (if the entire remainder is
+        // available, this is the same cell - then both checks will simply match, as expected).
         ScreenAssertions.CheckCellColor(gamePid, firstSquare, rowIndex, availableColor, ColorTolerance, MainBackground, "квадрат скорости (доступно)", failures);
         ScreenAssertions.CheckCellColor(gamePid, lastSquare, rowIndex, spentColor, ColorTolerance, MainBackground, "квадрат скорости (потрачено)", failures);
     }
@@ -103,7 +102,7 @@ public class CombatStateScenarioTests
         if (row == null) { failures.Add($"Строка действия «{label}» не найдена в легенде."); return; }
         int rowIndex = rows.IndexOf(row);
 
-        // Символ ищем ПОСЛЕ метки (сам символ действия должен быть правее двоеточия метки).
+        // We are looking for the symbol AFTER the label (the action symbol itself must be to the right of the colon of the label).
         int labelEnd = row.IndexOf(label + ":") + label.Length + 1;
         int symbolCol = row.IndexOf(symbol, labelEnd);
         if (symbolCol < 0) { failures.Add($"Символ «{symbol}» ({(spent ? "потрачено" : "доступно")}) не найден в строке «{label}»: «{row.TrimEnd()}»"); return; }

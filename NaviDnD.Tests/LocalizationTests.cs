@@ -4,37 +4,37 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.Tests;
 
-// Перевод (L): у каждой строки из L.T/L.F/L.Plural и L.W/L.WF/L.WPlural в исходниках есть английский вариант
-// в NaviDnD.Data/Localization/en.json с теми же подстановками {0}, {1}…
+// Translation (L): each line from L.T/L.F/L.Plural and L.W/L.WF/L.WPlural in the source code has a Russian
+// version in NaviDnD.Data/Localization/ru.json with the same substitutions {0}, {1}...
 public class LocalizationTests
 {
     private static readonly string[] SourceDirs = ["NaviDnD", "NaviDnD.Data", "NaviDnD.MapGen", "NaviDnD.Installer", "NaviDnD.McpServer"];
     private const string Literal = "\"((?:[^\"\\\\]|\\\\.)*)\"";
 
     [Fact]
-    public void EveryWrappedStringHasEnglishTranslation()
+    public void EveryWrappedStringHasRussianTranslation()
     {
-        var missing = SourceKeys().Where(k => !L.EnglishTable.ContainsKey(k.Key))
+        var missing = SourceKeys().Where(k => !L.RussianTable.ContainsKey(k.Key))
             .Select(k => $"{k.File}: {k.Key}").Distinct().ToList();
-        Assert.True(missing.Count == 0, "Нет перевода в en.json:\n" + string.Join("\n", missing));
+        Assert.True(missing.Count == 0, "Нет перевода в ru.json:\n" + string.Join("\n", missing));
     }
 
-    // У установщика свой словарь (NaviDnD.Installer/en.json) — те же переводы, только его строки.
+    // The installer has its own dictionary (NaviDnD.Installer/ru.json) - the same translations, only its strings.
     [Fact]
     public void InstallerDictionaryMatchesGame()
     {
-        string path = Path.Combine(RepoRoot(), "NaviDnD.Installer", "en.json");
+        string path = Path.Combine(RepoRoot(), "NaviDnD.Installer", "ru.json");
         var installer = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(path))!;
         var wrong = SourceKeys().Where(k => k.Dir == "NaviDnD.Installer")
-            .Where(k => !installer.TryGetValue(k.Key, out var v) || !L.EnglishTable.TryGetValue(k.Key, out var game) || v != game)
+            .Where(k => !installer.TryGetValue(k.Key, out var v) || !L.RussianTable.TryGetValue(k.Key, out var game) || v != game)
             .Select(k => $"{k.File}: {k.Key}").Distinct().ToList();
-        Assert.True(wrong.Count == 0, "Нет в NaviDnD.Installer/en.json или расходится с игрой:\n" + string.Join("\n", wrong));
+        Assert.True(wrong.Count == 0, "Нет в NaviDnD.Installer/ru.json или расходится с игрой:\n" + string.Join("\n", wrong));
     }
 
     [Fact]
     public void TranslationsKeepPlaceholders()
     {
-        var broken = L.EnglishTable.Where(p => !Placeholders(p.Key).SetEquals(Placeholders(p.Value)))
+        var broken = L.RussianTable.Where(p => !Placeholders(p.Key).SetEquals(Placeholders(p.Value)))
             .Select(p => $"{p.Key} → {p.Value}").ToList();
         Assert.True(broken.Count == 0, "Подстановки не совпадают:\n" + string.Join("\n", broken));
     }
@@ -42,30 +42,30 @@ public class LocalizationTests
     [Fact]
     public void KeysAreStaticLiterals()
     {
-        // L.T($"…") и L.T(@"…") не найти в en.json: ключ — обычная строка, значения — через L.F.
+        // L.T($"…") and L.T(@"…") cannot be found in ru.json; the key is a regular string, the values are through L.F.
         var dynamic = SourceFiles().SelectMany(f => Regex.Matches(File.ReadAllText(f.File), @"L\.(T|F|W|WF)\(\s*[$@]")
             .Select(m => $"{Path.GetFileName(f.File)}: {m.Value}")).ToList();
         Assert.True(dynamic.Count == 0, string.Join("\n", dynamic));
     }
 
-    // Названия из справочников переводятся при показе (L.T(name)) — у каждого должен быть перевод.
+    // Names from directories are translated when displayed (L.T(name)) - everyone must have a translation.
     [Fact]
-    public void CatalogNamesHaveEnglishTranslation()
+    public void CatalogNamesHaveRussianTranslation()
     {
         string[] places = ["capital", "city", "town", "village", "castle", "port", "ruins", "dungeon", "cave", "shrine"];
         var names = WorldBiomes.All.Values.Select(b => b.Name)
             .Concat(places.Select(WorldPlaceTypes.Label))
             .Concat(TerrainCatalog.Kinds.Values.Select(k => k.Name))
             .Concat(FurnitureCatalog.Kinds.Values.Select(k => k.Name))
-            .Concat(["север", "юг", "запад", "восток", "северо-запад", "северо-восток", "юго-запад", "юго-восток", "центр мира"])
-            .Concat(["Ночь", "Утро", "День", "Вечер"]);
-        var missing = names.Where(n => !L.EnglishTable.ContainsKey(n)).Distinct().ToList();
-        Assert.True(missing.Count == 0, "Нет перевода в en.json:\n" + string.Join("\n", missing));
+            .Concat(["north", "south", "west", "east", "northwest", "northeast", "southwest", "southeast", "center of the world"])
+            .Concat(["Night", "Morning", "Day", "Evening"]);
+        var missing = names.Where(n => !L.RussianTable.ContainsKey(n)).Distinct().ToList();
+        Assert.True(missing.Count == 0, "Нет перевода в ru.json:\n" + string.Join("\n", missing));
     }
 
-    // Варианты анкеты героя и шага «Приключение» — русские ключи (Prompts/Dnd5e/*.json): в английской игре — перевод.
+    // Options for the hero profile and the “Adventure” step - English keys (Prompts/Dnd5e/*.json): in the Russian game - translation.
     [Fact]
-    public void HeroAndAdventureOptionsHaveEnglishTranslation()
+    public void HeroAndAdventureOptionsHaveRussianTranslation()
     {
         string dir = Path.Combine(RepoRoot(), "NaviDnD", "Prompts", "Dnd5e");
         var hero = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(Path.Combine(dir, "heroOptions.json")))!;
@@ -74,28 +74,79 @@ public class LocalizationTests
         var adventure = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(Path.Combine(dir, "adventureOptions.json")))!;
         values = values.Concat(adventure["params"]!.AsArray()
             .SelectMany(p => p!["options"]!.AsArray().Select(o => o!.ToString()).Append((string)p["label"]!)));
-        var missing = values.Where(v => !L.EnglishTable.ContainsKey(v)).Distinct().ToList();
-        Assert.True(missing.Count == 0, "Нет перевода в en.json:\n" + string.Join("\n", missing));
+        var missing = values.Where(v => !L.RussianTable.ContainsKey(v)).Distinct().ToList();
+        Assert.True(missing.Count == 0, "Нет перевода в ru.json:\n" + string.Join("\n", missing));
         Assert.NotEmpty(hero["namesEn"]!.AsArray());
     }
 
     [Fact]
-    public void EnglishSwitchesAndFallsBack()
+    public void EnglishKeysTranslateToRussianAndFallBackToEnglish()
     {
         try
         {
             L.SetLanguage(L.English);
-            Assert.Equal("SETTINGS", L.T("НАСТРОЙКИ"));
-            Assert.Equal("нет такого ключа", L.T("нет такого ключа"));
-            Assert.Equal(L.T("день"), L.Plural(1, "день", "дня", "дней"));
-            Assert.Equal(L.T("дней"), L.Plural(21, "день", "дня", "дней"));
+            Assert.Equal("SETTINGS", L.T("SETTINGS"));
             L.SetLanguage(L.Russian);
-            Assert.Equal("НАСТРОЙКИ", L.T("НАСТРОЙКИ"));
-            Assert.Equal("день", L.Plural(21, "день", "дня", "дней"));
-            Assert.Equal("дня", L.Plural(3, "день", "дня", "дней"));
-            Assert.Equal("дней", L.Plural(12, "день", "дня", "дней"));
+            Assert.Equal("НАСТРОЙКИ", L.T("SETTINGS"));
+            Assert.Equal("Unknown key", L.T("Unknown key"));
+            Assert.Equal("День 3", L.F("Day {0}", 3));
+            Assert.Equal("НАЗВАНИЕ", L.T("TITLE"));
+            Assert.Equal("ИМЯ", L.T("NAME"));
+            Assert.Equal("север", L.T("north"));
+            Assert.Equal("на север", L.T("to the north"));
         }
         finally { L.SetLanguage(L.Russian); }
+    }
+
+    [Theory]
+    [InlineData(0, "дней", "days")]
+    [InlineData(1, "день", "day")]
+    [InlineData(2, "дня", "days")]
+    [InlineData(5, "дней", "days")]
+    [InlineData(11, "дней", "days")]
+    [InlineData(12, "дней", "days")]
+    [InlineData(21, "день", "days")]
+    [InlineData(24, "дня", "days")]
+    [InlineData(-1, "день", "day")]
+    [InlineData(-22, "дня", "days")]
+    [InlineData(long.MinValue, "дней", "days")]
+    public void PluralsRespectLanguage(long n, string russian, string english)
+    {
+        try
+        {
+            L.SetLanguage(L.Russian);
+            Assert.Equal(russian, L.Plural(n, "day", "days"));
+            L.SetLanguage(L.English);
+            Assert.Equal(english, L.Plural(n, "day", "days"));
+        }
+        finally { L.SetLanguage(L.Russian); }
+    }
+
+    [Fact]
+    public void WorldLanguageIsIndependentFromInterface()
+    {
+        try
+        {
+            L.SetLanguage(L.English);
+            L.SetWorld(L.Russian);
+            Assert.Equal("Room 3", L.F("Room {0}", 3));
+            Assert.Equal("Комната 3", L.WF("Room {0}", 3));
+            Assert.Equal("дня", L.WPlural(3, "day", "days"));
+            L.SetLanguage(L.Russian);
+            L.SetWorld(L.English);
+            Assert.Equal("Комната 3", L.F("Room {0}", 3));
+            Assert.Equal("Room 3", L.WF("Room {0}", 3));
+            Assert.Equal("days", L.WPlural(3, "day", "days"));
+        }
+        finally { L.SetLanguage(L.Russian); L.SetWorld(L.Russian); }
+    }
+
+    [Fact]
+    public void TranslationKeysAreEnglishAndRussianPluralFormsAreComplete()
+    {
+        Assert.DoesNotContain(L.RussianTable.Keys, k => Regex.IsMatch(k, "[А-Яа-яЁё]"));
+        Assert.DoesNotContain(SourceKeys(), k => Regex.IsMatch(k.Key, "[А-Яа-яЁё]"));
+        Assert.All(L.RussianPluralTable.Values, forms => Assert.Equal(3, forms.Length));
     }
 
     private static HashSet<string> Placeholders(string text) =>
@@ -109,10 +160,10 @@ public class LocalizationTests
             string name = Path.GetFileName(file);
             foreach (Match m in Regex.Matches(code, @"L\.(?:T|F|W|WF)\(\s*" + Literal))
                 yield return (dir, name, Unescape(m.Groups[1].Value));
-            foreach (Match m in Regex.Matches(code, @"L\.W?Plural\([^,]+,\s*" + Literal + @"\s*,\s*" + Literal + @"\s*,\s*" + Literal))
+            foreach (Match m in Regex.Matches(code, @"L\.W?Plural\([^,]+,\s*" + Literal + @"\s*,\s*" + Literal))
             {
                 yield return (dir, name, Unescape(m.Groups[1].Value));
-                yield return (dir, name, Unescape(m.Groups[3].Value));
+                yield return (dir, name, Unescape(m.Groups[2].Value));
             }
         }
     }

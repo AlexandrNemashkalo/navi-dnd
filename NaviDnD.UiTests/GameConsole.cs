@@ -2,17 +2,16 @@ using System.Runtime.InteropServices;
 
 namespace NaviDnD.UiTests;
 
-// Временно подключается к консоли РЕАЛЬНОГО процесса игры, чтобы прочитать её буфер
-// или отправить туда клавишу/клик мышью — так же, как это сделала бы Windows-консоль
-// от настоящего пользователя (WriteConsoleInput — тот же API, каким игра сама читает
-// ввод через ReadConsoleInput). Сразу после — отключается и возвращается в свою консоль.
+// Temporarily connects to the console of the REAL game process to read its buffer or send a key/mouse click
+// there - just as a Windows- console from a real user would do (WriteConsoleInput is the same API that the game
+// itself reads input through ReadConsoleInput). Immediately after - disconnects and returns to its console.
 internal static class GameConsole
 {
-    // ВАЖНО: не больше реальной ширины буфера консоли (=WindowWidth, см. ConsoleSetup.SetConsoleConfig).
-    // ReadConsoleOutputCharacterW не останавливается на границе строки — запрос длиннее буфера
-    // перетекает в начало СЛЕДУЮЩЕЙ строки, и тогда "найденная" колонка не имеет отношения
-    // к реальному экрану (ровно так нашёлся баг с сэмплингом пикселя — искали "Рустем" за
-    // пределами своей строки). RightBorderCol+1 — точная оправданная ширина рамки.
+    // IMPORTANT: no more than the actual width of the console buffer (=WindowWidth, see
+    // ConsoleSetup.SetConsoleConfig). ReadConsoleOutputCharacterW does not stop at the line boundary - a
+    // request longer than the buffer flows to the beginning of the NEXT line, and then the “found” column has
+    // no relation to the real screen (this is exactly how a bug with pixel sampling was found - they were
+    // looking for “Rustem” outside of its lines). RightBorderCol+1 is the exact justified width of the frame.
     public const int RightBorderCol = 148;
     public const int TitleReadWidth = RightBorderCol + 1;
     public const int ScanRowCount = 90;
@@ -21,7 +20,7 @@ internal static class GameConsole
     private const ushort KEY_EVENT_TYPE = 0x0001;
     private const ushort MOUSE_EVENT_TYPE = 0x0002;
     private const uint LEFT_BUTTON = 0x0001;
-    private const uint MOUSE_MOVED = 0x0001; // dwEventFlags — совпадает по значению с LEFT_BUTTON, но это другое поле
+    private const uint MOUSE_MOVED = 0x0001; // dwEventFlags - the same value as LEFT_BUTTON, but this is a different field
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool FreeConsole();
@@ -29,11 +28,11 @@ internal static class GameConsole
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool AttachConsole(uint dwProcessId);
 
-    // ВАЖНО: без явного CharSet.Unicode дефолт P/Invoke — CharSet.Ansi, что резолвит имя функции
-    // в WriteConsoleInputA — тот же INPUT_RECORD, но с ANSI-семантикой символьных полей, из-за
-    // чего wVirtualKeyCode=0 + произвольный UnicodeChar (наш SendText для кириллицы) превращается
-    // в кракозябры при чтении через Console.ReadKey() на стороне игры (проверено на реальном
-    // разломе: "ищу пот" → "8IC ?>B"). WriteConsoleInputW этого не делает.
+    // IMPORTANT: without explicit CharSet.Unicode the default of P/Invoke is CharSet.Ansi, which resolves the
+    // function name in WriteConsoleInputA - the same INPUT_RECORD, but with ANSI- semantics of character
+    // fields, which is why wVirtualKeyCode=0 + arbitrary UnicodeChar (our SendText for Cyrillic alphabet) turns
+    // into crap when read through Console.ReadKey() on the game side (tested on a real fault: “looking for
+    // sweat” → “8IC ?>B”). WriteConsoleInputW does not do this.
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "WriteConsoleInputW")]
     private static extern bool WriteConsoleInput(IntPtr hConsoleInput, INPUT_RECORD[] lpBuffer, uint nLength, out uint lpNumberOfEventsWritten);
 
@@ -46,8 +45,8 @@ internal static class GameConsole
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOZORDER = 0x0004;
 
-    // INPUT_RECORD: EventType(2)+pad(2) + union(16). Union размечен под оба варианта —
-    // KEY_EVENT_RECORD и MOUSE_EVENT_RECORD — так же, как в самом Windows Console API.
+    // INPUT_RECORD: EventType(2)+pad(2) + union(16). Union is marked for both options - KEY_EVENT_RECORD and
+    // MOUSE_EVENT_RECORD - the same as in Windows Console API.
     [StructLayout(LayoutKind.Explicit, Size = 20)]
     private struct INPUT_RECORD
     {
@@ -113,9 +112,9 @@ internal static class GameConsole
         return shape;
     }
 
-    // Реальный отрендеренный цвет (скриншот + сэмплинг пикселя) — в обход легаси-атрибутов,
-    // которые не отражают 24-битный ANSI, используемый игрой. Бросает исключение с точной
-    // причиной при неудаче (см. ScreenCapture.SampleCellColor).
+    // Real rendered color (screenshot + pixel sampling) - bypasses legacy attributes, which do not reflect the
+    // 24-bit ANSI used by the game. Throws an exception with the exact reason on failure (see
+    // ScreenCapture.SampleCellColor).
     public static (byte r, byte g, byte b) SampleCellColor(int processId, int col, int row, (byte r, byte g, byte b) background)
     {
         (byte, byte, byte) result = default;
@@ -137,8 +136,8 @@ internal static class GameConsole
         return rows;
     }
 
-    // Переносит окно консоли игры в левый верхний угол экрана (без изменения размера) —
-    // чтобы оно было предсказуемо видно целиком во время теста.
+    // Moves the game console window to the top left corner of the screen (without resizing) so that it is
+    // predictably visible in its entirety during testing.
     public static void MoveToTopLeft(int processId)
     {
         WithGameConsole(processId, () =>
@@ -149,7 +148,7 @@ internal static class GameConsole
         });
     }
 
-    // Отправляет KEY_DOWN — так же, как настоящее нажатие клавиши.
+    // Sends KEY_DOWN - just like a real keystroke.
     public static void SendKey(int processId, ConsoleKey key)
     {
         WithGameConsole(processId, () =>
@@ -166,9 +165,9 @@ internal static class GameConsole
         });
     }
 
-    // Отправляет строку как последовательность KEY_DOWN с UnicodeChar (без wVirtualKeyCode) —
-    // InputBox.GetInput() набирает текст по key.KeyChar (см. её default-ветку), а не по коду
-    // клавиши, так что этого достаточно для ввода произвольного текста, включая кириллицу.
+    // Sends a string as the sequence KEY_DOWN with UnicodeChar (without wVirtualKeyCode) - InputBox.GetInput()
+    // types text by key.KeyChar (see its default- thread), and not by key code, so this is enough to enter
+    // arbitrary text, including Cyrillic.
     public static void SendText(int processId, string text)
     {
         WithGameConsole(processId, () =>
@@ -188,8 +187,8 @@ internal static class GameConsole
         });
     }
 
-    // Отправляет ДВИЖЕНИЕ мыши в координаты (col, row) без клика — то, на что реагирует
-    // наведение (подсветка/курсор), через DrainMouseEvents().latestMove в самой игре.
+    // Sends mouse MOVE to coordinates (col, row) without a click - what the hover responds to
+    // (highlight/cursor) via DrainMouseEvents().latestMove in the game itself.
     public static void SendMouseMove(int processId, int col, int row)
     {
         WithGameConsole(processId, () =>
@@ -206,8 +205,8 @@ internal static class GameConsole
         });
     }
 
-    // Отправляет клик левой кнопкой мыши по координатам (col, row) — символьные координаты
-    // консоли, 0-based, так же, как их видит DrainMouseEvents() в самой игре.
+    // Sends a left-click on the coordinates (col, row) - symbolic console coordinates, 0-based, just as
+    // DrainMouseEvents() sees them in the game itself.
     public static void SendLeftClick(int processId, int col, int row)
     {
         WithGameConsole(processId, () =>
@@ -271,8 +270,8 @@ internal static class GameConsole
         return false;
     }
 
-    // Тот же поиск, но по диапазону строк — для маркеров, которые рисуются не в заголовке
-    // экрана (строка 1), а глубже внутри карточки (например, заголовок активной подвкладки).
+    // The same search, but by range of lines - for markers that are drawn not in the screen title (line 1), but
+    // deeper inside the card (for example, the title of the active subtab).
     public static bool WaitForAnyRowContains(int processId, int startRow, int rowCount, int length, string expected, int timeoutMs)
     {
         var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
@@ -287,11 +286,11 @@ internal static class GameConsole
         return false;
     }
 
-    // Как WaitForAnyRowContains, но с произвольным условием по ВСЕМ строкам сразу — нужно,
-    // когда простое "содержит подстроку X" даёт ложное срабатывание на СТАРОМ, ещё не
-    // перерисованном экране (например, "Длинный меч" может уже быть виден в обычном списке
-    // инвентаря ДО того, как патч переместит его в слот экипировки — Contains("Длинный меч")
-    // сработает мгновенно на устаревших данных, а этот метод — только когда УСЛОВИЕ выполнено).
+    // Like WaitForAnyRowContains, but with an arbitrary condition on ALL lines at once - needed when a simple
+    // “contains the substring X” gives a false positive on an OLD, not yet redrawn screen (for example, “Long
+    // Sword” may already be visible in the regular inventory list BEFORE the patch moves it to an equipment
+    // slot - Contains("Long Sword") will work instantly on outdated data, and this method only works when the
+    // CONDITION is met).
     public static bool WaitForRowsMatch(int processId, int startRow, int rowCount, int length, Func<List<string>, bool> predicate, int timeoutMs)
     {
         var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
@@ -306,9 +305,9 @@ internal static class GameConsole
         return false;
     }
 
-    // Как WaitForAnyRowContains, но для случаев с несколькими взаимоисключающими исходами
-    // (например, результат броска кубика непредсказуем — "Успех"/"Провал"/крит). Возвращает
-    // тот кандидат, который реально появился на экране, или null по таймауту.
+    // Like WaitForAnyRowContains, but for cases with several mutually exclusive outcomes (for example, the
+    // result of a die roll is unpredictable - “Success”/“Failure”/crit). Returns the candidate that actually
+    // appeared on the screen, or null by timeout.
     public static string? WaitForAnyRowContainsAny(int processId, int startRow, int rowCount, int length, IReadOnlyList<string> candidates, int timeoutMs)
     {
         var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);

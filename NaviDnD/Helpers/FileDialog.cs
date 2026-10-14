@@ -2,10 +2,10 @@ using System.Runtime.InteropServices;
 
 namespace NaviDnD.Helpers;
 
-// Стандартное окно Windows «Открыть файл» (comdlg32 GetOpenFileNameW) — без WinForms: подключение
-// WinForms сменило бы целевую платформу проекта (net9.0-windows) и пути сборки, от которых зависят
-// MCP-сервер и UI-тесты. Окно показывается в отдельном STA-потоке поверх окна консоли.
-// macOS: AppleScript «choose file» через osascript; Linux: zenity, если есть; иначе null (выбора файла нет).
+// Standard Windows "Open File" window (comdlg32 GetOpenFileNameW) - without WinForms:, connecting WinForms
+// would change the target platform of the project (net9.0-windows) and the build paths on which the MCP-server
+// and UI-tests depend. The window is shown in a separate STA- stream on top of the window consoles. macOS:
+// AppleScript "choose file" via osascript; Linux: zenity, otherwise null (no file selection).
 public static class FileDialog
 {
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -44,7 +44,7 @@ public static class FileDialog
     private const int OFN_FILEMUSTEXIST = 0x00001000, OFN_PATHMUSTEXIST = 0x00000800, OFN_EXPLORER = 0x00080000,
         OFN_NOCHANGEDIR = 0x00000008;
 
-    // Путь к выбранному файлу или null (отмена). filter — пары «описание\0маски» через \0.
+    // Path to the selected file or null (cancel). filter - pairs “description\0mask” separated by \0.
     public static string? OpenFile(string title, string filter)
     {
         if (!OperatingSystem.IsWindows()) return OpenFileUnix(title, filter);
@@ -87,20 +87,21 @@ public static class FileDialog
             : Environment.GetEnvironmentVariable("DISPLAY") is { Length: > 0 } || Environment.GetEnvironmentVariable("WAYLAND_DISPLAY") is { Length: > 0 }
                 ? ("zenity", ZenityArguments(title, filter)) : null;
         if (command is not { } c || UnixTools.Which(c.tool) is not { } path) return null;
-        // Ждёт игрока, как окно Windows; отмена — ненулевой код выхода.
+        // Waits for the player like a Windows window; cancel - non-zero exit code.
         var result = UnixTools.Run(path, c.arguments, null, start => start.Environment["LC_ALL"] = "en_US.UTF-8");
         string? file = result is { ExitCode: 0 } ok ? ok.Output.TrimEnd('\r', '\n') : null;
         return string.IsNullOrWhiteSpace(file) || !File.Exists(file) ? null : file;
     }
 
-    // «описание|*.png;*.jpg|…» → png, jpg (маски вида «*» или «*.*» — любой файл).
+    // “description|*.png;*.jpg|…” → png, jpg (masks of the form “*” or “*.*” - any file).
     internal static string[] Extensions(string filter) =>
         [.. filter.Split('|').Where((_, i) => i % 2 == 1).SelectMany(masks => masks.Split(';'))
             .Select(mask => mask.Trim().TrimStart('*').TrimStart('.').ToLowerInvariant())
             .Where(ext => ext.Length > 0 && ext != "*").Distinct()];
 
-    // Заголовок и типы файлов передаются аргументами скрипта — экранировать ничего не нужно. Перечислены и расширения, и их UTI:
-    // «choose file of type» принимает и то и другое. «activate» выводит окно поверх терминала.
+    // The header and file types are passed as script arguments - nothing needs to be escaped. Extensions are
+    // also listed, and their UTI: "choose file of type" accepts both. "activate" displays a window on top of
+    // the terminal.
     internal static string[] MacArguments(string title, string filter)
     {
         var kinds = Extensions(filter).SelectMany(ext => Utis.TryGetValue(ext, out var uti) ? new[] { ext, uti } : [ext]).Distinct();

@@ -23,7 +23,7 @@ public class ThirdPassMechanicsTests
         var enemy = new LivingEntity { Name = "Scout", Symbol = "SCT", Hidden = true, Position = [5,3], Hp = "8/8", DarkvisionFt = 60 };
         s.WorldState.Map.Entities = [enemy];
         string context = new AiContextBuilder(s.WorldState).TriggerState([(enemy, "spotted")], [], []);
-        Assert.Contains("Скрытность 19", context);
+        Assert.Contains("Stealth 19", context);
         Assert.Contains("\"hidden\":true", context);
         s.ApplyUpdateWorldState("""{"hero":{"stealth":null},"map":{"entities":[{"id":0,"hidden":false}]}}""");
         Assert.Null(s.WorldState.Hero.Stealth);
@@ -164,15 +164,17 @@ public class ThirdPassMechanicsTests
         Assert.Single(s.WorldState.Map.Objects!);
     }
 
-    [Fact]
-    public void TravelFoodSummaryIncludesSeparateAndPackedFoodWithoutSpendingIt()
+    [Theory]
+    [InlineData("Рационы", "Набор", "хлеб на два дня")]
+    [InlineData("Rations", "Pack", "bread for two days")]
+    public void TravelFoodSummaryIncludesSeparateAndPackedFoodWithoutSpendingIt(string food, string pack, string description)
     {
         var s = Scene();
-        s.WorldState.Hero.Inventory = [new() { Name="Рационы",Quantity=4 },new() {Name="Набор",Description="хлеб на два дня"}];
+        s.WorldState.Hero.Inventory = [new() { Name=food,Quantity=4 },new() {Name=pack,Description=description}];
         var summary = (string)typeof(TravelService).GetMethod("FoodLine",BindingFlags.NonPublic|BindingFlags.Static)!.Invoke(null,[s.WorldState,2])!;
-        Assert.Contains("Рационы (id 0) ×4",summary);
-        Assert.Contains("Набор",summary);
-        Assert.Contains("2 дня",summary);
+        Assert.Contains($"{food} (id 0) ×4",summary);
+        Assert.Contains(pack,summary);
+        Assert.Contains("2 days",summary);
         Assert.Equal(4,s.WorldState.Hero.Inventory[0].Quantity);
     }
 

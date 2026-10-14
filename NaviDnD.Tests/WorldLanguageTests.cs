@@ -3,7 +3,7 @@ using NaviDnD.MapGen.Generators;
 
 namespace NaviDnD.Tests;
 
-// Язык мира: названия генератора (места, королевства, природные области, комнаты) — на языке мира.
+// World language: generator names (places, kingdoms, natural areas, rooms) are in the world language.
 public class WorldLanguageTests
 {
     private static bool HasCyrillic(string s) => s.Any(c => c is >= 'Ѐ' and <= 'ӿ');
@@ -35,8 +35,8 @@ public class WorldLanguageTests
         try
         {
             L.SetWorld(L.English);
-            Assert.Equal("Corridor", L.W("Коридор"));
-            Assert.Equal("Room 3", L.WF("Комната {0}", 3));
+            Assert.Equal("Corridor", L.W("Corridor"));
+            Assert.Equal("Room 3", L.WF("Room {0}", 3));
             Assert.Equal("floor 2", MapConfig.FloorName(1));
             L.SetWorld(L.Russian);
             Assert.Equal("2 этаж", MapConfig.FloorName(1));
