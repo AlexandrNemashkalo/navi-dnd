@@ -78,21 +78,32 @@ public class ThirdPassMechanicsTests
     [InlineData("sphere")]
     [InlineData("line")]
     [InlineData("cube")]
-    public void AreaContainsAllyAndEnemyButExcludesHiddenAndDeletedTargets(string shape)
+    public void AreaContainsAllyEnemyAndHiddenButExcludesDeletedTargets(string shape)
     {
         var s = Scene();
         s.WorldState.Map.Entities = [
             new() { Name="Enemy", Symbol="ENM", Position=[5,3] },
             new() { Name="Ally", Symbol="ALY", Position=[4,3] },
-            new() { Name="Hidden", Symbol="HID", Position=[5,3], Hidden=true },
+            new() { Name="Hidden", Symbol="HID", Position=[6,3], Hidden=true },
             new() { Name="Gone", Symbol="GON", Position=[5,3], Deleted=true }];
         var cells = TargetGeometry.AreaCells(s.WorldState, 5,3,shape,15);
         var targets = TargetGeometry.CreaturesIn(s.WorldState,cells);
         Assert.Contains(targets,t=>t.Symbol=="ENM");
         Assert.Contains(targets,t=>t.Symbol=="ALY");
-        Assert.DoesNotContain(targets,t=>t.Symbol is "HID" or "GON");
+        Assert.Contains(targets,t=>t.Symbol=="HID");
+        Assert.DoesNotContain(targets,t=>t.Symbol=="GON");
         var selectable = TargetGeometry.SelectableCells(s.WorldState, new TargetSelectionRequest { Mode="creature", RangeFt=5 }, (_,_)=>true,(_,_)=>true);
         Assert.DoesNotContain((5,3),selectable);
+    }
+
+    [Fact]
+    public void AreaDamageIncludesHiddenCreatureButCannotSelectItDirectly()
+    {
+        var s=Scene();var ws=s.WorldState;
+        ws.Map.Entities=[new(){Name="Ambusher",Symbol="AMB",Hidden=true,Position=[5,3]}];
+        var area=TargetGeometry.AreaCells(ws,5,3,"sphere",5);
+        Assert.Contains(TargetGeometry.CreaturesIn(ws,area),t=>t.Symbol=="AMB" && t.Id==0);
+        Assert.DoesNotContain((5,3),TargetGeometry.SelectableCells(ws,new(){Mode="creature"},(_,_)=>true,(_,_)=>true));
     }
 
     [Fact]

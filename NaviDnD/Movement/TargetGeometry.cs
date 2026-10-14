@@ -122,10 +122,10 @@ public static class TargetGeometry
         return result;
     }
 
-    public static SelectedTarget Describe(WorldState ws, int col, int row)
+    public static SelectedTarget Describe(WorldState ws, int col, int row, bool includeHidden = false)
     {
         var hp = ws.Hero?.Position;
-        var occupant = LivingOnMap(ws).FirstOrDefault(e => e.Position[0] == col && e.Position[1] == row);
+        var occupant = LivingOnMap(ws, includeHidden).FirstOrDefault(e => e.Position[0] == col && e.Position[1] == row);
         int entityIdx = occupant == null || occupant == ws.Hero ? -1 : ws.Map.Entities?.IndexOf(occupant) ?? -1;
         return new SelectedTarget
         {
@@ -140,9 +140,9 @@ public static class TargetGeometry
     public static List<SelectedTarget> CreaturesIn(WorldState ws, IEnumerable<(int col, int row)> cells)
     {
         var set = cells.ToHashSet();
-        return LivingOnMap(ws)
+        return LivingOnMap(ws, includeHidden: true)
             .Where(e => set.Contains((e.Position[0], e.Position[1])))
-            .Select(e => Describe(ws, e.Position[0], e.Position[1]))
+            .Select(e => Describe(ws, e.Position[0], e.Position[1], includeHidden: true))
             .ToList();
     }
 
@@ -165,11 +165,11 @@ public static class TargetGeometry
             .ToList();
     }
 
-    private static IEnumerable<LivingEntity> LivingOnMap(WorldState ws)
+    private static IEnumerable<LivingEntity> LivingOnMap(WorldState ws, bool includeHidden = false)
     {
         if (ws.Hero?.Position is { Count: >= 2 }) yield return ws.Hero;
         foreach (var e in ws.Map.Entities ?? [])
-            if (e.Deleted != true && e.Hidden != true && e.Position is { Count: >= 2 })
+            if (e.Deleted != true && (includeHidden || e.Hidden != true) && e.Position is { Count: >= 2 })
                 yield return e;
     }
 
