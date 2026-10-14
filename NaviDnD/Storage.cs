@@ -916,14 +916,15 @@ public class Storage
 
     private static bool TryPatchProperty(JsonElement patch, string name, out JsonElement value)
     {
-        if (patch.TryGetProperty(name, out value)) return true;
+        value = default;
+        bool found = false;
         foreach (var property in patch.EnumerateObject())
             if (property.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
             {
                 value = property.Value;
-                return true;
+                found = true;
             }
-        return false;
+        return found;
     }
 
     private List<T> PatchByIndex<T>(List<T>? existing, JsonElement patches, JsonSerializerOptions options, bool allowDelete = true, bool retainDeleted = false)

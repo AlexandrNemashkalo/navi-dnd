@@ -353,4 +353,16 @@ public class StorageApplyUpdateTests
         Assert.Null(Assert.Single(storage.WorldState.Hero.Resources).Deleted);
     }
 
+    [Theory]
+    [InlineData("id")]
+    [InlineData("Id")]
+    public void LastCaseInsensitivePatchIndexWinsConsistently(string firstSpelling)
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Hero!.Resources = [new() { Name = "А", Value = "2/2" }, new() { Name = "Б", Value = "1/1" }];
+        storage.ApplyUpdateWorldState("""{"hero":{"resources":[{"FIRST":0,"ID":1,"value":"0/1"}]}}""".Replace("FIRST", firstSpelling));
+        Assert.Equal("2/2", storage.WorldState.Hero.Resources[0].Value);
+        Assert.Equal("0/1", storage.WorldState.Hero.Resources[1].Value);
+    }
+
 }
