@@ -506,13 +506,13 @@ public static class LocationGrower
     }
 
     // Ещё не наполненный блок, к которому герой подошёл (в TriggerDistance от его границ) — пора наполнить.
-    public static MapChunk? UnpopulatedNearHero(WorldState ws)
+    public static MapChunk? UnpopulatedNearHero(WorldState ws, int distance = TriggerDistance)
     {
         if (ws.Map.Chunks is not { Count: > 0 } chunks || ws.Hero?.Position is not { Count: >= 2 } hp) return null;
         int floor = ws.Map.FloorAt(hp[0], hp[1]);
         return chunks.FirstOrDefault(c => !c.Populated && c.Z == floor
-            && hp[0] >= c.OriginCol + 1 - TriggerDistance && hp[0] <= c.OriginCol + MapChunk.Cols + TriggerDistance
-            && hp[1] >= c.OriginRow + 1 - TriggerDistance && hp[1] <= c.OriginRow + MapChunk.Rows + TriggerDistance);
+            && hp[0] >= c.OriginCol + 1 - distance && hp[0] <= c.OriginCol + MapChunk.Cols + distance
+            && hp[1] >= c.OriginRow + 1 - distance && hp[1] <= c.OriginRow + MapChunk.Rows + distance);
     }
 
     // Комнаты и двери блока дописываются в конец списков — id уже существующих комнат/дверей не меняются.

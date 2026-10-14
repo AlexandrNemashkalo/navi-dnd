@@ -4,6 +4,7 @@ namespace NaviDnD.Clients;
 // MCP-сервер игры (NaviDnD.McpServer) для запроса.
 internal static class AiActionTools
 {
+    internal static readonly AsyncLocal<string?> StatePathOverride = new();
     // Инструменты MCP-сервера, разрешённые действию (имя действия — папка промпта: SendAction, StartNewGame…).
     public static string[] ToolsFor(string action) => action switch
     {
@@ -31,7 +32,7 @@ internal static class AiActionTools
     // (для клиентов без своего списка разрешённых инструментов).
     public static List<string> McpArgs(string action, AiLogger? logger, bool withToolFilter)
     {
-        string worldStatePath = DraftActions.Contains(action) ? Storage.DraftSavePath : Storage.SavePath;
+        string worldStatePath = StatePathOverride.Value ?? (DraftActions.Contains(action) ? Storage.DraftSavePath : Storage.SavePath);
         var args = new List<string> { "--world-state", worldStatePath };
         if (logger != null) args.AddRange(["--log", logger.LogPath]);
         args.AddRange(["--run-id", Guid.NewGuid().ToString("N")]);

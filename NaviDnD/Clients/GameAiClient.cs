@@ -14,6 +14,8 @@ public class GameAiClient
     private readonly WorldState _settings;
     private readonly Storage _storage;
     private readonly IAiProvider _provider;
+    private readonly SemaphoreSlim _requestGate = new(1, 1);
+    private readonly ChunkPopulationQueue _population = new();
     private readonly string _ruleSet;
     private readonly AppConfig _appConfig;
     public DialogDisplay? ActiveDialog { get; set; }
@@ -363,22 +365,60 @@ public class GameAiClient
         Action? onIdle = null,
         Action? onRedraw = null)
     {
-        string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(PopulateChunk));
+        // If prefetch is already running, consume the same request rather than issuing a second one.
+        await FlushPopulationAsync(true, onIdle);
+        if (chunk.Populated) return;
+        TryPrefetchChunk(chunk);
+        await FlushPopulationAsync(true, onIdle);
+        onRedraw?.Invoke();
+    }
+
+    public bool TryPrefetchChunk(MapChunk chunk)
+    {
+        if (_requestGate.CurrentCount == 0) return false;
         var ctx = new AiContextBuilder(_settings, _storage.VisibleCells);
-        string userMessage = "## Текущее состояние\n" + ctx.PopulationState() + "\n" + ctx.LocationPlan(chunk) + "\n" + ctx.ChunkState(chunk);
-        string response = "";
+        string message = "## Текущее состояние\n" + ctx.PopulationState() + "\n" + ctx.LocationPlan(chunk) + "\n" + ctx.ChunkState(chunk);
+        string snapshot = JsonSerializer.Serialize(_settings, _serializeOptions);
+        string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(PopulateChunk));
+        return _population.TryStart(_settings.Map, chunk, async () =>
+        {
+            string dir = Path.Combine(Path.GetTempPath(), "NaviDnD-population-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(dir);
+            string path = Path.Combine(dir, "worldState.json");
+            try
+            {
+                await File.WriteAllTextAsync(path, snapshot);
+                AiActionTools.StatePathOverride.Value = path;
+                return ExtractJson(await CompleteConfigured([ReadPrompt(actionPath)], message, actionPath, _appConfig.ClaudeModel));
+            }
+            finally
+            {
+                AiActionTools.StatePathOverride.Value = null;
+                try { Directory.Delete(dir, true); } catch (IOException) { }
+            }
+        });
+    }
+
+    public async Task<bool> FlushPopulationAsync(bool wait = false, Action? onIdle = null)
+    {
+        if (wait)
+            while (_population.HasPending && !_population.IsReady)
+            {
+                onIdle?.Invoke();
+                await Task.Delay(16);
+            }
         try
         {
-            _storage.Save(); // MCP get_world_state читает сохранение
-            response = await CompleteWithSpinner([ReadPrompt(actionPath)], userMessage, actionPath, _appConfig.ClaudeModel, onIdle);
-            await PlayResponse(ExtractJson(response), onChunk, onNewMessage, onRedraw);
-            chunk.Populated = true;
+            var result = await _population.TakeAsync(wait);
+            if (result == null) return false;
+            var json = ChunkPopulationPatch.Prepare(_settings, result);
+            if (json == null) return false;
+            _storage.ApplyUpdateWorldState(json);
+            result.Chunk.Populated = true;
             _storage.Save();
+            return true;
         }
-        catch (Exception ex)
-        {
-            RecordError(ex, response);
-        }
+        catch (Exception ex) { RecordError(ex, ""); return false; }
     }
 
     public async Task SendAction(
@@ -388,6 +428,7 @@ public class GameAiClient
         Action? onIdle = null,
         Action? onRedraw = null)
     {
+        await FlushPopulationAsync(true, onIdle);
         var (actionPath, systemBlocks, ctx) = BuildSendActionContext();
         Helpers.Speech.Stop();
         string response = "";
@@ -417,6 +458,7 @@ public class GameAiClient
         Action? onIdle = null,
         Action? onRedraw = null)
     {
+        await FlushPopulationAsync(true, onIdle);
         var (actionPath, systemBlocks, ctx) = BuildSendActionContext();
         string response = "";
         try
@@ -460,6 +502,7 @@ public class GameAiClient
         Action? onIdle = null,
         Action? onRedraw = null)
     {
+        await FlushPopulationAsync(true, onIdle);
         var (actionPath, systemBlocks, ctx) = BuildSendActionContext();
         string response = "";
         try
@@ -481,6 +524,7 @@ public class GameAiClient
         Action? onIdle = null,
         Action? onRedraw = null)
     {
+        await FlushPopulationAsync(true, onIdle);
         var (actionPath, systemBlocks, ctx) = BuildSendActionContext();
         string response = "";
         try
@@ -508,6 +552,7 @@ public class GameAiClient
         oneShotPatches.AddRange(BuildAreaOneShotPatches(areaTriggers));
         oneShotPatches.AddRange(BuildDoorOneShotPatches(doorTriggers));
 
+        await FlushPopulationAsync(true, onIdle);
         var (actionPath, systemBlocks, ctx) = BuildSendActionContext();
         string response = "";
         try
@@ -788,7 +833,7 @@ public class GameAiClient
                 "запятые, скобки, неэкранированные символы в строках, обрыв в конце). Верни тот же JSON с исправленным " +
                 "синтаксисом: те же ключи, значения и тексты, ничего не добавляй и не убирай по смыслу. Обрыв — закрой " +
                 "незаконченную строку/массив/объект. Ответ — только JSON, без пояснений и без ```.";
-            string fixedJson = ExtractJson(await _provider.Complete([repairPrompt], json, actionPath, _appConfig.RepairJsonModel));
+            string fixedJson = ExtractJson(await CompleteConfigured([repairPrompt], json, actionPath, _appConfig.RepairJsonModel));
             if (IsValidJson(fixedJson)) return fixedJson;
         }
         catch { /* починить не вышло — ошибка разбора ниже, как раньше */ }
@@ -838,12 +883,13 @@ public class GameAiClient
 
     private async Task<string> CompleteConfigured(IReadOnlyList<string> systemBlocks, string userMessage, string actionPath, string model)
     {
+        await _requestGate.WaitAsync();
         try
         {
             return await _provider.Complete(systemBlocks,
                 $"lang:{L.World}\nspeechEnabled:{(_appConfig.SpeechEnabled ? "true" : "false")}\n{userMessage}", actionPath, model);
         }
-        finally { WindowControls.NotifyIfMinimized(); }
+        finally { _requestGate.Release(); WindowControls.NotifyIfMinimized(); }
     }
 
     // JSON из ответа, со ссылками на справочники уже разрешёнными (CatalogReferences: icon/ref/monster).

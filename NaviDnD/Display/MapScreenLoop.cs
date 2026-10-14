@@ -990,23 +990,27 @@ internal class MapScreenLoop
         // героя враги молчали до его следующего шага, и он успевал уйти.
         // Наполнение локации по блокам (LocationGrower): геометрия всех блоков плана уже есть, один запрос к
         // нейронке наполняет блок, когда герой подходит к нему — до того, как он туда войдёт.
-        var populateAttempted = new HashSet<MapChunk>();
         async Task<bool> GrowLocationIfNeeded()
         {
             if (_display.MapLevel != MapLevel.Location || _config.DisableTriggers) return false;
             // Одна попытка на блок за запуск: если ответ ИИ упал, не долбить запросами на каждом шаге.
+            if (await _aiClient.FlushPopulationAsync()) return true;
             var chunk = LocationGrower.UnpopulatedNearHero(_settings);
-            if (chunk == null || !populateAttempted.Add(chunk)) return false;
+            if (chunk == null)
+            {
+                if (LocationGrower.UnpopulatedNearHero(_settings, LocationGrower.TriggerDistance + 6) is { } ahead)
+                    _aiClient.TryPrefetchChunk(ahead);
+                return false;
+            }
 
             var dialog = new DialogDisplay(_settings, _display, _storage);
-            _aiClient.ActiveDialog = dialog;
             dialog.PrepareStreaming();
             await _aiClient.PopulateChunk(chunk, dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, redrawAction);
             dialog.FinalizeStreaming();
             _aiClient.ActiveDialog = null;
             // Буфер клавиш не чистим: наполнение запустил не игрок, и набранное за это время — его следующее
             // действие (раньше текст молча пропадал, и ход в бою уходил впустую).
-            return true;
+            return chunk.Populated;
         }
 
         async Task FireEncounterTriggers(DialogDisplay dialog)
