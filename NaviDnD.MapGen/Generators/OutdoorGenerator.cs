@@ -48,23 +48,6 @@ public static class OutdoorGenerator
                 };
             }
 
-        // Река поперёк поля: глубокая вода посередине, мелководье по краям.
-        if (river != null)
-            for (int i = 0; i < (river.Horizontal ? W : H); i++)
-            {
-                int along = river.Horizontal ? chunk.OriginCol + i + 1 : chunk.OriginRow + i + 1;
-                int center = river.Center + (int)Math.Round(3 * Math.Sin(along / 6.0 + river.Seed % 7) + 3 * (Fbm(along, river.Seed % 997, noiseSeed + 33) - 0.5));
-                for (int k = -river.Width / 2 - 1; k <= (river.Width - 1) / 2 + 1; k++)
-                {
-                    int across = center + k;
-                    int local = across - (river.Horizontal ? chunk.OriginRow : chunk.OriginCol) - 1;
-                    if (local < 0 || local >= (river.Horizontal ? H : W)) continue;
-                    bool edge = k == -river.Width / 2 - 1 || k == (river.Width - 1) / 2 + 1;
-                    if (river.Horizontal) g[i, local] = edge ? '~' : 'W';
-                    else g[local, i] = edge ? '~' : 'W';
-                }
-            }
-
         // Края без соседа-местности: полоса преграды 1–3 клетки.
         foreach (var (side, code) in bands)
         {
@@ -81,6 +64,28 @@ public static class OutdoorGenerator
                 }
             }
         }
+
+        // Река поперёк поля: глубокая вода посередине, мелководье по краям.
+        if (river != null)
+            for (int i = 0; i < (river.Horizontal ? W : H); i++)
+            {
+                int along = river.Horizontal ? chunk.OriginCol + i + 1 : chunk.OriginRow + i + 1;
+                int center = river.Center + (int)Math.Round(3 * Math.Sin(along / 6.0 + river.Seed % 7) + 3 * (Fbm(along, river.Seed % 997, noiseSeed + 33) - 0.5));
+                for (int k = -river.Width / 2 - 1; k <= (river.Width - 1) / 2 + 1; k++)
+                {
+                    int across = center + k;
+                    int local = across - (river.Horizontal ? chunk.OriginRow : chunk.OriginCol) - 1;
+                    if (local < 0 || local >= (river.Horizontal ? H : W)) continue;
+                    bool edge = k == -river.Width / 2 - 1 || k == (river.Width - 1) / 2 + 1;
+                    int c = river.Horizontal ? i : local, r = river.Horizontal ? local : i;
+                    // На закрытой границе русло уходит за карту глубокой водой, без древесной перемычки.
+                    bool closedEdge = (c == 0 && bands.ContainsKey(ChunkSide.Left))
+                        || (c == W - 1 && bands.ContainsKey(ChunkSide.Right))
+                        || (r == 0 && bands.ContainsKey(ChunkSide.Bottom))
+                        || (r == H - 1 && bands.ContainsKey(ChunkSide.Top));
+                    g[c, r] = edge && !closedEdge ? '~' : 'W';
+                }
+            }
 
         // Поляна в центре и тропы от выходов к ней.
         const int hubC = W / 2, hubR = H / 2;

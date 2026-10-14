@@ -15,11 +15,31 @@ public class MapConnectivityTests
     public void RiverDoesNotDisconnectExits(string theme, int seed, bool horizontal)
     {
         var chunk = new MapChunk { Theme = theme, Seed = seed };
-        var result = OutdoorGenerator.Generate(chunk, MapSampleTests.Exits, new Dictionary<ChunkSide, char>(), seed,
+        var result = OutdoorGenerator.Generate(chunk, MapSampleTests.Exits,
+            Enum.GetValues<ChunkSide>().ToDictionary(side => side, _ => 'F'), seed,
             new(horizontal, horizontal ? 8 : 10, 4, seed));
         var map = new MapConfig { Chunks = [chunk], Doors = result.Doors };
         chunk.Terrain = result.Terrain;
         Check(map, chunk);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RiverReachesClosedEdgesAsDeepWater(bool horizontal)
+    {
+        for (int seed = 1; seed <= 20; seed++)
+        {
+            var chunk = new MapChunk { Theme = "forest", Seed = seed };
+            var bands = Enum.GetValues<ChunkSide>().ToDictionary(side => side, _ => 'F');
+            var result = OutdoorGenerator.Generate(chunk, [], bands, seed,
+                new(horizontal, horizontal ? 8 : 10, 4, seed));
+            var first = horizontal ? result.Terrain.Select(row => row[0]) : result.Terrain[0];
+            var last = horizontal ? result.Terrain.Select(row => row[^1]) : result.Terrain[^1];
+            Assert.Contains('W', first);
+            Assert.Contains('W', last);
+            Assert.All(first.Concat(last), code => Assert.True(TerrainCatalog.Get(code)!.BlocksMove));
+        }
     }
 
     [Theory]
