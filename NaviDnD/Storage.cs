@@ -488,7 +488,7 @@ public class Storage
         // Хиты — у нынешней версии существа (тот же патч мог свести их к 0), без неё — у прежней.
         LivingEntity Current(LivingEntity e) => WorldState.Map.Entities?.FirstOrDefault(x => x.Symbol is { Length: > 0 } && string.Equals(x.Symbol, e.Symbol, StringComparison.OrdinalIgnoreCase)) ?? e;
         foreach (var dead in before.Where(e => !alive.Contains(e) && !(e.Symbol is { Length: > 0 } s && aliveSymbols.Contains(s))
-                                               && AtZeroHp(Current(e)) && e.Position is { Count: >= 2 }))
+                                               && AtZeroHp(Current(e)) && !KnockedOut(Current(e)) && e.Position is { Count: >= 2 }))
         {
             if (dead == WorldState.Hero) continue;
             // Убитый вид — в бестиарий журнала (раньше пополнялся только проверкой знаний по просьбе мастера).
@@ -658,7 +658,7 @@ public class Storage
 
                 case "entities":
                     var entitiesBefore = WorldState.Map.Entities?.Where(e => e.Deleted != true).ToList() ?? [];
-                    WorldState.Map.Entities = PatchByIndex(WorldState.Map.Entities, prop.Value, options);
+                    WorldState.Map.Entities = PatchByIndex(WorldState.Map.Entities, prop.Value, options, retainDeleted: true);
                     LeaveBodies(entitiesBefore);
                     foreach (var entity in WorldState.Map.Entities ?? [])
                     {
@@ -913,7 +913,7 @@ public class Storage
     }
 
 
-    private List<T> PatchByIndex<T>(List<T>? existing, JsonElement patches, JsonSerializerOptions options, bool allowDelete = true)
+    private List<T> PatchByIndex<T>(List<T>? existing, JsonElement patches, JsonSerializerOptions options, bool allowDelete = true, bool retainDeleted = false)
     {
         var result = (existing ?? []).ToList();
         if (patches.ValueKind != JsonValueKind.Array) return result;
@@ -933,7 +933,11 @@ public class Storage
             int id = idEl.GetInt32();
             bool deleted = patchEl.TryGetProperty("deleted", out var d) && d.GetBoolean();
 
-            if (deleted && allowDelete)
+            if (deleted && retainDeleted)
+            {
+                if (id >= 0 && id < result.Count) result[id] = MergeInto(result[id], patchEl, options);
+            }
+            else if (deleted && allowDelete)
                 toDelete.Add(id);
             else if (!deleted && id < result.Count)
                 result[id] = MergeInto(result[id], patchEl, options);

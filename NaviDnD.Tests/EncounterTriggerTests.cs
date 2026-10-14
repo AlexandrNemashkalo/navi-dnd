@@ -508,4 +508,31 @@ public class EncounterTriggerTests
         Assert.Contains("\"id\":1", context);
     }
 
+    [Fact]
+    public void FleeingEnemyKeepsIndicesForLaterHistoryPatches()
+    {
+        var storage = MakeStorage();
+        var first = MakeEnemy("GB1", 6, 2); first.Hp = "7/7";
+        var second = MakeEnemy("GB2", 7, 2); second.Hp = "7/7";
+        storage.WorldState.Map.Entities = [first, second];
+        StartCombat(storage, "GB1", "GB2");
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"deleted":true}]}}""");
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":1,"hp":"3/7"}]}}""");
+        Assert.True(storage.WorldState.Map.Entities![0].Deleted);
+        Assert.Equal("GB2", storage.WorldState.Map.Entities[1].Symbol);
+        Assert.Equal("3/7", storage.WorldState.Map.Entities[1].Hp);
+        Assert.DoesNotContain(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+    }
+
+    [Fact]
+    public void ZeroHpAndDeletedInSamePatchStillLeavesBody()
+    {
+        var storage = MakeStorage();
+        var enemy = MakeEnemy("RT1", 6, 2); enemy.Hp = "3/4"; enemy.MonsterKey = "Крыса";
+        storage.WorldState.Map.Entities = [enemy];
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"hp":"0/4","deleted":true}]}}""");
+        Assert.Single(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+        Assert.Contains("Крыса", storage.WorldState.Narrative?.KnownMonsters ?? []);
+    }
+
 }
