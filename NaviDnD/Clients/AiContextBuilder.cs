@@ -645,6 +645,19 @@ public class AiContextBuilder
             if (!string.IsNullOrEmpty(_ws.Combat.CurrentTurn))
                 sb.AppendLine($"currentTurn: {_ws.Combat.CurrentTurn}");
         }
+        var sent = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in _ws.Combat?.Initiative?.Where(e => e.Deleted != true && e.Symbol != _ws.Hero?.Symbol) ?? [])
+        {
+            var enemy = _ws.Map.Entities?.FirstOrDefault(e => e.Deleted != true && e.Symbol == entry.Symbol);
+            if (enemy == null) continue;
+            sb.AppendLine($"{enemy.Symbol} speedFt:{enemy.SpeedMax ?? 30} notes:{string.Join("; ", enemy.AiInfo ?? [])}");
+            var monster = Helpers.MonsterDatabase.Find(enemy.MonsterKey);
+            if (monster == null || !sent.Add(monster.Name)) continue;
+            sb.AppendLine($"## Возможности {monster.Name} (только этот набор, ограничения и перезарядки соблюдай)");
+            if (!string.IsNullOrWhiteSpace(monster.Spells)) sb.AppendLine($"spells: {monster.Spells}");
+            foreach (var ability in monster.Traits.Concat(monster.Actions).Concat(monster.Reactions))
+                sb.AppendLine($"{ability.Name}: {ability.Text}");
+        }
         return MinimalState(sb.ToString());
     }
 
