@@ -50,7 +50,7 @@ public class Storage
     private readonly ConditionalWeakTable<ScheduledEvent, EventRuntime> _eventRuntime = new();
     private readonly Dictionary<string, int> _oaOnHeroLastRound = [];
     private readonly HashSet<string> _entitiesSeeingHero = [];
-    private readonly Dictionary<string, int> _entityRoundFired = [];
+    private readonly ConditionalWeakTable<LivingEntity, RoundRuntime> _entityRuntime = new();
 
     // Одна атака по возможности на существо за раунд (реакция существа). Возвращает true при первом срабатывании.
     public bool TryMarkOpportunityAttackOnHero(string symbol, int round)
@@ -113,7 +113,7 @@ public class Storage
         _eventRuntime.Clear();
         _oaOnHeroLastRound.Clear();
         _entitiesSeeingHero.Clear();
-        _entityRoundFired.Clear();
+        _entityRuntime.Clear();
     }
 
     public RoundBundle? TakeRoundBundle()
@@ -189,10 +189,11 @@ public class Storage
             var e = entities[i];
             if (e.Deleted == true || e.Hidden == true || e.Triggers?.OnRound == null) continue;
             if (inInitiative?.Contains(e.Symbol) == true) continue;
-            if (_entityRoundFired.TryGetValue(e.Symbol, out int last) && last >= currentRound) continue;
+            var runtime = _entityRuntime.GetOrCreateValue(e);
+            if (runtime.LastRound == currentRound) continue;
             if (!MovementCalculator.EntitySeesHero(WorldState, e)) continue;
 
-            _entityRoundFired[e.Symbol] = currentRound;
+            runtime.LastRound = currentRound;
             result.Add((i, e));
         }
         return result;
@@ -471,27 +472,25 @@ public class Storage
                 target.Hp = parts.Length > 1 ? $"{to}/{parts[1].Trim()}" : to.ToString();
                 changed = true;
             }
-        if (changed) LeaveBodies(WorldState.Map.Entities?.Where(e => e.Deleted != true).ToList() ?? []);
+        if (changed) LeaveBodies(LivingEntitySnapshots());
         return changed;
     }
 
-    private void LeaveBodies(List<LivingEntity> before)
+    private List<(LivingEntity Entity, int Index)> LivingEntitySnapshots() => (WorldState.Map.Entities ?? [])
+        .Select((entity, index) => (Entity: entity, Index: index)).Where(x => x.Entity.Deleted != true).ToList();
+
+    private void LeaveBodies(List<(LivingEntity Entity, int Index)> before)
     {
         // Хиты 0 — погиб: снять с карты. Пометкой, а не удалением из списка: дальше в том же ответе мастер обращается
         // к существам по id — номеру в списке, и он не должен съехать.
         foreach (var fallen in WorldState.Map.Entities?.Where(e => e.Deleted != true && AtZeroHp(e) && !KnockedOut(e)) ?? [])
             fallen.Deleted = true;
-        var alive = WorldState.Map.Entities?.Where(e => e.Deleted != true).ToHashSet() ?? [];
-        // Патч по id (шаг, хиты) заменяет объект существа новым (MergeInto) — по ссылке живая крыса после шага
-        // выглядела убитой: тело на клетке и вид в бестиарии. Жив — тот же символ на карте (символы уникальны).
-        var aliveSymbols = alive.Select(e => e.Symbol).Where(s => !string.IsNullOrEmpty(s)).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        // Хиты — у нынешней версии существа (тот же патч мог свести их к 0), без неё — у прежней.
-        LivingEntity Current(LivingEntity e) => WorldState.Map.Entities?.FirstOrDefault(x => x.Symbol is { Length: > 0 } && string.Equals(x.Symbol, e.Symbol, StringComparison.OrdinalIgnoreCase)) ?? e;
-        foreach (var dead in before.Where(e => !alive.Contains(e) && !(e.Symbol is { Length: > 0 } s && aliveSymbols.Contains(s))
-                                               && AtZeroHp(Current(e)) && !KnockedOut(Current(e)) && Current(e).Position is { Count: >= 2 }))
+        // Entity slots survive death and departure, so metadata changes do not lose identity.
+        foreach (var (previous, index) in before)
         {
-            if (dead == WorldState.Hero) continue;
-            var corpse = Current(dead);
+            var corpse = WorldState.Map.Entities is { } entities && index < entities.Count ? entities[index] : previous;
+            if (corpse == WorldState.Hero || corpse.Deleted != true || !AtZeroHp(corpse) || KnockedOut(corpse)
+                || corpse.Position is not { Count: >= 2 }) continue;
             // Убитый вид — в бестиарий журнала (раньше пополнялся только проверкой знаний по просьбе мастера).
             if (corpse.MonsterKey is { Length: > 0 } key)
             {
@@ -658,7 +657,7 @@ public class Storage
                     break;
 
                 case "entities":
-                    var entitiesBefore = WorldState.Map.Entities?.Where(e => e.Deleted != true).ToList() ?? [];
+                    var entitiesBefore = LivingEntitySnapshots();
                     WorldState.Map.Entities = PatchByIndex(WorldState.Map.Entities, prop.Value, options, retainDeleted: true);
                     LeaveBodies(entitiesBefore);
                     foreach (var entity in WorldState.Map.Entities ?? [])
@@ -898,7 +897,7 @@ public class Storage
                     {
                         _effectRuntime.Clear();
                         _areaRuntime.Clear();
-                        _entityRoundFired.Clear();
+                        _entityRuntime.Clear();
                         _oaOnHeroLastRound.Clear();
                     }
                     WorldState.Time.TotalRounds = nextRound;
@@ -1078,6 +1077,8 @@ public class Storage
             _eventRuntime.Add(newEvent, new EventRuntime { Fired = eventRuntime.Fired });
         if (existing is Area oldArea && merged is Area newArea && _areaRuntime.TryGetValue(oldArea, out var areaRuntime))
             _areaRuntime.Add(newArea, areaRuntime);
+        if (existing is LivingEntity oldEntity && merged is LivingEntity newEntity && _entityRuntime.TryGetValue(oldEntity, out var entityRuntime))
+            _entityRuntime.Add(newEntity, entityRuntime);
         return merged;
     }
 

@@ -561,4 +561,30 @@ public class EncounterTriggerTests
         Assert.Equal([7,2], body.Position);
     }
 
+    [Fact]
+    public void RenamingCreatureDuringDeathStillUsesItsStableIndexAndFinalMetadata()
+    {
+        var storage = MakeStorage();
+        var old = MakeEnemy("OLD", 1, 1); old.Deleted = true; old.Hp = "0/4";
+        var rat = MakeEnemy("RT1", 6, 2); rat.Hp = "3/4"; rat.MonsterKey = "Крыса";
+        storage.WorldState.Map.Entities = [old, rat];
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":1,"symbol":"RT2","name":"Уличная крыса","position":[7,2],"hp":"0/4"}]}}""");
+        var body = Assert.Single(storage.WorldState.Map.Objects ?? [], o => o.Symbol == "(†)");
+        Assert.Equal("Тело: Уличная крыса", body.Name);
+        Assert.Equal([7,2], body.Position);
+        Assert.Contains("Крыса", storage.WorldState.Narrative?.KnownMonsters ?? []);
+    }
+
+    [Fact]
+    public void ChangingNpcSymbolDoesNotRepeatItsRoundTrigger()
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Map.Entities = [MakeTalkativeNpc()];
+        Assert.Single(storage.TakeRoundBundle()!.EntityRoundTriggers);
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"id":0,"symbol":"BR2"}]}}""");
+        Assert.Null(storage.TakeRoundBundle());
+        storage.WorldState.Time.TotalRounds++;
+        Assert.Equal("BR2", Assert.Single(storage.TakeRoundBundle()!.EntityRoundTriggers).entity.Symbol);
+    }
+
 }
