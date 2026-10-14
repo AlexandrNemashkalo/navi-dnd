@@ -105,4 +105,39 @@ public class LevelUpPromptTests(ITestOutputHelper output)
             Assert.Contains('(', after.Stat(StatKeys.Class)!.Value);
     }
 
+    [Fact]
+    public async Task ExistingMonkAbilityGrowsWithoutAddingDuplicate()
+    {
+        var storage = new Storage();
+        var hero = new Hero { Symbol = "HRO", Name = "Тестер", Level = 10, Xp = 85000, Hp = "71/73",
+            Stats = [new() { Name = "Класс", Key = StatKeys.Class, Value = "Монах (Путь открытой ладони)" },
+                new() { Name = "Сила", Value = "+2 (14)" }, new() { Name = "Ловкость", Value = "+3 (16)" },
+                new() { Name = "Телосложение", Value = "+2 (14)" }, new() { Name = "Интеллект", Value = "+0 (10)" },
+                new() { Name = "Мудрость", Value = "+2 (14)" }, new() { Name = "Харизма", Value = "+0 (10)" },
+                new() { Name = "Бонус Мастерства", Value = "+4" }],
+            Abilities = [new() { Name = "Боевые искусства", Description = "Безоружный удар и оружие монаха: кость урона 1d6, можно использовать Ловкость." },
+                new() { Name = "Дополнительная атака", Description = "Две атаки за действие Атака." },
+                new() { Name = "Техника открытой ладони", Description = "Шквал ударов может сбить с ног, оттолкнуть или лишить реакции." }],
+            Resources = [new() { Name = "Ки", Value = "10/10", Category = ResourceCategories.Abilities }] };
+        storage.WorldState.Hero = hero;
+        var up = new LevelUp(hero, LevelRules.Current);
+        string options = await PromptScenario.CallRealAiAsync("Dnd5e", "LevelUpOptions", storage, "lang:ru\n" + up.OptionsRequest());
+        output.WriteLine(options);
+        Assert.True(up.LoadPlan(options));
+        Assert.Contains(up.Gains, g => g.Name == "Боевые искусства" && g.Value?.Contains("1d8") == true);
+        up.ChooseAverage();
+        foreach (var choice in up.VisibleChoices)
+            for (int i = 0; i < choice.Needed; i++) choice.Toggle(i);
+        Assert.True(up.Ready);
+        string patch = await PromptScenario.CallRealAiAsync("Dnd5e", "LevelUpApply", storage, "lang:ru\n" + up.ApplyRequest());
+        output.WriteLine(patch);
+        var after = up.Apply(patch);
+        Assert.Equal(11, after.Level);
+        Assert.Equal("78/80", after.Hp);
+        Assert.Equal("+4", AbilityNames.Proficiency(after)!.Value);
+        Assert.Contains("1d8", Assert.Single(after.Abilities, a => a.Name == "Боевые искусства").Description);
+        Assert.Contains(after.Resources, r => r.Name == "Ки" && r.Value == "11/11");
+        Assert.Contains("1d8", up.Preview().Abilities.Single(a => a.Name == "Боевые искусства").Description);
+    }
+
 }
