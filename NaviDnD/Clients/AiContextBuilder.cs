@@ -46,6 +46,7 @@ public class AiContextBuilder
         var sb = new System.Text.StringBuilder();
 
         // ── Hero ───────────────────────────── ─────────────────────────────
+        sb.AppendLine("Location [col,row]: north/up=+row, south/down=-row, east/right=+col, west/left=-col; world [x,y]: north=-y, south=+y.");
         sb.AppendLine($"round:{_ws.Time.TotalRounds} day:{_ws.Time.Day} timeOfDay:{_ws.Time.PartOfDay}");
 
         if (_ws.Hero != null)

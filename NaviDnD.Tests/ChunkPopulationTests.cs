@@ -108,6 +108,43 @@ public class ChunkPopulationTests
     }
 
     [Fact]
+    public void BlockedPopulationCellIsMovedLocallyWithoutLosingOtherAdditions()
+    {
+        var (world,chunk)=Scene();
+        chunk.X=2; chunk.Y=1; chunk.Theme="village";
+        chunk.Terrain=Enumerable.Repeat(new string('.',20),15).ToList();
+        var row=chunk.Terrain[2].ToCharArray(); row[8]='#'; chunk.Terrain[2]=new string(row);
+        world.Map.Rooms=[];
+        world.Hero!.Position=[49,17];
+        string json="""{"map":{"entities":[{"name":"Healer","symbol":"VED","position":[54,19]}],"objects":[{"name":"Frost","symbol":"(F)","position":[49,18]},{"name":"Ribbon","symbol":"(R)","position":[52,17]}]}}""";
+        string patch=ChunkPopulationPatch.Prepare(world,new(world.Map,chunk,json))!;
+        Assert.Empty(world.Map.Entities??[]);
+        Assert.Empty(world.Map.Objects??[]);
+        var storage=new Storage();storage.WorldState.Map=world.Map;storage.WorldState.Hero=world.Hero;
+        storage.ApplyUpdateWorldState(patch);
+        Assert.Single(world.Map.Entities!);
+        Assert.Equal(2,world.Map.Objects!.Count);
+        var frost=world.Map.Objects[0].Position!;
+        Assert.NotEqual(new List<int>{49,18},frost);
+        Assert.NotEqual(world.Hero.Position,frost);
+        Assert.InRange(Math.Abs(frost[0]-49)+Math.Abs(frost[1]-18),1,2);
+        Assert.False(world.Map.TerrainAt(frost[0],frost[1])!.BlocksMove);
+        Assert.Equal(new List<int>{52,17},world.Map.Objects[1].Position);
+    }
+
+    [Fact]
+    public void BlockedIndoorCellCannotMoveToAnotherRoomOrOutside()
+    {
+        var (world,chunk)=Scene();
+        chunk.Terrain=Enumerable.Repeat(new string('.',20),15).ToList();
+        var row=chunk.Terrain[2].ToCharArray(); row[1]='#'; chunk.Terrain[2]=new string(row);
+        world.Map.Rooms=[new(){Name="Blocked room",Positions=[[22,3]]},new(){Name="Other room",Positions=[[23,3]]}];
+        Assert.Throws<InvalidDataException>(()=>ChunkPopulationPatch.Prepare(world,new(world.Map,chunk,
+            """{"map":{"objects":[{"symbol":"[C]","position":[22,3]}]}}""")));
+        Assert.Empty(world.Map.Objects??[]);
+    }
+
+    [Fact]
     public void PrefetchThresholdIsEarlierAndStaysOnSameFloor()
     {
         var (world,chunk)=Scene(); world.Hero!.Position=[12,3];

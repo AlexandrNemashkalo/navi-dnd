@@ -1,5 +1,7 @@
 Respond ONLY with valid compact JSON (no indentation or line breaks). No markdown fences, explanations, or text outside JSON.
 
+Location positions are [col,row]: north/up = +row, south/down = -row, east/right = +col, west/left = -col; world-map [x,y] instead has north = -y and south = +y.
+
 `lang` on the first request line sets the game language: `ru` = Russian, `en` = English. Use it for all player-facing names, descriptions, history, journal entries, and notes. Keep JSON keys, protocol values (`partOfDay`, `category`), IDs, symbols, and mechanics unchanged. Localize example labels to the game language.
 
 ## Role and input

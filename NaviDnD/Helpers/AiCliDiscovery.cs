@@ -12,6 +12,7 @@ public static class AiCliDiscovery
     public static bool IsAvailable(string name, string configuredPath)
     {
         string path = NormalizePath(configuredPath);
+        if (name == "claude" && File.Exists(path) && IsDesktopApp(path)) return Find(name) != null;
         if (Path.IsPathRooted(path)) return File.Exists(path);
         return Find(name) != null;
     }
@@ -20,7 +21,7 @@ public static class AiCliDiscovery
     {
         string path = NormalizePath(configuredPath);
         if (!OperatingSystem.IsWindows())
-            return Path.IsPathRooted(path) && UnixTools.IsExecutable(path) ? path : Find(name);
+            return Path.IsPathRooted(path) && UnixTools.IsExecutable(path) && !(name == "claude" && IsDesktopApp(path)) ? path : Find(name);
         if (Path.IsPathRooted(path) && File.Exists(path))
         {
             if (path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
@@ -116,7 +117,41 @@ public static class AiCliDiscovery
     }
     // Electron Desktop's GUI executable is also named claude.exe, but is not a CLI.
     private static bool IsDesktopApp(string executable) =>
-        File.Exists(Path.Combine(Path.GetDirectoryName(executable)!, "resources", "app.asar"));
+        File.Exists(Path.Combine(Path.GetDirectoryName(executable)!, "resources", "app.asar"))
+        || File.Exists(Path.Combine(Path.GetDirectoryName(executable)!, "..", "Resources", "app.asar"));
+
+    public static bool IsClaudeDesktopInstalled(string configuredPath)
+    {
+        string path = NormalizePath(configuredPath);
+        if (File.Exists(path) && IsDesktopApp(path)) return true;
+        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (OperatingSystem.IsMacOS())
+            return File.Exists("/Applications/Claude.app/Contents/MacOS/Claude")
+                || File.Exists(Path.Combine(home, "Applications", "Claude.app", "Contents", "MacOS", "Claude"));
+        if (!OperatingSystem.IsWindows()) return false;
+        var roots = new[]
+        {
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AnthropicClaude"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Claude"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "WindowsApps")
+        };
+        foreach (string root in roots)
+        {
+            try
+            {
+                if (!Directory.Exists(root)) continue;
+                if (File.Exists(Path.Combine(root, "claude.exe")) && IsDesktopApp(Path.Combine(root, "claude.exe"))) return true;
+                foreach (string directory in Directory.EnumerateDirectories(root,
+                    Path.GetFileName(root) == "WindowsApps" ? "Claude_*" : "app-*"))
+                {
+                    string executable = Path.Combine(directory, Path.GetFileName(root) == "WindowsApps" ? "app" : "", "claude.exe");
+                    if (File.Exists(executable) && IsDesktopApp(executable)) return true;
+                }
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or System.Security.SecurityException) { }
+        }
+        return false;
+    }
 
     public static string? FindDesktopClaude(IEnumerable<string> roots)
     {

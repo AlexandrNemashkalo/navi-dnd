@@ -14,7 +14,8 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     private List<MouseUiHelper.TitleTab> _titleTabs = [];
     private int _titleRow;
     private bool _escHovered;
-    private enum Kind { Toggle, Choice, Text, Info } // Info - help line (control), not editable
+    private enum Kind { Toggle, Choice, Text, Info, Button, Link } // Info is not editable; buttons and links act on Enter/click.
+    private readonly AiConnection _ai = new();
 
     private sealed class Item(string label, Kind kind, string hint)
     {
@@ -55,8 +56,10 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     private int _width, _height, _x0, _bodyTop, _left;
     private char[,] _chars = new char[0, 0];
     private List<int>?[,] _fg = new List<int>?[0, 0];
+    private List<int>?[,] _bg = new List<int>?[0, 0];
     private char[,]? _drawnChars;
     private List<int>?[,]? _drawnFg;
+    private List<int>?[,]? _drawnBg;
     private readonly List<(int row, int item)> _itemRows = [];
     private readonly List<(int row, int item, int left, int right)> _arrows = [];
     private int _hovered = -1;
@@ -85,12 +88,21 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         Redraw();
 
         string speechStatus = Speech.Status;
-        if (config.AiProvider != "codex") ClaudeLogin.Check(config);
-        string loginStatus = ClaudeLogin.Status;
+        _ai.Check(config);
+        var connection = _ai.State;
+        var connectionConfig = (config.AiProvider, config.ClaudeCliPath, config.CodexCliPath, config.ClaudeOAuthToken);
         while (true)
         {
             if (speechStatus != Speech.Status) { speechStatus = Speech.Status; Redraw(); }
-            if (loginStatus != ClaudeLogin.Status) { loginStatus = ClaudeLogin.Status; Redraw(); }
+            if (_ai.TakeFoundPath(config.AiProvider == "codex" ? "codex" : "claude") is { } found)
+            {
+                if (config.AiProvider == "codex") config.CodexCliPath = found; else config.ClaudeCliPath = found;
+                config.SaveUserSettings();
+                _ai.Check(config);
+            }
+            var currentConfig = (config.AiProvider, config.ClaudeCliPath, config.CodexCliPath, config.ClaudeOAuthToken);
+            if (currentConfig != connectionConfig) { connectionConfig = currentConfig; _ai.Check(config); }
+            if (connection != _ai.State) { connection = _ai.State; Redraw(); }
             var (move, click, _) = ConsoleMouseReader.DrainMouseEvents();
             if (move is { } m)
             {
@@ -133,6 +145,8 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
                     // Clicking on a line only selects the item; The value is changed by the arrows “◄ ►” (or ←→).
                     _focus = item;
                     Sound.PlayClick();
+                    if (_items[item].Kind == Kind.Button) Change(_items[item], 1);
+                    if (_items[item].Kind == Kind.Link) _items[item].Step(1);
                     StartEditIfText();
                     Redraw();
                 }
@@ -187,7 +201,8 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             case ConsoleKey.LeftArrow: Change(item, -1); return false;
             case ConsoleKey.RightArrow: Change(item, 1); return false;
             case ConsoleKey.Enter:
-                if (item.Kind == Kind.Toggle) Change(item, 1);
+                if (item.Kind is Kind.Toggle or Kind.Button) Change(item, 1);
+                if (item.Kind == Kind.Link) { item.Step(1); Sound.PlayClick(); }
                 StartEditIfText();
                 return false;
         }
@@ -221,21 +236,21 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         _editing = false;
         var item = _items[_focus];
         string value = _edit.Trim().Trim('"');
-        if (value.Length == 0 || value == item.Get()) return;
+        if ((value.Length == 0 && !item.Secret) || value == item.Get()) return;
         item.Set(value);
         config.SaveUserSettings();
     }
 
     private void Change(Item item, int dir)
     {
-        if (item.Kind is not (Kind.Toggle or Kind.Choice)) return;
+        if (item.Kind is not (Kind.Toggle or Kind.Choice or Kind.Button)) return;
         item.Step(dir);
         config.SaveUserSettings();
         Sound.PlayClick();
         if (_relaunch && OperatingSystem.IsMacOS())
         {
             _relaunch = false;
-            MacApp.Relaunch(config, _focus);
+            MacApp.Relaunch(_focus);
         }
     }
 
@@ -395,6 +410,39 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             Step = _ => config.AiProvider = config.AiProvider == "codex" ? "claude" : "codex",
             Group = L.T("ARTIFICIAL INTELLIGENCE"),
         });
+        _items.Add(new Item(L.T("CONNECTION"), Kind.Info, "") { Get = ConnectionText });
+        _items.Add(new Item(L.T("ACCOUNT"), Kind.Info, "")
+        {
+            Get = () => _ai.State.Account,
+        });
+        Button("", L.T("Sign in in your browser. The game checks authorization after you finish. Click again to cancel."),
+            () => _ai.State.Status switch
+            {
+                AiConnectionStatus.PathNotFound => config.AiProvider != "codex" ? L.T("INSTALL CLAUDE CODE") : L.T("CHOOSE FILE"),
+                AiConnectionStatus.DesktopOnly => L.T("INSTALL CLAUDE CODE"),
+                AiConnectionStatus.Connected => L.T("SWITCH ACCOUNT"),
+                AiConnectionStatus.SigningIn => L.T("CANCEL SIGN-IN"),
+                AiConnectionStatus.Checking or AiConnectionStatus.CheckFailed => L.T("CHECK"),
+                _ => L.T("SIGN IN"),
+            }, () =>
+            {
+                if (_ai.State.Status == AiConnectionStatus.DesktopOnly || (_ai.State.Status == AiConnectionStatus.PathNotFound && config.AiProvider != "codex"))
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://code.claude.com/docs/en/quickstart") { UseShellExecute = true });
+                else if (_ai.State.Status == AiConnectionStatus.PathNotFound)
+                {
+                    string? path = FileDialog.OpenFile(L.T("Select AI client"), OperatingSystem.IsWindows() ? "Executable|*.exe" : "All files|*");
+                    if (path == null) return;
+                    if (config.AiProvider == "codex") config.CodexCliPath = path; else config.ClaudeCliPath = path;
+                    _ai.Check(config);
+                }
+                else if (_ai.State.Status is AiConnectionStatus.Checking or AiConnectionStatus.CheckFailed) _ai.Check(config);
+                else _ai.SignIn(config);
+            });
+        _items.First(i => i.Label == L.T("AI")).HintTail = () => "\n\n" + ConnectionText()
+            + "\n" + _ai.State.Account + "\n" + _ai.State.Path;
+        _items.Last(i => i.Kind == Kind.Button).HintTail = () => config.AiProvider != "codex"
+            ? "\n\n" + L.T("Claude Desktop cannot run the game. Install Claude Code CLI; the game will find it automatically. A CLI bundled with Desktop can also be used if available.")
+                + "\nhttps://code.claude.com/docs/en/quickstart" : "";
         string opusNote = "\n\n" + L.T("Opus is strongly recommended: the game was built and tested on it; other models may cause bugs.");
         Model(L.T("GAME MODEL"), L.T("Claude model for game turns: actions, combat, triggers.") + opusNote,
             () => config.ClaudeModel, v => config.ClaudeModel = v);
@@ -405,20 +453,14 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         Model(L.T("HERO MODEL"), L.T("Model for creating a hero from the form: stats, equipment, features.") + opusNote,
             () => config.ClaudeCreateNewGameModel, v => config.ClaudeCreateNewGameModel = v);
         OnlyFor("claude");
-        // Login - with the button: Enter opens the login in the browser, status - on the right (ClaudeLogin).
-        _items.Add(new Item(L.T("CLAUDE SIGN-IN"), Kind.Toggle,
-            L.T("Enter — sign in to your Claude account: the browser opens, sign in and allow access, and the game checks the sign-in itself. A Claude subscription (Pro or Max) is required. The sign-in is kept by Claude Code itself — the token below is not needed."))
-        {
-            Get = () => ClaudeLogin.Status,
-            Step = _ => ClaudeLogin.Toggle(config),
-        });
-        OnlyFor("claude");
         Text(L.T("CLAUDE TOKEN"), L.T("Claude OAuth token (claude setup-token). Stored only on your computer in Storage/settings.json."),
             () => config.ClaudeOAuthToken, v => config.ClaudeOAuthToken = v, secret: true);
         OnlyFor("claude");
+        _items[^1].HintTail = () => "\n\n" + L.T("A configured token takes precedence over browser sign-in. Paste a token to use it, or erase the field and press Enter to use your account. The token is always hidden.");
         Text(L.T("CLAUDE PATH"), OperatingSystem.IsWindows() ? L.T("Path to claude.exe (Claude CLI), which the game uses to reach the Dungeon Master.") : L.T("Path to claude (Claude CLI), which the game uses to reach the Dungeon Master."),
             () => config.ClaudeCliPath, v => config.ClaudeCliPath = v);
         OnlyFor("claude");
+        _items[^1].Visible = () => false;
         Model(L.T("GAME MODEL"), L.T("Codex model for game turns: actions, combat, triggers. Sol — balanced, Astra — complex tasks, Luna — simple ones. Availability depends on your account."),
             () => config.CodexModel, v => config.CodexModel = v, choices: CodexModels);
         OnlyFor("codex");
@@ -445,6 +487,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         Text(L.T("CODEX PATH"), OperatingSystem.IsWindows() ? L.T("Path to Codex CLI. \"codex\" — look it up in PATH (for the npm package the game picks codex.exe itself).") : L.T("Path to Codex CLI. \"codex\" — look it up in PATH."),
             () => config.CodexCliPath, v => config.CodexCliPath = v.Trim().Length > 0 ? v.Trim() : "codex");
         OnlyFor("codex");
+        _items[^1].Visible = () => false;
 
         Toggle(L.T("FOG OF WAR"), L.T("Keep explored cells between game launches. Off — the map is fogged again on every launch."),
             () => config.SaveExploredCells, v => { config.SaveExploredCells = v; storage.SaveExploredCells = v; },
@@ -456,8 +499,16 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         Toggle(L.T("AI ERRORS"), L.T("AI failures (malformed reply, dropped connection) are shown in full in the dialog. Off — a short \"repeat the action\", details in the log."),
             () => config.ShowAiErrors, v => config.ShowAiErrors = v, on: L.T("DETAILED"), off: L.T("SHORT"));
         // Credits: game creator and thanks.
-        _items.Add(new Item(L.T("CREATOR"), Kind.Info, "") { Get = () => "navitalevich", Group = L.T("CREDITS") });
-        _items.Add(new Item(L.T("THANKS"), Kind.Info, "") { Get = () => L.F("{0} — macOS port", "keytonw") });
+        _items.Add(new Item(L.T("CREATOR"), Kind.Link, "https://www.reddit.com/user/navitalevich/")
+        {
+            Get = () => "navitalevich", Group = L.T("CREDITS"),
+            Step = _ => OpenCredit("https://www.reddit.com/user/navitalevich/")
+        });
+        _items.Add(new Item(L.T("THANKS"), Kind.Link, "https://www.reddit.com/user/keytonw/")
+        {
+            Get = () => "keytonw",
+            Step = _ => OpenCredit("https://www.reddit.com/user/keytonw/")
+        });
         // Controls - help (without reassigning keys), a separate block on the right under the tooltip.
         _controls.Clear();
         _controls.AddRange([
@@ -504,6 +555,23 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     }
 
     // The last added item is only for the selected AI (claude/codex).
+    private string ConnectionText() => _ai.State.Status switch
+    {
+        AiConnectionStatus.PathNotFound => L.T("PATH NOT FOUND"),
+        AiConnectionStatus.DesktopOnly => L.T("Desktop only — CLI missing"),
+        AiConnectionStatus.NotAuthorized => L.T("NOT AUTHORIZED"),
+        AiConnectionStatus.Connected => L.T("CONNECTED"),
+        AiConnectionStatus.SigningIn => L.T("SIGNING IN…"),
+        AiConnectionStatus.CheckFailed => L.T("CHECK FAILED"),
+        _ => L.T("CHECKING…"),
+    };
+
+    private void Button(string label, string hint, Func<string> text, Action action) =>
+        _items.Add(new Item(label, Kind.Button, hint) { Get = text, Step = _ => action() });
+
+    private static void OpenCredit(string url) =>
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+
     private void OnlyFor(string provider)
     {
         var item = _items[^1];
@@ -539,7 +607,15 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     {
         foreach (var (row, item) in _itemRows)
             if (y == _bodyTop + row && x > _x0 + _left && x < _x0 + _left + ListWidth - 1)
+            {
+                if (_items[item].Kind == Kind.Link)
+                {
+                    int start = _x0 + _left + ValueCol;
+                    int length = _items[item].Get().Split(' ')[0].Length;
+                    return x >= start && x < start + length ? item : -1;
+                }
                 return _items[item].Kind == Kind.Info ? -1 : item;
+            }
         return -1;
     }
 
@@ -560,6 +636,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     {
         _chars = new char[_height, _width];
         _fg = new List<int>?[_height, _width];
+        _bg = new List<int>?[_height, _width];
         for (int r = 0; r < _height; r++) for (int c = 0; c < _width; c++) _chars[r, c] = ' ';
         _itemRows.Clear();
         _arrows.Clear();
@@ -620,16 +697,19 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             if (RowChanged(r)) WriteRow(r);
         _drawnChars = _chars;
         _drawnFg = _fg;
+        _drawnBg = _bg;
     }
 
     private bool RowChanged(int row)
     {
-        if (_drawnChars == null || _drawnFg == null
+        if (_drawnChars == null || _drawnFg == null || _drawnBg == null
             || _drawnChars.GetLength(0) != _height || _drawnChars.GetLength(1) != _width) return true;
         for (int c = 0; c < _width; c++)
             if (_drawnChars[row, c] != _chars[row, c]
                 || !(_drawnFg[row, c] ?? display.MainForeground)
-                    .SequenceEqual(_fg[row, c] ?? display.MainForeground)) return true;
+                    .SequenceEqual(_fg[row, c] ?? display.MainForeground)
+                || !(_drawnBg[row, c] ?? display.MainBackground)
+                    .SequenceEqual(_bg[row, c] ?? display.MainBackground)) return true;
         return false;
     }
 
@@ -642,14 +722,35 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
 
         if (item.Kind == Kind.Info)
         {
+            if (item.Label == L.T("ACCOUNT") && (_ai.State.Status != AiConnectionStatus.Connected || string.IsNullOrWhiteSpace(item.Get()))) return;
             Put(y, lx, item.Label, Fg);
-            Put(y, vx, Fit(item.Get(), valueWidth + 2), Dim);
+            var color = item.Label == L.T("CONNECTION") ? _ai.State.Status switch
+            {
+                AiConnectionStatus.Connected => new List<int> { 110, 210, 140 },
+                AiConnectionStatus.PathNotFound or AiConnectionStatus.DesktopOnly or AiConnectionStatus.NotAuthorized or AiConnectionStatus.CheckFailed => new List<int> { 230, 150, 100 },
+                _ => Dim
+            } : Dim;
+            Put(y, vx, Fit(item.Get(), valueWidth + 2), color);
             return;
         }
 
+        if (item.Kind == Kind.Button)
+        {
+            Put(y, vx - 2, focused ? "→ " : "  ", lit ? Bright : Fg);
+            const int buttonWidth = 24;
+            string text = Fit(item.Get(), buttonWidth - 2);
+            int padding = (buttonWidth - text.Length) / 2;
+            var background = lit ? new List<int> { 95, 130, 95 } : new List<int> { 48, 66, 48 };
+            Put(y, vx, new string(' ', padding) + text + new string(' ', buttonWidth - padding - text.Length),
+                lit ? new List<int> { 245, 250, 235 } : Bright, background);
+            return;
+        }
         Put(y, lx - 2, focused ? "→ " + item.Label : "  " + item.Label, lit ? Bright : Fg);
         switch (item.Kind)
         {
+            case Kind.Link:
+                Put(y, vx, Fit(item.Get(), valueWidth), lit ? Bright : new List<int> { 130, 180, 225 });
+                break;
             case Kind.Toggle or Kind.Choice:
             {
                 // Value - in a fixed-width field: "◄" and "►" are in place.
@@ -666,7 +767,8 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             {
                 bool editing = focused && _editing;
                 string value = editing ? _edit : item.Get();
-                if (item.Secret && !editing) value = Mask(value);
+                if (item.Secret) value = editing ? Mask(value)
+                    : value.Length > 0 ? L.T("in use") + " · " + Mask(value) : L.T("not set — account sign-in");
                 string shown = editing
                     ? (value.Length > valueWidth - 1 ? "…" + value[^(valueWidth - 2)..] : value) + "▌"
                     : Fit(value.Length == 0 ? "—" : value, valueWidth);
@@ -680,9 +782,9 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     private static List<string> HintLines(Item item, int width) =>
         (item.Hint + item.HintTail?.Invoke()).Split('\n').SelectMany(p => p.Length == 0 ? [""] : TextWrapper.WrapText(p, width)).ToList();
 
-    // The token in the list is the beginning and end, the middle is hidden.
+    // Never display any part of the token, including while editing.
     private static string Mask(string token) =>
-        token.Length <= 16 ? new string('•', token.Length) : token[..10] + "••••••" + token[^4..];
+        new string('•', Math.Min(token.Length, 12));
 
     private void DrawBox(int y, int x, int w, int h, string title)
     {
@@ -703,7 +805,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
     private static string Fit(string text, int width) =>
         text.Length <= width ? text : text[..Math.Max(0, width - 1)] + "…";
 
-    private void Put(int row, int x, string text, List<int> color)
+    private void Put(int row, int x, string text, List<int> color, List<int>? background = null)
     {
         if (row < 0 || row >= _height) return;
         for (int i = 0; i < text.Length && x + i < _width; i++)
@@ -711,6 +813,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             if (x + i < 0) continue;
             _chars[row, x + i] = text[i];
             _fg[row, x + i] = color;
+            _bg[row, x + i] = background;
         }
     }
 
@@ -721,10 +824,11 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         while (c < _width)
         {
             var fg = _fg[row, c];
+            var bg = _bg[row, c];
             int start = c;
-            while (c < _width && ReferenceEquals(_fg[row, c], fg)) c++;
+            while (c < _width && ReferenceEquals(_fg[row, c], fg) && ReferenceEquals(_bg[row, c], bg)) c++;
             var run = new string(Enumerable.Range(start, c - start).Select(i => _chars[row, i]).ToArray());
-            ColorHelper.WriteColored(run, fgColor: fg ?? display.MainForeground, bgColor: display.MainBackground);
+            ColorHelper.WriteColored(run, fgColor: fg ?? display.MainForeground, bgColor: bg ?? display.MainBackground);
         }
     }
 }

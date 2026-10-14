@@ -70,19 +70,17 @@ internal static class MacApp
     }
 
     // New window with current settings and return to settings to the same item; this window closes with the game.
-    internal static void Relaunch(AppConfig config, int settingsItem)
+    internal static void Relaunch(int settingsItem)
     {
-        var arguments = TerminalArguments(config, [SettingsFlag + settingsItem]);
-        var start = new System.Diagnostics.ProcessStartInfo(arguments[0])
-        {
-            UseShellExecute = false, RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true,
-        };
-        foreach (string argument in arguments.Skip(1)) start.ArgumentList.Add(argument);
-        using var terminal = System.Diagnostics.Process.Start(start);
-        if (terminal == null) return;
-        terminal.StandardInput.Close();
-        Environment.Exit(0);
+        // Launch Services owns the replacement app; it must not inherit this terminal's session or pipes.
+        // The new launcher reads the saved font/window settings and replaces itself with Alacritty.
+        if (RequestRelaunch(BundlePath, settingsItem,
+            args => UnixTools.Run("/usr/bin/open", args, TimeSpan.FromSeconds(30))?.ExitCode))
+            Environment.Exit(0);
     }
+
+    internal static bool RequestRelaunch(string bundle, int settingsItem, Func<string[], int?> launch) =>
+        launch(["-n", bundle, "--args", SettingsFlag + settingsItem]) == 0;
 
     // Font sizes for settings: auto and those at which the game fits on the screen in the selected mode.
     internal static int[] FontSizes(AppConfig config)

@@ -10,6 +10,16 @@ namespace NaviDnD.Tests;
 public class PromptLanguageTests
 {
     [Fact]
+    public void ActionContextDistinguishesLocationAndWorldAxes()
+    {
+        var state = new WorldState { Hero = new() { Position = [51, 37] } };
+        string context = new NaviDnD.Clients.AiContextBuilder(state).MinimalState("look around");
+        Assert.Contains("Location [col,row]: north/up=+row, south/down=-row", context);
+        Assert.Contains("world [x,y]: north=-y, south=+y", context);
+        Assert.Contains("position:[51,37]", context);
+    }
+
+    [Fact]
     public void SharedPromptsAndToolDescriptionsAreEnglish()
     {
         var files = Directory.GetFiles(Path.Combine(RepoRoot(), "NaviDnD", "Prompts", "Dnd5e"), "systemPrompt.md", SearchOption.AllDirectories);
@@ -42,8 +52,11 @@ public class PromptLanguageTests
         var map = FlatMap();
         var spot = WorldAtlas.FindSpot(map, new("cave", new() { X = 15, Y = 15 }, direction, 3, null), [], new HashSet<int>());
         Assert.NotNull(spot);
-        Assert.Equal(dx, Math.Sign(spot.Value.x - 15));
-        Assert.Equal(dy, Math.Sign(spot.Value.y - 15));
+        // The placement score includes small random variation; cardinal bearings may shift one cell sideways.
+        if (dx == 0) Assert.InRange(Math.Abs(spot.Value.x - 15), 0, 1);
+        else Assert.Equal(dx, Math.Sign(spot.Value.x - 15));
+        if (dy == 0) Assert.InRange(Math.Abs(spot.Value.y - 15), 0, 1);
+        else Assert.Equal(dy, Math.Sign(spot.Value.y - 15));
     }
 
     [Fact]

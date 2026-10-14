@@ -175,6 +175,7 @@ public class AiCliDiscoveryTests
             File.WriteAllText(Path.Combine(root, "claude.exe"), "fixture");
             File.WriteAllText(Path.Combine(root, "resources", "app.asar"), "fixture");
             Assert.Null(AiCliDiscovery.Find("claude", [root], []));
+            Assert.True(AiCliDiscovery.IsClaudeDesktopInstalled(Path.Combine(root, "claude.exe")));
         }
         finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
     }
