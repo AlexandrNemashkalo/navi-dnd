@@ -180,6 +180,8 @@ public sealed class GameActionTools(McpServerConfig config)
             if (doorId < 0 || doorId >= doors.Count)
                 throw new ArgumentException($"door id {doorId} out of range (0..{doors.Count - 1})");
             var door = doors[doorId];
+            if (door.IsWorldExit == true)
+                return Fail(logName, "Выход на карту мира не изменяется действиями с дверью.");
 
             (object fields, bool requiresAdjacency) = action.ToLowerInvariant() switch
             {

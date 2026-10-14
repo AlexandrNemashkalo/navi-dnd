@@ -35,6 +35,18 @@ public class GameActionToolsTests : IDisposable
 
     private const string OneDoor = """[{"from":[5,5],"to":[6,5],"isDoor":true,"color":[139,90,43],"isDoorOpen":false}]""";
 
+    [Theory]
+    [InlineData("open")]
+    [InlineData("break")]
+    [InlineData("hide")]
+    public void WorldExitCannotBeChangedByDoorAction(string action)
+    {
+        var tools = CreateTools("[3,3]", """[{"from":[3,3],"to":[4,3],"isDoor":true,"isWorldExit":true,"isDoorOpen":false}]""");
+        var result = Parse(tools.DoorAction(0, action));
+        Assert.False(result.RootElement.GetProperty("success").GetBoolean());
+        Assert.False(result.RootElement.TryGetProperty("patch", out _));
+    }
+
     [Fact]
     public void DoorAction_HeroStandingOnFrom_Succeeds()
     {
