@@ -108,6 +108,39 @@ public class ThirdPassMechanicsTests
         Assert.DoesNotContain((5,3),selectable);
     }
 
+    [Theory]
+    [InlineData("cone")]
+    [InlineData("line")]
+    [InlineData("sphere")]
+    [InlineData("cube")]
+    public void FullWallCutsAreaButPartialTerrainCoverDoesNot(string shape)
+    {
+        var s=Scene();var ws=s.WorldState;
+        ws.Map.Rooms=[new(){Positions=[..Enumerable.Range(1,5).SelectMany(c=>Enumerable.Range(1,10).Select(r=>new List<int>{c,r}))]},new(){Positions=[..Enumerable.Range(6,5).SelectMany(c=>Enumerable.Range(1,10).Select(r=>new List<int>{c,r}))]}];
+        Assert.DoesNotContain((6,3),TargetGeometry.AreaCells(ws,5,3,shape,20));
+        Assert.Contains((4,3),TargetGeometry.AreaCells(ws,5,3,shape,20));
+        var terrain=Enumerable.Repeat(new string('.',MapChunk.Cols),MapChunk.Rows).ToList();
+        terrain[2]="...o"+new string('.',MapChunk.Cols-4);
+        ws.Map.Chunks=[new(){Theme="forest",Terrain=terrain}];
+        Assert.Contains((4,3),TargetGeometry.AreaCells(ws,5,3,shape,20));
+    }
+
+    [Fact]
+    public void NpcAppointmentFiresOnDueRoundAndKeepsConversationMemoryInContext()
+    {
+        var s=Scene();s.WorldState.Time.TotalRounds=10;
+        s.ApplyUpdateWorldState("""{"narrative":{"npcs":[{"name":"Mira","memory":["Meet at round 12"]}]},"scheduledEvents":[{"name":"Mira returns","fireAtRound":12,"effect":"Mira brings promised medicine"}]}""");
+        Assert.Null(s.TakeRoundBundle());
+        s.WorldState.Time.TotalRounds=11;Assert.Null(s.TakeRoundBundle());
+        s.WorldState.Time.TotalRounds=12;
+        var bundle=s.TakeRoundBundle()!;
+        Assert.Single(bundle.FiredScheduledEvents);
+        string context=new AiContextBuilder(s.WorldState).RoundTransitionState(bundle);
+        Assert.Contains("Mira brings promised medicine",context);
+        Assert.Contains("Meet at round 12",new AiContextBuilder(s.WorldState).Serialize(["narrative.npcs"]));
+        Assert.Null(s.TakeRoundBundle());
+    }
+
     [Fact]
     public void AreaDamageIncludesHiddenCreatureButCannotSelectItDirectly()
     {
