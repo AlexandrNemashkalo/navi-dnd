@@ -92,6 +92,13 @@ public class GameAiClient
         if (_settings.Hero is not { } hero) return;
         if (hero.Hp is { } hp && hp.Split('/') is [_, var max] && max.Trim().Length > 0) hero.Hp = $"{max.Trim()}/{max.Trim()}";
         hero.Effects = [];
+        hero.Dead = null;
+        hero.Hidden = null;
+        hero.NoOpportunityAttacksRound = null;
+        hero.Light = null;
+        hero.SpeedLeft = hero.SpeedMax;
+        foreach (var action in hero.Actions ?? [])
+            if (action.Deleted != true) action.Value = action.MaxValue;
         hero.Inspiration = null;
         hero.Stealth = null;
         hero.Position = null;
@@ -103,7 +110,7 @@ public class GameAiClient
         await FixHeroForNewGame(
             "Этот герой из прошлой игры начинает новое приключение. Уровень, характеристики, навыки, заклинания, " +
             "способности, раса и класс — НЕ меняй. Замени снаряжение и деньги на обычные стартовые для его класса и " +
-            "уровня (убери уникальные/сюжетные предметы прошлой игры), ресурсы и ячейки заклинаний — полные." +
+            "уровня (убери уникальные/сюжетные предметы прошлой игры), ресурсы и ячейки заклинаний — полные, скорость — обычная без состояний." +
             (string.IsNullOrWhiteSpace(data.Description) ? "" : $" Описание героя игрок уточнил: {data.Description}"));
     }
 

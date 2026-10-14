@@ -67,6 +67,15 @@ public class WorldPromptTests(ITestOutputHelper output)
         try
         {
             var source = PromptScenario.LoadUiTestFixture("full_game.json").WorldState.Hero!;
+            source.Level = 5;
+            source.Xp = 6500;
+            source.Hp = "3/44";
+            source.Stats.Add(new() { Name = "Класс", Key = StatKeys.Class, Value = "Воин (Чемпион)" });
+            source.Effects = [new() { Name = "Схвачен" }];
+            source.SpeedMax = 0;
+            source.SpeedLeft = 0;
+            source.Dead = true;
+            source.NoOpportunityAttacksRound = 500;
             string heroJson = System.Text.Json.JsonSerializer.Serialize(source, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
             var storage = new Storage();
             var config = PromptScenario.TestConfig();
@@ -80,6 +89,13 @@ public class WorldPromptTests(ITestOutputHelper output)
             Assert.Equal(Stat(source, "Сила"), Stat(hero, "Сила"));
             Assert.Equal(source.Spells?.Count ?? 0, hero.Spells?.Count ?? 0);
             Assert.Empty(hero.Effects ?? []);
+            Assert.Equal(5, hero.Level);
+            Assert.Equal(6500, hero.Xp);
+            Assert.Equal("44/44", hero.Hp);
+            Assert.NotEqual(true, hero.Dead);
+            Assert.Null(hero.NoOpportunityAttacksRound);
+            Assert.Equal(30, hero.SpeedMax);
+            Assert.Equal(hero.SpeedMax, hero.SpeedLeft);
         }
         finally { try { Directory.Delete(prompts, recursive: true); } catch { } }
     }
