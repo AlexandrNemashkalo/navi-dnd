@@ -1,12 +1,12 @@
 {
-    "name":  "NaviDnD 2.2.6",
-    "tag_name":  "v2.2.6",
-    "description":  "# NaviDnD 2.2.6\n\n- Настройки ИИ стали понятнее: статус подключения, аккаунт при доступности и одна кнопка для входа или настройки. Токен Claude можно задать или очистить; видно, когда он используется, само значение скрыто.\n- Игра отличает Claude Desktop от Claude Code CLI. Если установлен только Desktop, показывает причину и кнопку с официальной инструкцией установки CLI; подходящий клиент находится автоматически.\n- Уточнены направления в инструкциях мастеру: на локальной карте север сверху, юг снизу; координаты карты мира используют другую ось Y.\n- Заполнение чанка больше не отклоняется из-за предмета на заблокированной клетке, если рядом есть безопасное место в той же комнате или на улице этого чанка.\n- Изменён запуск нового окна на macOS при смене шрифта и режима экрана: приложение открывается через системный механизм, старое окно закрывается после успешной команды запуска.\n- Ники в титрах открывают Reddit-профили по клику или Enter.\n\nПатчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются.\n\n## English\n\n- Clearer AI settings: connection status, account details when available, and one button for sign-in or setup. The Claude token can be entered or cleared; the interface shows when it is in use and masks its value.\n- The game distinguishes Claude Desktop from Claude Code CLI. Desktop-only installations show an explanation and a button linking to the official CLI installation guide; compatible clients are detected automatically.\n- Clarified compass directions in GM instructions: north is up and south is down on location maps; world maps use a different Y axis.\n- Chunk population no longer fails because an object was placed on a blocked cell when a nearby safe cell is available in the same room or outdoor section of that chunk.\n- Changed macOS window relaunch after font or display-mode changes: the app launches through the system, and the old window exits after the launch command succeeds.\n- Credit usernames open their Reddit profiles with a click or Enter.\n\nPatches for Windows and macOS (Apple Silicon). Saves and settings are retained.\n",
+    "name":  "NaviDnD 2.2.7",
+    "tag_name":  "v2.2.7",
+    "description":  "# NaviDnD 2.2.7\n\n- На Windows игра по умолчанию работает в Alacritty с аппаратным ускорением: карта и перемещение стали плавнее. Терминал включён в обновление, отдельно устанавливать его не нужно.\n- Сохранён привычный вид окна: без системного заголовка, с игровыми кнопками сворачивания, полного экрана и выхода, перетаскиванием и значком NaviDnD в панели задач.\n- Исправлены ввод текста, включая русский, указатель мыши и пропорции рисунков. Сворачивание и восстановление больше не портят изображение; музыка и звуки работают.\n- Добавлены изображения DCSS и улучшения игрового интерфейса.\n- Прежняя консоль доступна с аргументом `--classic-console`.\n\nПатчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются.\n\n## English\n\n- Windows now uses the bundled GPU-accelerated Alacritty terminal by default for smoother map rendering and movement. No separate terminal installation is required.\n- The game retains its borderless appearance, in-game minimize/fullscreen/close controls, window dragging, and NaviDnD taskbar icon.\n- Fixed text input, including Cyrillic, mouse pointers, artwork proportions, and screen preservation across minimize/restore. Music and sound effects are supported.\n- Added DCSS artwork and game interface improvements.\n- The classic console remains available with `--classic-console`.\n\nPatches for Windows and macOS (Apple Silicon). Saves and settings are retained.\r\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.6/navi-dnd-v2.2.6-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.7/navi-dnd-v2.2.7-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
@@ -16,15 +16,15 @@
                                  },
                                  {
                                      "name":  "NaviDnD-macOS-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.6/releases-macos/NaviDnD-macOS-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.7/releases-macos/NaviDnD-macOS-updates.json"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.6/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.7/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.6/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.7/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
@@ -145,6 +145,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.2.5-2.2.6.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.6/releases/patches/NaviDnD-patch-2.2.5-2.2.6.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.2.6-2.2.7.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.7/releases/patches/NaviDnD-patch-2.2.6-2.2.7.zip"
                                  }
                              ]
                }
