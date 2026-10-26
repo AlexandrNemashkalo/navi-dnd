@@ -8,9 +8,9 @@ alacritty-protocol-tests:
     - git -C /tmp/navidnd-alacritty checkout --quiet --detach 94e7c8874e526b1e67b349d9ba30ddf81669119e
     - git -C /tmp/navidnd-alacritty apply "$CI_PROJECT_DIR/macos/alacritty-osc22.patch"
     - cd /tmp/navidnd-alacritty
-    - rustc --edition 2021 --test alacritty/src/renderer/text/braille.rs -o /tmp/braille-tests
-    - /tmp/braille-tests
-    - cargo test --locked -p alacritty_terminal > "$CI_PROJECT_DIR/alacritty-tests.log" 2>&1
+    - rustc --edition 2021 --test alacritty/src/renderer/text/braille.rs -o /tmp/braille-tests > "$CI_PROJECT_DIR/alacritty-tests.log" 2>&1
+    - /tmp/braille-tests >> "$CI_PROJECT_DIR/alacritty-tests.log" 2>&1
+    - cargo test --locked -p alacritty_terminal >> "$CI_PROJECT_DIR/alacritty-tests.log" 2>&1
   after_script:
     - printf '%s\n' "$CI_JOB_STATUS" > alacritty-tests-status.txt
     - curl --fail --silent --show-error --header "JOB-TOKEN:$CI_JOB_TOKEN" --upload-file alacritty-tests-status.txt "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/navidnd-alacritty/$CI_COMMIT_SHA/tests-status.txt"

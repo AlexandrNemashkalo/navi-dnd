@@ -89,10 +89,10 @@ index 7987354..d3711ed 100644
          } else {
 diff --git a/alacritty/src/renderer/text/braille.rs b/alacritty/src/renderer/text/braille.rs
 new file mode 100644
-index 0000000..1c46ecd
+index 0000000..549e74a
 --- /dev/null
 +++ b/alacritty/src/renderer/text/braille.rs
-@@ -0,0 +1,90 @@
+@@ -0,0 +1,89 @@
 +//! Font-independent 2x4 artwork pixels. No platform or GPU dependencies.
 +
 +pub fn cell_height(advance: f64, offset_x: i8, offset_y: i8) -> f64 {
@@ -107,22 +107,21 @@ index 0000000..1c46ecd
 +    let mut pixels = vec![0; width * height * 3];
 +    // Unicode braille bit order: left 1,2,3,7; right 4,5,6,8.
 +    let bits = [[0, 1, 2, 6], [3, 4, 5, 7]];
-+    let pitch_x = width as f64 / 2.;
-+    let pitch_y = height as f64 / 4.;
-+    let half = pitch_x.min(pitch_y) / 3.;
++    // Units of 1/24 pixel represent all centers and edges exactly. Integer area
++    // coverage avoids asymmetric rounding (e.g. 42/43) at half-intensity edges.
++    let half = (width * 4).min(height * 2);
 +    for (column, rows) in bits.iter().enumerate() {
 +        for (row, bit) in rows.iter().enumerate() {
 +            if mask & (1 << bit) == 0 {
 +                continue;
 +            }
-+            let cx = (column as f64 + 0.5) * pitch_x;
-+            let cy = (row as f64 + 0.5) * pitch_y;
-+            // Area coverage keeps half-pixel spacing uniform at odd cell widths.
-+            for y in (cy - half).floor() as usize..((cy + half).ceil() as usize).min(height) {
-+                for x in (cx - half).floor() as usize..((cx + half).ceil() as usize).min(width) {
-+                    let dx = ((x + 1) as f64).min(cx + half) - (x as f64).max(cx - half);
-+                    let dy = ((y + 1) as f64).min(cy + half) - (y as f64).max(cy - half);
-+                    let value = (dx.max(0.) * dy.max(0.) * 255.).round() as u8;
++            let cx = width * 6 * (column * 2 + 1);
++            let cy = height * 3 * (row * 2 + 1);
++            for y in (cy - half) / 24..((cy + half + 23) / 24).min(height) {
++                for x in (cx - half) / 24..((cx + half + 23) / 24).min(width) {
++                    let dx = ((x + 1) * 24).min(cx + half) - (x * 24).max(cx - half);
++                    let dy = ((y + 1) * 24).min(cy + half) - (y * 24).max(cy - half);
++                    let value = ((dx * dy * 255 + 288) / 576) as u8;
 +                    pixels[(y * width + x) * 3..(y * width + x) * 3 + 3].fill(value);
 +                }
 +            }
