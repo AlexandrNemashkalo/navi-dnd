@@ -39,7 +39,7 @@ $utf8 = New-Object Text.UTF8Encoding($false)
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 # Pinned downloads: Python for macOS arm64 (astral-sh/python-build-standalone), Russian model Silero, terminal
-# Alacritty license and rcodesign (indygreg/apple-platform-rs). Custom Alacritty is built on macOS.
+# Alacritty license and rcodesign (indygreg/apple-platform-rs). Custom Alacritty is built natively on macOS or cross-compiled in pinned Linux CI.
 $downloads = [ordered]@{
     'python.tar.gz'     = @('https://github.com/astral-sh/python-build-standalone/releases/download/20260924/cpython-3.12.14%2B20260924-aarch64-apple-darwin-install_only.tar.gz', '9763f43db2481a6af36af82ec40302aab7a73632f880129d07a6e81aec846277')
     'v5_5_ru.pt'        = @('https://models.silero.ai/models/tts/ru/v5_5_ru.pt', '50081637b602126ee06cb3bc8a744d25651d2da149ee8864b9a379bfdd934437')
@@ -54,8 +54,22 @@ function CustomTerminal() {
     $directory = Join-Path $cache 'alacritty-custom'
     $binary = Join-Path $directory 'alacritty'
     $metadataPath = Join-Path $directory 'build.json'
+    $lockPath = Join-Path $root 'macos/alacritty-build.json'
+    if (Test-Path -LiteralPath $lockPath) {
+        $locked = Get-Content -LiteralPath $lockPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($locked.patchSha256 -ne (Sha256File (Join-Path $root 'macos/alacritty-osc22.patch'))) {
+            throw 'Alacritty patch changed; build and pin a new terminal artifact before releasing.'
+        }
+        New-Item -ItemType Directory -Force -Path $directory | Out-Null
+        if (!(Test-Path -LiteralPath $binary) -or (Sha256File $binary) -ne $locked.binarySha256) {
+            Invoke-WebRequest -UseBasicParsing -Uri $locked.downloadUrl -OutFile "$binary.part" -TimeoutSec 300
+            if ((Sha256File "$binary.part") -ne $locked.binarySha256) { throw 'Downloaded custom Alacritty checksum mismatch.' }
+            Move-Item -LiteralPath "$binary.part" -Destination $binary -Force
+        }
+        WriteJson $metadataPath $locked
+    }
     if (!(Test-Path -LiteralPath $binary) -or !(Test-Path -LiteralPath $metadataPath)) {
-        throw 'Build the cursor-enabled terminal on macOS with bash macos/build-alacritty.sh, then copy artifacts/macos-cache/alacritty-custom here. Stock Alacritty does not support OSC 22.'
+        throw 'Build the cursor-enabled terminal in build-macos-cursor CI or with bash macos/build-alacritty.sh on macOS, then copy artifacts/macos-cache/alacritty-custom here. Stock Alacritty does not support OSC 22.'
     }
     $metadata = Get-Content -LiteralPath $metadataPath -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($metadata.sourceCommit -ne '94e7c8874e526b1e67b349d9ba30ddf81669119e' -or
@@ -165,6 +179,7 @@ function BuildGame() {
     # Pinned custom terminal; the unmodified upstream binary ignores OSC 22.
     Copy-Item -LiteralPath $customTerminal -Destination (Join-Path $programsDir 'alacritty')
     Copy-Item -LiteralPath (Cached 'alacritty-LICENSE') -Destination (Join-Path $resources 'alacritty-LICENSE')
+    Copy-Item -LiteralPath (Join-Path $root 'macos/alacritty-freetype-LICENSE.txt') -Destination $resources
     Copy-Item -LiteralPath (Join-Path $root 'macos/alacritty.toml') -Destination $resources
     Copy-Item -LiteralPath (Join-Path $root 'macos/NaviDnD.icns') -Destination $resources
     $plist = [IO.File]::ReadAllText((Join-Path $root 'macos/Info.plist')).Replace("`r`n", "`n").Replace('$(VERSION)', $version)

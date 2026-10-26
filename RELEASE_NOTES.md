@@ -1,19 +1,15 @@
-﻿# NaviDnD 2.2.7
+﻿# NaviDnD 2.2.8
 
-- На Windows игра по умолчанию работает в Alacritty с аппаратным ускорением: карта и перемещение стали плавнее. Терминал включён в обновление, отдельно устанавливать его не нужно.
-- Сохранён привычный вид окна: без системного заголовка, с игровыми кнопками сворачивания, полного экрана и выхода, перетаскиванием и значком NaviDnD в панели задач.
-- Исправлены ввод текста, включая русский, указатель мыши и пропорции рисунков. Сворачивание и восстановление больше не портят изображение; музыка и звуки работают.
-- Добавлены изображения DCSS и улучшения игрового интерфейса.
-- Прежняя консоль доступна с аргументом `--classic-console`.
+- В macOS-сборку включён собственный Alacritty с поддержкой смены указателя: игра может показывать руку над кнопками и интерактивными объектами и возвращать обычную стрелку.
+- Указатель ограничен мышиным режимом игры; сброс терминала и отключение функции очищают выбранную форму.
+- Собственная сборка терминала проверяется по исходному коммиту, патчу, архитектуре и SHA256. Тесты протокола выполняются в CI.
 
-Патчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются.
+Патчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Нативное отображение указателя в этой версии требует проверки на Mac.
 
 ## English
 
-- Windows now uses the bundled GPU-accelerated Alacritty terminal by default for smoother map rendering and movement. No separate terminal installation is required.
-- The game retains its borderless appearance, in-game minimize/fullscreen/close controls, window dragging, and NaviDnD taskbar icon.
-- Fixed text input, including Cyrillic, mouse pointers, artwork proportions, and screen preservation across minimize/restore. Music and sound effects are supported.
-- Added DCSS artwork and game interface improvements.
-- The classic console remains available with `--classic-console`.
+- The macOS package includes a custom Alacritty build with mouse pointer support: the game can show a hand over buttons and interactive objects and restore the default arrow.
+- Application pointers are limited to mouse-reporting mode and cleared by terminal reset or disabling the feature.
+- The custom terminal is verified against its source commit, patch, architecture, and SHA256. Protocol tests run in CI.
 
-Patches for Windows and macOS (Apple Silicon). Saves and settings are retained.
+Patches for Windows and macOS (Apple Silicon). Saves and settings are retained. Native pointer appearance in this version still requires validation on a Mac.

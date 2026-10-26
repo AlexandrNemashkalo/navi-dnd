@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <Version>2.2.7</Version>
+    <Version>2.2.8</Version>
     <!-- Built from source with a newer .NET only (e.g. Homebrew's current SDK): run on it instead of failing. -->
     <RollForward>Major</RollForward>
   </PropertyGroup>
