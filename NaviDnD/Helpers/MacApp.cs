@@ -17,9 +17,9 @@ internal static class MacApp
     internal const string VersionFile = "Contents/Resources/" + Installer.Patch.DefaultVersionFile;
     private const int Columns = 150, Rows = 63;
 
-    // Font - Menlo (available on any Mac): with it the game grid is even. The width of the cell and the height of the line are in fractions of a point.
+    // Menlo advance in points; custom Alacritty pixel_art makes line height twice the physical cell width.
     private const string Font = "Menlo";
-    private const double CellWidth = 0.602, CellHeight = 1.164;
+    private const double CellWidth = 0.60205078125;
     private const string TopFlag = "--navidnd-top=";
 
     internal static string BundlePath => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", ".."));
@@ -95,19 +95,19 @@ internal static class MacApp
     {
         double width = screen.Width - (fullscreen ? 0 : 16), height = screen.Height - (fullscreen ? screen.Notch : 48);
         for (double size = 30; size >= 8; size -= 0.5)
-            if (Columns * Cell(size, CellWidth, screen.Scale) <= width && Rows * Cell(size, CellHeight, screen.Scale) <= height) return size;
+            if (Columns * Cell(size, screen.Scale) <= width && Rows * 2 * Cell(size, screen.Scale) <= height) return size;
         return 8;
     }
 
     // Cell Alacritty - in whole physical pixels.
-    private static double Cell(double size, double factor, double scale) => Math.Ceiling(size * factor * scale) / scale;
+    private static double Cell(double size, double scale) => Math.Max(1, Math.Floor(size * CellWidth * scale)) / scale;
 
     private static List<string> TerminalArguments(AppConfig config, IEnumerable<string> gameArguments)
     {
         var screen = Screen();
         double fit = Fit(config.Fullscreen, screen);
         double font = config.FullscreenFontSize > 0 ? Math.Min(config.FullscreenFontSize, fit) : fit;
-        double cellWidth = Cell(font, CellWidth, screen.Scale), cellHeight = Cell(font, CellHeight, screen.Scale);
+        double cellWidth = Cell(font, screen.Scale), cellHeight = 2 * cellWidth;
         var background = new Data.DisplayConfig().MainBackground;
         var invariant = System.Globalization.CultureInfo.InvariantCulture;
         var arguments = new List<string>

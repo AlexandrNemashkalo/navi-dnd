@@ -10,6 +10,28 @@ index 086edf4..5a26a51 100644
   "home",
   "libc",
   "log",
+diff --git a/alacritty/src/config/font.rs b/alacritty/src/config/font.rs
+index 683dcd3..8954caa 100644
+--- a/alacritty/src/config/font.rs
++++ b/alacritty/src/config/font.rs
+@@ -42,6 +42,9 @@ pub struct Font {
+ 
+     /// Whether to use the built-in font for box drawing characters.
+     pub builtin_box_drawing: bool,
++
++    /// Square artwork pixels with evenly spaced built-in braille dots.
++    pub pixel_art: bool,
+ }
+ 
+ impl Font {
+@@ -80,6 +83,7 @@ impl Default for Font {
+     fn default() -> Font {
+         Self {
+             builtin_box_drawing: true,
++            pixel_art: false,
+             glyph_offset: Default::default(),
+             use_thin_strokes: Default::default(),
+             bold_italic: Default::default(),
 diff --git a/alacritty/src/config/terminal.rs b/alacritty/src/config/terminal.rs
 index daf4a34..cb5aa36 100644
 --- a/alacritty/src/config/terminal.rs
@@ -65,6 +87,204 @@ index 7987354..d3711ed 100644
          } else if !self.ctx.modifiers().state().shift_key() && self.ctx.mouse_mode() {
              CursorIcon::Default
          } else {
+diff --git a/alacritty/src/renderer/text/braille.rs b/alacritty/src/renderer/text/braille.rs
+new file mode 100644
+index 0000000..1c46ecd
+--- /dev/null
++++ b/alacritty/src/renderer/text/braille.rs
+@@ -0,0 +1,90 @@
++//! Font-independent 2x4 artwork pixels. No platform or GPU dependencies.
++
++pub fn cell_height(advance: f64, offset_x: i8, offset_y: i8) -> f64 {
++    (advance + f64::from(offset_x)).floor().max(1.) * 2. - f64::from(offset_y)
++}
++
++pub fn rasterize(character: char, width: usize, height: usize) -> Option<Vec<u8>> {
++    let mask = (character as u32).checked_sub(0x2800)?;
++    if mask > 255 {
++        return None;
++    }
++    let mut pixels = vec![0; width * height * 3];
++    // Unicode braille bit order: left 1,2,3,7; right 4,5,6,8.
++    let bits = [[0, 1, 2, 6], [3, 4, 5, 7]];
++    let pitch_x = width as f64 / 2.;
++    let pitch_y = height as f64 / 4.;
++    let half = pitch_x.min(pitch_y) / 3.;
++    for (column, rows) in bits.iter().enumerate() {
++        for (row, bit) in rows.iter().enumerate() {
++            if mask & (1 << bit) == 0 {
++                continue;
++            }
++            let cx = (column as f64 + 0.5) * pitch_x;
++            let cy = (row as f64 + 0.5) * pitch_y;
++            // Area coverage keeps half-pixel spacing uniform at odd cell widths.
++            for y in (cy - half).floor() as usize..((cy + half).ceil() as usize).min(height) {
++                for x in (cx - half).floor() as usize..((cx + half).ceil() as usize).min(width) {
++                    let dx = ((x + 1) as f64).min(cx + half) - (x as f64).max(cx - half);
++                    let dy = ((y + 1) as f64).min(cy + half) - (y as f64).max(cy - half);
++                    let value = (dx.max(0.) * dy.max(0.) * 255.).round() as u8;
++                    pixels[(y * width + x) * 3..(y * width + x) * 3 + 3].fill(value);
++                }
++            }
++        }
++    }
++    Some(pixels)
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn geometry_stays_one_to_two_at_every_size_and_offset() {
++        for advance in [0.1, 6.9, 7., 7.5, 14.4, 24.9] {
++            for x in [-2, 0, 3] {
++                for y in [-1, 0, 4] {
++                    let width = (advance + f64::from(x)).floor().max(1.);
++                    assert_eq!(cell_height(advance, x, y) + f64::from(y), width * 2.);
++                }
++            }
++        }
++    }
++
++    #[test]
++    fn all_masks_use_correct_unicode_dot_positions() {
++        let bit_at = [[0, 1, 2, 6], [3, 4, 5, 7]];
++        for mask in 0..256u32 {
++            let pixels = rasterize(char::from_u32(0x2800 + mask).unwrap(), 12, 24).unwrap();
++            for (column, rows) in bit_at.iter().enumerate() {
++                for (row, bit) in rows.iter().enumerate() {
++                    let center = ((row * 6 + 3) * 12 + column * 6 + 3) * 3;
++                    assert_eq!(pixels[center], if mask & (1 << bit) != 0 { 255 } else { 0 });
++                }
++            }
++            assert_eq!(
++                pixels.iter().filter(|&&v| v > 0).count(),
++                mask.count_ones() as usize * 16 * 3
++            );
++        }
++        assert!(rasterize('A', 12, 24).is_none());
++        assert!(rasterize('\u{2900}', 12, 24).is_none());
++    }
++
++    #[test]
++    fn odd_and_retina_sizes_have_symmetric_uniform_dots() {
++        for width in 1..33 {
++            let height = width * 2;
++            let pixels = rasterize('\u{28ff}', width, height).unwrap();
++            assert_eq!(pixels.len(), width * height * 3);
++            for y in 0..height {
++                for x in 0..width {
++                    let at = |x, y| pixels[(y * width + x) * 3];
++                    assert_eq!(at(x, y), at(width - 1 - x, height - 1 - y));
++                    assert_eq!(at(x, y), at(x, (y + width) % height));
++                }
++            }
++        }
++    }
++}
+diff --git a/alacritty/src/renderer/text/glyph_cache.rs b/alacritty/src/renderer/text/glyph_cache.rs
+index bba1c41..8d94d61 100644
+--- a/alacritty/src/renderer/text/glyph_cache.rs
++++ b/alacritty/src/renderer/text/glyph_cache.rs
+@@ -76,6 +76,7 @@ pub struct GlyphCache {
+ 
+     /// Whether to use the built-in font for box drawing characters.
+     builtin_box_drawing: bool,
++    pixel_art: bool,
+ }
+ 
+ impl GlyphCache {
+@@ -95,6 +96,7 @@ impl GlyphCache {
+             glyph_offset: font.glyph_offset,
+             metrics,
+             builtin_box_drawing: font.builtin_box_drawing,
++            pixel_art: font.pixel_art,
+         })
+     }
+ 
+@@ -110,6 +112,11 @@ impl GlyphCache {
+         rasterizer.get_glyph(GlyphKey { font_key: key, character: 'm', size: font.size() })?;
+ 
+         let mut metrics = rasterizer.metrics(key, font.size())?;
++        if font.pixel_art {
++            // Apply the same metrics to layout, box drawing and braille, including DPI changes.
++            metrics.line_height =
++                super::braille::cell_height(metrics.average_advance, font.offset.x, font.offset.y);
++        }
+         metrics.strikeout_position += font.glyph_offset.y as f32;
+         Ok(metrics)
+     }
+@@ -208,17 +215,40 @@ impl GlyphCache {
+ 
+         // Rasterize the glyph using the built-in font for special characters or the user's font
+         // for everything else.
+-        let rasterized = self
+-            .builtin_box_drawing
++        let artwork = self
++            .pixel_art
+             .then(|| {
+-                builtin_font::builtin_glyph(
+-                    glyph_key.character,
+-                    &self.metrics,
+-                    &self.font_offset,
+-                    &self.glyph_offset,
+-                )
++                let width = (self.metrics.average_advance + f64::from(self.font_offset.x))
++                    .floor()
++                    .max(1.) as usize;
++                let height = width * 2;
++                super::braille::rasterize(glyph_key.character, width, height).map(|pixels| {
++                    RasterizedGlyph {
++                        character: glyph_key.character,
++                        width: width as i32,
++                        height: height as i32,
++                        top: height as i32 + self.metrics.descent as i32
++                            - i32::from(self.glyph_offset.y),
++                        left: -i32::from(self.glyph_offset.x),
++                        advance: (width as i32, height as i32),
++                        buffer: crossfont::BitmapBuffer::Rgb(pixels),
++                    }
++                })
++            })
++            .flatten();
++        let rasterized = artwork
++            .or_else(|| {
++                self.builtin_box_drawing
++                    .then(|| {
++                        builtin_font::builtin_glyph(
++                            glyph_key.character,
++                            &self.metrics,
++                            &self.font_offset,
++                            &self.glyph_offset,
++                        )
++                    })
++                    .flatten()
+             })
+-            .flatten()
+             .map_or_else(|| self.rasterizer.get_glyph(glyph_key), Ok);
+ 
+         let glyph = match rasterized {
+@@ -300,6 +330,7 @@ impl GlyphCache {
+         self.bold_italic_key = bold_italic;
+         self.metrics = metrics;
+         self.builtin_box_drawing = font.builtin_box_drawing;
++        self.pixel_art = font.pixel_art;
+ 
+         Ok(())
+     }
+diff --git a/alacritty/src/renderer/text/mod.rs b/alacritty/src/renderer/text/mod.rs
+index 50ef476..25446fa 100644
+--- a/alacritty/src/renderer/text/mod.rs
++++ b/alacritty/src/renderer/text/mod.rs
+@@ -10,6 +10,7 @@ use crate::gl::types::*;
+ 
+ mod atlas;
+ mod builtin_font;
++mod braille;
+ mod gles2;
+ mod glsl3;
+ pub mod glyph_cache;
 diff --git a/alacritty_terminal/Cargo.toml b/alacritty_terminal/Cargo.toml
 index 96bd274..8ec1050 100644
 --- a/alacritty_terminal/Cargo.toml

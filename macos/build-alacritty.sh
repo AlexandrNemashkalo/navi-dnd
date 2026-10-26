@@ -31,6 +31,8 @@ git -C "$work/source" apply "$patch"
 rustup toolchain install "$toolchain" --profile minimal
 rustup target add --toolchain "$toolchain" "$target"
 cd "$work/source"
+rustc "+$toolchain" --edition 2021 --test alacritty/src/renderer/text/braille.rs -o "$work/braille-tests"
+"$work/braille-tests"
 cargo "+$toolchain" test --locked -p alacritty_terminal
 cargo "+$toolchain" "$build_command" --locked --release --target "$target" -p alacritty --no-default-features
 cp "${CARGO_TARGET_DIR:-target}/$target/release/alacritty" "$output/alacritty"

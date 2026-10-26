@@ -26,6 +26,7 @@ history = 0
 normal = { family = "Menlo", style = "Regular" }
 size = 12.0
 builtin_box_drawing = true
+pixel_art = true
 
 [colors.primary]
 background = "#000000"
