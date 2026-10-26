@@ -15,18 +15,12 @@ alacritty-protocol-tests:
     - curl --fail --silent --show-error --header "JOB-TOKEN:$CI_JOB_TOKEN" --upload-file alacritty-tests.log "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/navidnd-alacritty/$CI_COMMIT_SHA/tests.log"
 
 alacritty-macos-build:
-  tags: [saas-macos-medium-m1]
-  image: macos-15-xcode-16
+  # cargo-zigbuild 0.23.4: includes Zig and macOS 11.3 SDK; no macOS runner required.
+  image: ghcr.io/rust-cross/cargo-zigbuild@sha256:d8313491ec5798de0633fdc1c5753761bff79967bea69076020dc78121b2cca8
   timeout: 30m
   rules:
     - if: '$CI_COMMIT_BRANCH == "build-macos-cursor"'
   script:
-    - |
-      if ! command -v rustup >/dev/null; then
-        curl --proto '=https' --tlsv1.2 --fail --silent --show-error https://sh.rustup.rs -o /tmp/navidnd-rustup.sh
-        sh /tmp/navidnd-rustup.sh -y --profile minimal --default-toolchain 1.85.0
-      fi
-    - export PATH="$HOME/.cargo/bin:$PATH"
     - bash macos/build-alacritty.sh > alacritty-build.log 2>&1
     - |
       for file in alacritty alacritty-LICENSE build.json; do
