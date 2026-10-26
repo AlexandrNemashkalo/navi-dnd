@@ -1,9 +1,9 @@
 {
-    "sourceCommit":  "94e7c8874e526b1e67b349d9ba30ddf81669119e",
-    "rustToolchain":  "1.85.0",
-    "target":  "aarch64-apple-darwin",
-    "patchSha256":  "b7fae0e6517fb7a51f766a17977135a52c8ccf35eeb3f2bb92902b33f7a7d4d4",
-    "binarySha256":  "673e2d5ba991cadda6b90e88b349e7b3c63198de42c66990eb5a25b0a767e46a",
-    "downloadUrl":  "https://gitlab.com/api/v4/projects/87300786/packages/generic/navidnd-alacritty/952cc6d85d944a471f4df33e65d72b7f642be0cd/alacritty",
-    "buildCommit":  "952cc6d85d944a471f4df33e65d72b7f642be0cd"
+  "sourceCommit": "94e7c8874e526b1e67b349d9ba30ddf81669119e",
+  "rustToolchain": "1.85.0",
+  "target": "aarch64-apple-darwin",
+  "patchSha256": "c215a89ae8d79bd7266d317d0288b29d99cc854512cb023d084e039336a4fcb1",
+  "binarySha256": "be93f3630aa8e7ced73483a29533e1c142ac88590be9602ca7c7d88337068587",
+  "buildCommit": "fd859db579775bc3dff51710af3d292aa950ad70",
+  "downloadUrl": "https://gitlab.com/api/v4/projects/87300786/packages/generic/navidnd-alacritty/fd859db579775bc3dff51710af3d292aa950ad70/alacritty"
 }

@@ -1,15 +1,15 @@
-﻿# NaviDnD 2.2.8
+﻿# NaviDnD 2.2.9
 
-- В macOS-сборку включён собственный Alacritty с поддержкой смены указателя: игра может показывать руку над кнопками и интерактивными объектами и возвращать обычную стрелку.
-- Указатель ограничен мышиным режимом игры; сброс терминала и отключение функции очищают выбранную форму.
-- Собственная сборка терминала проверяется по исходному коммиту, патчу, архитектуре и SHA256. Тесты протокола выполняются в CI.
+- На macOS высота ячейки терминала теперь ровно вдвое больше ширины: рисунки сохраняют пропорции при смене размера шрифта и масштаба экрана.
+- Точки рисунков отрисовывает сам терминал с равномерными промежутками внутри и между символами. Их геометрия больше не зависит от Menlo и подстановки шрифтов.
+- Автоматический размер шрифта учитывает новую высоту строки. Смена указателя сохранена; отображение Windows не меняется.
 
-Патчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Нативное отображение указателя в этой версии требует проверки на Mac.
+Патчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Внешний вид на настоящем Mac требует проверки после обновления.
 
 ## English
 
-- The macOS package includes a custom Alacritty build with mouse pointer support: the game can show a hand over buttons and interactive objects and restore the default arrow.
-- Application pointers are limited to mouse-reporting mode and cleared by terminal reset or disabling the feature.
-- The custom terminal is verified against its source commit, patch, architecture, and SHA256. Protocol tests run in CI.
+- On macOS, terminal cells now have an exact 1:2 width-to-height ratio, preserving artwork proportions across font sizes and display scales.
+- Braille artwork uses built-in dots with uniform spacing within and between characters, independent of Menlo and font fallback.
+- Automatic font sizing accounts for the new line height. Mouse pointer support is retained; Windows rendering is unchanged.
 
-Patches for Windows and macOS (Apple Silicon). Saves and settings are retained. Native pointer appearance in this version still requires validation on a Mac.
+Patches for Windows and macOS (Apple Silicon). Saves and settings are retained. Appearance on a physical Mac still needs validation after updating.
