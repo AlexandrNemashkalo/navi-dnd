@@ -654,7 +654,7 @@ class Program
                     Term.SetCursorPosition(0, ng.Wizard.StartTop);
                     // We returned and chose the world in a different language - the questionnaire and the hero again (options and names - in the language of the world).
                     if (ng.Form is { } old && old.Language != L.World) { ng.Form = null; ng.HeroReady = false; }
-                    var form = ng.Form ??= new NewGameDisplay(settings, display, screen, aiClient);
+                    var form = ng.Form ??= new NewGameDisplay(settings, display, screen, aiClient, config.IconPack);
                     form.CanGo = ng.CanGo;
                     int to = await form.Show();
                     if (to == 0) { ng.ReturnTo = Screen.NewGameHero; state.CurrentScreen = Screen.NewGameExit; break; }
@@ -662,6 +662,8 @@ class Program
                     {
                         data.WorldId = ng.WorldId;
                         storage.NewGameData = data;
+                        // The pack of this adventure - by default in the next questionnaire.
+                        if (data.IconPack is { } pack && pack != config.IconPack) { config.IconPack = pack; config.SaveUserSettings(); }
                         ng.HeroReady = true;
                         // A hero created by a AI goes straight into the hero library (not in UI tests).
                         if (testStatePath == null)

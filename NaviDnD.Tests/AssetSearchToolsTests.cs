@@ -2,6 +2,7 @@ using NaviDnD.McpServer;
 
 namespace NaviDnD.Tests;
 
+[Collection(IconPackCollection.Name)]
 public class AssetSearchToolsTests
 {
     [Fact]

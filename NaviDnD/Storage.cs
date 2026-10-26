@@ -90,6 +90,13 @@ public class Storage
         return _entityColors.GetValueOrDefault(name);
     }
 
+    // Picture pack of the game: in the save and in the search for new pictures (Helpers.CatalogSearch.IconPack).
+    public void SetIconPack(string? pack)
+    {
+        WorldState.IconPack = Helpers.CatalogSearch.NormalizePack(pack);
+        Helpers.CatalogSearch.IconPack = WorldState.IconPack;
+    }
+
     public void ResetWorldState()
     {
         // New game - in the language of the selected world (L.World is set by the new game wizard when choosing a world).
@@ -380,6 +387,10 @@ public class Storage
 
                 case "language":
                     if (prop.Value.ValueKind == JsonValueKind.String) WorldState.Language = L.Normalize(prop.Value.GetString());
+                    break;
+
+                case "iconpack":
+                    if (prop.Value.ValueKind == JsonValueKind.String) SetIconPack(prop.Value.GetString());
                     break;
             }
         }
@@ -1398,6 +1409,7 @@ public class Storage
     public void LoadFrom(string path)
     {
         string json = File.ReadAllText(path, Encoding.UTF8);
+        SetIconPack(null);   // a save without the field - game-icons, not the pack of the previous game
         WorldState.Hero = null;
         WorldState.Narrative = null;
         WorldState.Map.Rooms = null;

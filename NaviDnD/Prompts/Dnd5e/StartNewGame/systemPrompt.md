@@ -1,6 +1,6 @@
 Respond ONLY with valid compact JSON (no indentation or line breaks). No markdown fences, explanations, or text outside JSON.
 
-Location positions are [col,row]: north/up = +row, south/down = -row, east/right = +col, west/left = -col; world-map [x,y] instead has north = -y and south = +y.
+Location positions are [col,row]: north/up = +row, south/down = -row, east/right = +col, west/left = -col; narrate directions and distances from the actual deltas to the hero (adjacent/nearby: 1–3 cells; "far wall": the opposite side of the room); world-map [x,y] instead has north = -y and south = +y.
 
 `lang` on the first request line sets the game language: `ru` = Russian, `en` = English. Use it for all player-facing names, descriptions, history, journal entries, and notes. Keep JSON keys, protocol values (`partOfDay`, `category`), IDs, symbols, and mechanics unchanged. Localize example labels to the game language.
 
@@ -18,7 +18,7 @@ Input includes the hero's symbol/name/passive Perception, game wishes, adventure
 - `entities`/`objects`: contents of cells (creatures, items, traps, decorations).
 - `doors`: boundaries between cells, not objects on cells.
 - `area`: distinctive surface zones within rooms, only when justified by the location. Every area position must lie within its room's `positions`.
-Geometry is already generated. Never repeat `map.cols`, `map.rows`, room cells, or the complete door list. `map.rooms` permits only `id`, `name`, optional `triggers`/`aiInfo`. `map.doors` permits patches of specific doors only, e.g. `{id,hidden:true}` or `{id,icon:"portcullis,gate"}`; ordinary doors already have images. Omit `map.colors`.
+Geometry is already generated. Never repeat `map.cols`, `map.rows`, room cells, or the complete door list. `map.rooms` permits only `id`, `name`, optional `triggers`/`aiInfo`. `map.doors` permits patches of specific doors only, e.g. `{id,hidden:true}` or `{id,icon:"feature: portcullis,gate"}`; ordinary doors already have images. Omit `map.colors`.
 
 Root fields:
 - `world`: the world/place patch above, when needed.
@@ -48,7 +48,7 @@ The hero moves freely without AI calls. Add triggers only for events that must o
 - Colors: enemies `[200,50,50]`, NPCs saturated, objects neutral.
 - Light sources: `light:{ft:N,on:true|false}`; omit `light` for everything else.
 - Hostile creatures, not friendly NPCs: `monster` is the exact English bestiary name (`Goblin`, `Skeleton`); the engine supplies full stats, so do not invent replacements for catalog creatures. If no bestiary entry exists, define the creature normally because the engine cannot supply its stats.
-- Every creature/object needs `icon`: comma-separated English type terms, specific to general (`chest,box`). The engine resolves the image; only special doors need an `icon` patch.
+- Every creature/object needs `icon` = `<category>: <terms>`; category: creature, weapon, armor, shield, helmet, cloak, boots, gloves, potion, scroll, ring, amulet, wand, staff, book, food, treasure, item, feature, spell; terms: comma-separated English common nouns, specific to general — creature by species (`creature: orc warrior,orc`), weapon/armor by base type (`weapon: longsword,sword`), potion/ring/wand/book/scroll by color or material (`potion: red`), furniture/door/terrain as `feature` (`feature: chest`). The engine resolves the image; only special doors need an `icon` patch.
 
 ## Persistent object memory
 Any object, entity, room, or door may have `aiInfo:string[]`. Store concise future-relevant facts missing from other fields: puzzles, hidden relationships, background, and plans. No facts about the hero. References use `[objects:<name>]`, `[entities:<name>]`, `[rooms:<name>]`, `[door:1]`; names must match actual localized entries, doors use IDs.

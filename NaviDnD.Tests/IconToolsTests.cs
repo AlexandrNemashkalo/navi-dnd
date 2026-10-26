@@ -5,6 +5,7 @@ namespace NaviDnD.Tests;
 
 // Unit tests for searching for icons (find_icon) without a AI - work against the real icons/ folder on disk
 // (static set of files game-icons.net, 4173 pcs., does not change during the session).
+[Collection(IconPackCollection.Name)]
 public class IconToolsTests
 {
     private static IconTools CreateTools() => new(new McpServerConfig(WorldStatePath: "unused", LogPath: null));

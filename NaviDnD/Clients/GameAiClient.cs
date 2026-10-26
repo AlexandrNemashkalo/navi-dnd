@@ -59,6 +59,7 @@ public class GameAiClient
     public async Task CreateNewGame(NewGameData newGameData)
     {
         _storage.ResetWorldState();
+        _storage.SetIconPack(newGameData.IconPack);   // before the AI call: pictures of its answer - from this pack
         // MCP- server requires an existing state file at startup (see Program.cs) - before that CreateNewGame
         // went without MCP at all (allowedTools:null), now it needs find_icon.
         _storage.SaveDraft();
@@ -91,6 +92,7 @@ public class GameAiClient
     public async Task ReuseHero(NewGameData data, string heroJson)
     {
         _storage.ResetWorldState();
+        _storage.SetIconPack(data.IconPack);
         _storage.ApplySavedState("{\"hero\":" + heroJson + "}");   // level and experience - as they were
         if (_settings.Hero is not { } hero) return;
         if (hero.Hp is { } hp && hp.Split('/') is [_, var max] && max.Trim().Length > 0) hero.Hp = $"{max.Trim()}/{max.Trim()}";

@@ -487,7 +487,7 @@ public class LevelUpDisplay
                 _border.DrawContentLine2Columns(leftContent, () =>
                 {
                     Console.Write(new string(' ', pad));
-                    ColorHelper.WriteColored(line, lineColor);
+                    if (!PixelArt.Write(line, _display.MainBackground)) ColorHelper.WriteColored(line, lineColor);
                 }, leftW, rightW);
             }
             else _border.DrawContentLine(leftContent);

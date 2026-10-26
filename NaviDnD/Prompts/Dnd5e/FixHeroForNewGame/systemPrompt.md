@@ -43,7 +43,7 @@ For `inventory`, `abilities`, `spells`, `stats`, `skills`, and `resources`, patc
 - Rarity colors: common `[160,160,160]`, uncommon `[80,200,80]`, rare `[60,120,255]`, very rare `[180,80,255]`, legendary `[255,140,0]`, artifact `[220,40,40]`.
 - `equipmentedSlot` is ALWAYS an array, never a string. Unequipped: `[]`; one hand: `["R Hand"]`; two-handed: `["L Hand","R Hand"]`; multiple slots: `["Body","Belt"]`. Use exact labels from the existing `equipmentSlots`, in their existing language.
 - `description`: one line of mechanics only.
-- New item: `name` in the game language, `ref` as the exact English PHB name, and `icon` as comma-separated English type terms, specific to general (`longsword,sword`). The engine resolves the image and canonical localized name.
+- New item: `name` in the game language, `ref` as the exact English PHB name, and `icon` = `<category>: <terms>`; category: creature, weapon, armor, shield, helmet, cloak, boots, gloves, potion, scroll, ring, amulet, wand, staff, book, food, treasure, item, feature, spell; terms: comma-separated English common nouns, specific to general — creature by species (`creature: orc warrior,orc`), weapon/armor by base type (`weapon: longsword,sword`), potion/ring/wand/book/scroll by color or material (`potion: red`), furniture/door/terrain as `feature` (`feature: chest`). The engine resolves the image and canonical localized name.
 - After adding, removing, equipping, or unequipping an item with bonuses, return every affected stat/skill/save. If it changes an ability score, patch that score too.
 - Recompute AC from the actual armor: armor base + Dexterity modifier (full for light, capped at +2 for medium, ignored for heavy) + shield (+2). Do not use a memorized typical AC.
 

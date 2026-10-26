@@ -543,6 +543,16 @@ public class DialogDisplay
                     ColorHelper.WriteColored(after, mainFg, bg);
                 };
             }
+            else if (!isAnimation && PixelArt.Colors(text) != null)
+            {
+                // Color sprite (Dungeon Crawl tile) - in its own colors, not in the color of the creature.
+                int capturedLeftPad = leftPad;
+                lines[absRow] = () =>
+                {
+                    if (capturedLeftPad > 0) Console.Write(new string(' ', capturedLeftPad));
+                    PixelArt.Write(text, bg);
+                };
+            }
             else if (segments != null && i < segments.Length && segments[i] is { } lineSegs)
             {
                 int capturedLeftPad = leftPad;

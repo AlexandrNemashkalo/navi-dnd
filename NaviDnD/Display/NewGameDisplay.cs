@@ -29,7 +29,9 @@ public class NewGameDisplay
 
 
 
-    private sealed record Portrait(string Image, string Title);
+    // Gender: "male"/"female" - only for a hero of this gender (GENDER field), null - for anyone.
+    private sealed record Portrait(string Image, string Title, string? Gender = null);
+    private const string Male = "male", Female = "female";
 
     private static (string Name, List<int> Rgb)[] Palette =>
     [
@@ -39,26 +41,57 @@ public class NewGameDisplay
         (L.T("PINK"), [230, 120, 170]), (L.T("FOREST"), [120, 175, 70]), (L.T("ASHEN"), [155, 145, 135]),
     ];
 
-    // Ready set of portraits (game-icons) - scrolls through after those selected by the AI.
+    // Ready set of portraits (game-icons): faces and figures, not a helmet or a hat instead of a person.
     private static Portrait[] Gallery =>
     [
-        new("delapouite/wizard-face", L.T("MAGE")), new("delapouite/woman-elf-face", L.T("ELF WOMAN")),
-        new("delapouite/dwarf-face", L.T("DWARF")), new("delapouite/barbarian", L.T("BARBARIAN")),
-        new("delapouite/monk-face", L.T("MONK")), new("delapouite/bandit", L.T("BANDIT")),
-        new("cathelineau/witch-face", L.T("WITCH")), new("cathelineau/nun-face", L.T("PRIESTESS")),
+        new("delapouite/wizard-face", L.T("MAGE"), Male), new("delapouite/woman-elf-face", L.T("ELF WOMAN"), Female),
+        new("delapouite/dwarf-face", L.T("DWARF"), Male), new("delapouite/barbarian", L.T("BARBARIAN"), Male),
+        new("delapouite/monk-face", L.T("MONK"), Male), new("delapouite/bandit", L.T("BANDIT"), Male),
+        new("cathelineau/witch-face", L.T("WITCH"), Female), new("cathelineau/nun-face", L.T("PRIESTESS"), Female),
         new("darkzaitzev/ninja-head", L.T("NINJA")), new("darkzaitzev/hooded-assassin", L.T("ASSASSIN")),
         new("darkzaitzev/hooded-figure", L.T("WANDERER")), new("lorc/cowled", L.T("HERMIT")),
-        new("lorc/visored-helm", L.T("KNIGHT")), new("delapouite/closed-barbute", L.T("WARRIOR")),
-        new("delapouite/black-knight-helm", L.T("BLACK KNIGHT")), new("delapouite/overlord-helm", L.T("OVERLORD")),
-        new("delapouite/viking-helmet", L.T("VIKING")), new("delapouite/spartan-helmet", L.T("HOPLITE")),
-        new("delapouite/samurai-helmet", L.T("SAMURAI")), new("kier-heyl/elf-helmet", L.T("ELF WARRIOR")),
-        new("kier-heyl/dwarf-helmet", L.T("DWARF WARRIOR")), new("kier-heyl/dwarf-king", L.T("DWARF KING")),
+        new("skoll/mounted-knight", L.T("KNIGHT")), new("cathelineau/swordwoman", L.T("SWORDSWOMAN"), Female),
+        new("delapouite/viking-head", L.T("VIKING"), Male), new("delapouite/pikeman", L.T("PIKEMAN")),
+        new("lorc/bowman", L.T("BOWMAN")), new("delapouite/sun-priest", L.T("SUN PRIEST")),
+        new("caro-asercion/philosopher-bust", L.T("SAGE"), Male), new("cathelineau/bad-gnome", L.T("GNOME"), Male),
+        new("kier-heyl/dwarf-king", L.T("DWARF KING"), Male),
         new("delapouite/orc-head", L.T("ORC")), new("delapouite/goblin-head", L.T("GOBLIN")),
         new("delapouite/kenku-head", L.T("KENKU")), new("lorc/lizardman", L.T("LIZARDFOLK")),
-        new("faithtoken/dragon-head", L.T("DRAGONBORN")), new("delapouite/vampire-dracula", L.T("VAMPIRE")),
+        new("faithtoken/dragon-head", L.T("DRAGONBORN")), new("delapouite/vampire-dracula", L.T("VAMPIRE"), Male),
         new("lorc/werewolf", L.T("WEREWOLF")), new("lorc/cultist", L.T("CULTIST")),
-        new("delapouite/plague-doctor-profile", L.T("PLAGUE DOCTOR")), new("delapouite/fairy", L.T("FAIRY")),
-        new("delapouite/archer", L.T("ARCHER")), new("cathelineau/swordman", L.T("SWORDSMAN")),
+        new("delapouite/plague-doctor-profile", L.T("PLAGUE DOCTOR")), new("delapouite/fairy", L.T("FAIRY"), Female),
+        new("delapouite/archer", L.T("ARCHER")), new("cathelineau/swordman", L.T("SWORDSMAN"), Male),
+    ];
+
+    // Dungeon Crawl: ready characters of the pack (people and humanoids dressed as heroes) - after the hero assembled
+    // for the race and class, not tied to them.
+    private static Portrait[] DcssGallery =>
+    [
+        new("dcss/monster/human_new", L.T("WANDERER"), Male), new("dcss/monster/human", L.T("ADVENTURER"), Male),
+        new("dcss/monster/wizard", L.T("MAGE"), Male), new("dcss/monster/necromancer_new", L.T("NECROMANCER"), Male),
+        new("dcss/monster/enchantress_human", L.T("ENCHANTRESS"), Female), new("dcss/monster/hell_knight_new", L.T("BLACK KNIGHT"), Male),
+        new("dcss/monster/death_knight", L.T("BLACK KNIGHT")), new("dcss/monster/dwarf_new", L.T("DWARF"), Male),
+        new("dcss/monster/deep_dwarf_artificer", L.T("DWARF"), Male), new("dcss/monster/halfling_new", L.T("HALFLING"), Male),
+        new("dcss/monster/elf_new", L.T("ELF")), new("dcss/monster/deep_elf_knight_new", L.T("ELF WARRIOR")),
+        new("dcss/monster/deep_elf_blademaster", L.T("ELF WARRIOR")), new("dcss/monster/deep_elf_master_archer", L.T("ARCHER")),
+        new("dcss/monster/deep_elf_sorcerer", L.T("MAGE")), new("dcss/monster/deep_elf_annihilator", L.T("MAGE")),
+        new("dcss/monster/deep_elf_priest", L.T("PRIEST")), new("dcss/monster/deep_elf_high_priest", L.T("PRIEST")),
+        new("dcss/monster/orc_knight_new", L.T("ORC"), Male), new("dcss/monster/orc_sorcerer_new", L.T("ORC SHAMAN"), Male),
+        new("dcss/monster/unique/donald_new", L.T("ADVENTURER"), Male), new("dcss/monster/unique/duane", L.T("WARRIOR"), Male),
+        new("dcss/monster/unique/edmund_new", L.T("WARRIOR"), Male), new("dcss/monster/unique/joseph_new", L.T("WARRIOR"), Male),
+        new("dcss/monster/unique/terence_new", L.T("WARRIOR"), Male), new("dcss/monster/unique/frances_male", L.T("KNIGHT"), Male),
+        new("dcss/monster/unique/eustachio_new", L.T("NOBLE"), Male), new("dcss/monster/unique/frederick_new", L.T("NOBLE"), Male),
+        new("dcss/monster/unique/fannar", L.T("MAGE"), Male), new("dcss/monster/unique/francis", L.T("SAGE"), Male),
+        new("dcss/monster/unique/sigmund_new", L.T("NECROMANCER"), Male), new("dcss/monster/unique/harold", L.T("HUNTER"), Male),
+        new("dcss/monster/unique/maurice_new", L.T("ROGUE"), Male), new("dcss/monster/unique/michael", L.T("HERMIT"), Male),
+        new("dcss/monster/unique/norris", L.T("BARBARIAN"), Male), new("dcss/monster/unique/rupert_new", L.T("BARBARIAN"), Male),
+        new("dcss/monster/unique/jory", L.T("VAMPIRE"), Male), new("dcss/monster/unique/wiglaf_new", L.T("DWARF WARRIOR"), Male),
+        new("dcss/monster/unique/frances", L.T("SWORDSWOMAN"), Female), new("dcss/monster/unique/margery_new", L.T("SWORDSWOMAN"), Female),
+        new("dcss/monster/unique/maud_new", L.T("SWORDSWOMAN"), Female), new("dcss/monster/unique/sonja_new", L.T("ASSASSIN"), Female),
+        new("dcss/monster/unique/erica_new", L.T("SORCERESS"), Female), new("dcss/monster/unique/jessica_new", L.T("SORCERESS"), Female),
+        new("dcss/monster/unique/louise", L.T("SORCERESS"), Female), new("dcss/monster/unique/psyche_new", L.T("ENCHANTRESS"), Female),
+        new("dcss/monster/unique/kirke_new", L.T("PRIESTESS"), Female), new("dcss/monster/unique/josephine_new", L.T("WITCH"), Female),
+        new("dcss/monster/unique/agnes_new", L.T("WANDERER"), Female),
     ];
 
     private static string[] PortraitActions => [L.T("CHOOSE FILE…")];
@@ -66,6 +99,9 @@ public class NewGameDisplay
     // Races and classes of rules with a suitable portrait (gallery slug) - Prompts/{RuleSet}/heroOptions.json.
     private sealed record HeroOption(string Name, string? Portrait);
     private readonly Dictionary<string, string?> _optionPortraits = [];
+    // Dungeon Crawl pack: the body of the race ("doll", hair - "dollHair") and gear variants of the class ("dolls") - HeroDoll.
+    private readonly Dictionary<string, (string Body, bool Hair)> _raceDolls = [];
+    private readonly Dictionary<string, List<HeroDoll.Gear>> _classDolls = [];
     private readonly List<string> _names = [];   // names for "RANDOM"
     private static readonly Random _rnd = new();
 
@@ -85,12 +121,19 @@ public class NewGameDisplay
                     string name = L.W(plain ? o!.ToString() : (string?)o?["name"] ?? "");
                     if (name.Length == 0) continue;
                     _fields[field].Options.Add(name);
-                    if (!plain) _optionPortraits[name] = (string?)o?["portrait"];
+                    if (plain) continue;
+                    _optionPortraits[name] = (string?)o?["portrait"];
+                    if (key == "races" && (string?)o?["doll"] is { Length: > 0 } body)
+                        _raceDolls[name] = (body, (bool?)o?["dollHair"] ?? true);
+                    if (key == "classes")
+                        _classDolls[name] = [.. (o?["dolls"]?.AsArray() ?? []).Select(g => new HeroDoll.Gear(
+                            (string?)g?["gear"] ?? "", (string?)g?["hair"], (string?)g?["hairFemale"], (string?)g?["beard"]))];
                 }
             foreach (var n in root?[L.WorldIsEnglish ? "namesEn" : "names"]?.AsArray() ?? [])
                 if (n?.ToString() is { Length: > 0 } s) _names.Add(s);
         }
         catch { /*no list - leaflets are empty*/ }
+        _fields[GenderField].Options.AddRange(GenderNames);
         foreach (int f in ChoiceFields)
         {
             if (_fields[f].Options.Count == 0) _fields[f].Options.Add("—");
@@ -133,11 +176,82 @@ public class NewGameDisplay
         f.Value = value;
     }
 
+    // Picture pack of the adventure (field "PICTURES"): game-icons - ready gallery, Dungeon Crawl - the hero of the
+    // selected race and class assembled from layers.
+    private static readonly string[] Packs = [CatalogSearch.GameIconsPack, CatalogSearch.DcssPack];
+    private static readonly string[] PackNames = ["GAME-ICONS", "DUNGEON CRAWL"];
+    private string Pack => Packs[Math.Clamp(_fields[PackField].Index, 0, Packs.Length - 1)];
+
+    // Gender of the hero (field "GENDER"): filters the portraits, goes to the AI with the questionnaire.
+    private static readonly string[] Genders = [Male, Female];
+    private static string[] GenderNames => [L.T("male"), L.T("female")];
+    private string Gender => Genders[Math.Clamp(_fields[GenderField].Index, 0, Genders.Length - 1)];
+
+    private void SetPack(int index)
+    {
+        _fields[PackField].Index = Math.Clamp(index, 0, Packs.Length - 1);
+        _fields[PackField].Value = PackNames[_fields[PackField].Index];
+        RebuildPortraits();
+    }
+
+    // Pack of a ready-made portrait: a Dungeon Crawl slug - its pack, anything else (game-icons, own file) - game-icons.
+    private static int PackOfImage(string? image) =>
+        image?.StartsWith(CatalogSearch.DcssPrefix, StringComparison.Ordinal) == true ? Array.IndexOf(Packs, CatalogSearch.DcssPack) : 0;
+
+    // Portraits not from the gallery - own file, hero from the library: always first, with any pack.
+    private readonly List<Portrait> _customPortraits = [];
+    // Portrait of the hero from the library - only while he is selected (a new hero does not get it).
+    private Portrait? _libraryPortrait;
+    private int FixedPortraits => _customPortraits.Count + (_libraryPortrait != null ? 1 : 0);
+
+    private void AddCustomPortrait(Portrait portrait)
+    {
+        _customPortraits.RemoveAll(p => p.Image == portrait.Image);
+        _customPortraits.Insert(0, portrait);
+        RebuildPortraits();
+        _portrait = 0;
+    }
+
+    // Gallery anew (pack, race or class changed): the selected portrait remains selected, if it is in the new one.
+    private void RebuildPortraits()
+    {
+        string? selected = _portraits.Count > 0 ? _portraits[_portrait].Image : null;
+        _portraits.Clear();
+        if (_libraryPortrait != null) _portraits.Add(_libraryPortrait);
+        _portraits.AddRange(_customPortraits);
+        var gallery = Pack == CatalogSearch.DcssPack ? [.. DollGallery(), .. DcssGallery] : Gallery;
+        _portraits.AddRange(gallery.Where(p => p.Gender == null || p.Gender == Gender));
+        int index = _portraits.FindIndex(p => p.Image == selected);
+        _portrait = index >= 0 ? index : Math.Min(FixedPortraits, _portraits.Count - 1);
+    }
+
+    // The race and gender of the hero in all variants of the selected class, then - in the first variant of each
+    // other class. Race or class without a recipe - the first one.
+    private List<Portrait> DollGallery()
+    {
+        (string Body, bool Hair) race = _raceDolls.TryGetValue(_fields[RaceField].Value, out var r) ? r : _raceDolls.Values.FirstOrDefault(("human", true));
+        string selectedClass = _classDolls.ContainsKey(_fields[ClassField].Value) ? _fields[ClassField].Value : _classDolls.Keys.FirstOrDefault() ?? "";
+        var result = new List<Portrait>();
+        foreach (var (cls, variants) in _classDolls.OrderBy(c => c.Key != selectedClass))
+            for (int v = 0; v < (cls == selectedClass ? variants.Count : Math.Min(1, variants.Count)); v++)
+                result.Add(new Portrait(HeroDoll.Slug(race.Body, Gender == Female, variants[v], race.Hair),
+                    cls.ToUpperInvariant() + (v > 0 ? $" {v + 1}" : "")));
+        return result;
+    }
+
     // Changed race/class - a portrait for them from the gallery (their own picture from the file is not
-    // touched). The selected one does not have a suitable one - in another field.
+    // touched). The selected one does not have a suitable one - in another field. Dungeon Crawl - the gallery is
+    // assembled for them anew, the first one (a man of the selected class) is selected.
     private void PortraitFor(int changed)
     {
-        if (_portraits[_portrait].Image.StartsWith(SvgToBrailleConverter.PortraitsPrefix)) return;
+        bool custom = _portrait < FixedPortraits;
+        RebuildPortraits();
+        if (custom) return;
+        if (Pack == CatalogSearch.DcssPack)
+        {
+            _portrait = Math.Min(FixedPortraits, _portraits.Count - 1);
+            return;
+        }
         int other = changed == RaceField ? ClassField : RaceField;
         foreach (int f in new[] { changed, other })
             if (_optionPortraits.GetValueOrDefault(_fields[f].Value) is { } slug && _portraits.FindIndex(p => p.Image == slug) is int pi and >= 0)
@@ -178,29 +292,31 @@ public class NewGameDisplay
         new(L.T("LEVEL"), Kind.Choice), new(L.T("ALIGNMENT"), Kind.Choice),
         new(L.T("RANDOM"), Kind.RandomButton),
         new(L.T("BACKGROUND"), Kind.Choice),
-        new(L.T("NEXT"), Kind.Button),
+        new(L.T("PICTURES"), Kind.Choice),
+        new(L.T("GENDER"), Kind.Choice),
+        new(L.T("NEXT"), Kind.Button),   // the button is the last one
     ];
     private const int NameField = 0, SymbolField = 1, RaceField = 2, ClassField = 3, DescriptionField = 4,
         ColorField = 5, HeroField = 8, PromptField = 9, AiField = 10, LevelField = 11, AlignmentField = 12, RandomField = 13,
-        BackgroundField = 14;
+        BackgroundField = 14, PackField = 15, GenderField = 16;
     private const string Setting = "DnD 5e";   // rules - only one for now (not shown in the questionnaire)
 
     // The order of the fields on the screen (↑↓): HERO is at the top, the button is at the bottom (in the list
     // _fields the button is the last one). Description of the hero - in the bottom block (like a description of
     // the world): text, request to the AI, INVENT / CHANGE.
-    private static readonly int[] Order = [HeroField, 0, 1, 2, 3, LevelField, AlignmentField, BackgroundField, 5, 6, 7, RandomField,
-        DescriptionField, PromptField, AiField, 15];
+    private static readonly int[] Order = [HeroField, 0, 1, 2, 3, GenderField, LevelField, AlignmentField, BackgroundField, 5, PackField, 6, 7, RandomField,
+        DescriptionField, PromptField, AiField, 17];
 
     // HERO (as WORLD at the “World” step): “new hero” (first), deferred options for this game creation (Draft -
     // ready, only read; to the library - only the one with which you moved on) and library heroes (Card).
-    private sealed record HeroDraft(string[] Values, int Color, string Image);
+    private sealed record HeroDraft(string[] Values, int Color, string Image, int Pack);
     private sealed record HeroChoice(HeroLibrary.Card? Card = null, HeroDraft? Draft = null);
     private readonly List<HeroChoice> _heroes = [new()];
 
     private int _focus;
     private bool _editing;
     private int _color;
-    private readonly List<Portrait> _portraits = [.. Gallery];
+    private readonly List<Portrait> _portraits = [];
     private int _portrait;
     private int _action;             // selected button in the line below the portrait
     private string _message = "";
@@ -229,7 +345,8 @@ public class NewGameDisplay
     // Language of the world in which the questionnaire was collected (options, names): the world has changed to another language - the questionnaire is created anew.
     public string Language { get; } = L.World;
 
-    public NewGameDisplay(WorldState settings, DisplayConfig display, ScreenConfig screen, GameAiClient aiClient)
+    // iconPack - picture pack of the previous new game (AppConfig.IconPack): the default value of "PICTURES".
+    public NewGameDisplay(WorldState settings, DisplayConfig display, ScreenConfig screen, GameAiClient aiClient, string? iconPack = null)
     {
         _aiClient = aiClient;
         _screen = screen;
@@ -238,6 +355,10 @@ public class NewGameDisplay
         _borderDrawer = new BorderDrawer(settings, display);
         _startTop = Term.CursorTop;
         LoadHeroOptions(aiClient.RuleSet);
+        _fields[PackField].Options.AddRange(PackNames);
+        _fields[PackField].Index = Math.Max(0, Array.IndexOf(Packs, CatalogSearch.NormalizePack(iconPack)));
+        _fields[PackField].Value = PackNames[_fields[PackField].Index];
+        RebuildPortraits();
         PortraitFor(RaceField);
         _fields[HeroField].Options.Add(L.T("new hero"));
         foreach (var h in HeroLibrary.All())
@@ -251,12 +372,12 @@ public class NewGameDisplay
     // hero from the library - his race and class are fixed (level and skills transfer as is). What was entered
     // for a new hero is stored while you are flipping through the heroes of the library (returned to “new” -
     // everything is as it was).
-    private static readonly int[] PersonalFields = [NameField, SymbolField, RaceField, ClassField, LevelField, AlignmentField, BackgroundField, DescriptionField];
-    private static readonly int[] ChoiceFields = [RaceField, ClassField, LevelField, AlignmentField, BackgroundField];
+    private static readonly int[] PersonalFields = [NameField, SymbolField, RaceField, ClassField, LevelField, AlignmentField, BackgroundField, DescriptionField, GenderField];
+    private static readonly int[] ChoiceFields = [RaceField, ClassField, LevelField, AlignmentField, BackgroundField, GenderField];
     private HeroDraft? _newHeroDraft;
     private string _newHeroPrompt = "";
 
-    private HeroDraft Snapshot() => new([.. PersonalFields.Select(f => _fields[f].Value)], _color, _portraits[_portrait].Image);
+    private HeroDraft Snapshot() => new([.. PersonalFields.Select(f => _fields[f].Value)], _color, _portraits[_portrait].Image, _fields[PackField].Index);
 
     private void ApplyHeroChoice(int previous)
     {
@@ -265,22 +386,32 @@ public class NewGameDisplay
         var h = _heroes[_fields[HeroField].Index];
         bool isNew = h.Card == null && h.Draft == null;
         // A ready-made hero (library or deferred version) is like a ready-made world: everything is read-only.
-        foreach (int f in PersonalFields.Concat([ColorField, ColorField + 1, ColorField + 2, PromptField, AiField, RandomField])) _fields[f].ReadOnly = !isNew;
+        foreach (int f in PersonalFields.Concat([ColorField, ColorField + 1, ColorField + 2, PackField, PromptField, AiField, RandomField])) _fields[f].ReadOnly = !isNew;
         _fields[PromptField].Value = isNew ? _newHeroPrompt : "";
-        if (h.Card != null) { ApplyPrefill(h.Card); return; }
+        // A ready-made hero keeps the picture pack of his portrait (old heroes - game-icons), it is not changed.
+        if (h.Card != null)
+        {
+            SetPack(PackOfImage(h.Card.Image));
+            ApplyPrefill(h.Card);
+            bool? female = h.Card.Image?.StartsWith(HeroDoll.Prefix, StringComparison.Ordinal) == true ? h.Card.Image.Contains("_female") : null;
+            if (female != null) SetChoice(GenderField, GenderNames[female.Value ? 1 : 0]);
+            else _fields[GenderField].Value = "—";
+            return;
+        }
         var d = h.Draft ?? _newHeroDraft;
+        if (d != null) SetPack(d.Pack);
         for (int i = 0; i < PersonalFields.Length; i++)
         {
             string v = d?.Values[i] ?? "";
             if (ChoiceFields.Contains(PersonalFields[i])) SetChoice(PersonalFields[i], v);
             else _fields[PersonalFields[i]].Value = v;
         }
-        if (d != null)
-        {
-            _color = d.Color;
-            int pi = _portraits.FindIndex(p => p.Image == d.Image);
-            if (pi >= 0) _portrait = pi;
-        }
+        // The gallery - by the restored pack, race, class and gender; the library portrait is gone.
+        _libraryPortrait = null;
+        RebuildPortraits();
+        if (d != null) _color = d.Color;
+        int pi = d != null ? _portraits.FindIndex(p => p.Image == d.Image) : -1;
+        _portrait = pi >= 0 ? pi : Math.Min(FixedPortraits, _portraits.Count - 1);
     }
 
     // The new hero already has a description - before “RAND” he becomes a ready-made option in the HERO page
@@ -307,10 +438,17 @@ public class NewGameDisplay
         SetChoice(BackgroundField, HeroStat(h.HeroJson, StatKeys.Background));
         _fields[DescriptionField].Value = h.Description;   // no description - empty (not the text of the previous hero)
         if (h.Color != null && Array.FindIndex(Palette, p => p.Rgb.SequenceEqual(h.Color)) is int ci and >= 0) _color = ci;
+        _libraryPortrait = null;   // the portrait of the previously viewed library hero
+        RebuildPortraits();
         if (h.Image != null)
         {
             int pi = _portraits.FindIndex(p => p.Image == h.Image);
-            if (pi < 0) { _portraits.Insert(0, new Portrait(h.Image, h.Name.ToUpperInvariant())); pi = 0; }
+            if (pi < 0)
+            {
+                _libraryPortrait = new Portrait(h.Image, h.Name.ToUpperInvariant());
+                RebuildPortraits();
+                pi = 0;
+            }
             _portrait = pi;
         }
     }
@@ -448,7 +586,7 @@ public class NewGameDisplay
     // option appears in the leaflet).
     private string EssentialKey() => string.Join("|", System.Runtime.CompilerServices.RuntimeHelpers.GetHashCode(_heroes[_fields[HeroField].Index]),
         _fields[RaceField].Value.Trim(),
-        _fields[ClassField].Value.Trim(), _fields[LevelField].Value, _fields[BackgroundField].Value);
+        _fields[ClassField].Value.Trim(), _fields[LevelField].Value, _fields[BackgroundField].Value, Pack);
 
     // An already created hero: name, symbol, color and portrait from the profile - into the hero as is, without a AI.
     private void ApplyLooks()
@@ -460,6 +598,8 @@ public class NewGameDisplay
         Data.Alignment = _fields[AlignmentField].Value;
         Data.Color = [.. Palette[_color].Rgb];
         Data.Image = string.IsNullOrEmpty(portrait.Image) ? null : portrait.Image;
+        Data.IconPack = Pack;
+        Data.Gender = _fields[GenderField].Value == "—" ? null : Gender;
         if (_settings.Hero is not { } hero) return;
         hero.Name = Data.Name;
         if (hero.Stat(StatKeys.Alignment) is { } align)
@@ -596,7 +736,7 @@ public class NewGameDisplay
             {
                 field.Value = field.Options[field.Index];
                 int fi = _fields.IndexOf(field);
-                if (fi is RaceField or ClassField) PortraitFor(fi);
+                if (fi is RaceField or ClassField or PackField or GenderField) PortraitFor(fi is PackField or GenderField ? ClassField : fi);
             }
         }
         else return;
@@ -653,7 +793,7 @@ public class NewGameDisplay
         }
         _describeTask = _aiClient.DescribeHero(_fields[NameField].Value.Trim(), _fields[RaceField].Value.Trim(),
             _fields[ClassField].Value.Trim(), _fields[DescriptionField].Value.Trim(), _fields[PromptField].Value.Trim(),
-            $"Уровень: {_fields[LevelField].Value}\nМировоззрение: {_fields[AlignmentField].Value}\nПредыстория: {_fields[BackgroundField].Value}");
+            $"Уровень: {_fields[LevelField].Value}\nМировоззрение: {_fields[AlignmentField].Value}\nПредыстория: {_fields[BackgroundField].Value}\nGender: {Gender}");
     }
 
     private void FinishDescribe()
@@ -918,9 +1058,7 @@ public class NewGameDisplay
                 _message = L.T("Could not read the image");
                 return;
             }
-            _portraits.RemoveAll(p => p.Image == image);
-            _portraits.Insert(0, new Portrait(image, L.T("CUSTOM: ") + Path.GetFileNameWithoutExtension(target).ToUpperInvariant()));
-            _portrait = 0;
+            AddCustomPortrait(new Portrait(image, L.T("CUSTOM: ") + Path.GetFileNameWithoutExtension(target).ToUpperInvariant()));
             _message = "";
         }
         catch (Exception ex)
@@ -950,6 +1088,8 @@ public class NewGameDisplay
             SettingWish = "",   // wishes for the game - step “Adventure” after the editor
             Color = [.. Palette[_color].Rgb],
             Image = string.IsNullOrEmpty(portrait.Image) ? null : portrait.Image,
+            IconPack = Pack,
+            Gender = _fields[GenderField].Value == "—" ? null : Gender,
         };
 
         // Waiting - in the center, in the place of the hint under the button (and not the general spinner at
@@ -1003,8 +1143,8 @@ public class NewGameDisplay
         int y = boxTop + 2;
         int valueWidth = FormWidth - ValueCol - 3;
         _actionPos.Clear();
-        foreach (int group in new[] { HeroField, -1, NameField, SymbolField, -1, RaceField, ClassField, LevelField, AlignmentField, BackgroundField, -1,
-                     ColorField, -1, ColorField + 1, -1, ColorField + 2 })
+        foreach (int group in new[] { HeroField, -1, NameField, SymbolField, -1, RaceField, ClassField, GenderField, LevelField, AlignmentField, BackgroundField, -1,
+                     ColorField, -1, PackField, ColorField + 1, -1, ColorField + 2 })
         {
             if (group < 0) { y++; continue; }
             y += DrawField(group, y, left, valueWidth);
@@ -1286,13 +1426,14 @@ public class NewGameDisplay
     private void Put(int row, int x, string text, List<int> color, bool skipBlank = false, List<int>? bg = null)
     {
         if (row < 0 || row >= _height) return;
+        var cells = PixelArt.Colors(text);   // color sprite - in its own colors, transparent cells are skipped
         for (int i = 0; i < text.Length && x + i < _width; i++)
         {
             if (x + i < 0) continue;
-            if (skipBlank && text[i] == '⠀') continue;
+            if (skipBlank && (text[i] == '⠀' || cells != null && cells[i].Fg == null)) continue;
             _chars[row, x + i] = text[i];
-            _fg[row, x + i] = color;
-            _bg[row, x + i] = bg;
+            _fg[row, x + i] = cells != null ? cells[i].Fg : color;
+            _bg[row, x + i] = cells != null ? cells[i].Bg ?? bg : bg;
         }
     }
 

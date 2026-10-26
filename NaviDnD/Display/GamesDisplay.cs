@@ -30,6 +30,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
     private int _width, _height, _x0, _bodyTop, _left, _top;
     private char[,] _chars = new char[0, 0];
     private List<int>?[,] _fg = new List<int>?[0, 0];
+    private List<int>?[,] _bg = new List<int>?[0, 0];   // only color sprites; null - the background of the screen
 
     private List<int> Fg => display.MainForeground;
     private List<int> Bright => ColorHelper.Pale(display.MainForeground, 0.75);
@@ -189,6 +190,7 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
     {
         _chars = new char[_height, _width];
         _fg = new List<int>?[_height, _width];
+        _bg = new List<int>?[_height, _width];
         for (int r = 0; r < _height; r++) for (int c = 0; c < _width; c++) _chars[r, c] = ' ';
 
         int total = CardWidth * 2 + Gap;
@@ -274,12 +276,14 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
     private void Put(int row, int x, string text, List<int> color, bool skipBlank = false)
     {
         if (row < 0 || row >= _height) return;
+        var cells = PixelArt.Colors(text);   // color sprite - in its own colors, transparent cells are skipped
         for (int i = 0; i < text.Length && x + i < _width; i++)
         {
             if (x + i < 0) continue;
-            if (skipBlank && text[i] == '⠀') continue;
+            if (skipBlank && (text[i] == '⠀' || cells != null && cells[i].Fg == null)) continue;
             _chars[row, x + i] = text[i];
-            _fg[row, x + i] = color;
+            _fg[row, x + i] = cells != null ? cells[i].Fg : color;
+            _bg[row, x + i] = cells?[i].Bg;
         }
     }
 
@@ -290,10 +294,11 @@ public class GamesDisplay(WorldState settings, DisplayConfig display, string tit
         while (c < _width)
         {
             var fg = _fg[row, c];
+            var bg = _bg[row, c];
             int start = c;
-            while (c < _width && ReferenceEquals(_fg[row, c], fg)) c++;
+            while (c < _width && ReferenceEquals(_fg[row, c], fg) && ReferenceEquals(_bg[row, c], bg)) c++;
             var run = new string(Enumerable.Range(start, c - start).Select(i => _chars[row, i]).ToArray());
-            ColorHelper.WriteColored(run, fgColor: fg ?? display.MainForeground, bgColor: display.MainBackground);
+            ColorHelper.WriteColored(run, fgColor: fg ?? display.MainForeground, bgColor: bg ?? display.MainBackground);
         }
     }
 }

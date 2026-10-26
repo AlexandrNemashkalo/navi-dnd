@@ -35,8 +35,17 @@ public static class SvgToBrailleConverter
     /// </summary>
     public static string[]? Convert(string imagePath, string name, int widthChars = 36)
     {
+        imagePath = PackPictures.ForPack(imagePath);   // the engine's own pictures - in the pack of the game
         string cacheKey = imagePath + "|" + widthChars;
         if (_cache.TryGetValue(cacheKey, out var cached)) return AppendName(cached, name, widthChars);
+
+        if (imagePath.StartsWith(HeroDoll.Prefix, StringComparison.Ordinal))
+        {
+            using var doll = HeroDoll.Render(imagePath);
+            if (doll == null) return null;
+            _cache[cacheKey] = PixelArt.Render(doll, widthChars);
+            return AppendName(_cache[cacheKey], name, widthChars);
+        }
 
         string fullPath = ResolveFullPath(imagePath);
         if (!File.Exists(fullPath)) return null;
@@ -142,13 +151,14 @@ public static class SvgToBrailleConverter
 
     // Raster image → braille: fit into a square with a white background, the points where darker than average
     // (threshold based on average brightness - photos and drawings with any background give a readable
-    // silhouette).
+    // silhouette). Small sprites (Dungeon Crawl tiles 32×32) - in color with half blocks (PixelArt).
     private static string[]? ConvertRaster(string fullPath, int widthChars)
     {
         try
         {
             using var src = SKBitmap.Decode(fullPath);
             if (src == null) return null;
+            if (PixelArt.IsSprite(src)) return PixelArt.Render(src, widthChars);
             int pixelW = widthChars * 2, pixelH = pixelW;
             using var bmp = new SKBitmap(new SKImageInfo(pixelW, pixelH, SKColorType.Bgra8888, SKAlphaType.Unpremul));
             using (var canvas = new SKCanvas(bmp))
@@ -200,6 +210,8 @@ public static class SvgToBrailleConverter
         if (imagePath.StartsWith(PortraitsPrefix, StringComparison.OrdinalIgnoreCase))
             return Path.Combine(PortraitsDir, imagePath[PortraitsPrefix.Length..]);
         if (Path.IsPathRooted(imagePath)) return imagePath;
+        if (imagePath.StartsWith(CatalogSearch.DcssPrefix, StringComparison.OrdinalIgnoreCase))
+            return Path.Combine(CatalogSearch.DcssBasePath, imagePath[CatalogSearch.DcssPrefix.Length..].Replace('/', Path.DirectorySeparatorChar) + ".png");
 
         string normalized = imagePath.TrimStart('/', '\\').Replace('/', Path.DirectorySeparatorChar);
         if (!normalized.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))

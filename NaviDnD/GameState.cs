@@ -81,6 +81,10 @@ public class NewGameData
     // Selected by the player in the profile - they are transferred to the hero as is (the AI does not reselect them).
     public List<int>? Color { get; set; }
     public string? Image { get; set; }
+    // Picture pack of the adventure (CatalogSearch.GameIconsPack/DcssPack) - the questionnaire field "PICTURES".
+    public string? IconPack { get; set; }
+    // Gender of the hero from the questionnaire: "male" / "female"; null - unknown (hero from the library).
+    public string? Gender { get; set; }
     // Game world: id of the library world (continue its chronicle) or null - a new world of size WorldSize.
     public string? WorldId { get; set; }
     public string WorldSize { get; set; } = "small";

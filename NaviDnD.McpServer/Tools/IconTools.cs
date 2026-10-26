@@ -13,7 +13,7 @@ namespace NaviDnD.McpServer;
 public sealed class IconTools(McpServerConfig config)
 {
     [McpServerTool]
-    [Description("Search game-icons.net slugs for image. query is comma-separated alternatives from specific to general (longsword,sword), tried in order until a match. Make one call, never repeat it. Use 1–2 ordinary English nouns describing the item type, not a poetic name (sword, not Blade of Kings). This general icon collection is not D&D-specific and may lack exotic items. Returns comma-separated author/name slugs; select the best match. Empty result: omit image, never guess a slug.")]
+    [Description("Search image slugs in the picture pack of this game. query is an optional <category>: prefix (creature, weapon, armor, shield, helmet, cloak, boots, gloves, potion, scroll, ring, amulet, wand, staff, book, food, treasure, item, feature, spell) plus comma-separated alternatives from specific to general (weapon: longsword,sword), tried in order until a match. Make one call, never repeat it. Use 1–2 ordinary English nouns describing the item type, not a poetic name (sword, not Blade of Kings). Returns comma-separated author/name slugs; select the best match. Empty result: omit image, never guess a slug.")]
     public string FindIcon([Description("Comma-separated terms, specific to general, e.g. \"longsword,sword\".")] string query)
     {
         Log($"find_icon → \"{query}\"");

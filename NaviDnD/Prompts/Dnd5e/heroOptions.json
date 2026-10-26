@@ -1,113 +1,265 @@
 {
   "races": [
     {
-      "name": "Human"
+      "name": "Human",
+      "doll": "human"
     },
     {
       "name": "High elf",
-      "portrait": "delapouite/woman-elf-face"
+      "portrait": "delapouite/woman-elf-face",
+      "doll": "elf"
     },
     {
       "name": "Wood elf",
-      "portrait": "delapouite/woman-elf-face"
+      "portrait": "delapouite/woman-elf-face",
+      "doll": "elf"
     },
     {
       "name": "Dark elf (drow)",
-      "portrait": "delapouite/woman-elf-face"
+      "portrait": "delapouite/woman-elf-face",
+      "doll": "deep_elf"
     },
     {
       "name": "Mountain dwarf",
-      "portrait": "delapouite/dwarf-face"
+      "portrait": "delapouite/dwarf-face",
+      "doll": "dwarf"
     },
     {
       "name": "Hill dwarf",
-      "portrait": "delapouite/dwarf-face"
+      "portrait": "delapouite/dwarf-face",
+      "doll": "dwarf"
     },
     {
-      "name": "Halfling"
+      "name": "Halfling",
+      "doll": "halfling"
     },
     {
-      "name": "Gnome"
+      "name": "Gnome",
+      "portrait": "cathelineau/bad-gnome",
+      "doll": "gnome"
     },
     {
       "name": "Half-elf",
-      "portrait": "kier-heyl/elf-helmet"
+      "portrait": "delapouite/woman-elf-face",
+      "doll": "elf"
     },
     {
       "name": "Half-orc",
-      "portrait": "delapouite/orc-head"
+      "portrait": "delapouite/orc-head",
+      "doll": "orc"
     },
     {
       "name": "Dragonborn",
-      "portrait": "faithtoken/dragon-head"
+      "portrait": "faithtoken/dragon-head",
+      "doll": "draconian_red",
+      "dollHair": false
     },
     {
-      "name": "Tiefling"
+      "name": "Tiefling",
+      "doll": "demonspawn_red"
     },
     {
       "name": "Orc",
-      "portrait": "delapouite/orc-head"
+      "portrait": "delapouite/orc-head",
+      "doll": "orc"
     },
     {
       "name": "Goblin",
-      "portrait": "delapouite/goblin-head"
+      "portrait": "delapouite/goblin-head",
+      "doll": "spriggan"
     },
     {
       "name": "Kenku",
-      "portrait": "delapouite/kenku-head"
+      "portrait": "delapouite/kenku-head",
+      "doll": "kenku_wingless",
+      "dollHair": false
     },
     {
       "name": "Lizardfolk",
-      "portrait": "lorc/lizardman"
+      "portrait": "lorc/lizardman",
+      "doll": "draconian_green",
+      "dollHair": false
     }
   ],
   "classes": [
     {
       "name": "Fighter",
-      "portrait": "delapouite/closed-barbute"
+      "portrait": "cathelineau/swordman",
+      "dolls": [
+        {
+          "gear": "boots/middle_gray+legs/leg_armor_1+body/chainmail+hand_right/long_sword+hand_left/shield_kite_1",
+          "hair": "short_black",
+          "hairFemale": "fem_black"
+        },
+        {
+          "gear": "boots/mesh_black+legs/metal_gray+body/plate+head/iron_1+hand_right/great_sword+hand_left/shield_knight_gray",
+          "hair": "short_black",
+          "hairFemale": "fem_black"
+        }
+      ]
     },
     {
       "name": "Barbarian",
-      "portrait": "delapouite/barbarian"
+      "portrait": "delapouite/barbarian",
+      "dolls": [
+        {
+          "gear": "legs/loincloth_red+body/animal_skin+hand_right/great_axe",
+          "hair": "long_black",
+          "hairFemale": "fem_black"
+        },
+        {
+          "gear": "boots/short_brown+legs/pants_short_brown+body/troll_hide+head/horned+hand_right/battleaxe",
+          "hair": "long_red",
+          "hairFemale": "fem_red"
+        }
+      ]
     },
     {
-      "name": "Bard"
+      "name": "Bard",
+      "dolls": [
+        {
+          "gear": "boots/short_red+legs/pants_blue+body/vest_red+head/feather_red+hand_right/rapier",
+          "hair": "brown_1",
+          "hairFemale": "pigtails_brown"
+        },
+        {
+          "gear": "boots/middle_brown+legs/pants_red+body/shirt_white_yellow+hand_right/misc/horn",
+          "hair": "short_yellow",
+          "hairFemale": "ponytail_yellow"
+        }
+      ]
     },
     {
       "name": "Cleric",
-      "portrait": "cathelineau/nun-face"
+      "portrait": "cathelineau/nun-face",
+      "dolls": [
+        {
+          "gear": "boots/short_brown+body/robe_white_red+head/healer+hand_right/mace_new+hand_left/shield_holy",
+          "hair": "short_black",
+          "hairFemale": "fem_black"
+        },
+        {
+          "gear": "boots/middle_gray+legs/metal_gray+body/half_plate+hand_right/hammer_new+hand_left/shield_long_cross",
+          "hair": "short_black",
+          "hairFemale": "fem_black"
+        }
+      ]
     },
     {
       "name": "Druid",
-      "portrait": "lorc/cowled"
+      "portrait": "lorc/cowled",
+      "dolls": [
+        {
+          "gear": "cloak/brown+boots/short_brown+body/robe_green+hand_right/staff_organic",
+          "hair": "long_black",
+          "hairFemale": "fem_black"
+        },
+        {
+          "gear": "legs/pants_darkgreen+body/animal_skin+head/hood_green+hand_right/sickle"
+        }
+      ]
     },
     {
       "name": "Monk",
-      "portrait": "delapouite/monk-face"
+      "portrait": "delapouite/monk-face",
+      "dolls": [
+        {
+          "gear": "legs/pants_blue+body/monk_blue+hand_right/quarterstaff",
+          "hairFemale": "fem_black"
+        },
+        {
+          "gear": "body/karate+gloves/glove_short_white",
+          "hairFemale": "ponytail_yellow"
+        }
+      ]
     },
     {
       "name": "Paladin",
-      "portrait": "lorc/visored-helm"
+      "portrait": "skoll/mounted-knight",
+      "dolls": [
+        {
+          "gear": "boots/mesh_white+legs/metal_gray+body/plate_and_cloth+hand_right/long_sword+hand_left/shield_knight_rw",
+          "hair": "short_yellow",
+          "hairFemale": "fem_yellow"
+        },
+        {
+          "gear": "boots/mesh_white+legs/metal_gray+body/plate_2+head/full_gold+hand_right/blessed_blade+hand_left/shield_holy",
+          "hair": "short_yellow",
+          "hairFemale": "fem_yellow"
+        }
+      ]
     },
     {
       "name": "Ranger",
-      "portrait": "delapouite/archer"
+      "portrait": "delapouite/archer",
+      "dolls": [
+        {
+          "gear": "cloak/green+boots/middle_brown+legs/pants_brown+body/leather_green+head/hood_green+hand_right/bow"
+        },
+        {
+          "gear": "boots/middle_brown+legs/pants_brown+body/leather_armor+hand_right/short_sword+hand_left/misc/short_sword_slant_new",
+          "hair": "brown_1",
+          "hairFemale": "elf_yellow"
+        }
+      ]
     },
     {
       "name": "Rogue",
-      "portrait": "delapouite/bandit"
+      "portrait": "delapouite/bandit",
+      "dolls": [
+        {
+          "gear": "cloak/black+boots/short_brown+legs/pants_black+body/leather_jacket+head/hood_black_2+hand_right/dagger_new+hand_left/misc/dagger_new"
+        },
+        {
+          "gear": "boots/short_brown+legs/pants_black+body/shirt_black+head/ninja_black+hand_right/sword_thief"
+        }
+      ]
     },
     {
       "name": "Sorcerer",
-      "portrait": "cathelineau/witch-face"
+      "portrait": "cathelineau/witch-face",
+      "dolls": [
+        {
+          "gear": "boots/short_red+body/robe_red_gold+hand_right/misc/fire_red+hand_left/misc/fire_white",
+          "hair": "long_red",
+          "hairFemale": "fem_red"
+        },
+        {
+          "gear": "boots/short_purple+body/robe_purple+hand_right/staff_ruby+hand_left/misc/spark",
+          "hair": "short_black",
+          "hairFemale": "fem_black"
+        }
+      ]
     },
     {
       "name": "Warlock",
-      "portrait": "lorc/cultist"
+      "portrait": "lorc/cultist",
+      "dolls": [
+        {
+          "gear": "cloak/black+body/robe_black_red+head/hood_red+hand_right/staff_skull"
+        },
+        {
+          "gear": "body/robe_of_night+head/horn_evil+hand_right/misc/skull+hand_left/misc/fire_dark",
+          "hair": "long_black",
+          "hairFemale": "fem_black"
+        }
+      ]
     },
     {
       "name": "Wizard",
-      "portrait": "delapouite/wizard-face"
+      "portrait": "delapouite/wizard-face",
+      "dolls": [
+        {
+          "gear": "boots/short_brown+body/robe_blue+head/wizard_blue+hand_right/staff_mage",
+          "hairFemale": "fem_white",
+          "beard": "long_white"
+        },
+        {
+          "gear": "boots/short_purple+body/robe_purple+head/wizard_purple+hand_right/staff_mage_2+hand_left/misc/book_blue",
+          "hairFemale": "fem_white",
+          "beard": "long_white"
+        }
+      ]
     }
   ],
   "levels": [

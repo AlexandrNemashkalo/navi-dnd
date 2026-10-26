@@ -456,13 +456,14 @@ public class LegendDisplay
     public int PathLineIndex { get; private set; } = -1;
     public int MoveLineIndex { get; private set; } = -1;
 
-    private static readonly List<List<int>> _actionColors =
+    // Action kinds of the hero (id 0 - action, 1 - bonus action, 2 - reaction): colors and symbols - also on the spell card.
+    internal static readonly List<List<int>> _actionColors =
     [
         [  70, 200,  70 ],  // id:0 Action
         [ 160, 100,  50 ],  // id:1 Bon. action
         [ 220,  70,  70 ],  // id:2 Reaction
     ];
-    private static readonly string[] _actionSymbols = ["●", "■", "▲"];
+    internal static readonly string[] _actionSymbols = ["●", "■", "▲"];
 
     private List<Action> BuildCombatLines(int width)
     {

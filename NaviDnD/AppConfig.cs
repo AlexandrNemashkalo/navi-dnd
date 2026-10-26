@@ -116,6 +116,9 @@ public class AppConfig
     public bool ShowKeyHints { get; set; } = true;
     // Whole screen: game window of the same size in the center of the monitor, around the game background (Helpers/FullscreenBackdrop).
     public bool Fullscreen { get; set; } = true;
+    // Picture pack of the last new game ("game-icons" / "dcss") - the default of the questionnaire field "PICTURES";
+    // the pack of a game itself is in its save (WorldState.IconPack).
+    public string IconPack { get; set; } = Helpers.CatalogSearch.GameIconsPack;
     // Console font ("FONT TYPE" setting).
     public string FontFace { get; set; } = "Consolas";
     // Full screen font size: 0 - auto (the largest at which the game fits into the monitor), otherwise size.
@@ -187,6 +190,7 @@ public class AppConfig
         public bool? Fullscreen { get; set; }
         public int? FullscreenFontSize { get; set; }
         public string? FontFace { get; set; }
+        public string? IconPack { get; set; }
         public string? Language { get; set; }
     }
 
@@ -228,6 +232,7 @@ public class AppConfig
             Fullscreen = s.Fullscreen ?? Fullscreen;
             FullscreenFontSize = s.FullscreenFontSize ?? FullscreenFontSize;
             FontFace = s.FontFace ?? FontFace;
+            IconPack = s.IconPack is Helpers.CatalogSearch.DcssPack ? s.IconPack : IconPack;
             // There is no field - settings from the version before choosing the language: the player played in Russian, after the update - too.
             Language = L.Normalize(s.Language ?? L.Russian);
         }
@@ -251,7 +256,7 @@ public class AppConfig
                 AiProvider = AiProvider, CodexCliPath = CodexCliPath, CodexModel = CodexModel, Fullscreen = Fullscreen,
                 CodexReasoningEffort = CodexReasoningEffort,
                 CodexCreateNewGameModel = CodexCreateNewGameModel, CodexStartNewGameModel = CodexStartNewGameModel,
-                FullscreenFontSize = FullscreenFontSize, FontFace = FontFace,
+                FullscreenFontSize = FullscreenFontSize, FontFace = FontFace, IconPack = IconPack,
                 DisableTriggers = DisableTriggers, ShowKeyHints = ShowKeyHints, Language = Language,
             };
             File.WriteAllText(UserSettingsPath, System.Text.Json.JsonSerializer.Serialize(s,

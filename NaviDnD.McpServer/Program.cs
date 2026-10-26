@@ -30,11 +30,14 @@ if (!File.Exists(worldStatePath))
     throw new FileNotFoundException($"worldState.json not found: {worldStatePath}");
 
 // Game language (save field language): names from reference books and the generator - in it, as the GM writes.
+// Picture pack of the game (iconPack) - find_icon searches in it.
 try
 {
-    NaviDnD.L.SetWorld(System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(worldStatePath))?["language"]?.GetValue<string>());
+    var savedState = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(worldStatePath));
+    NaviDnD.L.SetWorld(savedState?["language"]?.GetValue<string>());
+    NaviDnD.Helpers.CatalogSearch.IconPack = NaviDnD.Helpers.CatalogSearch.NormalizePack(savedState?["iconPack"]?.GetValue<string>());
 }
-catch { /*not read - Russian*/ }
+catch { /*not read - Russian, game-icons*/ }
 
 var builder = Host.CreateApplicationBuilder(Array.Empty<string>());
 

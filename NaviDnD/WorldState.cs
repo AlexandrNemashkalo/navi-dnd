@@ -8,6 +8,9 @@ public class WorldState
     public int FormatVersion { get; set; } = StorageFormat.Current;
     // Game language (L.Russian/L.English) - language of the world when creating: story, history, names; L.World when loading.
     public string Language { get; set; } = L.Russian;
+    // Picture pack of the game (CatalogSearch.GameIconsPack/DcssPack) - chosen in the hero questionnaire, like the
+    // language it stays with the adventure. Saves before the choice - game-icons.
+    public string IconPack { get; set; } = Helpers.CatalogSearch.GameIconsPack;
     public MapConfig Map { get; set; } = new MapConfig();
     public List<DialogMessage>? History { get; set; } = [];
     public Hero? Hero { get; set; }

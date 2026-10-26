@@ -60,9 +60,18 @@ public static class CatalogReferences
         }
         if (Take(obj, "monster") is { } monster && Exact(CatalogSearch.Monsters(monster), m => m.NameEn, monster) is { } found)
             obj["monsterKey"] ??= found.LocalizedName;
-        if (icon != null && obj["image"] == null && CatalogSearch.IconsFor(icon).Slugs is [var slug, ..])
+        if (icon != null && obj["image"] == null && CatalogSearch.IconsFor(icon, defaultCategory: DefaultIconCategory(key)).Slugs is [var slug, ..])
             obj["image"] = slug;
     }
+
+    // Kind of picture by the place in the answer - when nothing is found, the default picture of this kind.
+    private static string DefaultIconCategory(string? key) => key switch
+    {
+        "entities" or "hero" or "npcs" => "creature",
+        "objects" or "doors" or "furniture" => "feature",
+        "spells" => "spell",
+        _ => "item",
+    };
 
     // Canonical name - the game uses it to find the spell text for the card.
     private static void Spell(JsonObject obj, string reference)

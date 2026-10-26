@@ -960,7 +960,8 @@ internal static class MouseUiHelper
     internal static void SetSelectedSpell(DisplayConfig display, HeroSpell spell, int page)
     {
         CancelPreparedPicture(display);
-        var info = SpellDatabase.Find(spell.Name)?.Localized;
+        var entry = SpellDatabase.Find(spell.Name);
+        var info = entry?.Localized;
         int total = display.MaxHistoryLines;
         int textWidth = Math.Max(1, display.DialogRightPanelWidth - 2);
 
@@ -986,19 +987,88 @@ internal static class MouseUiHelper
         for (int i = 0; i < wrapped.Count; i += textAreaLines)
             pages.Add(wrapped.Skip(i).Take(textAreaLines).ToList());
         if (pages.Count == 0) pages.Add([]);
-        int pageCount = pages.Count;
+        // Page 0 - the picture of the spell, under it the name and "● level, school" (the symbol of the action as in
+        // the legend); then - the card with fields and text, as before.
+        int pageCount = 1 + pages.Count;
         page = Math.Clamp(page, 0, pageCount - 1);
 
-        var lines = new List<string>(header);
-        foreach (var l in pages[page]) lines.Add(l.PadRight(textWidth));
-        while (lines.Count < header.Count + textAreaLines) lines.Add(new string(' ', textWidth));
-        lines.Add(pageCount > 1 ? DialogDisplay.NotePageIndicatorText(page, pageCount) : "");
+        List<string> lines;
+        List<(string, List<int>?)>?[]? segments = null;
+        if (page == 0)
+        {
+            string name = FitPanelName(display, spell.Name.ToUpperInvariant()) ?? "";
+            int kind = SpellActionKind(entry);
+            string symbol = kind >= 0 ? LegendDisplay._actionSymbols[kind] + " " : "";
+            string brief = FitPanelName(display, symbol + subtitle) ?? "";
+            lines = [.. SvgToBrailleConverter.Convert(SpellImage(spell, entry), "") ?? []];
+            while (lines.Count < total - 3) lines.Add("");
+            lines.Add(name);
+            lines.Add(brief);
+            var segs = new List<(string, List<int>?)>?[lines.Count];
+            segs[^2] = [(name, spell.Color)];
+            segs[^1] = kind >= 0
+                ? [(symbol, LegendDisplay._actionColors[kind]), (brief[symbol.Length..], ColorHelper.Darker(display.MainForeground, 0.75))]
+                : [(brief, ColorHelper.Darker(display.MainForeground, 0.75))];
+            segments = [.. segs, null];
+        }
+        else
+        {
+            lines = [.. header];
+            foreach (var l in pages[page - 1]) lines.Add(l.PadRight(textWidth));
+            while (lines.Count < header.Count + textAreaLines) lines.Add(new string(' ', textWidth));
+        }
+        lines.Add(DialogDisplay.NotePageIndicatorText(page, pageCount));
 
-        display.SelectedImageLines = lines.ToArray();
+        var lineArray = lines.ToArray();
+        display.SelectedImageLines = lineArray;
+        display.SelectedImageSegments = segments;
+        display.SelectedImageSegmentsFor = segments != null ? lineArray : null;
         display.SelectedImageColor = spell.Color;
-        display.SelectedImageColorTitleOnly = true;
+        // The silhouette of the picture (game-icons) - in the color of the spell; on the text pages - only the title.
+        display.SelectedImageColorTitleOnly = page > 0;
         display.NotePage = page;
         display.NotePageCount = pageCount;
+    }
+
+    // Kind of action of the casting (index of LegendDisplay._actionSymbols) by the English casting time of the
+    // reference book: -1 - longer than an action (minute, hour) or unknown.
+    private static int SpellActionKind(SpellInfo? entry)
+    {
+        string time = (entry?.En ?? entry)?.CastingTime.ToLowerInvariant() ?? "";
+        if (time.Contains("bonus action")) return 1;
+        if (time.Contains("reaction")) return 2;
+        return time.Contains("action") ? 0 : -1;
+    }
+
+    // D&D school → the folder of Dungeon Crawl spell icons of the same kind (DCSS "conjuration" - battle magic).
+    private static readonly Dictionary<string, string> DcssSpellSchools = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Abjuration"] = "enchantment", ["Conjuration"] = "summoning", ["Divination"] = "divination",
+        ["Enchantment"] = "enchantment", ["Evocation"] = "conjuration", ["Illusion"] = "enchantment",
+        ["Necromancy"] = "necromancy", ["Transmutation"] = "transmutation",
+    };
+    // The same school in game-icons - an emblem, when the name of the spell is not found.
+    private static readonly Dictionary<string, string> GameIconsSpellSchools = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Abjuration"] = "lorc/magic-shield", ["Conjuration"] = "lorc/magic-portal", ["Divination"] = "lorc/crystal-ball",
+        ["Enchantment"] = "lorc/charm", ["Evocation"] = "lorc/magic-swirl", ["Illusion"] = "lorc/mirror-mirror",
+        ["Necromancy"] = "sbed/death-skull", ["Transmutation"] = "delapouite/transform",
+    };
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> SpellImages = new();
+
+    // Picture of a spell - searched by its English name in the pack of the game, then the emblem of its school; not
+    // found - a spell book. Not stored in the save: found once per session.
+    internal static string SpellImage(HeroSpell spell, SpellInfo? entry)
+    {
+        string nameEn = (entry?.NameEn is { Length: > 0 } n ? n : spell.Name).Replace(',', ' ');
+        string school = (entry?.En ?? entry)?.School ?? "";
+        return SpellImages.GetOrAdd(CatalogSearch.IconPack + "|" + nameEn, _ =>
+        {
+            string query = "spell: " + nameEn;
+            if (CatalogSearch.IconPack == CatalogSearch.DcssPack && DcssSpellSchools.TryGetValue(school, out var folder)) query += "," + folder;
+            return CatalogSearch.IconsFor(query).Slugs.FirstOrDefault()
+                ?? GameIconsSpellSchools.GetValueOrDefault(school) ?? "delapouite/spell-book";
+        });
     }
 
     private static string SpellField(string label, string? value, int width)

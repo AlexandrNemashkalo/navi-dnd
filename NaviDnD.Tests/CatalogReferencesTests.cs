@@ -6,6 +6,7 @@ namespace NaviDnD.Tests;
 // Links to reference books in the wizard's response (icon/ref/monster) - the game substitutes the data itself,
 // without calling the tool. Against real reference books and the icons/ folder (Russian game is the default
 // language).
+[Collection(IconPackCollection.Name)]
 public class CatalogReferencesTests
 {
     private static JsonNode Resolve(string json) => JsonNode.Parse(CatalogReferences.Resolve(json))!;
@@ -82,7 +83,8 @@ public class CatalogReferencesTests
         var node = Resolve("""{"map":{"entities":[{"name":"Нечто","monster":"zzzunknownzzz","icon":"zzzunknownzzz"}]}}""");
         var entity = node["map"]!["entities"]![0]!;
         Assert.Null(entity["monsterKey"]);
-        Assert.Null(entity["image"]);
+        // Nothing found - the default picture of a creature (an entity), not an empty block.
+        Assert.Equal("delapouite/person", (string?)entity["image"]);
         Assert.Null(entity["monster"]);
         Assert.Null(entity["icon"]);
     }
