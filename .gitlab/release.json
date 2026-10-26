@@ -1,12 +1,12 @@
 {
-    "name":  "NaviDnD 2.2.8",
-    "tag_name":  "v2.2.8",
-    "description":  "# NaviDnD 2.2.8\n\n- В macOS-сборку включён собственный Alacritty с поддержкой смены указателя: игра может показывать руку над кнопками и интерактивными объектами и возвращать обычную стрелку.\n- Указатель ограничен мышиным режимом игры; сброс терминала и отключение функции очищают выбранную форму.\n- Собственная сборка терминала проверяется по исходному коммиту, патчу, архитектуре и SHA256. Тесты протокола выполняются в CI.\n\nПатчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Нативное отображение указателя в этой версии требует проверки на Mac.\n\n## English\n\n- The macOS package includes a custom Alacritty build with mouse pointer support: the game can show a hand over buttons and interactive objects and restore the default arrow.\n- Application pointers are limited to mouse-reporting mode and cleared by terminal reset or disabling the feature.\n- The custom terminal is verified against its source commit, patch, architecture, and SHA256. Protocol tests run in CI.\n\nPatches for Windows and macOS (Apple Silicon). Saves and settings are retained. Native pointer appearance in this version still requires validation on a Mac.\r\n",
+    "name":  "NaviDnD 2.2.9",
+    "tag_name":  "v2.2.9",
+    "description":  "# NaviDnD 2.2.9\r\n\r\n- На macOS высота ячейки терминала теперь ровно вдвое больше ширины: рисунки сохраняют пропорции при смене размера шрифта и масштаба экрана.\r\n- Точки рисунков отрисовывает сам терминал с равномерными промежутками внутри и между символами. Их геометрия больше не зависит от Menlo и подстановки шрифтов.\r\n- Автоматический размер шрифта учитывает новую высоту строки. Смена указателя сохранена; отображение Windows не меняется.\r\n\r\nПатчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Внешний вид на настоящем Mac требует проверки после обновления.\r\n\r\n## English\r\n\r\n- On macOS, terminal cells now have an exact 1:2 width-to-height ratio, preserving artwork proportions across font sizes and display scales.\r\n- Braille artwork uses built-in dots with uniform spacing within and between characters, independent of Menlo and font fallback.\r\n- Automatic font sizing accounts for the new line height. Mouse pointer support is retained; Windows rendering is unchanged.\r\n\r\nPatches for Windows and macOS (Apple Silicon). Saves and settings are retained. Appearance on a physical Mac still needs validation after updating.\r\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.8/navi-dnd-v2.2.8-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.9/navi-dnd-v2.2.9-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
@@ -16,15 +16,15 @@
                                  },
                                  {
                                      "name":  "NaviDnD-macOS-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.8/releases-macos/NaviDnD-macOS-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.9/releases-macos/NaviDnD-macOS-updates.json"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.8/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.9/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.8/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.9/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
@@ -153,6 +153,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.2.7-2.2.8.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.8/releases/patches/NaviDnD-patch-2.2.7-2.2.8.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.2.8-2.2.9.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.9/releases/patches/NaviDnD-patch-2.2.8-2.2.9.zip"
                                  }
                              ]
                }
