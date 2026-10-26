@@ -37,6 +37,10 @@ style = { shape = "Block", blinking = "Never" }
 [mouse]
 hide_when_typing = false
 
+[terminal]
+# Supported by our pinned Alacritty build (macos/alacritty-osc22.patch).
+osc22 = true
+
 [keyboard]
 # Extras for the game: new windows and tabs, search, cleaning, changing the size and the whole screen (the game grid is fixed).
 # ⌘ or Ctrl with “+”/“−” - world map scale: the terminal would simply transmit “=”/“-”, therefore - as Ctrl+ “=”/“-” (CSI u).

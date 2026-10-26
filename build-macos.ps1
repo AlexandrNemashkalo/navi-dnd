@@ -15,7 +15,7 @@
 # the downloaded application was corrupted, and the label on Mac would change files and break patch checking. The label is the same
 # with each build, so the build is always complete (with voice acting) - only what has changed gets into the patch.
 # Downloads (with pinned versions and hashes) are cached in artifacts/macos-cache.
-# Needed: .NET SDK, git, Python 3 with pip (voice wheels and ZIP), internet.
+# Needed: .NET SDK, git, Python 3 with pip, internet, and the artifact from macos/build-alacritty.sh.
 param([switch]$Base, [switch]$Test, [string]$Python = 'python')
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -39,20 +39,37 @@ $utf8 = New-Object Text.UTF8Encoding($false)
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
 
 # Pinned downloads: Python for macOS arm64 (astral-sh/python-build-standalone), Russian model Silero, terminal
-# Alacritty and its license, rcodesign (indygreg/apple-platform-rs) - label on Windows, 7-Zip - unpack .dmg.
+# Alacritty license and rcodesign (indygreg/apple-platform-rs). Custom Alacritty is built on macOS.
 $downloads = [ordered]@{
     'python.tar.gz'     = @('https://github.com/astral-sh/python-build-standalone/releases/download/20260924/cpython-3.12.14%2B20260924-aarch64-apple-darwin-install_only.tar.gz', '9763f43db2481a6af36af82ec40302aab7a73632f880129d07a6e81aec846277')
     'v5_5_ru.pt'        = @('https://models.silero.ai/models/tts/ru/v5_5_ru.pt', '50081637b602126ee06cb3bc8a744d25651d2da149ee8864b9a379bfdd934437')
-    'alacritty.dmg'     = @('https://github.com/alacritty/alacritty/releases/download/v0.17.0/Alacritty-v0.17.0.dmg', 'ad8d7de35fb38e43184776cac6dfee05ca325caa0b6639a06a55e54e4b026620')
     'alacritty-LICENSE' = @('https://raw.githubusercontent.com/alacritty/alacritty/v0.17.0/LICENSE-APACHE', '8884289e3969c089cd556c53fa1d3f51d86b29e52a8c1d660a55ce8292986910')
     'rcodesign.zip'     = @('https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign/0.29.0/apple-codesign-0.29.0-x86_64-pc-windows-msvc.zip', '54bb500e2da7a8de02fcae0f331d1cac6e6d7173b4281042ff9c528ba3159aaa')
-    '7zr.exe'           = @('https://github.com/ip7z/7zip/releases/download/26.03/7zr.exe', 'ad4c82fadcbdf93c03b4fc440f300509c7d60c5c2f4d183e35d9d70d6957037d')
-    '7z-x64.exe'        = @('https://github.com/ip7z/7zip/releases/download/26.03/7z2603-x64.exe', '0859c524b8a63551848f0c246abddcb1d0b7b656b0fbfe879f8d85e61a9e6edd')
 }
 # Rights 755 in ZIP: everything in Contents/MacOS and voiceover installation script; the rest - 644.
 
 function RawUrl($tag, $relative) { $rawBase + $tag + '/' + ((($relative -split '/') | ForEach-Object { [uri]::EscapeDataString($_) }) -join '/') }
 function Sha256File($path) { (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant() }
+function CustomTerminal() {
+    $directory = Join-Path $cache 'alacritty-custom'
+    $binary = Join-Path $directory 'alacritty'
+    $metadataPath = Join-Path $directory 'build.json'
+    if (!(Test-Path -LiteralPath $binary) -or !(Test-Path -LiteralPath $metadataPath)) {
+        throw 'Build the cursor-enabled terminal on macOS with bash macos/build-alacritty.sh, then copy artifacts/macos-cache/alacritty-custom here. Stock Alacritty does not support OSC 22.'
+    }
+    $metadata = Get-Content -LiteralPath $metadataPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($metadata.sourceCommit -ne '94e7c8874e526b1e67b349d9ba30ddf81669119e' -or
+        $metadata.rustToolchain -ne '1.85.0' -or $metadata.target -ne 'aarch64-apple-darwin' -or
+        $metadata.patchSha256 -ne (Sha256File (Join-Path $root 'macos/alacritty-osc22.patch')) -or
+        $metadata.binarySha256 -ne (Sha256File $binary)) { throw 'Custom Alacritty provenance/hash mismatch; rebuild with macos/build-alacritty.sh.' }
+    $header = New-Object byte[] 8
+    $stream = [IO.File]::OpenRead($binary)
+    try { $read = $stream.Read($header, 0, 8) } finally { $stream.Dispose() }
+    if ($read -ne 8 -or [BitConverter]::ToString($header) -ne 'CF-FA-ED-FE-0C-00-00-01') {
+        throw 'Custom Alacritty must be an arm64 Mach-O executable.'
+    }
+    $binary
+}
 function WriteJson($path, $value) { [IO.File]::WriteAllText($path, ($value | ConvertTo-Json -Depth 10), $utf8) }
 # File from cache (downloaded if it is not there or the hash is incorrect).
 function Cached($name) {
@@ -145,12 +162,8 @@ function BuildGame() {
     Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination (Join-Path $game 'LICENSE')
     Copy-Item -LiteralPath (Join-Path $root 'RELEASE_NOTES.md') -Destination (Join-Path $game 'RELEASE_NOTES.md')
 
-    # Terminal: alacritty from .dmg (7-Zip - from its installer, without installation into the system).
-    $tools = Join-Path $work 'tools'
-    New-Item -ItemType Directory -Force -Path $tools | Out-Null
-    Native '7-Zip unpack' (Cached '7zr.exe') x -y "-o$tools\7z" (Cached '7z-x64.exe')
-    Native 'Alacritty unpack' "$tools\7z\7z.exe" e -y "-o$tools\alacritty" (Cached 'alacritty.dmg') 'Alacritty\Alacritty.app\Contents\MacOS\alacritty'
-    Copy-Item -LiteralPath "$tools\alacritty\alacritty" -Destination (Join-Path $programsDir 'alacritty')
+    # Pinned custom terminal; the unmodified upstream binary ignores OSC 22.
+    Copy-Item -LiteralPath $customTerminal -Destination (Join-Path $programsDir 'alacritty')
     Copy-Item -LiteralPath (Cached 'alacritty-LICENSE') -Destination (Join-Path $resources 'alacritty-LICENSE')
     Copy-Item -LiteralPath (Join-Path $root 'macos/alacritty.toml') -Destination $resources
     Copy-Item -LiteralPath (Join-Path $root 'macos/NaviDnD.icns') -Destination $resources
@@ -191,6 +204,7 @@ function MakeArchive($output) {
 }
 
 try {
+    $customTerminal = CustomTerminal
     BuildGame; BuildSpeech; SignApp
     $archive = Join-Path $root "artifacts/NaviDnD-macOS-arm64-$version.zip"
     if ($Test) { MakeArchive $archive }

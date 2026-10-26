@@ -1,0 +1,40 @@
+# Isolated build branch: do not block normal game release pipelines on macOS runner availability.
+alacritty-protocol-tests:
+  image: rust:1.85.0
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "build-macos-cursor"'
+  script:
+    - git clone --quiet --no-checkout https://github.com/alacritty/alacritty.git /tmp/navidnd-alacritty
+    - git -C /tmp/navidnd-alacritty checkout --quiet --detach 94e7c8874e526b1e67b349d9ba30ddf81669119e
+    - git -C /tmp/navidnd-alacritty apply "$CI_PROJECT_DIR/macos/alacritty-osc22.patch"
+    - cd /tmp/navidnd-alacritty
+    - cargo test --locked -p alacritty_terminal > "$CI_PROJECT_DIR/alacritty-tests.log" 2>&1
+  after_script:
+    - printf '%s\n' "$CI_JOB_STATUS" > alacritty-tests-status.txt
+    - curl --fail --silent --show-error --header "JOB-TOKEN:$CI_JOB_TOKEN" --upload-file alacritty-tests-status.txt "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/navidnd-alacritty/$CI_COMMIT_SHA/tests-status.txt"
+    - curl --fail --silent --show-error --header "JOB-TOKEN:$CI_JOB_TOKEN" --upload-file alacritty-tests.log "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/navidnd-alacritty/$CI_COMMIT_SHA/tests.log"
+
+alacritty-macos-build:
+  tags: [saas-macos-medium-m1]
+  image: macos-15-xcode-16
+  timeout: 30m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "build-macos-cursor"'
+  script:
+    - |
+      if ! command -v rustup >/dev/null; then
+        curl --proto '=https' --tlsv1.2 --fail --silent --show-error https://sh.rustup.rs -o /tmp/navidnd-rustup.sh
+        sh /tmp/navidnd-rustup.sh -y --profile minimal --default-toolchain 1.85.0
+      fi
+    - export PATH="$HOME/.cargo/bin:$PATH"
+    - bash macos/build-alacritty.sh > alacritty-build.log 2>&1
+    - |
+      for file in alacritty alacritty-LICENSE build.json; do
+        curl --fail --silent --show-error --header "JOB-TOKEN:$CI_JOB_TOKEN" \
+          --upload-file "artifacts/macos-cache/alacritty-custom/$file" \
+          "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/navidnd-alacritty/$CI_COMMIT_SHA/$file"
+      done
+  after_script:
+    - printf '%s\n' "$CI_JOB_STATUS" > alacritty-build-status.txt
+    - curl --fail --silent --show-error --header "JOB-TOKEN:$CI_JOB_TOKEN" --upload-file alacritty-build-status.txt "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/navidnd-alacritty/$CI_COMMIT_SHA/build-status.txt"
+    - curl --fail --silent --show-error --header "JOB-TOKEN:$CI_JOB_TOKEN" --upload-file alacritty-build.log "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/navidnd-alacritty/$CI_COMMIT_SHA/build.log"

@@ -1,0 +1,220 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 086edf4..5a26a51 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -99,6 +99,7 @@ version = "0.26.0"
+ dependencies = [
+  "base64",
+  "bitflags 2.9.4",
++ "cursor-icon",
+  "home",
+  "libc",
+  "log",
+diff --git a/alacritty/src/config/terminal.rs b/alacritty/src/config/terminal.rs
+index daf4a34..cb5aa36 100644
+--- a/alacritty/src/config/terminal.rs
++++ b/alacritty/src/config/terminal.rs
+@@ -10,6 +10,8 @@ use crate::config::ui_config::{Program, StringVisitor};
+ pub struct Terminal {
+     /// OSC52 support mode.
+     pub osc52: SerdeOsc52,
++    /// Allow application mouse pointer changes (OSC 22).
++    pub osc22: bool,
+     /// Path to a shell program to run on startup.
+     pub shell: Option<Program>,
+ }
+diff --git a/alacritty/src/config/ui_config.rs b/alacritty/src/config/ui_config.rs
+index a884da2..c56cbaf 100644
+--- a/alacritty/src/config/ui_config.rs
++++ b/alacritty/src/config/ui_config.rs
+@@ -123,6 +123,7 @@ impl UiConfig {
+             vi_mode_cursor_style: self.cursor.vi_mode_style(),
+             default_cursor_style: self.cursor.style(),
+             osc52: self.terminal.osc52.0,
++            osc22: self.terminal.osc22,
+             kitty_keyboard: true,
+         }
+     }
+diff --git a/alacritty/src/display/mod.rs b/alacritty/src/display/mod.rs
+index a651d4e..02ef820 100644
+--- a/alacritty/src/display/mod.rs
++++ b/alacritty/src/display/mod.rs
+@@ -1105,7 +1105,11 @@ impl Display {
+             self.window.set_mouse_cursor(CursorIcon::Pointer);
+         } else if self.highlighted_hint.is_some() {
+             self.hint_mouse_point = None;
+-            if term.mode().intersects(TermMode::MOUSE_MODE) && !term.mode().contains(TermMode::VI) {
++            if let Some(icon) = term.mouse_cursor_icon() {
++                self.window.set_mouse_cursor(icon);
++            } else if term.mode().intersects(TermMode::MOUSE_MODE)
++                && !term.mode().contains(TermMode::VI)
++            {
+                 self.window.set_mouse_cursor(CursorIcon::Default);
+             } else {
+                 self.window.set_mouse_cursor(CursorIcon::Text);
+diff --git a/alacritty/src/input/mod.rs b/alacritty/src/input/mod.rs
+index 7987354..d3711ed 100644
+--- a/alacritty/src/input/mod.rs
++++ b/alacritty/src/input/mod.rs
+@@ -1105,6 +1105,8 @@ impl<T: EventListener, A: ActionContext<T>> Processor<T, A> {
+             mouse_state
+         } else if self.ctx.display().highlighted_hint.as_ref().is_some_and(hint_highlighted) {
+             CursorIcon::Pointer
++        } else if let Some(icon) = self.ctx.terminal().mouse_cursor_icon() {
++            icon
+         } else if !self.ctx.modifiers().state().shift_key() && self.ctx.mouse_mode() {
+             CursorIcon::Default
+         } else {
+diff --git a/alacritty_terminal/Cargo.toml b/alacritty_terminal/Cargo.toml
+index 96bd274..8ec1050 100644
+--- a/alacritty_terminal/Cargo.toml
++++ b/alacritty_terminal/Cargo.toml
+@@ -16,6 +16,7 @@ serde = ["dep:serde", "bitflags/serde", "vte/serde"]
+ 
+ [dependencies]
+ base64 = "0.22.0"
++cursor-icon = "1.2.0"
+ bitflags = "2.4.1"
+ home = "0.5.5"
+ libc = "0.2"
+diff --git a/alacritty_terminal/src/term/mod.rs b/alacritty_terminal/src/term/mod.rs
+index 8eb6797..b952023 100644
+--- a/alacritty_terminal/src/term/mod.rs
++++ b/alacritty_terminal/src/term/mod.rs
+@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
+ use base64::Engine;
+ use base64::engine::general_purpose::STANDARD as Base64;
+ use bitflags::bitflags;
++use cursor_icon::CursorIcon;
+ use log::{debug, trace};
+ use unicode_width::UnicodeWidthChar;
+ 
+@@ -327,6 +328,8 @@ pub struct Term<T> {
+ 
+     /// Config directly for the terminal.
+     config: Config,
++
++    mouse_cursor_icon: Option<CursorIcon>,
+ }
+ 
+ /// Configuration options for the [`Term`].
+@@ -351,6 +354,9 @@ pub struct Config {
+ 
+     /// OSC52 support mode.
+     pub osc52: Osc52,
++
++    /// Allow applications in mouse mode to select the pointer with OSC 22.
++    pub osc22: bool,
+ }
+ 
+ impl Default for Config {
+@@ -362,6 +368,7 @@ impl Default for Config {
+             vi_mode_cursor_style: Default::default(),
+             kitty_keyboard: Default::default(),
+             osc52: Default::default(),
++            osc22: false,
+         }
+     }
+ }
+@@ -435,6 +442,7 @@ impl<T> Term<T> {
+             active_charset: Default::default(),
+             vi_mode_cursor: Default::default(),
+             cursor_style: Default::default(),
++            mouse_cursor_icon: None,
+             colors: color::Colors::default(),
+             title_stack: Default::default(),
+             is_focused: Default::default(),
+@@ -501,6 +509,10 @@ impl<T> Term<T> {
+         T: EventListener,
+     {
+         let old_config = mem::replace(&mut self.config, options);
++        if !self.config.osc22 {
++            self.mouse_cursor_icon = None;
++            self.event_proxy.send_event(Event::MouseCursorDirty);
++        }
+ 
+         let title_event = match &self.title {
+             Some(title) => Event::Title(title.clone()),
+@@ -706,6 +718,15 @@ impl<T> Term<T> {
+ 
+     /// Active terminal modes.
+     #[inline]
++    /// Application pointer, only while mouse reporting is active and vi mode is off.
++    pub fn mouse_cursor_icon(&self) -> Option<CursorIcon> {
++        if self.mode.intersects(TermMode::MOUSE_MODE) && !self.mode.contains(TermMode::VI) {
++            self.mouse_cursor_icon
++        } else {
++            None
++        }
++    }
++
+     pub fn mode(&self) -> &TermMode {
+         &self.mode
+     }
+@@ -1838,6 +1859,8 @@ impl<T: EventListener> Handler for Term<T> {
+         }
+         self.active_charset = Default::default();
+         self.cursor_style = None;
++        self.mouse_cursor_icon = None;
++        self.event_proxy.send_event(Event::MouseCursorDirty);
+         self.grid.reset();
+         self.inactive_grid.reset();
+         self.scroll_region = Line(0)..Line(self.screen_lines() as i32);
+@@ -2209,6 +2232,14 @@ impl<T: EventListener> Handler for Term<T> {
+         self.event_proxy.send_event(Event::CursorBlinkingChange);
+     }
+ 
++    #[inline]
++    fn set_mouse_cursor_icon(&mut self, icon: CursorIcon) {
++        if self.config.osc22 && self.mouse_cursor_icon != Some(icon) {
++            self.mouse_cursor_icon = Some(icon);
++            self.event_proxy.send_event(Event::MouseCursorDirty);
++        }
++    }
++
+     #[inline]
+     fn set_cursor_shape(&mut self, shape: CursorShape) {
+         trace!("Setting cursor shape {shape:?}");
+@@ -2518,6 +2549,42 @@ mod tests {
+     use crate::term::test::TermSize;
+     use crate::vte::ansi::{self, CharsetIndex, Handler, StandardCharset};
+ 
++    #[test]
++    fn osc22_pointer_lifecycle() {
++        let config = Config { osc22: true, ..Config::default() };
++        let mut term = Term::new(config.clone(), &TermSize::new(10, 5), VoidListener);
++        let mut parser: ansi::Processor = ansi::Processor::new();
++        parser.advance(&mut term, b"\x1b[?1003h\x1b]22;pointer\x1b\\");
++        assert_eq!(term.mouse_cursor_icon(), Some(CursorIcon::Pointer));
++        parser.advance(&mut term, b"\x1b]22;default\x07");
++        assert_eq!(term.mouse_cursor_icon(), Some(CursorIcon::Default));
++        parser.advance(&mut term, b"\x1b]22;pointer\x07\x1b[?1003l");
++        assert_eq!(term.mouse_cursor_icon(), None);
++        parser.advance(&mut term, b"\x1b[?1003h");
++        term.mode.insert(TermMode::VI);
++        assert_eq!(term.mouse_cursor_icon(), None);
++        term.mode.remove(TermMode::VI);
++        parser.advance(&mut term, b"\x1bc\x1b[?1003h");
++        assert_eq!(term.mouse_cursor_icon(), None);
++        parser.advance(&mut term, b"\x1b]22;pointer\x07");
++        term.set_options(Config::default());
++        assert_eq!(term.mouse_cursor_icon(), None);
++        term.set_options(config);
++        assert_eq!(term.mouse_cursor_icon(), None);
++    }
++
++    #[test]
++    fn osc22_disabled_and_invalid_sequences() {
++        let mut term = Term::new(Config::default(), &TermSize::new(10, 5), VoidListener);
++        let mut parser: ansi::Processor = ansi::Processor::new();
++        parser.advance(&mut term, b"\x1b[?1003h\x1b]22;pointer\x07");
++        assert_eq!(term.mouse_cursor_icon(), None);
++        term.set_options(Config { osc22: true, ..Config::default() });
++        parser.advance(&mut term, b"\x1b]22;pointer\x07\x1b]22;not-a-cursor\x07");
++        assert_eq!(term.mouse_cursor_icon(), Some(CursorIcon::Pointer));
++        assert_eq!(term.grid.cursor.point, Point::default());
++    }
++
+     #[test]
+     fn scroll_display_page_up() {
+         let size = TermSize::new(5, 10);

@@ -1,3 +1,6 @@
+include:
+  - local: .gitlab/alacritty-ci.yml
+
 publish-release:
   image: curlimages/curl:8.12.1
   rules:
