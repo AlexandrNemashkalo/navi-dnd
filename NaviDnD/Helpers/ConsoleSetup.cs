@@ -143,7 +143,7 @@ internal static class ConsoleSetup
     // sometimes remains hanging - an explicit WM_CLOSE is guaranteed to close it before exiting.
     internal static void CloseConsoleAndExit()
     {
-        if (!OperatingSystem.IsWindows())
+        if (!OperatingSystem.IsWindows() || WindowsAlacritty.Active)
         {
             UnixTerminal.Current?.Restore();
             Environment.Exit(0);
@@ -160,7 +160,7 @@ internal static class ConsoleSetup
     // otherwise the user sees the “regular console → game” blinking.
     internal static void HideWindow()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || WindowsAlacritty.Active) return;
         var consoleWindow = GetConsoleWindow();
         if (consoleWindow != IntPtr.Zero)
             ShowWindow(consoleWindow, SW_HIDE);
@@ -168,7 +168,7 @@ internal static class ConsoleSetup
 
     internal static void ShowWindowReady()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || WindowsAlacritty.Active) return;
         var consoleWindow = GetConsoleWindow();
         if (consoleWindow != IntPtr.Zero)
             ShowWindow(consoleWindow, SW_SHOW);
@@ -177,10 +177,10 @@ internal static class ConsoleSetup
     internal static void SetConsoleConfig(WorldState settings)
     {
         Console.Title = "NaviDnD";
-        Console.OutputEncoding = Encoding.UTF8;
+        if (UnixTerminal.Current == null) Console.OutputEncoding = Encoding.UTF8;
 
         var (width, height) = WindowSize(settings);
-        if (!OperatingSystem.IsWindows())
+        if (!OperatingSystem.IsWindows() || WindowsAlacritty.Active)
         {
             // The terminal leaves its font: we ask it for the same grid (xterm- compatible terminals do this)
             // and wait until it becomes no smaller.
@@ -252,7 +252,7 @@ internal static class ConsoleSetup
     // transfer on the last column).
     private static void TrimWindowToRows()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || WindowsAlacritty.Active) return;
         try
         {
             var hwnd = GetConsoleWindow();
@@ -278,7 +278,7 @@ internal static class ConsoleSetup
     // and should see them), when exiting - they are removed.
     internal static void LoadBundledFonts()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || WindowsAlacritty.Active) return;
         try
         {
             string dir = Path.Combine(AppConfig.ProjectRoot, "Fonts");
@@ -327,7 +327,7 @@ internal static class ConsoleSetup
 
     private static void SetConsoleFontSize(short size)
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || WindowsAlacritty.Active) return;
         var handle = GetStdHandle(STD_OUTPUT_HANDLE);
         var info = new CONSOLE_FONT_INFOEX();
         info.cbSize = (uint)Marshal.SizeOf(info);
@@ -354,7 +354,7 @@ internal static class ConsoleSetup
 
     internal static void BlockConsoleFullscreen()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || WindowsAlacritty.Active) return;
         _keyboardHookProc = KeyboardHookCallback;
         var thread = new Thread(() =>
         {
@@ -373,7 +373,7 @@ internal static class ConsoleSetup
 
     internal static void EnableAnsiSupport()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || WindowsAlacritty.Active) return;
 
         var handle = GetStdHandle(STD_OUTPUT_HANDLE);
         if (GetConsoleMode(handle, out uint mode))
@@ -406,7 +406,7 @@ internal static class ConsoleSetup
 
     internal static void DisableQuickEdit()
     {
-        if (!OperatingSystem.IsWindows()) return;
+        if (!OperatingSystem.IsWindows() || WindowsAlacritty.Active) return;
         IntPtr handle = GetStdHandle(STD_INPUT_HANDLE);
         GetConsoleMode(handle, out uint mode);
         mode &= ~ENABLE_QUICK_EDIT;
@@ -417,10 +417,10 @@ internal static class ConsoleSetup
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
 
-        IntPtr hWnd = GetConsoleWindow();
+        IntPtr hWnd = WindowControls.NativeWindow;
         if (hWnd == IntPtr.Zero) return;
 
-        IntPtr hIcon = LoadImage(IntPtr.Zero, "dnd.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+        IntPtr hIcon = LoadImage(IntPtr.Zero, Path.Combine(AppContext.BaseDirectory, "dnd.ico"), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
         if (hIcon != IntPtr.Zero)
         {
             SendMessage(hWnd, WM_SETICON, ICON_SMALL, hIcon);
@@ -435,7 +435,7 @@ internal static class ConsoleSetup
 
     internal static void ShowWindow()
     {
-        if (!OperatingSystem.IsWindows()) return;
+        if (!OperatingSystem.IsWindows() || WindowsAlacritty.Active) return;
         IntPtr hWnd = GetConsoleWindow();
         if (hWnd == IntPtr.Zero) return;
 
@@ -450,7 +450,7 @@ internal static class ConsoleSetup
     // the window in its normal position and everything is ready to be shown to the user.
     internal static void RevealWindow()
     {
-        if (!OperatingSystem.IsWindows()) return;
+        if (!OperatingSystem.IsWindows() || WindowsAlacritty.Active) return;
         IntPtr hWnd = GetConsoleWindow();
         if (hWnd == IntPtr.Zero) return;
 

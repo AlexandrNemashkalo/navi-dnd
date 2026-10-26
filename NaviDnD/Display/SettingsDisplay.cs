@@ -271,7 +271,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
             Group = L.T("INTERFACE"),
         });
         // The window mode and console font are only available on Windows:; the terminal on macOS/Linux has its own.
-        if (OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows() && !WindowsAlacritty.Active)
         {
             Toggle(L.T("SCREEN"), L.T("Full screen: the game at the same size centered on the monitor with the game background around it (taskbar hidden). Windowed — as usual, the window can be dragged."),
                 () => config.Fullscreen, v => { config.Fullscreen = v; ApplyScreen(); },

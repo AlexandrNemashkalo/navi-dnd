@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NaviDnD.Helpers;
 
-// The terminal on macOS/Linux. The game was written against the Windows console: a queue of key and mouse records
+// VT terminal on macOS/Linux and opt-in Windows Alacritty. The game uses a queue of key and mouse records
 // (ReadConsoleInput) and a cursor whose position can always be read back. This class gives it the same model on a
 // VT terminal: stdin goes raw, an input thread turns escape sequences (keys, SGR mouse, bracketed paste) into
 // Windows-style INPUT_RECORDs, and stdout goes through a writer that tracks the cursor and batches writes.
@@ -35,6 +35,7 @@ internal sealed class UnixTerminal
     private int _restored;
     private int _ticks;
     private readonly List<PosixSignalRegistration> _signals = [];   // a registration lasts only while it is referenced
+    private uint _savedInputMode, _savedOutputMode, _savedInputCodePage, _savedOutputCodePage;
 
     public bool CursorVisible { get; private set; } = true;
     public int CursorLeft => _out.Col;
@@ -53,10 +54,10 @@ internal sealed class UnixTerminal
     // Rows at the top the game must not use: on a MacBook with a notch the full-screen terminal reaches under it.
     public static int ReservedTopRows { get; set; }
 
-    // Takes over the terminal; null when this is Windows or stdin/stdout are not a terminal (tests, pipes).
+    // Takes over VT terminals; null for classic Windows console or redirected streams (tests, pipes).
     public static UnixTerminal? Start()
     {
-        if (OperatingSystem.IsWindows() || Current != null || Console.IsInputRedirected || Console.IsOutputRedirected) return Current;
+        if ((OperatingSystem.IsWindows() && !WindowsAlacritty.Active) || Current != null || Console.IsInputRedirected || Console.IsOutputRedirected) return Current;
         try
         {
             Current = new UnixTerminal();
@@ -71,13 +72,33 @@ internal sealed class UnixTerminal
 
     private UnixTerminal()
     {
-        if (tcgetattr(StdIn, _savedTermios) != 0) throw new InvalidOperationException("stdin is not a terminal");
-        Buffer.BlockCopy(_savedTermios, 0, _rawTermios, 0, _savedTermios.Length);
-        cfmakeraw(_rawTermios);
-        // Raw input, but keep output processing (\n → \r\n) and signals (Ctrl+C still quits).
-        OrFlag(_rawTermios, OFlagOffset, OPOST | ONLCR);
-        OrFlag(_rawTermios, LFlagOffset, ISIG);
-        tcsetattr(StdIn, TCSANOW, _rawTermios);
+        if (OperatingSystem.IsWindows())
+        {
+            if (!GetConsoleMode(GetStdHandle(-10), out _savedInputMode)
+                || !GetConsoleMode(GetStdHandle(-11), out _savedOutputMode))
+                throw new IOException("Console handles are unavailable.");
+            _savedInputCodePage = GetConsoleCP();
+            _savedOutputCodePage = GetConsoleOutputCP();
+            SetConsoleCP(65001);
+            SetConsoleOutputCP(65001);
+            // Raw UTF-8 VT input; ConPTY translates terminal keys and mouse reports.
+            if (!SetConsoleMode(GetStdHandle(-10), 0x0200 | 0x0080 | 0x0010)
+                || !SetConsoleMode(GetStdHandle(-11), _savedOutputMode | 0x0001 | 0x0004))
+            {
+                RestoreWindowsModes();
+                throw new IOException("Virtual terminal mode is unavailable.");
+            }
+        }
+        else
+        {
+            if (tcgetattr(StdIn, _savedTermios) != 0) throw new InvalidOperationException("stdin is not a terminal");
+            Buffer.BlockCopy(_savedTermios, 0, _rawTermios, 0, _savedTermios.Length);
+            cfmakeraw(_rawTermios);
+            // Raw input, but keep output processing (\n → \r\n) and signals (Ctrl+C still quits).
+            OrFlag(_rawTermios, OFlagOffset, OPOST | ONLCR);
+            OrFlag(_rawTermios, LFlagOffset, ISIG);
+            tcsetattr(StdIn, TCSANOW, _rawTermios);
+        }
 
         RefreshSize(force: true);
         // Straight to fd 1: .NET's console stream locks Console.Out on every write, which deadlocks against the
@@ -94,10 +115,13 @@ internal sealed class UnixTerminal
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) => Restore();
         AppDomain.CurrentDomain.UnhandledException += (_, _) => Restore();
-        _signals.Add(PosixSignalRegistration.Create(PosixSignal.SIGTERM, _ => Restore()));
-        _signals.Add(PosixSignalRegistration.Create(PosixSignal.SIGHUP, _ => Restore()));
-        _signals.Add(PosixSignalRegistration.Create(PosixSignal.SIGINT, _ => Restore()));
-        _signals.Add(PosixSignalRegistration.Create(PosixSignal.SIGWINCH, _ => RefreshSize(force: true)));
+        if (!OperatingSystem.IsWindows())
+        {
+            _signals.Add(PosixSignalRegistration.Create(PosixSignal.SIGTERM, _ => Restore()));
+            _signals.Add(PosixSignalRegistration.Create(PosixSignal.SIGHUP, _ => Restore()));
+            _signals.Add(PosixSignalRegistration.Create(PosixSignal.SIGINT, _ => Restore()));
+            _signals.Add(PosixSignalRegistration.Create(PosixSignal.SIGWINCH, _ => RefreshSize(force: true)));
+        }
     }
 
     // Leaves the terminal as it was: mouse and paste modes off, cursor shown, main screen, original line settings.
@@ -111,12 +135,22 @@ internal sealed class UnixTerminal
             _out.Flush();
         }
         catch { /* the terminal is gone */ }
-        tcsetattr(StdIn, TCSANOW, _savedTermios);
+        if (OperatingSystem.IsWindows()) RestoreWindowsModes();
+        else tcsetattr(StdIn, TCSANOW, _savedTermios);
+    }
+
+    private void RestoreWindowsModes()
+    {
+        SetConsoleMode(GetStdHandle(-10), _savedInputMode);
+        SetConsoleMode(GetStdHandle(-11), _savedOutputMode);
+        SetConsoleCP(_savedInputCodePage);
+        SetConsoleOutputCP(_savedOutputCodePage);
     }
 
     private void Tick()
     {
         _out.Flush();
+        if (OperatingSystem.IsWindows()) return;
         // A child process that inherits the terminal can leave it in line mode (and .NET resets it around such
         // children) — put raw mode back.
         if (++_ticks % 60 != 0) return;
@@ -178,7 +212,9 @@ internal sealed class UnixTerminal
             [
                 L.T("The terminal window is too small for NaviDnD."),
                 L.F("It needs at least {0} × {1} characters; now it is {2} × {3}.", cols, rows + ReservedTopRows, RealWidth, RealHeight),
-                L.T("Enlarge the window or make the font smaller (Cmd and minus)."),
+                OperatingSystem.IsWindows()
+                    ? L.T("Enlarge the window or make the font smaller (Ctrl and minus).")
+                    : L.T("Enlarge the window or make the font smaller (Cmd and minus)."),
             ];
             Clear();
             for (int i = 0; i < lines.Length; i++)
@@ -305,6 +341,20 @@ internal sealed class UnixTerminal
 
     private void ReadStdIn()
     {
+        if (OperatingSystem.IsWindows())
+        {
+            // ReadFile's console byte conversion is unreliable for non-ASCII input on some
+            // ConPTY hosts. Read UTF-16 directly and feed UTF-8 to the shared VT parser.
+            var chars = new char[2048];
+            var bytes = new byte[Encoding.UTF8.GetMaxByteCount(chars.Length)];
+            var encoder = Encoding.UTF8.GetEncoder();
+            while (ReadConsoleW(GetStdHandle(-10), chars, (uint)chars.Length, out uint count, 0) && count > 0)
+            {
+                int length = encoder.GetBytes(chars.AsSpan(0, (int)count), bytes, flush: false);
+                for (int i = 0; i < length; i++) _bytes.Add(bytes[i]);
+            }
+            return;
+        }
         var buf = new byte[4096];
         while (true)
         {
@@ -734,10 +784,12 @@ internal sealed class UnixTerminal
         {
             while (!buffer.IsEmpty)
             {
-                nint n = write(1, ref MemoryMarshal.GetReference(buffer), buffer.Length);
-                if (n < 0)
+                nint n = OperatingSystem.IsWindows()
+                    ? (WriteFile(GetStdHandle(-11), ref MemoryMarshal.GetReference(buffer), (uint)buffer.Length, out uint count, 0) ? (nint)count : -1)
+                    : write(1, ref MemoryMarshal.GetReference(buffer), buffer.Length);
+                if (n <= 0)
                 {
-                    if (Marshal.GetLastPInvokeError() == 4) continue;   // EINTR
+                    if (!OperatingSystem.IsWindows() && Marshal.GetLastPInvokeError() == 4) continue;   // EINTR
                     throw new IOException("stdout closed");
                 }
                 buffer = buffer[(int)n..];
@@ -746,6 +798,17 @@ internal sealed class UnixTerminal
     }
 
     // ── termios ───────────────────────────────────────────────────────────────────────────────────────────────
+
+    [DllImport("kernel32.dll")] private static extern nint GetStdHandle(int handle);
+    [DllImport("kernel32.dll")] private static extern bool GetConsoleMode(nint handle, out uint mode);
+    [DllImport("kernel32.dll")] private static extern bool SetConsoleMode(nint handle, uint mode);
+    [DllImport("kernel32.dll")] private static extern uint GetConsoleCP();
+    [DllImport("kernel32.dll")] private static extern uint GetConsoleOutputCP();
+    [DllImport("kernel32.dll")] private static extern bool SetConsoleCP(uint codePage);
+    [DllImport("kernel32.dll")] private static extern bool SetConsoleOutputCP(uint codePage);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+    private static extern bool ReadConsoleW(nint handle, [Out] char[] buffer, uint count, out uint read, nint control);
+    [DllImport("kernel32.dll", SetLastError = true)] private static extern bool WriteFile(nint handle, ref byte buffer, uint count, out uint written, nint overlapped);
 
     private const int TCSANOW = 0;
     private static readonly bool Mac = OperatingSystem.IsMacOS();

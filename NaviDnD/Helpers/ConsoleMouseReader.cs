@@ -59,16 +59,16 @@ public static class ConsoleMouseReader
     // button is physically held down.
     public static void StartWindowDrag()
     {
-        if (!OperatingSystem.IsWindows()) return;   // terminal window moves past its title
+        if (!OperatingSystem.IsWindows()) return;   // Unix terminal owns its window
         if (FullscreenBackdrop.Active) return;   // entire screen - the window is centered
-        var hwnd = GetConsoleWindow();
+        var hwnd = WindowControls.NativeWindow;
         if (hwnd == 0) return;
         if (!GetCursorPos(out var startCursor)) return;
         if (!GetWindowRect(hwnd, out var startRect)) return;
 
         _windowDrag = () =>
         {
-            if (!LeftButtonHeld() || !GetCursorPos(out var cur))
+            if ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) == 0 || !GetCursorPos(out var cur))
             {
                 _windowDrag = null;
                 return;
@@ -233,7 +233,7 @@ public static class ConsoleMouseReader
     public static void Enable()
     {
         if (UnixTerminal.Current != null) { _enabled = true; return; }
-        if (!OperatingSystem.IsWindows()) return;
+        if (!OperatingSystem.IsWindows() || WindowsAlacritty.Active) return;
         _inputHandle = GetStdHandle(STD_INPUT_HANDLE);
         GetConsoleMode(_inputHandle, out _originalMode);
         // ENABLE_PROCESSED_INPUT has been removed: with it, conhost intercepts Shift+ arrows for his text
@@ -672,7 +672,7 @@ public static class ConsoleMouseReader
     /// Returns the fractional Y position of the pixel cursor within its character cell (0.0 = top, 1.0 = bottom).
     private static float GetSubCellFraction()
     {
-        if (!OperatingSystem.IsWindows()) return 0.5f;   // terminal reports only whole cells
+        if (!OperatingSystem.IsWindows() || WindowsAlacritty.Active) return 0.5f;   // terminal reports only whole cells
         try
         {
             if (!GetCursorPos(out var pt)) return 0.5f;
@@ -698,7 +698,7 @@ public static class ConsoleMouseReader
     /// Returns the fractional X position of the pixel cursor within its character cell (0.0 = left, 1.0 = right).
     private static float GetSubCellFractionX()
     {
-        if (!OperatingSystem.IsWindows()) return 0.5f;   // terminal reports only whole cells
+        if (!OperatingSystem.IsWindows() || WindowsAlacritty.Active) return 0.5f;   // terminal reports only whole cells
         try
         {
             if (!GetCursorPos(out var pt)) return 0.5f;

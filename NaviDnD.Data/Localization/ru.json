@@ -1,4 +1,10 @@
 {
+  "Alacritty was not found. Install it, put alacritty.exe beside NaviDnD.exe, or set NAVIDND_ALACRITTY_PATH.": "Alacritty не найден. Установи его, положи alacritty.exe рядом с NaviDnD.exe или укажи путь в NAVIDND_ALACRITTY_PATH.",
+  "Game executable not found.": "Исполняемый файл игры не найден.",
+  "Alacritty game configuration not found.": "Конфигурация Alacritty для игры не найдена.",
+  "Alacritty did not start.": "Не удалось запустить Alacritty.",
+  "Could not initialize Alacritty terminal input/output.": "Не удалось настроить ввод и вывод терминала Alacritty.",
+  "Enlarge the window or make the font smaller (Ctrl and minus).": "Увеличь окно или уменьши шрифт (Ctrl и минус).",
   "Not enough movement for this step — [F10] end turn.": "Недостаточно скорости для этого шага — [F10] конец хода.",
   "LANGUAGE": "ЯЗЫК",
   "INTERFACE": "ИНТЕРФЕЙС",

@@ -53,7 +53,7 @@ internal static class ConsoleZoomBlocker
 
     public static void Start()
     {
-        if (_proc != null || !OperatingSystem.IsWindows()) return;
+        if (_proc != null || !OperatingSystem.IsWindows() || WindowsAlacritty.Active) return;
         _consoleWindow = GetConsoleWindow();
         if (_consoleWindow == 0) return;
         _proc = Hook;

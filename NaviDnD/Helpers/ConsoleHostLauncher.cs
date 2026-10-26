@@ -6,9 +6,8 @@ using Microsoft.Win32;
 
 namespace NaviDnD.Helpers;
 
-// The game draws in the classic console (conhost): Windows Terminal does not allow you to control the window,
-// font and mouse as it needs. Any launch without RelaunchFlag - restarts in conhost.exe with this flag (the
-// flag is set only by the game itself).
+// Fallback Windows host: classic conhost with native window/font/mouse controls. The default Alacritty
+// backend bypasses relaunch but shares single-instance ownership and activation with the classic host.
 public static class ConsoleHostLauncher
 {
     public const string RelaunchFlag = "--navidnd-conhost";
@@ -63,16 +62,16 @@ public static class ConsoleHostLauncher
     {
         if (!OperatingSystem.IsWindows() || Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") != null
             || Console.IsInputRedirected || Console.IsOutputRedirected) return false;
-        if (args.Contains(RelaunchFlag))
+        if (args.Contains(RelaunchFlag) || WindowsAlacritty.Active)
         {
             using (SwitchGate()) RestorePending();
             // Another game is already running (two starts in a race) - show its window, close this one.
             if (!ClaimInstance()) { ActivateRunning(); return true; }
-            nint own = GetConsoleWindow();
+            nint own = WindowsAlacritty.Active ? WindowsAlacritty.Window : GetConsoleWindow();
             try { File.WriteAllText(WindowPath, own.ToString()); } catch { /*not important for startup*/ }
             if (own != 0) SetForegroundWindow(own);
             // There was already a restart, but the classic console window was still not there - the terminal intercepted it too.
-            if (!InClassicConsole()) Log("После перезапуска игра всё ещё не в классической консоли.");
+            if (!WindowsAlacritty.Active && !InClassicConsole()) Log("После перезапуска игра всё ещё не в классической консоли.");
             return false;
         }
         // The game is already running - its window is forward, do not launch a second copy.

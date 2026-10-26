@@ -1,0 +1,22 @@
+# Dedicated game configuration; does not import or modify the player's terminal settings.
+[window]
+dimensions = { columns = 150, lines = 63 }
+title = "NaviDnD — Alacritty"
+dynamic_title = false
+# Keep Winit's standard non-client/minimize handling; the game removes the visible frame.
+decorations = "Full"
+dynamic_padding = true
+
+[font]
+normal = { family = "Consolas", style = "Regular" }
+size = 10.0
+# Consolas at 10pt/100% DPI: 7x15 -> 7x14, matching the artwork's 1:2 cell ratio.
+offset = { x = 0, y = -1 }
+
+[colors.primary]
+background = "#121216"
+foreground = "#b8c8ae"
+
+[scrolling]
+history = 0
+

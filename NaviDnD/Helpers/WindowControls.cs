@@ -54,7 +54,7 @@ public static class WindowControls
         frame.Append($"\x1b[38;2;{foreground[0]};{foreground[1]};{foreground[2]}m");
         // Send complete glyphs and their styles in one write, including hover redraws.
         string text = frame.ToString();
-        if (!OperatingSystem.IsWindows() || Console.IsOutputRedirected
+        if (!OperatingSystem.IsWindows() || WindowsAlacritty.Active || Console.IsOutputRedirected
             || !WriteConsoleW(GetStdHandle(-11), text, (uint)text.Length, out _, 0))
             ColorHelper.WriteColored(text, display.MainForeground, background);
     }
@@ -63,7 +63,7 @@ public static class WindowControls
 
     public static int HitTest(int x, int y, int left, int width)
     {
-        if (y != 1 || width < Buttons.Length) return -1;
+        if (!Available || y != 1 || width < Buttons.Length) return -1;
         int offset = x - (left + width - Buttons.Length);
         int button = offset is >= 1 and < 10 ? (offset - 1) / 3 : -1;
         return button == 1 && FullscreenDisabled ? -1 : button;   // inactive button - neither hover nor click
@@ -84,7 +84,7 @@ public static class WindowControls
                     if (OperatingSystem.IsMacOS()) SetMinimized(MacApp.IsHidden());
                     return;
                 }
-                var window = GetConsoleWindow();
+                var window = NativeWindow;
                 bool minimized = IsIconic(window);
                 if (!minimized && _attentionNotified)
                 {
@@ -111,7 +111,7 @@ public static class WindowControls
         if (!OperatingSystem.IsWindows()) return;
         lock (_stateLock)
         {
-            var window = GetConsoleWindow();
+            var window = NativeWindow;
             if (window == 0 || !IsIconic(window) || _attentionNotified) return;
             _attentionNotified = true;
             Flash(window, 2, 3); // FLASHW_TRAY: three flashes, without activation or sound.
@@ -140,7 +140,9 @@ public static class WindowControls
                 Speech.SetWindowMinimized(true);
                 Music.SetPaused(true);
                 FullscreenBackdrop.SetMinimized(true);
-                ShowWindow(GetConsoleWindow(), 6);
+                // Alacritty keeps standard non-client handling (see RemoveWindowFrame),
+                // so direct minimization preserves its terminal grid as in classic conhost.
+                ShowWindow(NativeWindow, 6);
             }
         }
         else if (button == 0 && OperatingSystem.IsMacOS())
@@ -151,6 +153,8 @@ public static class WindowControls
         else if (button == 1) _toggle?.Invoke();
         else if (button == 2) _close?.Invoke();
     }
+
+    internal static nint NativeWindow => WindowsAlacritty.Active ? WindowsAlacritty.Window : GetConsoleWindow();
 
     [DllImport("kernel32.dll")] private static extern nint GetConsoleWindow();
     [StructLayout(LayoutKind.Sequential)]

@@ -20,6 +20,7 @@ class Program
             Environment.ExitCode = Migrations.MigrateCommand.Run(args.Length > 1 ? args[1] : AppConfig.DataRoot);
             return;
         }
+        if (WindowsAlacritty.Launch(args)) return;
         if (ConsoleHostLauncher.TryRelaunch(args)) return;
         if (OperatingSystem.IsMacOS() && MacApp.Launch(args)) return;
         // An unhandled exception used to simply drop the process silently (the console closes immediately, .NET
@@ -41,6 +42,8 @@ class Program
         if (OperatingSystem.IsMacOS() && !AppConfig.InMacApp) UnixTools.ClearQuarantine(AppContext.BaseDirectory);
         // macOS/Linux: take control of the terminal (raw input, mouse, alternative screen) before anything is drawn.
         UnixTerminal.Start();
+        if (WindowsAlacritty.Active && UnixTerminal.Current == null)
+            throw new InvalidOperationException(L.T("Could not initialize Alacritty terminal input/output."));
         // The console window Windows creates and shows BEFORE the first line Main() - we hide it right away,
         // set everything (no frame, size for a map, font/colors) invisibly and show it ready.
         Term.CursorVisible = false;
@@ -157,7 +160,7 @@ class Program
         ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
         ColorHelper.SetBackgroundColor(display.MainBackground);
         ColorHelper.SetForegroundColor(display.MainForeground);
-        Console.OutputEncoding = Encoding.UTF8;
+        if (UnixTerminal.Current == null) Console.OutputEncoding = Encoding.UTF8;
 
         var mapLoop = new MapScreenLoop(settings, display, storage, aiClient, config, mapDisplay, legendDisplay);
 
@@ -292,7 +295,7 @@ class Program
             ColorHelper.ClearScreen(display.MainBackground, display.MainForeground);
             ColorHelper.SetBackgroundColor(display.MainBackground);
             ColorHelper.SetForegroundColor(display.MainForeground);
-            Console.OutputEncoding = Encoding.UTF8;
+            if (UnixTerminal.Current == null) Console.OutputEncoding = Encoding.UTF8;
 
             // There is no tactical map (the hero is on the way, the scene is in text) - instead of a terrain, there is a world (before the title is drawn).
             if (state.CurrentScreen == Screen.Map && !GameWorld.HasLocation(settings)) state.CurrentScreen = Screen.World;

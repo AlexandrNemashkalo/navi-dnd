@@ -1,7 +1,7 @@
 namespace NaviDnD.Helpers;
 
-// The game's view of the terminal. On Windows (and whenever UnixTerminal is not running, e.g. in tests) every member is
-// the matching System.Console call. On macOS/Linux UnixTerminal owns stdin and stdout: .NET's own cursor getters would
+// The game's view of the terminal. In classic Windows console (and tests) members use System.Console.
+// On macOS/Linux and Windows Alacritty, UnixTerminal owns stdin and stdout: .NET's own cursor getters would
 // query the terminal through stdin and race the input reader, so the cursor position and visibility are tracked here.
 internal static class Term
 {

@@ -101,6 +101,24 @@ function PublishInstaller() {
     [ordered]@{ name = $installerName; url = (RawUrl "v$version" "releases/$installerName"); sha256 = (Sha256File $file.FullName); size = $file.Length; source = (InstallerSource) }
 }
 # Game without Silero: published projects, public tracked resources, version, license, notes.
+function BundleWindowsTerminal() {
+    $cache = Join-Path $root 'artifacts/alacritty'
+    New-Item -ItemType Directory -Force -Path $cache | Out-Null
+    $downloads = @{
+        'alacritty.exe' = @('https://github.com/alacritty/alacritty/releases/download/v0.17.0/Alacritty-v0.17.0-portable.exe', '5ad70ddc5c2a2bfe84084a2c4c73558e9360914f035a902d7a69277be7249f1f')
+        'alacritty-LICENSE' = @('https://raw.githubusercontent.com/alacritty/alacritty/v0.17.0/LICENSE-APACHE', '8884289e3969c089cd556c53fa1d3f51d86b29e52a8c1d660a55ce8292986910')
+    }
+    foreach ($name in $downloads.Keys) {
+        $file = Join-Path $cache $name
+        $source = $downloads[$name]
+        if (!(Test-Path -LiteralPath $file) -or (Sha256File $file) -ne $source[1]) {
+            Invoke-WebRequest -UseBasicParsing -Uri $source[0] -OutFile $file
+        }
+        if ((Sha256File $file) -ne $source[1]) { throw "Windows terminal checksum mismatch: $name" }
+        Copy-Item -LiteralPath $file -Destination (Join-Path $payload $name)
+    }
+}
+
 function BuildGame() {
     New-Item -ItemType Directory -Force -Path $payload | Out-Null
     foreach ($project in @('NaviDnD', 'NaviDnD.McpServer')) {
@@ -127,6 +145,7 @@ function BuildGame() {
     }
     if (Get-ChildItem $payload -Recurse -Directory | Where-Object Name -in @('Storage', 'logs', 'Updater')) { throw 'Private data in payload' }
     if (Test-Path -LiteralPath (Join-Path $payload 'Speech/silero')) { throw 'Speech bundle must come from the base' }
+    BundleWindowsTerminal
     Set-Content (Join-Path $payload 'release-version.txt') $version -Encoding ASCII
     Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination (Join-Path $payload 'LICENSE')
     Copy-Item -LiteralPath (Join-Path $root 'RELEASE_NOTES.md') -Destination (Join-Path $payload 'RELEASE_NOTES.md')

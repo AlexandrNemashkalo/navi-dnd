@@ -20,7 +20,7 @@ public static class FullscreenBackdrop
                 ShowWindow(_backdrop, 0);
                 return;
             }
-            var console = GetConsoleWindow();
+            var console = WindowControls.NativeWindow;
             if (console == IntPtr.Zero || IsIconic(console)) return;
             // Showing a topmost backdrop by itself puts it above the restored console.
             // Restore the pair in order, placing the backdrop immediately behind the game.
@@ -42,11 +42,11 @@ public static class FullscreenBackdrop
         lock (_lock)
         {
             if (on == Active) { if (on) Recenter(); return; }
-            var console = GetConsoleWindow();
+            var console = WindowControls.NativeWindow;
             if (console == IntPtr.Zero) return;
             // Windows Terminal supplies a message-only pseudoconsole window. A topmost
             // backdrop there covers the actual terminal instead of sitting behind the game.
-            if (on && !IsVisibleClassicConsole(console)) return;
+            if (on && !(WindowsAlacritty.Active ? IsWindowVisible(console) : IsVisibleClassicConsole(console))) return;
             if (on)
             {
                 if (GetWindowRect(console, out var r)) _windowedPos = (r.Left, r.Top);
@@ -105,7 +105,7 @@ public static class FullscreenBackdrop
     public static void Recenter()
     {
         if (!Active || !OperatingSystem.IsWindows()) return;
-        var console = GetConsoleWindow();
+        var console = WindowControls.NativeWindow;
         if (console == IntPtr.Zero || !GetWindowRect(console, out var r)) return;
         var mon = MonitorRect(console);
         int w = r.Right - r.Left, h = r.Bottom - r.Top;
@@ -117,7 +117,7 @@ public static class FullscreenBackdrop
     public static (int width, int height) MonitorSize()
     {
         if (!OperatingSystem.IsWindows()) return (1920, 1080);
-        var r = MonitorRect(GetConsoleWindow());
+        var r = MonitorRect(WindowControls.NativeWindow);
         return (r.Right - r.Left, r.Bottom - r.Top);
     }
 

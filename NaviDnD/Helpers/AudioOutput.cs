@@ -33,10 +33,9 @@ internal static class AudioOutput
         ? new Mp3FileReader(path)
         : new Mp3FileReaderBase(path, format => new NLayer.NAudioSupport.Mp3FrameDecompressor(format));
 
-    // macOS/Linux only: on Windows audio failures stay silent, as they always were.
+    // Log audio failures on every platform, including Windows terminal hosts.
     public static void Log(Exception ex)
     {
-        if (OperatingSystem.IsWindows()) return;
         try
         {
             string dir = Path.Combine(AppConfig.DataRoot, "logs");
