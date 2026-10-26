@@ -17,6 +17,11 @@ alacritty-protocol-tests:
 alacritty-macos-build:
   # cargo-zigbuild 0.23.4: includes Zig and macOS 11.3 SDK; no macOS runner required.
   image: ghcr.io/rust-cross/cargo-zigbuild@sha256:d8313491ec5798de0633fdc1c5753761bff79967bea69076020dc78121b2cca8
+  variables:
+    CARGO_TARGET_DIR: "$CI_PROJECT_DIR/.alacritty-target"
+  cache:
+    key: alacritty-0.17-rust1.85-zig0.23.4-macos
+    paths: [.alacritty-target/]
   timeout: 30m
   rules:
     - if: '$CI_COMMIT_BRANCH == "build-macos-cursor"'

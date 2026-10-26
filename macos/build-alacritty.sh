@@ -13,6 +13,9 @@ if [[ "$(uname -s)" == Darwin ]]; then
 else
     command -v cargo-zigbuild >/dev/null
     [[ -d "${SDKROOT:-}/System/Library/Frameworks" ]] || { echo 'macOS SDK is required.' >&2; exit 1; }
+    # Do not use the Linux host's freetype.pc for an Apple target. freetype-sys
+    # falls back to compiling its bundled sources with Zig for arm64 macOS.
+    export FREETYPE2_NO_PKG_CONFIG=1
     build_command=zigbuild
 fi
 command -v rustup >/dev/null
@@ -30,7 +33,7 @@ rustup target add --toolchain "$toolchain" "$target"
 cd "$work/source"
 cargo "+$toolchain" test --locked -p alacritty_terminal
 cargo "+$toolchain" "$build_command" --locked --release --target "$target" -p alacritty --no-default-features
-cp "target/$target/release/alacritty" "$output/alacritty"
+cp "${CARGO_TARGET_DIR:-target}/$target/release/alacritty" "$output/alacritty"
 cp LICENSE-APACHE "$output/alacritty-LICENSE"
 python3 - "$output" "$patch" "$source_commit" "$toolchain" "$target" <<'PY'
 import hashlib, json, pathlib, sys
