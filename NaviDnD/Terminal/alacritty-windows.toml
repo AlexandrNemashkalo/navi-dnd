@@ -20,3 +20,11 @@ foreground = "#b8c8ae"
 [scrolling]
 history = 0
 
+# The game controls caret visibility; keep the terminal caret steady.
+[cursor]
+style = { shape = "Block", blinking = "Never" }
+
+# Invisible before the game initializes; input fields restore a visible caret with OSC 12.
+[colors.cursor]
+text = "#121216"
+cursor = "#121216"

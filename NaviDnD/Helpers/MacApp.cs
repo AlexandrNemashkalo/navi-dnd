@@ -5,9 +5,9 @@ namespace NaviDnD.Helpers;
 
 // NaviDnD.app on macOS. Finder launches the application without a terminal - then the game replaces itself with
 // its terminal (Alacritty from Contents/MacOS, settings - Contents/Resources/alacritty.toml): icon NaviDnD in
-// Dock, window without buttons macOS exactly under the game grid or the entire screen, font size - from the
+// Dock, fullscreen window without macOS buttons, font size - from the
 // game settings. In it starts the game again - with TerminalFlag. The terminal window cannot be changed after
-// launch - changing the mode and font in the settings restarts it (Relaunch).
+// launch - changing the font in the settings restarts it (Relaunch).
 [SupportedOSPlatform("macos")]
 internal static class MacApp
 {
@@ -26,6 +26,14 @@ internal static class MacApp
 
     // The game runs in its own terminal: it draws the window buttons itself (minimize - hide the application, close - exit).
     internal static bool InOwnTerminal { get; private set; }
+    private static bool _introPending;
+
+    internal static bool TakeStartupIntro()
+    {
+        bool pending = _introPending;
+        _introPending = false;
+        return pending;
+    }
 
     // Settings item to return to after restarting the window; null - normal launch. Take it once.
     private static int? SettingsFocus { get; set; }
@@ -46,6 +54,8 @@ internal static class MacApp
             InOwnTerminal = true;
             if (args.FirstOrDefault(a => a.StartsWith(SettingsFlag, StringComparison.Ordinal)) is { } focus
                 && int.TryParse(focus[SettingsFlag.Length..], out int item)) SettingsFocus = item;
+            // Animate only the initial menu, not returns from the game or a font-setting restart.
+            _introPending = SettingsFocus == null;
             if (args.FirstOrDefault(a => a.StartsWith(TopFlag, StringComparison.Ordinal)) is { } top
                 && int.TryParse(top[TopFlag.Length..], out int rows)) UnixTerminal.ReservedTopRows = rows;
             return false;
@@ -82,18 +92,18 @@ internal static class MacApp
     internal static bool RequestRelaunch(string bundle, int settingsItem, Func<string[], int?> launch) =>
         launch(["-n", bundle, "--args", SettingsFlag + settingsItem]) == 0;
 
-    // Font sizes for settings: auto and those at which the game fits on the screen in the selected mode.
+    // Font sizes for settings: auto and those at which the game fits on the screen in fullscreen mode.
     internal static int[] FontSizes(AppConfig config)
     {
-        double fit = Fit(config.Fullscreen, Screen());
+        double fit = Fit(Screen());
         return [0, .. new[] { 10, 11, 12, 13, 14, 15, 16, 18, 20, 22 }.Where(size => size <= fit)];
     }
 
     // The largest typeface, in which 150 × 63 cells are placed: the entire screen - except for the cutout at
-    // the top (MacBook with a “bang”), the window - under the menu bar and with an indent.
-    private static double Fit(bool fullscreen, (double Width, double Height, double Scale, double Notch) screen)
+    // the top of a MacBook display.
+    private static double Fit((double Width, double Height, double Scale, double Notch) screen)
     {
-        double width = screen.Width - (fullscreen ? 0 : 16), height = screen.Height - (fullscreen ? screen.Notch : 48);
+        double width = screen.Width, height = screen.Height - screen.Notch;
         for (double size = 30; size >= 8; size -= 0.5)
             if (Columns * Cell(size, screen.Scale) <= width && Rows * 2 * Cell(size, screen.Scale) <= height) return size;
         return 8;
@@ -105,7 +115,7 @@ internal static class MacApp
     private static List<string> TerminalArguments(AppConfig config, IEnumerable<string> gameArguments)
     {
         var screen = Screen();
-        double fit = Fit(config.Fullscreen, screen);
+        double fit = Fit(screen);
         double font = config.FullscreenFontSize > 0 ? Math.Min(config.FullscreenFontSize, fit) : fit;
         double cellWidth = Cell(font, screen.Scale), cellHeight = 2 * cellWidth;
         var background = new Data.DisplayConfig().MainBackground;
@@ -117,22 +127,9 @@ internal static class MacApp
             "-o", $"colors.primary.background=\"#{background[0]:x2}{background[1]:x2}{background[2]:x2}\"",
         };
         var game = new List<string> { Path.Combine(AppContext.BaseDirectory, "NaviDnD"), TerminalFlag };
-        if (config.Fullscreen)
-        {
-            // The terminal is full screen, the background around the game is its background (like “full screen”
-            // on Windows). The game itself stands in the center of the grid (UnixTerminal), skips lines under
-            // the cutout; Alacritty divides the rest of the pixels equally.
-            arguments.AddRange(["-o", "window.startup_mode=\"SimpleFullscreen\"", "-o", "window.dynamic_padding=true"]);
-            if (screen.Notch > 0) game.Add(TopFlag + (int)Math.Ceiling(screen.Notch / cellHeight));
-        }
-        else
-        {
-            // Window - in the center of the screen below the menu bar; position for Alacritty - in physical pixels.
-            double windowWidth = Columns * cellWidth, windowHeight = Rows * cellHeight;
-            int x = (int)Math.Max(0, (screen.Width - windowWidth) / 2 * screen.Scale);
-            int y = (int)Math.Max(0, (40 + (screen.Height - 40 - windowHeight) / 2) * screen.Scale);
-            arguments.AddRange(["-o", $"window.position={{ x = {x}, y = {y} }}"]);
-        }
+        // Always use fullscreen, including installations with Fullscreen=false saved by older versions.
+        arguments.AddRange(["-o", "window.startup_mode=\"SimpleFullscreen\"", "-o", "window.dynamic_padding=true"]);
+        if (screen.Notch > 0) game.Add(TopFlag + (int)Math.Ceiling(screen.Notch / cellHeight));
         arguments.Add("-e");
         arguments.AddRange(game);
         arguments.AddRange(gameArguments.Where(a => a != TerminalFlag && !a.StartsWith(TopFlag, StringComparison.Ordinal)));

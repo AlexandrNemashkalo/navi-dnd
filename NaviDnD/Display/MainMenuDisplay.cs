@@ -38,6 +38,7 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     private readonly List<(int row, int x, int w)> _itemPos = [];
     private List<Item> _items = [];
     private int _selected;
+    private double _introOpacity = 1;
 
     internal void DrawForUpdate()
     {
@@ -66,8 +67,28 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
 
         Term.CursorVisible = false;
         Layout();
+        bool intro = WindowsAlacritty.AwaitingFirstFrame
+            || (OperatingSystem.IsMacOS() && MacApp.TakeStartupIntro());
+        if (intro) _introOpacity = 0;
         DrawAll();
 
+        UnixTerminal.Current?.Flush();
+        WindowsAlacritty.RevealFirstFrame();
+        if (intro)
+        {
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            while (clock.ElapsedMilliseconds < 1200)
+            {
+                double t = Math.Clamp(clock.Elapsed.TotalMilliseconds / 1200, 0, 1);
+                _introOpacity = t * t * (3 - 2 * t);
+                DrawAll();
+                UnixTerminal.Current?.Flush();
+                Thread.Sleep(25);
+            }
+            _introOpacity = 1;
+            DrawAll();
+            UnixTerminal.Current?.Flush();
+        }
         while (true)
         {
             string updateLabel = GameUpdates.MenuLabel;
@@ -230,6 +251,18 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
 
     // ── Output ──────────────────────────────── ────────────────────────────────
     private void DrawAll()
+    {
+        if (_introOpacity < 1)
+        {
+            // Commit each brightness step as a complete terminal frame, not row by row.
+            Console.Write("\x1b[?2026h");
+            try { ColorHelper.WithForegroundOpacity(display.MainBackground, _introOpacity, DrawFrame); }
+            finally { Console.Write("\x1b[?2026l"); }
+        }
+        else DrawFrame();
+    }
+
+    private void DrawFrame()
     {
         var border = new BorderDrawer(settings, display);
         Term.SetCursorPosition(0, 0);

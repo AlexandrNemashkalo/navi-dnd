@@ -280,7 +280,7 @@ public class Storage
     public void ApplySavedState(string json)
     {
         _fromSave = true;
-        try { ApplyUpdateWorldState(json); }
+        try { ApplyUpdateWorldState(json); LocationGrower.EnsureBoundaryPathExits(WorldState.Map); }
         finally { _fromSave = false; }
     }
 
@@ -608,14 +608,15 @@ public class Storage
                     {
                         if (Math.Max(Math.Abs(dc), Math.Abs(dr)) != rad) continue;
                         int c = p[0] + dc, r = p[1] + dr;
-                        if (!Walkable(c, r) || Occupied(c, r, who)) continue;
+                        if (!Walkable(c, r) || Occupied(c, r, who)
+                            || map.FloorAt(c, r) != map.FloorAt(p[0], p[1])) continue;
                         who.Position = [c, r];
                         return;
                     }
         }
         if (WorldState.Hero != null) Fix(WorldState.Hero, Walkable);
         foreach (var e in map.Entities ?? [])
-            if (e.Deleted != true) Fix(e, OnField);
+            if (e.Deleted != true) Fix(e, (c, r) => Walkable(c, r) && !Occupied(c, r, e));
     }
 
     private void FillMissingStats()
@@ -816,8 +817,7 @@ public class Storage
                     break;
                 case "vision":
                 case "visionft":
-                    if (prop.Value.ValueKind != JsonValueKind.Null)
-                        WorldState.Hero.VisionFt = prop.Value.GetInt32();
+                    WorldState.Hero.VisionFt = prop.Value.ValueKind == JsonValueKind.Null ? null : prop.Value.GetInt32();
                     break;
                 case "inspiration":
                     WorldState.Hero.Inspiration = prop.Value.ValueKind == JsonValueKind.Null ? null : prop.Value.GetBoolean();

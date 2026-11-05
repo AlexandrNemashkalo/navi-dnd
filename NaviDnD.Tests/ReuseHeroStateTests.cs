@@ -6,15 +6,18 @@ namespace NaviDnD.Tests;
 
 public class ReuseHeroStateTests
 {
-    private sealed class EmptyProvider : IAiProvider
+    private sealed class EmptyProvider(string response) : IAiProvider
     {
-        public Task<string> Complete(IReadOnlyList<string> blocks, string message, string path, string model) => Task.FromResult("{}");
+        public Task<string> Complete(IReadOnlyList<string> blocks, string message, string path, string model) => Task.FromResult(response);
         public Task<string> CompleteWithStreaming(IReadOnlyList<string> blocks, string message, string path, string model, Action<string>? onChunk)
             => Complete(blocks, message, path, model);
     }
 
-    [Fact]
-    public async Task NewAdventureClearsDeathAndCombatFlagsWithoutChangingProgress()
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("{\"hero\":{\"vision\":5}}")]
+    [InlineData("{\"hero\":{\"visionFt\":5}}")]
+    public async Task NewAdventureClearsDeathAndCombatFlagsWithoutChangingProgress(string response)
     {
         string ruleSet = $"test_reuse_{Guid.NewGuid():N}";
         string ruleDirectory = Path.Combine(AppConfig.ProjectRoot, "Prompts", ruleSet);
@@ -25,7 +28,7 @@ public class ReuseHeroStateTests
         try
         {
             var storage = new Storage();
-            var client = new GameAiClient(storage.WorldState, storage, new EmptyProvider(), new AppConfig { RuleSet = ruleSet });
+            var client = new GameAiClient(storage.WorldState, storage, new EmptyProvider(response), new AppConfig { RuleSet = ruleSet });
             var source = new Hero { Symbol = "HRO", Name = "Герой", Level = 5, Xp = 6500, Hp = "0/44", Dead = true,
                 Hidden = true, Stealth = 20, Inspiration = true, NoOpportunityAttacksRound = 500,
                 SpeedMax = 30, SpeedLeft = 0, Position = [3,3], Light = new() { On = true, Ft = 60 },
@@ -45,6 +48,7 @@ public class ReuseHeroStateTests
             Assert.Empty(hero.Effects!);
             Assert.Equal(5, hero.Level);
             Assert.Equal(6500, hero.Xp);
+            Assert.Null(hero.VisionFt);
         }
         finally
         {

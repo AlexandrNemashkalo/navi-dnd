@@ -186,6 +186,7 @@ public static class LocationGrower
 
         var (startCol, startRow) = exits[start][0].AnchorCell(start);
         MarkWorldExit(map, startCol, startRow);
+        EnsureBoundaryPathExits(map);
         if (ws.Hero != null)
             ws.Hero.Position = startInside && FirstRoomCell(map, start, startCol, startRow) is var (ic, ir) ? [ic, ir] : [startCol, startRow];
         return (start, null);
@@ -498,6 +499,35 @@ public static class LocationGrower
 
     // The color of the door exiting the location to the world map is different from regular doors.
     public static readonly List<int> WorldExitColor = [160, 90, 220];
+
+    // Village streets may reach an unplanned edge. Make those actual exits, not invisible walls.
+    // Append only: existing door indexes are referenced by saves and pending history patches.
+    public static void EnsureBoundaryPathExits(MapConfig map)
+    {
+        foreach (var chunk in map.Chunks ?? [])
+        {
+            if (chunk.Z != 0 || !MapChunk.IsOpenGround(chunk.Theme) || chunk.Terrain == null) continue;
+            foreach (var side in Enum.GetValues<ChunkSide>())
+            {
+                var (dx, dy) = ChunkExit.Step(side);
+                int count = side is ChunkSide.Left or ChunkSide.Right ? MapChunk.Rows : MapChunk.Cols;
+                for (int offset = 1; offset <= count; offset++)
+                {
+                    var exit = new ChunkExit { Side = side, Offset = offset, External = true };
+                    var (c, r) = exit.AnchorCell(chunk);
+                    int x = c - chunk.OriginCol - 1, y = r - chunk.OriginRow - 1;
+                    if (y >= chunk.Terrain.Count || x >= chunk.Terrain[y].Length || chunk.Terrain[y][x] != '=') continue;
+                    int nc = c + dx, nr = r + dy;
+                    if ((map.Chunks ?? []).Any(other => !ReferenceEquals(other, chunk) && other.Contains(nc, nr))) continue;
+                    if ((map.Doors ?? []).Any(d => d.From is { Count: >= 2 } f && d.To is { Count: >= 2 } t
+                        && ((f[0] == c && f[1] == r && t[0] == nc && t[1] == nr)
+                            || (t[0] == c && t[1] == r && f[0] == nc && f[1] == nr)))) continue;
+                    (map.Doors ??= []).Add(new Door { From = [c, r], To = [nc, nr], IsEntry = true,
+                        IsWorldExit = true, IsDoor = true, IsDoorOpen = false, Color = [.. WorldExitColor] });
+                }
+            }
+        }
+    }
 
     // Entrance from outside (cell anchor on the edge of the block) - exit door to the world map: closed, of its
     // own color. At the same time, it closes the gap in the wall, behind which is the emptiness of the field.

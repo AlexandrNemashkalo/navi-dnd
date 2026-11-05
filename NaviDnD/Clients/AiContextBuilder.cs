@@ -279,25 +279,41 @@ public class AiContextBuilder
 
         var visSection  = visSb.Length  > 0 ? $"\n## Visible\n{visSb}"  : "";
         var nearSection = nearSb.Length > 0 ? $"\n## Nearby\n{nearSb}"   : "";
-        return $"## Current state\n{sb}{visSection}{nearSection}{NpcMemorySection()}\n## Player action\n{playerAction}";
+        return $"## Current state\n{sb}{visSection}{nearSection}{SceneMemory(playerAction)}\n## Player action\n{playerAction}";
     }
 
-    // Memory of NPC, whom the hero now sees: the tail of the story is short, and the conversation with NPC
-    // should survive it - facts from npcs[i].memory go into context immediately, without a separate MCP-
-    // request.
-    private string NpcMemorySection()
+    // Bounded scene recall without another model call. Full records remain available through MCP.
+    // Place/name matching is deliberately conservative; it does not simulate events or change knowledge.
+    private string SceneMemory(string playerAction)
     {
-        if (_visibleCells == null || _ws.Narrative?.Npcs is not { Count: > 0 } npcs) return "";
+        if (_ws.Narrative is not { } narrative) return "";
         var visibleNames = (_ws.Map.Entities ?? [])
             .Where(e => e.Deleted != true && e.Hidden != true && e.Position is { Count: >= 2 }
-                        && _visibleCells.Contains((e.Position[0], e.Position[1])))
+                        && _visibleCells?.Contains((e.Position[0], e.Position[1])) == true)
             .Select(e => e.Name)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
         var sb = new System.Text.StringBuilder();
-        foreach (var npc in npcs.Where(n => n.Deleted != true && n.Memory is { Count: > 0 } && visibleNames.Contains(n.Name)))
-            sb.AppendLine($"{npc.Name}: {string.Join(" | ", npc.Memory!)}");
-        return sb.Length > 0 ? $"\n## NPC memory\n{sb}" : "";
+        const int budget = 2400;
+        static string Clip(string? value, int limit) => string.IsNullOrEmpty(value) ? "" :
+            value.Length <= limit ? value : value[..limit] + "…";
+        static bool Mentions(string? text, string? name) => !string.IsNullOrWhiteSpace(name)
+            && text?.Contains(name, StringComparison.OrdinalIgnoreCase) == true;
+        void Add(string line)
+        {
+            if (sb.Length + line.Length + Environment.NewLine.Length <= budget) sb.AppendLine(line);
+        }
+        // Preserve original indexes: hidden/deleted records must not shift patch targets.
+        foreach (var (npc, id) in narrative.Npcs.Select((npc, id) => (npc, id))
+                     .Where(x => x.npc.Deleted != true && (visibleNames.Contains(x.npc.Name) || Mentions(playerAction, x.npc.Name)))
+                     .OrderByDescending(x => visibleNames.Contains(x.npc.Name)).Take(2))
+            Add($"NPC#{id} {Clip(npc.Name, 80)}: {Clip(npc.Attitude, 60)}; known: {Clip(npc.Notes, 140)}; GM: {Clip(npc.DmNotes, 220)}; memory: {Clip(string.Join(" | ", npc.Memory?.TakeLast(3) ?? []), 260)}");
+        foreach (var (thread, id) in narrative.PlotThreads.Select((thread, id) => (thread, id))
+                     .Where(x => x.thread.Deleted != true && (Mentions(playerAction, x.thread.Name)
+                         || Mentions(x.thread.DmNotes, _ws.World?.Place) || Mentions(x.thread.Description, _ws.World?.Place)
+                         || visibleNames.Any(name => Mentions(x.thread.DmNotes, name))))
+                     .OrderByDescending(x => Mentions(playerAction, x.thread.Name)).Take(3))
+            Add($"Thread#{id} {Clip(thread.Name, 80)} [{Clip(thread.Status, 40)}; hidden:{thread.Hidden == true}]: known: {Clip(thread.Description, 140)}; GM: {Clip(thread.DmNotes, 220)}; latest: {Clip(thread.Steps?.LastOrDefault(), 120)}");
+        return sb.Length > 0 ? $"\n## Scene memory (GM only)\n{sb}" : "";
     }
 
     /// <summary>

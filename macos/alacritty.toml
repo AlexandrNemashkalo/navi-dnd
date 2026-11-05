@@ -17,7 +17,7 @@ resize_increments = false
 option_as_alt = "Both"
 title = "NaviDnD"
 dynamic_title = false
-startup_mode = "Windowed"
+startup_mode = "SimpleFullscreen"
 
 [scrolling]
 history = 0

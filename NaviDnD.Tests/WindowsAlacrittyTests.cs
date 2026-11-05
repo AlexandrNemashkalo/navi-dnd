@@ -23,7 +23,7 @@ public class WindowsAlacrittyTests
         Assert.False(start.UseShellExecute);
         Assert.Equal(@"C:\Game with spaces", start.WorkingDirectory);
         Assert.Equal(new[] { "--config-file", @"C:\Game with spaces\terminal.toml", "--title", WindowsAlacritty.Title,
-            "-e", @"C:\Game with spaces\NaviDnD.exe", WindowsAlacritty.ChildFlag, "literal & value", "русский" }, start.ArgumentList);
+            "-o", WindowsAlacritty.QuietPosition, "-e", @"C:\Game with spaces\NaviDnD.exe", WindowsAlacritty.ChildFlag, WindowsAlacritty.QuietFlag, "literal & value", "русский" }, start.ArgumentList);
     }
 
     [Fact]
@@ -32,6 +32,6 @@ public class WindowsAlacrittyTests
         var start = WindowsAlacritty.CreateStartInfo("alacritty.exe", "dotnet.exe", "config.toml",
             [WindowsAlacritty.ChildFlag, "--example"], "work", "game.dll");
         Assert.Equal(new[] { "--config-file", "config.toml", "--title", WindowsAlacritty.Title,
-            "-e", "dotnet.exe", "game.dll", WindowsAlacritty.ChildFlag, "--example" }, start.ArgumentList);
+            "-o", WindowsAlacritty.QuietPosition, "-e", "dotnet.exe", "game.dll", WindowsAlacritty.ChildFlag, WindowsAlacritty.QuietFlag, "--example" }, start.ArgumentList);
     }
 }

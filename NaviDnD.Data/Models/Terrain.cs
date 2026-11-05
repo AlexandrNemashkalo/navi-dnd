@@ -42,7 +42,7 @@ public static class TerrainCatalog
         new TerrainKind('~', "Shallow water", [" ~ ", "~ ~", "  ~", "~  "], "~ ~", [104, 146, 176], [48, 74, 96], StepCostFt: 10),
         new TerrainKind('W', "Deep water", ["≈≈≈", "≈ ≈", " ≈≈", "≈≈ "], "≈≈≈", [82, 122, 162], [30, 50, 80], BlocksMove: true),
         new TerrainKind(':', "Bog", [" ░ ", "░ ░", "  ░", "░  "], "░░░", [96, 104, 66], [52, 58, 40], StepCostFt: 10),
-        new TerrainKind('#', "Fence", ["═╪═", "╪══", "══╪"], "═╪═", [168, 132, 90], [56, 72, 42], BlocksMove: true, Cover: "half"),
+        new TerrainKind('#', "Fence", ["─┼─"], "─┼─", [168, 132, 90], [56, 72, 42], BlocksMove: true, Cover: "half", Join: "─│"),
         new TerrainKind('V', "Well", ["(◦)"], "(◦)", [150, 170, 196], [70, 66, 60], BlocksMove: true, Cover: "half"),
         new TerrainKind('G', "Garden beds", [":·:", "·:·", "::·"], ":·:", [120, 160, 70], [66, 50, 34], StepCostFt: 10),
         // The roof of a neighboring house as seen from an upper floor window (you can’t see the inside from above).

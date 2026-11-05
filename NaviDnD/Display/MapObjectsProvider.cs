@@ -277,7 +277,7 @@ public class MapObjectsProvider
                 var (jfg, jbg) = TerrainColors(k1, GetBackgroundForWall(x, y, isHorisonal));
                 if (!visible) { jfg = ColorHelper.Darker(jfg, 0.5); jbg = ColorHelper.Darker(jbg, 0.5); }
                 string jointText = !isHorisonal ? join[0].ToString()
-                    : HasRowNeighbour(c1.Item1, c1.Item2) ? new string(join[0], _display.CellWidth) : $" {join[1]} ";
+                    : k1.Code != '#' && HasRowNeighbour(c1.Item1, c1.Item2) ? new string(join[0], _display.CellWidth) : $" {join[1]} ";
                 ColorHelper.WriteColored(jointText, fgColor: jfg, bgColor: jbg);
                 return;
             }
@@ -463,6 +463,21 @@ public class MapObjectsProvider
     // Symbol of a stand/bench next to neighbors of the same type: in a row - a horizontal beam, in a column - a vertical one.
     private string? JoinedGlyph(TerrainKind kind, int x, int y)
     {
+        if (kind.Code == '#')
+        {
+            bool l = SamePiece((x, y), (x - 1, y)), r = SamePiece((x, y), (x + 1, y));
+            bool u = SamePiece((x, y), (x, y + 1)), d = SamePiece((x, y), (x, y - 1));
+            char center = (l, r, u, d) switch
+            {
+                (true, true, true, true) => '┼', (true, true, true, false) => '┴',
+                (true, true, false, true) => '┬', (true, false, true, true) => '┤',
+                (false, true, true, true) => '├', (true, false, true, false) => '┘',
+                (true, false, false, true) => '┐', (false, true, true, false) => '└',
+                (false, true, false, true) => '┌', (_, _, true, _) or (_, _, _, true) => '│',
+                _ => '─'
+            };
+            return $"{(l ? '─' : ' ')}{center}{(r ? '─' : ' ')}";
+        }
         if (kind.Join is not { } join) return null;
         if (HasRowNeighbour(x, y))
         {
@@ -982,6 +997,7 @@ public class MapObjectsProvider
     private int OutdoorVisionFt()
     {
         var hero = _settings.Hero;
+        if (hero?.VisionFt == 0) return 0;
         int light = _settings.Time.PartOfDay switch
         {
             PartsOfDay.Night => Math.Max(hero?.DarkvisionFt ?? 0, 10),

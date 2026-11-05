@@ -146,6 +146,14 @@ internal sealed class SequentialHistoryPlayer(
             var pos = step.Select(n => n?.GetValue<int>() ?? 0).ToList();
             if (pos.Count >= 2)
             {
+                if (entity.Position is not { Count: >= 2 } from
+                    || Math.Max(Math.Abs(pos[0] - from[0]), Math.Abs(pos[1] - from[1])) > 1
+                    || !MovementCalculator.CanMoveTo(settings, from[0], from[1], pos[0], pos[1], id))
+                {
+                    // Do not animate through a tree/wall or apply the rejected path's endpoint later.
+                    if (entity.Position is { } last) entityNode["position"] = new JsonArray(last.Select(n => (JsonNode?)JsonValue.Create(n)).ToArray());
+                    break;
+                }
                 entity.Position = pos;
                 onRedraw?.Invoke();
                 await _animations.DelayAsync(TimeSpan.FromMilliseconds(MoveStepDelayMs), onPoll);

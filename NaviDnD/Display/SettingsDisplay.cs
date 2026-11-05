@@ -306,10 +306,7 @@ public class SettingsDisplay(WorldState settings, DisplayConfig display, AppConf
         }
         else if (OperatingSystem.IsMacOS() && MacApp.InOwnTerminal)
         {
-            // NaviDnD.app: screen and font - near the terminal window; shift restarts the window (and returns to this point).
-            Toggle(L.T("SCREEN"), L.T("Full screen: the game in the middle of the screen with the game background around it, the menu bar and Dock hidden. Windowed: a window exactly the size of the game that you can drag by its top. Changing it restarts the game window."),
-                () => config.Fullscreen, v => { config.Fullscreen = v; _relaunch = true; },
-                on: L.T("FULL SCREEN"), off: L.T("WINDOWED"));
+            // The Mac app always uses fullscreen; font changes restart the terminal.
             _items.Add(new Item(L.T("FONT SIZE"), Kind.Choice,
                 L.T("Font size sets the size of the whole game: auto is the largest that fits the screen; the list shows only sizes that fit. Changing it restarts the game window."))
             {

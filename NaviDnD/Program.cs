@@ -67,6 +67,11 @@ class Program
         if (Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null) config.LoadUserSettings();
         // UI-tests (settings are not readable) - in Russian, as they expected.
         L.SetLanguage(Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null ? config.Language : L.Russian);
+        // Prepare the full-screen background and final window position while the terminal is
+        // still cloaked, before loading saves or drawing the menu. Reveal must not change geometry.
+        if (WindowsAlacritty.AwaitingFirstFrame && config.Fullscreen
+            && Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null)
+            FullscreenBackdrop.Set(true, new DisplayConfig().MainBackground);
         string initialClaudePath = config.ClaudeCliPath, initialCodexPath = config.CodexCliPath;
         string initialProvider = config.AiProvider;
         var cliDiscovery = Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") == null

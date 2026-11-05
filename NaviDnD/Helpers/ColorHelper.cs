@@ -4,6 +4,33 @@ public static class ColorHelper
 {
     private static List<int> _currentForeground;
     private static List<int> _currentBackground;
+    [ThreadStatic] private static List<int>? _fadeBackground;
+    [ThreadStatic] private static double _fadeOpacity;
+
+    internal static void WithForegroundOpacity(List<int> background, double opacity, Action draw)
+    {
+        var previousBackground = _fadeBackground;
+        double previousOpacity = _fadeOpacity;
+        try
+        {
+            _fadeBackground = background;
+            _fadeOpacity = Math.Clamp(opacity, 0, 1);
+            SetForegroundColor(_currentForeground);
+            draw();
+        }
+        finally
+        {
+            _fadeBackground = previousBackground;
+            _fadeOpacity = previousOpacity;
+            SetForegroundColor(_currentForeground);
+        }
+    }
+
+    private static string ForegroundSequence(List<int> rgb)
+    {
+        var color = _fadeBackground is { } bg ? MixWith(bg, rgb, _fadeOpacity) : rgb;
+        return $"\x1b[38;2;{color[0]};{color[1]};{color[2]}m";
+    }
 
     // Clear the screen with background bg: Console.Clear fills with the current ANSI-background - if before
     // this the line of the world map left its background (water), the line under the frame would also be filled
@@ -29,7 +56,7 @@ public static class ColorHelper
         if (rgb != null && rgb.Count == 3)
         {
             _currentForeground = rgb;
-            Console.Write($"\x1b[38;2;{rgb[0]};{rgb[1]};{rgb[2]}m");
+            Console.Write(ForegroundSequence(rgb));
         }
     }
 
@@ -51,7 +78,7 @@ public static class ColorHelper
 
         if (fgColor != null && fgColor.Count == 3)
         {
-            Console.Write($"\x1b[38;2;{fgColor[0]};{fgColor[1]};{fgColor[2]}m");
+            Console.Write(ForegroundSequence(fgColor));
         }
 
         Console.Write(text);
@@ -67,7 +94,7 @@ public static class ColorHelper
         if (fgColor != null)
         {
             if (oldFg != null)
-                Console.Write($"\x1b[38;2;{oldFg[0]};{oldFg[1]};{oldFg[2]}m");
+                Console.Write(ForegroundSequence(oldFg));
             else
                 Console.Write("\x1b[39m");
         }

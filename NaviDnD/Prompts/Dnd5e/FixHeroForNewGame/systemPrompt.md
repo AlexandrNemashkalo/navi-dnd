@@ -34,8 +34,8 @@ For `inventory`, `abilities`, `spells`, `stats`, `skills`, and `resources`, patc
 ## Field rules
 - `symbol`: exactly 3 Latin characters.
 - `hp`: `"current/maximum"`. Do not change maximum HP without an explicit request. For a new game, `speedMax` is normal Speed from the stat/class without temporary conditions, and `speedLeft` equals `speedMax`.
-- `vision`: integer feet; 5 without darkvision, racial 60/120 for darkvision, 0 when blind.
-- Ability scores in `stats`: `"+2 (15)"`. Recalculate their modifiers and dependent combat stats, saves, and skills. The Darkvision stat is the fixed racial baseline (`"5 ft"`, `"60 ft"`, `"120 ft"`); change it only when race explicitly changes.
+- `visionFt:null`: ordinary sight follows lighting; clear an erroneous sight limit with an actual null patch, not a promise that it will fix itself. Racial darkvision belongs only in the Darkvision stat, not visionFt.
+- Ability scores in `stats`: `"+2 (15)"`. Recalculate their modifiers and dependent combat stats, saves, and skills. The Darkvision stat is the fixed racial baseline (`"0 ft"` without darkvision, otherwise the racial range); change it only when race explicitly changes.
 - `skills`: `"+3 +2"` when proficient, `"+1"` otherwise; separate numerical terms, no source labels. Recalculate affected skills when an ability score changes.
 
 ## Inventory

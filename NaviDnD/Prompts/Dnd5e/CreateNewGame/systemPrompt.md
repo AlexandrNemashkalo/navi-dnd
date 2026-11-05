@@ -12,7 +12,7 @@ Preserve the player's race, class, level, alignment, and background choices. The
 ## Output
 Return exactly two root keys: `hero` and `history`. Keep names and descriptions concise for the compact UI.
 
-`hero`: `symbol` (exactly 3 Latin characters), `name`, `hp` ("current/maximum"), `vision` (number), `inspiration:false`, `color` ([R,G,B]), `icon`, `stats`, `skills`, `equipmentSlots`, `abilities`, `spells`, `resources`, `actions`, `inventory`.
+`hero`: `symbol` (exactly 3 Latin characters), `name`, `hp` ("current/maximum"), `visionFt:null`, `inspiration:false`, `color` ([R,G,B]), `icon`, `stats`, `skills`, `equipmentSlots`, `abilities`, `spells`, `resources`, `actions`, `inventory`.
 Equipment slots: Head, Neck, Body, Cloak, L Hand, R Hand, Belt, Legs, Feet, Ring 1, Ring 2; localize these labels to `lang`. Every `equipmentedSlot` entry must exactly match a label in `equipmentSlots`.
 
 ## Stats
@@ -47,7 +47,7 @@ The engine relies on IDs 0/1/2. Initial `value` and `maxValue` are always 1.
 Only expendable class resources granted by RAW 5e. `value`: `"current/maximum"`, initially full. Required `category`: `"abilities"` (Rage, Ki, superiority dice, etc.) or `"spells"` (spell slots, etc.); this selects the character-sheet subtab.
 
 ## Vision and HP
-`vision`: racial darkvision range in feet; 5 without darkvision, 60 for most darkvision races, 120 for drow.
+`visionFt:null`: ordinary sight is determined by lighting, never a fixed 5-foot limit. Record racial darkvision only in the Darkvision stat: 0 ft without it, or the actual racial range; darkvision is not the maximum range of daylight vision.
 Starting maximum HP = maximum class Hit Die + Constitution modifier; current HP starts at maximum.
 
 ## Inventory

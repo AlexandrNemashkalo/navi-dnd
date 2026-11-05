@@ -501,24 +501,24 @@ public class LegendDisplay
             // initiative
             () =>
             {
-                int lineStart = Term.CursorLeft;
                 Console.Write(" ");
                 ColorHelper.WriteColored(label1, dim, bg);
                 var combat = _storage.WorldState.Combat;
                 if (combat?.Active == true && combat.Initiative is { Count: > 0 })
                 {
+                    int used = 1 + label1.Length;
                     foreach (var entry in combat.Initiative.Where(e => e.Deleted != true))
                     {
+                        if (used + 5 > width) break;
                         bool isCurrent = entry.Symbol == combat.CurrentTurn;
                         string sym = entry.Symbol?.Length == 3 ? entry.Symbol : "???";
                         var color = GetSymbolColor(entry.Symbol);
-                        ColorHelper.WriteColored(isCurrent ? $"⚔️{sym}" : $" {sym} ", color, bg);
+                        ColorHelper.WriteColored(isCurrent ? $"⚔ {sym}" : $" {sym} ", color, bg);
+                        used += 5;
                     }
                     // On the right is the end-of-turn button (instead of the text “I’m ending the GM’s turn”),
                     // if it fits. A snapshot of the legend (MapDisplay.CaptureOutput) writes to the line - the
                     // cursor does not move, the width is the same as the text.
-                    int used = Console.Out is StringWriter ? 1 + label1.Length + 5 * combat.Initiative.Count(e => e.Deleted != true)
-                                                           : Term.CursorLeft - lineStart;
                     int at = width - EndTurnText.Length - 1;
                     if (IsHeroTurn && used < at)
                     {
@@ -753,7 +753,8 @@ public class LegendDisplay
     // In the legend and for guidance: what the hero sees now; objects are also remembered in the fog (creatures
     // are not: where they are now is unknown).
     private bool IsShown(CellEntity x) =>
-        _config.RevealMap || (x.Hidden != true && (_storage.VisibleCells.Contains((x.Position[0], x.Position[1])) || _storage.IsRemembered(x)));
+        x.Deleted != true && x.Position is { Count: >= 2 } &&
+        (_config.RevealMap || (x.Hidden != true && (_storage.VisibleCells.Contains((x.Position[0], x.Position[1])) || _storage.IsRemembered(x))));
 
     public int GetSelectableIndexForCell(int col, int row)
     {

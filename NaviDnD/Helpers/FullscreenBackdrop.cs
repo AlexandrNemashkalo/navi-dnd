@@ -59,7 +59,7 @@ public static class FullscreenBackdrop
                 Active = _backdrop != IntPtr.Zero;
                 if (Active) Borderless(console, true);
                 Recenter();
-                SetForegroundWindow(console);
+                if (!WindowsAlacritty.AwaitingFirstFrame) SetForegroundWindow(console);
             }
             else
             {
@@ -145,8 +145,20 @@ public static class FullscreenBackdrop
                 lpszClassName = cls,
             };
             RegisterClassEx(ref wc);   // re-registration after shutdown - error, class already exists: does not interfere
-            _backdrop = CreateWindowEx(WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, cls, "NaviDnD", WS_POPUP | WS_VISIBLE,
+            _backdrop = CreateWindowEx(WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, cls, "NaviDnD", WS_POPUP,
                 mon.Left, mon.Top, mon.Right - mon.Left, mon.Bottom - mon.Top, IntPtr.Zero, IntPtr.Zero, hInstance, IntPtr.Zero);
+            if (_backdrop != IntPtr.Zero)
+            {
+                // Do not expose the new surface until its background has actually been painted.
+                int enabled = 1;
+                DwmSetWindowAttribute(_backdrop, 3, ref enabled, sizeof(int)); // no OS show animation
+                DwmSetWindowAttribute(_backdrop, 13, ref enabled, sizeof(int)); // cloak
+                ShowWindow(_backdrop, 4); // SW_SHOWNOACTIVATE
+                RedrawWindow(_backdrop, IntPtr.Zero, IntPtr.Zero, 0x0001 | 0x0004 | 0x0100); // INVALIDATE | ERASE | UPDATENOW
+                DwmFlush();
+                enabled = 0;
+                DwmSetWindowAttribute(_backdrop, 13, ref enabled, sizeof(int));
+            }
         }
         finally { ready.Set(); }
         if (_backdrop == IntPtr.Zero) return;
@@ -208,6 +220,8 @@ public static class FullscreenBackdrop
     [DllImport("user32.dll")] private static extern int GetWindowLong(IntPtr hWnd, int index);
     [DllImport("user32.dll")] private static extern int SetWindowLong(IntPtr hWnd, int index, int value);
     [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+    [DllImport("dwmapi.dll")] private static extern int DwmFlush();
+    [DllImport("user32.dll")] private static extern bool RedrawWindow(IntPtr window, IntPtr rect, IntPtr region, uint flags);
 
     [DllImport("kernel32.dll")] private static extern IntPtr GetConsoleWindow();
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] private static extern IntPtr GetModuleHandle(string? name);

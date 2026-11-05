@@ -206,6 +206,7 @@ public class GameAiClient
         if (dialog == null)
         {
             await CallAction(userMessage, nameof(FixHeroForNewGame), _appConfig.ClaudeModel);
+            if (_settings.Hero is { } editedHero) editedHero.VisionFt = null;
             return;
         }
 
@@ -217,6 +218,7 @@ public class GameAiClient
         {
             response = await CompleteWithSpinner([ReadPrompt(actionPath)], userMessage, actionPath, _appConfig.ClaudeModel, dialog.TickSpinner);
             await PlayResponse(ExtractJson(response), dialog.AppendStreamChunk, dialog.NewStreamingMessage, onRedraw: null);
+            if (_settings.Hero is { } editedHero) editedHero.VisionFt = null;
         }
         catch (Exception ex)
         {
@@ -357,6 +359,7 @@ public class GameAiClient
             _storage.ApplyUpdateWorldState(json);
 
             // The world was created successfully - we record it in the combat save file
+            if (_settings.Hero is { } startingHero) startingHero.VisionFt = null;
             _storage.Save();
             Storage.DeleteDraft();
         }

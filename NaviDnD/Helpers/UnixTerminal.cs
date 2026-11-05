@@ -106,7 +106,7 @@ internal sealed class UnixTerminal
         _out = new TrackingWriter(new StdOutStream(), this);
         Console.SetOut(_out);
         // Alternate screen, all mouse motion in SGR coordinates, bracketed paste.
-        _out.Write("\x1b[?1049h\x1b[?1000h\x1b[?1002h\x1b[?1003h\x1b[?1006h\x1b[?2004h\x1b[H");
+        _out.Write("\x1b[?25l\x1b[?1049h\x1b[?1000h\x1b[?1002h\x1b[?1003h\x1b[?1006h\x1b[?2004h\x1b[H");
         _out.Flush();
 
         new Thread(ReadStdIn) { IsBackground = true, Name = "stdin reader" }.Start();
@@ -128,6 +128,7 @@ internal sealed class UnixTerminal
     public void Restore()
     {
         if (Interlocked.Exchange(ref _restored, 1) != 0) return;
+        WindowsAlacritty.HideForExit();
         try
         {
             _flushTimer.Dispose();
@@ -181,7 +182,13 @@ internal sealed class UnixTerminal
     public void ShowCursor(bool visible)
     {
         if (visible == CursorVisible) return;
-        _out.Write(visible ? "\x1b[?25h" : "\x1b[?25l");
+        if (WindowsAlacritty.Active)
+        {
+            // The bundled terminal starts with a background-colored caret to avoid
+            // exposing it before the game connects. Restore contrast only for input.
+            _out.Write(visible ? "\x1b]12;#b8c8ae\x1b\\\x1b[?25h" : "\x1b[?25l\x1b]112\x1b\\");
+        }
+        else _out.Write(visible ? "\x1b[?25h" : "\x1b[?25l");
     }
 
     private void SetCursorVisible(bool visible) => CursorVisible = visible;
@@ -690,11 +697,21 @@ internal sealed class UnixTerminal
                     return;
             }
             if (c == '\x1b') { _state = State.Esc; return; }
+            // ConPTY and Unix TTYs differ in CR/LF and last-column wrap handling.
+            // Our UI owns a fixed grid: move explicitly to the next logical row so a
+            // fully painted row cannot cause an extra line feed or leave old input behind.
+            if (c == '\n')
+            {
+                Col = 0;
+                Row = Math.Min(Row + 1, term.Height - 1);
+                _pendingWrap = false;
+                _inner.Write($"\x1b[{Row + term._offY + 1};{term._offX + 1}H");
+                return;
+            }
             _inner.Write(c);
             switch (c)
             {
                 case '\r': Col = 0; _pendingWrap = false; ToLeftEdge(); return;
-                case '\n': Col = 0; Row = Math.Min(Row + 1, term._height - 1); _pendingWrap = false; ToLeftEdge(); return;
                 case '\b': Col = Math.Max(0, Col - 1); _pendingWrap = false; return;
                 case '\t': Col = Math.Min(term._width - 1, (Col / 8 + 1) * 8); return;
             }

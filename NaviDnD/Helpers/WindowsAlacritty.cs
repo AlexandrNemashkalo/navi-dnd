@@ -10,9 +10,14 @@ public static class WindowsAlacritty
     public const string LaunchFlag = "--alacritty";
     public const string ChildFlag = "--navidnd-alacritty";
     public const string ClassicFlag = "--classic-console";
+    public const string QuietFlag = "--navidnd-quiet-start";
+    public const string QuietPosition = "window.position={x=-32000,y=-32000}";
+    private static bool _awaitingFirstFrame;
+    private static Timer? _startupFallback;
     public const string Title = "NaviDnD — Alacritty";
     internal static bool Active { get; private set; }
-    internal static nint Window => Active ? FindWindow(null, Title) : 0;
+    private static nint _window;
+    internal static nint Window => Active ? (_window != 0 ? _window : FindWindow(null, Title)) : 0;
 
     internal static bool Launch(string[] args)
     {
@@ -20,6 +25,8 @@ public static class WindowsAlacritty
         if (args.Contains(ChildFlag))
         {
             Active = true;
+            _window = FindParentWindow();
+            if (args.Contains(QuietFlag)) PrepareHiddenWindow();
             RemoveWindowFrame();
             ConsoleSetup.SetConsoleIcon();
             return false;
@@ -70,13 +77,86 @@ public static class WindowsAlacritty
         {
             UseShellExecute = false, WorkingDirectory = directory, WindowStyle = ProcessWindowStyle.Normal
         };
-        foreach (string arg in new[] { "--config-file", config, "--title", Title, "-e", executable }) start.ArgumentList.Add(arg);
+        foreach (string arg in new[] { "--config-file", config, "--title", Title, "-o", QuietPosition, "-e", executable }) start.ArgumentList.Add(arg);
         if (assembly != null) start.ArgumentList.Add(assembly);
         start.ArgumentList.Add(ChildFlag);
-        foreach (string arg in args.Where(a => a != LaunchFlag && a != ChildFlag && a != ClassicFlag && a != ConsoleHostLauncher.RelaunchFlag))
+        start.ArgumentList.Add(QuietFlag);
+        foreach (string arg in args.Where(a => a != LaunchFlag && a != ChildFlag && a != QuietFlag && a != ClassicFlag && a != ConsoleHostLauncher.RelaunchFlag))
             start.ArgumentList.Add(arg);
         return start;
     }
+
+    private static void PrepareHiddenWindow()
+    {
+        var window = Window;
+        if (window == 0) return;
+        int cloak = 1;
+        DwmSetWindowAttribute(window, 3, ref cloak, sizeof(int)); // DWMWA_TRANSITIONS_FORCEDISABLED
+        DwmSetWindowAttribute(window, 13, ref cloak, sizeof(int));
+        DwmFlush(); // Commit hiding before moving the framed window onto the screen.
+        _awaitingFirstFrame = true;
+        // Move onto the primary display while cloaked, so DPI and terminal size settle before drawing.
+        if (GetWindowRect(window, out var bounds))
+            SetWindowPos(window, 0, Math.Max(0, (GetSystemMetrics(0) - (bounds.Right - bounds.Left)) / 2),
+                Math.Max(0, (GetSystemMetrics(1) - (bounds.Bottom - bounds.Top)) / 2), 0, 0, 0x0001 | 0x0004 | 0x0010);
+        // Startup errors must not leave an invisible application indefinitely.
+        _startupFallback = new Timer(_ => RevealFirstFrame(), null, 15000, Timeout.Infinite);
+    }
+
+    internal static bool AwaitingFirstFrame => _awaitingFirstFrame;
+
+    internal static void RevealFirstFrame()
+    {
+        if (!_awaitingFirstFrame) return;
+        _awaitingFirstFrame = false;
+        _startupFallback?.Dispose();
+        UnixTerminal.Current?.Flush();
+        // Give the terminal time to consume the flushed first frame before exposing its surface.
+        Thread.Sleep(100);
+        var window = Window;
+        DwmFlush(); // Finish frame/position changes while the game is still cloaked.
+        int cloak = 0;
+        DwmSetWindowAttribute(window, 13, ref cloak, sizeof(int));
+        SetForegroundWindow(window);
+    }
+
+    internal static void HideForExit()
+    {
+        if (!Active) return;
+        _awaitingFirstFrame = false;
+        _startupFallback?.Dispose();
+        if (Window != 0) ShowWindow(Window, 0);
+    }
+
+    private static nint FindParentWindow()
+    {
+        // The title can change; bind controls to this game's actual terminal process.
+        var information = new nint[6];
+        using var process = Process.GetCurrentProcess();
+        if (NtQueryInformationProcess(process.Handle, 0, information, information.Length * IntPtr.Size, out _) != 0)
+            return FindWindow(null, Title);
+        uint parent = unchecked((uint)information[5]);
+        nint found = 0;
+        EnumWindows((window, _) =>
+        {
+            GetWindowThreadProcessId(window, out uint owner);
+            if (owner != parent || (GetWindowLong(window, -16) & 0x00C00000) == 0) return true;
+            found = window;
+            return false;
+        }, 0);
+        return found != 0 ? found : FindWindow(null, Title);
+    }
+
+    private delegate bool EnumWindowCallback(nint window, nint data);
+    [DllImport("user32.dll")] private static extern bool EnumWindows(EnumWindowCallback callback, nint data);
+    [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(nint window, out uint processId);
+    [DllImport("user32.dll")] private static extern bool ShowWindow(nint window, int command);
+    [DllImport("user32.dll")] private static extern bool SetForegroundWindow(nint window);
+    [DllImport("ntdll.dll")] private static extern int NtQueryInformationProcess(nint process, int kind, [Out] nint[] information, int size, out int returned);
+
+    [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(nint window, int attribute, ref int value, int size);
+    [DllImport("dwmapi.dll")] private static extern int DwmFlush();
+    [DllImport("user32.dll")] private static extern int GetSystemMetrics(int index);
 
     private static void RemoveWindowFrame()
     {

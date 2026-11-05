@@ -69,7 +69,7 @@ public static class ConsoleHostLauncher
             if (!ClaimInstance()) { ActivateRunning(); return true; }
             nint own = WindowsAlacritty.Active ? WindowsAlacritty.Window : GetConsoleWindow();
             try { File.WriteAllText(WindowPath, own.ToString()); } catch { /*not important for startup*/ }
-            if (own != 0) SetForegroundWindow(own);
+            if (own != 0 && !WindowsAlacritty.AwaitingFirstFrame) SetForegroundWindow(own);
             // There was already a restart, but the classic console window was still not there - the terminal intercepted it too.
             if (!WindowsAlacritty.Active && !InClassicConsole()) Log("После перезапуска игра всё ещё не в классической консоли.");
             return false;

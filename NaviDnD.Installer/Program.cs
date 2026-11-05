@@ -144,10 +144,7 @@ internal static class Program
         if (!parentExited) return;
         try
         {
-            var start = new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "conhost.exe"))
-                { UseShellExecute = true, WorkingDirectory = destination };
-            start.ArgumentList.Add(Path.Combine(destination, "NaviDnD.exe"));
-            Process.Start(start);
+            Process.Start(GameLauncher.CreateStartInfo(destination));
         }
         catch (Exception error)
         {
@@ -248,10 +245,7 @@ internal sealed class SetupForm : Form
                 Report(L.F("Game {0} is installed. Settings and saves are created on first launch.", version), 1);
                 if (launch.Checked)
                 {
-                    var start = new ProcessStartInfo(ConsoleHostPath) {
-                        UseShellExecute = true, WorkingDirectory = destination };
-                    start.ArgumentList.Add(executable);
-                    Process.Start(start);
+                    Process.Start(GameLauncher.CreateStartInfo(destination));
                 }
                 install.Text = L.T("Close");
                 installed = true;
@@ -287,15 +281,14 @@ internal sealed class SetupForm : Form
         });
     }
 
-    private static string ConsoleHostPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "conhost.exe");
-
     private static void CreateShortcut(string destination, string executable)
     {
         dynamic shell = Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell")!)!;
         dynamic link = shell.CreateShortcut(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "NaviDnD.lnk"));
-        link.TargetPath = ConsoleHostPath;
-        link.Arguments = "\"" + executable + "\"";
+        var start = GameLauncher.CreateStartInfo(destination);
+        link.TargetPath = start.FileName;
+        link.Arguments = string.Join(" ", start.ArgumentList.Select(argument => "\"" + argument + "\""));
         link.WorkingDirectory = destination;
         link.IconLocation = Path.Combine(destination, "dnd.ico") + ",0";
         link.Save();

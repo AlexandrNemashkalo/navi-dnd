@@ -11,7 +11,7 @@ public static class ChunkPopulationPatch
         if(!ReferenceEquals(world.Map,result.Map) || world.Map.Chunks?.Contains(result.Chunk)!=true || result.Chunk.Populated) return null;
         var root=JsonNode.Parse(result.Json)?.AsObject() ?? throw new InvalidDataException("Population response must be an object.");
         var map=root["map"]?.AsObject() ?? throw new InvalidDataException("Population response must contain map.");
-        if(map.Any(p=>p.Key is not ("rooms" or "entities" or "objects"))) throw new InvalidDataException("Population cannot change geometry.");
+        if(map.Any(p=>p.Key is not ("rooms" or "entities" or "objects" or "furniture"))) throw new InvalidDataException("Population cannot change geometry.");
         var patch=new JsonObject();
         var symbols=(world.Map.Entities??[]).Cast<CellEntity>().Concat(world.Map.Objects??[]).Where(e=>e.Deleted!=true).Select(e=>e.Symbol).Append(world.Hero?.Symbol??"HRO").ToHashSet(StringComparer.OrdinalIgnoreCase);
         var occupied=(world.Map.Entities??[]).Cast<CellEntity>().Concat(world.Map.Objects??[]).Where(e=>e.Deleted!=true && e.Position?.Count>=2).Select(e=>(e.Position[0],e.Position[1])).ToHashSet();
@@ -66,6 +66,22 @@ public static class ChunkPopulationPatch
                 if(id<0 || id>=(world.Map.Rooms?.Count??0) || world.Map.Rooms![id].Positions.Any(p=>!result.Chunk.Contains(p[0],p[1]))) throw new InvalidDataException("Population room is outside requested chunk.");
             }
             patch["rooms"]=rooms.DeepClone();
+        }
+        if (map["furniture"] is JsonArray furniture)
+        {
+            foreach (var node in furniture)
+            {
+                var item = node?.AsObject() ?? throw new InvalidDataException("Invalid furniture patch.");
+                if (item.Any(p => p.Key is not ("id" or "name" or "aiInfo")))
+                    throw new InvalidDataException("Population cannot change furniture geometry.");
+                int id = item["id"]?.GetValue<int>() ?? -1;
+                if (id < 0 || id >= (world.Map.Furniture?.Count ?? 0)
+                    || world.Map.Furniture![id].Deleted == true
+                    || world.Map.Furniture[id].Positions is not { Count: > 0 } positions
+                    || positions.Any(p => p.Count < 2 || !result.Chunk.Contains(p[0], p[1])))
+                    throw new InvalidDataException("Population furniture is outside requested chunk.");
+            }
+            patch["furniture"] = furniture.DeepClone();
         }
         // Background population never changes the hero, time, combat, existing narrative or visible history.
         return new JsonObject{["map"]=patch}.ToJsonString();

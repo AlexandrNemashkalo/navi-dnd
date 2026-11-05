@@ -14,7 +14,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
     public enum Section { Quests, People, Locations, Bestiary, Notes }
 
     private static (Section section, string label, string key)[] Sections =>
-        [(Section.Quests, L.T("QUESTS"), "F6"), (Section.People, L.T("PEOPLE"), "F7"), (Section.Locations, L.T("LOCATIONS"), "F8"),
+        [(Section.Quests, L.T("STORIES"), "F6"), (Section.People, L.T("PEOPLE"), "F7"), (Section.Locations, L.T("LOCATIONS"), "F8"),
          (Section.Bestiary, L.T("BESTIARY"), "F9"), (Section.Notes, L.T("NOTES"), "F10")];
 
     private static string NotesHint => L.T("Text below + Enter — add a note");
