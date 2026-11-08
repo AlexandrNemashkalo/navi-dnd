@@ -2658,6 +2658,21 @@
       }
     },
     {
+      "id": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
+      "path": "Runtime/Images/4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22.png",
+      "sha256": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:forest-thicket-v2",
+      "description": "Three clearly separated overlapping evergreen crowns with brown trunks on a small mossy base; restrained colors and transparent padding.",
+      "provenance": {
+        "member": "forest-thicket-v2.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/forest-thicket-v2/original.png"
+      }
+    },
+    {
       "id": "4cafcecd79325e5f7b83bbaee26fde475bed4ea4427242020e1469dc8ed7fedf",
       "path": "Runtime/Images/4cafcecd79325e5f7b83bbaee26fde475bed4ea4427242020e1469dc8ed7fedf.png",
       "sha256": "4cafcecd79325e5f7b83bbaee26fde475bed4ea4427242020e1469dc8ed7fedf",
@@ -4098,21 +4113,6 @@
         "author": "Craftpix",
         "commit": null,
         "licenseFile": null
-      }
-    },
-    {
-      "id": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
-      "path": "Runtime/Images/7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644.png",
-      "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
-      "width": 32,
-      "height": 32,
-      "sourceAssetId": "own-art:forest-thicket-v1",
-      "description": "Dense overlapping green foliage, three gnarled trunks and tangled roots blocking passage.",
-      "provenance": {
-        "member": "forest-thicket-v1.png",
-        "sourceKind": "ai_generated",
-        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
-        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/forest-thicket-v1/original.png"
       }
     },
     {
@@ -20211,8 +20211,8 @@
         "feature",
         "terrain"
       ],
-      "usage": "place_view",
-      "imageId": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+      "usage": "prop",
+      "imageId": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
       "match": "visual_representation"
     },
     {
@@ -21182,7 +21182,7 @@
     "delapouite/barrel": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
     "delapouite/star-altar": "1abd7c37231a2c6772ddbf5e08962e40078c308d3b428b882daaceee29ad186e",
     "delapouite/park-bench": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
-    "delapouite/forest": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+    "delapouite/forest": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
     "lorc/incense": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
     "delapouite/grass": "4abe6001cd9d13f96895c65d49a31b76603ead7211e8e6ded9d3334c284d2447",
     "lorc/oak": "a460cb1f9d355a91869f12cf87c867a05bef2e312aae13cb610dcb0715fbbf4b",
@@ -22245,5 +22245,5 @@
     "dcss/player/base/halfling": "halfling",
     "dcss/player/base/draconian": "dragonborn"
   },
-  "revision": "369e76bd2ab4722aafaaba1b667f51008c7634864aa805ca9c90bf61275e16fb"
+  "revision": "b48e6158d53073aa499d6e879531ced1cd1535a837a3fc67bb7ac7a4e1082916"
 }

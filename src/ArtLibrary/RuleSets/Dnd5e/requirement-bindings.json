@@ -68528,10 +68528,10 @@
       "note": "Original generated artwork, visually reviewed at 32x32 for the game and shared library.",
       "candidates": [
         {
-          "assetId": "own-art:forest-thicket-v1",
-          "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
-          "usage": "place_view",
-          "reason": "Dense overlapping green foliage, three gnarled trunks and tangled roots blocking passage.",
+          "assetId": "own-art:forest-thicket-v2",
+          "sha256": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
+          "usage": "prop",
+          "reason": "Three clearly separated overlapping evergreen crowns with brown trunks on a small mossy base; restrained colors and transparent padding.",
           "match": "visual_representation",
           "sourcePriority": 0
         }

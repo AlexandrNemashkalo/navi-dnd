@@ -143,6 +143,64 @@ public class AlacrittyAdventureSceneTests
     }
 
     [AlacrittyFact]
+    public void MainMenuKeepsGameStyleAndKeyboardNavigation()
+    {
+        string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;
+        foreach (bool hasSave in new[] { true, false })
+        {
+            var start = new ProcessStartInfo(Path.Combine(runtime, "NaviDnD.Launcher.exe")) { WorkingDirectory = runtime, UseShellExecute = false };
+            Configure(start);
+            if (!hasSave) start.Environment["NAVIDND_TEST_WORLDSTATE"] = Path.Combine(output, "missing-menu-" + Guid.NewGuid().ToString("N") + ".json");
+            using var launcher = Process.Start(start)!;
+            Process? terminal = null;
+            try
+            {
+                var watch = Stopwatch.StartNew();
+                while (terminal == null && watch.Elapsed < TimeSpan.FromSeconds(15)) { terminal = FindTerminal(runtime); Thread.Sleep(50); }
+                Assert.NotNull(terminal);
+                int pid = 0;
+                Assert.True(SpinWait.SpinUntil(() =>
+                {
+                    foreach (var process in Process.GetProcessesByName("NaviDnD"))
+                    {
+                        using (process)
+                            if (process.MainModule?.FileName == Path.Combine(runtime, "NaviDnD.exe")) { pid = process.Id; return true; }
+                    }
+                    return false;
+                }, 10000), "Game process did not start.");
+                string selected = hasSave ? "→ ПРОДОЛЖИТЬ ←" : "→ НОВАЯ ИГРА ←";
+                Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 63, 150, selected, 10000));
+                // Input remains active while the opening fade is running.
+                Press(terminal, ConsoleKey.DownArrow);
+                Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 63, 150, hasSave ? "→ НОВАЯ ИГРА ←" : "→ МОИ ИГРЫ ←", 2000));
+                Press(terminal, ConsoleKey.UpArrow);
+                Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 63, 150, selected, 2000));
+                Thread.Sleep(500);
+                var rows = GameConsole.ReadRows(pid, 0, 63, 150);
+                Assert.DoesNotContain(rows.Skip(3), row => row.Any(c => c is >= '\u2800' and <= '\u28ff'));
+                Assert.Contains(rows, row => row.Contains("██"));
+                ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, Path.Combine(output, $"main-menu-{hasSave}-a.png"));
+                Thread.Sleep(900);
+                Assert.Equal(rows, GameConsole.ReadRows(pid, 0, 63, 150));
+                ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, Path.Combine(output, $"main-menu-{hasSave}-b.png"));
+                if (hasSave) { Press(terminal, ConsoleKey.Enter); WaitForInput(runtime); }
+                else
+                {
+                    Press(terminal, ConsoleKey.UpArrow);
+                    Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 63, 150, "→ ВЫХОД ←", 2000));
+                    Press(terminal, ConsoleKey.Enter);
+                    Assert.True(terminal.WaitForExit(5000));
+                }
+            }
+            finally
+            {
+                if (terminal is { HasExited: false }) { terminal.Kill(entireProcessTree: true); terminal.WaitForExit(5000); }
+                terminal?.Dispose();
+            }
+        }
+    }
+
+    [AlacrittyFact]
     public void NpcFacesAndTerrainPicturesUsePixelsInMapAndJournal()
     {
         string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;

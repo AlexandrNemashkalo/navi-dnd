@@ -3190,16 +3190,16 @@
       "sheet": "hundred/review-081-100.png"
     },
     {
-      "assetId": "own-art:forest-thicket-v1",
-      "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
-      "method": "Reviewed final 32x32 silhouette and color clusters.",
-      "sheet": "artifacts/npc-art-fix/forest-thicket-v1.png"
-    },
-    {
       "assetId": "own-art:incense-sticks-v3",
       "sha256": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
       "method": "Reviewed final 32x32 with separate sticks and clean gaps.",
       "sheet": "artifacts/npc-art-fix/incense-sticks-v3.png"
+    },
+    {
+      "assetId": "own-art:forest-thicket-v2",
+      "sha256": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
+      "method": "Readable three-tree silhouette, inspected at native 32x32 and enlarged.",
+      "sheet": "forest-thicket-v2.png"
     }
   ]
 }

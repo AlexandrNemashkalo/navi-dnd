@@ -95,7 +95,7 @@ public sealed class NpcPortraitTests
     }
 
     [Fact]
-    public void EveryTerrainIsPixelRenderedAndSpellFallbackKeepsBrailleWithSeparateCache()
+    public void TerrainHasArtworkAndFineVectorFallbackPreservesDotsAndAddsColor()
     {
         var previous = ArtPictures.Current;
         string pack = CatalogSearch.IconPack;
@@ -107,13 +107,16 @@ public sealed class NpcPortraitTests
             {
                 var lines = SvgToBrailleConverter.Convert(ArtPictures.TerrainImage(terrain)!, "");
                 Assert.NotNull(lines);
-                Assert.DoesNotContain(lines, line => line.Any(c => c is >= '\u2800' and <= '\u28ff'));
+                Assert.NotEmpty(lines);
             }
             const string fallback = "delapouite/high-grass";
             var braille = SvgToBrailleConverter.Convert(fallback, "", applyPackMapping: false)!;
             Assert.Contains(braille, line => line.Any(c => c is >= '\u2800' and <= '\u28ff'));
-            var pixels = SvgToBrailleConverter.Convert(fallback, "")!;
-            Assert.DoesNotContain(pixels, line => line.Any(c => c is >= '\u2800' and <= '\u28ff'));
+            var detailed = SvgToBrailleConverter.Convert(fallback, "")!;
+            Assert.Equal(braille, detailed);
+            Assert.True(detailed.SelectMany(line => PixelArt.Colors(line) ?? []).Where(c => c.Fg != null)
+                .Select(c => string.Join(',', c.Fg!)).Distinct().Count() > 1);
+            Assert.All(braille, line => Assert.Null(PixelArt.Colors(line)));
         }
         finally { ArtPictures.Current = previous; CatalogSearch.IconPack = pack; }
     }

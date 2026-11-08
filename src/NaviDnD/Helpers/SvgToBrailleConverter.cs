@@ -39,8 +39,8 @@ public static class SvgToBrailleConverter
         if (imagePath.StartsWith("bg3-lines/", StringComparison.OrdinalIgnoreCase)
             || imagePath.EndsWith(".mask.png", StringComparison.OrdinalIgnoreCase)) return null;
         if (applyPackMapping) imagePath = PackPictures.ForPack(imagePath);
-        bool pixelFallback = applyPackMapping && CatalogSearch.IconPack == CatalogSearch.DcssPack;
-        string cacheKey = imagePath + "|" + widthChars + "|" + pixelFallback;
+        bool coloredLines = applyPackMapping && CatalogSearch.IconPack == CatalogSearch.DcssPack;
+        string cacheKey = imagePath + "|" + widthChars + "|" + coloredLines;
         if (_cache.TryGetValue(cacheKey, out var cached)) return AppendName(cached, name, widthChars);
 
         if (imagePath.StartsWith(HeroDoll.Prefix, StringComparison.Ordinal))
@@ -64,25 +64,6 @@ public static class SvgToBrailleConverter
 
         try
         {
-            // An SVG without a bundled color replacement must not silently switch a pixel game to Braille.
-            // Spell cards opt out of pack mapping and retain their dedicated Braille renderer.
-            if (pixelFallback)
-            {
-                using var pixels = RenderSvg(fullPath, widthChars, widthChars);
-                if (pixels == null) return null;
-                bool Lit(int x, int y)
-                {
-                    var c = pixels.GetPixel(x, y);
-                    return c.Alpha >= 128 && 0.22f * c.Red + 0.72f * c.Green + 0.06f * c.Blue < 128;
-                }
-                var rows = new string[widthChars / 2];
-                for (int y = 0; y < rows.Length; y++)
-                    rows[y] = new string(Enumerable.Range(0, widthChars).Select(x =>
-                        (Lit(x, y * 2), Lit(x, y * 2 + 1)) switch
-                        { (true, true) => '█', (true, false) => '▀', (false, true) => '▄', _ => ' ' }).ToArray());
-                _cache[cacheKey] = rows;
-                return AppendName(rows, name, widthChars);
-            }
             // Each braille char covers 2×4 pixels.
             // For a square icon: pixelW = widthChars*2, pixelH = pixelW/2*4 = pixelW*2
             // But terminal chars are typically ~2× taller than wide, so for a square display:
@@ -95,6 +76,26 @@ public static class SvgToBrailleConverter
 
             using var bmp = RenderSvg(fullPath, pixelW, pixelH);
             if (bmp == null) return null;
+            if (coloredLines)
+            {
+                // Preserve all 2x4 samples of the source linework; color is independent of its geometry.
+                using var colors = new SKBitmap(pixelW, pixelH);
+                bool foliage = imagePath is "delapouite/high-grass" or "delapouite/grass" or "delapouite/vines"
+                    or "delapouite/forest" or "lorc/oak" or "lorc/pine-tree";
+                bool water = imagePath is "lorc/water-splash" or "lorc/waves" or "lorc/droplet-splash";
+                var top = foliage ? new SKColor(166, 191, 109) : water ? new SKColor(130, 190, 210) : new SKColor(191, 198, 179);
+                var bottom = foliage ? new SKColor(104, 137, 76) : water ? new SKColor(66, 113, 160) : new SKColor(126, 151, 139);
+                for (int y = 0; y < pixelH; y++)
+                {
+                    double t = y / (double)Math.Max(1, pixelH - 1);
+                    var color = new SKColor((byte)(top.Red * (1 - t) + bottom.Red * t),
+                        (byte)(top.Green * (1 - t) + bottom.Green * t), (byte)(top.Blue * (1 - t) + bottom.Blue * t));
+                    for (int x = 0; x < pixelW; x++) colors.SetPixel(x, y, color);
+                }
+                var detailedLines = ColoredBraille.Render(bmp, colors, widthChars);
+                _cache[cacheKey] = detailedLines;
+                return AppendName(detailedLines, name, widthChars);
+            }
 
             int charsW = pixelW / 2;
             int charsH = pixelH / 4;

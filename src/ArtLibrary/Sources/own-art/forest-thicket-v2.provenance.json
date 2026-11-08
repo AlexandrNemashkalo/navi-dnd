@@ -1,0 +1,22 @@
+{
+  "id": "own-art:forest-thicket-v2",
+  "file": "forest-thicket-v2.png",
+  "subject": "Thicket",
+  "nameRu": "Чаща",
+  "width": 32,
+  "height": 32,
+  "sha256": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
+  "usage": "prop",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.prop.32",
+  "descriptionEn": "Three clearly separated overlapping evergreen crowns with brown trunks on a small mossy base; restrained colors and transparent padding.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/forest-thicket-v2/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_8_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/forest-thicket-v2/prompt.txt"
+}
