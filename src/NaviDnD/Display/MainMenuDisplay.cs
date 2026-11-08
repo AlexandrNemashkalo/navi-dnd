@@ -3,23 +3,27 @@ using NaviDnD.Helpers;
 
 namespace NaviDnD.Display;
 
-// Same frame, theme palette and selection arrows as the game. No decorative image pipeline:
-// the title is a small pixel font; only the selected row gently changes brightness.
+// The main menu is in the style of other screens: a frame, a title bar “MAIN MENU” and a separator (a window is
+// dragged behind them, as everywhere else), below in the center is a logo and “tabbed” items: “[F1]CONTINUE”,
+// selected - “→ CONTINUE ←” (as the active tab in the header). The colors are only game colors (MainForeground
+// and its light/dark shades). There is no input line
+// or hotkeys: ↑↓ + Enter, mouse (hover selects, click confirms).
 internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display)
 {
     public enum Choice { Continue, NewGame, Games, Settings, Updates, Exit }
 
     private sealed record Item(string Name, Choice? Action);
 
-    private static readonly string[] Logo = BuildLogo();
-    private static string[] BuildLogo()
-    {
-        string[] letters = ["10001/11001/10101/10011/10001", "01110/10001/11111/10001/10001",
-            "10001/10001/10001/01010/00100", "111/010/010/010/111", "000/000/000/000/000",
-            "11110/10001/10001/10001/11110", "10001/11001/10101/10011/10001", "11110/10001/10001/10001/11110"];
-        return Enumerable.Range(0, 5).Select(row => string.Join("  ", letters.Select(letter =>
-            string.Concat(letter.Split('/')[row].Select(c => c == '1' ? "██" : "  "))))).ToArray();
-    }
+    // Logo “NAVIDND” in font ANSI Shadow.
+    private static readonly string[] Logo =
+    [
+        "███╗   ██╗ █████╗ ██╗   ██╗██╗██████╗ ███╗   ██╗██████╗ ",
+        "████╗  ██║██╔══██╗██║   ██║██║██╔══██╗████╗  ██║██╔══██╗",
+        "██╔██╗ ██║███████║██║   ██║██║██║  ██║██╔██╗ ██║██║  ██║",
+        "██║╚██╗██║██╔══██║╚██╗ ██╔╝██║██║  ██║██║╚██╗██║██║  ██║",
+        "██║ ╚████║██║  ██║ ╚████╔╝ ██║██████╔╝██║ ╚████║██████╔╝",
+        "╚═╝  ╚═══╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚═════╝ ╚═╝  ╚═══╝╚═════╝ ",
+    ];
 
     private static string Title => L.T(" MAIN MENU");
     private const int HeaderRows = 3; // top frame, header, divider
@@ -31,12 +35,10 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     private int _width, _height, _x0;
     private char[,] _chars = new char[0, 0];
     private List<int>?[,] _colors = new List<int>?[0, 0];
-    private List<int>?[,] _backgrounds = new List<int>?[0, 0];
     private readonly List<(int row, int x, int w)> _itemPos = [];
     private List<Item> _items = [];
     private int _selected;
     private double _introOpacity = 1;
-    private double _pulse;
 
     internal void DrawForUpdate()
     {
@@ -67,29 +69,28 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         Layout();
         bool intro = WindowsAlacritty.AwaitingFirstFrame
             || (OperatingSystem.IsMacOS() && MacApp.TakeStartupIntro());
-        _introOpacity = intro ? 0 : 1;
+        if (intro) _introOpacity = 0;
         DrawAll();
 
         UnixTerminal.Current?.Flush();
         WindowsAlacritty.RevealFirstFrame();
-        var clock = System.Diagnostics.Stopwatch.StartNew();
-        long nextFrame = 0;
+        if (intro)
+        {
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            while (clock.ElapsedMilliseconds < 1200)
+            {
+                double t = Math.Clamp(clock.Elapsed.TotalMilliseconds / 1200, 0, 1);
+                _introOpacity = t * t * (3 - 2 * t);
+                DrawAll();
+                UnixTerminal.Current?.Flush();
+                Thread.Sleep(25);
+            }
+            _introOpacity = 1;
+            DrawAll();
+            UnixTerminal.Current?.Flush();
+        }
         while (true)
         {
-            if (clock.ElapsedMilliseconds >= nextFrame)
-            {
-                nextFrame = clock.ElapsedMilliseconds + 50;
-                _pulse = (1 - Math.Cos(clock.Elapsed.TotalSeconds * Math.Tau / 4)) / 2;
-                RenderItems();
-                if (_introOpacity < 1)
-                {
-                    double t = Math.Clamp(clock.Elapsed.TotalMilliseconds / 450, 0, 1);
-                    _introOpacity = t * t * (3 - 2 * t);
-                    DrawAll();
-                }
-                else WriteRow(_itemPos[_selected].row, positioned: true);
-                UnixTerminal.Current?.Flush();
-            }
             string updateLabel = GameUpdates.MenuLabel;
             if (_items[4].Name != updateLabel)
             {
@@ -119,7 +120,6 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
 
             ConsoleKey? key = ConsoleMouseReader.TryReadKey()?.Key;
             if (key == null) { Thread.Sleep(15); continue; }
-            if (_introOpacity < 1) { _introOpacity = 1; DrawAll(); }
 
             switch (key)
             {
@@ -171,29 +171,25 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
         _x0 = DisplayConfig.LeftMargin + 1;
         _chars = new char[_height, _width];
         _colors = new List<int>?[_height, _width];
-        _backgrounds = new List<int>?[_height, _width];
         for (int r = 0; r < _height; r++) for (int c = 0; c < _width; c++) _chars[r, c] = ' ';
 
         // Center: logo, label, points, tooltip.
-        var logo = _width >= Logo[0].Length + 8 && _height >= 30 ? Logo : ["NAVI DND"];
-        int spacing = _height >= 30 ? 2 : 1;
-        int blockHeight = logo.Length + 2 + 3 + _items.Count * spacing + 1;
+        int blockHeight = Logo.Length + 2 + 3 + _items.Count * 2 + 1;
         int y = Math.Max(1, (_height - blockHeight) / 2);
-        for (int i = 0; i < logo.Length; i++)
-            Center(y + i, logo[i], ColorHelper.MixWith(Bright, Fg, i / (double)Math.Max(1, logo.Length - 1) * 0.55));
-        y += logo.Length + 1;
+        for (int i = 0; i < Logo.Length; i++)
+            Center(y + i, Logo[i], ColorHelper.MixWith(Bright, Dim, i / (double)(Logo.Length - 1) * 0.6));
+        y += Logo.Length + 1;
         Center(y, L.T("AI DUNGEON MASTER"), Dim);
-        Center(y + 2, new string('─', Math.Min(42, _width - 4)), ColorHelper.MixWith(display.MainBackground, Fg, 0.3));
         y += 3;
         _itemPos.Clear();
         foreach (var _ in _items)
         {
             _itemPos.Add((y, 0, 0));
-            y += spacing;
+            y += 2;
         }
         RenderItems();
-        Center(Math.Min(_height - 3, y), new string('─', Math.Min(42, _width - 4)), ColorHelper.MixWith(display.MainBackground, Fg, 0.3));
-        Center(Math.Min(_height - 1, y + 2), L.T("[↑↓]SELECT     [Enter]CONFIRM"), Dim);
+        Center(Math.Min(_height - 2, y), L.T("[↑↓]SELECT     [Enter]CONFIRM"), Dim);
+
     }
 
     // Centered items: “NEW GAME” / “→ NEW GAME ←” (same length - when selected, the item does not move, the
@@ -205,20 +201,13 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
             var item = _items[i];
             int row = _itemPos[i].row;
             for (int c = 0; c < _width; c++)
-            { _chars[row, c] = ' '; _colors[row, c] = null; _backgrounds[row, c] = null; }
+                if (Math.Abs(c - _width / 2) < 16) { _chars[row, c] = ' '; _colors[row, c] = null; }
 
             bool selected = i == _selected && item.Action != null;
             string text = selected ? "→ " + item.Name + " ←" : "  " + item.Name + "  ";
-            var color = item.Action == null ? ColorHelper.MixWith(display.MainBackground, Fg, 0.28)
-                : selected ? ColorHelper.MixWith(Fg, Bright, 0.6 + _pulse * 0.2) : Fg;
-            int width = Math.Min(_width, Math.Max(42, text.Length + 4)), x = (_width - width) / 2;
-            if (selected)
-            {
-                var bg = ColorHelper.MixWith(display.MainBackground, Fg, 0.06 + _pulse * 0.02);
-                for (int c = x; c < x + width; c++) _backgrounds[row, c] = bg;
-            }
-            Center(row, text, color);
-            _itemPos[i] = (row, x, width);
+            var color = item.Action == null ? Dim : selected ? Bright : Fg;
+            int x = Center(row, text, color);
+            _itemPos[i] = (row, x, text.Length);
         }
     }
 
@@ -272,14 +261,13 @@ internal sealed class MainMenuDisplay(WorldState settings, DisplayConfig display
     private void WriteRow(int row, bool positioned)
     {
         if (positioned) Term.SetCursorPosition(_x0, HeaderRows + row);
+        var bg = display.MainBackground;
         int c = 0;
         while (c < _width)
         {
             var color = _colors[row, c];
-            var bg = _backgrounds[row, c] ?? display.MainBackground;
             int start = c;
-            while (c < _width && ReferenceEquals(_colors[row, c], color)
-                && ReferenceEquals(_backgrounds[row, c] ?? display.MainBackground, bg)) c++;
+            while (c < _width && ReferenceEquals(_colors[row, c], color)) c++;
             var run = new string(Enumerable.Range(start, c - start).Select(i => _chars[row, i]).ToArray());
             ColorHelper.WriteColored(run, fgColor: color ?? display.MainForeground, bgColor: bg);
         }

@@ -170,7 +170,7 @@ public class AlacrittyAdventureSceneTests
                 }, 10000), "Game process did not start.");
                 string selected = hasSave ? "→ ПРОДОЛЖИТЬ ←" : "→ НОВАЯ ИГРА ←";
                 Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 63, 150, selected, 10000));
-                // Input remains active while the opening fade is running.
+                // Keyboard navigation remains available with and without a saved game.
                 Press(terminal, ConsoleKey.DownArrow);
                 Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 63, 150, hasSave ? "→ НОВАЯ ИГРА ←" : "→ МОИ ИГРЫ ←", 2000));
                 Press(terminal, ConsoleKey.UpArrow);
