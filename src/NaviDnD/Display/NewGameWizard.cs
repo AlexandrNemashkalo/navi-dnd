@@ -49,6 +49,7 @@ public class NewGameWizard
     private List<int>?[,] _bgc = new List<int>?[0, 0];
     private readonly List<(int row, int x, int w, string id)> _hits = [];
     private bool _frozen;
+    private readonly FormRowCache _rowCache = new();
     private (int left, int top, int w, int h, WorldMapView view, WorldMap world)? _map;
     private string? _hovered;
     // What is currently drawn in place of the map: the same map (world, concept, mark) - is not redrawn.
@@ -1087,6 +1088,7 @@ public class NewGameWizard
 
     private void Begin()
     {
+        _rowCache.Invalidate();
         Term.CursorVisible = false;
         Term.SetCursorPosition(0, StartTop);
         _border.DrawSeparator();
@@ -1188,7 +1190,11 @@ public class NewGameWizard
     private void Flush(int mapLeft = -1, int mapTop = -1, int mapW = 0, int mapH = 0)
     {
         Term.CursorVisible = false;
-        if (_mapRect != (mapLeft, mapTop, mapW, mapH)) _mapDrawn = null;   // map has shifted - draw again
+        if (_mapRect != (mapLeft, mapTop, mapW, mapH))
+        {
+            _mapDrawn = null;   // map has shifted - draw again
+            _rowCache.Invalidate();
+        }
         _mapRect = (mapLeft, mapTop, mapW, mapH);
         bool keepMap = _mapDrawn != null;
         for (int r = 0; r < _height; r++)
@@ -1260,6 +1266,7 @@ public class NewGameWizard
     private void WriteRow(int row, int from, int to)
     {
         if (from >= to) return;
+        if (!_rowCache.Changed(row, from, to, _chars, _fg, _bgc, _display.MainForeground, _display.MainBackground)) return;
         Term.SetCursorPosition(_x0 + from, _bodyTop + row);
         int c = from;
         while (c < to)

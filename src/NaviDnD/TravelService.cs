@@ -133,7 +133,7 @@ public static class TravelService
 
         // Summary for the GM.
         var sb = new StringBuilder();
-        sb.AppendLine("## TRAVEL (the engine already moved the hero on the world map and advanced time; do not change time or world.place)");
+        sb.AppendLine("## TRAVEL (the engine already moved the hero and charged the route time; do not charge it again or change world.place; patch only additional delays and rest)");
         string toName = plan.TargetPlace ?? WorldAtlas.TileName(world, plan.To.x, plan.To.y);
         sb.AppendLine($"From: {fromName} → to: {toName}, {WorldAtlas.Direction(plan.To.x - plan.From.x, plan.To.y - plan.From.y)} (this is the travel direction). Pace: {PaceName(pace)}{(pace == Pace.Fast ? " (−5 passive Perception while traveling)" : pace == Pace.Slow ? " (stealth is possible)" : "")}.");
         double roadShare = walkedTiles.Count == 0 ? 1 : walkedTiles.Count(t => world.RoadAt(t.x, t.y) > 0) / (double)walkedTiles.Count;
@@ -149,7 +149,7 @@ public static class TravelService
         int nights = Math.Max(walked - 1, 0);
         if (dropped.Count > 0)
             sb.AppendLine($"The engine cancelled delayed events from the previous scene (the hero left and days passed): {string.Join("; ", dropped)} — if relevant, account for their outcome in the narrative.");
-        sb.AppendLine($"Rest stops: nights on the road — {nights}; on arrival/at camp, take a long_rest unless interrupted.");
+        sb.AppendLine($"Rest stops: nights on the road — {nights}; on arrival/at camp, take one long_rest unless interrupted, passing only uncommitted detour days as elapsedDays; apply its complete time patch at the final resting history entry, not before earlier travel-time patches.");
         sb.AppendLine(FoodLine(ws, walked));
         if (roadShare < 0.5) sb.AppendLine("More than half the route is off road: navigation check via roll_dice Survival DC 10 (forest/hills) to 15 (mountains/swamp/desert). Failure: lost, +1 day (time.day+1); narrate the detour.");
         if (encounter != null)

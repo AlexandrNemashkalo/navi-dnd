@@ -73,18 +73,21 @@ public sealed class GameActionTools(McpServerConfig config)
 
     [McpServerTool]
     [Description("Long rest. Call only after deciding it is allowed, with no active damaging onRound effect. Advances partOfDay by 2, increments day across night, sets totalRounds to 1, restores actions to maxValue and speedLeft to speedMax, and removes expiresAtRound and untilLongRest effects. Returns a time+hero patch; merge HP/resource recovery into the same hero. Do NOT call advance_round afterward; actions were already reset.")]
-    public string LongRest() => Rest(isLong: true);
+    public string LongRest(
+        [Description("Whole days already elapsed in this response before resting but not yet applied to saved time (for example a travel detour). Do not include days already charged by the engine.")] int elapsedDays = 0) => Rest(isLong: true, elapsedDays);
 
     [McpServerTool]
     [Description("Short rest. Call only after deciding it is allowed. Advances partOfDay by 1, increments day across night, sets totalRounds to 1, restores actions to maxValue and speedLeft to speedMax, and removes expiresAtRound effects while retaining untilLongRest effects. Returns a time+hero patch; merge recovery into the same hero. Do NOT call advance_round afterward.")]
-    public string ShortRest() => Rest(isLong: false);
+    public string ShortRest(
+        [Description("Whole days already elapsed in this response before resting but not yet applied to saved time. Do not include days already charged by the engine.")] int elapsedDays = 0) => Rest(isLong: false, elapsedDays);
 
-    private string Rest(bool isLong)
+    private string Rest(bool isLong, int elapsedDays)
     {
         string kind = isLong ? "long_rest" : "short_rest";
         Log($"{kind} →");
         try
         {
+            if (elapsedDays < 0) throw new ArgumentOutOfRangeException(nameof(elapsedDays), "Elapsed days cannot be negative.");
             var ws = LoadWorldState();
             var hero = ws.Hero ?? throw new InvalidOperationException("hero missing");
 
@@ -124,7 +127,7 @@ public sealed class GameActionTools(McpServerConfig config)
 
             var result = new Dictionary<string, object?>
             {
-                ["time"] = new { totalRounds = 1, partOfDay = _partsOfDay[newIndex], day = ws.Time.Day + dayIncrement },
+                ["time"] = new { totalRounds = 1, partOfDay = _partsOfDay[newIndex], day = checked(ws.Time.Day + elapsedDays + dayIncrement) },
                 ["hero"] = heroPatch,
             };
 

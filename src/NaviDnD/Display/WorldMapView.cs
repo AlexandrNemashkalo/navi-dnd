@@ -133,14 +133,15 @@ public sealed class WorldMapView
         return row >= 0 && row < _frame.Rows.Length ? _frame.Rows[row] : "";
     }
 
-    // Places whose icons are visible in the window at this scale (for the legend) are given priority.
+    // Keep all known destinations in the viewport selectable in the legend, even when
+    // zoom hides their map labels. Otherwise nearby villages and quest sites vanish from Tab navigation.
     public List<int> VisiblePlaces(int W, int H, double cx, double cy, int z, HashSet<string> filter)
     {
         var list = new List<int>();
         for (int i = 0; i < _w.Places.Count; i++)
         {
             var p = _w.Places[i];
-            if (!VisibleAt(p.Type, Stage(z)) || !filter.Contains(Category(p.Type))) continue;
+            if (p.Hidden || !filter.Contains(Category(p.Type))) continue;
             double sc = Scale(z);
             double col = (p.X - cx) / sc + W / 2;
             double row = ((p.Y - cy) / sc + H) / 2;

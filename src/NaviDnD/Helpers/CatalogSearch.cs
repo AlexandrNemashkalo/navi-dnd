@@ -143,10 +143,18 @@ public static class CatalogSearch
         string? categoryTerm = category != null && !GenericCategories.Contains(category) && !terms.Contains(category) ? category : null;
         bool lookNamed = categoryTerm != null && LookNamedCategories.Contains(categoryTerm);
         string[] packs = dcss ? [DcssPack, GameIconsPack] : [GameIconsPack];
-        var steps = (dcss ? terms.SelectMany(t => DcssAliases.TryGetValue(Normalize(t).Trim(), out var alias) ? [alias, t] : new[] { t }) : terms)
-                .Select(t => (t, packs[0]))
+        // Resolve compound meanings before trying broad fallback terms (a notice board is not a surfboard).
+        var exactTerms = terms.SelectMany(t => IconAliases.TryGetValue(Normalize(t).Trim(), out var alias) ? new[] { t, alias } : [t]).ToList();
+        var preferredSteps = (dcss ? exactTerms.SelectMany(t => DcssAliases.TryGetValue(Normalize(t).Trim(), out var alias) ? [alias, t] : new[] { t }) : exactTerms)
+            .Select(t => (t, packs[0]));
+        // For scenery props, preserve the requested meaning across packs before accepting a
+        // broader fallback: "footprints,mud" must show a footprint, not a plain floor tile.
+        if ((category ?? defaultCategory) == "feature")
+            preferredSteps = exactTerms.SelectMany(t => new[] { t }.Concat(Singulars(Normalize(t).Trim())))
+                .SelectMany(t => packs.Select(p => (t, p)));
+        var steps = preferredSteps
             .Concat(lookNamed ? [(categoryTerm!, packs[0])] : [])
-            .Concat(dcss ? terms.Select(t => (t, GameIconsPack)) : [])
+            .Concat(dcss ? exactTerms.Select(t => (t, GameIconsPack)) : [])
             .Concat(LooseWords(terms).SelectMany(w => packs.Select(p => (w, p))))
             // game-icons has no folders: the word "food" there is a food truck - the default picture is more accurate.
             .Concat(dcss && categoryTerm != null && !lookNamed ? [(categoryTerm, DcssPack)] : []);
@@ -194,6 +202,12 @@ public static class CatalogSearch
     {
         ["skeleton"] = "skeleton humanoid", ["skeletons"] = "skeleton humanoid",
         ["zombie"] = "zombie small", ["zombies"] = "zombie small",
+    };
+
+    private static readonly Dictionary<string, string> IconAliases = new()
+    {
+        ["notice board"] = "wooden sign", ["noticeboard"] = "wooden sign",
+        ["bulletin board"] = "wooden sign", ["signboard"] = "wooden sign",
     };
 
     private static readonly HashSet<string> FillerWords =

@@ -305,7 +305,8 @@ public class AiContextBuilder
         // Preserve original indexes: hidden/deleted records must not shift patch targets.
         foreach (var (npc, id) in narrative.Npcs.Select((npc, id) => (npc, id))
                      .Where(x => x.npc.Deleted != true && (visibleNames.Contains(x.npc.Name) || Mentions(playerAction, x.npc.Name)))
-                     .OrderByDescending(x => visibleNames.Contains(x.npc.Name)).Take(2))
+                     .OrderByDescending(x => Mentions(playerAction, x.npc.Name))
+                     .ThenByDescending(x => visibleNames.Contains(x.npc.Name)).Take(2))
             Add($"NPC#{id} {Clip(npc.Name, 80)}: {Clip(npc.Attitude, 60)}; known: {Clip(npc.Notes, 140)}; GM: {Clip(npc.DmNotes, 220)}; memory: {Clip(string.Join(" | ", npc.Memory?.TakeLast(3) ?? []), 260)}");
         foreach (var (thread, id) in narrative.PlotThreads.Select((thread, id) => (thread, id))
                      .Where(x => x.thread.Deleted != true && (Mentions(playerAction, x.thread.Name)

@@ -10,6 +10,25 @@ public class IconToolsTests
 {
     private static IconTools CreateTools() => new(new McpServerConfig(WorldStatePath: "unused", LogPath: null));
 
+    [Theory]
+    [InlineData("dcss")]
+    [InlineData("game-icons")]
+    public void NoticeBoardUsesSignRatherThanSportsEquipment(string pack)
+    {
+        var result = NaviDnD.Helpers.CatalogSearch.IconsFor("feature: notice board,board", pack);
+        Assert.Equal("lorc/wooden-sign", result.Slugs[0]);
+        Assert.Equal("delapouite/surf-board",
+            NaviDnD.Helpers.CatalogSearch.IconsFor("surf board", pack).Slugs[0]);
+    }
+
+    [Theory]
+    [InlineData("dcss")]
+    [InlineData("game-icons")]
+    public void FootprintsKeepTheirMeaningBeforeFallingBackToMud(string pack)
+    {
+        Assert.Equal("lorc/footprint", NaviDnD.Helpers.CatalogSearch.IconsFor("feature: footprints,mud", pack).Slugs[0]);
+    }
+
     [Fact]
     public void FindIcon_ExactNameMatch_RanksFirst()
     {

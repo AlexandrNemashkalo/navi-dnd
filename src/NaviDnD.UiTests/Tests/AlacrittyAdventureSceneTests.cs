@@ -22,9 +22,11 @@ public class AlacrittyAdventureSceneTests
     {
         [FieldOffset(0)] public uint Type;
         [FieldOffset(8)] public ushort Key;
+        [FieldOffset(10)] public ushort Scan;
         [FieldOffset(12)] public uint Flags;
     }
     [DllImport("user32.dll")] private static extern bool SetForegroundWindow(nint window);
+    [DllImport("user32.dll")] private static extern bool SetCursorPos(int x, int y);
     [DllImport("user32.dll")] private static extern uint SendInput(uint count, KeyInput[] inputs, int size);
     private static void Press(Process terminal, ConsoleKey key)
     {
@@ -56,6 +58,8 @@ public class AlacrittyAdventureSceneTests
 
     private static void Configure(ProcessStartInfo start, string fixture = "world_game.json")
     {
+        // A pointer left on a previous window's menu item overrides the initial keyboard selection.
+        SetCursorPos(0, 0);
         start.Environment["NAVIDND_TEST_WORLDSTATE"] = Path.Combine(AppContext.BaseDirectory, "Fixtures", fixture);
         start.Environment["NAVIDND_TEST_MOCKED_ACTIONS"] = "*";
         start.Environment["NAVIDND_MUTE"] = "1";
@@ -66,6 +70,77 @@ public class AlacrittyAdventureSceneTests
 
     private static void WaitForInput(string runtime) => Assert.True(GameConsole.WaitForAnyRowContains(
         GamePid(runtime), 60, 3, GameConsole.TitleReadWidth, "Ввод:", 30000), "Game has not finished drawing input.");
+
+    [AlacrittyFact]
+    public void NarrativeTypingKeepsReadableCadence()
+    {
+        string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;
+        string mockDir = Path.Combine(output, "typing-mocks", "SendAction");
+        Directory.CreateDirectory(mockDir);
+        string text = "В камине спокойно горит огонь. Хозяйка приносит горячий хлеб, за окном шумят осенние деревья. Вечер только начинается. КОНЕЦ.";
+        File.WriteAllText(Path.Combine(mockDir, "response.json"), new JsonObject { ["history"] = new JsonArray(new JsonObject { ["text"] = text }) }.ToJsonString());
+        var start = new ProcessStartInfo(Path.Combine(runtime, "NaviDnD.Launcher.exe")) { WorkingDirectory = runtime, UseShellExecute = false };
+        Configure(start);
+        start.Environment["NAVIDND_TEST_MOCK_RESPONSES_DIR"] = Path.GetDirectoryName(mockDir);
+        using var launcher = Process.Start(start)!;
+        Process? terminal = null;
+        try
+        {
+            var watch = Stopwatch.StartNew();
+            while (terminal == null && watch.Elapsed < TimeSpan.FromSeconds(15)) { terminal = FindTerminal(runtime); Thread.Sleep(100); }
+            Assert.NotNull(terminal);
+            Thread.Sleep(2000);
+            Press(terminal, ConsoleKey.Enter);
+            WaitForInput(runtime);
+            Press(terminal, ConsoleKey.X);
+            Press(terminal, ConsoleKey.Enter);
+            watch.Restart();
+            Assert.True(GameConsole.WaitForAnyRowContains(GamePid(runtime), 39, 20, 110, "КОНЕЦ.", 20000));
+            File.WriteAllText(Path.Combine(output, "typing-ms.txt"), watch.ElapsedMilliseconds.ToString());
+            WaitForInput(runtime);
+        }
+        finally
+        {
+            if (terminal is { HasExited: false }) { terminal.Kill(entireProcessTree: true); terminal.WaitForExit(5000); }
+            terminal?.Dispose();
+        }
+    }
+
+    [AlacrittyFact]
+    public void WorldWizardAcceptsLongDescriptionAndKeepsItAcrossSteps()
+    {
+        string runtime = Runtime();
+        var start = new ProcessStartInfo(Path.Combine(runtime, "NaviDnD.Launcher.exe")) { WorkingDirectory = runtime, UseShellExecute = false };
+        Configure(start);
+        using var launcher = Process.Start(start)!;
+        Process? terminal = null;
+        try
+        {
+            var watch = Stopwatch.StartNew();
+            while (terminal == null && watch.Elapsed < TimeSpan.FromSeconds(15)) { terminal = FindTerminal(runtime); Thread.Sleep(100); }
+            Assert.NotNull(terminal);
+            Thread.Sleep(2000);
+            Press(terminal, ConsoleKey.DownArrow); Press(terminal, ConsoleKey.Enter);
+            int pid = GamePid(runtime);
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 60, 150, "ОПИСАНИЕ МИРА", 5000));
+            Press(terminal, ConsoleKey.Enter); Press(terminal, ConsoleKey.UpArrow);
+            string description = string.Concat(Enumerable.Repeat("Лесной тракт, уютные деревни и старые башни. ", 8)) + "ФОНАРИ ЗАЖЖЕНЫ";
+            var inputs = description.SelectMany(c => new[] { new KeyInput { Type = 1, Scan = c, Flags = 4 }, new KeyInput { Type = 1, Scan = c, Flags = 6 } }).ToArray();
+            watch.Restart();
+            Assert.Equal((uint)inputs.Length, SendInput((uint)inputs.Length, inputs, 40));
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 60, 150, "ФОНАРИ ЗАЖЖЕНЫ", 4000), "Pasted description took too long to finish.");
+            File.WriteAllText(Path.Combine(Path.GetDirectoryName(runtime)!, "wizard-input-ms.txt"), watch.ElapsedMilliseconds.ToString());
+            Press(terminal, ConsoleKey.F2);
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 60, 150, "АНКЕТА", 5000));
+            Press(terminal, ConsoleKey.F1);
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 60, 150, "ФОНАРИ ЗАЖЖЕНЫ", 5000));
+        }
+        finally
+        {
+            if (terminal is { HasExited: false }) { terminal.Kill(entireProcessTree: true); terminal.WaitForExit(5000); }
+            terminal?.Dispose();
+        }
+    }
 
     [AlacrittyFact]
     public void F11CyclesAll64ScenesAndWrapsToFirst()
@@ -154,6 +229,15 @@ public class AlacrittyAdventureSceneTests
     [AlacrittyFact]
     public void RepresentativeScenesAnimateAndPauseWithoutChangingDialog()
     {
+        // The empty input field's terminal caret blinks independently of scene animation.
+        static bool InputCaret(int x, int y, int width, int height) =>
+            x >= width * 9 / 150 && x < width * 10 / 150 && y >= height * 61 / 63 && y < height * 62 / 63;
+        static IEnumerable<int> StablePixels(System.Drawing.Bitmap bitmap)
+        {
+            for (int y = 0; y < bitmap.Height; y++)
+            for (int x = 0; x < bitmap.Width; x++)
+                if (!InputCaret(x, y, bitmap.Width, bitmap.Height)) yield return bitmap.GetPixel(x, y).ToArgb();
+        }
         foreach (string type in new[] { "port", "cave", "tavern", "ruins", "forest", "snow", "camp", "dungeon" })
         {
             string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;
@@ -207,7 +291,7 @@ public class AlacrittyAdventureSceneTests
                     if (first.GetPixel(x, y) != next.GetPixel(x, y))
                     {
                         if (x >= first.Width * 2 / 150 && x < first.Width * 89 / 150 && y >= first.Height * 3 / 63 && y < first.Height * 36 / 63) inside++;
-                        else outside++;
+                        else if (!InputCaret(x, y, first.Width, first.Height)) outside++;
                     }
                 
                 
@@ -249,7 +333,9 @@ public class AlacrittyAdventureSceneTests
                 ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, a);
                 Thread.Sleep(1000);
                 ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, b);
-                Assert.Equal(File.ReadAllBytes(a), File.ReadAllBytes(b));
+                using var pausedFirst = new System.Drawing.Bitmap(a);
+                using var pausedNext = new System.Drawing.Bitmap(b);
+                Assert.Equal(StablePixels(pausedFirst), StablePixels(pausedNext));
             }
             finally
             {
@@ -299,11 +385,13 @@ public class AlacrittyAdventureSceneTests
         }
         void KeyAndExpect(ConsoleKey key, string text, int timeout = 5000)
         {
+            var keyWatch = Stopwatch.StartNew();
             int offset = Read().Length;
             Press(terminal, key);
             Assert.True(Wait(s => s.Length >= offset && (key == ConsoleKey.F11
                 ? s[offset..].Count(c => c is >= '\u2580' and <= '\u259f' or >= '\u2800' and <= '\u28ff') > 1000
                 : s[offset..].Contains(text)), timeout), $"{key}: missing {text} after keypress.");
+            File.AppendAllText(Path.Combine(output, "transition-timings.txt"), $"{key}: {keyWatch.ElapsedMilliseconds} ms\n");
         }
         try
         {
@@ -315,7 +403,13 @@ public class AlacrittyAdventureSceneTests
             KeyAndExpect(ConsoleKey.F12, "Анимация: пауза");
             KeyAndExpect(ConsoleKey.F12, "Анимация: вкл.");
             KeyAndExpect(ConsoleKey.F2, "Вы: Ключи");
+            KeyAndExpect(ConsoleKey.Tab, "Путь: Светлоград");
             KeyAndExpect(ConsoleKey.F1, "[F11] Другой вид");
+            for (int cycle = 0; cycle < 5; cycle++)
+            {
+                KeyAndExpect(ConsoleKey.F2, "Вы: Ключи");
+                KeyAndExpect(ConsoleKey.F1, "[F11] Другой вид");
+            }
             Press(terminal, ConsoleKey.X);
             KeyAndExpect(ConsoleKey.Enter, "Ожидание");
             KeyAndExpect(ConsoleKey.F3, "ЖУРНАЛ");
@@ -336,6 +430,7 @@ public class AlacrittyAdventureSceneTests
             WaitForInput(runtime);
             Thread.Sleep(300);
             ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, Path.Combine(output, "scene-after-exit.png"));
+            Assert.DoesNotContain("ГАЛЕРЕЯ СЦЕН", string.Join("\n", GameConsole.ReadRows(GamePid(runtime), 0, 36, 150)));
             File.WriteAllText(Path.Combine(output, "scene-transitions.txt"), Read());
         }
         finally

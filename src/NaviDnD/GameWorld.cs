@@ -14,7 +14,7 @@ public static class GameWorld
     private static (GameWorldLink link, int version, bool hidden, WorldMap geo, WorldMap result)? _cacheHidden, _cacheVisible;
     private static readonly GameWorldLink _noGame = new();
 
-    // Is there a tactical map (location): no - the hero is on the road or a scene without a map, the “Map” tab shows the world.
+    // Without tactical geometry, the Map tab shows the current place's illustration; World stays a separate tab.
     public static bool HasLocation(WorldState ws) =>
         ws.Map.Chunks is { Count: > 0 } || ws.Map.Rooms is { Count: > 0 } || ws.Map.Area is { Count: > 0 } || ws.Map.Doors is { Count: > 0 };
 

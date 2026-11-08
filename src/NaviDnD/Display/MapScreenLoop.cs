@@ -747,6 +747,8 @@ internal class MapScreenLoop
             int pos = list.IndexOf(_display.SelectedWorldPlace);
             pos = pos < 0 ? (delta > 0 ? 0 : list.Count - 1) : (pos + delta + list.Count) % list.Count;
             _display.SelectedWorldPlace = list[pos];
+            var destination = _mapDisplay.WorldView.World.Places[_display.SelectedWorldPlace];
+            SetTravelTarget((destination.X, destination.Y));
             Sound.PlayClick();
             ShowWorldPlaceCard(_display.SelectedWorldPlace);
             RedrawWorldKeepCursor();

@@ -274,6 +274,7 @@ public class NewGameDisplay
     private int _buttonRow, _buttonX, _buttonWidth, _formLeft;
     private readonly List<(int row, int x)> _swatches = [];      // palette samples (clickable)
     private char[,] _chars = new char[0, 0];
+    private readonly FormRowCache _rowCache = new();
     private List<int>?[,] _fg = new List<int>?[0, 0];
     private List<int>?[,] _bg = new List<int>?[0, 0];
     private readonly List<(int row, int field)> _fieldRows = []; // body lines occupied by field (for mouse)
@@ -414,6 +415,7 @@ public class NewGameDisplay
     // Questionnaire (step 2). Returns the step to go to: 1 - world, 3/4 - further (the hero is created, Data), 0 - exit to the menu.
     public async Task<int> Show()
     {
+        _rowCache.Invalidate();
         _startTop = Term.CursorTop;
         _titleTabsCache = null;   // title may have changed (steps available)
         _tabHovered = null;
@@ -1387,6 +1389,7 @@ public class NewGameDisplay
 
     private void WriteRow(int row)
     {
+        if (!_rowCache.Changed(row, 0, _width, _chars, _fg, _bg, _display.MainForeground, _display.MainBackground)) return;
         Term.SetCursorPosition(_x0, _bodyTop + row);
         int c = 0;
         while (c < _width)

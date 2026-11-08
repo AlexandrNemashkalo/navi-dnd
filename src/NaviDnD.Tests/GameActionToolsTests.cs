@@ -125,6 +125,31 @@ public class GameActionToolsTests : IDisposable
     }
 
     private static JsonDocument Parse(string json) => JsonDocument.Parse(json);
+
+    [Theory]
+    [InlineData(true, 5, "morning")]
+    [InlineData(false, 5, "night")]
+    public async Task DetourThenRestKeepsFinalTimeConsistentWithHistory(bool isLong, int expectedDay, string expectedPart)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"navidnd_test_{Guid.NewGuid():N}.json");
+        _files.Add(path);
+        string saved = """{"time":{"day":3,"partOfDay":"evening","totalRounds":1},"hero":{"name":"Traveler","hp":"12/12","speedMax":30}}""";
+        File.WriteAllText(path, saved);
+        var tools = new GameActionTools(new McpServerConfig(path, LogPath: null));
+        string rest = isLong ? tools.LongRest(elapsedDays: 1) : tools.ShortRest(elapsedDays: 1);
+        Assert.Equal(saved, File.ReadAllText(path)); // tools return patches; the player applies them in order
+        Assert.True(Parse(tools.LongRest(-1)).RootElement.TryGetProperty("error", out _));
+        var storage = new Storage();
+        storage.ApplySavedState(saved);
+        string response = "{\"history\":[{\"text\":\"Detour.\",\"patch\":{\"time\":{\"day\":4,\"partOfDay\":\"evening\"}}},{\"text\":\"Rest complete.\",\"patch\":" + rest + "}]}";
+        var type = typeof(AppConfig).Assembly.GetType("NaviDnD.Clients.SequentialHistoryPlayer")!;
+        var player = Activator.CreateInstance(type, storage.WorldState, storage, new JsonSerializerOptions(), null, null, null, null)!;
+        await (Task)type.GetMethod("PlayAsync")!.Invoke(player, [response])!;
+        Assert.Equal(expectedDay, storage.WorldState.Time.Day);
+        Assert.Equal(expectedPart, storage.WorldState.Time.PartOfDay);
+        Assert.Equal(30, storage.WorldState.Hero!.SpeedLeft);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

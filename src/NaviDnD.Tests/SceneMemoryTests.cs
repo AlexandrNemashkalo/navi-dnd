@@ -6,6 +6,21 @@ namespace NaviDnD.Tests;
 public class SceneMemoryTests
 {
     [Fact]
+    public void AddressedNpcHasPriorityOverOtherVisibleBystanders()
+    {
+        var ws = new WorldState { Narrative = new() { Npcs =
+        [new() { Name = "Innkeeper", Memory = ["Room available"] },
+         new() { Name = "Driver", Memory = ["Cart broken"] },
+         new() { Name = "Dunya", Memory = ["Knows the postman's sign"] }] } };
+        ws.Map.Entities = [new() { Name = "Innkeeper", Position = [1, 1] },
+            new() { Name = "Driver", Position = [2, 1] }, new() { Name = "Dunya", Position = [3, 1] }];
+        string context = new AiContextBuilder(ws, [(1, 1), (2, 1), (3, 1)]).MinimalState("Dunya, what happened?");
+        Assert.Contains("NPC#2 Dunya", context);
+        Assert.Contains("Knows the postman's sign", context);
+        Assert.DoesNotContain("NPC#1 Driver", context);
+    }
+
+    [Fact]
     public void LeavingPlaceDoesNotCarryItsUnrelatedPlansIntoScene()
     {
         var ws = new WorldState { World = new() { Place = "Переправа" }, Narrative = new()

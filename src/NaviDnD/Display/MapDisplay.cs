@@ -603,17 +603,37 @@ public class MapDisplay
     public int MapAreaWidth => ViewCols * (_display.CellWidth + 1) + 7;
     public int MapAreaHeight => ViewRows * 2 + 3;
 
-    public bool ShowsAdventureScene => _display.MapLevel == MapLevel.Location && !GameWorld.HasLocation(_settings);
-    public AdventureScene CurrentScene => _sceneGalleryIndex >= 0
-        ? AdventureScene.Preview(_sceneGalleryIndex, _settings.Time.PartOfDay)
+    public bool ShowsAdventureScene
+    {
+        get
+        {
+            SynchronizeScenePlace();
+            return _display.MapLevel == MapLevel.Location && !GameWorld.HasLocation(_settings);
+        }
+    }
+    public AdventureScene CurrentScene => SceneGalleryIndex >= 0
+        ? AdventureScene.Preview(SceneGalleryIndex, _settings.Time.PartOfDay)
         : AdventureScene.Select(_settings, GameWorld.ForDisplay(_settings));
     public bool SceneAnimationPaused { get; private set; }
+    public int SceneGalleryIndex { get { SynchronizeScenePlace(); return _sceneGalleryIndex; } }
     private int _sceneGalleryIndex = -1;
+    private (string? world, int? x, int? y, string? place, bool tactical)? _scenePlace;
     private int _scenePhase;
     private long _nextSceneFrame;
     private readonly AdventureSceneRenderer _sceneRenderer = new();
     private string[] _sceneRows = [];
     private string[] _paintedSceneRows = [];
+
+    private void SynchronizeScenePlace()
+    {
+        var link = _settings.World;
+        var place = (link?.Id, link?.X, link?.Y, link?.Place, GameWorld.HasLocation(_settings));
+        if (_scenePlace == place) return;
+        _scenePlace = place;
+        _sceneGalleryIndex = -1;
+        _scenePhase = 0;
+        _nextSceneFrame = 0;
+    }
 
     // Alternate rendering is available only to isolated UI tests for visual comparison.
     private AdventureSceneStyle SceneStyle => Environment.GetEnvironmentVariable("NAVIDND_TEST_WORLDSTATE") != null
@@ -636,6 +656,7 @@ public class MapDisplay
 
     public void NextSceneVariant()
     {
+        SynchronizeScenePlace();
         _sceneGalleryIndex = (_sceneGalleryIndex + 1) % AdventureScene.GalleryCount;
         _scenePhase = 0;
         RefreshAdventureScene(force: true);

@@ -1,3 +1,4 @@
+using NaviDnD.Data;
 using NaviDnD.Data.Models;
 using NaviDnD.Display;
 using System.Text.Json;
@@ -7,6 +8,40 @@ namespace NaviDnD.Tests;
 
 public class AdventureSceneTests
 {
+    [Fact]
+    public void GallerySurvivesTabSwitchButStopsWhenTheHeroChangesPlaceOrEntersAMap()
+    {
+        var storage = new Storage();
+        var state = storage.WorldState;
+        state.World = new() { Id = "scene-test", X = 2, Y = 3, Place = "Camp" };
+        state.Map = new();
+        var display = new NaviDnD.Data.DisplayConfig { MapLevel = MapLevel.Location, MapHoverEnabled = false };
+        var map = new MapDisplay(state, display, new LegendDisplay(storage, display, new AppConfig()));
+        Assert.True(map.ShowsAdventureScene);
+        map.NextSceneVariant();
+        map.NextSceneVariant();
+        Assert.Equal(1, map.SceneGalleryIndex);
+        display.MapLevel = MapLevel.World;
+        Assert.False(map.ShowsAdventureScene);
+        display.MapLevel = MapLevel.Location;
+        Assert.True(map.ShowsAdventureScene);
+        Assert.Equal(1, map.SceneGalleryIndex);
+        state.Time.PartOfDay = PartsOfDay.Night;
+        Assert.Equal(1, map.SceneGalleryIndex);
+        state.World.X++;
+        Assert.Equal(-1, map.SceneGalleryIndex);
+        map.NextSceneVariant();
+        state.World.Place = "Village";
+        Assert.Equal(-1, map.SceneGalleryIndex);
+        map.NextSceneVariant();
+        state.Map.Chunks = [new()];
+        Assert.False(map.ShowsAdventureScene);
+        Assert.Equal(-1, map.SceneGalleryIndex);
+        state.Map.Chunks.Clear();
+        Assert.True(map.ShowsAdventureScene);
+        Assert.Equal(-1, map.SceneGalleryIndex);
+    }
+
     private static readonly Regex Ansi = new("\x1b\\[[0-9;]*m");
 
     [Fact]

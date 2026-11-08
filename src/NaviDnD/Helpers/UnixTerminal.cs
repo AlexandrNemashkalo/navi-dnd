@@ -809,8 +809,10 @@ internal sealed class UnixTerminal
         {
             while (!buffer.IsEmpty)
             {
-                // Bound Windows console writes and keep UTF-8 code points intact.
-                int length = OperatingSystem.IsWindows() ? Math.Min(buffer.Length, 16 * 1024) : buffer.Length;
+                // Pace large Windows frames: an uninterrupted burst can leave Alacritty/ConPTY
+                // displaying only part of the frame until the next keypress. Small animation
+                // patches stay on the fast path. Keep UTF-8 code points intact at each boundary.
+                int length = OperatingSystem.IsWindows() ? Math.Min(buffer.Length, 4 * 1024) : buffer.Length;
                 while (length < buffer.Length && (buffer[length] & 0xc0) == 0x80) length--;
                 nint n = OperatingSystem.IsWindows()
                     ? (WriteFile(GetStdHandle(-11), ref MemoryMarshal.GetReference(buffer), (uint)length, out uint count, 0) ? (nint)count : -1)
@@ -821,6 +823,7 @@ internal sealed class UnixTerminal
                     throw new IOException("stdout closed");
                 }
                 buffer = buffer[(int)n..];
+                if (OperatingSystem.IsWindows() && !buffer.IsEmpty) Thread.Sleep(1);
             }
         }
     }
