@@ -161,6 +161,9 @@ public class AlacrittyAdventureSceneTests
             Press(terminal, ConsoleKey.F12);
             int pid = GamePid(runtime);
             Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 60, 150, "Анимация: пауза", 5000));
+            // Input can be visible before the saved dialogue finishes its initial redraw.
+            // Compare gallery navigation against the loaded dialogue, not a transient blank panel.
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 39, 19, 110, "Осматриваюсь по сторонам.", 5000));
             var dialog = GameConsole.ReadRows(pid, 39, 19, 110);
             List<string>? first = null;
             for (int index = 1; index <= 65; index++)
@@ -383,6 +386,7 @@ public class AlacrittyAdventureSceneTests
             while (watch.ElapsedMilliseconds < timeout) { if (predicate(Read())) return true; Thread.Sleep(50); }
             return false;
         }
+        var sceneSwitchMilliseconds = new List<long>();
         void KeyAndExpect(ConsoleKey key, string text, int timeout = 5000)
         {
             var keyWatch = Stopwatch.StartNew();
@@ -392,6 +396,7 @@ public class AlacrittyAdventureSceneTests
                 ? s[offset..].Count(c => c is >= '\u2580' and <= '\u259f' or >= '\u2800' and <= '\u28ff') > 1000
                 : s[offset..].Contains(text)), timeout), $"{key}: missing {text} after keypress.");
             File.AppendAllText(Path.Combine(output, "transition-timings.txt"), $"{key}: {keyWatch.ElapsedMilliseconds} ms\n");
+            if (key == ConsoleKey.F1) sceneSwitchMilliseconds.Add(keyWatch.ElapsedMilliseconds);
         }
         try
         {
@@ -410,6 +415,10 @@ public class AlacrittyAdventureSceneTests
                 KeyAndExpect(ConsoleKey.F2, "Вы: Ключи");
                 KeyAndExpect(ConsoleKey.F1, "[F11] Другой вид");
             }
+            // Includes Press's 180 ms focus delay. Sleep(1) per write used to inflate
+            // these scene transitions to 600–700 ms on the same terminal.
+            long medianSceneSwitch = sceneSwitchMilliseconds.Order().ElementAt(sceneSwitchMilliseconds.Count / 2);
+            Assert.True(medianSceneSwitch < 500, $"Scene redraws are too slow: median {medianSceneSwitch} ms.");
             Press(terminal, ConsoleKey.X);
             KeyAndExpect(ConsoleKey.Enter, "Ожидание");
             KeyAndExpect(ConsoleKey.F3, "ЖУРНАЛ");

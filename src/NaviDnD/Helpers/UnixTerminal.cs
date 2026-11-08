@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Win32.SafeHandles;
 
 namespace NaviDnD.Helpers;
 
@@ -793,6 +794,8 @@ internal sealed class UnixTerminal
 
     private sealed class StdOutStream : Stream
     {
+        private SafeWaitHandle? _pacingTimer;
+        private bool _pacingTimerUnavailable;
         public override bool CanRead => false;
         public override bool CanSeek => false;
         public override bool CanWrite => true;
@@ -823,9 +826,42 @@ internal sealed class UnixTerminal
                     throw new IOException("stdout closed");
                 }
                 buffer = buffer[(int)n..];
-                if (OperatingSystem.IsWindows() && !buffer.IsEmpty) Thread.Sleep(1);
+                if (OperatingSystem.IsWindows() && !buffer.IsEmpty) PaceWindowsWrite();
             }
         }
+
+        // Sleep(1) can last an entire scheduler tick (~15 ms), multiplying full-screen
+        // redraw latency. A private one-shot timer yields for 1 ms without busy-waiting
+        // or changing the system timer resolution. Writes are serialized by TrackingWriter.
+        private void PaceWindowsWrite()
+        {
+            if (!_pacingTimerUnavailable)
+            {
+                _pacingTimer ??= CreateWaitableTimerExW(0, null, 0x2, 0x00100002); // HIGH_RESOLUTION; SYNCHRONIZE | TIMER_MODIFY_STATE
+                long dueTime = -10_000; // relative, in 100 ns units
+                if (!_pacingTimer.IsInvalid && SetWaitableTimer(_pacingTimer, ref dueTime, 0, 0, 0, false)
+                    && WaitForSingleObject(_pacingTimer, 100) == 0) return;
+                _pacingTimer.Dispose();
+                _pacingTimer = null;
+                _pacingTimerUnavailable = true;
+            }
+            // Older Windows builds may not support high-resolution timers.
+            Thread.Yield();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _pacingTimer?.Dispose();
+            base.Dispose(disposing);
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        private static extern SafeWaitHandle CreateWaitableTimerExW(nint attributes, string? name, uint flags, uint access);
+        [DllImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetWaitableTimer(SafeWaitHandle timer, ref long dueTime, int period, nint callback, nint argument, [MarshalAs(UnmanagedType.Bool)] bool resume);
+        [DllImport("kernel32.dll")]
+        private static extern uint WaitForSingleObject(SafeWaitHandle handle, uint milliseconds);
     }
 
     // ── termios ───────────────────────────────────────────────────────────────────────────────────────────────
