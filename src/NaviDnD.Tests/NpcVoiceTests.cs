@@ -80,7 +80,7 @@ public class NpcVoiceTests
             Assert.True(result.Ok,string.Join(";",result.Errors));
             var root=JsonNode.Parse(File.ReadAllText(path))!;
             var npc=root["narrative"]!["npcs"]![0]!;
-            Assert.Equal(3,(int)root["formatVersion"]!);
+            Assert.Equal(StorageFormat.Current,(int)root["formatVersion"]!);
             Assert.Contains((string)npc["speechVoice"]!["speaker"]!,NpcVoices.EnglishFemale);
             Assert.Equal("Promise",(string)npc["memory"]![0]!);
             Assert.Equal(0,StorageMigration.Run(dir).Migrated);

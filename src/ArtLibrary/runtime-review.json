@@ -3188,6 +3188,18 @@
       "sha256": "07ac907b58b9f5a7ec7eb164d8b2e24cfb0b7a609d310e07f9c87c2b282c5409",
       "method": "Giant Weasel: Inspected actual 32x32 and integer enlargement: complete giant owl with facial disks and feathered silhouette, or elongated giant weasel with short legs and long tail; transparent background.",
       "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:forest-thicket-v1",
+      "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+      "method": "Reviewed final 32x32 silhouette and color clusters.",
+      "sheet": "artifacts/npc-art-fix/forest-thicket-v1.png"
+    },
+    {
+      "assetId": "own-art:incense-sticks-v3",
+      "sha256": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
+      "method": "Reviewed final 32x32 with separate sticks and clean gaps.",
+      "sheet": "artifacts/npc-art-fix/incense-sticks-v3.png"
     }
   ]
 }

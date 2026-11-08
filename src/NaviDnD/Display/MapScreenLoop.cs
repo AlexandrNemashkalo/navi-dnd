@@ -170,6 +170,8 @@ internal class MapScreenLoop
         void SetMapEntityImage(int page = 0)
         {
             var (image, _, _) = _legendDisplay.GetSelectedEntityImageAndName();
+            var selectedEntity = _legendDisplay.GetSelectedLivingEntity();
+            if (selectedEntity is not Hero) image = NpcPortraits.Find(_settings, selectedEntity?.Name)?.Portrait ?? image;
             int selected = _display.SelectedMapItemIndex;
             QueueImage(page == 0 ? image : null, () =>
             {
@@ -634,13 +636,13 @@ internal class MapScreenLoop
                         var (sc, sr) = cell!.Value;
                         string label = _settings.Map.StairTarget(sc, sr) is var (tc, tr)
                             ? $"{L.T(stairHere.Name)} → {MapConfig.FloorLabel(_settings.Map.FloorAt(tc, tr))}" : L.T(stairHere.Name);
-                        SetMapImage(TerrainCatalog.Image(stairHere), label, stairHere.LegendColor);
+                        SetMapImage(ArtPictures.TerrainImage(stairHere), label, stairHere.LegendColor);
                         activeDialog?.RerenderRightPanel();
                     }
                     else if (terrainHere != null)
                     {
                         string label = L.T(terrainHere.Name) + (TerrainCatalog.Properties(terrainHere) is { } tprops ? "\n" + tprops : "");
-                        SetMapImage(TerrainCatalog.Image(terrainHere), label, terrainHere.LegendColor ?? terrainHere.Fg);
+                        SetMapImage(ArtPictures.TerrainImage(terrainHere), label, terrainHere.LegendColor ?? terrainHere.Fg);
                         activeDialog?.RerenderRightPanel();
                     }
                     else if (_display.SelectedMapItemIndex < 0)

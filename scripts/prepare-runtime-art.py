@@ -17,6 +17,12 @@ REVIEW = ROOT / 'artifacts/art-catalog-review'
 def prepare():
     assets = {a['id']: a for a in json.loads((REVIEW / 'assets.json').read_text(encoding='utf-8'))}
     requirements = json.loads((REVIEW / 'requirements.json').read_text(encoding='utf-8'))
+    additions = json.loads((LIBRARY/'RuleSets/Dnd5e/runtime-additions.json').read_text(encoding='utf-8'))
+    for extra in additions['bindings']:
+        asset = assets[extra['assetId']]
+        requirements = [r for r in requirements if r['id'] != extra['id']]
+        requirements.append(dict(extra, name=extra['names'][0], candidates=[dict(assetId=asset['id'],
+            sha256=asset['sha256'], usage=extra['usage'], match='visual_representation')]))
     approved = {a['assetId']: a['sha256'] for a in json.loads((LIBRARY / 'runtime-review.json').read_text(encoding='utf-8'))['assets']}
     images, bindings, engine_aliases, credits = {}, [], {}, {}
     furniture_source = (ROOT/'src/NaviDnD.Data/Models/Furniture.cs').read_text(encoding='utf-8-sig')
@@ -66,7 +72,7 @@ def prepare():
             license_target = LIBRARY/'Runtime/Licenses'/asset['pack']/'LICENSE.txt'
             license_target.parent.mkdir(parents=True, exist_ok=True)
             license_target.write_bytes(original.read_bytes())
-        names = list(dict.fromkeys(n for n in [requirement.get('nameEn'), requirement['name'], requirement.get('nameRu')] if n))
+        names = requirement.get('names') or list(dict.fromkeys(n for n in [requirement.get('nameEn'), requirement['name'], requirement.get('nameRu')] if n))
         categories = {'item'} if usage == 'item' else {'creature'} if usage in ('map_actor', 'portrait') else {'feature'}
         categories.add(category)
         source_ref = requirement.get('source', '')
@@ -90,6 +96,8 @@ def prepare():
                              usage=usage, imageId=digest, match=candidate['match']))
         if category == 'furniture' and requirement['name'] in furniture_icons:
             engine_aliases[furniture_icons[requirement['name']]] = digest
+        for alias in requirement.get('engineAliases', []):
+            engine_aliases[alias] = digest
     portraits = []
     for entry in json.loads((LIBRARY/'portrait-gallery.json').read_text(encoding='utf-8'))['portraits']:
         asset = assets.get(entry['assetId'])
@@ -112,9 +120,19 @@ def prepare():
         images[digest] = dict(id=digest, path=relative, sha256=digest, width=32, height=32,
             sourceAssetId=asset['id'], description=asset.get('descriptionEn',''), provenance=asset.get('provenance',{}))
         credits.setdefault(asset['pack'], asset.get('provenance',{}))
-        portraits.append(dict(imageId=digest, framing=asset['framing'], group=entry['group']))
+        portraits.append(dict(imageId=digest, framing=asset['framing'], group=entry['group'], gender=entry.get('gender', 'unknown')))
+    # Terrain has its own authored bindings; it previously never reached engineAliases.
+    terrain_source = (ROOT/'src/NaviDnD.Data/Models/Terrain.cs').read_text(encoding='utf-8-sig')
+    kinds = dict(re.findall(r"new TerrainKind\('([^']+)',\s*\"([^\"]+)\"", terrain_source))
+    terrain_icons = dict(re.findall(r"\['([^']+)'\]\s*=\s*\"([^\"]+)\"", terrain_source))
+    for binding in bindings:
+        if 'terrain' not in binding['categories']: continue
+        for code, name in kinds.items():
+            if name in binding['names'] and code in terrain_icons:
+                engine_aliases[terrain_icons[code]] = binding['imageId']
     payload = dict(schemaVersion=1, ruleSet='Dnd5e', images=sorted(images.values(), key=lambda x: x['id']),
-                   bindings=bindings, engineAliases=engine_aliases, portraits=portraits)
+                   bindings=bindings, engineAliases=engine_aliases, portraits=portraits,
+                   npcSpriteGroups=additions['npcSpriteGroups'])
     payload['revision'] = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     target = LIBRARY / 'RuleSets/Dnd5e/runtime-pictures.json'
     text = json.dumps(payload, ensure_ascii=False, indent=2) + '\n'

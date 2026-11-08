@@ -90,7 +90,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                         details.Add((L.T("Remembered:"), Dim));
                         details.AddRange(memory.Select(m => ("· " + m, Fg)));
                     }
-                    list.Add(new Entry(p.Name ?? "?", "●", color, details, onMap?.Image ?? "delapouite/person", onMap?.Color ?? color));
+                    list.Add(new Entry(p.Name ?? "?", "●", color, details, p.Portrait ?? onMap?.Image ?? "delapouite/person", onMap?.Color ?? color));
                 }
                 break;
 

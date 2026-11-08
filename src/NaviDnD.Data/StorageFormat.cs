@@ -5,5 +5,5 @@ namespace NaviDnD;
 // (when updating the game). Changed the data format - increase Current and add a migration step.
 public static class StorageFormat
 {
-    public const int Current = 3;
+    public const int Current = 4;
 }

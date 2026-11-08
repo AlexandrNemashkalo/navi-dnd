@@ -1,0 +1,22 @@
+{
+  "id": "own-art:forest-thicket-v1",
+  "file": "forest-thicket-v1.png",
+  "subject": "Thicket",
+  "nameRu": "Чаща",
+  "width": 32,
+  "height": 32,
+  "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+  "usage": "place_view",
+  "framing": "landscape",
+  "styleId": "fantasy.pixel.place_view.32",
+  "descriptionEn": "Dense overlapping green foliage, three gnarled trunks and tangled roots blocking passage.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/forest-thicket-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_24_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/forest-thicket-v1/prompt.txt"
+}

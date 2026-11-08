@@ -859,7 +859,7 @@ public class AiContextBuilder
 
         var serialized = JsonSerializer.SerializeToNode(root, _json)!;
         if (serialized["narrative"]?["npcs"] is JsonArray npcs)
-            foreach (var npc in npcs.OfType<JsonObject>()) npc.Remove("speechVoice");
+            foreach (var npc in npcs.OfType<JsonObject>()) { npc.Remove("speechVoice"); npc.Remove("portrait"); }
         return serialized.ToJsonString(_json);
     }
 

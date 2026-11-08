@@ -84,242 +84,290 @@
     {
       "assetId": "prepared-portraits-native-32-humans:icon-001",
       "sha256": "cd57082f6259762754fedb863c11b82f00aa75a2584af1928c36655f654aac82",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-002",
       "sha256": "0353fb74164560024708609d7dcdcba4320ba2de1a1b1deea36b0696cc4a3872",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-003",
       "sha256": "52ff88c29a58576b8381b6cba0f5001198994f6db57dcd9cbc275d0445dee58f",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-004",
       "sha256": "f7ba564f1095f0bf7d2a8e8160cab0adec737731103b2d0272940e352be69951",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-005",
       "sha256": "db3f17d05f9db996096bb711e2bc3dc78048159e8a321e5531564af89a086276",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-006",
       "sha256": "70df25e6ab4083c476cc2c25657575885734bf372264a3a9dd9f312437cd25ca",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-007",
       "sha256": "8fc1063181f2cc0938c6c372dc95aa63ade2f399f503cf066fcaede2d738ad27",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-008",
       "sha256": "5ff10adaeae82024ea3152da8594d15a6c7cb4a9a6f55c673f585428be756d48",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-009",
       "sha256": "3dee63163787d342e78985fa38890c60d1bb0b94ee564301cea9efeb941e6c9f",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-010",
       "sha256": "ded4c7d9474b0220d796f46cc45346fb3eef29cdf65c32a6a1de8dcd81c51b82",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-011",
       "sha256": "cdcb3ce4c6cf0b54a7e59674fd4fb4690c912c074ed1135e6875af7082fad2ee",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-012",
       "sha256": "6f665d159c6eb6b51616510ece4046519cf4e9228a28e4acff23ff342f816aad",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-013",
       "sha256": "b94b11688ce0b7edb85f516473fa9f0f7df259555166a87588f92948bfa3ba01",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-014",
       "sha256": "844e35e2856461f48ca8fc0510ec7269e791863ace5bce73476f349f2eb2c2a5",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-015",
       "sha256": "e282b37700fe3998a6700e814523973fd8e0d4021551a74b825d6b1f8f6819cf",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-016",
       "sha256": "4192dd36ae8aba80fda42d2379994c6fcd4efba9fe6662f604f185eb80ea19f6",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-017",
       "sha256": "109a8771e1c07ae2b03d40f351ada30928571586992384321b61a7e0ac2475d0",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-018",
       "sha256": "8ede5acae2fb757420661d98e07289e80d981f1f0770b0a3d5d6447c68d728b3",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-019",
       "sha256": "93d2c86aea6e41b3d66729ae01b1193a1623946f33623e3f2630333ac221f715",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-020",
       "sha256": "b4151c795e5887bced1ec449304391bff8b9ed5f33a4eab80d9b1d5685fecaae",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-021",
       "sha256": "c1acc6acd67e91739e2a7d5f6071d3c0046f5672243badfe5e5a2c4fa278f3a0",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-022",
       "sha256": "61b9cefe7f7fed00f2253994ae22c5f242c847e9818ef6a3a93d75c503d6293f",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-023",
       "sha256": "51a6548a4a59e0ddc8506bd20691277cfde6872598cc7c9cbec446994b7b2db2",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-024",
       "sha256": "c7cc53cb851243ce924f915303e3f75bee7a0d62b66d7d4f758a9e58e471e21e",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-025",
       "sha256": "8fa5dbba015e5286752a6c75b0f29f15046d53f67b76dda4e291ad84ee88c6f0",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-026",
       "sha256": "9153165e2a346702986d8ad0a5474d87c3c817e63f7bb990051b045ef7427bfe",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-027",
       "sha256": "34463faf5027f50e2af692c6532409875a2459a4a03825ad1e43935036d3b780",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-028",
       "sha256": "68df322c90f96bc3888e890f4114a667094257fde7fe454f5e5c8bd873be5aaa",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-029",
       "sha256": "a26cde785acd6f26fad4ada58d5a4836ca32d467b78c66b00e5114c9e9e6d740",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-030",
       "sha256": "8af4a209d3854089101268d909c16a540d6ffc7280014e01bfd171a63b79a577",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-031",
       "sha256": "698cabc30cf9c7a2bf9f259b6809e4f88d559e0bd7e123f7cbcdc62d2a3ab880",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-032",
       "sha256": "d9fc63466f39c8f4f13cc21692dca8758d7b2b42b1a2e98635a4933af6232f78",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-033",
       "sha256": "539d1d51ae0b2a2d1690ad0c5461615254eb5218cb67d42e3597c25cef809b7c",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-034",
       "sha256": "e4871ecd4d7f823b8c610dff67028ec04754d533bf6c710f8a856ccf6f36ce3c",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-035",
       "sha256": "de8009389996d72621ee7dca973a5076117c5f7c6c3e4901704cc45185dfb112",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-036",
       "sha256": "279a2280ff9cc333f732de411e245fac6a362f5b98a1f031b9fb78cbec94e6b7",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-037",
       "sha256": "f4a479b57e497ff50e1eb622730b09d5c77389f1b24fc02d0d8ad87a66bea468",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-038",
       "sha256": "2f27ab16b52138b02f230316b9b396843bdccf4909474318daa7eacfba1338ff",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-039",
       "sha256": "890e2a92a1b9d4e08f46b19afd9c7ccd19aef094c7084cb545dc748d42a3258c",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-040",
       "sha256": "59cb4c7a6aa9e58bcd78c7d809e324494f74e2db74767bb5bf9bb1927e82e438",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-041",
       "sha256": "dcd05ee6cadbe7a979bdfd982cd1e6cf4b3d173f93bc6df7cd3cd7334717061f",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-042",
       "sha256": "fdd728a1e06b27f9706231871d85b6cc7f44bcbb8cad1ce3249aa86b97a0f703",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-043",
       "sha256": "4cbbf7667bd86191b72bd6005d69e64ca8d0e1fe14471fd2b919cb416517ce37",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-044",
       "sha256": "392eebceffd24c4b2d208433f03076806c0cde156ae8386c2ca6404539c3af1a",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-045",
       "sha256": "3a9aad79a6ba69c3a932a6fbe36fbd79a4fbad9c060a281feff835f61045dbb8",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-046",
       "sha256": "7ee5e72aa11b0e670a9710e8083287532b41c85e5ad712d9daa8fc5b684eec0b",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-047",
       "sha256": "38503e1de750d500f6cb0b6d9d20df85a81043ca553cf0124daacc04282ccd42",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-humans:icon-048",
       "sha256": "64db31088108a25ea0acc7dc61fa4d86f143518521e8ba781cdbf6542d068593",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "assetId": "prepared-portraits-native-32-dwarves:icon-001",

@@ -143,6 +143,66 @@ public class AlacrittyAdventureSceneTests
     }
 
     [AlacrittyFact]
+    public void NpcFacesAndTerrainPicturesUsePixelsInMapAndJournal()
+    {
+        string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;
+        var fixture = JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Fixtures", "world_location_game.json")))!;
+        fixture["iconPack"] = "dcss";
+        fixture["formatVersion"] = NaviDnD.StorageFormat.Current;
+        fixture["narrative"] = JsonNode.Parse("""{"npcs":[{"name":"Аглая","gender":"female","met":true,"notes":"Хозяйка трактира.","attitude":"friendly"}]}""");
+        fixture["map"]!["entities"] = JsonNode.Parse("""[{"name":"Аглая","symbol":"AGR","position":[31,31],"color":[160,190,120],"hp":"8/8","image":"dcss/monster/human"}]""");
+        fixture["map"]!["entities"]![0]!["image"] = NaviDnD.Helpers.ArtPictures.Load("Dnd5e", Path.Combine(runtime, "ArtLibrary")).Find("Commoner", "creature").Single();
+        fixture["map"]!["objects"] = JsonNode.Parse("""[{"name":"Трава","symbol":"GRS","position":[30,30],"color":[100,180,90],"image":"delapouite/grass"},{"name":"Благовония","symbol":"INC","position":[30,32],"color":[180,140,90],"image":"lorc/incense"},{"name":"Тропа","symbol":"PTH","position":[29,31],"color":[160,140,90],"image":"delapouite/trail"},{"name":"Чаща","symbol":"THK","position":[29,30],"color":[80,150,60],"image":"delapouite/forest"}]""");
+        string fixturePath = Path.Combine(output, "npc-art-fixture.json");
+        File.WriteAllText(fixturePath, fixture.ToJsonString());
+        var start = new ProcessStartInfo(Path.Combine(runtime, "NaviDnD.Launcher.exe")) { WorkingDirectory = runtime, UseShellExecute = false };
+        Configure(start);
+        start.Environment["NAVIDND_TEST_WORLDSTATE"] = fixturePath;
+        using var launcher = Process.Start(start)!;
+        Process? terminal = null;
+        try
+        {
+            var watch = Stopwatch.StartNew();
+            while (terminal == null && watch.Elapsed < TimeSpan.FromSeconds(15)) { terminal = FindTerminal(runtime); Thread.Sleep(100); }
+            Assert.NotNull(terminal);
+            Thread.Sleep(2000);
+            Press(terminal, ConsoleKey.Enter);
+            WaitForInput(runtime);
+            int pid = GamePid(runtime);
+            string Panel() => string.Join('\n', GameConsole.ReadRows(pid, 39, 20, 150).Select(row => row.Length > 112 ? row[112..] : ""));
+            var remaining = new HashSet<string> { "Аглая", "Трава", "Благовония", "Тропа", "Чаща" };
+            for (int i = 0; i < 12 && remaining.Count > 0; i++)
+            {
+                Press(terminal, ConsoleKey.Tab);
+                Thread.Sleep(250);
+                string panel = Panel();
+                foreach (string name in remaining.Where(panel.Contains).ToArray())
+                {
+                    Assert.Contains(panel, c => c is '▀' or '▄');
+                    Assert.DoesNotContain(panel, c => c is >= '\u2800' and <= '\u28ff');
+                    ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, Path.Combine(output, "npc-art-" + remaining.Count + ".png"));
+                    remaining.Remove(name);
+                }
+            }
+            Assert.Empty(remaining);
+            Press(terminal, ConsoleKey.F3);
+            Press(terminal, ConsoleKey.F7);
+            Thread.Sleep(500);
+            Press(terminal, ConsoleKey.Tab);
+            Thread.Sleep(350);
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 0, 35, 150, "Аглая", 5000));
+            Assert.Contains(Panel(), c => c is '▀' or '▄');
+            Assert.DoesNotContain(Panel(), c => c is >= '\u2800' and <= '\u28ff');
+            ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, Path.Combine(output, "npc-art-journal.png"));
+        }
+        finally
+        {
+            if (terminal is { HasExited: false }) { terminal.Kill(entireProcessTree: true); terminal.WaitForExit(5000); }
+            terminal?.Dispose();
+        }
+    }
+
+    [AlacrittyFact]
     public void F11CyclesAll64ScenesAndWrapsToFirst()
     {
         string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;

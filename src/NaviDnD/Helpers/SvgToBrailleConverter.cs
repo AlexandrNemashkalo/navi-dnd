@@ -17,9 +17,9 @@ public static class SvgToBrailleConverter
     // Decode first-use pictures off the UI loop. Completed pictures are applied only by UI polling.
     public static Task PrepareAsync(string? imagePath, int widthChars = 36)
     {
-        if (string.IsNullOrEmpty(imagePath) || _cache.ContainsKey(imagePath + "|" + widthChars))
+        if (string.IsNullOrEmpty(imagePath))
             return Task.CompletedTask;
-        return _preparing.GetOrAdd(imagePath + "|" + widthChars, _ => new Lazy<Task>(() => Task.Run(async () =>
+        return _preparing.GetOrAdd(imagePath + "|" + widthChars + "|" + CatalogSearch.IconPack, _ => new Lazy<Task>(() => Task.Run(async () =>
         {
             await PrepareGate.WaitAsync();
             try { Convert(imagePath, "", widthChars); }
@@ -39,7 +39,8 @@ public static class SvgToBrailleConverter
         if (imagePath.StartsWith("bg3-lines/", StringComparison.OrdinalIgnoreCase)
             || imagePath.EndsWith(".mask.png", StringComparison.OrdinalIgnoreCase)) return null;
         if (applyPackMapping) imagePath = PackPictures.ForPack(imagePath);
-        string cacheKey = imagePath + "|" + widthChars;
+        bool pixelFallback = applyPackMapping && CatalogSearch.IconPack == CatalogSearch.DcssPack;
+        string cacheKey = imagePath + "|" + widthChars + "|" + pixelFallback;
         if (_cache.TryGetValue(cacheKey, out var cached)) return AppendName(cached, name, widthChars);
 
         if (imagePath.StartsWith(HeroDoll.Prefix, StringComparison.Ordinal))
@@ -63,6 +64,25 @@ public static class SvgToBrailleConverter
 
         try
         {
+            // An SVG without a bundled color replacement must not silently switch a pixel game to Braille.
+            // Spell cards opt out of pack mapping and retain their dedicated Braille renderer.
+            if (pixelFallback)
+            {
+                using var pixels = RenderSvg(fullPath, widthChars, widthChars);
+                if (pixels == null) return null;
+                bool Lit(int x, int y)
+                {
+                    var c = pixels.GetPixel(x, y);
+                    return c.Alpha >= 128 && 0.22f * c.Red + 0.72f * c.Green + 0.06f * c.Blue < 128;
+                }
+                var rows = new string[widthChars / 2];
+                for (int y = 0; y < rows.Length; y++)
+                    rows[y] = new string(Enumerable.Range(0, widthChars).Select(x =>
+                        (Lit(x, y * 2), Lit(x, y * 2 + 1)) switch
+                        { (true, true) => '█', (true, false) => '▀', (false, true) => '▄', _ => ' ' }).ToArray());
+                _cache[cacheKey] = rows;
+                return AppendName(rows, name, widthChars);
+            }
             // Each braille char covers 2×4 pixels.
             // For a square icon: pixelW = widthChars*2, pixelH = pixelW/2*4 = pixelW*2
             // But terminal chars are typically ~2× taller than wide, so for a square display:

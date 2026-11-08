@@ -676,16 +676,17 @@ internal static class MouseUiHelper
     internal static void SetSelectedMapEntity(DisplayConfig display, LegendDisplay legendDisplay, WorldState settings, int page = 0)
     {
         var entity = legendDisplay.GetSelectedLivingEntity();
+        string? portrait = entity is Hero ? null : NpcPortraits.Find(settings, entity?.Name)?.Portrait;
         bool known = entity?.MonsterKey != null
             && settings.Narrative?.KnownMonsters?.Contains(entity.MonsterKey, StringComparer.OrdinalIgnoreCase) == true;
         if (entity != null && known)
         {
-            SetSelectedMonster(display, entity, MonsterDatabase.Find(entity.MonsterKey), page);
+            SetSelectedMonster(display, entity, MonsterDatabase.Find(entity.MonsterKey), page, portrait);
             return;
         }
 
         var (imgPath, imgName, imgColor) = legendDisplay.GetSelectedEntityImageAndName();
-        SetSelectedImage(display, imgPath, imgName, imgColor);
+        SetSelectedImage(display, entity is Hero ? imgPath : portrait ?? ArtPictures.Prefer(imgName, entity == null ? "feature" : "creature", imgPath), imgName, imgColor);
         display.NotePage = 0;
         display.NotePageCount = 0;
     }
@@ -863,9 +864,9 @@ internal static class MouseUiHelper
     // is no header at all - all statblock is just one long text cut into pages, the picture is always first.
     // info == null - species is not identified (or monsterKey is not set for the gombyu creature): a regular
     // picture without stats, like any other entity without text.
-    internal static void SetSelectedMonster(DisplayConfig display, LivingEntity entity, MonsterInfo? info, int page)
+    internal static void SetSelectedMonster(DisplayConfig display, LivingEntity entity, MonsterInfo? info, int page, string? portrait = null)
     {
-        var monsterImage = ArtPictures.Prefer(info?.NameEn ?? entity.MonsterKey ?? entity.Name, "creature", entity.Image);
+        var monsterImage = portrait ?? ArtPictures.Prefer(info?.NameEn ?? entity.MonsterKey ?? entity.Name, "creature", entity.Image);
         if (info == null)
         {
             SetSelectedImage(display, monsterImage, entity.Name, entity.Color);

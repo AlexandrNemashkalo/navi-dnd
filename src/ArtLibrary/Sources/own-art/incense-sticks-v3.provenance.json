@@ -1,0 +1,22 @@
+{
+  "id": "own-art:incense-sticks-v3",
+  "file": "incense-sticks-v3.png",
+  "subject": "Incense",
+  "nameRu": "Благовония",
+  "width": 32,
+  "height": 32,
+  "sha256": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "Three separate tan incense sticks, glowing tips and a short grey smoke wisp, in a wooden holder; clean transparent gaps.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/incense-sticks-v3/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_16_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/incense-sticks-v3/prompt.txt"
+}

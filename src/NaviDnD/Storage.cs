@@ -398,6 +398,7 @@ public class Storage
         L.SetWorld(WorldState.Language);
         FillMissingStats();
         NpcVoices.Assign(WorldState);
+        Helpers.NpcPortraits.Assign(WorldState);
     }
 
     // Apply aliases once per reference; sequential replacement would corrupt symbol swaps.
@@ -1088,7 +1089,7 @@ public class Storage
                     var npcs = JsonNode.Parse(prop.Value.GetRawText())!.AsArray();
                     if (!_fromSave)
                         foreach (var npc in npcs.OfType<JsonObject>())
-                            foreach (var key in npc.Select(p => p.Key).Where(k => k.Equals("speechVoice", StringComparison.OrdinalIgnoreCase)).ToList()) npc.Remove(key);
+                            foreach (var key in npc.Select(p => p.Key).Where(k => k.Equals("speechVoice", StringComparison.OrdinalIgnoreCase) || k.Equals("portrait", StringComparison.OrdinalIgnoreCase)).ToList()) npc.Remove(key);
                     WorldState.Narrative.Npcs = PatchByIndex(WorldState.Narrative.Npcs, JsonSerializer.SerializeToElement(npcs), options);
                     break;
                 // The bestiary is only growing: the list from the GM is an addition to the known (species

@@ -196,4 +196,18 @@ public class StorageMigrationTests : IDisposable
         Assert.True(File.Exists(Path.Combine(Storage, "update-error.txt")));
         Assert.Contains("migrations.log", Directory.GetFiles(Path.Combine(_root, "logs")).Select(Path.GetFileName));
     }
+
+    [Fact]
+    public void VersionThreeReservesPortraitAndPreservesAssignedFacesWithBackup()
+    {
+        Write("game1.json", """{"formatVersion":3,"narrative":{"npcs":[{"name":"A"},{"name":"B","portrait":"portraits/custom.png"}]}}""");
+        var result = StorageMigration.Run(Storage);
+        Assert.True(result.Ok);
+        Assert.NotNull(result.BackupDir);
+        var save = Read("game1.json");
+        Assert.Equal(StorageFormat.Current, (int)save["formatVersion"]!);
+        Assert.True(save["narrative"]!["npcs"]![0]!.AsObject().ContainsKey("portrait"));
+        Assert.Equal("portraits/custom.png", (string?)save["narrative"]!["npcs"]![1]!["portrait"]);
+        Assert.False(StorageMigration.Needed(Storage));
+    }
 }

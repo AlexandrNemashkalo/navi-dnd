@@ -1,0 +1,37 @@
+{
+  "bindings": [
+    {
+      "id": "engine:terrain:Thicket",
+      "category": "terrain",
+      "names": ["Thicket", "Чаща"],
+      "assetId": "own-art:forest-thicket-v1",
+      "usage": "place_view",
+      "engineAliases": ["delapouite/forest"]
+    },
+    {
+      "id": "curated:item:incense",
+      "category": "equipment",
+      "names": ["Incense", "Incense sticks", "Благовония", "Благовонья", "Благовоние", "Ароматические палочки"],
+      "assetId": "own-art:incense-sticks-v3",
+      "usage": "item",
+      "engineAliases": ["lorc/incense"]
+    }
+  ],
+  "npcSpriteGroups": {
+    "dcss/monster/human": "human",
+    "dcss/player/base/human": "human",
+    "delapouite/person": "human",
+    "delapouite/peasant": "human",
+    "dcss/monster/elf": "elf",
+    "dcss/monster/deep_elf": "dark_elf",
+    "dcss/monster/dwarf": "dwarf",
+    "dcss/monster/deep_dwarf": "dwarf",
+    "dcss/monster/orc": "orc",
+    "dcss/monster/goblin": "goblin",
+    "dcss/monster/halfling": "halfling",
+    "dcss/player/base/elf": "elf",
+    "dcss/player/base/dwarf": "dwarf",
+    "dcss/player/base/halfling": "halfling",
+    "dcss/player/base/draconian": "dragonborn"
+  }
+}

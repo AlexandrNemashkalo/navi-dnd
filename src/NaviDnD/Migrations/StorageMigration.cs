@@ -167,7 +167,20 @@ public static class StorageMigration
         Func<JsonObject, JsonObject> World,
         Action<JsonObject> Location);
 
-    private static readonly Step[] Steps = [Migration1.Step, Migration2.Step, Migration3.Step];
+    private static readonly Step[] Steps = [Migration1.Step, Migration2.Step, Migration3.Step, Migration4.Step];
+
+    private static class Migration4
+    {
+        // 3 → 4: reserve the persisted face assignment; the loaded art pack assigns it on first load.
+        public static readonly Step Step = new(SaveFile, notes => notes, hero => hero, world => world, _ => { });
+        private static JsonObject SaveFile(JsonObject save)
+        {
+            if (Get(save, "narrative") is JsonObject narrative && Get(narrative, "npcs") is JsonArray npcs)
+                foreach (var npc in npcs.OfType<JsonObject>())
+                    if (Get(npc, "portrait") == null) Set(npc, "portrait", (string?)null);
+            return save;
+        }
+    }
 
     private static class Migration1
     {

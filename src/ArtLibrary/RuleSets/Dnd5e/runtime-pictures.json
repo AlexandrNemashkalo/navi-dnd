@@ -4101,6 +4101,21 @@
       }
     },
     {
+      "id": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+      "path": "Runtime/Images/7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644.png",
+      "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:forest-thicket-v1",
+      "description": "Dense overlapping green foliage, three gnarled trunks and tangled roots blocking passage.",
+      "provenance": {
+        "member": "forest-thicket-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/forest-thicket-v1/original.png"
+      }
+    },
+    {
       "id": "790ce18b3544260b8ab10a31969e52dc84f0cbf012dc7d99367f3785b62cea2d",
       "path": "Runtime/Images/790ce18b3544260b8ab10a31969e52dc84f0cbf012dc7d99367f3785b62cea2d.png",
       "sha256": "790ce18b3544260b8ab10a31969e52dc84f0cbf012dc7d99367f3785b62cea2d",
@@ -8429,6 +8444,21 @@
         "sourceKind": "preview_extraction",
         "licenseStatus": "not_recorded_in_staged_collection",
         "originalPaletteRecovered": false
+      }
+    },
+    {
+      "id": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
+      "path": "Runtime/Images/f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7.png",
+      "sha256": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:incense-sticks-v3",
+      "description": "Three separate tan incense sticks, glowing tips and a short grey smoke wisp, in a wooden holder; clean transparent gaps.",
+      "provenance": {
+        "member": "incense-sticks-v3.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/incense-sticks-v3/original.png"
       }
     },
     {
@@ -21108,6 +21138,38 @@
       "usage": "prop",
       "imageId": "dceaae4ddf8b6d6d70f827459a51ef9eb2735bd21b33aaf39344f3a913fddf4e",
       "match": "visual_representation"
+    },
+    {
+      "key": "engine:terrain:Thicket",
+      "names": [
+        "Thicket",
+        "Чаща"
+      ],
+      "categories": [
+        "feature",
+        "terrain"
+      ],
+      "usage": "place_view",
+      "imageId": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+      "match": "visual_representation"
+    },
+    {
+      "key": "curated:item:incense",
+      "names": [
+        "Incense",
+        "Incense sticks",
+        "Благовония",
+        "Благовонья",
+        "Благовоние",
+        "Ароматические палочки"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
+      "match": "visual_representation"
     }
   ],
   "engineAliases": {
@@ -21119,864 +21181,1069 @@
     "delapouite/fireplace": "a71f40526c2ed948bcbc873ccdb2987730e117cbd3398315cb5b584ce4fbcc3d",
     "delapouite/barrel": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
     "delapouite/star-altar": "1abd7c37231a2c6772ddbf5e08962e40078c308d3b428b882daaceee29ad186e",
-    "delapouite/park-bench": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713"
+    "delapouite/park-bench": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
+    "delapouite/forest": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+    "lorc/incense": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
+    "delapouite/grass": "4abe6001cd9d13f96895c65d49a31b76603ead7211e8e6ded9d3334c284d2447",
+    "lorc/oak": "a460cb1f9d355a91869f12cf87c867a05bef2e312aae13cb610dcb0715fbbf4b",
+    "lorc/mountains": "a22e2b2e3beef040173ab52113f93577d998652a11dd355982558a7d01632399",
+    "delapouite/stone-stack": "12eaaf1a31e912811c07de885e12440ea143d75fe97db52fb8852d5fe15a9aab",
+    "delapouite/stone-pile": "a22e2b2e3beef040173ab52113f93577d998652a11dd355982558a7d01632399",
+    "lorc/waves": "5193f5526ddc6cfff42759efa2f1c48b3b1c85b8d0477dc6dd4215db35fcb6b6",
+    "delapouite/trail": "3acfc826601c053b9792670d9b9dde709873ce20db95b6f45cb00957ec731a54",
+    "delapouite/desert": "91ed57fe11c488c5218cdb1701ae9e20adaa4cadb4784bab5081105a22b2d1de",
+    "delapouite/sandstorm": "91ed57fe11c488c5218cdb1701ae9e20adaa4cadb4784bab5081105a22b2d1de",
+    "lorc/snowing": "97278756f137f2a51f3d856212797f7d611320ec539b8b74d4aa97703c9b6c51",
+    "lorc/cracked-glass": "d9b8692f8c423ba8a82538b5f96f7bec6ff9070fa704067c0745b0ff9bd5b792",
+    "lorc/stone-block": "6ef30dd9dd204cc9ef500311691fc97756a35c2fa2af416d5a90587cf670d12d",
+    "delapouite/vines": "45cef4330b4c9ed6bddd0584553d9ee736269eaf06a4a39940cffe25bf3cd929",
+    "delapouite/3d-stairs": "3bd84b18c0ad24584cb80dd0948908c91546cb0364c00359b6fa75b4574482c9",
+    "delapouite/ancient-columns": "f44d71d8b322e3b7f1c3cee2be0858cd036f86fcca14ad883ea6438228661998"
   },
   "portraits": [
     {
       "imageId": "5583f65daed1148ce4013b0b958f917cb36749999f0c7e73a5b568abb51a9564",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "082d0b67ad90b59dafa90781e6740f79e6789ca01cfbee57a56e85fde014d5e4",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "c8cf4aa531333630c0aa8a32a9f12d5b575713e8ce2f0887afa1813f5c38b5de",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "64e11a30201d714f7e2ae11c5cb6dc224ceea86cbb319e9d7471e625dea82203",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "ccb76a7dd70433705aa9a198ef6cd2a46804ec74d938ee62fe67e7ed2b23f590",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "e2ccb69ef01860ae93358e690399ea4283677d7ff2d3843a75556a8eb4b206c3",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "27f4378ac1f92cded9804ec2ad238cad87051510da807584f60be5eefb239c46",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "b990bc336a398b8a69ab2033d16f3ab74d284be738e0d71c8786de333a1380f8",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "bef749352e99e28c6549230e5fb7aba923d47a566cc49f858c4dd985536e6f9b",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "e1e5936778c147ff6053db076cf0748466cbf8bca30218ff4cb595a27374f82d",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "bf3dfeeff3cb4a363d62f0153dc0ad49b1664952e9441d0c2bcd7d5ea4a71b12",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "92989dd56f2a07cd8f5bfa7472cfb9d9a85a6e2e6721876fadbed6a0854e3cfd",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "16bc2681a47fc3944c5731ddccf1f286c6823ef89fddf6b80692f848b1f1c6cf",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "815c7c75e5b866ee32c0e2ffa2eb2690c454d048bebc91e964d7552437db1084",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "d504b38423130aaf1cdf0506232e7608c62eaefce71ae165aa96b522a09c4857",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "72c61703a17f7bf3e874490a4e3faa3eb68824d504fb4d5239760c3de04f9f36",
       "framing": "head_shoulders",
-      "group": "elf"
+      "group": "elf",
+      "gender": "unknown"
     },
     {
       "imageId": "cd57082f6259762754fedb863c11b82f00aa75a2584af1928c36655f654aac82",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "0353fb74164560024708609d7dcdcba4320ba2de1a1b1deea36b0696cc4a3872",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "52ff88c29a58576b8381b6cba0f5001198994f6db57dcd9cbc275d0445dee58f",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "f7ba564f1095f0bf7d2a8e8160cab0adec737731103b2d0272940e352be69951",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "db3f17d05f9db996096bb711e2bc3dc78048159e8a321e5531564af89a086276",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "70df25e6ab4083c476cc2c25657575885734bf372264a3a9dd9f312437cd25ca",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "8fc1063181f2cc0938c6c372dc95aa63ade2f399f503cf066fcaede2d738ad27",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "5ff10adaeae82024ea3152da8594d15a6c7cb4a9a6f55c673f585428be756d48",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "3dee63163787d342e78985fa38890c60d1bb0b94ee564301cea9efeb941e6c9f",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "ded4c7d9474b0220d796f46cc45346fb3eef29cdf65c32a6a1de8dcd81c51b82",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "cdcb3ce4c6cf0b54a7e59674fd4fb4690c912c074ed1135e6875af7082fad2ee",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "6f665d159c6eb6b51616510ece4046519cf4e9228a28e4acff23ff342f816aad",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "b94b11688ce0b7edb85f516473fa9f0f7df259555166a87588f92948bfa3ba01",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "844e35e2856461f48ca8fc0510ec7269e791863ace5bce73476f349f2eb2c2a5",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "e282b37700fe3998a6700e814523973fd8e0d4021551a74b825d6b1f8f6819cf",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "4192dd36ae8aba80fda42d2379994c6fcd4efba9fe6662f604f185eb80ea19f6",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "109a8771e1c07ae2b03d40f351ada30928571586992384321b61a7e0ac2475d0",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "8ede5acae2fb757420661d98e07289e80d981f1f0770b0a3d5d6447c68d728b3",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "93d2c86aea6e41b3d66729ae01b1193a1623946f33623e3f2630333ac221f715",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "b4151c795e5887bced1ec449304391bff8b9ed5f33a4eab80d9b1d5685fecaae",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "c1acc6acd67e91739e2a7d5f6071d3c0046f5672243badfe5e5a2c4fa278f3a0",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "61b9cefe7f7fed00f2253994ae22c5f242c847e9818ef6a3a93d75c503d6293f",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "51a6548a4a59e0ddc8506bd20691277cfde6872598cc7c9cbec446994b7b2db2",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "c7cc53cb851243ce924f915303e3f75bee7a0d62b66d7d4f758a9e58e471e21e",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "8fa5dbba015e5286752a6c75b0f29f15046d53f67b76dda4e291ad84ee88c6f0",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "9153165e2a346702986d8ad0a5474d87c3c817e63f7bb990051b045ef7427bfe",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "34463faf5027f50e2af692c6532409875a2459a4a03825ad1e43935036d3b780",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "68df322c90f96bc3888e890f4114a667094257fde7fe454f5e5c8bd873be5aaa",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "a26cde785acd6f26fad4ada58d5a4836ca32d467b78c66b00e5114c9e9e6d740",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "8af4a209d3854089101268d909c16a540d6ffc7280014e01bfd171a63b79a577",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "698cabc30cf9c7a2bf9f259b6809e4f88d559e0bd7e123f7cbcdc62d2a3ab880",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "d9fc63466f39c8f4f13cc21692dca8758d7b2b42b1a2e98635a4933af6232f78",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "539d1d51ae0b2a2d1690ad0c5461615254eb5218cb67d42e3597c25cef809b7c",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "e4871ecd4d7f823b8c610dff67028ec04754d533bf6c710f8a856ccf6f36ce3c",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "de8009389996d72621ee7dca973a5076117c5f7c6c3e4901704cc45185dfb112",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "279a2280ff9cc333f732de411e245fac6a362f5b98a1f031b9fb78cbec94e6b7",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "f4a479b57e497ff50e1eb622730b09d5c77389f1b24fc02d0d8ad87a66bea468",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "2f27ab16b52138b02f230316b9b396843bdccf4909474318daa7eacfba1338ff",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "890e2a92a1b9d4e08f46b19afd9c7ccd19aef094c7084cb545dc748d42a3258c",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "59cb4c7a6aa9e58bcd78c7d809e324494f74e2db74767bb5bf9bb1927e82e438",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "dcd05ee6cadbe7a979bdfd982cd1e6cf4b3d173f93bc6df7cd3cd7334717061f",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "fdd728a1e06b27f9706231871d85b6cc7f44bcbb8cad1ce3249aa86b97a0f703",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "4cbbf7667bd86191b72bd6005d69e64ca8d0e1fe14471fd2b919cb416517ce37",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "male"
     },
     {
       "imageId": "392eebceffd24c4b2d208433f03076806c0cde156ae8386c2ca6404539c3af1a",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "3a9aad79a6ba69c3a932a6fbe36fbd79a4fbad9c060a281feff835f61045dbb8",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "7ee5e72aa11b0e670a9710e8083287532b41c85e5ad712d9daa8fc5b684eec0b",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "38503e1de750d500f6cb0b6d9d20df85a81043ca553cf0124daacc04282ccd42",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "64db31088108a25ea0acc7dc61fa4d86f143518521e8ba781cdbf6542d068593",
       "framing": "head_shoulders",
-      "group": "human"
+      "group": "human",
+      "gender": "female"
     },
     {
       "imageId": "ae95c019cbbd2065180adbb8d2ccc2d4c042a4e20923cff7b7f98069eff34ac1",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "d5da495795365803c51af3e5314e95dc88048c19243843274334e1590db61f61",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "d34d57c4d2b88f84ad160b9dd0a4287cf6ee0d05299041991fbcb9211f8fc829",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "042b1da6c02f395c5c161aaf575eee7633cb290fb1549f18015a11045195cd3e",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "7830ef72dc939d2a131b29ac31b92551c6028398516335484b7ce34b97fb4918",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "f6a2d72f3eb7eb9323eb1d66aeaaf5faf9e8d9404ddfdbb9dd0da318fd8fab5c",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "d84a83937e1cc4d98118ba062e59073375e450ff4de0b57c3608f5851406fcff",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "0fc5deb06d381ac9744c3539c0be464101400de27fd75ada76eeb7ee52082a0c",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "e9a8e6fe6920e3d2a0be58fe74fad8e992b7465b34f9e024a7e0cf29713e3aaa",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "bb09d2613d966ecce6868afc22cdd0281889ea8b93e1a8c7d35f56947d9e7ace",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "b7c0113bc5c942bf5baf71586d55f7bbbc1e6532504ad272c0a9594ebb1d7548",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "f0d550afb0912e63e12339f5a25e03ebc8a8b84f39fb5909e23846ed124b0b64",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "7f5628289e54b7f0ec5bc249ea04c3de8b43a9a7c6df23b83e7ccf65f726cb6a",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "12a378cb9cf24ce58315a5f8c01d46fd3fda985fb6b77b59def6fda09f2895f9",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "b8eb4787bb02c897ba92660e7980f1ac66b06da1aa2f8457a49654a46392805b",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "c6e8431d382f4cd9dd5ae2483fdf833a48a3ebd0a3caa79ef73e91459ff4e0fc",
       "framing": "head_shoulders",
-      "group": "dwarf"
+      "group": "dwarf",
+      "gender": "unknown"
     },
     {
       "imageId": "2a70b16b6097c0d17a2f98a4569e1d833f60dd60f2bba61348659936c0d10969",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "f5b4763321535ad198256c31e4b28243f88962423262edc4d0acc9e8afae63f3",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "278b35c124b1456042ec35e6365129d8a10ed91bf5d476b3c5c631e89d62f38b",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "7c703b4e97721cba2f45adab0c3d2203f323b392a94de0f0e51da2ebd53b39f4",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "8475800f137d365b187d0253411138aec76041200d597681a850a0331997cea5",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "fe54d943185ea85b4a0c813a47c2afb6297c0abf3f2ff7e8c461974c0828d3da",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "61d03c062755836c89e47c01b2a72b78f3002b8921e802f57730579a5580658f",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "42466b770a73bdc31dd9665bd14d0442d760e4a957820698504e91fbe0038391",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "84c59b54bb78686b3eac748c2b64bce91e90545b8246432b8607c3938d469f1a",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "c976fafc0a92c1f55b005b4f8da14117af3b4d5b7e4b26461f6b5d17a7f2d7ae",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "cd4937e2d6c063f1cb2bc5eae259effcceb4b5d61e4fbc57f2a738c0d70fe49e",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "5febbafa939e89129a10d9e5ce40b57209b6cb7500717550136a9ddc75b20bde",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "2085cb6bdc38cf1f17dffd41b05f88057441add1e980e7794833240fbef8391b",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "49f3a396b4a13ed482c5dbd9511f69eed5efe2a48105b04a9e5bd114c617da57",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "fc9fd15cc17e003fd9a21a533b8da8ef04da8d612fa199e786a9629ea56a206e",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "c8f88f60763c6e3aeb18177769254ae9a14d34e81eef52eccbcbc6b51e5d5c32",
       "framing": "head_shoulders",
-      "group": "dark_elf"
+      "group": "dark_elf",
+      "gender": "unknown"
     },
     {
       "imageId": "1f86659442e8ae042285260f0f234239c4c0a328ee1a6426cfb32bd5da535a5a",
       "framing": "head_shoulders",
-      "group": "orc"
+      "group": "orc",
+      "gender": "unknown"
     },
     {
       "imageId": "2b926059ef09c9c3996b72d48b2c4cf1262cdcd4d167c7e021cd144b6d71f027",
       "framing": "head_shoulders",
-      "group": "orc"
+      "group": "orc",
+      "gender": "unknown"
     },
     {
       "imageId": "c869291cf248477a3664993e046c71970b4d737529991c98f95f7c7d9c12cdaf",
       "framing": "head_shoulders",
-      "group": "orc"
+      "group": "orc",
+      "gender": "unknown"
     },
     {
       "imageId": "e6b2b46804d4ad42a1952d3ca7a5ce5afdc1508024281d2031880cc55101a8db",
       "framing": "head_shoulders",
-      "group": "orc"
+      "group": "orc",
+      "gender": "unknown"
     },
     {
       "imageId": "45cf215231dea71f7f2314b40cbd2482ba499d2719f7fa730599f8c4ab6e4814",
       "framing": "head_shoulders",
-      "group": "orc"
+      "group": "orc",
+      "gender": "unknown"
     },
     {
       "imageId": "2e9cded6c762a41fe6c64244d08eec395da7825b2d6721967b9599eb0eb089fd",
       "framing": "head_shoulders",
-      "group": "orc"
+      "group": "orc",
+      "gender": "unknown"
     },
     {
       "imageId": "469e8481cfc12f67c2d6312ed83129802cb341a5b24f093a92168dbf7a6a5227",
       "framing": "head_shoulders",
-      "group": "orc"
+      "group": "orc",
+      "gender": "unknown"
     },
     {
       "imageId": "af38f25f7d3b0db6479decd1666a1a66ed0acbd50cdc895249a5a11fe79fd70f",
       "framing": "head_shoulders",
-      "group": "goblin"
+      "group": "goblin",
+      "gender": "unknown"
     },
     {
       "imageId": "b815b077f1c151f7f1c21976474a2fe44d2854f4bdba577c2c9acd1fe1fa2947",
       "framing": "head_shoulders",
-      "group": "goblin"
+      "group": "goblin",
+      "gender": "unknown"
     },
     {
       "imageId": "ebaa54029afe1355f46f690da0ca468f9fe4f5f9bd6a7f75bcd705daeb5e61d0",
       "framing": "head_shoulders",
-      "group": "goblin"
+      "group": "goblin",
+      "gender": "unknown"
     },
     {
       "imageId": "23b5085fe59b2806c267fe65a093658b3fde359ff08eb5330054c4ffdb36722c",
       "framing": "head_shoulders",
-      "group": "goblin"
+      "group": "goblin",
+      "gender": "unknown"
     },
     {
       "imageId": "ab010698ef1de6b29f09de605c665d596dc241db808963c1cda23574db7a7d5b",
       "framing": "head_shoulders",
-      "group": "goblin"
+      "group": "goblin",
+      "gender": "unknown"
     },
     {
       "imageId": "68ff11df1753ebf7cf59d212ce84b3c57e17bfa5d948aecf3331b8ab7e919d92",
       "framing": "head_shoulders",
-      "group": "goblin"
+      "group": "goblin",
+      "gender": "unknown"
     },
     {
       "imageId": "6572255095ecc330f66e2dfef96d1143741676af3460b56d7b3add4c5cac3399",
       "framing": "head_shoulders",
-      "group": "goblin"
+      "group": "goblin",
+      "gender": "unknown"
     },
     {
       "imageId": "6fb7ee5aee6861a2748d5c6786f990864812a7bf1ec24fec70d027fe27214335",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "5e9836c1ff9653e98232ea2b8a2e4e1e7deba3dfb89e65e62e986bedaac2ac69",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "2685210a2dcb38164749caa70dd5aa3df240b85aa33f7c853fddfd7681cdcda1",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "6293af38af3a73324aa987a9046b09f445f166ef0efb18003a249d276e4372a0",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "c45dba1096d5bc84dab739ef8ed0d5e10bb4e8e2cf76932ba9912f9655c3e239",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "ab6bd97b19994bfc09b6af94577dda6267dcb66d85b578c6ee06d74a2f358a70",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "bee0acf5e342362afc2bb3b9fb875e1448797c9dae958847cfb768ce3a196c6f",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "3132ab0a59f78f858191cd7d6e57ea4c251f7da9b768fd7dcf2a3c26046dac36",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "d5b95ab11da9b7091b99f329ee88eb4132a00af152f532b047ba8d1b6e0cee48",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "45a6626cfd5ae4076a80ecc164c9813d5a6440699a2e3af1c4a4d3fe32ba16a8",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "e04a1b620927081ef8111e390c35fe96f0a5320b8973e3c4c9ec06ce066bce2e",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "d1d10c0793443e59107ecf30c3dd57ec2bd5ef71163747cf2903c285b2fdee12",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "e35ee575a9cda276186950d808e0d791676c4f6478cd2b4d6b8b21fc80f04d4d",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "9decc65566bf6d340fd6b005ad8f27d0709b06816395786616f3bc78ab4ff02d",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "984ff093cfe8435e6a0984d0ece78dd801598639e6ac58c0e90726a6a2f4da98",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "ac71f867ee1c8dd9895df8b884c4c56d858067306324f2d149be14392b02d9cb",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "f860e9a126bd90cf37ab8246a1254bf208de992191530ddf38d84044f07f62b3",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "10720ead93ebe75be4503399cef833c67da37d5c7f7afda8abbb681995dbe1e0",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "858207ebd21b20fa01c4a54048a4368a1544f0d4218c8f061c87434bb8c3a168",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "5df5199f0f358412fa0f8e22aca639230990945860040177aeb70b64f9c55214",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "09f84acc41a3ce22d54be5be4d8f9fa2a10d7690911b8cef2105b35f154037b6",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "ea9a432c32566d6fe49d4e3144a1745a5efe150dd7352ecbc6874c9c0acb063a",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "2107b6b399eadfa82fbd1615efbe7eec12e0f7b14b0851daa9bf07161db18052",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "d435442e92a070bdb0333734e827dc5fd676a5fd0066465d49bfc72cb6defbc4",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "1e5b0d01b6ee0db08ac722ac00809d703e04349668689fd22a4d7d35db8c42fa",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "3ff3a46ff25e0a2acc287fafb8138df436771cd07f30445effd2db0064e5cc31",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "ab6311bcb88cdb5885285b42f3cd404cfe1a85059f06a9bc8a5272598b299993",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "808f40f34b20061eae30ffa6bd3371ea5fb92724c7c3eea80a0a3cbb5cb80b4d",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "e2743c9e8fa813d9602e99b742b57f383734ce490749dcc35a80d6cf6e32bb62",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "319a2f78abae984a7bcf7cc672a62bfd6a7a708f2d21ebb73f4582ec4febec25",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "7df7bb666dfe47888c32a248b46cda7706fa937da62fe3404396dbe80689a20f",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "51d1158ddc595a714a6537fcf0033220ec4434e3d4d1bdf5bb6462d58835db6e",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "78eb818caf0e49923a1d4fb65e153e100b030b422cbc45be9bcb9a21a8ac0959",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "85fb534a0378c1edd676a94330a8639627ddf16d0dfa48225d7392d98faf3fc5",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "fb1bffe953a75d473dbbb9789d1fc51d61b080d63f4aa02ba7b2829a9fdc74ab",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "1120fd925c2fb9409355f0f46b23b1a7be7f438b2af2e09e27358c98c53f963d",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "8b6e8d258313c46253a6acd3dbd97e2637f8edd676ef6506e7f6084572bda900",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "0d0025ef836d95bee602ed5a4f315b5647e5a385d19c7b2371232a1e374a6f1c",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "a65165b064ea926720ef07bb015a1a6f0128d8e291153fab1d0bf31e4e01af7a",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "b3e76ef41b807af60106565beafdb227364682a7276821e5d9867e0a3011edb2",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "c959ea5c979d6a1b3d1e860bef0b85dec495f616b29efe111531e52640434f3b",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "ed0643362c3506c53e977f59267c23e0ebb8d94d0e442fa42cd9163bde41a9ce",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "cc3c8602784ee0a1008d6a634d09cab26d0a6074106c747fa6ffb9928cf4d6d4",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "71858e7d6b7ef961c02319905cbe200741401ba377d388f19a7532d7aea1668b",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "a3e50f2a54e808fb799e36225e329d9da1b8cb75def0220503ce56f376102b98",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "31c85dddedb5fd69e6f8a6f72a111e02d62e0547bb2e3c1f4839a4cfcccf97d1",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "fa2f7d99a0691830d03241ca1f538fb6b3b2f56c065edf7b7558938da8653657",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "0f4b1475a6889e6e5d6313de905a4dd864240aa3e01d45954d7311c3339aaa68",
       "framing": "head_shoulders",
-      "group": "halfling"
+      "group": "halfling",
+      "gender": "unknown"
     },
     {
       "imageId": "566870cfab3e9ab823d8df131254eceb2aae44e274580b62a5569ea7539cda13",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "110d43b06ca3d13f7b0cabfc5fffb159dd5725059406d1b95bb4e9bb55358cb0",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "0391f1fcfad052ebebd63c82ad4a8ce74d6b8f6b07bf3cc5b81843cfad567cfa",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "e8e712b291346c9540eb384afcf531983d29a8624c59d142ba27287a0c4b76fe",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "1487f6fae74465e26a3dbc56a8137dfb09220b119972d84b052fd8c08f7ad9e8",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "1f5d3a1332bd0f65bde236ebf183fca8325ce86ce9a4f398355cd6c10765b8eb",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "9fe34774d8aa4a5f4790be87de67abd34295d3136cb8f507f9cab9075c1f55bf",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "eecfea90d2c433cad234c0895950caa5c523f59749e3ff579078e2140eb4afe3",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "88a66d26a0255980c06bedfc175daedaa60b064133d2ed9d31de8ee55dedbb36",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "48132ebedaede4da373937e860f9c6bf8fb0854582225a8ac0b3f38ea5c44e91",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "1c56eae503d2839826e87c7a076184379ae795c61c3508de49e124cbd6884373",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "212047f224dfb579ef867d9a611d9609f9c3b0a9d967226625673d29518878d7",
       "framing": "head_shoulders",
-      "group": "tiefling"
+      "group": "tiefling",
+      "gender": "unknown"
     },
     {
       "imageId": "5026e366dcab14bec1ac92810f201055a3f795eb00d2aee628b3bd46dd5864da",
       "framing": "head_shoulders",
-      "group": "dragonborn"
+      "group": "dragonborn",
+      "gender": "unknown"
     }
   ],
-  "revision": "ec303c3e2638c10f802680ed9a4deefec86008fc94d675a7378fc23c2205294f"
+  "npcSpriteGroups": {
+    "dcss/monster/human": "human",
+    "dcss/player/base/human": "human",
+    "delapouite/person": "human",
+    "delapouite/peasant": "human",
+    "dcss/monster/elf": "elf",
+    "dcss/monster/deep_elf": "dark_elf",
+    "dcss/monster/dwarf": "dwarf",
+    "dcss/monster/deep_dwarf": "dwarf",
+    "dcss/monster/orc": "orc",
+    "dcss/monster/goblin": "goblin",
+    "dcss/monster/halfling": "halfling",
+    "dcss/player/base/elf": "elf",
+    "dcss/player/base/dwarf": "dwarf",
+    "dcss/player/base/halfling": "halfling",
+    "dcss/player/base/draconian": "dragonborn"
+  },
+  "revision": "0d4d118bfbfe4b16ba2bee2fb3dad60e9e74e35c5184440a3298dc49a457f768"
 }

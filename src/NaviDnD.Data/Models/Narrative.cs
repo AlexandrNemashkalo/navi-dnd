@@ -59,6 +59,7 @@ public class NpcRecord : IPatchable
     // Stable keys; gender is supplied as a fact, voice and pitch are assigned only by the engine.
     public string? Gender { get; set; } // male | female | null
     public NpcSpeechVoice? SpeechVoice { get; set; }
+    public string? Portrait { get; set; } // Engine-assigned stable face; excluded from model context and patches.
 
     /// <summary>Attitude towards the hero: friendly / neutral / hostile / unknown</summary>
     public string Attitude { get; set; }
