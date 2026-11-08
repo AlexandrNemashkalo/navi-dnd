@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-lion-v1",
+  "file": "batch100-lion-v1.png",
+  "subject": "Lion",
+  "nameRu": "Лев",
+  "width": 32,
+  "height": 32,
+  "sha256": "538ff7e58a886d30f1f0234664b68c8856abd77dfca6865f48a49972230f7942",
+  "usage": "map_actor",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.map_actor.32",
+  "descriptionEn": "A complete lion with recognizable species anatomy and characteristic silhouette, natural colors, side or three-quarter view.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-lion-v1/original.png",
+  "sourceDimensions": [
+    1295,
+    1214
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-lion-v1.json",
+  "batch": "hundred-20261107"
+}

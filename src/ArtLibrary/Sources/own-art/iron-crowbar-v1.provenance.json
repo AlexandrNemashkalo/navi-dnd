@@ -1,0 +1,22 @@
+{
+  "id": "own-art:iron-crowbar-v1",
+  "file": "iron-crowbar-v1.png",
+  "subject": "Iron crowbar",
+  "nameRu": "Железный ломик",
+  "width": 32,
+  "height": 32,
+  "sha256": "df05954b163d26fd1be219440a0790fef751a5b7ab1f156d1abc3b865526235d",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "Complete dark iron pry bar with a hooked end and a flattened tip, shown diagonally. Exact 32x32 prepared generated image.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/iron-crowbar-v1/original.png",
+  "sourceDimensions": [
+    1262,
+    1246
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_8_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "own-art:sea-symbol-32x32",
+  "file": "sea-symbol-32x32.png",
+  "origin": "Pixel derivative of lorc/at-sea.svg. Icons made by Lorc.",
+  "sourceKind": "svg_derivative",
+  "sourcePath": "src/icons/000000/ffffff/1x1/lorc/at-sea.svg",
+  "sourceSha256": "5cf872140e49f2b3556b99426b6064bda11c57531edee471cb96059519508e5c",
+  "license": "CC BY 3.0",
+  "licenseRef": "src/icons/license.txt",
+  "author": "Lorc",
+  "subject": "Sea / pixel symbol",
+  "usage": "biome_view",
+  "width": 32,
+  "height": 32,
+  "mode": "RGBA",
+  "sha256": "2c1a99125e2428193116308f1fc4fd8eb36be91310008d3cef8482d473408518",
+  "processing": "SVG coverage rasterization; BOX to 32x32; binary threshold 128; two solid colors, no antialiasing.",
+  "artApproved": false,
+  "styleId": "fantasy.pixel.landscape-symbol.32",
+  "framing": "landscape_symbol",
+  "descriptionEn": "Circular sea symbol with two rows of waves and an open horizon."
+}

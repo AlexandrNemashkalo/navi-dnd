@@ -1,0 +1,13 @@
+{
+  "index": 35,
+  "key": "batch100-mountains-v1",
+  "category": "biome_view",
+  "name": "Mountains",
+  "nameRu": "Горы",
+  "usage": "place_view",
+  "transparent": false,
+  "description": "Two angular gray mountain peaks with snow caps rising above a green foothill and blue sky.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: Two angular gray mountain peaks with snow caps rising above a green foothill and blue sky. Opaque square landscape, eye-level view toward the horizon or distant opening, foreground at bottom, distant scenery above. No overhead map view. Fill the square.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-345541d7-3f89-44ec-8dab-0bee803d1eb3.png",
+  "status": "generated"
+}

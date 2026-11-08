@@ -1,0 +1,18 @@
+{
+  "id": "own-art:sea-horizon-32x32",
+  "file": "sea-horizon-32x32.png",
+  "origin": "AI-generated with OpenAI image generation; requested by the project owner",
+  "createdDate": "2026-11-06",
+  "subject": "Sea / horizon view",
+  "usage": "biome_view",
+  "width": 32,
+  "height": 32,
+  "mode": "RGBA",
+  "sha256": "4b56785538971f88a398f81cebff6e19faaed88f826c3abff7379b9172ed2c8c",
+  "processing": "Area averaging (BOX) to a fixed 32x32 grid; median-cut 16-color palette; no dithering.",
+  "artApproved": false,
+  "styleId": "fantasy.pixel.landscape.32",
+  "framing": "horizon_view",
+  "descriptionEn": "Blue sea with waves beneath a cloudy sky, viewed toward the ocean horizon.",
+  "generationSource": "generation-sources/sea-horizon.png"
+}

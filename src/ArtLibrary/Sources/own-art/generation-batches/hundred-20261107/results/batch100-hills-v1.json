@@ -1,0 +1,13 @@
+{
+  "index": 34,
+  "key": "batch100-hills-v1",
+  "category": "biome_view",
+  "name": "Hills",
+  "nameRu": "Холмы",
+  "usage": "place_view",
+  "transparent": false,
+  "description": "Three broad rounded green hill ridges receding toward a blue sky, grass foreground.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: Three broad rounded green hill ridges receding toward a blue sky, grass foreground. Opaque square landscape, eye-level view toward the horizon or distant opening, foreground at bottom, distant scenery above. No overhead map view. Fill the square.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-8a6186f9-2d71-48d6-9dd3-dd75177756cd.png",
+  "status": "generated"
+}

@@ -1,0 +1,726 @@
+{
+  "dcss/dungeon/altars/unknown": {
+    "sha256": "76070ce669633ae78c2e378ea1e069ad8344dd5106d4a604b30abbdf3e725999",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06"
+  },
+  "dcss/dungeon/gateways/portal_unknown": {
+    "sha256": "f84627d652dda137b6033f317fa6734af01330b089e9bf127c98bcd06ce1580d",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06"
+  },
+  "dcss/misc/error": {
+    "sha256": "4580ac14f00e8370f87ea8b18b2b17b6c9d4f42e2ebee4c8ffcd4c69578a727d",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06"
+  },
+  "dcss/misc/unseen_item_new": {
+    "sha256": "e43fd1497e51ce2291424a1a7ff420ddc76cc9638bd8b6a0c9dec08244c1c3db",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06"
+  },
+  "dcss/monster/panlord/demon_body_armor_top": {
+    "sha256": "f1eca4577b25603c7207e5150f6f1f2e0ffd83306278a1a1632cac8933837940",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_caterpillar_top": {
+    "sha256": "1203675a2b437062dde56a10498cb51b3d078d72ae92ff64e343b910f6fc6061",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_crouch_top": {
+    "sha256": "270c9656a8358f8a8cadab42dc0350162e9b8f0df84aa2ee5b6bfdeb9b664219",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_fat_top_new": {
+    "sha256": "7804f6473c54fa68820f1d8d1543284fc95ee94da856e316712c74f08b80d153",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_fat_top_old": {
+    "sha256": "b2a1eac0bc44e1a45dd6cdeba4d736bf67ba24b90be5bd5bbc85902c6f7a55dd",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_fatter_top_new": {
+    "sha256": "03aa528c99e92a67f1310021a6f14e6f7cb0a4366b953b8c577d930a97d850b2",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_fatter_top_old": {
+    "sha256": "f0be30802d1f7ab1d4cd30bde25d3d3cc4c7a423dbe0797158c12782ed326995",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_mantis_top": {
+    "sha256": "309e7d3ff114766972df786021e704b579ca1233a987296619d68376ca7a58cd",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_normal_top_new": {
+    "sha256": "aa9d7e7fad9aaeadf48b91bb3b973806d4b2400e5926ccdbb26106ef9fd8406a",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_normal_top_old": {
+    "sha256": "a225bce0856b50621cb69d3cb3aef27e9cc8cb3afc667a6ce6fcb03300706fa7",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_skeletal_top": {
+    "sha256": "9a6f6a37d22f645396d80077b58e3a6c3450e3db32b9e3234e05c83812c776f9",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_spiked_top_new": {
+    "sha256": "ba07afaf4c52e2fa4a28aaa168a704c1989b4744f747962976a200b9bf7e978b",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_spiked_top_old": {
+    "sha256": "ae4e111c6142bd494142439d9ccb649314f3475c29763a2e9092fc8fda09a8d1",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_spotty_top_new": {
+    "sha256": "9232a2a07d21a0c883049dec69c81f840d610c324c253e5790b11ef268b87dbb",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_spotty_top_old": {
+    "sha256": "97a52ebd7999c1c272174aa0287260ceda13f1eaaa6d76992f7c48a05e798108",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_succubus_top": {
+    "sha256": "f97245e423834d2f1b0ca7608934314c9fca0877863b3c184c39e14f04b386de",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_tentacley_top": {
+    "sha256": "8f86cfcdb748e46a26957232bb75903260a52564c92316cd6546131a348c6888",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_thin_top_new": {
+    "sha256": "a40b727f2e6e765e64bf0b8fe224f0df4b4463b470841ce98a259dac319f3a3b",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_body_thin_top_old": {
+    "sha256": "baa84013b29ccfeb50393672337b587c5099e751fdedd7a93d055bc19191d121",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_bird_top_new": {
+    "sha256": "902bc15e121dc438c6720e2b89250d4d759a2cf58c4b2eacef2e6d03fe1f4d14",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_bird_top_old": {
+    "sha256": "5cf1c8fa056c6a3c5f2db11b001343539cde97d5d79b2717b9815258c8aaa1c2",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_boxes_top": {
+    "sha256": "aa9d0449d5226a84f1d3cb2888401e70e0dc13ce35825217427b3ea8e1c52e9c",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_brain_top": {
+    "sha256": "984aeb6ecfaef8cf9b051c95841fa2a5e653a2033625a9601ac556ef24a92d29",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_butterfly_top": {
+    "sha256": "e73b16e68903f6e4f5cefa3b96f78c2e6f84f932c7f003b4e64278305630b159",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_cow_skull_top": {
+    "sha256": "1ea63cbd83d849f1d3d1e74ed1925a1e08c7ed0b1894674c5487512a61103335",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_cthulhu_top_new": {
+    "sha256": "4535f5d1efbf6d4b4df6296db320b6694bfc34bbe81fc57ce47dcdac374e3cf3",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_cthulhu_top_old": {
+    "sha256": "2680ca239b9ff8288e9332a820d6cac8f234eb39f09cee8eaedfcc4b581a7daa",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_elephant_top_new": {
+    "sha256": "b9ac578cf09566f728aee02630ecd60d55d059e41c38d2f05ec7a306a22cf353",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_elephant_top_old": {
+    "sha256": "03728940d00a62a51d6844f006d3208802080ac68869bf443006f577d75cbd4d",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_eyeball_top_new": {
+    "sha256": "c418be28e8beff3dddc2732297cfde3600558481e219eb249d13139a4f1daa88",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_eyeball_top_old": {
+    "sha256": "6b2d806abbee113661bfc7ca9d6e6841b0bf7cff3ed7cbc33739c4e14c056a16",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_fly_top": {
+    "sha256": "ee28ea424cae6e8f1fb5f5add5ac446026ad497d3d98e66c61168594f1c441db",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_frog_top": {
+    "sha256": "9b84b12729b400be3a198a23693765bc40f9ddff3100315a1d6c5ea0f8bf14c8",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_fungus_top": {
+    "sha256": "11157ebd37cc77cf843e5a146e5515a65ded14c574f34e349ce44601f9939b58",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_hair_top": {
+    "sha256": "15bf2944b64ff864f8f81fe8e01c2a5a731ef909aef5c639ed9d51fbf18f7298",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_heads_top": {
+    "sha256": "4f5b755a624058737f63750a1b423b44b091fee00b799e0ff09bf622b9a69cc6",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_helmet_top_new": {
+    "sha256": "0bea03f9a7f34e210849c43c6e8ed217d8cc927bf174466f011db81ad8f0b079",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_helmet_top_old": {
+    "sha256": "cc06f914f9e15ce6cf957feb3df6cd6f05f8cdca37945cdc6a50ac2a683a745f",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_horn_top": {
+    "sha256": "9280854bae37c59c9b571d4a3f90f6857f47fc78c2c206175d8a03e89aa13a42",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_horns_top_new": {
+    "sha256": "e209e26b258c23873af8e2023f5cd51e547990f82823f07517b2717de251f883",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_horns_top_old": {
+    "sha256": "954ae107abea11c10760bb073ea03d7db5f315cfcc325d413baaecfd7e777460",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_horse_top_new": {
+    "sha256": "16a326889952615b220eaf18b8ebb76941a83a95163c89f410fd942061499a2f",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_horse_top_old": {
+    "sha256": "08387376bb7f7bf16a9f5f248a8a1e53218d47340eaec3000ae1544e8f350c16",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_incubus_top": {
+    "sha256": "043be4705dca653d61cf5b85eb20c55d568cad045e8a1e16cafc09416ae87d6b",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_medusa_top_new": {
+    "sha256": "43e57e186f425072ac6d0514c3be0e252d48dd6068228bf6d64e3a66dc9b7942",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_medusa_top_old": {
+    "sha256": "f86d30334ef9316120d1e4f5ba450837d40d54d7b38f70774ae80071ea410b8c",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_monkey_top_new": {
+    "sha256": "015a9a3f73a32e974b868f8a388abb4b3335adafc4c67af8a8c15d517acfb61b",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_monkey_top_old": {
+    "sha256": "5ce47888767b1aa865e3dc33a86c8be1c7bb269171a2e91d165382a2f36159ae",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_mouse_top_new": {
+    "sha256": "604e5e8b1e86233311cf2b4d43f7156736fda3a50893de8b04587a1bd9239e81",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_mouse_top_old": {
+    "sha256": "f5d1ac8720243b6f488f5a1ee00727c0468b9f64303dea2a2d94f20fa53d6c95",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_ram_top_new": {
+    "sha256": "37fd52733e7611e78d56401d6b42700aaef874c0b3e3db99e7b08e70c30b05a7",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_ram_top_old": {
+    "sha256": "f1980a4179dabcdd83aa7dd7a01af54c0fd3be9219969108c270646921b75e95",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_rhino_top_new": {
+    "sha256": "c13033b60dd84f4315174bab6c8df9bf40f03f3986aab55799e1875e543b52db",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_rhino_top_old": {
+    "sha256": "aee55bcb98a81c75a5d6371b4547524b2b62f0184264838767d83c92cb7f3703",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_skull_top": {
+    "sha256": "7ef8ddf9b64c6dd0572e8d900d406041660a8733f3335a2478e9ca7eb5182723",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_succubus_top": {
+    "sha256": "ebc2d64b28d5c51ba4b9a66be22b60af956be7023d01649f0c062fbb2ea7bf85",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_teeth_top": {
+    "sha256": "3c8861f8654192318e4bff021c22dfaa98df3d06eded4c360f38014ced41766c",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_tentacles_top_new": {
+    "sha256": "64f8f3a5581337212fabd77863e7861ac95d4dd989de009e2fe6fae5e8d37f7b",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_tentacles_top_old": {
+    "sha256": "73a823c5c43a256df41841be558725fad285b306d4a7237fb2d54573bd84f266",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_head_worm_top": {
+    "sha256": "af895de404770c0c97ab8fa092cefd7ceb34397dcfba5e9383c659c16e0b8213",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_bat_top": {
+    "sha256": "f767d662fba237bbd65cda2e998385880c0adf905a60d34c6e85c40c4e383f3c",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_bones_top_new": {
+    "sha256": "6c9f9ba8c038dd2ebf3ee2163d454d9500a108dbc177c85a1392ed4084c7364f",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_bones_top_old": {
+    "sha256": "d211f15a949a7d62f1acc7828e3f743a3627f85cd8ca5f44f453359a2d7dbee2",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_butterfly_small_top": {
+    "sha256": "12d78610958c00caea3c939417bb85efe352a751f0039df3c2f69d2879bba97a",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_butterfly_top_new": {
+    "sha256": "ecbe24911a19a4e886024a13d7c0c36c663bd9c97db8dc2c13838f08a5ab46b8",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_butterfly_top_old": {
+    "sha256": "6a5649050bcb3a562a7b8badd28f668e4bd8bd82bb915201c2d69d4721a7906e",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_demonic_top_new": {
+    "sha256": "804e916cfbd92d7774c98e25d507e1a7129936e95fc632a4c0d4e34f362d7248",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_demonic_top_old": {
+    "sha256": "bb4d656418cbe65c62cd502f45304f825fe36fa4ec997e2ddaaddc0ce4420cdf",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_dragonfly_top": {
+    "sha256": "a5c1c06bba4d7923eed570e8b12975fec1766aad007af22b48f8d8f6d010c02c",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_hooked_top": {
+    "sha256": "790bbb37be4e51afa67d67f8892a9544e7c013b349f3536d713cd2be21519458",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_knobs_top": {
+    "sha256": "74cc2f6e0176eeffae4449395be8e343bf2a8a140c9bce22c79d3689919bbb87",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_large_top_new": {
+    "sha256": "f0ba2b41ca363c61b729b58196adb10ff7aeecef55335fdbc5979ef7c91d229b",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_large_top_old": {
+    "sha256": "48eb0a1739a66222a8f63c3d4e1d628b05efb6d0d17127fbb3e335397df4b39d",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_medium_top_new": {
+    "sha256": "cdb1e6cc59e2c11eb8684319485772d26964b6c247181fb23f73738f9365a892",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_medium_top_old": {
+    "sha256": "c463341b0d1aa327e68884d627c7faba4890e50db6c27dcf6420763594eac860",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_red_top_new": {
+    "sha256": "1b5063ace7a8fb7d75a1f781f8ef63234a9606a2eb319d1afe9ff7e91ce5ebff",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_red_top_old": {
+    "sha256": "b7403df960766b372c793750aabcac8995f7c98626b78fc8a92810e8a4edfbaf",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_sparrow_top": {
+    "sha256": "b64e95083eb49a436753e098dad5458669d158d5cd1bd4c80283f439562dd135",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/panlord/demon_wings_torn_top": {
+    "sha256": "5efa34b5402f0519bd052dd344228f51458900f1907693f145b289050730f454",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "overlay_32"
+  },
+  "dcss/monster/unique/asmodeus_top": {
+    "sha256": "f920e953b5d012159f908edd2e0f696ef9f643a5ca103e864a84da0f1edf8362",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/cerebov_top": {
+    "sha256": "3820f5d8e2ce52299cd90f593d1c12a98a6032fd38a7d1a961b66f56a7473235",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/dispater_top": {
+    "sha256": "b7071b34c5cff7278112a3732d6cc2c4d8bff9766efec7eddbf95cbb6dd37cec",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/ereshkigal_top": {
+    "sha256": "f638eade6e462bb8d1e08769525108a1cd0fb59b9777cb12c09b2ca79068c4d1",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/gloorx_vloq_top": {
+    "sha256": "5c7efb760ad0b6c0e412213c71015114d236f277e5e11c2693ff7e33bed702a7",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lernaean_hydra_10_top": {
+    "sha256": "71fae31e118a791f2b535f4b9b9d597f200c4d5bb3e1f257e5499f1dbeef1ae0",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lernaean_hydra_1_top": {
+    "sha256": "a13c1380471d6ffd94ebbf28c8e42cf9cdbaea2d8c45b8d7eb9342690df0e24b",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lernaean_hydra_2_top": {
+    "sha256": "210d6303fad6b1a2dc7df8c727365fbedba78cd5a07826f450bd8dd77365b4aa",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lernaean_hydra_3_top": {
+    "sha256": "f11440abaca3142190fa54be5215261e5bd2f5a91c7faa51bfd1a24338bb9755",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lernaean_hydra_4_top": {
+    "sha256": "70ef6f82037032176a683f565d622dc0fd5c307fbd34deb7b90896dab0fcc07f",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lernaean_hydra_5_top": {
+    "sha256": "01d4b1edd9781cf949add74909cab39911f575b50dfd0d6be6bfdc41b7d43e5f",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lernaean_hydra_6_top": {
+    "sha256": "4e236cc5a8b4e1a35a84c31dfa4e8c25bee4e226c2a5f6626a99ef2ea292a41b",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lernaean_hydra_7_top": {
+    "sha256": "f2bde8b631c48e6522d369673b211fa5c950f30f02a2019c858b8f67bb2079b9",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lernaean_hydra_9_top": {
+    "sha256": "fcccdd70e98eb3d2ec01bc39b07663a59ccad7fc7e1fcadaf6f45873f6d0233f",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/lom_lobon_top": {
+    "sha256": "52f936a2b40130152fa2708333829d0cf1af7c648a19d259b1ab1774459e06d7",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/mnoleg_top": {
+    "sha256": "e4226f9bf3eaa540fb36c74de5ea815a4458608fdec737020ebd24bcc5c1040e",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/royal_jelly_top": {
+    "sha256": "28598f7918185b67748ce66e2dea875679232c138b768cfda2c4b48fc3dc3481",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/serpent_of_hell-coc_top": {
+    "sha256": "3d7cff06389c405c0bbce9a3068d12d0265d2c4959b59f2eb04219fc0a0280e9",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/serpent_of_hell-dis_top": {
+    "sha256": "3497c0ac43fda5a79f326f648e0e5b213c0b4305c8178f9e0a2a45cbafac844c",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/serpent_of_hell-geh_top": {
+    "sha256": "a61c130a962229812ba0d56b94bbeac163ad6d6e1264cec76ec0063784851fb7",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  },
+  "dcss/monster/unique/serpent_of_hell-tar_top": {
+    "sha256": "980609066a93f083937e52277cb2b535c83c0d70d4db522164cef3572b8305f6",
+    "decision": "keep",
+    "reason": "User reviewed all removal suggestions, deleted unwanted files, and explicitly retained the survivors.",
+    "source": "explicit_user_instruction_2026-11-06",
+    "compositionMode": "single_32"
+  }
+}

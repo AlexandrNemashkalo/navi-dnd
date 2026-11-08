@@ -1,0 +1,9 @@
+{
+  "craftpix-945210": {
+    "reason": "user_excluded_64px_sources_and_downscaled_derivatives",
+    "requiredNativeSize": [
+      32,
+      32
+    ]
+  }
+}

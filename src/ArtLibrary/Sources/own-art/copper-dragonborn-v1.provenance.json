@@ -1,0 +1,22 @@
+{
+  "id": "own-art:copper-dragonborn-v1",
+  "file": "copper-dragonborn-v1.png",
+  "subject": "Copper dragonborn",
+  "nameRu": "Медный драконорождённый",
+  "width": 32,
+  "height": 32,
+  "sha256": "5026e366dcab14bec1ac92810f201055a3f795eb00d2aee628b3bd46dd5864da",
+  "usage": "portrait",
+  "framing": "head_shoulders",
+  "styleId": "fantasy.pixel.portrait.32",
+  "descriptionEn": "Original copper-scaled dragonborn head and shoulders, ivory horns, amber eye and dark teal collar. Generated source resampled to exact 32x32; transparent background.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/copper-dragonborn-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

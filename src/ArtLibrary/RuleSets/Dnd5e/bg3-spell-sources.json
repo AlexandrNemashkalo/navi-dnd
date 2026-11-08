@@ -1,0 +1,2844 @@
+{
+  "schemaVersion": 2,
+  "defaultRenderMode": "pixels",
+  "origin": "BG3 Icon Pack by starpest; original artwork credited to Larian.",
+  "sourceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+  "archiveSha256": "71c374b7a27c366c3ddbf23fb4f746bf086e0349441533f4745f683d30500f13",
+  "license": "Original game assets; no independent redistribution license established.",
+  "matching": "Original named icons are checked against BG3 spell identities and wiki artwork. mappingKind separates exact original icons from individually reviewed thematic replacements for spells absent from BG3; source names and reasons are retained.",
+  "icons": [
+    {
+      "name": "Acid Splash",
+      "sheet": 2,
+      "tile": 27,
+      "referenceUrl": "https://bg3.wiki/w/images/7/7c/Acid_Splash_Unfaded_Icon.webp",
+      "matchError": 8.265,
+      "nextMatchError": 50.938,
+      "id": "acid-splash"
+    },
+    {
+      "name": "Blade Ward",
+      "sheet": 2,
+      "tile": 2,
+      "referenceUrl": "https://bg3.wiki/w/images/0/04/Blade_Ward_Unfaded_Icon.webp",
+      "matchError": 8.615,
+      "nextMatchError": 44.362,
+      "id": "blade-ward"
+    },
+    {
+      "name": "Burning Hands",
+      "sheet": 2,
+      "tile": 49,
+      "referenceUrl": "https://bg3.wiki/w/images/3/37/Burning_Hands_Unfaded_Icon.webp",
+      "matchError": 10.116,
+      "nextMatchError": 17.851,
+      "id": "burning-hands"
+    },
+    {
+      "name": "Charm Person",
+      "sheet": 2,
+      "tile": 28,
+      "referenceUrl": "https://bg3.wiki/w/images/f/fb/Charm_Person_Unfaded_Icon.webp",
+      "matchError": 7.21,
+      "nextMatchError": 15.185,
+      "id": "charm-person"
+    },
+    {
+      "name": "Chromatic Orb",
+      "sheet": 2,
+      "tile": 31,
+      "referenceUrl": "https://bg3.wiki/w/images/f/f2/Chromatic_Orb_Unfaded_Icon.webp",
+      "matchError": 5.969,
+      "nextMatchError": 46.51,
+      "id": "chromatic-orb"
+    },
+    {
+      "name": "Comprehend Languages",
+      "sheet": 2,
+      "tile": 163,
+      "referenceUrl": "https://bg3.wiki/w/images/a/ae/Comprehend_Languages_Unfaded_Icon.webp",
+      "matchError": 7.074,
+      "nextMatchError": 53.293,
+      "id": "comprehend-languages"
+    },
+    {
+      "name": "Dancing Lights",
+      "sheet": 2,
+      "tile": 97,
+      "referenceUrl": "https://bg3.wiki/w/images/c/c2/Dancing_Lights_Unfaded_Icon.webp",
+      "matchError": 6.711,
+      "nextMatchError": 38.652,
+      "id": "dancing-lights"
+    },
+    {
+      "name": "Disguise Self",
+      "sheet": 2,
+      "tile": 177,
+      "referenceUrl": "https://bg3.wiki/w/images/2/22/Disguise_Self_Unfaded_Icon.webp",
+      "matchError": 7.384,
+      "nextMatchError": 15.484,
+      "id": "disguise-self"
+    },
+    {
+      "name": "Expeditious Retreat",
+      "sheet": 2,
+      "tile": 90,
+      "referenceUrl": "https://bg3.wiki/w/images/0/0e/Expeditious_Retreat_Unfaded_Icon.webp",
+      "matchError": 6.85,
+      "nextMatchError": 14.891,
+      "id": "expeditious-retreat"
+    },
+    {
+      "name": "False Life",
+      "sheet": 2,
+      "tile": 36,
+      "referenceUrl": "https://bg3.wiki/w/images/e/ed/False_Life_Unfaded_Icon.webp",
+      "matchError": 10.779,
+      "nextMatchError": 18.447,
+      "id": "false-life"
+    },
+    {
+      "name": "Feather Fall",
+      "sheet": 2,
+      "tile": 33,
+      "referenceUrl": "https://bg3.wiki/w/images/3/30/Feather_Fall_Unfaded_Icon.webp",
+      "matchError": 7.31,
+      "nextMatchError": 15.349,
+      "id": "feather-fall"
+    },
+    {
+      "name": "Fire Bolt",
+      "sheet": 2,
+      "tile": 30,
+      "referenceUrl": "https://bg3.wiki/w/images/5/53/Fire_Bolt_Unfaded_Icon.webp",
+      "matchError": 9.412,
+      "nextMatchError": 45.525,
+      "id": "fire-bolt"
+    },
+    {
+      "name": "Fog Cloud",
+      "sheet": 2,
+      "tile": 173,
+      "referenceUrl": "https://bg3.wiki/w/images/f/fc/Fog_Cloud_Unfaded_Icon.webp",
+      "matchError": 6.663,
+      "nextMatchError": 14.498,
+      "id": "fog-cloud"
+    },
+    {
+      "name": "Friends",
+      "sheet": 2,
+      "tile": 50,
+      "referenceUrl": "https://bg3.wiki/w/images/0/0d/Friends_Unfaded_Icon.webp",
+      "matchError": 7.251,
+      "nextMatchError": 38.673,
+      "id": "friends"
+    },
+    {
+      "name": "Grease",
+      "sheet": 2,
+      "tile": 5,
+      "referenceUrl": "https://bg3.wiki/w/images/1/1b/Grease_Unfaded_Icon.webp",
+      "matchError": 7.505,
+      "nextMatchError": 15.621,
+      "id": "grease"
+    },
+    {
+      "name": "Identify",
+      "sheet": 1,
+      "tile": 26,
+      "referenceUrl": "https://bg3.wiki/w/images/6/6c/Identify_Unfaded_Icon.webp",
+      "matchError": 8.355,
+      "nextMatchError": 51.691,
+      "id": "identify"
+    },
+    {
+      "name": "Jump",
+      "sheet": 2,
+      "tile": 0,
+      "referenceUrl": "https://bg3.wiki/w/images/6/60/Jump_Unfaded_Icon.webp",
+      "matchError": 4.78,
+      "nextMatchError": 44.956,
+      "id": "jump"
+    },
+    {
+      "name": "Light",
+      "sheet": 2,
+      "tile": 161,
+      "referenceUrl": "https://bg3.wiki/w/images/b/b3/Light_Unfaded_Icon.webp",
+      "matchError": 7.776,
+      "nextMatchError": 39.667,
+      "id": "light"
+    },
+    {
+      "name": "Longstrider",
+      "sheet": 2,
+      "tile": 41,
+      "referenceUrl": "https://bg3.wiki/w/images/0/09/Longstrider_Unfaded_Icon.webp",
+      "matchError": 7.395,
+      "nextMatchError": 15.328,
+      "id": "longstrider"
+    },
+    {
+      "name": "Mage Hand",
+      "sheet": 2,
+      "tile": 38,
+      "referenceUrl": "https://bg3.wiki/w/images/0/03/Mage_Hand_Unfaded_Icon.webp",
+      "matchError": 6.996,
+      "nextMatchError": 40.288,
+      "id": "mage-hand"
+    },
+    {
+      "name": "Magic Missile",
+      "sheet": 2,
+      "tile": 11,
+      "referenceUrl": "https://bg3.wiki/w/images/c/c4/Magic_Missile_Unfaded_Icon.webp",
+      "matchError": 8.613,
+      "nextMatchError": 16.604,
+      "id": "magic-missile"
+    },
+    {
+      "name": "Mending",
+      "sheet": 2,
+      "tile": 34,
+      "referenceUrl": "https://bg3.wiki/w/images/0/00/Mending_Unfaded_Icon.webp",
+      "matchError": 7.251,
+      "nextMatchError": 41.298,
+      "id": "mending"
+    },
+    {
+      "name": "Minor Illusion",
+      "sheet": 2,
+      "tile": 86,
+      "referenceUrl": "https://bg3.wiki/w/images/3/34/Minor_Illusion_Unfaded_Icon.webp",
+      "matchError": 6.543,
+      "nextMatchError": 28.904,
+      "id": "minor-illusion"
+    },
+    {
+      "name": "Poison Spray",
+      "sheet": 2,
+      "tile": 46,
+      "referenceUrl": "https://bg3.wiki/w/images/5/53/Poison_Spray_Unfaded_Icon.webp",
+      "matchError": 11.736,
+      "nextMatchError": 40.587,
+      "id": "poison-spray"
+    },
+    {
+      "name": "Protection from Evil and Good",
+      "sheet": 2,
+      "tile": 179,
+      "referenceUrl": "https://bg3.wiki/w/images/2/29/Protection_from_Evil_and_Good_Unfaded_Icon.webp",
+      "matchError": 8.677,
+      "nextMatchError": 16.679,
+      "id": "protection-from-evil-and-good"
+    },
+    {
+      "name": "Ray of Frost",
+      "sheet": 2,
+      "tile": 45,
+      "referenceUrl": "https://bg3.wiki/w/images/f/fa/Ray_of_Frost_Unfaded_Icon.webp",
+      "matchError": 10.368,
+      "nextMatchError": 42.177,
+      "id": "ray-of-frost"
+    },
+    {
+      "name": "Ray of Sickness",
+      "sheet": 2,
+      "tile": 40,
+      "referenceUrl": "https://bg3.wiki/w/images/e/ec/Ray_of_Sickness_Unfaded_Icon.webp",
+      "matchError": 10.763,
+      "nextMatchError": 18.493,
+      "id": "ray-of-sickness"
+    },
+    {
+      "name": "Shield",
+      "sheet": 2,
+      "tile": 751,
+      "referenceUrl": "https://bg3.wiki/w/images/5/5e/Shield_spell_Unfaded_Icon.webp",
+      "matchError": 9.165,
+      "nextMatchError": 46.263,
+      "id": "shield"
+    },
+    {
+      "name": "Shocking Grasp",
+      "sheet": 2,
+      "tile": 47,
+      "referenceUrl": "https://bg3.wiki/w/images/7/79/Shocking_Grasp_Unfaded_Icon.webp",
+      "matchError": 9.678,
+      "nextMatchError": 47.889,
+      "id": "shocking-grasp"
+    },
+    {
+      "name": "True Strike",
+      "sheet": 2,
+      "tile": 8,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e6/True_Strike_Unfaded_Icon.webp",
+      "matchError": 7.543,
+      "nextMatchError": 38.967,
+      "id": "true-strike"
+    },
+    {
+      "name": "Arcane Lock",
+      "sheet": 1,
+      "tile": 257,
+      "referenceUrl": "https://bg3.wiki/w/images/1/1a/Arcane_Lock_Unfaded_Icon.webp",
+      "matchError": 8.328,
+      "nextMatchError": 28.543,
+      "id": "arcane-lock"
+    },
+    {
+      "name": "Blink",
+      "sheet": 2,
+      "tile": 625,
+      "referenceUrl": "https://bg3.wiki/w/images/5/50/Blink_Unfaded_Icon.webp",
+      "matchError": 8.286,
+      "nextMatchError": 40.587,
+      "id": "blink"
+    },
+    {
+      "name": "Blur",
+      "sheet": 2,
+      "tile": 98,
+      "referenceUrl": "https://bg3.wiki/w/images/d/d4/Blur_Unfaded_Icon.webp",
+      "matchError": 9.123,
+      "nextMatchError": 16.817,
+      "id": "blur"
+    },
+    {
+      "name": "Cloud of Daggers",
+      "sheet": 2,
+      "tile": 545,
+      "referenceUrl": "https://bg3.wiki/w/images/d/d2/Cloud_of_Daggers_Unfaded_Icon.webp",
+      "matchError": 10.026,
+      "nextMatchError": 40.027,
+      "id": "cloud-of-daggers"
+    },
+    {
+      "name": "Crown of Madness",
+      "sheet": 2,
+      "tile": 546,
+      "referenceUrl": "https://bg3.wiki/w/images/8/8a/Crown_of_Madness_Unfaded_Icon.webp",
+      "matchError": 7.996,
+      "nextMatchError": 43.305,
+      "id": "crown-of-madness"
+    },
+    {
+      "name": "Darkness",
+      "sheet": 2,
+      "tile": 95,
+      "referenceUrl": "https://bg3.wiki/w/images/1/1d/Darkness_Unfaded_Icon.webp",
+      "matchError": 11.548,
+      "nextMatchError": 26.607,
+      "id": "darkness",
+      "processing": {
+        "threshold": 40,
+        "hueRange": [
+          170,
+          225
+        ],
+        "brightnessGain": 1.7,
+        "minComponent": 8
+      }
+    },
+    {
+      "name": "Detect Thoughts",
+      "sheet": 2,
+      "tile": 91,
+      "referenceUrl": "https://bg3.wiki/w/images/9/94/Detect_Thoughts_Unfaded_Icon.webp",
+      "matchError": 7.209,
+      "nextMatchError": 39.712,
+      "id": "detect-thoughts"
+    },
+    {
+      "name": "Flaming Sphere",
+      "sheet": 2,
+      "tile": 407,
+      "referenceUrl": "https://bg3.wiki/w/images/a/aa/Flaming_Sphere_Unfaded_Icon.webp",
+      "matchError": 7.303,
+      "nextMatchError": 42.27,
+      "id": "flaming-sphere"
+    },
+    {
+      "name": "Gust of Wind",
+      "sheet": 2,
+      "tile": 791,
+      "referenceUrl": "https://bg3.wiki/w/images/b/bf/Gust_of_Wind_Unfaded_Icon.webp",
+      "matchError": 7.193,
+      "nextMatchError": 49.219,
+      "id": "gust-of-wind"
+    },
+    {
+      "name": "Hold Person",
+      "sheet": 2,
+      "tile": 9,
+      "referenceUrl": "https://bg3.wiki/w/images/7/7e/Hold_Person_Unfaded_Icon.webp",
+      "matchError": 7.808,
+      "nextMatchError": 36.994,
+      "id": "hold-person"
+    },
+    {
+      "name": "Invisibility",
+      "sheet": 2,
+      "tile": 172,
+      "referenceUrl": "https://bg3.wiki/w/images/2/2d/Invisibility_spell_Unfaded_Icon.webp",
+      "matchError": 7.188,
+      "nextMatchError": 14.854,
+      "id": "invisibility"
+    },
+    {
+      "name": "Knock",
+      "sheet": 2,
+      "tile": 162,
+      "referenceUrl": "https://bg3.wiki/w/images/1/1e/Knock_Unfaded_Icon.webp",
+      "matchError": 6.797,
+      "nextMatchError": 38.019,
+      "id": "knock"
+    },
+    {
+      "name": "Levitate",
+      "sheet": 2,
+      "tile": 1001,
+      "referenceUrl": "https://bg3.wiki/w/images/3/31/Levitate_Unfaded_Icon.webp",
+      "matchError": 6.832,
+      "nextMatchError": 41.1,
+      "id": "levitate"
+    },
+    {
+      "name": "Magic Weapon",
+      "sheet": 2,
+      "tile": 841,
+      "referenceUrl": "https://bg3.wiki/w/images/c/cd/Magic_Weapon_Unfaded_Icon.webp",
+      "matchError": 10.743,
+      "nextMatchError": 46.644,
+      "id": "magic-weapon"
+    },
+    {
+      "name": "Melf's Acid Arrow",
+      "sheet": 2,
+      "tile": 99,
+      "referenceUrl": "https://bg3.wiki/w/images/6/64/Melf%27s_Acid_Arrow_Unfaded_Icon.webp",
+      "matchError": 7.894,
+      "nextMatchError": 45.381,
+      "id": "melf-s-acid-arrow"
+    },
+    {
+      "name": "Mirror Image",
+      "sheet": 2,
+      "tile": 212,
+      "referenceUrl": "https://bg3.wiki/w/images/8/83/Mirror_Image_Unfaded_Icon.webp",
+      "matchError": 8.594,
+      "nextMatchError": 41.53,
+      "id": "mirror-image"
+    },
+    {
+      "name": "Misty Step",
+      "sheet": 2,
+      "tile": 6,
+      "referenceUrl": "https://bg3.wiki/w/images/3/36/Misty_Step_Unfaded_Icon.webp",
+      "matchError": 7.005,
+      "nextMatchError": 38.074,
+      "id": "misty-step"
+    },
+    {
+      "name": "Phantasmal Force",
+      "sheet": 2,
+      "tile": 619,
+      "referenceUrl": "https://bg3.wiki/w/images/d/d5/Phantasmal_Force_Unfaded_Icon.webp",
+      "matchError": 7.697,
+      "nextMatchError": 50.044,
+      "id": "phantasmal-force"
+    },
+    {
+      "name": "Ray of Enfeeblement",
+      "sheet": 2,
+      "tile": 15,
+      "referenceUrl": "https://bg3.wiki/w/images/b/b6/Ray_of_Enfeeblement_Unfaded_Icon.webp",
+      "matchError": 7.193,
+      "nextMatchError": 37.715,
+      "id": "ray-of-enfeeblement"
+    },
+    {
+      "name": "Scorching Ray",
+      "sheet": 2,
+      "tile": 83,
+      "referenceUrl": "https://bg3.wiki/w/images/1/14/Scorching_Ray_Unfaded_Icon.webp",
+      "matchError": 7.946,
+      "nextMatchError": 33.807,
+      "id": "scorching-ray"
+    },
+    {
+      "name": "See Invisibility",
+      "sheet": 2,
+      "tile": 618,
+      "referenceUrl": "https://bg3.wiki/w/images/7/7e/See_Invisibility_Unfaded_Icon.webp",
+      "matchError": 7.759,
+      "nextMatchError": 37.882,
+      "id": "see-invisibility"
+    },
+    {
+      "name": "Shatter",
+      "sheet": 2,
+      "tile": 154,
+      "referenceUrl": "https://bg3.wiki/w/images/0/0b/Shatter_Unfaded_Icon.webp",
+      "matchError": 7.807,
+      "nextMatchError": 50.457,
+      "id": "shatter"
+    },
+    {
+      "name": "Sleep",
+      "sheet": 2,
+      "tile": 51,
+      "referenceUrl": "https://bg3.wiki/w/images/9/9b/Sleep_Unfaded_Icon.webp",
+      "matchError": 6.758,
+      "nextMatchError": 14.64,
+      "id": "sleep"
+    },
+    {
+      "name": "Tasha's Hideous Laughter",
+      "sheet": 2,
+      "tile": 35,
+      "referenceUrl": "https://bg3.wiki/w/images/a/ae/Tasha%27s_Hideous_Laughter_Unfaded_Icon.webp",
+      "matchError": 6.84,
+      "nextMatchError": 14.888,
+      "id": "tasha-s-hideous-laughter"
+    },
+    {
+      "name": "Thunderwave",
+      "sheet": 2,
+      "tile": 12,
+      "referenceUrl": "https://bg3.wiki/w/images/2/2b/Thunderwave_Unfaded_Icon.webp",
+      "matchError": 6.827,
+      "nextMatchError": 14.618,
+      "id": "thunderwave"
+    },
+    {
+      "name": "Web",
+      "sheet": 2,
+      "tile": 7,
+      "referenceUrl": "https://bg3.wiki/w/images/f/fc/Web_Unfaded_Icon.webp",
+      "matchError": 6.82,
+      "nextMatchError": 41.013,
+      "id": "web"
+    },
+    {
+      "name": "Witch Bolt",
+      "sheet": 2,
+      "tile": 13,
+      "referenceUrl": "https://bg3.wiki/w/images/b/ba/Witch_Bolt_Unfaded_Icon.webp",
+      "matchError": 7.88,
+      "nextMatchError": 14.885,
+      "id": "witch-bolt"
+    },
+    {
+      "name": "Arcane Eye",
+      "sheet": 1,
+      "tile": 38,
+      "referenceUrl": "https://bg3.wiki/w/images/b/b6/Arcane_Eye_Unfaded_Icon.webp",
+      "matchError": 7.949,
+      "nextMatchError": 47.102,
+      "id": "arcane-eye"
+    },
+    {
+      "name": "Banishment",
+      "sheet": 1,
+      "tile": 39,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e2/Banishment_Unfaded_Icon.webp",
+      "matchError": 6.893,
+      "nextMatchError": 38.342,
+      "id": "banishment"
+    },
+    {
+      "name": "Blight",
+      "sheet": 1,
+      "tile": 36,
+      "referenceUrl": "https://bg3.wiki/w/images/d/dc/Blight_Unfaded_Icon.webp",
+      "matchError": 8.669,
+      "nextMatchError": 45.565,
+      "id": "blight"
+    },
+    {
+      "name": "Confusion",
+      "sheet": 1,
+      "tile": 31,
+      "referenceUrl": "https://bg3.wiki/w/images/9/9e/Confusion_Unfaded_Icon.webp",
+      "matchError": 7.222,
+      "nextMatchError": 26.437,
+      "id": "confusion"
+    },
+    {
+      "name": "Counterspell",
+      "sheet": 2,
+      "tile": 865,
+      "referenceUrl": "https://bg3.wiki/w/images/3/35/Counterspell_Unfaded_Icon.webp",
+      "matchError": 8.441,
+      "nextMatchError": 44.935,
+      "id": "counterspell"
+    },
+    {
+      "name": "Dimension Door",
+      "sheet": 1,
+      "tile": 46,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e5/Dimension_Door_Unfaded_Icon.webp",
+      "matchError": 6.631,
+      "nextMatchError": 37.462,
+      "id": "dimension-door"
+    },
+    {
+      "name": "Evard's Black Tentacles",
+      "sheet": 1,
+      "tile": 33,
+      "referenceUrl": "https://bg3.wiki/w/images/8/84/Evard%27s_Black_Tentacles_Unfaded_Icon.webp",
+      "matchError": 8.18,
+      "nextMatchError": 47.148,
+      "id": "evard-s-black-tentacles"
+    },
+    {
+      "name": "Fear",
+      "sheet": 2,
+      "tile": 762,
+      "referenceUrl": "https://bg3.wiki/w/images/5/53/Fear_Unfaded_Icon.webp",
+      "matchError": 8.088,
+      "nextMatchError": 47.196,
+      "id": "fear"
+    },
+    {
+      "name": "Feign Death",
+      "sheet": 2,
+      "tile": 800,
+      "referenceUrl": "https://bg3.wiki/w/images/b/bb/Feign_Death_Unfaded_Icon.webp",
+      "matchError": 8.795,
+      "nextMatchError": 44.676,
+      "id": "feign-death"
+    },
+    {
+      "name": "Fire Shield",
+      "sheet": 1,
+      "tile": 53,
+      "referenceUrl": "https://bg3.wiki/w/images/3/31/Fire_Shield_Unfaded_Icon.webp",
+      "matchError": 8.391,
+      "nextMatchError": 39.141,
+      "id": "fire-shield"
+    },
+    {
+      "name": "Fireball",
+      "sheet": 2,
+      "tile": 790,
+      "referenceUrl": "https://bg3.wiki/w/images/2/29/Fireball_Unfaded_Icon.webp",
+      "matchError": 9.972,
+      "nextMatchError": 47.186,
+      "id": "fireball"
+    },
+    {
+      "name": "Fly",
+      "sheet": 2,
+      "tile": 623,
+      "referenceUrl": "https://bg3.wiki/w/images/f/f8/Fly_Unfaded_Icon.webp",
+      "matchError": 5.264,
+      "nextMatchError": 43.217,
+      "id": "fly"
+    },
+    {
+      "name": "Gaseous Form",
+      "sheet": 2,
+      "tile": 802,
+      "referenceUrl": "https://bg3.wiki/w/images/8/86/Gaseous_Form_Unfaded_Icon.webp",
+      "matchError": 8.706,
+      "nextMatchError": 41.579,
+      "id": "gaseous-form"
+    },
+    {
+      "name": "Glyph of Warding",
+      "sheet": 2,
+      "tile": 769,
+      "referenceUrl": "https://bg3.wiki/w/images/3/32/Glyph_of_Warding_Unfaded_Icon.webp",
+      "matchError": 6.454,
+      "nextMatchError": 21.085,
+      "id": "glyph-of-warding"
+    },
+    {
+      "name": "Greater Invisibility",
+      "sheet": 1,
+      "tile": 56,
+      "referenceUrl": "https://bg3.wiki/w/images/3/38/Greater_Invisibility_Unfaded_Icon.webp",
+      "matchError": 8.053,
+      "nextMatchError": 37.831,
+      "id": "greater-invisibility"
+    },
+    {
+      "name": "Haste",
+      "sheet": 2,
+      "tile": 803,
+      "referenceUrl": "https://bg3.wiki/w/images/d/d5/Haste_Unfaded_Icon.webp",
+      "matchError": 9.521,
+      "nextMatchError": 45.072,
+      "id": "haste"
+    },
+    {
+      "name": "Hypnotic Pattern",
+      "sheet": 2,
+      "tile": 793,
+      "referenceUrl": "https://bg3.wiki/w/images/e/ed/Hypnotic_Pattern_Unfaded_Icon.webp",
+      "matchError": 8.567,
+      "nextMatchError": 45.975,
+      "id": "hypnotic-pattern"
+    },
+    {
+      "name": "Ice Storm",
+      "sheet": 1,
+      "tile": 55,
+      "referenceUrl": "https://bg3.wiki/w/images/5/52/Ice_Storm_Unfaded_Icon.webp",
+      "matchError": 8.954,
+      "nextMatchError": 45.329,
+      "id": "ice-storm"
+    },
+    {
+      "name": "Lightning Bolt",
+      "sheet": 1,
+      "tile": 63,
+      "referenceUrl": "https://bg3.wiki/w/images/e/ee/Lightning_Bolt_Unfaded_Icon.webp",
+      "matchError": 8.055,
+      "nextMatchError": 36.054,
+      "id": "lightning-bolt"
+    },
+    {
+      "name": "Magic Circle",
+      "sheet": 1,
+      "tile": 100,
+      "referenceUrl": "https://bg3.wiki/w/images/9/9e/Magic_Circle_Unfaded_Icon.webp",
+      "matchError": 9.22,
+      "nextMatchError": 24.162,
+      "id": "magic-circle"
+    },
+    {
+      "name": "Protection from Energy",
+      "sheet": 2,
+      "tile": 775,
+      "referenceUrl": "https://bg3.wiki/w/images/6/6d/Protection_from_Energy_Unfaded_Icon.webp",
+      "matchError": 10.278,
+      "nextMatchError": 23.33,
+      "id": "protection-from-energy"
+    },
+    {
+      "name": "Remove Curse",
+      "sheet": 2,
+      "tile": 874,
+      "referenceUrl": "https://bg3.wiki/w/images/4/4c/Remove_Curse_Unfaded_Icon.webp",
+      "matchError": 7.751,
+      "nextMatchError": 46.746,
+      "id": "remove-curse"
+    },
+    {
+      "name": "Sleet Storm",
+      "sheet": 2,
+      "tile": 784,
+      "referenceUrl": "https://bg3.wiki/w/images/4/47/Sleet_Storm_Unfaded_Icon.webp",
+      "matchError": 8.703,
+      "nextMatchError": 44.89,
+      "id": "sleet-storm"
+    },
+    {
+      "name": "Slow",
+      "sheet": 1,
+      "tile": 75,
+      "referenceUrl": "https://bg3.wiki/w/images/a/af/Slow_Unfaded_Icon.webp",
+      "matchError": 7.932,
+      "nextMatchError": 42.754,
+      "id": "slow"
+    },
+    {
+      "name": "Stinking Cloud",
+      "sheet": 2,
+      "tile": 786,
+      "referenceUrl": "https://bg3.wiki/w/images/c/c0/Stinking_Cloud_Unfaded_Icon.webp",
+      "matchError": 8.221,
+      "nextMatchError": 42.025,
+      "id": "stinking-cloud"
+    },
+    {
+      "name": "Vampiric Touch",
+      "sheet": 2,
+      "tile": 801,
+      "referenceUrl": "https://bg3.wiki/w/images/b/b5/Vampiric_Touch_Unfaded_Icon.webp",
+      "matchError": 10.059,
+      "nextMatchError": 47.744,
+      "id": "vampiric-touch"
+    },
+    {
+      "name": "Arcane Gate",
+      "sheet": 1,
+      "tile": 294,
+      "referenceUrl": "https://bg3.wiki/w/images/1/11/Arcane_Gate_Unfaded_Icon.webp",
+      "matchError": 7.936,
+      "nextMatchError": 28.342,
+      "id": "arcane-gate"
+    },
+    {
+      "name": "Chain Lightning",
+      "sheet": 1,
+      "tile": 345,
+      "referenceUrl": "https://bg3.wiki/w/images/8/81/Chain_Lightning_Unfaded_Icon.webp",
+      "matchError": 9.634,
+      "nextMatchError": 45.181,
+      "id": "chain-lightning"
+    },
+    {
+      "name": "Circle of Death",
+      "sheet": 1,
+      "tile": 346,
+      "referenceUrl": "https://bg3.wiki/w/images/2/27/Circle_of_Death_Unfaded_Icon.webp",
+      "matchError": 10.343,
+      "nextMatchError": 34.807,
+      "id": "circle-of-death"
+    },
+    {
+      "name": "Cloudkill",
+      "sheet": 1,
+      "tile": 175,
+      "referenceUrl": "https://bg3.wiki/w/images/0/03/Cloudkill_Unfaded_Icon.webp",
+      "matchError": 11.472,
+      "nextMatchError": 38.906,
+      "id": "cloudkill"
+    },
+    {
+      "name": "Cone of Cold",
+      "sheet": 1,
+      "tile": 210,
+      "referenceUrl": "https://bg3.wiki/w/images/e/ee/Cone_of_Cold_Unfaded_Icon.webp",
+      "matchError": 10.352,
+      "nextMatchError": 42.009,
+      "id": "cone-of-cold"
+    },
+    {
+      "name": "Conjure Elemental",
+      "sheet": 1,
+      "tile": 173,
+      "referenceUrl": "https://bg3.wiki/w/images/6/6d/Conjure_Elemental_Unfaded_Icon.webp",
+      "matchError": 7.876,
+      "nextMatchError": 39.855,
+      "id": "conjure-elemental"
+    },
+    {
+      "name": "Create Undead",
+      "sheet": 1,
+      "tile": 167,
+      "referenceUrl": "https://bg3.wiki/w/images/f/fa/Create_Undead_Unfaded_Icon.webp",
+      "matchError": 7.451,
+      "nextMatchError": 43.614,
+      "id": "create-undead"
+    },
+    {
+      "name": "Disintegrate",
+      "sheet": 1,
+      "tile": 270,
+      "referenceUrl": "https://bg3.wiki/w/images/e/ee/Disintegrate_Unfaded_Icon.webp",
+      "matchError": 10.409,
+      "nextMatchError": 40.625,
+      "id": "disintegrate"
+    },
+    {
+      "name": "Dominate Person",
+      "sheet": 1,
+      "tile": 154,
+      "referenceUrl": "https://bg3.wiki/w/images/6/6c/Dominate_Person_Unfaded_Icon.webp",
+      "matchError": 8.029,
+      "nextMatchError": 45.556,
+      "id": "dominate-person"
+    },
+    {
+      "name": "Hold Monster",
+      "sheet": 1,
+      "tile": 298,
+      "referenceUrl": "https://bg3.wiki/w/images/1/10/Hold_Monster_Unfaded_Icon.webp",
+      "matchError": 7.859,
+      "nextMatchError": 37.337,
+      "id": "hold-monster"
+    },
+    {
+      "name": "Otiluke's Resilient Sphere",
+      "sheet": 1,
+      "tile": 32,
+      "referenceUrl": "https://bg3.wiki/w/images/3/33/Otiluke%27s_Resilient_Sphere_Unfaded_Icon.webp",
+      "matchError": 7.872,
+      "nextMatchError": 43.823,
+      "id": "otiluke-s-resilient-sphere"
+    },
+    {
+      "name": "Phantasmal Killer",
+      "sheet": 1,
+      "tile": 97,
+      "referenceUrl": "https://bg3.wiki/w/images/6/6b/Phantasmal_Killer_Unfaded_Icon.webp",
+      "matchError": 9.302,
+      "nextMatchError": 51.874,
+      "id": "phantasmal-killer"
+    },
+    {
+      "name": "Planar Binding",
+      "sheet": 1,
+      "tile": 325,
+      "referenceUrl": "https://bg3.wiki/w/images/b/bf/Planar_Binding_Unfaded_Icon.webp",
+      "matchError": 9.273,
+      "nextMatchError": 46.17,
+      "id": "planar-binding"
+    },
+    {
+      "name": "Polymorph",
+      "sheet": 1,
+      "tile": 70,
+      "referenceUrl": "https://bg3.wiki/w/images/5/53/Polymorph_Unfaded_Icon.webp",
+      "matchError": 7.807,
+      "nextMatchError": 42.791,
+      "id": "polymorph"
+    },
+    {
+      "name": "Seeming",
+      "sheet": 1,
+      "tile": 338,
+      "referenceUrl": "https://bg3.wiki/w/images/6/63/Seeming_Unfaded_Icon.webp",
+      "matchError": 7.335,
+      "nextMatchError": 51.606,
+      "id": "seeming"
+    },
+    {
+      "name": "Stoneskin",
+      "sheet": 1,
+      "tile": 74,
+      "referenceUrl": "https://bg3.wiki/w/images/5/5c/Stoneskin_Unfaded_Icon.webp",
+      "matchError": 8.687,
+      "nextMatchError": 32.502,
+      "id": "stoneskin"
+    },
+    {
+      "name": "Telekinesis",
+      "sheet": 1,
+      "tile": 278,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e4/Telekinesis_Unfaded_Icon.webp",
+      "matchError": 8.18,
+      "nextMatchError": 40.602,
+      "id": "telekinesis"
+    },
+    {
+      "name": "Wall of Fire",
+      "sheet": 1,
+      "tile": 73,
+      "referenceUrl": "https://bg3.wiki/w/images/6/60/Wall_of_Fire_Unfaded_Icon.webp",
+      "matchError": 11.459,
+      "nextMatchError": 48.236,
+      "id": "wall-of-fire"
+    },
+    {
+      "name": "Wall of Stone",
+      "sheet": 1,
+      "tile": 268,
+      "referenceUrl": "https://bg3.wiki/w/images/a/ab/Wall_of_Stone_Unfaded_Icon.webp",
+      "matchError": 8.437,
+      "nextMatchError": 47.991,
+      "id": "wall-of-stone"
+    },
+    {
+      "name": "Flesh to Stone",
+      "sheet": 1,
+      "tile": 344,
+      "referenceUrl": "https://bg3.wiki/w/images/7/77/Flesh_to_Stone_Unfaded_Icon.webp",
+      "matchError": 8.761,
+      "nextMatchError": 42.474,
+      "id": "flesh-to-stone"
+    },
+    {
+      "name": "Globe of Invulnerability",
+      "sheet": 1,
+      "tile": 290,
+      "referenceUrl": "https://bg3.wiki/w/images/7/76/Globe_of_Invulnerability_Unfaded_Icon.webp",
+      "matchError": 9.151,
+      "nextMatchError": 51.083,
+      "id": "globe-of-invulnerability"
+    },
+    {
+      "name": "Magic Jar",
+      "sheet": 1,
+      "tile": 342,
+      "referenceUrl": "https://bg3.wiki/w/images/b/bd/Magic_Jar_Unfaded_Icon.webp",
+      "matchError": 7.747,
+      "nextMatchError": 41.604,
+      "id": "magic-jar"
+    },
+    {
+      "name": "Otiluke's Freezing Sphere",
+      "sheet": 1,
+      "tile": 348,
+      "referenceUrl": "https://bg3.wiki/w/images/7/7d/Otiluke%27s_Freezing_Sphere_Unfaded_Icon.webp",
+      "matchError": 10.299,
+      "nextMatchError": 45.575,
+      "id": "otiluke-s-freezing-sphere"
+    },
+    {
+      "name": "Otto's Irresistible Dance",
+      "sheet": 1,
+      "tile": 258,
+      "referenceUrl": "https://bg3.wiki/w/images/8/86/Otto%27s_Irresistible_Dance_Unfaded_Icon.webp",
+      "matchError": 7.98,
+      "nextMatchError": 44.686,
+      "id": "otto-s-irresistible-dance"
+    },
+    {
+      "name": "Sunbeam",
+      "sheet": 1,
+      "tile": 287,
+      "referenceUrl": "https://bg3.wiki/w/images/e/ef/Sunbeam_Unfaded_Icon.webp",
+      "matchError": 7.659,
+      "nextMatchError": 13.782,
+      "id": "sunbeam"
+    },
+    {
+      "name": "True Seeing",
+      "sheet": 1,
+      "tile": 272,
+      "referenceUrl": "https://bg3.wiki/w/images/7/71/True_Seeing_Unfaded_Icon.webp",
+      "matchError": 7.632,
+      "nextMatchError": 37.92,
+      "id": "true-seeing"
+    },
+    {
+      "name": "Wall of Ice",
+      "sheet": 1,
+      "tile": 289,
+      "referenceUrl": "https://bg3.wiki/w/images/d/d7/Wall_of_Ice_Unfaded_Icon.webp",
+      "matchError": 10.669,
+      "nextMatchError": 51.355,
+      "id": "wall-of-ice"
+    },
+    {
+      "name": "Animal Friendship",
+      "sheet": 2,
+      "tile": 176,
+      "referenceUrl": "https://bg3.wiki/w/images/1/1b/Animal_Friendship_Unfaded_Icon.webp",
+      "matchError": 7.253,
+      "nextMatchError": 15.281,
+      "id": "animal-friendship"
+    },
+    {
+      "name": "Bless",
+      "sheet": 2,
+      "tile": 169,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e5/Bless_Unfaded_Icon.webp",
+      "matchError": 7.759,
+      "nextMatchError": 15.632,
+      "id": "bless"
+    },
+    {
+      "name": "Cure Wounds",
+      "sheet": 2,
+      "tile": 62,
+      "referenceUrl": "https://bg3.wiki/w/images/8/85/Cure_Wounds_Unfaded_Icon.webp",
+      "matchError": 9.998,
+      "nextMatchError": 17.608,
+      "id": "cure-wounds"
+    },
+    {
+      "name": "Dissonant Whispers",
+      "sheet": 2,
+      "tile": 164,
+      "referenceUrl": "https://bg3.wiki/w/images/c/ca/Dissonant_Whispers_Unfaded_Icon.webp",
+      "matchError": 6.836,
+      "nextMatchError": 14.738,
+      "id": "dissonant-whispers"
+    },
+    {
+      "name": "Enhance Ability",
+      "sheet": 2,
+      "tile": 414,
+      "referenceUrl": "https://bg3.wiki/w/images/9/9f/Enhance_Ability_Unfaded_Icon.webp",
+      "matchError": 7.678,
+      "nextMatchError": 38.126,
+      "id": "enhance-ability"
+    },
+    {
+      "name": "Faerie Fire",
+      "sheet": 2,
+      "tile": 167,
+      "referenceUrl": "https://bg3.wiki/w/images/a/a1/Faerie_Fire_Unfaded_Icon.webp",
+      "matchError": 9.112,
+      "nextMatchError": 16.646,
+      "id": "faerie-fire"
+    },
+    {
+      "name": "Guiding Bolt",
+      "sheet": 2,
+      "tile": 61,
+      "referenceUrl": "https://bg3.wiki/w/images/8/82/Guiding_Bolt_Unfaded_Icon.webp",
+      "matchError": 7.916,
+      "nextMatchError": 16.151,
+      "id": "guiding-bolt"
+    },
+    {
+      "name": "Healing Word",
+      "sheet": 2,
+      "tile": 78,
+      "referenceUrl": "https://bg3.wiki/w/images/1/15/Healing_Word_Unfaded_Icon.webp",
+      "matchError": 11.378,
+      "nextMatchError": 19.032,
+      "id": "healing-word"
+    },
+    {
+      "name": "Heat Metal",
+      "sheet": 2,
+      "tile": 385,
+      "referenceUrl": "https://bg3.wiki/w/images/8/87/Heat_Metal_Unfaded_Icon.webp",
+      "matchError": 9.387,
+      "nextMatchError": 43.125,
+      "id": "heat-metal"
+    },
+    {
+      "name": "Inflict Wounds",
+      "sheet": 2,
+      "tile": 59,
+      "referenceUrl": "https://bg3.wiki/w/images/f/f4/Inflict_Wounds_Unfaded_Icon.webp",
+      "matchError": 9.423,
+      "nextMatchError": 17.175,
+      "id": "inflict-wounds"
+    },
+    {
+      "name": "Mass Cure Wounds",
+      "sheet": 1,
+      "tile": 301,
+      "referenceUrl": "https://bg3.wiki/w/images/4/4a/Mass_Cure_Wounds_Unfaded_Icon.webp",
+      "matchError": 10.011,
+      "nextMatchError": 48.289,
+      "id": "mass-cure-wounds"
+    },
+    {
+      "name": "Power Word Kill",
+      "sheet": 1,
+      "tile": 277,
+      "referenceUrl": "https://bg3.wiki/w/images/c/ca/Power_Word_Kill_Unfaded_Icon.webp",
+      "matchError": 8.679,
+      "nextMatchError": 43.816,
+      "id": "power-word-kill"
+    },
+    {
+      "name": "Sacred Flame",
+      "sheet": 2,
+      "tile": 63,
+      "referenceUrl": "https://bg3.wiki/w/images/9/9c/Sacred_Flame_Unfaded_Icon.webp",
+      "matchError": 7.846,
+      "nextMatchError": 40.932,
+      "id": "sacred-flame"
+    },
+    {
+      "name": "Silence",
+      "sheet": 2,
+      "tile": 157,
+      "referenceUrl": "https://bg3.wiki/w/images/0/07/Silence_Unfaded_Icon.webp",
+      "matchError": 7.962,
+      "nextMatchError": 39.646,
+      "id": "silence"
+    },
+    {
+      "name": "Speak with Animals",
+      "sheet": 2,
+      "tile": 65,
+      "referenceUrl": "https://bg3.wiki/w/images/2/2d/Speak_with_Animals_Unfaded_Icon.webp",
+      "matchError": 9.487,
+      "nextMatchError": 17.127,
+      "id": "speak-with-animals"
+    },
+    {
+      "name": "Speak with Dead",
+      "sheet": 2,
+      "tile": 66,
+      "referenceUrl": "https://bg3.wiki/w/images/4/4b/Speak_with_Dead_Unfaded_Icon.webp",
+      "matchError": 7.401,
+      "nextMatchError": 41.631,
+      "id": "speak-with-dead"
+    },
+    {
+      "name": "Vicious Mockery",
+      "sheet": 2,
+      "tile": 446,
+      "referenceUrl": "https://bg3.wiki/w/images/a/a7/Vicious_Mockery_Unfaded_Icon.webp",
+      "matchError": 7.583,
+      "nextMatchError": 45.197,
+      "id": "vicious-mockery"
+    },
+    {
+      "name": "Blade Barrier",
+      "sheet": 1,
+      "tile": 269,
+      "referenceUrl": "https://bg3.wiki/w/images/c/c2/Blade_Barrier_Unfaded_Icon.webp",
+      "matchError": 11.072,
+      "nextMatchError": 38.896,
+      "id": "blade-barrier"
+    },
+    {
+      "name": "Crusader's Mantle",
+      "sheet": 2,
+      "tile": 826,
+      "referenceUrl": "https://bg3.wiki/w/images/5/5a/Crusader%27s_Mantle_Unfaded_Icon.webp",
+      "matchError": 9.306,
+      "nextMatchError": 46.228,
+      "id": "crusader-s-mantle"
+    },
+    {
+      "name": "Daylight",
+      "sheet": 2,
+      "tile": 789,
+      "referenceUrl": "https://bg3.wiki/w/images/8/8a/Daylight_Unfaded_Icon.webp",
+      "matchError": 8.553,
+      "nextMatchError": 34.776,
+      "id": "daylight"
+    },
+    {
+      "name": "Dominate Beast",
+      "sheet": 1,
+      "tile": 45,
+      "referenceUrl": "https://bg3.wiki/w/images/d/d0/Dominate_Beast_Unfaded_Icon.webp",
+      "matchError": 8.552,
+      "nextMatchError": 45.029,
+      "id": "dominate-beast"
+    },
+    {
+      "name": "Flame Strike",
+      "sheet": 1,
+      "tile": 91,
+      "referenceUrl": "https://bg3.wiki/w/images/5/57/Flame_Strike_Unfaded_Icon.webp",
+      "matchError": 10.133,
+      "nextMatchError": 45.716,
+      "id": "flame-strike"
+    },
+    {
+      "name": "Grasping Vine",
+      "sheet": 1,
+      "tile": 58,
+      "referenceUrl": "https://bg3.wiki/w/images/7/7a/Grasping_Vine_Unfaded_Icon.webp",
+      "matchError": 7.72,
+      "nextMatchError": 45.666,
+      "id": "grasping-vine"
+    },
+    {
+      "name": "Guardian of Faith",
+      "sheet": 1,
+      "tile": 108,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e6/Guardian_of_Faith_Unfaded_Icon.webp",
+      "matchError": 7.844,
+      "nextMatchError": 44.632,
+      "id": "guardian-of-faith"
+    },
+    {
+      "name": "Harm",
+      "sheet": 1,
+      "tile": 261,
+      "referenceUrl": "https://bg3.wiki/w/images/9/92/Harm_Unfaded_Icon.webp",
+      "matchError": 8.337,
+      "nextMatchError": 31.97,
+      "id": "harm"
+    },
+    {
+      "name": "Mass Healing Word",
+      "sheet": 2,
+      "tile": 792,
+      "referenceUrl": "https://bg3.wiki/w/images/d/de/Mass_Healing_Word_Unfaded_Icon.webp",
+      "matchError": 12.31,
+      "nextMatchError": 38.523,
+      "id": "mass-healing-word"
+    },
+    {
+      "name": "Planar Ally",
+      "sheet": 1,
+      "tile": 321,
+      "referenceUrl": "https://bg3.wiki/w/images/0/02/Planar_Ally_Unfaded_Icon.webp",
+      "matchError": 7.872,
+      "nextMatchError": 51.114,
+      "id": "planar-ally"
+    },
+    {
+      "name": "Plant Growth",
+      "sheet": 2,
+      "tile": 804,
+      "referenceUrl": "https://bg3.wiki/w/images/2/29/Plant_Growth_Unfaded_Icon.webp",
+      "matchError": 8.454,
+      "nextMatchError": 46.56,
+      "id": "plant-growth"
+    },
+    {
+      "name": "Prayer of Healing",
+      "sheet": 2,
+      "tile": 85,
+      "referenceUrl": "https://bg3.wiki/w/images/d/db/Prayer_of_Healing_Unfaded_Icon.webp",
+      "matchError": 9.133,
+      "nextMatchError": 38.869,
+      "id": "prayer-of-healing"
+    },
+    {
+      "name": "Produce Flame",
+      "sheet": 2,
+      "tile": 391,
+      "referenceUrl": "https://bg3.wiki/w/images/8/8b/Produce_Flame_Unfaded_Icon.webp",
+      "matchError": 8.091,
+      "nextMatchError": 48.958,
+      "id": "produce-flame"
+    },
+    {
+      "name": "Revivify",
+      "sheet": 2,
+      "tile": 876,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e3/Revivify_Unfaded_Icon.webp",
+      "matchError": 9.42,
+      "nextMatchError": 37.142,
+      "id": "revivify"
+    },
+    {
+      "name": "Sanctuary",
+      "sheet": 2,
+      "tile": 844,
+      "referenceUrl": "https://bg3.wiki/w/images/2/20/Sanctuary_Unfaded_Icon.webp",
+      "matchError": 8.932,
+      "nextMatchError": 44.258,
+      "id": "sanctuary"
+    },
+    {
+      "name": "Shield of Faith",
+      "sheet": 2,
+      "tile": 67,
+      "referenceUrl": "https://bg3.wiki/w/images/c/cc/Shield_of_Faith_Unfaded_Icon.webp",
+      "matchError": 8.249,
+      "nextMatchError": 16.291,
+      "id": "shield-of-faith"
+    },
+    {
+      "name": "Spirit Guardians",
+      "sheet": 2,
+      "tile": 785,
+      "referenceUrl": "https://bg3.wiki/w/images/b/b4/Spirit_Guardians_Unfaded_Icon.webp",
+      "matchError": 7.416,
+      "nextMatchError": 45.947,
+      "id": "spirit-guardians"
+    },
+    {
+      "name": "Arms of Hadar",
+      "sheet": 2,
+      "tile": 175,
+      "referenceUrl": "https://bg3.wiki/w/images/5/5c/Arms_of_Hadar_Unfaded_Icon.webp",
+      "matchError": 9.783,
+      "nextMatchError": 17.956,
+      "id": "arms-of-hadar"
+    },
+    {
+      "name": "Bestow Curse",
+      "sheet": 2,
+      "tile": 877,
+      "referenceUrl": "https://bg3.wiki/w/images/a/a9/Bestow_Curse_Unfaded_Icon.webp",
+      "matchError": 8.67,
+      "nextMatchError": 43.148,
+      "id": "bestow-curse"
+    },
+    {
+      "name": "Blinding Smite",
+      "sheet": 2,
+      "tile": 823,
+      "referenceUrl": "https://bg3.wiki/w/images/6/67/Blinding_Smite_Unfaded_Icon.webp",
+      "matchError": 8.911,
+      "nextMatchError": 52.208,
+      "id": "blinding-smite"
+    },
+    {
+      "name": "Calm Emotions",
+      "sheet": 2,
+      "tile": 622,
+      "referenceUrl": "https://bg3.wiki/w/images/c/cc/Calm_Emotions_Unfaded_Icon.webp",
+      "matchError": 8.697,
+      "nextMatchError": 44.022,
+      "id": "calm-emotions"
+    },
+    {
+      "name": "Conjure Animals",
+      "sheet": 1,
+      "tile": 49,
+      "referenceUrl": "https://bg3.wiki/w/images/4/43/Conjure_Animals_Unfaded_Icon.webp",
+      "matchError": 7.831,
+      "nextMatchError": 43.047,
+      "id": "conjure-animals"
+    },
+    {
+      "name": "Eldritch Blast",
+      "sheet": 2,
+      "tile": 29,
+      "referenceUrl": "https://bg3.wiki/w/images/3/3b/Eldritch_Blast_Unfaded_Icon.webp",
+      "matchError": 9.162,
+      "nextMatchError": 40.321,
+      "id": "eldritch-blast"
+    },
+    {
+      "name": "Elemental Weapon",
+      "sheet": 2,
+      "tile": 828,
+      "referenceUrl": "https://bg3.wiki/w/images/6/69/Elemental_Weapon_Unfaded_Icon.webp",
+      "matchError": 10.194,
+      "nextMatchError": 49.763,
+      "id": "elemental-weapon"
+    },
+    {
+      "name": "Entangle",
+      "sheet": 2,
+      "tile": 386,
+      "referenceUrl": "https://bg3.wiki/w/images/6/63/Entangle_Unfaded_Icon.webp",
+      "matchError": 8.224,
+      "nextMatchError": 16.802,
+      "id": "entangle"
+    },
+    {
+      "name": "Enthrall",
+      "sheet": 2,
+      "tile": 624,
+      "referenceUrl": "https://bg3.wiki/w/images/f/f4/Enthrall_Unfaded_Icon.webp",
+      "matchError": 7.646,
+      "nextMatchError": 25.979,
+      "id": "enthrall"
+    },
+    {
+      "name": "Flame Blade",
+      "sheet": 2,
+      "tile": 415,
+      "referenceUrl": "https://bg3.wiki/w/images/9/9f/Flame_Blade_Unfaded_Icon.webp",
+      "matchError": 7.063,
+      "nextMatchError": 42.988,
+      "id": "flame-blade"
+    },
+    {
+      "name": "Goodberry",
+      "sheet": 2,
+      "tile": 392,
+      "referenceUrl": "https://bg3.wiki/w/images/1/15/Goodberry_Unfaded_Icon.webp",
+      "matchError": 6.822,
+      "nextMatchError": 40.063,
+      "id": "goodberry"
+    },
+    {
+      "name": "Hail of Thorns",
+      "sheet": 2,
+      "tile": 79,
+      "referenceUrl": "https://bg3.wiki/w/images/7/72/Hail_of_Thorns_Unfaded_Icon.webp",
+      "matchError": 9.539,
+      "nextMatchError": 17.21,
+      "id": "hail-of-thorns"
+    },
+    {
+      "name": "Hellish Rebuke",
+      "sheet": 2,
+      "tile": 295,
+      "referenceUrl": "https://bg3.wiki/w/images/b/b2/Hellish_Rebuke_Unfaded_Icon.webp",
+      "matchError": 8.013,
+      "nextMatchError": 15.627,
+      "id": "hellish-rebuke"
+    },
+    {
+      "name": "Heroism",
+      "sheet": 2,
+      "tile": 616,
+      "referenceUrl": "https://bg3.wiki/w/images/2/25/Heroism_Unfaded_Icon.webp",
+      "matchError": 9.404,
+      "nextMatchError": 45.707,
+      "id": "heroism"
+    },
+    {
+      "name": "Hex",
+      "sheet": 2,
+      "tile": 89,
+      "referenceUrl": "https://bg3.wiki/w/images/a/ad/Hex_Unfaded_Icon.webp",
+      "matchError": 8.704,
+      "nextMatchError": 16.509,
+      "id": "hex"
+    },
+    {
+      "name": "Hunger of Hadar",
+      "sheet": 2,
+      "tile": 783,
+      "referenceUrl": "https://bg3.wiki/w/images/1/19/Hunger_of_Hadar_Unfaded_Icon.webp",
+      "matchError": 9.755,
+      "nextMatchError": 54.074,
+      "id": "hunger-of-hadar"
+    },
+    {
+      "name": "Hunter's Mark",
+      "sheet": 2,
+      "tile": 84,
+      "referenceUrl": "https://bg3.wiki/w/images/1/1b/Hunter%27s_Mark_Unfaded_Icon.webp",
+      "matchError": 7.543,
+      "nextMatchError": 39.153,
+      "id": "hunter-s-mark"
+    },
+    {
+      "name": "Lesser Restoration",
+      "sheet": 2,
+      "tile": 180,
+      "referenceUrl": "https://bg3.wiki/w/images/c/c6/Lesser_Restoration_Unfaded_Icon.webp",
+      "matchError": 8.261,
+      "nextMatchError": 31.417,
+      "id": "lesser-restoration"
+    },
+    {
+      "name": "Lightning Arrow",
+      "sheet": 1,
+      "tile": 310,
+      "referenceUrl": "https://bg3.wiki/w/images/9/94/Lightning_Arrow_Unfaded_Icon.webp",
+      "matchError": 9.782,
+      "nextMatchError": 50.607,
+      "id": "lightning-arrow"
+    },
+    {
+      "name": "Moonbeam",
+      "sheet": 2,
+      "tile": 380,
+      "referenceUrl": "https://bg3.wiki/w/images/7/74/Moonbeam_Unfaded_Icon.webp",
+      "matchError": 8.154,
+      "nextMatchError": 47.714,
+      "id": "moonbeam"
+    },
+    {
+      "name": "Shillelagh",
+      "sheet": 2,
+      "tile": 395,
+      "referenceUrl": "https://bg3.wiki/w/images/9/90/Shillelagh_Unfaded_Icon.webp",
+      "matchError": 7.541,
+      "nextMatchError": 39.987,
+      "id": "shillelagh"
+    },
+    {
+      "name": "Thorn Whip",
+      "sheet": 2,
+      "tile": 396,
+      "referenceUrl": "https://bg3.wiki/w/images/8/81/Thorn_Whip_Unfaded_Icon.webp",
+      "matchError": 11.315,
+      "nextMatchError": 45.197,
+      "id": "thorn-whip"
+    },
+    {
+      "name": "Wall of Thorns",
+      "sheet": 1,
+      "tile": 273,
+      "referenceUrl": "https://bg3.wiki/w/images/8/82/Wall_of_Thorns_Unfaded_Icon.webp",
+      "matchError": 8.52,
+      "nextMatchError": 53.102,
+      "id": "wall-of-thorns"
+    },
+    {
+      "name": "Wrathful Smite",
+      "sheet": 2,
+      "tile": 849,
+      "referenceUrl": "https://bg3.wiki/w/images/2/27/Wrathful_Smite_Unfaded_Icon.webp",
+      "matchError": 8.127,
+      "nextMatchError": 51.814,
+      "id": "wrathful-smite"
+    },
+    {
+      "name": "Aid",
+      "sheet": 2,
+      "tile": 181,
+      "referenceUrl": "https://bg3.wiki/w/images/a/a1/Aid_Unfaded_Icon.webp",
+      "matchError": 9.576,
+      "nextMatchError": 40.501,
+      "id": "aid"
+    },
+    {
+      "name": "Animate Dead",
+      "sheet": 2,
+      "tile": 759,
+      "referenceUrl": "https://bg3.wiki/w/images/d/d5/Animate_Dead_Unfaded_Icon.webp",
+      "matchError": 7.723,
+      "nextMatchError": 21.727,
+      "id": "animate-dead"
+    },
+    {
+      "name": "Barkskin",
+      "sheet": 2,
+      "tile": 387,
+      "referenceUrl": "https://bg3.wiki/w/images/a/ae/Barkskin_Unfaded_Icon.webp",
+      "matchError": 8.632,
+      "nextMatchError": 32.998,
+      "id": "barkskin"
+    },
+    {
+      "name": "Beacon of Hope",
+      "sheet": 2,
+      "tile": 768,
+      "referenceUrl": "https://bg3.wiki/w/images/8/8d/Beacon_of_Hope_Unfaded_Icon.webp",
+      "matchError": 10.959,
+      "nextMatchError": 44.993,
+      "id": "beacon-of-hope"
+    },
+    {
+      "name": "Call Lightning",
+      "sheet": 2,
+      "tile": 781,
+      "referenceUrl": "https://bg3.wiki/w/images/7/71/Call_Lightning_Unfaded_Icon.webp",
+      "matchError": 9.17,
+      "nextMatchError": 18.462,
+      "id": "call-lightning"
+    },
+    {
+      "name": "Compelled Duel",
+      "sheet": 2,
+      "tile": 824,
+      "referenceUrl": "https://bg3.wiki/w/images/c/ce/Compelled_Duel_Unfaded_Icon.webp",
+      "matchError": 8.474,
+      "nextMatchError": 49.902,
+      "id": "compelled-duel"
+    },
+    {
+      "name": "Conjure Barrage",
+      "sheet": 1,
+      "tile": 352,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e0/Conjure_Barrage_Unfaded_Icon.webp",
+      "matchError": 10.893,
+      "nextMatchError": 39.532,
+      "id": "conjure-barrage"
+    },
+    {
+      "name": "Death Ward",
+      "sheet": 1,
+      "tile": 30,
+      "referenceUrl": "https://bg3.wiki/w/images/1/1e/Death_Ward_Unfaded_Icon.webp",
+      "matchError": 7.958,
+      "nextMatchError": 42.72,
+      "id": "death-ward"
+    },
+    {
+      "name": "Destructive Wave",
+      "sheet": 1,
+      "tile": 166,
+      "referenceUrl": "https://bg3.wiki/w/images/f/f9/Destructive_Wave_Unfaded_Icon.webp",
+      "matchError": 7.745,
+      "nextMatchError": 56.568,
+      "id": "destructive-wave"
+    },
+    {
+      "name": "Detect Evil and Good",
+      "sheet": 2,
+      "tile": 93,
+      "referenceUrl": "https://bg3.wiki/w/images/b/bc/Detect_Evil_and_Good_Unfaded_Icon.webp",
+      "matchError": 7.477,
+      "nextMatchError": 40.02,
+      "id": "detect-evil-and-good"
+    },
+    {
+      "name": "Dispel Evil and Good",
+      "sheet": 1,
+      "tile": 155,
+      "referenceUrl": "https://bg3.wiki/w/images/0/0f/Dispel_Evil_And_Good_Unfaded_Icon.webp",
+      "matchError": 9.209,
+      "nextMatchError": 29.678,
+      "id": "dispel-evil-and-good"
+    },
+    {
+      "name": "Freedom of Movement",
+      "sheet": 1,
+      "tile": 50,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e4/Freedom_of_Movement_Unfaded_Icon.webp",
+      "matchError": 8.601,
+      "nextMatchError": 41.206,
+      "id": "freedom-of-movement"
+    },
+    {
+      "name": "Greater Restoration",
+      "sheet": 1,
+      "tile": 208,
+      "referenceUrl": "https://bg3.wiki/w/images/7/75/Greater_Restoration_Unfaded_Icon.webp",
+      "matchError": 8.935,
+      "nextMatchError": 30.717,
+      "id": "greater-restoration"
+    },
+    {
+      "name": "Guidance",
+      "sheet": 2,
+      "tile": 58,
+      "referenceUrl": "https://bg3.wiki/w/images/b/ba/Guidance_Unfaded_Icon.webp",
+      "matchError": 8.219,
+      "nextMatchError": 42.393,
+      "id": "guidance"
+    },
+    {
+      "name": "Heal",
+      "sheet": 1,
+      "tile": 262,
+      "referenceUrl": "https://bg3.wiki/w/images/1/10/Heal_Unfaded_Icon.webp",
+      "matchError": 8.469,
+      "nextMatchError": 32.302,
+      "id": "heal"
+    },
+    {
+      "name": "Heroes' Feast",
+      "sheet": 1,
+      "tile": 343,
+      "referenceUrl": "https://bg3.wiki/w/images/d/d4/Heroes%27_Feast_Unfaded_Icon.webp",
+      "matchError": 7.581,
+      "nextMatchError": 46.259,
+      "id": "heroes-feast"
+    },
+    {
+      "name": "Insect Plague",
+      "sheet": 1,
+      "tile": 350,
+      "referenceUrl": "https://bg3.wiki/w/images/1/11/Insect_Plague_Unfaded_Icon.webp",
+      "matchError": 10.066,
+      "nextMatchError": 37.235,
+      "id": "insect-plague"
+    },
+    {
+      "name": "Protection from Poison",
+      "sheet": 2,
+      "tile": 379,
+      "referenceUrl": "https://bg3.wiki/w/images/7/73/Protection_from_Poison_Unfaded_Icon.webp",
+      "matchError": 8.455,
+      "nextMatchError": 38.684,
+      "id": "protection-from-poison"
+    },
+    {
+      "name": "Searing Smite",
+      "sheet": 2,
+      "tile": 226,
+      "referenceUrl": "https://bg3.wiki/w/images/4/46/Searing_Smite_Unfaded_Icon.webp",
+      "matchError": 11.326,
+      "nextMatchError": 18.987,
+      "id": "searing-smite"
+    },
+    {
+      "name": "Spike Growth",
+      "sheet": 2,
+      "tile": 394,
+      "referenceUrl": "https://bg3.wiki/w/images/b/b0/Spike_Growth_Unfaded_Icon.webp",
+      "matchError": 11.048,
+      "nextMatchError": 42.679,
+      "id": "spike-growth"
+    },
+    {
+      "name": "Thaumaturgy",
+      "sheet": 2,
+      "tile": 296,
+      "referenceUrl": "https://bg3.wiki/w/images/4/4c/Thaumaturgy_Unfaded_Icon.webp",
+      "matchError": 8.121,
+      "nextMatchError": 40.251,
+      "id": "thaumaturgy"
+    },
+    {
+      "name": "Thunderous Smite",
+      "sheet": 2,
+      "tile": 846,
+      "referenceUrl": "https://bg3.wiki/w/images/4/4b/Thunderous_Smite_Unfaded_Icon.webp",
+      "matchError": 7.789,
+      "nextMatchError": 53.849,
+      "id": "thunderous-smite"
+    },
+    {
+      "name": "Warding Bond",
+      "sheet": 2,
+      "tile": 151,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e6/Warding_Bond_Unfaded_Icon.webp",
+      "matchError": 7.846,
+      "nextMatchError": 44.199,
+      "id": "warding-bond"
+    },
+    {
+      "name": "Wind Walk",
+      "sheet": 1,
+      "tile": 326,
+      "referenceUrl": "https://bg3.wiki/w/images/9/99/Wind_Walk_Unfaded_Icon.webp",
+      "matchError": 7.877,
+      "nextMatchError": 47.619,
+      "id": "wind-walk"
+    },
+    {
+      "name": "Absorb Elements",
+      "sheet": 1,
+      "tile": 54,
+      "referenceUrl": "https://bg3.wiki/w/images/f/f0/Absorb_Elements_Unfaded_Icon.webp",
+      "matchError": 5.357,
+      "nextMatchError": 58.703,
+      "id": "absorb-elements"
+    },
+    {
+      "name": "Ice Knife",
+      "sheet": 1,
+      "tile": 203,
+      "referenceUrl": "https://bg3.wiki/w/images/c/c0/Ice_Knife_Unfaded_Icon.webp",
+      "matchError": 8.225,
+      "nextMatchError": 34.272,
+      "id": "ice-knife"
+    },
+    {
+      "name": "Darkvision",
+      "sheet": 2,
+      "tile": 94,
+      "referenceUrl": "https://bg3.wiki/w/images/1/15/Darkvision_spell_Unfaded_Icon.webp",
+      "matchError": 8.907,
+      "nextMatchError": 27.082,
+      "id": "darkvision",
+      "processing": {
+        "threshold": 55,
+        "hueRange": [
+          170,
+          225
+        ],
+        "brightnessGain": 1.7,
+        "minComponent": 8
+      }
+    },
+    {
+      "name": "Pass without Trace",
+      "sheet": 2,
+      "tile": 214,
+      "referenceUrl": "https://bg3.wiki/w/images/4/40/Pass_Without_Trace_Unfaded_Icon.webp",
+      "matchError": 9.453,
+      "nextMatchError": 47.336,
+      "id": "pass-without-trace"
+    },
+    {
+      "name": "Branding Smite",
+      "sheet": 2,
+      "tile": 787,
+      "referenceUrl": "https://bg3.wiki/w/images/8/80/Branding_Smite_Melee_Unfaded_Icon.webp",
+      "matchError": 8.794,
+      "nextMatchError": 51.841,
+      "variant": "melee spell variant",
+      "id": "branding-smite"
+    },
+    {
+      "name": "Banishing Smite",
+      "sheet": 1,
+      "tile": 260,
+      "referenceUrl": "https://bg3.wiki/w/images/1/19/Banishing_Smite_Melee_Unfaded_Icon.webp",
+      "matchError": 8.205,
+      "nextMatchError": 38.859,
+      "variant": "melee spell variant",
+      "id": "banishing-smite"
+    },
+    {
+      "name": "Bane",
+      "sheet": 2,
+      "tile": 168,
+      "referenceUrl": "https://bg3.wiki/w/images/d/de/Bane_spell_Unfaded_Icon.webp",
+      "matchError": 8.318,
+      "nextMatchError": 15.896,
+      "id": "bane"
+    },
+    {
+      "name": "Resistance",
+      "sheet": 2,
+      "tile": 64,
+      "referenceUrl": "https://bg3.wiki/w/images/8/87/Resistance_Cantrip_Unfaded_Icon.webp",
+      "matchError": 8.629,
+      "nextMatchError": 41.554,
+      "id": "resistance"
+    },
+    {
+      "name": "Ensnaring Strike",
+      "sheet": 2,
+      "tile": 3,
+      "referenceUrl": "https://bg3.wiki/w/images/c/c3/Ensnaring_Strike_Melee_Unfaded_Icon.webp",
+      "matchError": 10.678,
+      "nextMatchError": 18.68,
+      "variant": "melee spell variant",
+      "id": "ensnaring-strike"
+    },
+    {
+      "name": "DANSE MACABRE",
+      "sheet": 1,
+      "tile": 710,
+      "referenceUrl": "https://bg3.wiki/w/images/a/ab/Danse_Macabre_Unfaded_Icon.webp",
+      "matchError": 8.338,
+      "nextMatchError": 53.062,
+      "id": "danse-macabre"
+    },
+    {
+      "name": "MIND SPIKE",
+      "sheet": 2,
+      "tile": 895,
+      "referenceUrl": "https://bg3.wiki/w/images/9/9e/Mind_Spike_Unfaded_Icon.webp",
+      "matchError": 7.857,
+      "nextMatchError": 45.178,
+      "id": "mind-spike"
+    },
+    {
+      "name": "SHADOW BLADE",
+      "sheet": 1,
+      "tile": 714,
+      "referenceUrl": "https://bg3.wiki/w/images/d/dc/Shadow_Blade_Unfaded_Icon.webp",
+      "matchError": 7.153,
+      "nextMatchError": 42.047,
+      "id": "shadow-blade"
+    },
+    {
+      "sheet": 2,
+      "tile": 37,
+      "referenceUrl": "https://bg3.wiki/w/images/5/5a/Bone_Chill_Unfaded_Icon.webp",
+      "matchError": 8.332,
+      "nextMatchError": 41.262,
+      "name": "Chill Touch",
+      "id": "chill-touch",
+      "mappingKind": "exact",
+      "sourceName": "Bone Chill",
+      "mappingReason": "BG3 Bone Chill has the ChillTouch spell identity; the spectral skeletal hand depicts necrotic contact.",
+      "gameSpellIds": [
+        "Target_ChillTouch",
+        "Target_GOB_PainPriest_ChillTouch",
+        "Target_SHA_Necromancer_ChillTouch",
+        "Target_TWN_RegretfulHunter_SoulRelease",
+        "Target_TWN_RegretfulHunter_SoulRelease_Debug"
+      ],
+      "gameIconNames": [
+        "Spell_Necromancy_ChillTouch"
+      ],
+      "spellPage": "https://bg3.wiki/wiki/Bone_Chill"
+    },
+    {
+      "sheet": 1,
+      "tile": 420,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Detect Magic",
+      "id": "detect-magic",
+      "mappingKind": "thematic",
+      "sourceName": "Arcane sensing eye",
+      "mappingReason": "A luminous eye with orbiting points represents perception of magical auras."
+    },
+    {
+      "sheet": 2,
+      "tile": 96,
+      "referenceUrl": "https://bg3.wiki/w/images/9/9b/Find_Familiar_Cat_Unfaded_Icon.webp",
+      "matchError": 7.54,
+      "nextMatchError": 39.979,
+      "name": "Find Familiar",
+      "id": "find-familiar",
+      "mappingKind": "exact",
+      "sourceName": "Find Familiar",
+      "mappingReason": "Verified against the base spell icon on bg3.wiki and the BG3 spell data: the general spell uses this same artwork as its named variant.",
+      "gameSpellIds": [
+        "Target_FindFamiliar",
+        "Target_FindFamiliar_2",
+        "Target_FindFamiliar_3",
+        "Target_FindFamiliar_4",
+        "Target_FindFamiliar_5",
+        "Target_FindFamiliar_6",
+        "Target_FindFamiliar_NPC",
+        "Target_FindFamiliar_Raven_NPC",
+        "Target_FindFamiliar_Ritual",
+        "Target_FindFamiliar_Spider_NPC"
+      ],
+      "gameIconNames": [
+        "Spell_Conjuration_FindFamiliar"
+      ],
+      "spellPage": "https://bg3.wiki/wiki/Find_Familiar"
+    },
+    {
+      "sheet": 2,
+      "tile": 48,
+      "referenceUrl": "https://bg3.wiki/w/images/a/a2/Mage_Armour_Unfaded_Icon.webp",
+      "matchError": 8.255,
+      "nextMatchError": 15.695,
+      "name": "Mage Armor",
+      "id": "mage-armor",
+      "mappingKind": "exact",
+      "sourceName": "Mage Armour",
+      "mappingReason": "The named BG3 Mage Armour icon depicts magical protective armour.",
+      "gameSpellIds": [
+        "Target_MageArmor",
+        "Target_MageArmor_2",
+        "Target_MageArmor_3",
+        "Target_MageArmor_4",
+        "Target_MageArmor_5",
+        "Target_MageArmor_6"
+      ],
+      "gameIconNames": [
+        "Spell_Abjuration_MageArmor"
+      ],
+      "spellPage": "https://bg3.wiki/wiki/Mage_Armour"
+    },
+    {
+      "sheet": 2,
+      "tile": 161,
+      "referenceUrl": "https://bg3.wiki/w/images/b/b3/Light_Unfaded_Icon.webp",
+      "name": "Continual Flame",
+      "id": "continual-flame",
+      "mappingKind": "thematic",
+      "sourceName": "Light",
+      "mappingReason": "A glowing candle represents a persistent magical flame without an ornamental frame.",
+      "matchError": 7.776,
+      "nextMatchError": 39.667
+    },
+    {
+      "sheet": 1,
+      "tile": 409,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Magic Mouth",
+      "id": "magic-mouth",
+      "mappingKind": "thematic",
+      "sourceName": "Speaking mouth",
+      "mappingReason": "An isolated open mouth directly depicts the speaking-mouth effect."
+    },
+    {
+      "sheet": 1,
+      "tile": 115,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e7/Conjure_Minor_Elemental_Azer_Unfaded_Icon.webp",
+      "matchError": 7.698,
+      "nextMatchError": 43.208,
+      "name": "Conjure Minor Elementals",
+      "id": "conjure-minor-elementals",
+      "mappingKind": "exact",
+      "sourceName": "Conjure Minor Elementals",
+      "mappingReason": "Verified against the base spell icon on bg3.wiki and the BG3 spell data: the general spell uses this same artwork as its named variant.",
+      "gameSpellIds": [
+        "Target_ConjureElementals_Minor_Container",
+        "Target_ConjureElementals_Minor_Container_5",
+        "Target_ConjureElementals_Minor_Container_6"
+      ],
+      "gameIconNames": [
+        "Spell_Conjuration_ConjureMinorElementals"
+      ],
+      "spellPage": "https://bg3.wiki/wiki/Conjure_Minor_Elemental"
+    },
+    {
+      "sheet": 1,
+      "tile": 284,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Locate Creature",
+      "id": "locate-creature",
+      "mappingKind": "thematic",
+      "sourceName": "Three searching eyes",
+      "mappingReason": "Several eyes looking in different directions convey searching for a creature."
+    },
+    {
+      "sheet": 1,
+      "tile": 353,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Stone Shape",
+      "id": "stone-shape",
+      "mappingKind": "thematic",
+      "sourceName": "Hands shaping a sphere",
+      "mappingReason": "Two hands reshape a rounded mass, representing the shaping of stone rather than an attack."
+    },
+    {
+      "sheet": 1,
+      "tile": 437,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Bigby's Hand",
+      "id": "bigby-s-hand",
+      "mappingKind": "thematic",
+      "sourceName": "Spectral open hand",
+      "mappingReason": "A large open magical hand is the central form of this spell."
+    },
+    {
+      "sheet": 1,
+      "tile": 46,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e5/Dimension_Door_Unfaded_Icon.webp",
+      "matchError": 6.631,
+      "nextMatchError": 37.462,
+      "name": "Passwall",
+      "id": "passwall",
+      "mappingKind": "thematic",
+      "sourceName": "Dimension Door",
+      "mappingReason": "A doorway through a solid outline represents a temporary passage through a barrier."
+    },
+    {
+      "sheet": 1,
+      "tile": 416,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Move Earth",
+      "id": "move-earth",
+      "mappingKind": "thematic",
+      "sourceName": "Figure moving loose stones",
+      "mappingReason": "A figure surrounded by displaced stones depicts movement of earth and loose material."
+    },
+    {
+      "sheet": 2,
+      "tile": 407,
+      "referenceUrl": "https://bg3.wiki/w/images/a/aa/Flaming_Sphere_Unfaded_Icon.webp",
+      "matchError": 7.303,
+      "nextMatchError": 42.27,
+      "name": "Delayed Blast Fireball",
+      "id": "delayed-blast-fireball",
+      "mappingKind": "thematic",
+      "sourceName": "Flaming Sphere",
+      "mappingReason": "A contained glowing fire orb suggests stored fire before its release."
+    },
+    {
+      "sheet": 2,
+      "tile": 9,
+      "referenceUrl": "https://bg3.wiki/w/images/7/7e/Hold_Person_Unfaded_Icon.webp",
+      "matchError": 7.808,
+      "nextMatchError": 36.994,
+      "name": "Forcecage",
+      "id": "forcecage",
+      "mappingKind": "thematic",
+      "sourceName": "Hold Person",
+      "mappingReason": "A figure enclosed by a rectangular boundary gives a clear visual cage."
+    },
+    {
+      "sheet": 2,
+      "tile": 880,
+      "referenceUrl": "https://bg3.wiki/w/images/1/1f/Spiritual_Weapon_Greatsword_Unfaded_Icon.webp",
+      "matchError": 7.168,
+      "nextMatchError": 39.714,
+      "name": "Mordenkainen's Sword",
+      "id": "mordenkainen-s-sword",
+      "mappingKind": "thematic",
+      "sourceName": "Spiritual Weapon Greatsword",
+      "mappingReason": "A hovering sword rising above a magical base depicts a conjured force blade."
+    },
+    {
+      "sheet": 1,
+      "tile": 46,
+      "referenceUrl": "https://bg3.wiki/w/images/e/e5/Dimension_Door_Unfaded_Icon.webp",
+      "matchError": 6.631,
+      "nextMatchError": 37.462,
+      "name": "Demiplane",
+      "id": "demiplane",
+      "mappingKind": "thematic",
+      "sourceName": "Dimension Door",
+      "mappingReason": "A receding doorway represents entry to a separate pocket space."
+    },
+    {
+      "sheet": 1,
+      "tile": 665,
+      "referenceUrl": "https://bg3.wiki/w/images/1/16/Rolan%27s_Firestorm_Unfaded_Icon.webp",
+      "matchError": 9.713,
+      "nextMatchError": 51.473,
+      "name": "Incendiary Cloud",
+      "id": "incendiary-cloud",
+      "mappingKind": "thematic",
+      "sourceName": "Rolan's Firestorm",
+      "mappingReason": "Multiple falling flames represent a broad area of burning magic."
+    },
+    {
+      "sheet": 1,
+      "tile": 445,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Sunburst",
+      "id": "sunburst",
+      "mappingKind": "thematic",
+      "sourceName": "Golden radiant burst",
+      "mappingReason": "A bright radial golden burst clearly represents a sudden flash of sunlight."
+    },
+    {
+      "sheet": 1,
+      "tile": 294,
+      "referenceUrl": "https://bg3.wiki/w/images/1/11/Arcane_Gate_Unfaded_Icon.webp",
+      "matchError": 7.936,
+      "nextMatchError": 28.342,
+      "name": "Gate",
+      "id": "gate",
+      "mappingKind": "thematic",
+      "sourceName": "Arcane Gate",
+      "mappingReason": "The framed magical gateway represents a planar opening."
+    },
+    {
+      "sheet": 1,
+      "tile": 325,
+      "referenceUrl": "https://bg3.wiki/w/images/b/bf/Planar_Binding_Unfaded_Icon.webp",
+      "matchError": 9.273,
+      "nextMatchError": 46.17,
+      "name": "Imprisonment",
+      "id": "imprisonment",
+      "mappingKind": "thematic",
+      "sourceName": "Planar Binding",
+      "mappingReason": "A figure restrained by surrounding lines depicts magical confinement."
+    },
+    {
+      "sheet": 1,
+      "tile": 665,
+      "referenceUrl": "https://bg3.wiki/w/images/1/16/Rolan%27s_Firestorm_Unfaded_Icon.webp",
+      "matchError": 9.713,
+      "nextMatchError": 51.473,
+      "name": "Meteor Swarm",
+      "id": "meteor-swarm",
+      "mappingKind": "thematic",
+      "sourceName": "Rolan's Firestorm",
+      "mappingReason": "Several descending fire masses convey a shower of fiery meteors."
+    },
+    {
+      "sheet": 1,
+      "tile": 75,
+      "referenceUrl": "https://bg3.wiki/w/images/a/af/Slow_Unfaded_Icon.webp",
+      "matchError": 7.932,
+      "nextMatchError": 42.754,
+      "name": "Time Stop",
+      "id": "time-stop",
+      "mappingKind": "thematic",
+      "sourceName": "Slow",
+      "mappingReason": "An hourglass is an immediately legible symbol of controlled or suspended time."
+    },
+    {
+      "sheet": 1,
+      "tile": 301,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Power Word Heal",
+      "id": "power-word-heal",
+      "mappingKind": "thematic",
+      "sourceName": "Radiant healing cross",
+      "mappingReason": "A bright cross with an inner star depicts powerful restorative magic."
+    },
+    {
+      "sheet": 1,
+      "tile": 26,
+      "referenceUrl": "https://bg3.wiki/w/images/6/6c/Identify_Unfaded_Icon.webp",
+      "matchError": 8.355,
+      "nextMatchError": 51.691,
+      "name": "Find Traps",
+      "id": "find-traps",
+      "mappingKind": "thematic",
+      "sourceName": "Identify",
+      "mappingReason": "A magnifying glass represents deliberate detection and inspection of hidden hazards."
+    },
+    {
+      "sheet": 1,
+      "tile": 103,
+      "referenceUrl": "https://bg3.wiki/w/images/6/60/Spiritual_Weapon_Halberd_Unfaded_Icon.webp",
+      "matchError": 7.828,
+      "nextMatchError": 37.69,
+      "name": "Spiritual Weapon",
+      "id": "spiritual-weapon",
+      "mappingKind": "exact",
+      "sourceName": "Spiritual Weapon",
+      "mappingReason": "Verified against the base spell icon on bg3.wiki and the BG3 spell data: the general spell uses this same artwork as its named variant.",
+      "gameSpellIds": [
+        "Target_MAG_SpiritualWeapon",
+        "Target_MAG_Tyr_SwordAndHammer",
+        "Target_SpiritualWeapon"
+      ],
+      "gameIconNames": [
+        "Spell_Evocation_SpiritualWeapon"
+      ],
+      "spellPage": "https://bg3.wiki/wiki/Spiritual_Weapon"
+    },
+    {
+      "sheet": 1,
+      "tile": 665,
+      "referenceUrl": "https://bg3.wiki/w/images/1/16/Rolan%27s_Firestorm_Unfaded_Icon.webp",
+      "matchError": 9.713,
+      "nextMatchError": 51.473,
+      "name": "Fire Storm",
+      "id": "fire-storm",
+      "mappingKind": "thematic",
+      "sourceName": "Rolan's Firestorm",
+      "mappingReason": "The BG3 firestorm artwork shows several flames descending over an area."
+    },
+    {
+      "sheet": 1,
+      "tile": 381,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Earthquake",
+      "id": "earthquake",
+      "mappingKind": "thematic",
+      "sourceName": "Cracked ground shock",
+      "mappingReason": "A spreading network of cracks represents a destructive ground tremor."
+    },
+    {
+      "sheet": 1,
+      "tile": 267,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Mass Heal",
+      "id": "mass-heal",
+      "mappingKind": "thematic",
+      "sourceName": "Healing rays and cross",
+      "mappingReason": "Outward rays around a healing cross distinguish broad healing from a single target."
+    },
+    {
+      "sheet": 2,
+      "tile": 804,
+      "referenceUrl": "https://bg3.wiki/w/images/2/29/Plant_Growth_Unfaded_Icon.webp",
+      "matchError": 8.454,
+      "nextMatchError": 46.56,
+      "name": "Druidcraft",
+      "id": "druidcraft",
+      "mappingKind": "thematic",
+      "sourceName": "Plant Growth",
+      "mappingReason": "An opening leafy sprout conveys small acts of nature magic."
+    },
+    {
+      "sheet": 1,
+      "tile": 436,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Beast Sense",
+      "id": "beast-sense",
+      "mappingKind": "thematic",
+      "sourceName": "Animal senses",
+      "mappingReason": "An attentive animal face suggests perceiving the world through a beast."
+    },
+    {
+      "sheet": 2,
+      "tile": 178,
+      "referenceUrl": "https://bg3.wiki/w/images/2/2d/Armour_of_Agathys_Unfaded_Icon.webp",
+      "matchError": 9.317,
+      "nextMatchError": 17.335,
+      "name": "Armor of Agathys",
+      "id": "armor-of-agathys",
+      "mappingKind": "exact",
+      "sourceName": "Armour of Agathys",
+      "mappingReason": "The named Armour of Agathys icon combines armour with a cold star.",
+      "gameSpellIds": [
+        "Shout_ArmorOfAgathys",
+        "Shout_ArmorOfAgathys_2",
+        "Shout_ArmorOfAgathys_3",
+        "Shout_ArmorOfAgathys_4",
+        "Shout_ArmorOfAgathys_5",
+        "Shout_ArmorOfAgathys_6",
+        "Shout_MAG_ArmorOfAgathys_3",
+        "Shout_WYR_MessHallBodyguard_ArmorOfAgathys"
+      ],
+      "gameIconNames": [
+        "Spell_Abjuration_ArmorOfAgathys"
+      ],
+      "spellPage": "https://bg3.wiki/wiki/Armour_of_Agathys"
+    },
+    {
+      "sheet": 1,
+      "tile": 254,
+      "referenceUrl": "https://bg3.wiki/w/images/2/2e/Fire_Breath_Line_Unfaded_Icon.webp",
+      "matchError": 7.611,
+      "nextMatchError": 30.291,
+      "name": "Aganazzar's Scorcher",
+      "id": "aganazzar-s-scorcher",
+      "mappingKind": "thematic",
+      "sourceName": "Fire Breath Line",
+      "mappingReason": "A narrow projected flame depicts the spell's line of fire."
+    },
+    {
+      "sheet": 2,
+      "tile": 65,
+      "referenceUrl": "https://bg3.wiki/w/images/2/2d/Speak_with_Animals_Unfaded_Icon.webp",
+      "matchError": 9.487,
+      "nextMatchError": 17.127,
+      "name": "Beast Bond",
+      "id": "beast-bond",
+      "mappingKind": "thematic",
+      "sourceName": "Speak with Animals",
+      "mappingReason": "Facing human and animal profiles represent a mental connection with a beast."
+    },
+    {
+      "sheet": 1,
+      "tile": 268,
+      "referenceUrl": "https://bg3.wiki/w/images/a/ab/Wall_of_Stone_Unfaded_Icon.webp",
+      "matchError": 8.437,
+      "nextMatchError": 47.991,
+      "name": "Bones of the Earth",
+      "id": "bones-of-the-earth",
+      "mappingKind": "thematic",
+      "sourceName": "Wall of Stone",
+      "mappingReason": "Raised jagged stone columns represent pillars erupting from the earth."
+    },
+    {
+      "sheet": 2,
+      "tile": 49,
+      "referenceUrl": "https://bg3.wiki/w/images/3/37/Burning_Hands_Unfaded_Icon.webp",
+      "name": "Control Flames",
+      "id": "control-flames",
+      "mappingKind": "thematic",
+      "sourceName": "Burning Hands",
+      "mappingReason": "Two hands directing flame represent control of fire without a button-like border.",
+      "matchError": 10.116,
+      "nextMatchError": 17.851
+    },
+    {
+      "sheet": 2,
+      "tile": 791,
+      "referenceUrl": "https://bg3.wiki/w/images/b/bf/Gust_of_Wind_Unfaded_Icon.webp",
+      "matchError": 7.193,
+      "nextMatchError": 49.219,
+      "name": "Control Winds",
+      "id": "control-winds",
+      "mappingKind": "thematic",
+      "sourceName": "Gust of Wind",
+      "mappingReason": "Long curling streams show directed air currents."
+    },
+    {
+      "sheet": 1,
+      "tile": 423,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Create Bonfire",
+      "id": "create-bonfire",
+      "mappingKind": "thematic",
+      "sourceName": "Rising bonfire",
+      "mappingReason": "An upright flame growing from a base depicts a conjured bonfire."
+    },
+    {
+      "sheet": 1,
+      "tile": 397,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Dust Devil",
+      "id": "dust-devil",
+      "mappingKind": "thematic",
+      "sourceName": "Small whirlwind",
+      "mappingReason": "A compact funnel with swirling material depicts a dust vortex."
+    },
+    {
+      "sheet": 1,
+      "tile": 381,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Earth Tremor",
+      "id": "earth-tremor",
+      "mappingKind": "thematic",
+      "sourceName": "Cracked ground shock",
+      "mappingReason": "A spreading crack pattern depicts a local ground tremor."
+    },
+    {
+      "sheet": 1,
+      "tile": 382,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Erupting Earth",
+      "id": "erupting-earth",
+      "mappingKind": "thematic",
+      "sourceName": "Erupting stones",
+      "mappingReason": "Fragments of rock shoot upward from the ground."
+    },
+    {
+      "sheet": 1,
+      "tile": 422,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Frostbite",
+      "id": "frostbite",
+      "mappingKind": "thematic",
+      "sourceName": "Sharp frost crystal",
+      "mappingReason": "A cold blue crystal with sharp radiating points conveys intense freezing."
+    },
+    {
+      "sheet": 2,
+      "tile": 791,
+      "referenceUrl": "https://bg3.wiki/w/images/b/bf/Gust_of_Wind_Unfaded_Icon.webp",
+      "matchError": 7.193,
+      "nextMatchError": 49.219,
+      "name": "Gust",
+      "id": "gust",
+      "mappingKind": "thematic",
+      "sourceName": "Gust of Wind",
+      "mappingReason": "Curling horizontal lines directly convey a burst of wind."
+    },
+    {
+      "sheet": 1,
+      "tile": 418,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Immolation",
+      "id": "immolation",
+      "mappingKind": "thematic",
+      "sourceName": "Figure engulfed in fire",
+      "mappingReason": "A face surrounded by tall flames conveys a creature being consumed by fire."
+    },
+    {
+      "sheet": 1,
+      "tile": 53,
+      "referenceUrl": "https://bg3.wiki/w/images/3/31/Fire_Shield_Unfaded_Icon.webp",
+      "matchError": 8.391,
+      "nextMatchError": 39.141,
+      "name": "Investiture of Flame",
+      "id": "investiture-of-flame",
+      "mappingKind": "thematic",
+      "sourceName": "Fire Shield",
+      "mappingReason": "A fiery protective outline conveys a body cloaked in flame."
+    },
+    {
+      "sheet": 2,
+      "tile": 178,
+      "referenceUrl": "https://bg3.wiki/w/images/2/2d/Armour_of_Agathys_Unfaded_Icon.webp",
+      "matchError": 9.317,
+      "nextMatchError": 17.335,
+      "name": "Investiture of Ice",
+      "id": "investiture-of-ice",
+      "mappingKind": "thematic",
+      "sourceName": "Armour of Agathys",
+      "mappingReason": "An armour outline filled with a cold star conveys an icy mantle."
+    },
+    {
+      "sheet": 1,
+      "tile": 74,
+      "referenceUrl": "https://bg3.wiki/w/images/5/5c/Stoneskin_Unfaded_Icon.webp",
+      "matchError": 8.687,
+      "nextMatchError": 32.502,
+      "name": "Investiture of Stone",
+      "id": "investiture-of-stone",
+      "mappingKind": "thematic",
+      "sourceName": "Stoneskin",
+      "mappingReason": "A hand with a faceted stone surface represents a body taking on stone properties."
+    },
+    {
+      "sheet": 1,
+      "tile": 353,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Magic Stone",
+      "id": "magic-stone",
+      "mappingKind": "thematic",
+      "sourceName": "Hands shaping a sphere",
+      "mappingReason": "Hands working a small rounded object convey enchanting a stone."
+    },
+    {
+      "sheet": 1,
+      "tile": 407,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Melf's Minute Meteors",
+      "id": "melf-s-minute-meteors",
+      "mappingKind": "thematic",
+      "sourceName": "Small fiery projectiles",
+      "mappingReason": "Several compact flaming projectiles depict small meteors rather than one large fireball."
+    },
+    {
+      "sheet": 1,
+      "tile": 416,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Mold Earth",
+      "id": "mold-earth",
+      "mappingKind": "thematic",
+      "sourceName": "Figure moving loose stones",
+      "mappingReason": "Floating earth fragments around a shaping figure convey controlled earth movement."
+    },
+    {
+      "sheet": 2,
+      "tile": 784,
+      "referenceUrl": "https://bg3.wiki/w/images/4/47/Sleet_Storm_Unfaded_Icon.webp",
+      "matchError": 8.703,
+      "nextMatchError": 44.89,
+      "name": "Snilloc's Snowball Swarm",
+      "id": "snilloc-s-snowball-swarm",
+      "mappingKind": "thematic",
+      "sourceName": "Sleet Storm",
+      "mappingReason": "Several separate cold starbursts depict a shower of freezing particles."
+    },
+    {
+      "sheet": 1,
+      "tile": 416,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Transmute Rock",
+      "id": "transmute-rock",
+      "mappingKind": "thematic",
+      "sourceName": "Figure moving loose stones",
+      "mappingReason": "Changing loose stone around a figure conveys manipulation of rock and earth."
+    },
+    {
+      "sheet": 1,
+      "tile": 394,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Warding Wind",
+      "id": "warding-wind",
+      "mappingKind": "thematic",
+      "sourceName": "Encircling wind current",
+      "mappingReason": "A curling air current suggests a surrounding wind barrier."
+    },
+    {
+      "sheet": 1,
+      "tile": 397,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Whirlwind",
+      "id": "whirlwind",
+      "mappingKind": "thematic",
+      "sourceName": "Small whirlwind",
+      "mappingReason": "A clear funnel-shaped vortex represents a whirlwind."
+    },
+    {
+      "sheet": 1,
+      "tile": 116,
+      "referenceUrl": "https://bg3.wiki/w/images/4/44/Conjure_Woodland_Being_Unfaded_Icon.webp",
+      "matchError": 8.209,
+      "nextMatchError": 45.929,
+      "name": "Conjure Minor Plant Creatures",
+      "id": "conjure-minor-plant-creatures",
+      "mappingKind": "thematic",
+      "sourceName": "Conjure Woodland Being",
+      "mappingReason": "A plant-like face in a summoning ring depicts conjured woodland life."
+    },
+    {
+      "sheet": 1,
+      "tile": 116,
+      "referenceUrl": "https://bg3.wiki/w/images/4/44/Conjure_Woodland_Being_Unfaded_Icon.webp",
+      "matchError": 8.209,
+      "nextMatchError": 45.929,
+      "name": "Conjure Plant Creature",
+      "id": "conjure-plant-creature",
+      "mappingKind": "thematic",
+      "sourceName": "Conjure Woodland Being",
+      "mappingReason": "The leafy face of a summoned woodland being represents a living plant ally."
+    },
+    {
+      "sheet": 2,
+      "tile": 804,
+      "referenceUrl": "https://bg3.wiki/w/images/2/29/Plant_Growth_Unfaded_Icon.webp",
+      "matchError": 8.454,
+      "nextMatchError": 46.56,
+      "name": "Mold Plant",
+      "id": "mold-plant",
+      "mappingKind": "thematic",
+      "sourceName": "Plant Growth",
+      "mappingReason": "A sprouting plant conveys shaping and directing living vegetation."
+    },
+    {
+      "sheet": 1,
+      "tile": 254,
+      "referenceUrl": "https://bg3.wiki/w/images/2/2e/Fire_Breath_Line_Unfaded_Icon.webp",
+      "matchError": 7.611,
+      "nextMatchError": 30.291,
+      "name": "AGANAEZAR'S SCORCHER",
+      "id": "aganaezar-s-scorcher",
+      "mappingKind": "thematic",
+      "sourceName": "Fire Breath Line",
+      "mappingReason": "Alternate catalog spelling of the line-of-fire spell; it uses the same narrow flame artwork."
+    },
+    {
+      "sheet": 2,
+      "tile": 762,
+      "referenceUrl": "https://bg3.wiki/w/images/5/53/Fear_Unfaded_Icon.webp",
+      "matchError": 8.088,
+      "nextMatchError": 47.196,
+      "name": "CAUSE FEAR",
+      "id": "cause-fear",
+      "mappingKind": "thematic",
+      "sourceName": "Fear",
+      "mappingReason": "A startled figure surrounded by alarm lines represents magical fear."
+    },
+    {
+      "sheet": 1,
+      "tile": 45,
+      "referenceUrl": "https://bg3.wiki/w/images/d/d0/Dominate_Beast_Unfaded_Icon.webp",
+      "matchError": 8.552,
+      "nextMatchError": 45.029,
+      "name": "CHARM MONSTER",
+      "id": "charm-monster",
+      "mappingKind": "thematic",
+      "sourceName": "Dominate Beast",
+      "mappingReason": "A creature face touched by a magical hand represents influence over a nonhuman mind."
+    },
+    {
+      "sheet": 2,
+      "tile": 153,
+      "referenceUrl": "https://bg3.wiki/w/images/6/61/Radiance_of_the_Dawn_Unfaded_Icon.webp",
+      "matchError": 10.309,
+      "nextMatchError": 49.984,
+      "name": "DAWN",
+      "id": "dawn",
+      "mappingKind": "thematic",
+      "sourceName": "Radiance of the Dawn",
+      "mappingReason": "A radiant sun raised over a hand directly conveys a burst of dawn light."
+    },
+    {
+      "sheet": 1,
+      "tile": 255,
+      "referenceUrl": "https://bg3.wiki/w/images/5/52/Fire_Breath_Cone_Unfaded_Icon.webp",
+      "matchError": 8.275,
+      "nextMatchError": 30.273,
+      "name": "DRAGON'S BREATH",
+      "id": "dragon-s-breath",
+      "mappingKind": "thematic",
+      "sourceName": "Fire Breath Cone",
+      "mappingReason": "A dragon head breathing a cone depicts the core breath-weapon effect; the artwork does not choose its damage type."
+    },
+    {
+      "sheet": 1,
+      "tile": 395,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "DRUID GROVE",
+      "id": "druid-grove",
+      "mappingKind": "thematic",
+      "sourceName": "Figure surrounded by branches",
+      "mappingReason": "A figure enclosed by living branches suggests a protected druidic grove."
+    },
+    {
+      "sheet": 1,
+      "tile": 408,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "ILLUSORY DRAGON",
+      "id": "illusory-dragon",
+      "mappingKind": "thematic",
+      "sourceName": "Dragon head silhouette",
+      "mappingReason": "A large draconic silhouette represents the projected dragon; illusory behaviour remains a game rule."
+    },
+    {
+      "sheet": 2,
+      "tile": 182,
+      "referenceUrl": "https://bg3.wiki/w/images/c/c3/Find_Familiar_Imp_Unfaded_Icon.webp",
+      "matchError": 6.846,
+      "nextMatchError": 40.68,
+      "name": "INFERNAL CALLING",
+      "id": "infernal-calling",
+      "mappingKind": "thematic",
+      "sourceName": "Find Familiar Imp",
+      "mappingReason": "A horned fiend enclosed by a chain clearly depicts calling an infernal creature."
+    },
+    {
+      "sheet": 1,
+      "tile": 333,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "MENTAL PRISON",
+      "id": "mental-prison",
+      "mappingKind": "thematic",
+      "sourceName": "Mind inside a head",
+      "mappingReason": "A brain contained inside a head outline makes the mental nature of the confinement clear."
+    },
+    {
+      "sheet": 1,
+      "tile": 401,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "PRIMAL SAVAGERY",
+      "id": "primal-savagery",
+      "mappingKind": "thematic",
+      "sourceName": "Beast claws and fangs",
+      "mappingReason": "A feral muzzle and sweeping claws depict a brief savage natural attack."
+    },
+    {
+      "sheet": 1,
+      "tile": 342,
+      "referenceUrl": "https://bg3.wiki/w/images/b/bd/Magic_Jar_Unfaded_Icon.webp",
+      "matchError": 7.747,
+      "nextMatchError": 41.604,
+      "name": "SOUL CAGE",
+      "id": "soul-cage",
+      "mappingKind": "thematic",
+      "sourceName": "Magic Jar",
+      "mappingReason": "A spirit-shaped figure trapped in a vessel directly represents capturing a soul."
+    },
+    {
+      "sheet": 2,
+      "tile": 240,
+      "referenceUrl": "https://bg3.wiki/w/images/1/12/Find_Familiar_Quasit_Unfaded_Icon.webp",
+      "matchError": 6.691,
+      "nextMatchError": 40.747,
+      "name": "SUMMON GREATER DEMON",
+      "id": "summon-greater-demon",
+      "mappingKind": "thematic",
+      "sourceName": "Find Familiar Quasit",
+      "mappingReason": "A fierce horned demon face inside a chain conveys a bound summoned demon; strength is a game rule."
+    },
+    {
+      "sheet": 2,
+      "tile": 240,
+      "referenceUrl": "https://bg3.wiki/w/images/1/12/Find_Familiar_Quasit_Unfaded_Icon.webp",
+      "matchError": 6.691,
+      "nextMatchError": 40.747,
+      "name": "SUMMON LESSER DEMONS",
+      "id": "summon-lesser-demons",
+      "mappingKind": "thematic",
+      "sourceName": "Find Familiar Quasit",
+      "mappingReason": "A chained demonic face conveys demonic summoning; the icon does not establish the number summoned."
+    },
+    {
+      "referenceUrl": "https://bg3.wiki/w/images/0/0e/Toll_the_Dead_Unfaded_Icon.webp",
+      "name": "TOLL THE DEAD",
+      "id": "toll-the-dead",
+      "mappingKind": "exact",
+      "sourceName": "Toll the Dead",
+      "mappingReason": "Original BG3 Patch 8 bell icon (Target_TollTheDead), absent from the older Nexus archive; preserved from its native 64x64 wiki source.",
+      "sourceFile": "Sources/bg3-spells-supplemental/toll-the-dead.webp",
+      "sourceSha256": "b5343d895d117b3d7373eab58cf7f56803f9136152857945f9ced1b0672d4e87",
+      "gameSpellIds": [
+        "Target_TollTheDead"
+      ],
+      "gameIconNames": [
+        "Spell_TollOfTheDead"
+      ],
+      "spellPage": "https://bg3.wiki/wiki/Toll_the_Dead"
+    },
+    {
+      "sheet": 2,
+      "tile": 153,
+      "referenceUrl": "https://bg3.wiki/w/images/6/61/Radiance_of_the_Dawn_Unfaded_Icon.webp",
+      "matchError": 10.309,
+      "nextMatchError": 49.984,
+      "name": "WORD of RADIANCE",
+      "id": "word-of-radiance",
+      "mappingKind": "thematic",
+      "sourceName": "Radiance of the Dawn",
+      "mappingReason": "Outward rays from a bright sun convey a nearby burst of radiant power."
+    },
+    {
+      "sheet": 1,
+      "tile": 33,
+      "referenceUrl": "https://bg3.wiki/w/images/8/84/Evard%27s_Black_Tentacles_Unfaded_Icon.webp",
+      "matchError": 8.18,
+      "nextMatchError": 47.148,
+      "name": "SUMMON ABERRATION",
+      "id": "summon-aberration",
+      "mappingKind": "thematic",
+      "sourceName": "Evard's Black Tentacles",
+      "mappingReason": "Unnatural curling tentacles convey an aberrant summoned presence."
+    },
+    {
+      "sheet": 1,
+      "tile": 403,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "SUMMON BEAST",
+      "id": "summon-beast",
+      "mappingKind": "thematic",
+      "sourceName": "Beast paw print",
+      "mappingReason": "A paw print represents a summoned beast without fixing its species."
+    },
+    {
+      "sheet": 1,
+      "tile": 173,
+      "referenceUrl": "https://bg3.wiki/w/images/6/6d/Conjure_Elemental_Unfaded_Icon.webp",
+      "matchError": 7.876,
+      "nextMatchError": 39.855,
+      "name": "SUMMON ELEMENTAL",
+      "id": "summon-elemental",
+      "mappingKind": "thematic",
+      "sourceName": "Conjure Elemental",
+      "mappingReason": "A stylised elemental body represents an elemental ally."
+    },
+    {
+      "sheet": 1,
+      "tile": 321,
+      "referenceUrl": "https://bg3.wiki/w/images/0/02/Planar_Ally_Unfaded_Icon.webp",
+      "matchError": 7.872,
+      "nextMatchError": 51.114,
+      "name": "SUMMON FIEND",
+      "id": "summon-fiend",
+      "mappingKind": "thematic",
+      "sourceName": "Planar Ally",
+      "mappingReason": "A winged horned outsider provides a clear fiendish-summoning motif."
+    },
+    {
+      "sheet": 1,
+      "tile": 97,
+      "referenceUrl": "https://bg3.wiki/w/images/6/6b/Phantasmal_Killer_Unfaded_Icon.webp",
+      "matchError": 9.302,
+      "nextMatchError": 51.874,
+      "name": "SUMMON SHADOWSPAWN",
+      "id": "summon-shadowspawn",
+      "mappingKind": "thematic",
+      "sourceName": "Phantasmal Killer",
+      "mappingReason": "A tall spectral hooded figure conveys a summoned shadow creature."
+    },
+    {
+      "sheet": 1,
+      "tile": 167,
+      "referenceUrl": "https://bg3.wiki/w/images/f/fa/Create_Undead_Unfaded_Icon.webp",
+      "matchError": 7.451,
+      "nextMatchError": 43.614,
+      "name": "SUMMON UNDEAD",
+      "id": "summon-undead",
+      "mappingKind": "thematic",
+      "sourceName": "Create Undead",
+      "mappingReason": "A summoned skeletal body directly represents an undead ally."
+    },
+    {
+      "sheet": 1,
+      "tile": 398,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Ashardalon's Stride",
+      "id": "ashardalon-s-stride",
+      "mappingKind": "thematic",
+      "sourceName": "Boot with rushing trails",
+      "mappingReason": "A boot trailing rushing lines conveys magically accelerated movement."
+    },
+    {
+      "sheet": 1,
+      "tile": 210,
+      "referenceUrl": "https://bg3.wiki/w/images/e/ee/Cone_of_Cold_Unfaded_Icon.webp",
+      "matchError": 10.352,
+      "nextMatchError": 42.009,
+      "name": "Rime's Binding Ice",
+      "id": "rime-s-binding-ice",
+      "mappingKind": "thematic",
+      "sourceName": "Cone of Cold",
+      "mappingReason": "A widening cone filled with ice crystals represents the freezing area."
+    },
+    {
+      "sheet": 1,
+      "tile": 408,
+      "referenceUrl": "https://www.nexusmods.com/baldursgate3/mods/3125",
+      "name": "Summon Draconic Spirit",
+      "id": "summon-draconic-spirit",
+      "mappingKind": "thematic",
+      "sourceName": "Dragon head silhouette",
+      "mappingReason": "A dragon silhouette represents the summoned draconic spirit."
+    }
+  ]
+}

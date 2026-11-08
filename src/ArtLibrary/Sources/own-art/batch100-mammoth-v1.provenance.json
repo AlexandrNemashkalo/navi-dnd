@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-mammoth-v1",
+  "file": "batch100-mammoth-v1.png",
+  "subject": "Mammoth",
+  "nameRu": "Мамонт",
+  "width": 32,
+  "height": 32,
+  "sha256": "8a63bd8a5d9b2ed3c3fbcc7979932cdbf3a4cbbb5e0f11c1e8ca4710b5695655",
+  "usage": "map_actor",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.map_actor.32",
+  "descriptionEn": "A complete mammoth with recognizable species anatomy and characteristic silhouette, natural colors, side or three-quarter view.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-mammoth-v1/original.png",
+  "sourceDimensions": [
+    1261,
+    1247
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-mammoth-v1.json",
+  "batch": "hundred-20261107"
+}

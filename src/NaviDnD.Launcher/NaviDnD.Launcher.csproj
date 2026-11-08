@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ApplicationIcon>../NaviDnD/dnd.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../NaviDnD.Installer/GameLauncher.cs" Link="GameLauncher.cs" />
+    <Compile Include="../NaviDnD/Helpers/WindowsTerminalSizing.cs" Link="WindowsTerminalSizing.cs" />
+    <ProjectReference Include="../NaviDnD.Data/NaviDnD.Data.csproj" />
+  </ItemGroup>
+</Project>

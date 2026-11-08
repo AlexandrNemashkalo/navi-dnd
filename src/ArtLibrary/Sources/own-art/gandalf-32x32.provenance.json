@@ -1,0 +1,14 @@
+{
+  "id": "own-art:gandalf-32x32",
+  "file": "gandalf-32x32.png",
+  "origin": "AI-generated with OpenAI image generation; requested by the project owner",
+  "createdDate": "2026-11-06",
+  "subject": "Gandalf the Grey",
+  "usage": "portrait",
+  "width": 32,
+  "height": 32,
+  "mode": "RGBA",
+  "sha256": "730d5e127ddb0456a98fece7b494d6a106917ba650b396aa20a3b701cdfe0f73",
+  "processing": "Generated using existing pixel portraits as style references; cropped to alpha bounds, resized with nearest-neighbor to fit 30x30, placed on a transparent 32x32 canvas.",
+  "artApproved": false
+}

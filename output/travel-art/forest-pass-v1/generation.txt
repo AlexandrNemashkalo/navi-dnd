@@ -1,0 +1,3 @@
+Built-in image_gen. Original generated artwork; no purchased assets used.
+Prompt: Original 1-bit fantasy landscape, winding forest road, pine trees, distant mountain pass, crescent moon. Pure white on black, bold silhouettes, sparse stipple, no text or gradients. Designed for 160x120 dots / 80x30 Braille characters.
+Braille: source center sampling, luminance threshold 128, Unicode standard 2x4 dot mapping.

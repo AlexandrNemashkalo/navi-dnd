@@ -1,0 +1,1265 @@
+{
+  "catalogEntries": 539,
+  "totalSpells": 535,
+  "prepared": 284,
+  "exact": 211,
+  "thematic": 73,
+  "fallbackCount": 251,
+  "fallback": [
+    {
+      "name": "Message",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Prestidigitation",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Alarm",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Color Spray",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Illusory Script",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Silent Image",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Tenser's Floating Disk",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Unseen Servant",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Blindness/Deafness",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Enlarge/Reduce",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Gentle Repose",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Locate Object",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Nystul's Magic Aura",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Rope Trick",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Spider Climb",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Suggestion",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Clairvoyance",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Dispel Magic",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Leomund's Tiny Hut",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Major Image",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Nondetection",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Phantom Steed",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Sending",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Tongues",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Water Breathing",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Control Water",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Fabricate",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Hallucinatory Terrain",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Leomund's Secret Chest",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Mordenkainen's Faithful Hound",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Mordenkainen's Private Sanctum",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Animate Objects",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Contact Other Plane",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Creation",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Dream",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Geas",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Legend Lore",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Mislead",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Modify Memory",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Rary's Telepathic Bond",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Scrying",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Teleportation Circle",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Wall of Force",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Contingency",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Drawmij's Instant Summon",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Eyebite",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Guards and Wards",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Mass Suggestion",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Programmed Illusion",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Etherealness",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Finger of Death",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Mirage Arcane",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Mordenkainen's Magnificent Mansion",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Plane Shift",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Prismatic Spray",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Project Image",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Reverse Gravity",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Sequester",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Simulacrum",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Symbol",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Teleport",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Antimagic Field",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Antipathy/Sympathy",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Clone",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Control Weather",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Dominate Monster",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Feeblemind",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Maze",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Mind Blank",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Power Word Stun",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Telepathy",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Astral Projection",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Foresight",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Prismatic Wall",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Shapechange",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "True Polymorph",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Weird",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Wish",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Animal Messenger",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Locate Animals or Plants",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Zone of Truth",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Speak with Plants",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Raise Dead",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Regenerate",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Resurrection",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Spare the Dying",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Command",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Create or Destroy Water",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Detect Poison and Disease",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Purify Food and Drink",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Augury",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Create Food and Water",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Meld into Stone",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Water Walk",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Divination",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Commune",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Contagion",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Forbiddance",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Word of Recall",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Conjure Celestial",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Divine Word",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Holy Aura",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "True Resurrection",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Wind Wall",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Tree Stride",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Conjure Woodland Beings",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Commune with Nature",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Transport via Plants",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Find Steed",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Aura of Vitality",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Aura of Life",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Aura of Purity",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Staggering Smite",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Circle of Power",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Conjure Volley",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Swift Quiver",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Compulsion",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Awaken",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Find the Path",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Glibness",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Hallow",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Giant Insect",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Antilife Shell",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Reincarnate",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Conjure Fey",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Animal Shapes",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Tsunami",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Storm of Vengeance",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Divine Favor",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Cordon of Arrows",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Alter Self",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Abi-Dalzim's Horrid Wilting",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Catapult",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Earthbind",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Elemental Bane",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Flame Arrows",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Investiture of Wind",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Maelstrom",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Maximilian's Earthen Grasp",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Primordial Ward",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Pyrotechnics",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Shape Water",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Skywrite",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Storm Sphere",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Thunderclap",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Tidal Wave",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Vitriolic Sphere",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Watery Sphere",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "WALL OF WATER",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "BOOMING BLADE",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "GREEN-FLAME BLADE",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "LIGHTNING LURE",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SWORD BURST",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Arm of the Wild",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Bonding Vine",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Bridge of Branches",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Cloud of Spores",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Dryad's Leap",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Engulfing Thorns",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Explosive Seed",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Fell",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Gaea's Hand",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Grasping Sprout",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Mind Spore",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Overgrowth",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Piercing Thorn",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Rapport Spores",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Skewering Branch",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Slicing Leaves",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Sporecaller's Smite",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Spray of Thorns",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Thorn Shield",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Tree Strike",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "CATNAP",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "CEREMONY",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "CHAOS BOLT",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "CREATE HOMUNCULUS",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "CROWN OF STARS",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "ENEMIES ABOUND",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "ENERVATION",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "FAR STEP",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "FIND GREATER STEED",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "GUARDIAN OF NATURE",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "HEALING SPIRIT",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "HOLY WEAPON",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "INFESTATION",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "INVULNERABILITY",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "LIFE TRANSFERENCE",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "MADDENING DARKNESS",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "MASS POLYMORPH",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "MIGHTY FORTRESS",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "NEGATIVE ENERGY FLOOD",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "POWER WORD PAIN",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "PSYCHIC SCREAM",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SCATTER",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SHADOW OF MOIL",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SICKENING RADIANCE",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SKILL EMPOWERMENT",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SNARE",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "STEEL WIND STRIKE",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SYNAPTIC STATIC",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "TEMPLE OF THE GODS",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "TENSER'S TRANSFORMATION",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "THUNDER STEP",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "TINY SERVANT",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "WALL OF LIGHT",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "WALL of SAND",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "WRATH OF NATURE",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "ZEPHYR STRIKE",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "BLADE OF DISASTER",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "DREAM OF THE BLUE VEIL",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "INTELLECT FORTRESS",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "MIND SLIVER",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SUMMON CELESTIAL",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SUMMON CONSTRUCT",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SUMMON FEY",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "TASHA'S CAUSTIC BREW",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "TASHA'S MIND WHIP",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "TASHA'S OTHERWORLDLY GUISE",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "SPIRIT SHROUD",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Silvery Barbs",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Borrowed Knowledge",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Kinetic Jaunt",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Vortex Warp",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Wither and Bloom",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Distort Value",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Fast Friends",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Gift of Gab",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Incite Greed",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Jim's Glowing Coin",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Jim's Magic Missle",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Motivational Speech",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Draconic Transformation",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Fizban's Platinum Shield",
+      "school": "Abjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Nathair's Mischief",
+      "school": "Illusion",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Raulothim's Psychic Lance",
+      "school": "Enchantment",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Gift of alacrity",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Sapping sting",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Magnify gravity",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Fortune's favor",
+      "school": "Divination",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Wristpocket",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Immovable object",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Pulse wave",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Gravity sinkhole",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Temporal shunt",
+      "school": "Transmutation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Gravity fissure",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Tether essence",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Dark star",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Reality break",
+      "school": "Conjuration",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Time ravage",
+      "school": "Necromancy",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    },
+    {
+      "name": "Ravenous void",
+      "school": "Evocation",
+      "reason": "No pinned BG3 icon yet; keep the existing spell picture."
+    }
+  ]
+}

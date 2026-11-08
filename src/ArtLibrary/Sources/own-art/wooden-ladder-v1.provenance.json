@@ -1,0 +1,22 @@
+{
+  "id": "own-art:wooden-ladder-v1",
+  "file": "wooden-ladder-v1.png",
+  "subject": "Wooden ladder",
+  "nameRu": "Деревянная лестница",
+  "width": 32,
+  "height": 32,
+  "sha256": "427e1e835272371e4c091b3e4d10f1de87243c6ffdc94cbad367c2a4d2a3332d",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "Complete wooden ladder with six visible rungs.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/wooden-ladder-v1/original.png",
+  "sourceDimensions": [
+    1246,
+    1262
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_12_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

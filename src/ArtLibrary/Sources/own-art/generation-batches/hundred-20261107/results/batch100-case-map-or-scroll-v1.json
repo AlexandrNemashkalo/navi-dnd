@@ -1,0 +1,13 @@
+{
+  "index": 18,
+  "key": "batch100-case-map-or-scroll-v1",
+  "category": "equipment",
+  "name": "Case, map or scroll",
+  "nameRu": "Футляр для документов",
+  "usage": "item",
+  "transparent": true,
+  "description": "A cylindrical brown leather scroll tube with fitted lid, shoulder strap and small visible parchment edge.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: A cylindrical brown leather scroll tube with fitted lid, shoulder strap and small visible parchment edge. Genuine transparent background. One complete centered subject with a one-pixel clear margin. Full body for creatures, full object for equipment. No scenery or extra objects beyond the stated subject.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-c420e603-d3a8-4838-af56-d5c3653a99f6.png",
+  "status": "generated"
+}

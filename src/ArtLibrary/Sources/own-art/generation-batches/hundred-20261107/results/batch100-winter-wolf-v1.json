@@ -1,0 +1,13 @@
+{
+  "index": 93,
+  "key": "batch100-winter-wolf-v1",
+  "category": "monster",
+  "name": "Winter Wolf",
+  "nameRu": "Зимний волк",
+  "usage": "map_actor",
+  "transparent": true,
+  "description": "A large white wolf with icy blue shadows, pointed ears, long muzzle and bushy tail.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: A large white wolf with icy blue shadows, pointed ears, long muzzle and bushy tail. Genuine transparent background. One complete centered subject with a one-pixel clear margin. Full body for creatures, full object for equipment. No scenery or extra objects beyond the stated subject.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-e177d584-151a-4887-a63f-d61db1dde7f9.png",
+  "status": "generated"
+}

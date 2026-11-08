@@ -1,0 +1,98 @@
+[
+  {
+    "id": "dcss-review-composition-01",
+    "canvas": [
+      32,
+      32
+    ],
+    "mode": "alpha_overlay",
+    "layers": [
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_wings_bones_top_new.png",
+        "sha256": "6c9f9ba8c038dd2ebf3ee2163d454d9500a108dbc177c85a1392ed4084c7364f"
+      },
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_body_normal_top_new.png",
+        "sha256": "aa9d7e7fad9aaeadf48b91bb3b973806d4b2400e5926ccdbb26106ef9fd8406a"
+      },
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_head_cow_skull_top.png",
+        "sha256": "1ea63cbd83d849f1d3d1e74ed1925a1e08c7ed0b1894674c5487512a61103335"
+      }
+    ],
+    "preview": "artifacts/art-catalog-review/dcss-details/composition-01.png",
+    "purpose": "review_example_not_runtime_assignment"
+  },
+  {
+    "id": "dcss-review-composition-02",
+    "canvas": [
+      32,
+      32
+    ],
+    "mode": "alpha_overlay",
+    "layers": [
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_wings_large_top_new.png",
+        "sha256": "f0ba2b41ca363c61b729b58196adb10ff7aeecef55335fdbc5979ef7c91d229b"
+      },
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_body_armor_top.png",
+        "sha256": "f1eca4577b25603c7207e5150f6f1f2e0ffd83306278a1a1632cac8933837940"
+      },
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_head_brain_top.png",
+        "sha256": "984aeb6ecfaef8cf9b051c95841fa2a5e653a2033625a9601ac556ef24a92d29"
+      }
+    ],
+    "preview": "artifacts/art-catalog-review/dcss-details/composition-02.png",
+    "purpose": "review_example_not_runtime_assignment"
+  },
+  {
+    "id": "dcss-review-composition-03",
+    "canvas": [
+      32,
+      32
+    ],
+    "mode": "alpha_overlay",
+    "layers": [
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_wings_bat_top.png",
+        "sha256": "f767d662fba237bbd65cda2e998385880c0adf905a60d34c6e85c40c4e383f3c"
+      },
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_body_succubus_top.png",
+        "sha256": "f97245e423834d2f1b0ca7608934314c9fca0877863b3c184c39e14f04b386de"
+      },
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_head_horns_top_new.png",
+        "sha256": "e209e26b258c23873af8e2023f5cd51e547990f82823f07517b2717de251f883"
+      }
+    ],
+    "preview": "artifacts/art-catalog-review/dcss-details/composition-03.png",
+    "purpose": "review_example_not_runtime_assignment"
+  },
+  {
+    "id": "dcss-review-composition-04",
+    "canvas": [
+      32,
+      32
+    ],
+    "mode": "alpha_overlay",
+    "layers": [
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_wings_dragonfly_top.png",
+        "sha256": "a5c1c06bba4d7923eed570e8b12975fec1766aad007af22b48f8d8f6d010c02c"
+      },
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_body_caterpillar_top.png",
+        "sha256": "1203675a2b437062dde56a10498cb51b3d078d72ae92ff64e343b910f6fc6061"
+      },
+      {
+        "path": "src/icons/dcss/monster/panlord/demon_head_worm_top.png",
+        "sha256": "af895de404770c0c97ab8fa092cefd7ceb34397dcfba5e9383c659c16e0b8213"
+      }
+    ],
+    "preview": "artifacts/art-catalog-review/dcss-details/composition-04.png",
+    "purpose": "review_example_not_runtime_assignment"
+  }
+]

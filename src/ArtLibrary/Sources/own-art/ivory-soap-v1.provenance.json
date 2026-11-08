@@ -1,0 +1,22 @@
+{
+  "id": "own-art:ivory-soap-v1",
+  "file": "ivory-soap-v1.png",
+  "subject": "Plain soap bar",
+  "nameRu": "Кусок мыла",
+  "width": 32,
+  "height": 32,
+  "sha256": "43cec03391aa905341766eaeede2f127486aee1570301aebde4f26b61f9c820b",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "Single ivory soap bar with a warm shaded side and shallow top notch. Exact 32x32 prepared generated image.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/ivory-soap-v1/original.png",
+  "sourceDimensions": [
+    1263,
+    1246
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_8_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

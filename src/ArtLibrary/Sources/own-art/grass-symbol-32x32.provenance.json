@@ -1,0 +1,22 @@
+{
+  "id": "own-art:grass-symbol-32x32",
+  "file": "grass-symbol-32x32.png",
+  "origin": "Pixel derivative of delapouite/grass.svg. Icons made by Delapouite.",
+  "sourceKind": "svg_derivative",
+  "sourcePath": "src/icons/000000/ffffff/1x1/delapouite/grass.svg",
+  "sourceSha256": "215d2349a0e8ce1282faa54106f18de6ef76aa6e6975ceab7d66d9f0fcdf3d76",
+  "license": "CC BY 3.0",
+  "licenseRef": "src/icons/license.txt",
+  "author": "Delapouite",
+  "subject": "Grass / pixel symbol",
+  "usage": "biome_view",
+  "width": 32,
+  "height": 32,
+  "mode": "RGBA",
+  "sha256": "c878ccbb1112c76da981f609e7239abdd3424bcaeeb48c6037aca7efccb99cd5",
+  "processing": "SVG coverage rasterization; BOX to 32x32; binary threshold 128; two solid colors, no antialiasing.",
+  "artApproved": false,
+  "styleId": "fantasy.pixel.landscape-symbol.32",
+  "framing": "landscape_symbol",
+  "descriptionEn": "Upright grass blades joined into a strong ground-level silhouette."
+}

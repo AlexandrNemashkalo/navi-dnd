@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-hawk-v1",
+  "file": "batch100-hawk-v1.png",
+  "subject": "Hawk",
+  "nameRu": "Ястреб",
+  "width": 32,
+  "height": 32,
+  "sha256": "aabd15ae52b9bab58e1e19d9d6825e06b09a67144f6924a88918990895da02af",
+  "usage": "map_actor",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.map_actor.32",
+  "descriptionEn": "A complete hawk with recognizable species anatomy and characteristic silhouette, natural colors, side or three-quarter view.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-hawk-v1/original.png",
+  "sourceDimensions": [
+    1263,
+    1246
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-hawk-v1.json",
+  "batch": "hundred-20261107"
+}

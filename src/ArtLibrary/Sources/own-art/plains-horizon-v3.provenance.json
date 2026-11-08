@@ -1,0 +1,22 @@
+{
+  "id": "own-art:plains-horizon-v3",
+  "file": "plains-horizon-v3.png",
+  "subject": "Open grassland horizon",
+  "nameRu": "Равнина с горизонтом",
+  "width": 32,
+  "height": 32,
+  "sha256": "01f886ccb637ae069a4f225d810e4df59eccee9f92b26d5ddd19a5f0f3e4590e",
+  "usage": "place_view",
+  "framing": "landscape",
+  "styleId": "fantasy.pixel.place_view.32",
+  "descriptionEn": "Eye-level view across open green plains under a blue sky and two cream clouds. Opaque 32x32 scene, not a top-down terrain tile.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/plains-horizon-v3/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_12_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

@@ -1,0 +1,95 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <EmbeddedResource Include="Display/Art/Scenes/*.png" LogicalName="NaviDnD.Scenes.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ApplicationIcon>dnd.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!-- The system ConPTY in Windows 11 24H2 can stop forwarding colorful frames.
+       Bundle a pinned host with Alacritty instead of depending on the OS revision. -->
+  <ItemGroup Condition="('$(RuntimeIdentifier)' == '' And '$(OS)' == 'Windows_NT') Or $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win'))">
+    <PackageReference Include="Microsoft.Windows.Console.ConPTY" Version="1.25.260930003"
+                      GeneratePathProperty="true" ExcludeAssets="all" PrivateAssets="all" />
+  </ItemGroup>
+  <PropertyGroup>
+    <ConPtyArchitecture Condition="'$(RuntimeIdentifier)' == 'win-arm64'">arm64</ConPtyArchitecture>
+    <ConPtyArchitecture Condition="'$(RuntimeIdentifier)' == 'win-x86'">x86</ConPtyArchitecture>
+    <ConPtyArchitecture Condition="'$(ConPtyArchitecture)' == ''">x64</ConPtyArchitecture>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(PkgMicrosoft_Windows_Console_ConPTY)' != '' And (('$(RuntimeIdentifier)' == '' And '$(OS)' == 'Windows_NT') Or $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win')))">
+    <Content Include="$(PkgMicrosoft_Windows_Console_ConPTY)/runtimes/win-$(ConPtyArchitecture)/native/conpty.dll"
+             Link="conpty.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <Content Include="$(PkgMicrosoft_Windows_Console_ConPTY)/build/native/runtimes/$(ConPtyArchitecture)/OpenConsole.exe"
+             Link="OpenConsole.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <Content Include="Terminal/ConPTY-LICENSE.txt" Link="ConPTY-LICENSE.txt"
+             CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+	<ItemGroup>
+    <Content Include="../ArtLibrary/Runtime/Images/*.png" Link="ArtLibrary/Runtime/Images/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../ArtLibrary/Runtime/**/*.txt" Link="ArtLibrary/Runtime/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../ArtLibrary/RuleSets/**/runtime-pictures.json" Link="ArtLibrary/RuleSets/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <PackageReference Include="NAudio" Version="2.2.1" />
+	  <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
+	  <PackageReference Include="NLayer" Version="1.16.0" />
+	  <PackageReference Include="NLayer.NAudioSupport" Version="1.4.0" />
+	  <PackageReference Include="Spectre.Console" Version="0.54.0" />
+	  <PackageReference Include="Svg.Skia" Version="5.2.1" />
+	  <PackageReference Include="System.Windows.Extensions" Version="10.0.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+    <Content Include="../ArtLibrary/Sources/bg3-spells/*.png" Exclude="../ArtLibrary/Sources/bg3-spells/*.original.png" Link="SpellArt/Images/bg3-spells/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../ArtLibrary/RuleSets/**/spell-icons.json" Link="SpellArt/RuleSets/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <ProjectReference Include="..\NaviDnD.Data\NaviDnD.Data.csproj" />
+	  <ProjectReference Include="..\NaviDnD.MapGen\NaviDnD.MapGen.csproj" />
+	  <ProjectReference Include="..\NaviDnD.Launcher\NaviDnD.Launcher.csproj" ReferenceOutputAssembly="false"
+      Condition="('$(RuntimeIdentifier)' == '' And '$(OS)' == 'Windows_NT') Or $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win'))" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Terminal\*.toml" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <None Update="dnd.ico">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Speech\**">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\dnd.wav">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\click.wav">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\music\**">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\ambience\**">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="sound\dice-roll.mp3">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
+	<!-- Update code shared with the installer: release description and patches (checking the database before downloading). -->
+	<ItemGroup>
+	  <Compile Include="../NaviDnD.Installer/UpdateManifest.cs" Link="Updates/UpdateManifest.cs" />
+	  <Compile Include="../NaviDnD.Installer/Patch.cs" Link="Updates/Patch.cs" />
+	</ItemGroup>
+  <!-- Keep the GUI launcher beside source builds as well as published releases. -->
+  <Target Name="CopyGameLauncher" AfterTargets="Build"
+    Condition="('$(RuntimeIdentifier)' == '' And '$(OS)' == 'Windows_NT') Or $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win'))">
+    <ItemGroup>
+      <GameLauncherFiles Include="../NaviDnD.Launcher/bin/$(Configuration)/$(TargetFramework)/$(RuntimeIdentifier)/NaviDnD.Launcher.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(GameLauncherFiles)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

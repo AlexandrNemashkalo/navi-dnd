@@ -1,0 +1,192 @@
+{
+  "filesRemoved": 6678,
+  "bytesRemoved": 257047864,
+  "removed": [
+    {
+      "path": "artifacts/portraits-native-32",
+      "reason": "final_png_verified_in_library_inputs_retained_galleries_superseded",
+      "files": 433,
+      "bytes": 7710517
+    },
+    {
+      "path": "artifacts/items-native-32",
+      "reason": "final_png_verified_in_library_inputs_retained_galleries_superseded",
+      "files": 2230,
+      "bytes": 42470996
+    },
+    {
+      "path": "artifacts/items-native-32-batch2",
+      "reason": "final_png_verified_in_library_inputs_retained_galleries_superseded",
+      "files": 2100,
+      "bytes": 52337860
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-780987/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 99,
+      "bytes": 11301294
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-128598/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 99,
+      "bytes": 9146878
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-253495/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 99,
+      "bytes": 4523408
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-305321/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 210,
+      "bytes": 9222929
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-415209/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 210,
+      "bytes": 22084731
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-459799/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 113,
+      "bytes": 1845292
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-495817/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 51,
+      "bytes": 23628629
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-523115/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 56,
+      "bytes": 8095855
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-688754/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 99,
+      "bytes": 1994758
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-737210/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 106,
+      "bytes": 2732090
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-883583/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 99,
+      "bytes": 2463604
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-909691/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 53,
+      "bytes": 19272513
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-986554/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 106,
+      "bytes": 3444773
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-996288/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 159,
+      "bytes": 3050439
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-945210/source",
+      "reason": "verified_duplicate_of_permanent_source",
+      "files": 7,
+      "bytes": 15191638
+    },
+    {
+      "path": "artifacts/elf-portraits-32-v2",
+      "reason": "superseded_intermediate_extraction_or_unfinished_experiment",
+      "files": 60,
+      "bytes": 3590489
+    },
+    {
+      "path": "artifacts/portraits-32-clean",
+      "reason": "superseded_intermediate_extraction_or_unfinished_experiment",
+      "files": 222,
+      "bytes": 10514621
+    },
+    {
+      "path": "artifacts/portraits-transparent-32",
+      "reason": "superseded_intermediate_extraction_or_unfinished_experiment",
+      "files": 1,
+      "bytes": 1404
+    },
+    {
+      "path": "artifacts/art-catalog-review/craftpix-portraits",
+      "reason": "legacy_gallery_superseded_by_imported_portraits",
+      "files": 57,
+      "bytes": 250499
+    },
+    {
+      "path": "artifacts/art-catalog-review/imported/craftpix-945210",
+      "reason": "unused_preview_of_excluded_64px_pack",
+      "files": 1,
+      "bytes": 107443
+    },
+    {
+      "path": "artifacts/art-catalog-review/contact-sheets/dungeon-03.png",
+      "reason": "superseded_generated_preview",
+      "files": 1,
+      "bytes": 274752
+    },
+    {
+      "path": "artifacts/art-catalog-review/contact-sheets/dungeon-04.png",
+      "reason": "superseded_generated_preview",
+      "files": 1,
+      "bytes": 269169
+    },
+    {
+      "path": "artifacts/art-catalog-review/contact-sheets/dungeon-05.png",
+      "reason": "superseded_generated_preview",
+      "files": 1,
+      "bytes": 463564
+    },
+    {
+      "path": "artifacts/art-catalog-review/contact-sheets/dungeon-06.png",
+      "reason": "superseded_generated_preview",
+      "files": 1,
+      "bytes": 364599
+    },
+    {
+      "path": "artifacts/art-catalog-review/contact-sheets/dungeon-07.png",
+      "reason": "superseded_generated_preview",
+      "files": 1,
+      "bytes": 257645
+    },
+    {
+      "path": "artifacts/art-catalog-review/contact-sheets/dungeon-08.png",
+      "reason": "superseded_generated_preview",
+      "files": 1,
+      "bytes": 222332
+    },
+    {
+      "path": "artifacts/art-catalog-review/craftpix-contact-sheet.png",
+      "reason": "superseded_generated_preview",
+      "files": 1,
+      "bytes": 95791
+    },
+    {
+      "path": "artifacts/art-catalog-review/review-screenshot.png",
+      "reason": "superseded_generated_preview",
+      "files": 1,
+      "bytes": 117352
+    }
+  ]
+}

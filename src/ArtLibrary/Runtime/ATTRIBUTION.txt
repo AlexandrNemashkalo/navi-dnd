@@ -1,0 +1,568 @@
+NaviDnD: source credits for bundled reference illustrations.
+
+craftpix-415209
+{
+  "archive": "craftpix-net-415209-free-goblins-and-orcs-pixel-art-icon-pack.zip",
+  "archiveSha256": "08138c002f9ad9630c1c86c1026146a65ab17f8795a24ea66b2a08632dca69c8",
+  "member": "PNG/Transperent/Icon2.png",
+  "licenseRef": "imported/craftpix-415209/source/License.txt"
+}
+
+craftpix-459799
+{
+  "archive": "craftpix-net-459799-free-low-level-monsters-pixel-icons-32x32.zip",
+  "archiveSha256": "c6bf05ea42762ca6886d13aedac30b812aff2912a01e12514e4c3f2931679dde",
+  "member": "PNG/Transperent/Icon17.png",
+  "licenseRef": "imported/craftpix-459799/source/License.txt"
+}
+
+craftpix-737210
+{
+  "archive": "craftpix-net-737210-free-chaos-monsters-32x32-icon-pack.zip",
+  "archiveSha256": "a5babbab314f9c881c7f9129156cd27731940eb089e1cf5ab84a1814b63b9e6c",
+  "member": "PNG/Transperent/Icon12.png",
+  "licenseRef": "imported/craftpix-737210/source/License.txt"
+}
+
+craftpix-883583
+{
+  "archive": "craftpix-net-883583-free-shield-and-amulet-rpg-icons.zip",
+  "archiveSha256": "1f2f7785e0c7d6e7fc09f177bcfcd615ef9d7bfd08da607aaa80fb714c7740b3",
+  "member": "PNG/Transperent/Icon37.png",
+  "licenseRef": "imported/craftpix-883583/source/License.txt"
+}
+
+craftpix-986554
+{
+  "archive": "craftpix-net-986554-free-undead-loot-pixel-art-icons.zip",
+  "archiveSha256": "cb02fc0947621ac9ea17def673829d9090156ef23bb3d4cf02fd9bb00a768cbe",
+  "member": "PNG/Transperent/Icon38.png",
+  "licenseRef": "imported/craftpix-986554/source/License.txt"
+}
+
+craftpix-996288
+{
+  "archive": "craftpix-net-996288-free-bow-and-crossbow-pixel-art-icons.zip",
+  "archiveSha256": "b75bf937cfc675ffa4bcc5f63a7a6bafc47c9e34128c21b78352a943e8c853b0",
+  "member": "PNG/Transperent/Icon27_no_effect.png",
+  "licenseRef": "imported/craftpix-996288/source/License.txt"
+}
+
+dcss
+{}
+
+gwiztiles
+{
+  "member": "spr_grass_center.png",
+  "sourceKind": "original_png",
+  "sourceUrl": "https://raw.githubusercontent.com/gwizdala/GwizTiles/258b2c92d782fe1e57f52b68a7e8fa6dec04be03/Grass/spr_grass_center.png",
+  "license": "CC-BY-4.0",
+  "author": "David Gwizdala",
+  "commit": "258b2c92d782fe1e57f52b68a7e8fa6dec04be03",
+  "licenseFile": null
+}
+
+halfling-faces-32
+{
+  "member": "halflings.jpg#row=1,column=1",
+  "sourceKind": "preview_extraction",
+  "sourceUrl": "https://img.craftpix.net/2022/08/Halfling-Avatar-Icons-Pixel-Art2.jpg",
+  "license": "Source preview; original license not recorded in this collection",
+  "author": "Craftpix",
+  "commit": null,
+  "licenseFile": null
+}
+
+harbor-props-32
+{
+  "member": "PNG/32x32/boats/rowboat.png",
+  "sourceKind": "original_png",
+  "sourceUrl": "https://reodesuxz.itch.io/free-pixel-lighthouse-harbor-icons-32x32",
+  "license": "Custom: use in games permitted; no standalone redistribution",
+  "author": "reodesuxz",
+  "commit": null,
+  "licenseFile": "Sources/harbor-props-32/LICENSE.txt"
+}
+
+idylwild-inventory-32
+{
+  "member": "parchment.png",
+  "sourceKind": "original_png",
+  "sourceUrl": "https://opengameart.org/content/idylwilds-inventory",
+  "license": "CC0-1.0",
+  "author": "Idylwild",
+  "commit": null,
+  "licenseFile": "Sources/idylwild-inventory-32/LICENSE.txt"
+}
+
+own-art
+{
+  "member": "batch100-unarmed-strike-v1.png",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-unarmed-strike-v1/original.png"
+}
+
+prepared-items-native-32-01-loot
+{
+  "member": "01-loot-26.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/01-loot/01-loot-26.png",
+  "sourceUrl": "https://img.craftpix.net/2020/07/Loot-Icons-Pixel-Art-Pack2.jpg",
+  "page": "https://craftpix.net/product/loot-icons-pixel-art-pack/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-02-crafting
+{
+  "member": "02-crafting-10.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/02-crafting/02-crafting-10.png",
+  "sourceUrl": "https://img.craftpix.net/2020/07/Materials-for-Crafting-Pixel-Art-Icons2.jpg",
+  "page": "https://craftpix.net/product/materials-for-crafting-pixel-art-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-04-crafting-materials
+{
+  "member": "04-crafting-materials-47.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/04-crafting-materials/04-crafting-materials-47.png",
+  "sourceUrl": "https://img.craftpix.net/2020/08/RPG-Crafting-Material-Icons-Pixel-Art2.jpg",
+  "page": "https://craftpix.net/product/rpg-crafting-material-icons-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-05-gems
+{
+  "member": "05-gems-02.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/05-gems/05-gems-02.png",
+  "sourceUrl": "https://img.craftpix.net/2020/08/Magic-Gems-Pixel-Art-Icons2.jpg",
+  "page": "https://craftpix.net/product/magic-gems-pixel-art-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-10-mining
+{
+  "member": "10-mining-25.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/10-mining/10-mining-25.png",
+  "sourceUrl": "https://img.craftpix.net/2020/09/Mining-Icons-Pixel-Art-Pack2.jpg",
+  "page": "https://craftpix.net/product/mining-icons-pixel-art-pack/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-12-artifacts
+{
+  "member": "12-artifacts-35.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/12-artifacts/12-artifacts-35.png",
+  "sourceUrl": "https://img.craftpix.net/2020/10/Magic-Artifacts-Pixel-Art-Icons2.jpg",
+  "page": "https://craftpix.net/product/magic-artifacts-pixel-art-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-13-books
+{
+  "member": "13-books-01.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/13-books/13-books-01.png",
+  "sourceUrl": "https://img.craftpix.net/2020/10/Magic-Books-Pixel-Art-Icons-Pack2.jpg",
+  "page": "https://craftpix.net/product/magic-books-pixel-art-icons-pack/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-18-fruit-vegetables
+{
+  "member": "18-fruit-vegetables-41.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/18-fruit-vegetables/18-fruit-vegetables-41.png",
+  "sourceUrl": "https://img.craftpix.net/2020/12/Fruits-and-Vegetables-Pixel-Art-Icon-Pack2.jpg",
+  "page": "https://craftpix.net/product/fruits-and-vegetables-pixel-art-icon-pack/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-20-fishing
+{
+  "member": "20-fishing-34.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/20-fishing/20-fishing-34.png",
+  "sourceUrl": "https://img.craftpix.net/2020/12/Fishing-Game-Icons-Pixel-Art2.jpg",
+  "page": "https://craftpix.net/product/fishing-game-icons-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-23-farming
+{
+  "member": "23-farming-18.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/23-farming/23-farming-18.png",
+  "sourceUrl": "https://img.craftpix.net/2021/01/Farming-Pixel-Art-Icons-Pack2-1.jpg",
+  "page": "https://craftpix.net/product/farming-pixel-art-icons-pack/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-24-scrolls
+{
+  "member": "24-scrolls-01.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/24-scrolls/24-scrolls-01.png",
+  "sourceUrl": "https://img.craftpix.net/2021/01/Scroll-Pixel-Art-Icons2.jpg",
+  "page": "https://craftpix.net/product/scroll-pixel-art-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-28-food
+{
+  "member": "28-food-11.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/28-food/28-food-11.png",
+  "sourceUrl": "https://img.craftpix.net/2021/02/Food-Icons-Pixel-Art-Pack2.jpg",
+  "page": "https://craftpix.net/product/food-icons-pixel-art-pack/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-29-potions
+{
+  "member": "29-potions-03.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/29-potions/29-potions-03.png",
+  "sourceUrl": "https://img.craftpix.net/2021/02/Potion-Icons-Pixel-Art-Pack2.jpg",
+  "page": "https://craftpix.net/product/potion-icons-pixel-art-pack/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-31-jewellery
+{
+  "member": "31-jewellery-05.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/31-jewellery/31-jewellery-05.png",
+  "sourceUrl": "https://img.craftpix.net/2021/03/Ring-and-Jewellery-Pixel-Art-Icons2.jpg",
+  "page": "https://craftpix.net/product/ring-and-jewellery-pixel-art-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-32-treasure
+{
+  "member": "32-treasure-01.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/32-treasure/32-treasure-01.png",
+  "sourceUrl": "https://img.craftpix.net/2021/04/Chest-and-Treasure-Pixel-Art-Game-Icons2.jpg",
+  "page": "https://craftpix.net/product/chest-and-treasure-pixel-art-game-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-33-spears
+{
+  "member": "33-spears-23.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/33-spears/33-spears-23.png",
+  "sourceUrl": "https://img.craftpix.net/2021/04/Dagger-Icons-Pixel-Art2.jpg",
+  "page": "https://craftpix.net/product/dagger-icons-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-36-swords
+{
+  "member": "36-swords-01.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/36-swords/36-swords-01.png",
+  "sourceUrl": "https://img.craftpix.net/2021/04/Sword-RPG-Icons-Pixel-Art3.jpg",
+  "page": "https://craftpix.net/product/sword-rpg-icons-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-40-staves
+{
+  "member": "40-staves-38.png",
+  "collection": "items-native-32",
+  "stagedPath": "artifacts/items-native-32/png/40-staves/40-staves-38.png",
+  "sourceUrl": "https://img.craftpix.net/2021/06/Mace-Pixel-Art-Game-Icons3.jpg",
+  "page": "https://craftpix.net/product/mace-pixel-art-game-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-01-bracers
+{
+  "member": "01-bracers-07.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/01-bracers/01-bracers-07.png",
+  "sourceUrl": "https://img.craftpix.net/2021/06/Bracers-Pixel-Art-Icons2.jpg",
+  "page": "https://craftpix.net/product/bracers-pixel-art-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-02-axes
+{
+  "member": "02-axes-01.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/02-axes/02-axes-01.png",
+  "sourceUrl": "https://img.craftpix.net/2021/07/Axe-RPG-Icons-Pixel-Art3-1.jpg",
+  "page": "https://craftpix.net/product/axe-rpg-icons-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-04-boots
+{
+  "member": "04-boots-02.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/04-boots/04-boots-02.png",
+  "sourceUrl": "https://img.craftpix.net/2021/07/Sabaton-Pixel-Art-Icon-Set2.jpg",
+  "page": "https://craftpix.net/product/sabaton-pixel-art-icon-set/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-05-cuirasses
+{
+  "member": "05-cuirasses-03.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/05-cuirasses/05-cuirasses-03.png",
+  "sourceUrl": "https://img.craftpix.net/2021/08/Cuirass-RPG-Pixel-Art-Icons2.jpg",
+  "page": "https://craftpix.net/product/cuirass-rpg-pixel-art-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-11-arrows
+{
+  "member": "11-arrows-01.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/11-arrows/11-arrows-01.png",
+  "sourceUrl": "https://img.craftpix.net/2021/11/Arrow-and-Bolt-Icons-Pixel-Art2.jpg",
+  "page": "https://craftpix.net/product/arrow-and-bolt-icons-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-13-spears
+{
+  "member": "13-spears-23.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/13-spears/13-spears-23.png",
+  "sourceUrl": "https://img.craftpix.net/2021/12/Spear-Pixel-Art-RPG-Icons2.jpg",
+  "page": "https://craftpix.net/product/spear-pixel-art-rpg-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-22-undead-loot
+{
+  "member": "22-undead-loot-31.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/22-undead-loot/22-undead-loot-31.png",
+  "sourceUrl": "https://img.craftpix.net/2022/09/Demon-Loot-Icons-32-32-Pixel-Art2.jpg",
+  "page": "https://craftpix.net/product/demon-loot-icons-32x32-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-28-dwarf-loot
+{
+  "member": "28-dwarf-loot-02.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/28-dwarf-loot/28-dwarf-loot-02.png",
+  "sourceUrl": "https://img.craftpix.net/2024/01/Dwarf-loot-Icons-32x32-Pixel-Art2.jpg",
+  "page": "https://craftpix.net/product/dwarf-loot-icons-32x32-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-31-exotic-weapons
+{
+  "member": "31-exotic-weapons-14.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/31-exotic-weapons/31-exotic-weapons-14.png",
+  "sourceUrl": "https://img.craftpix.net/2024/02/The-Exotic-Weapon-Icons-32x32-Pixel-Art2.jpg",
+  "page": "https://craftpix.net/product/the-exotic-weapon-icons-32x32-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-35-kobold-loot
+{
+  "member": "35-kobold-loot-02.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/35-kobold-loot/35-kobold-loot-02.png",
+  "sourceUrl": "https://img.craftpix.net/2024/07/Cobold-Loot-32x32-Pixel-Icons2.jpg",
+  "page": "https://craftpix.net/product/cobold-loot-32x32-pixel-icons/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-items-native-32-batch2-36-kobolds
+{
+  "member": "36-kobolds-01.png",
+  "collection": "items-native-32-batch2",
+  "stagedPath": "artifacts/items-native-32-batch2/png/36-kobolds/36-kobolds-01.png",
+  "sourceUrl": "https://img.craftpix.net/2024/07/Cobold-Monster-Icons-32x32-Pixel-Art2.jpg",
+  "page": "https://craftpix.net/product/cobold-monster-icons-32x32-pixel-art/",
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-portraits-native-32-dark-elves
+{
+  "member": "dark-elves-01.png",
+  "collection": "portraits-native-32",
+  "stagedPath": "artifacts/portraits-native-32/png/dark-elves/dark-elves-01.png",
+  "sourceUrl": "https://img.craftpix.net/2021/08/Dark-Elf-Avatar-Icons-Pixel-Art2.jpg",
+  "page": null,
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-portraits-native-32-demons
+{
+  "member": "demons-01.png",
+  "collection": "portraits-native-32",
+  "stagedPath": "artifacts/portraits-native-32/png/demons/demons-01.png",
+  "sourceUrl": "https://img.craftpix.net/2022/09/Demon-Avatar-32x32-Icons-Pixel-Art2.jpg",
+  "page": null,
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-portraits-native-32-dwarves
+{
+  "member": "dwarves-09.png",
+  "collection": "portraits-native-32",
+  "stagedPath": "artifacts/portraits-native-32/png/dwarves/dwarves-09.png",
+  "sourceUrl": "https://img.craftpix.net/2024/02/Dwarf-Avatars-32x32-Pixel-Icon-Pack2.jpg",
+  "page": null,
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-portraits-native-32-elves
+{
+  "member": "elves-01.png",
+  "collection": "portraits-native-32",
+  "stagedPath": "artifacts/portraits-native-32/png/elves/elves-01.png",
+  "sourceUrl": "https://img.craftpix.net/2021/08/Elf-Avatar-Icons-Pixel-Art2.jpg",
+  "page": null,
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-portraits-native-32-humans
+{
+  "member": "humans-27.png",
+  "collection": "portraits-native-32",
+  "stagedPath": "artifacts/portraits-native-32/png/humans/humans-27.png",
+  "sourceUrl": "https://img.craftpix.net/2021/05/People-in-Medieval-Avatar-Icons-Pixel-Art2.jpg",
+  "page": null,
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+prepared-portraits-native-32-pirates
+{
+  "member": "pirates-02.png",
+  "collection": "portraits-native-32",
+  "stagedPath": "artifacts/portraits-native-32/png/pirates/pirates-02.png",
+  "sourceUrl": "https://img.craftpix.net/2023/02/Pirate-32-32-Icons-Pixel-Art2.jpg",
+  "page": null,
+  "sourceKind": "preview_extraction",
+  "licenseStatus": "not_recorded_in_staged_collection",
+  "originalPaletteRecovered": false
+}
+
+shikashi-utility-32
+{
+  "member": "Shikashi's Fantasy Icons Pack v2/#1 - Transparent Icons.png#9,19,32,32",
+  "sourceKind": "original_png",
+  "sourceUrl": "https://shikashipx.itch.io/shikashis-fantasy-icons-pack",
+  "license": "CC-BY-3.0 / author page CC-BY-4.0",
+  "author": "Shikashi; game-icons.net contributors",
+  "commit": null,
+  "licenseFile": "Sources/shikashi-utility-32/LICENSE.txt"
+}
+
+village-market-32
+{
+  "member": "PNG/32x32/stalls/scales.png",
+  "sourceKind": "original_png",
+  "sourceUrl": "https://reodesuxz.itch.io/free-pixel-medieval-village-market-icons-32x32",
+  "license": "Custom: use in games permitted; no standalone redistribution",
+  "author": "reodesuxz",
+  "commit": null,
+  "licenseFile": "Sources/village-market-32/LICENSE.txt"
+}
+
+wizard-furniture-32
+{
+  "member": "PNG/32x32/decor/magic_mirror.png",
+  "sourceKind": "original_png",
+  "sourceUrl": "https://reodesuxz.itch.io/free-pixel-wizard-tower-furniture-icons-32x32",
+  "license": "Custom: use in games permitted; no standalone redistribution",
+  "author": "reodesuxz",
+  "commit": null,
+  "licenseFile": "Sources/wizard-furniture-32/LICENSE.txt"
+}
+
+workshop-tools-32
+{
+  "member": "PNG/32x32/hardware/padlock.png",
+  "sourceKind": "original_png",
+  "sourceUrl": "https://reodesuxz.itch.io/free-pixel-tools-hardware-icons-32x32",
+  "license": "Custom: use in games permitted; no standalone redistribution",
+  "author": "reodesuxz",
+  "commit": null,
+  "licenseFile": "Sources/workshop-tools-32/LICENSE.txt"
+}

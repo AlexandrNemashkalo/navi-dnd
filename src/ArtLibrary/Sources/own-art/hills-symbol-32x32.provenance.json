@@ -1,0 +1,22 @@
+{
+  "id": "own-art:hills-symbol-32x32",
+  "file": "hills-symbol-32x32.png",
+  "origin": "Pixel derivative of delapouite/hills.svg. Icons made by Delapouite.",
+  "sourceKind": "svg_derivative",
+  "sourcePath": "src/icons/000000/ffffff/1x1/delapouite/hills.svg",
+  "sourceSha256": "e72e0e1886f98d3420d5df2b4b3d50935dd13ac336e6b878059f386a250df3b9",
+  "license": "CC BY 3.0",
+  "licenseRef": "src/icons/license.txt",
+  "author": "Delapouite",
+  "subject": "Hills / pixel symbol",
+  "usage": "biome_view",
+  "width": 32,
+  "height": 32,
+  "mode": "RGBA",
+  "sha256": "0543f9c2b78c5aec02a94b9117ea442ecc409b3d21c8d9cdd7b6946b3d74da25",
+  "processing": "SVG coverage rasterization; BOX to 32x32; binary threshold 128; two solid colors, no antialiasing.",
+  "artApproved": false,
+  "styleId": "fantasy.pixel.landscape-symbol.32",
+  "framing": "landscape_symbol",
+  "descriptionEn": "Three overlapping rounded hills separated by light contour lines, with a sun in the corner."
+}

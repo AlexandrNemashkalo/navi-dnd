@@ -1,0 +1,14 @@
+Pixel Medieval Village Market Icons
+Copyright (c) 2026 reodesuxz
+
+Permitted:
+- Use in unlimited personal and commercial projects (games, apps, films, renders, prototypes).
+- Modify the assets for use in your projects.
+- No attribution required (credit appreciated: "Pixel Medieval Village Market Icons by reodesuxz").
+
+Not permitted:
+- Reselling, sublicensing or redistributing the asset files, modified or unmodified,
+  as standalone assets or as part of another asset pack or library.
+- Using the assets to train or fine-tune AI models.
+
+Provided "as is" without warranty of any kind.

@@ -1,0 +1,362 @@
+[
+  {
+    "id": "01-loot",
+    "slug": "loot-icons-pixel-art-pack",
+    "kind": "item",
+    "variant": 2,
+    "source": "Loot-Icons-Pixel-Art-Pack2.jpg",
+    "page": "https://craftpix.net/product/loot-icons-pixel-art-pack/",
+    "sourceUrl": "https://img.craftpix.net/2020/07/Loot-Icons-Pixel-Art-Pack2.jpg"
+  },
+  {
+    "id": "02-crafting",
+    "slug": "materials-for-crafting-pixel-art-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Materials-for-Crafting-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/materials-for-crafting-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2020/07/Materials-for-Crafting-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "03-minerals",
+    "slug": "free-minerals-pixel-art-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "RPG-Gems-Icon-Pack-Pixel-Art2.jpg",
+    "page": "https://craftpix.net/product/rpg-gems-icon-pack-pixel-art/",
+    "sourceUrl": "https://img.craftpix.net/2020/08/RPG-Gems-Icon-Pack-Pixel-Art2.jpg"
+  },
+  {
+    "id": "04-crafting-materials",
+    "slug": "rpg-crafting-material-icons-pixel-art",
+    "kind": "item",
+    "variant": 2,
+    "source": "RPG-Crafting-Material-Icons-Pixel-Art2.jpg",
+    "page": "https://craftpix.net/product/rpg-crafting-material-icons-pixel-art/",
+    "sourceUrl": "https://img.craftpix.net/2020/08/RPG-Crafting-Material-Icons-Pixel-Art2.jpg"
+  },
+  {
+    "id": "05-gems",
+    "slug": "rpg-gems-icon-pack-pixel-art",
+    "kind": "item",
+    "variant": 2,
+    "source": "Magic-Gems-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/magic-gems-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2020/08/Magic-Gems-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "06-herbs",
+    "slug": "alchemy-herbs-icons-pixel-art",
+    "kind": "item",
+    "variant": 2,
+    "source": "Alchemy-Items-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/alchemy-items-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2020/08/Alchemy-Items-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "07-barbarian",
+    "slug": "barbarian-skills-pixel-art-icon-pack",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Barbarian-Skills-Pixel-Art-Icon-Pack2.jpg",
+    "page": "https://craftpix.net/product/barbarian-skills-pixel-art-icon-pack/",
+    "sourceUrl": "https://img.craftpix.net/2020/09/Barbarian-Skills-Pixel-Art-Icon-Pack2.jpg"
+  },
+  {
+    "id": "08-alchemy",
+    "slug": "alchemy-items-pixel-art-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Alchemy-Herbs-Icons-Pixel-Art2.jpg",
+    "page": "https://craftpix.net/product/alchemy-herbs-icons-pixel-art/",
+    "sourceUrl": "https://img.craftpix.net/2020/09/Alchemy-Herbs-Icons-Pixel-Art2.jpg"
+  },
+  {
+    "id": "09-thief",
+    "slug": "thief-skills-pixel-art-icon-pack",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Thief-Skills-Pixel-Art-Icon-Pack2.jpg",
+    "page": "https://craftpix.net/product/thief-skills-pixel-art-icon-pack/",
+    "sourceUrl": "https://img.craftpix.net/2020/09/Thief-Skills-Pixel-Art-Icon-Pack2.jpg"
+  },
+  {
+    "id": "10-mining",
+    "slug": "mining-icons-pixel-art-pack",
+    "kind": "item",
+    "variant": 2,
+    "source": "Mining-Icons-Pixel-Art-Pack2.jpg",
+    "page": "https://craftpix.net/product/mining-icons-pixel-art-pack/",
+    "sourceUrl": "https://img.craftpix.net/2020/09/Mining-Icons-Pixel-Art-Pack2.jpg"
+  },
+  {
+    "id": "11-pyromancer",
+    "slug": "pyromancer-skills-pixel-art-icons",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Pyromancer-Skills-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/pyromancer-skills-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2020/10/Pyromancer-Skills-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "12-artifacts",
+    "slug": "magic-artifacts-pixel-art-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Magic-Artifacts-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/magic-artifacts-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2020/10/Magic-Artifacts-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "13-books",
+    "slug": "magic-books-pixel-art-icons-pack",
+    "kind": "item",
+    "variant": 2,
+    "source": "Magic-Books-Pixel-Art-Icons-Pack2.jpg",
+    "page": "https://craftpix.net/product/magic-books-pixel-art-icons-pack/",
+    "sourceUrl": "https://img.craftpix.net/2020/10/Magic-Books-Pixel-Art-Icons-Pack2.jpg"
+  },
+  {
+    "id": "14-runes",
+    "slug": "magic-runes-pixel-art-icon-pack",
+    "kind": "item",
+    "variant": 2,
+    "source": "Magic-Runes-Pixel-Art-Icon-Pack2.jpg",
+    "page": "https://craftpix.net/product/magic-runes-pixel-art-icon-pack/",
+    "sourceUrl": "https://img.craftpix.net/2020/10/Magic-Runes-Pixel-Art-Icon-Pack2.jpg"
+  },
+  {
+    "id": "15-warlock",
+    "slug": "warlock-skills-pixel-art-icons-pack",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Warlock-Skills-Pixel-Art-Icons-Pack2.jpg",
+    "page": "https://craftpix.net/product/warlock-skills-pixel-art-icons-pack/",
+    "sourceUrl": "https://img.craftpix.net/2020/11/Warlock-Skills-Pixel-Art-Icons-Pack2.jpg"
+  },
+  {
+    "id": "16-archer",
+    "slug": "archer-skills-pixel-art-icons",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Archer-Skills-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/archer-skills-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2020/11/Archer-Skills-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "17-berries",
+    "slug": "berries-and-nuts-pixel-art-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Berries-and-Nuts-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/berries-and-nuts-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2020/12/Berries-and-Nuts-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "18-fruit-vegetables",
+    "slug": "fruits-and-vegetables-pixel-art-icon-pack",
+    "kind": "item",
+    "variant": 2,
+    "source": "Fruits-and-Vegetables-Pixel-Art-Icon-Pack2.jpg",
+    "page": "https://craftpix.net/product/fruits-and-vegetables-pixel-art-icon-pack/",
+    "sourceUrl": "https://img.craftpix.net/2020/12/Fruits-and-Vegetables-Pixel-Art-Icon-Pack2.jpg"
+  },
+  {
+    "id": "19-spearman",
+    "slug": "spearman-skills-pixel-art-icons",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Spearman-Skills-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/spearman-skills-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2020/12/Spearman-Skills-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "20-fishing",
+    "slug": "fishing-game-icons-pixel-art",
+    "kind": "item",
+    "variant": 2,
+    "source": "Fishing-Game-Icons-Pixel-Art2.jpg",
+    "page": "https://craftpix.net/product/fishing-game-icons-pixel-art/",
+    "sourceUrl": "https://img.craftpix.net/2020/12/Fishing-Game-Icons-Pixel-Art2.jpg"
+  },
+  {
+    "id": "21-aeromancer",
+    "slug": "aeromancer-skill-icons-pixel-art",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Aeromancer-Skill-Icons-Pixel-Art2.jpg",
+    "page": "https://craftpix.net/product/aeromancer-skill-icons-pixel-art/",
+    "sourceUrl": "https://img.craftpix.net/2020/12/Aeromancer-Skill-Icons-Pixel-Art2.jpg"
+  },
+  {
+    "id": "22-crossbowman",
+    "slug": "crossbowman-skills-pixel-art-icons",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Crossbowman-Skills-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/crossbowman-skills-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/01/Crossbowman-Skills-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "23-farming",
+    "slug": "farming-pixel-art-icons-pack",
+    "kind": "item",
+    "variant": 2,
+    "source": "Farming-Pixel-Art-Icons-Pack2-1.jpg",
+    "page": "https://craftpix.net/product/farming-pixel-art-icons-pack/",
+    "sourceUrl": "https://img.craftpix.net/2021/01/Farming-Pixel-Art-Icons-Pack2-1.jpg"
+  },
+  {
+    "id": "24-scrolls",
+    "slug": "scroll-pixel-art-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Scroll-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/scroll-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/01/Scroll-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "25-cryomancer",
+    "slug": "cryomancer-skill-pixel-art-icons",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Cryomancer-Skill-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/cryomancer-skill-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/01/Cryomancer-Skill-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "26-mushrooms",
+    "slug": "mushroom-pixel-art-game-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Mushroom-Pixel-Art-Game-Icons2.jpg",
+    "page": "https://craftpix.net/product/mushroom-pixel-art-game-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/02/Mushroom-Pixel-Art-Game-Icons2.jpg"
+  },
+  {
+    "id": "27-meat-skin",
+    "slug": "meat-and-skin-pixel-art-icon-pack",
+    "kind": "item",
+    "variant": 2,
+    "source": "Meat-and-Skins-Pixel-Art-Icons-Pack2.jpg",
+    "page": "https://craftpix.net/product/meat-and-skins-pixel-art-icons-pack/",
+    "sourceUrl": "https://img.craftpix.net/2021/02/Meat-and-Skins-Pixel-Art-Icons-Pack2.jpg"
+  },
+  {
+    "id": "28-food",
+    "slug": "food-icons-pixel-art-pack",
+    "kind": "item",
+    "variant": 2,
+    "source": "Food-Icons-Pixel-Art-Pack2.jpg",
+    "page": "https://craftpix.net/product/food-icons-pixel-art-pack/",
+    "sourceUrl": "https://img.craftpix.net/2021/02/Food-Icons-Pixel-Art-Pack2.jpg"
+  },
+  {
+    "id": "29-potions",
+    "slug": "potion-icons-pixel-art-pack",
+    "kind": "item",
+    "variant": 2,
+    "source": "Potion-Icons-Pixel-Art-Pack2.jpg",
+    "page": "https://craftpix.net/product/potion-icons-pixel-art-pack/",
+    "sourceUrl": "https://img.craftpix.net/2021/02/Potion-Icons-Pixel-Art-Pack2.jpg"
+  },
+  {
+    "id": "30-buffs",
+    "slug": "buff-skill-pixel-art-icons",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Buff-Skill-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/buff-skill-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/03/Buff-Skill-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "31-jewellery",
+    "slug": "ring-and-jewellery-pixel-art-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Ring-and-Jewellery-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/ring-and-jewellery-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/03/Ring-and-Jewellery-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "32-treasure",
+    "slug": "chest-and-treasure-pixel-art-game-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Chest-and-Treasure-Pixel-Art-Game-Icons2.jpg",
+    "page": "https://craftpix.net/product/chest-and-treasure-pixel-art-game-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/04/Chest-and-Treasure-Pixel-Art-Game-Icons2.jpg"
+  },
+  {
+    "id": "33-spears",
+    "slug": "spear-pixel-art-rpg-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Dagger-Icons-Pixel-Art2.jpg",
+    "page": "https://craftpix.net/product/dagger-icons-pixel-art/",
+    "sourceUrl": "https://img.craftpix.net/2021/04/Dagger-Icons-Pixel-Art2.jpg"
+  },
+  {
+    "id": "34-sigils",
+    "slug": "sigil-rpg-game-icons-pixel-art",
+    "kind": "item",
+    "variant": 2,
+    "source": "Sigil-RPG-Game-Icons-Pixel-Art2.jpg",
+    "page": "https://craftpix.net/product/sigil-rpg-game-icons-pixel-art/",
+    "sourceUrl": "https://img.craftpix.net/2021/04/Sigil-RPG-Game-Icons-Pixel-Art2.jpg"
+  },
+  {
+    "id": "35-swords-effects",
+    "slug": "sword-rpg-icons-pixel-art",
+    "kind": "item",
+    "variant": 2,
+    "source": "Sword-RPG-Icons-Pixel-Art2.jpg",
+    "page": "https://craftpix.net/product/sword-rpg-icons-pixel-art/",
+    "sourceUrl": "https://img.craftpix.net/2021/04/Sword-RPG-Icons-Pixel-Art2.jpg"
+  },
+  {
+    "id": "36-swords",
+    "slug": "sword-rpg-icons-pixel-art",
+    "kind": "item",
+    "variant": 3,
+    "source": "Sword-RPG-Icons-Pixel-Art3.jpg",
+    "page": "https://craftpix.net/product/sword-rpg-icons-pixel-art/",
+    "sourceUrl": "https://img.craftpix.net/2021/04/Sword-RPG-Icons-Pixel-Art3.jpg"
+  },
+  {
+    "id": "37-debuffs",
+    "slug": "debuff-skill-pixel-art-icons",
+    "kind": "skill",
+    "variant": 2,
+    "source": "Debuff-Skill-Pixel-Art-Icons2.jpg",
+    "page": "https://craftpix.net/product/debuff-skill-pixel-art-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/05/Debuff-Skill-Pixel-Art-Icons2.jpg"
+  },
+  {
+    "id": "38-helmets",
+    "slug": "helmet-pixel-art-game-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Helmet-Pixel-Art-Game-Icons2.jpg",
+    "page": "https://craftpix.net/product/helmet-pixel-art-game-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/05/Helmet-Pixel-Art-Game-Icons2.jpg"
+  },
+  {
+    "id": "39-staves-effects",
+    "slug": "staff-pixel-art-rpg-icons",
+    "kind": "item",
+    "variant": 2,
+    "source": "Mace-Pixel-Art-Game-Icons2.jpg",
+    "page": "https://craftpix.net/product/mace-pixel-art-game-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/06/Mace-Pixel-Art-Game-Icons2.jpg"
+  },
+  {
+    "id": "40-staves",
+    "slug": "staff-pixel-art-rpg-icons",
+    "kind": "item",
+    "variant": 3,
+    "source": "Mace-Pixel-Art-Game-Icons3.jpg",
+    "page": "https://craftpix.net/product/mace-pixel-art-game-icons/",
+    "sourceUrl": "https://img.craftpix.net/2021/06/Mace-Pixel-Art-Game-Icons3.jpg"
+  }
+]

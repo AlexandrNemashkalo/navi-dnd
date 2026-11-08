@@ -1,0 +1,22 @@
+{
+  "id": "own-art:leather-waterskin-v1",
+  "file": "leather-waterskin-v1.png",
+  "subject": "Leather waterskin",
+  "nameRu": "Кожаный бурдюк",
+  "width": 32,
+  "height": 32,
+  "sha256": "9ba586fabf794637e7b7b8f997f46159032f7c47a3999fc1e395ec6433b8fd2e",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "Complete brown pear-shaped leather waterskin with cork stopper, carrying loop and visible seam. Exact 32x32 prepared generated image.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/leather-waterskin-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

@@ -1,0 +1,13 @@
+{
+  "index": 30,
+  "key": "batch100-lake-v1",
+  "category": "biome_view",
+  "name": "Lake",
+  "nameRu": "Озеро",
+  "usage": "place_view",
+  "transparent": false,
+  "description": "Quiet blue inland lake surrounded by low green banks, distant hills and clear sky.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: Quiet blue inland lake surrounded by low green banks, distant hills and clear sky. Opaque square landscape, eye-level view toward the horizon or distant opening, foreground at bottom, distant scenery above. No overhead map view. Fill the square.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-a5b79452-0bec-4ecb-a18b-1173ab26412c.png",
+  "status": "generated"
+}

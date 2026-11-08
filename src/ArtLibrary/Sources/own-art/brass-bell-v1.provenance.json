@@ -1,0 +1,22 @@
+{
+  "id": "own-art:brass-bell-v1",
+  "file": "brass-bell-v1.png",
+  "subject": "Brass hand bell",
+  "nameRu": "Латунный колокольчик",
+  "width": 32,
+  "height": 32,
+  "sha256": "8e3c2237a7c58d061a4e74861ee87927e102d8c192034499608b1cd5998907fe",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "Complete brass hand bell with a short wooden handle, dark underside and visible clapper. Exact 32x32 prepared generated image.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/brass-bell-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

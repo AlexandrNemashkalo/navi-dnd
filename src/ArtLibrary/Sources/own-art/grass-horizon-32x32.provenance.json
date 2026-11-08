@@ -1,0 +1,18 @@
+{
+  "id": "own-art:grass-horizon-32x32",
+  "file": "grass-horizon-32x32.png",
+  "origin": "AI-generated with OpenAI image generation; requested by the project owner",
+  "createdDate": "2026-11-06",
+  "subject": "Grass / horizon view",
+  "usage": "biome_view",
+  "width": 32,
+  "height": 32,
+  "mode": "RGBA",
+  "sha256": "b5a357babbecf747439488869d654a36145673ecb8a4bc94a0428363926c4599",
+  "processing": "Area averaging (BOX) to a fixed 32x32 grid; median-cut 16-color palette; no dithering.",
+  "artApproved": false,
+  "styleId": "fantasy.pixel.landscape.32",
+  "framing": "horizon_view",
+  "descriptionEn": "Grassy plain with foreground rocks and grass tufts, viewed toward a distant horizon.",
+  "generationSource": "generation-sources/grass-horizon.png"
+}

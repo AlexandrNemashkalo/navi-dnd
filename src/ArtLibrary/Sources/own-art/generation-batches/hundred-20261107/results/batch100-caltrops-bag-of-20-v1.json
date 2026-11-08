@@ -1,0 +1,13 @@
+{
+  "index": 4,
+  "key": "batch100-caltrops-bag-of-20-v1",
+  "category": "equipment",
+  "name": "Caltrops (bag of 20)",
+  "nameRu": "Калтропы (сумка 20 шт.)",
+  "usage": "item",
+  "transparent": true,
+  "description": "A small open leather pouch beside two large iron caltrops with clearly separated sharp points.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: A small open leather pouch beside two large iron caltrops with clearly separated sharp points. Genuine transparent background. One complete centered subject with a one-pixel clear margin. Full body for creatures, full object for equipment. No scenery or extra objects beyond the stated subject.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-484f3231-9f1d-4222-a6c6-70a25a536cac.png",
+  "status": "generated"
+}

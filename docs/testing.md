@@ -3,10 +3,10 @@
 ## Логика
 
 ```powershell
-dotnet test NaviDnD.Tests/NaviDnD.Tests.csproj
+dotnet test src/NaviDnD.Tests/NaviDnD.Tests.csproj
 ```
 
-Обычный прогон без реальных запросов к модели. Сборка игры и сервера: `dotnet build NaviDnD.McpServer/NaviDnD.McpServer.csproj`. Перед пересборкой закрой игру: Windows блокирует exe и dll.
+Обычный прогон без реальных запросов к модели. Сборка игры и сервера: `dotnet build src/NaviDnD.McpServer/NaviDnD.McpServer.csproj`. Перед пересборкой закрой игру: Windows блокирует exe и dll.
 
 ## UI
 
@@ -18,6 +18,8 @@ dotnet test NaviDnD.Tests/NaviDnD.Tests.csproj
 
 `ConsoleHandles` открывает `CONOUT$`/`CONIN$`: `GetStdHandle` у testhost может оставаться перенаправленным в пайп. `NAVIDND_TEST_STEP_DELAY_MS` добавляет паузы между шагами; задержка моков позволяет проверить спиннер.
 
+Сцены приключения: `AdventureSceneTests` проверяет покрытие биомов, варианты всех иллюстраций, заполнение панели, освещение и отсутствие изменений сохранения. UI-фильтр `FullyQualifiedName~TravelPreviewScenarioTests` проверяет F1/F2, F11 и паузу в классической консоли. `AlacrittyAdventureSceneTests` запускает настоящий терминал и лаунчер, сравнивает четыре способа отрисовки, проверяет переходы во время ответа мастера и появление/исчезновение клеточной карты; отдельный сценарий проверяет анимацию и неподвижность диалога по пикселям. Для него задай `NAVIDND_ALACRITTY_TEST_RUNTIME` — полный путь к отдельной копии Windows-сборки внутри `artifacts`, без личной папки `Storage`. Без этой переменной тесты Alacritty пропускаются. Фикстуры, моки и скриншоты находятся в тестовой копии; окно получает фокус на время нажатий.
+
 ## Настоящие модели
 
 `NaviDnD.PromptTests` использует отдельное хранилище и реальные CLI-провайдеры. Запросы расходуют лимиты или средства, результаты недетерминированы. Не запускай тесты всего решения для обычной проверки кода.
@@ -27,4 +29,4 @@ dotnet test NaviDnD.Tests/NaviDnD.Tests.csproj
 `PromptScenario.ApplyAndParse` применяет ответ по протоколу движка. Проверяются игровые последствия: экипировка, хиты, цели и вызовы инструментов. Автоответчик имитирует броски и выбор игрока. `NAVIDND_RECORD_PROMPTS=1` обновляет моки — включай намеренно и проверяй ответ перед коммитом.
 ## Образцы тактических карт
 
-`dotnet test NaviDnD.Tests/NaviDnD.Tests.csproj --filter FullyQualifiedName~MapSampleTests` создаёт 70 текстовых карт с легендой и мебелью в `artifacts/map-samples/` (пять сидов каждого варианта, без нейронки). `MapConnectivityTests` проверяет выходы/двери и броды, `MapCompatibilityTests` — отпечатки старых building/village без новых опций. План `plan_location` поддерживает `moat: true` для building на земле и `layout: road|square|river|palisade` для village; параметры влияют на готовую геометрию, дополнительных полей сохранения нет.
+`dotnet test src/NaviDnD.Tests/NaviDnD.Tests.csproj --filter FullyQualifiedName~MapSampleTests` создаёт 70 текстовых карт с легендой и мебелью в `artifacts/map-samples/` (пять сидов каждого варианта, без нейронки). `MapConnectivityTests` проверяет выходы/двери и броды, `MapCompatibilityTests` — отпечатки старых building/village без новых опций. План `plan_location` поддерживает `moat: true` для building на земле и `layout: road|square|river|palisade` для village; параметры влияют на готовую геометрию, дополнительных полей сохранения нет.

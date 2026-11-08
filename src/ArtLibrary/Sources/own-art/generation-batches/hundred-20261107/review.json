@@ -1,0 +1,505 @@
+{
+  "approved": [
+    {
+      "key": "batch100-block-and-tackle-v1",
+      "sha256": "43a513409a4b5706dcb94620491a170dfe365e41205377bc70857d15367e2965",
+      "reason": "Reviewed final 32x32: two linked wooden pulley housings, connecting rope and end hooks remain visible."
+    },
+    {
+      "key": "batch100-chalk-1-piece-v1",
+      "sha256": "7d63d13b29cd44e369866b0eae01aa245fee04fe8ac0fd9bfdc26f3aed22a57d",
+      "reason": "Reviewed final 32x32: one complete white chalk stick with squared ends and a gray side shadow."
+    },
+    {
+      "key": "batch100-lance-v1",
+      "sha256": "4997cf9bd03142e16083ceda67332bbfeed4e45d08d354fa4db9444861f05c58",
+      "reason": "Reviewed 32x32: complete long diagonal cavalry lance, pointed metal tip, wooden shaft and hand guard."
+    },
+    {
+      "key": "batch100-ball-bearings-bag-of-1000-v1",
+      "sha256": "2e703bd5c934ac2fdcdbe0b7926ff9a73582de1c700df6fa9d51b45e19a5d638",
+      "reason": "Reviewed 32x32: open brown pouch and separated round steel balls. Inventory quantity remains a data property."
+    },
+    {
+      "key": "batch100-unarmed-strike-v1",
+      "sha256": "51ee8c155336d06c2ba9f3e587a08b1358c5f918157635a5ddb436cfe7208c21",
+      "reason": "Inspected final 32x32 and integer enlargement: Clenched bare fist with folded fingers, thumb and short wrist."
+    },
+    {
+      "key": "batch100-caltrops-bag-of-20-v1",
+      "sha256": "0d003488a3c359c45905832f82a325d85920a6a25d2cd82f9863881ad6985c8c",
+      "reason": "Inspected final 32x32 and integer enlargement: Open leather pouch beside two pointed iron caltrops."
+    },
+    {
+      "key": "batch100-climber-s-kit-v1",
+      "sha256": "fd830e7803ff5c7cc7f0140540dd14d05efc0e66f1afd540ed13c22c247b2e59",
+      "reason": "Inspected final 32x32 and integer enlargement: Coiled rope with metal climbing tools and a hammer."
+    },
+    {
+      "key": "batch100-healer-s-kit-v1",
+      "sha256": "99ced6f4b43338671f25def0ab0e16fce0bc84b0076f3e895f155f0baacdc1e5",
+      "reason": "Inspected final 32x32 and integer enlargement: Open leather medical satchel with pale bandage and medicine bottle."
+    },
+    {
+      "key": "batch100-sealing-wax-v1",
+      "sha256": "083b1b786e7e0f7893672000e425d1b043c89bbec77db638a1ca73f2946c0c96",
+      "reason": "Inspected final 32x32 and integer enlargement: Red wax stick and separate round wax seal."
+    },
+    {
+      "key": "batch100-abacus-v1",
+      "sha256": "0d48018550764d604643411f73bb227d1b749f661c62aee19f6ad61255fd4f20",
+      "reason": "Inspected final 32x32 and integer enlargement: Wooden abacus frame with four horizontal rows of colored beads."
+    },
+    {
+      "key": "batch100-ram-portable-v1",
+      "sha256": "631ff4efae1b458fbe7df011f75c797199de8d687b273e2b7b0e20420337314a",
+      "reason": "Inspected final 32x32 and integer enlargement: Horizontal wooden battering ram with iron cap and carrying handles."
+    },
+    {
+      "key": "batch100-totem-v1",
+      "sha256": "05152f0a923735d648e9b54f4ff7fe7b0884e32198f1ec7ddf1fd0e0c1eddad0",
+      "reason": "Inspected final 32x32 and integer enlargement: Carved wooden owl totem with broad base."
+    },
+    {
+      "key": "batch100-whetstone-v1",
+      "sha256": "a2fe424cd45ac7526da4841318239f8279984bb1486b1d0722b1cfdca70302f2",
+      "reason": "Inspected final 32x32 and integer enlargement: Oblong gray sharpening stone with flat pale top and darker side."
+    },
+    {
+      "key": "batch100-reliquary-v1",
+      "sha256": "3ff1a3d597f821276b972a1ecf792ebd331994d7662e266341f990e07385a430",
+      "reason": "Inspected final 32x32 and integer enlargement: Golden peaked reliquary casket with central red jewel and short feet."
+    },
+    {
+      "key": "batch100-signal-whistle-v1",
+      "sha256": "b513eb3d4e47e072629e2754500ff53dd8930d7a736481ded10f7f687faa7743",
+      "reason": "Inspected final 32x32 and integer enlargement: Brass whistle with mouthpiece, circular body and hanging loop."
+    },
+    {
+      "key": "batch100-tinderbox-v1",
+      "sha256": "5e7367d434ba9c88de65f1d0cb1ea34437b725412bc093b4d8695c2abf12edb0",
+      "reason": "Inspected final 32x32 and integer enlargement: Open metal tinderbox containing flint and striker, no modern lighter."
+    },
+    {
+      "key": "batch100-case-crossbow-bolt-v1",
+      "sha256": "ebc28a84c071115f4e24824c65706aed7e5d34c3547746af64647a4b72a5d452",
+      "reason": "Inspected final 32x32 and integer enlargement: Short rigid leather case with visible crossbow bolts."
+    },
+    {
+      "key": "batch100-case-map-or-scroll-v1",
+      "sha256": "48fc53b1e78e3106cb43045e78753b981ca704f7d010138dc38824ef7c0a1278",
+      "reason": "Inspected final 32x32 and integer enlargement: Complete cylindrical leather scroll case with lid and strap."
+    },
+    {
+      "key": "batch100-emblem-v1",
+      "sha256": "860d60f5708d23661ae408b11f775b5bef031f652e7386aee994045f1cca059a",
+      "reason": "Inspected final 32x32 and integer enlargement: Silver pendant with central golden sun and distinct rays."
+    },
+    {
+      "key": "batch100-capital-v1",
+      "sha256": "8e7a0be239796213ce7e6fc652be9c240a1412839b3bfe3793f219236f2bc718",
+      "reason": "Inspected final 32x32 and integer enlargement: Eye-level royal capital view with central palace, towers, city wall and sky; no overhead map geometry."
+    },
+    {
+      "key": "batch100-city-v1",
+      "sha256": "abb95348fd2f9824aef561d4e855bfa2069f2c058b07b1ee560e24d32efa2663",
+      "reason": "city: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-town-v1",
+      "sha256": "725d591c4c362e046012bae082abd2df5bbf1042a7510f1afb601838db9c7065",
+      "reason": "town: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-village-v1",
+      "sha256": "bd7e59ea9f004582f6c029c9b548c23f058105401c2f9de5f49d68ca58f90d2e",
+      "reason": "village: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-castle-v1",
+      "sha256": "1dad2c1569a42272125521564230d2bc941ee34f4d6529a23ec83daa3792dd32",
+      "reason": "castle: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-port-v1",
+      "sha256": "e99b047407bd1f44ff535ca8cce77ac52c7bbbf3a6c4dd24f8549614e8f8f235",
+      "reason": "port: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-ruins-v1",
+      "sha256": "99c4d34ff329d1bd908369137afcfd661b0484a5b03fd94477de14b33c3b15f5",
+      "reason": "ruins: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-dungeon-v1",
+      "sha256": "c6b5e67e78d7c985ce920b821bc1132615b38d4447b08b2900a5ac1747318861",
+      "reason": "dungeon: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-cave-v1",
+      "sha256": "146305440c1fc9f28fe25843b759deaa897b0898300041cf71d83359e7d336ad",
+      "reason": "cave: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-shrine-v1",
+      "sha256": "741b11f440b6a7e7db722ef313d0a78ae57d9294482f744d4338dc4a4e9e15fa",
+      "reason": "shrine: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-lake-v1",
+      "sha256": "57bf5e863f53854462e714877ae491c3edd947d95d6f53f2a27455034d811390",
+      "reason": "Lake: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-beach-v1",
+      "sha256": "0ec18de67f14247ccc04f1e9519ecace793c35bbd7ea14bb903bede0a10e42c1",
+      "reason": "Beach: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-forest-v1",
+      "sha256": "8f1281a1ab171e52629b4e0e2d895a1208ec5dc725fadcf742180799b9a123f4",
+      "reason": "Forest: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-deepforest-v1",
+      "sha256": "8575b2d6ab4bfae0b189e6e208d367d6d8e6d340877b780e7ce34d199df83e5e",
+      "reason": "DeepForest: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-hills-v1",
+      "sha256": "250a19954ac08f05a9460c129df56ee085b7538fc5969e492212388c1efaa19e",
+      "reason": "Hills: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-mountains-v1",
+      "sha256": "48251eb18b7b5a691ac216e85aa7ecb41b0e6d5b1faac2bac1923525e8662255",
+      "reason": "Mountains: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-peaks-v1",
+      "sha256": "dfa3c406d478509ef0a319511fd88709573995e2aaabcbf87e3c774db160bad3",
+      "reason": "Peaks: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-swamp-v1",
+      "sha256": "9815c4649a6d19136f900f1643bc9929ae8968096c794e15cb92551f1e3c00d8",
+      "reason": "Swamp: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-desert-v1",
+      "sha256": "454d908898875f8b870e78e610dd9ef60a02bded02544d7c4da7492c7ea34aa0",
+      "reason": "Desert: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-tundra-v1",
+      "sha256": "e64df3b0bebba41e3279e0c4cd4b392d38901ac278ba5031ed0cda85b6fbf3e7",
+      "reason": "Tundra: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-snow-v1",
+      "sha256": "d081c84be340bbdc3915c399f25bc9cc14fbb0525472f3820506d0badb57c371",
+      "reason": "Snow: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view."
+    },
+    {
+      "key": "batch100-snowforest-v1",
+      "sha256": "e5e88c8c6ad509f5e155d8843abdfa7c568eb22ec21b56c1061f419b120eab14",
+      "reason": "SnowForest: Inspected native 32x32 and integer enlargement: snowy conifers, snow-covered ground and distant sky, eye-level landscape."
+    },
+    {
+      "key": "batch100-ape-v1",
+      "sha256": "9a9b89cd25280bfe0de8f878d24fe85646f1924c1da03f404dba527dd9360c4c",
+      "reason": "Ape: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-baboon-v1",
+      "sha256": "2b222ddb7576ff82ef25b280ceb2136c17fb2ebeb368f4523e70a08f66021a79",
+      "reason": "Baboon: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-badger-v1",
+      "sha256": "baf04de46a6da8a890fa4ce1fcb2ed76eba84f378dcdfb9798e1ebe528963386",
+      "reason": "Badger: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-camel-v1",
+      "sha256": "0abefaa7438e3617cd785983d32f25fd171aed36e61fd6ae833bae8b5951900b",
+      "reason": "Camel: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-deer-v1",
+      "sha256": "1a37653920107abedcea05ceddc84774173558e7ce54b04d64cb940718e371fa",
+      "reason": "Deer: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-boar-v1",
+      "sha256": "9c1178ca1dbaf6fe085e7df8a0639ba2946145e3a98b63ecbc793a84e70a827c",
+      "reason": "Boar: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-draft-horse-v1",
+      "sha256": "6d8f9aa8d42a629dbb72b3a6eded39bb5f6cbefc210370fcbe838826a8f11298",
+      "reason": "Draft Horse: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-eagle-v1",
+      "sha256": "0c4fa88be5bc05af26a5ab578b3aa82f5c76a5290b0a691050a80d914bd678b9",
+      "reason": "Eagle: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-elk-v1",
+      "sha256": "aea9c64f4bf3bea0f2423d8cbf2d5db98155baa6a2ccef8d24383b3354093f46",
+      "reason": "Elk: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-goat-v1",
+      "sha256": "a05bc9daaa8ac3d029fc8ce0db0dd8cff01bd5dbddf76e9418d12ed162c61aa1",
+      "reason": "Goat: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-hyena-v1",
+      "sha256": "386e6b0bc4141d238974be8c7944922fcd68e6b506ee6bb0a80dafe1d832be8d",
+      "reason": "Hyena: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-killer-whale-v1",
+      "sha256": "56eb7d6838b115ecfa9f73a1a83abfca2620a4479f5dbe55bd71545b5b4993ed",
+      "reason": "Killer Whale: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-lion-v1",
+      "sha256": "538ff7e58a886d30f1f0234664b68c8856abd77dfca6865f48a49972230f7942",
+      "reason": "Lion: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background."
+    },
+    {
+      "key": "batch100-cat-v1",
+      "sha256": "b12a1042dd7644e7ddf30633256302a1a360ce58847187040d3f1ded2d94bf53",
+      "reason": "Cat: Inspected actual 32x32 PNG: complete striped cat with pointed ears, muzzle, four legs and raised curved tail on transparent background."
+    },
+    {
+      "key": "batch100-hawk-v1",
+      "sha256": "aabd15ae52b9bab58e1e19d9d6825e06b09a67144f6924a88918990895da02af",
+      "reason": "Hawk: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background."
+    },
+    {
+      "key": "batch100-hunter-shark-v1",
+      "sha256": "4e384ec1d424b288f21286f492e0fa7ca496cceb790d3e77973735a29b5a8707",
+      "reason": "Hunter Shark: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background."
+    },
+    {
+      "key": "batch100-mammoth-v1",
+      "sha256": "8a63bd8a5d9b2ed3c3fbcc7979932cdbf3a4cbbb5e0f11c1e8ca4710b5695655",
+      "reason": "Mammoth: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background."
+    },
+    {
+      "key": "batch100-mule-v1",
+      "sha256": "ba2d3d485648fe96654428ce2c5d12ca6e434b62c0a69499a2d6a7ff3acf7be3",
+      "reason": "Mule: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background."
+    },
+    {
+      "key": "batch100-octopus-v1",
+      "sha256": "5ffff58d90967576c1716e7fbd84859d02c33e6e2d9f559d0e1e9140b93f6752",
+      "reason": "Octopus: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background."
+    },
+    {
+      "key": "batch100-owl-v1",
+      "sha256": "2791cccf061d1b102e60cc2d185b110776df200560f4f3824badca59370141e0",
+      "reason": "Owl: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-panther-v1",
+      "sha256": "c05d521d1aa3fa980469f504359af78a350851a8e5e532fb42ddb278661a1acc",
+      "reason": "Panther: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-pony-v1",
+      "sha256": "e4ee23e70ac55bebaf25a2f1f381cc40adfe68175a71287d5315d53584e2b2f1",
+      "reason": "Pony: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-quipper-v1",
+      "sha256": "0624b1f334c2a219dcca35c9a377270ac80f5d3af63aad66ebbdc38ba1257a5d",
+      "reason": "Quipper: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-reef-shark-v1",
+      "sha256": "07864130897c228d3d93cc805ca17d00f3316bec5de7450aa72fbf9b3a4d4611",
+      "reason": "Reef Shark: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-rhinoceros-v1",
+      "sha256": "b7e3cf3319219a1537833adccf7e4b19f512133a69575b441ee412ec698d7412",
+      "reason": "Rhinoceros: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-riding-horse-v1",
+      "sha256": "362fab50d70277a814e4a684a4c18fe9718fc0038735949037ba593fe38f6df1",
+      "reason": "Riding Horse: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-tiger-v1",
+      "sha256": "780197a0506d5f49415760679aa739728ab36c22edfbe418fa23272758f706a9",
+      "reason": "Tiger: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-vulture-v1",
+      "sha256": "0a79f9d91fedf1130e4826f6e44ec17e8bad98fbbe79022803a2c8a3f04d99e2",
+      "reason": "Vulture: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-warhorse-v1",
+      "sha256": "285424755c17481327103cdd8401af7a650c7d28f8215685883af26da222ae7b",
+      "reason": "Warhorse: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-weasel-v1",
+      "sha256": "2064682b775b82496d224eae291a21a1df8b9a56ce0eccba76b6b0f30952ddbe",
+      "reason": "Weasel: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-allosaurus-v1",
+      "sha256": "fcd9decf295a0495ac8d04968b743f19fcd864358ee934015abe7efd865181ac",
+      "reason": "Allosaurus: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-ankylosaurus-v1",
+      "sha256": "d77098bda728c90ae7fd87d4c35576069e44528278fa6c7a39b4da0eb6c2decc",
+      "reason": "Ankylosaurus: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-pteranodon-v1",
+      "sha256": "42b782d83e89916dda3ca8cccb1f2bdc62b80e4344f6dec34e9487819da916fb",
+      "reason": "Pteranodon: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks."
+    },
+    {
+      "key": "batch100-triceratops-v1",
+      "sha256": "2db167f77c18d58a0227e61d3761398308c978ec33d37ab2e2d091d9f8a9c294",
+      "reason": "Triceratops: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette."
+    },
+    {
+      "key": "batch100-tyrannosaurus-rex-v1",
+      "sha256": "0b88e57f76e795dcfa7f2c64b7836867795dc25296703eb8092c0d91046bd2bb",
+      "reason": "Tyrannosaurus Rex: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette."
+    },
+    {
+      "key": "batch100-plesiosaurus-v1",
+      "sha256": "b585be44bbebe0c9b4532259ddc75fe5ffc8bdc7519f1272000b469b2c9390c8",
+      "reason": "Plesiosaurus: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette."
+    },
+    {
+      "key": "batch100-saber-toothed-tiger-v1",
+      "sha256": "df24117322a765dde70cdcb14e426cb353dac1f2a85290165e3bddf5e69f41d0",
+      "reason": "Saber-Toothed Tiger: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette."
+    },
+    {
+      "key": "batch100-unicorn-v1",
+      "sha256": "8a21694910b36cb78fd5348d8446dfed41f5c5b3b24506ce414f34b925e2c20b",
+      "reason": "Unicorn: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette."
+    },
+    {
+      "key": "batch100-pegasus-v1",
+      "sha256": "fab83bd8b1f6d7ba5438e1fee3a11621549145d93352705a95c79c26c8036732",
+      "reason": "Pegasus: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks."
+    },
+    {
+      "key": "batch100-owlbear-v1",
+      "sha256": "c99afbb721c15e4455eb3b55e2a09bc61a2b256054b36c837f6068099b9d6039",
+      "reason": "Owlbear: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks."
+    },
+    {
+      "key": "batch100-nightmare-v1",
+      "sha256": "47b96a16fb38c0ee65b588df4ad92e0245168d3d956509c52f42ff36b400915f",
+      "reason": "Nightmare: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks."
+    },
+    {
+      "key": "batch100-scarecrow-v1",
+      "sha256": "5319be90968f3737bf157034b7318d348997f6239fd7f09880cc3b4f3f304ec4",
+      "reason": "Scarecrow: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks."
+    },
+    {
+      "key": "batch100-gelatinous-cube-v1",
+      "sha256": "3ef3a2e9cc49e814a2b55799065d82ee41ee245d10d64821eccd9a0f1338e377",
+      "reason": "Gelatinous Cube: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks."
+    },
+    {
+      "key": "batch100-black-pudding-v1",
+      "sha256": "eb26815d3ebde869abfb1c6567ce12cefbe5fd89fde32472f1cdff62d03c0158",
+      "reason": "Black Pudding: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks."
+    },
+    {
+      "key": "batch100-ochre-jelly-v1",
+      "sha256": "eb0fed549e750ac9a8e627784320898f9a3df0f8515343f741c7ef40e6541010",
+      "reason": "Ochre jelly: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks."
+    },
+    {
+      "key": "batch100-flameskull-v1",
+      "sha256": "a2a5470c1adf9fe4bbe524ce7468e2aa0ebe16135a3f8b4f5c22cc3027078d62",
+      "reason": "Flameskull: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks."
+    },
+    {
+      "key": "batch100-gray-ooze-v1",
+      "sha256": "9a4b44802169a775c31d1249ae5e7615405a54dba6fe29789fd4287c45ffe212",
+      "reason": "Gray Ooze: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-crawling-claw-v1",
+      "sha256": "a032f85aeb0cf68e3451a71bae414866ad7b49c1fc215d9c4f130a24ed0547ef",
+      "reason": "Crawling Claw: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-purple-worm-v1",
+      "sha256": "80b6e6fcbabe07a5a8deff22b6660e0be6451811f1481e9c7aa4ddb276b9a683",
+      "reason": "Purple Worm: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-rust-monster-v1",
+      "sha256": "b248c6f08e2e036aaef6c80d09f4f57d3c9446715e9df71971007874fe5b2bf8",
+      "reason": "Rust Monster: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-winter-wolf-v1",
+      "sha256": "5419363f2eca969347bcc799b4075b1f8c29e4d8aa4aea8fcf55c1a5035bc095",
+      "reason": "Winter Wolf: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-yeti-v1",
+      "sha256": "3d431d5b43e7ad98a9ac0ddf2724c60fc43aa422ecf33840406666a01e152196",
+      "reason": "Yeti: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-death-dog-v1",
+      "sha256": "3f8f58fc8a2f0555db1de60c759d2a76f8c10963d79f4e4febb5205ab814c022",
+      "reason": "Death Dog: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-giant-goat-v1",
+      "sha256": "8c94905cc239b932ef35e17ce345ea615f588d02083b61b69e6584d717ff2ba9",
+      "reason": "Giant Goat: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-giant-hyena-v1",
+      "sha256": "2825df13c31df316c8f4d61c1973dc63c0315da44a1876207ef5da8917d90e19",
+      "reason": "Giant Hyena: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-giant-octopus-v1",
+      "sha256": "4e08074a7bd5980de328ef1d26cce27b05d6ae615a36d097738cf7126a7e4276",
+      "reason": "Giant Octopus: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks."
+    },
+    {
+      "key": "batch100-sea-horse-v2",
+      "sha256": "9981a2659bf953bfc23b0aa2c2fcd84bfe24e0b086e1bbffee35f511a2f99cab",
+      "reason": "Sea Horse: Inspected exact 32x32 replacement: golden seahorse and curled tail preserved, unrelated white stripe removed, background transparent."
+    },
+    {
+      "key": "batch100-giant-owl-v1",
+      "sha256": "52c0456ac343a9e33fc24a6849b52fae02296a085e52ea82d6f6b9334cb5d98f",
+      "reason": "Giant Owl: Inspected actual 32x32 and integer enlargement: complete giant owl with facial disks and feathered silhouette, or elongated giant weasel with short legs and long tail; transparent background."
+    },
+    {
+      "key": "batch100-giant-weasel-v1",
+      "sha256": "07ac907b58b9f5a7ec7eb164d8b2e24cfb0b7a609d310e07f9c87c2b282c5409",
+      "reason": "Giant Weasel: Inspected actual 32x32 and integer enlargement: complete giant owl with facial disks and feathered silhouette, or elongated giant weasel with short legs and long tail; transparent background."
+    }
+  ],
+  "rejected": []
+}

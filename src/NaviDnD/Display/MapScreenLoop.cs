@@ -1,0 +1,1449 @@
+﻿using NaviDnD.Clients;
+using NaviDnD.Data;
+using NaviDnD.Data.Models;
+using NaviDnD.Display;
+using NaviDnD.Helpers;
+
+namespace NaviDnD;
+
+internal class MapScreenLoop
+{
+    private readonly WorldState _settings;
+    private readonly DisplayConfig _display;
+    private readonly Storage _storage;
+    private readonly GameAiClient _aiClient;
+    private readonly AppConfig _config;
+    private readonly MapDisplay _mapDisplay;
+    private readonly LegendDisplay _legendDisplay;
+    internal MapScreenLoop(
+        WorldState settings, DisplayConfig display, Storage storage,
+        GameAiClient aiClient, AppConfig config,
+        MapDisplay mapDisplay, LegendDisplay legendDisplay)
+    {
+        _settings = settings;
+        _display = display;
+        _storage = storage;
+        _aiClient = aiClient;
+        _config = config;
+        _mapDisplay = mapDisplay;
+        _legendDisplay = legendDisplay;
+    }
+
+    internal async Task RunAsync(ScreenConfig screen, string title)
+    {
+        _display.ArrowKeysMovement = true;
+        _display.MapHoverEnabled = true;
+        MouseUiHelper.SetDefaultImage(_display, _settings.Map.DefaultImage);
+        var movementHandler = new MovementHandler(_settings, _storage, _display);
+        int mapDrawTop = Term.CursorTop;
+        _display.MapDrawTop = mapDrawTop;
+        bool firstMapDraw = true;
+        var mapObjectsProvider = new MapObjectsProvider(_settings, _display, _storage, _config);
+        // The camera only follows the hero when he moves - otherwise, after dragging the map with the mouse,
+        // the camera would immediately jump back to him.
+        List<int>? followedHeroPos = null;
+        // Last pointing on the world map (location, cell) - UpdateWorldHover.
+        (int place, int x, int y)? lastWorldHit = null;
+        void FollowHeroIfMoved()
+        {
+            var hp = _settings.Hero?.Position;
+            if (hp == null || (followedHeroPos != null && hp.SequenceEqual(followedHeroPos))) return;
+            bool first = followedHeroPos == null;
+            // Stairs to another floor (he is on the field in a different place): the camera goes straight to the hero.
+            bool jumped = !first && hp.Count >= 2
+                && _settings.Map.FloorAt(hp[0], hp[1]) != _settings.Map.FloorAt(followedHeroPos![0], followedHeroPos[1]);
+            if (jumped)
+            {
+                // Floors of one building (general outline): the camera shifts by block shift - the building
+                // stands in place of the screen, only the content changes. Basement dungeon/cave (different
+                // layout) - hero in the center.
+                var from = _settings.Map.ChunkAt(followedHeroPos![0], followedHeroPos[1]);
+                var to = _settings.Map.ChunkAt(hp[0], hp[1]);
+                if (_mapDisplay.LockToFloorIfFits()) { }
+                else if (from is { Theme: MapChunk.Building } && to is { Theme: MapChunk.Building })
+                {
+                    _display.CameraCol += to.OriginCol - from.OriginCol;
+                    _display.CameraRow += to.OriginRow - from.OriginRow;
+                    _mapDisplay.ClampCamera();
+                    if (!_mapDisplay.HeroInView()) _mapDisplay.CenterOnHeroIfNeeded(force: true);
+                }
+                else _mapDisplay.CenterOnHeroIfNeeded(force: true);
+            }
+            followedHeroPos = [.. hp];
+            if (first) _mapDisplay.CenterOnHeroIfNeeded();
+            // After the stairs - without “catching up” at the edge of the window: a step on the stairs near the wall would otherwise move the map onto a square.
+            if (!jumped) _mapDisplay.FollowHero();
+        }
+
+        Dictionary<(int col, int row, bool d), (int cost, (int col, int row, bool d)? parent)>? hoverReachability = null;
+        (int col, int row, bool diagonal)? hoverSearchOrigin = null;
+
+        Action redrawAction = () =>
+        {
+            Term.CursorVisible = false;
+            Term.SetCursorPosition(0, mapDrawTop);
+            hoverReachability = null;
+            mapObjectsProvider.Refresh();
+            FollowHeroIfMoved();
+            _mapDisplay.DrawMap(mapObjectsProvider);
+        };
+        _display.OnMapRedraw = redrawAction;
+        _display.IsAdventureScene = () => _mapDisplay.ShowsAdventureScene;
+        _display.OnSceneVariant = () =>
+        {
+            if (!_display.MapHoverEnabled || !_mapDisplay.ShowsAdventureScene) return;
+            _mapDisplay.NextSceneVariant();
+        };
+        _display.OnSceneAnimation = () =>
+        {
+            if (!_display.MapHoverEnabled || !_mapDisplay.ShowsAdventureScene) return;
+            _mapDisplay.ToggleSceneAnimation();
+        };
+        _display.OnMapCellsRedraw = cells =>
+        {
+            bool vis = Term.CursorVisible;
+            Term.CursorVisible = false;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            foreach (var (c, r) in cells) _mapDisplay.RedrawCellFrame(c, r, mapObjectsProvider);
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
+        };
+        DialogDisplay? hoverDialog = null;
+        Task? pendingImageLoad = null;
+        Action? pendingImageUpdate = null;
+        string[]? imageBeforeLoad = null;
+        _display.OnTabKey = () =>
+        {
+            int total = _legendDisplay.GetSelectableMapItemCount();
+            if (total > 0)
+            {
+                _display.SelectedMapItemIndex = _display.SelectedMapItemIndex < 0 ? 0
+                    : (_display.SelectedMapItemIndex + 1) % total;
+                SetMapEntityImage();
+            }
+        };
+        _display.OnShiftTabKey = () =>
+        {
+            int total = _legendDisplay.GetSelectableMapItemCount();
+            if (total > 0)
+            {
+                _display.SelectedMapItemIndex = _display.SelectedMapItemIndex <= 0 ? total - 1
+                    : _display.SelectedMapItemIndex - 1;
+                SetMapEntityImage();
+            }
+        };
+        DateTime? hoverSince = null;
+        (int col, int row)? pendingHoverCell = null;
+        // Furniture/stairs under the cursor, whose picture is currently in the picture block (pointing at a cell without a creature).
+        object? shownFurniture = null;
+        Door? pendingHoverDoor = null;
+        (int col, int row)? mouseHoverCandidate = null;
+        DateTime? doorHoverSince = null;
+        (int col, int row, bool isHorizontal)? hoveredDoorWall = null;
+        var titleTabs = MouseUiHelper.ComputeTitleTabs(title);
+        string? hoveredTabKey = null;
+        (short x, short y)? pendingMousePosition = null;
+
+        void ApplyPreparedImage()
+        {
+            if (pendingImageLoad?.IsCompleted != true || pendingImageUpdate == null) return;
+            var apply = pendingImageUpdate;
+            pendingImageLoad = null;
+            pendingImageUpdate = null;
+            // A different screen/card may have replaced this request while the image loaded.
+            if (!ReferenceEquals(imageBeforeLoad, _display.SelectedImageLines)) return;
+            apply();
+            (hoverDialog ?? _aiClient.ActiveDialog)?.RerenderRightPanel();
+        }
+
+        void QueueImage(string? image, Action apply)
+        {
+            imageBeforeLoad = _display.SelectedImageLines;
+            pendingImageUpdate = apply;
+            pendingImageLoad = SvgToBrailleConverter.PrepareAsync(image);
+            ApplyPreparedImage();
+        }
+
+        void SetMapImage(string? image, string? name, List<int>? color = null) =>
+            QueueImage(image, () => MouseUiHelper.SetSelectedImage(_display, image, name, color));
+
+        void SetMapEntityImage(int page = 0)
+        {
+            var (image, _, _) = _legendDisplay.GetSelectedEntityImageAndName();
+            int selected = _display.SelectedMapItemIndex;
+            QueueImage(page == 0 ? image : null, () =>
+            {
+                if (_display.SelectedMapItemIndex == selected)
+                    MouseUiHelper.SetSelectedMapEntity(_display, _legendDisplay, _settings, page);
+            });
+        }
+
+        _display.PollAction = () =>
+        {
+            var activeDialog = hoverDialog ?? _aiClient.ActiveDialog;
+            ApplyPreparedImage();
+            _mapDisplay.RefreshAdventureScene();
+            // During streaming the active title may change (SwitchTab); recompute tabs from it.
+            var activeTitle = _display.StreamingTabTitle ?? title;
+            var activeTabs = _display.StreamingTabTitle != null
+                ? MouseUiHelper.ComputeTitleTabs(activeTitle)
+                : titleTabs;
+
+            var (mousePos, clickPos, _) = ConsoleMouseReader.DrainMouseEvents();
+            if (ConsoleMouseReader.IsDragging) { pendingMousePosition = null; return; }
+            MouseUiHelper.HandleDialogArrowClick(clickPos, activeDialog);
+            if (clickPos.HasValue)
+            {
+                var clickedTabKey = MouseUiHelper.GetHoveredTabKey(clickPos.Value.x, clickPos.Value.y, activeTabs);
+                if (clickedTabKey != null) { Sound.PlayClick(); _display.PendingCommand = clickedTabKey; return; }
+                if (clickPos.Value.y is >= 0 and <= 2) { ConsoleMouseReader.StartWindowDrag(); return; }
+                if (_display.MapHoverEnabled && _mapDisplay.ShowsAdventureScene && clickPos.Value.x >= _mapDisplay.LegendX)
+                {
+                    int row = clickPos.Value.y - _display.MapDrawTop - 1;
+                    if (row == _mapDisplay.MapAreaHeight - 2) { _display.OnSceneVariant(); return; }
+                    if (row == _mapDisplay.MapAreaHeight - 1) { _display.OnSceneAnimation(); return; }
+                    if (row == _mapDisplay.MapAreaHeight - 3) { _display.PendingCommand = "F2"; return; }
+                }
+                // Button “[F10] END OF TURN” in the “Battle order” line of the legend.
+                if (_display.MapLevel == MapLevel.Location && _legendDisplay.IsHeroTurn && _legendDisplay.EndTurnButton is { x0: >= 0 } eb
+                    && clickPos.Value.y == _display.MapDrawTop + 1 + _legendDisplay.CombatLineIndex
+                    && clickPos.Value.x >= _mapDisplay.LegendX + eb.x0 && clickPos.Value.x <= _mapDisplay.LegendX + eb.x1)
+                {
+                    Sound.PlayClick();
+                    _display.PendingCommand = "F10";
+                    return;
+                }
+                // World map: click on the filter switch in the legend.
+                if (_display.MapHoverEnabled && activeDialog != null && _display.MapLevel == MapLevel.World)
+                {
+                    var zones = _mapDisplay.WorldLegendHitZones();
+                    int zi = Array.FindIndex(zones, z => clickPos.Value.y == z.row && clickPos.Value.x >= z.x0 && clickPos.Value.x <= z.x1);
+                    if (zi == 0)
+                    {
+                        // Stage 1 debugging: new world of different size.
+                        var cur = _mapDisplay.WorldView.World;
+                        var made = WorldLibrary.Create(cur.Size == WorldSizes.Large ? WorldSizes.Small : WorldSizes.Large, new Random().Next());
+                        if (_settings.World != null) _settings.World = new GameWorldLink { Id = made.Id };   // debugging: game - to a new world
+                        lastWorldHit = null;
+                        RedrawWorldKeepCursor();
+                        return;
+                    }
+                    if (zi == 1) { ToggleWorldFilter(null); return; }
+                    if (zi >= 2) { ToggleWorldFilter(WorldMapView.Categories[zi - 2].key); return; }
+                }
+                // World map: hold and drag - the image follows the cursor (like a map in a browser); Click
+                // without shifting on a place to select it.
+                if (_display.MapHoverEnabled && activeDialog != null && _display.MapLevel == MapLevel.World
+                    && _mapDisplay.IsInMapArea(clickPos.Value))
+                {
+                    int clickedPlace = _mapDisplay.WorldHit(clickPos.Value).place;
+                    double startX = _display.WorldCenterX, startY = _display.WorldCenterY;
+                    bool worldPanned = false;
+                    double lastCenterX = startX, lastCenterY = startY;
+                    ConsoleMouseReader.BeginDrag(clickPos.Value, (dx, dy) =>
+                    {
+                        worldPanned = true;
+                        _mapDisplay.PanWorld(startX, startY, dx, dy);
+                        if (_display.WorldCenterX == lastCenterX && _display.WorldCenterY == lastCenterY) return;
+                        lastCenterX = _display.WorldCenterX;
+                        lastCenterY = _display.WorldCenterY;
+                        RedrawWorldKeepCursor(refreshLegend: false);
+                    }, () =>
+                    {
+                        if (worldPanned) RedrawWorldKeepCursor();
+                        if (!worldPanned)
+                        {
+                            // Click - the destination of the path (a place or any cell, including into the unknown); by location - also choose it.
+                            var hit = _mapDisplay.WorldHit(clickPos.Value);
+                            if (clickedPlace >= 0) _display.SelectedWorldPlace = clickedPlace;
+                            Sound.PlayClick();
+                            if (hit is { } th) SetTravelTarget(clickedPlace >= 0 ? (_mapDisplay.WorldView.World.Places[clickedPlace].X, _mapDisplay.WorldView.World.Places[clickedPlace].Y) : (th.x, th.y));
+                            if (clickedPlace >= 0) ShowWorldPlaceCard(clickedPlace);
+                            RedrawWorldKeepCursor();
+                            RerenderRightPanelKeepCursor();
+                        }
+                    });
+                    return;
+                }
+                // Location - field up to 100x100: hold and pull - the camera moves. I let go without moving it - a regular click.
+                if (_display.MapHoverEnabled && activeDialog != null && _display.MapLevel == MapLevel.Location
+                    && _mapDisplay.IsInMapArea(clickPos.Value))
+                {
+                    int startCol = _display.CameraCol, startRow = _display.CameraRow;
+                    int lastCol = startCol, lastRow = startRow;
+                    bool panned = false;
+                    ConsoleMouseReader.BeginDrag(clickPos.Value, (dx, dy) =>
+                    {
+                        _mapDisplay.PanCamera(startCol, startRow, dx, dy);
+                        // The mouse has moved less than a square - the camera is the same, we do not redraw the frame.
+                        if (_display.CameraCol == lastCol && _display.CameraRow == lastRow) return;
+                        lastCol = _display.CameraCol;
+                        lastRow = _display.CameraRow;
+                        panned = true;
+                        _display.HoveredCell = null;
+                        bool vis = Term.CursorVisible;
+                        int sl = Term.CursorLeft, st = Term.CursorTop;
+                        Term.CursorVisible = false;
+                        _mapDisplay.RedrawLocationViewport(mapObjectsProvider, refreshLegend: false); // map area only, one entry
+                        Term.SetCursorPosition(sl, st);
+                        Term.CursorVisible = vis;
+                    }, () =>
+                    {
+                        if (!panned) HandleMapClick(clickPos.Value);
+                        else
+                        {
+                            int sl = Term.CursorLeft, st = Term.CursorTop;
+                            _mapDisplay.RefreshLegend();
+                            Term.SetCursorPosition(sl, st);
+                        }
+                    });
+                    return;
+                }
+                if (_display.MapHoverEnabled) HandleMapClick(clickPos.Value);
+            }
+
+            // World map: mouse wheel - zoom in (away from you) / zoom out, relative to the point under the
+            // cursor. We always take away the scrolling - otherwise the accumulated scrolling on other views
+            // would have worked later.
+            int wheel = ConsoleMouseReader.TakeWheel(out var wheelPos, out int sideWheel);
+            if (MouseUiHelper.HandleDialogWheel(activeDialog, wheel, wheelPos)) { }   // above the dialogue - scrolling through the history of macOS: on the touchpad does not transmit a
+            // pinch, but swiping with two fingers comes with a scroll - above the map it moves the map, like
+            // dragging (scale - ⌘/Ctrl and “+”/“−”).
+            else if ((wheel != 0 || sideWheel != 0) && OperatingSystem.IsMacOS() && _display.MapHoverEnabled && activeDialog != null
+                && _mapDisplay.IsInMapArea(wheelPos) && !(_display.MapLevel == MapLevel.Location && wheelPos.x >= _mapDisplay.LegendX))
+            {
+                if (_display.MapLevel == MapLevel.World)
+                {
+                    _mapDisplay.PanWorld(_display.WorldCenterX, _display.WorldCenterY, -2 * sideWheel, 2 * wheel);
+                    RedrawWorldKeepCursor(refreshLegend: false);
+                }
+                else
+                {
+                    // Cell - scrollable: the same as when dragging one cell.
+                    _mapDisplay.PanCamera(_display.CameraCol, _display.CameraRow, -(_display.CellWidth + 1) * sideWheel, 2 * wheel);
+                    _display.HoveredCell = null;
+                    bool panVisible = Term.CursorVisible;
+                    int panLeft = Term.CursorLeft, panTop = Term.CursorTop;
+                    Term.CursorVisible = false;
+                    _mapDisplay.RedrawLocationViewport(mapObjectsProvider, refreshLegend: false);
+                    Term.SetCursorPosition(panLeft, panTop);
+                    Term.CursorVisible = panVisible;
+                }
+            }
+            else if (wheel != 0 && _display.MapHoverEnabled && activeDialog != null
+                && _display.MapLevel == MapLevel.World && _mapDisplay.IsInMapArea(wheelPos))
+            {
+                _mapDisplay.ZoomWorld(wheel, wheelPos);
+                RedrawWorldKeepCursor();
+            }
+            // Terrain: wheel above the legend - scroll the list (from yourself - up).
+            else if (wheel != 0 && activeDialog != null && _display.MapLevel == MapLevel.Location
+                && wheelPos.x >= _mapDisplay.LegendX && wheelPos.y > _display.MapDrawTop
+                && wheelPos.y <= _display.MapDrawTop + _legendDisplay.SeparatorLineIndex)
+            {
+                _display.LegendScroll = Math.Max(0, _display.LegendScroll - wheel);
+                bool lvis = Term.CursorVisible;
+                int lsl = Term.CursorLeft, lst = Term.CursorTop;
+                Term.CursorVisible = false;
+                _mapDisplay.RefreshLegend();
+                Term.SetCursorPosition(lsl, lst);
+                Term.CursorVisible = lvis;
+            }
+
+            if (!_display.MapHoverEnabled || _display.MapLevel != MapLevel.Location || _mapDisplay.ShowsAdventureScene)
+            {
+                if (mousePos.HasValue)
+                {
+                    var newKey = MouseUiHelper.GetHoveredTabKey(mousePos.Value.x, mousePos.Value.y, activeTabs);
+                    if (newKey != hoveredTabKey)
+                    {
+                        if (hoveredTabKey != null) MouseUiHelper.SetTabHighlight(activeTitle, activeTabs, hoveredTabKey, false, _display);
+                        hoveredTabKey = newKey;
+                        if (hoveredTabKey != null) MouseUiHelper.SetTabHighlight(activeTitle, activeTabs, hoveredTabKey, true, _display);
+                    }
+                    if (hoveredTabKey != null)
+                    {
+                        ConsoleMouseReader.SetCursorShape(true);
+                    }
+                    else
+                    {
+                        var (isOnUp, isOnDown) = MouseUiHelper.DialogArrowHover(mousePos.Value, activeDialog);
+                        // You can drag the world map - there is a “hand” cursor above it.
+                        bool overWorld = _display.MapHoverEnabled && activeDialog != null
+                            && _display.MapLevel == MapLevel.World && _mapDisplay.IsInMapArea(mousePos.Value);
+                        if (_display.MapLevel == MapLevel.World && activeDialog != null) UpdateWorldHover(overWorld ? mousePos.Value : null);
+                        ConsoleMouseReader.SetCursorShape(isOnUp || isOnDown || overWorld);
+                        activeDialog?.SetArrowHover(isOnUp, isOnDown);
+                    }
+                }
+                return;
+            }
+
+            // Commit pending entity selection after 50 ms of stable hover
+            if (pendingHoverCell.HasValue && hoverSince.HasValue
+                && pendingHoverCell == _display.HoveredCell
+                && (DateTime.UtcNow - hoverSince.Value).TotalMilliseconds >= 50)
+            {
+                pendingHoverCell = null;
+                hoverSince = null;
+                int commitIdx = _display.HoveredCell.HasValue
+                    ? _legendDisplay.GetSelectableIndexForCell(_display.HoveredCell.Value.col, _display.HoveredCell.Value.row)
+                    : -1;
+                if (commitIdx != _display.SelectedMapItemIndex)
+                {
+                    _display.SelectedMapItemIndex = commitIdx;
+                    if (commitIdx >= 0)
+                    {
+                        SetMapEntityImage();
+                    }
+                    else
+                    {
+                        SetMapImage(null, null, null);
+                    }
+                    bool vis0 = Term.CursorVisible;
+                    Term.CursorVisible = false;
+                    int sl0 = Term.CursorLeft, st0 = Term.CursorTop;
+                    _mapDisplay.RefreshLegend();
+                    activeDialog?.RerenderRightPanel();
+                    SyncHoverImage();
+                    Term.SetCursorPosition(sl0, st0);
+                    Term.CursorVisible = vis0;
+                }
+            }
+
+            // Commit door image after 50 ms of stable hover
+            if (pendingHoverDoor != null && doorHoverSince.HasValue
+                && _display.HoveredDoor == pendingHoverDoor
+                && (DateTime.UtcNow - doorHoverSince.Value).TotalMilliseconds >= 50)
+            {
+                pendingHoverDoor = null;
+                doorHoverSince = null;
+                var committedDoor = _display.HoveredDoor!;
+                string doorLabel = committedDoor.IsWorldExit == true ? L.T("Exit to the world map")
+                    : committedDoor.IsWindow == true ? ((committedDoor.IsDoorOpen ?? false) ? L.T("Window open") : L.T("Window"))
+                    : (committedDoor.IsDoorOpen ?? false) ? L.T("Door open") : L.T("Door closed");
+                SetMapImage(MouseUiHelper.DoorImage(committedDoor, _settings.Map), doorLabel, committedDoor.Color);
+                bool visDoor = Term.CursorVisible;
+                Term.CursorVisible = false;
+                int slDoor = Term.CursorLeft, stDoor = Term.CursorTop;
+                activeDialog?.RerenderRightPanel();
+                Term.SetCursorPosition(slDoor, stDoor);
+                Term.CursorVisible = visDoor;
+            }
+
+            mousePos ??= pendingMousePosition;
+            pendingMousePosition = null;
+            if (mousePos == null) return;
+
+            // Title tab hover
+            var newTabKey = MouseUiHelper.GetHoveredTabKey(mousePos.Value.x, mousePos.Value.y, activeTabs);
+            if (newTabKey != hoveredTabKey)
+            {
+                if (hoveredTabKey != null) MouseUiHelper.SetTabHighlight(activeTitle, activeTabs, hoveredTabKey, false, _display);
+                hoveredTabKey = newTabKey;
+                if (hoveredTabKey != null) MouseUiHelper.SetTabHighlight(activeTitle, activeTabs, hoveredTabKey, true, _display);
+            }
+            if (hoveredTabKey != null) { ConsoleMouseReader.SetCursorShape(true); return; }
+
+            // Check for wall/door before cell
+            var wall = _mapDisplay.ScreenToWall(mousePos.Value.x, mousePos.Value.y);
+            var wallDoor = wall.HasValue
+                ? mapObjectsProvider.GetHoveredDoor(wall.Value.col, wall.Value.row, wall.Value.isHorizontal)
+                : null;
+
+            if (wallDoor != null)
+            {
+                ConsoleMouseReader.SetCursorShape(true);
+                activeDialog?.SetArrowHover(false, false);
+
+                if (wallDoor != _display.HoveredDoor)
+                {
+                    bool visD = Term.CursorVisible;
+                    Term.CursorVisible = false;
+                    int slD = Term.CursorLeft, stD = Term.CursorTop;
+
+                    var doorOldCell = _display.HoveredCell;
+                    var oldDoorWall = hoveredDoorWall;
+                    int oldSelectedIdx = _display.SelectedMapItemIndex;
+
+                    _display.HoveredCell = null;
+                    pendingHoverCell = null;
+                    hoverSince = null;
+                    shownFurniture = null; // the block of pictures is now occupied by the door - show the furniture again when returning
+
+                    if (oldSelectedIdx >= 0)
+                    {
+                        // Had entity selected — full redraw to clear legend arrow
+                        _display.SelectedMapItemIndex = -1;
+                        _display.HoveredDoor = wallDoor;
+                        hoveredDoorWall = wall;
+                        SetMapImage(null, null, null);
+                        if (doorOldCell.HasValue)
+                            _mapDisplay.RedrawCell(doorOldCell.Value.col, doorOldCell.Value.row, mapObjectsProvider);
+                        if (oldDoorWall.HasValue) RedrawDoor(oldDoorWall.Value);
+                        RedrawDoor(wall.Value);
+                        _mapDisplay.RefreshLegend();
+                        activeDialog?.RerenderRightPanel();
+                    }
+                    else
+                    {
+                        // Targeted redraws
+                        if (oldDoorWall.HasValue)
+                        {
+                            _display.HoveredDoor = null;
+                            RedrawDoor(oldDoorWall.Value);
+                        }
+                        if (doorOldCell.HasValue)
+                            _mapDisplay.RedrawCell(doorOldCell.Value.col, doorOldCell.Value.row, mapObjectsProvider);
+                        _display.HoveredDoor = wallDoor;
+                        hoveredDoorWall = wall;
+                        RedrawDoor(wall.Value);
+                        SetMapImage(null, null, null);
+                        activeDialog?.RerenderRightPanel();
+                    }
+
+                    pendingHoverDoor = wallDoor;
+                    doorHoverSince = DateTime.UtcNow;
+
+                    Term.SetCursorPosition(slD, stD);
+                    Term.CursorVisible = visD;
+                }
+                return;
+            }
+            else if (_display.HoveredDoor != null)
+            {
+                // Left a door — clear hover
+                bool visC = Term.CursorVisible;
+                Term.CursorVisible = false;
+                int slC = Term.CursorLeft, stC = Term.CursorTop;
+
+                if (hoveredDoorWall.HasValue)
+                {
+                    _display.HoveredDoor = null;
+                    RedrawDoor(hoveredDoorWall.Value);
+                }
+                else
+                {
+                    _display.HoveredDoor = null;
+                }
+                hoveredDoorWall = null;
+                pendingHoverDoor = null;
+                doorHoverSince = null;
+                shownFurniture = null;
+                SetMapImage(null, null, null);
+                activeDialog?.RerenderRightPanel();
+
+                Term.SetCursorPosition(slC, stC);
+                Term.CursorVisible = visC;
+            }
+
+            var cell = KnownCellOrNull(_mapDisplay.ScreenToCell(mousePos.Value.x, mousePos.Value.y));
+
+            var (isOnUpArrow, isOnDownArrow) = MouseUiHelper.DialogArrowHover(mousePos.Value, cell.HasValue ? null : activeDialog);
+            var (isOnNoteLeft, isOnNoteRight) = MouseUiHelper.NotePageArrowHover(mousePos.Value, cell.HasValue ? null : activeDialog, _display);
+            ConsoleMouseReader.SetCursorShape(cell.HasValue || isOnUpArrow || isOnDownArrow || isOnNoteLeft || isOnNoteRight);
+            activeDialog?.SetArrowHover(isOnUpArrow, isOnDownArrow);
+            activeDialog?.SetNoteArrowHover(isOnNoteLeft, isOnNoteRight);
+
+            if (cell == _display.HoveredCell)
+            {
+                mouseHoverCandidate = null;
+                return;
+            }
+
+            // Jitter filter: require the same cell in two consecutive polls before committing.
+            // One-poll delay (~10ms) is enough to suppress hardware jitter without visible lag.
+            if (cell != mouseHoverCandidate)
+            {
+                mouseHoverCandidate = cell;
+                pendingMousePosition = mousePos;
+                return;
+            }
+
+            mouseHoverCandidate = null;
+            var oldCell = _display.HoveredCell;
+            _display.HoveredCell = cell;
+            bool vis = Term.CursorVisible;
+            Term.CursorVisible = false;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+
+            int newEntityIdx = cell.HasValue
+                ? _legendDisplay.GetSelectableIndexForCell(cell.Value.col, cell.Value.row)
+                : -1;
+            // Point at a creature/object - show it; empty cell or cursor outside the map - pinned by click (if
+            // any), otherwise nothing.
+            int desiredIdx = cell.HasValue && newEntityIdx >= 0 ? newEntityIdx : PinnedIndex();
+
+            if (desiredIdx == _display.SelectedMapItemIndex)
+            {
+                // Same committed entity (or same "none") — cancel any pending
+                pendingHoverCell = null;
+                hoverSince = null;
+                if (oldCell.HasValue) _mapDisplay.RedrawCell(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
+                if (cell.HasValue)    _mapDisplay.RedrawCell(cell.Value.col, cell.Value.row, mapObjectsProvider);
+            }
+            else if (cell.HasValue && newEntityIdx >= 0)
+            {
+                // Different entity — highlight cell immediately, start/restart 50ms timer
+                pendingHoverCell = cell;
+                hoverSince = DateTime.UtcNow;
+                if (oldCell.HasValue) _mapDisplay.RedrawCell(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
+                _mapDisplay.RedrawCell(cell.Value.col, cell.Value.row, mapObjectsProvider);
+            }
+            else
+            {
+                // An empty cell or the cursor has left the map - return the pinned one (or deselect it).
+                pendingHoverCell = null;
+                hoverSince = null;
+                RestorePinnedOrClear();
+                if (oldCell.HasValue) _mapDisplay.RedrawCell(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
+                if (cell.HasValue) _mapDisplay.RedrawCell(cell.Value.col, cell.Value.row, mapObjectsProvider);
+                activeDialog?.RerenderRightPanel();
+            }
+
+            SyncHoverImage();
+
+            UpdateHoverInfo(_display.HoveredCell);
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
+
+            // Furniture or stairs under the cursor (there is no creature/object on the cell) - a picture and name in the picture block.
+            void SyncHoverImage()
+            {
+                var cell = _display.HoveredCell;
+                int newEntityIdx = cell.HasValue ? _legendDisplay.GetSelectableIndexForCell(cell.Value.col, cell.Value.row) : -1;
+                bool knownCell = cell is { } kc && newEntityIdx < 0 && (_config.RevealMap || _storage.ExploredCells.Contains(kc));
+                var furnitureHere = knownCell ? _settings.Map.FurnitureAt(cell!.Value.col, cell.Value.row) : null;
+                var terrainHere = knownCell && furnitureHere == null ? _settings.Map.TerrainAt(cell!.Value.col, cell.Value.row) : null;
+                var stairHere = terrainHere != null && TerrainCatalog.IsStair(terrainHere.Code) ? terrainHere : null;
+                // Terrain - by type (neighboring cells of the same type do not redraw the picture).
+                object? hoverThing = (object?)furnitureHere ?? (stairHere != null ? cell : terrainHere);
+                if (!Equals(hoverThing, shownFurniture))
+                {
+                    shownFurniture = hoverThing;
+                    if (furnitureHere != null)
+                    {
+                        string label = L.T(FurnitureCatalog.DisplayName(furnitureHere)) + (string.IsNullOrEmpty(furnitureHere.State) ? "" : $" ({furnitureHere.State})");
+                        if (FurnitureCatalog.Terrain(furnitureHere) is { } fk && TerrainCatalog.Properties(fk) is { } fprops) label += "\n" + fprops;
+                        SetMapImage(furnitureHere.Image ?? FurnitureCatalog.Get(furnitureHere.Kind)?.Image, label,
+                            FurnitureCatalog.Terrain(furnitureHere)?.LegendColor);
+                        activeDialog?.RerenderRightPanel();
+                    }
+                    else if (stairHere != null)
+                    {
+                        var (sc, sr) = cell!.Value;
+                        string label = _settings.Map.StairTarget(sc, sr) is var (tc, tr)
+                            ? $"{L.T(stairHere.Name)} → {MapConfig.FloorLabel(_settings.Map.FloorAt(tc, tr))}" : L.T(stairHere.Name);
+                        SetMapImage(TerrainCatalog.Image(stairHere), label, stairHere.LegendColor);
+                        activeDialog?.RerenderRightPanel();
+                    }
+                    else if (terrainHere != null)
+                    {
+                        string label = L.T(terrainHere.Name) + (TerrainCatalog.Properties(terrainHere) is { } tprops ? "\n" + tprops : "");
+                        SetMapImage(TerrainCatalog.Image(terrainHere), label, terrainHere.LegendColor ?? terrainHere.Fg);
+                        activeDialog?.RerenderRightPanel();
+                    }
+                    else if (_display.SelectedMapItemIndex < 0)
+                    {
+                        SetMapImage(null, null, null);
+                        activeDialog?.RerenderRightPanel();
+                    }
+                }
+            }
+
+            void RedrawDoor((int col, int row, bool isHorizontal) dw)
+            {
+                if (dw.isHorizontal)
+                    _mapDisplay.RedrawHorizontalWall(dw.col, dw.row, mapObjectsProvider);
+                else
+                    _mapDisplay.RedrawVerticalWall(dw.col, dw.row, mapObjectsProvider);
+            }
+
+        };
+        var capturedMapPollAction = _display.PollAction;
+        _display.MapPollActionFactory = _ => capturedMapPollAction;
+
+        // The cell under the cursor is “interactive” (hand + highlight + hints), only if the hero sees it or
+        // has already explored it - you cannot feel with the mouse for something you haven’t seen.
+        (int col, int row)? KnownCellOrNull((int col, int row)? c) =>
+            c is { } k && _display.MapLevel == MapLevel.Location && !_mapDisplay.ShowsAdventureScene
+            && (_config.RevealMap || _storage.ExploredCells.Contains(k) || _storage.VisibleCells.Contains(k)) ? c : null;
+
+        // Hover on the world map: place - icon highlight and card (picture, name, type, kingdom), otherwise -
+        // cell terrain and whose land.
+        void UpdateWorldHover((short x, short y)? pos)
+        {
+            (int place, int x, int y)? hit = pos is { } p ? _mapDisplay.WorldHit(p) : null;
+            if (hit == lastWorldHit) return;
+            var world = _mapDisplay.WorldView.World;
+            bool placeChanged = (hit?.place ?? -1) != _display.HoveredWorldPlace;
+            bool tileInfoChanged = hit is not { } h0 || lastWorldHit is not { } l0 || h0.place != l0.place
+                || (h0.place < 0 && (world.BiomeAt(h0.x, h0.y) != world.BiomeAt(l0.x, l0.y) || world.OwnerAt(h0.x, h0.y) != world.OwnerAt(l0.x, l0.y)
+                    || world.RoadAt(h0.x, h0.y) != world.RoadAt(l0.x, l0.y) || (world.RiverAt(h0.x, h0.y) > 0) != (world.RiverAt(l0.x, l0.y) > 0)
+                    || (GameWorld.HeroTile(_settings) is { } ht0 && (ht0 == (h0.x, h0.y)) != (ht0 == (l0.x, l0.y)))));
+            lastWorldHit = hit;
+            _display.HoveredWorldPlace = hit?.place ?? -1;
+            if (placeChanged) RedrawWorldKeepCursor();
+            if (!tileInfoChanged) return;
+            if (hit is not { } h)
+                ShowWorldPlaceCard(_display.SelectedWorldPlace);
+            else if (h.place >= 0)
+                ShowWorldPlaceCard(h.place);
+            else if (world.InBounds(h.x, h.y))
+            {
+                char b = world.BiomeAt(h.x, h.y);
+                int own = world.OwnerAt(h.x, h.y);
+                string land = WorldBiomes.IsWater(b) ? "" : own >= 0 && own < world.Kingdoms.Count ? world.Kingdoms[own].Name : L.T("unclaimed lands");
+                // A river or road on a square is the main thing (its own picture and name), the terrain is in the second line.
+                int road = world.RoadAt(h.x, h.y);
+                var biome = WorldBiomes.Get(b);
+                string biomeName = L.T(biome.Name);
+                var (title, image, color) = world.RiverAt(h.x, h.y) > 0 && road > 0 ? (L.T("Bridge"), road == 2 ? "delapouite/stone-bridge" : "delapouite/arch-bridge", new List<int> { 150, 108, 70 })
+                    : world.RiverAt(h.x, h.y) > 0 ? (L.T("River"), "delapouite/river", new List<int> { 72, 122, 178 })
+                    : road == 2 ? (L.T("Highway"), "delapouite/stone-path", new List<int> { 176, 148, 102 })
+                    : road == 1 ? (L.T("Path"), "delapouite/trail", new List<int> { 146, 128, 96 })
+                    : (biomeName, WorldMapView.BiomeImage(b), biome.Color);
+                string terrain = title == biomeName ? "" : biomeName.ToLowerInvariant();
+                // Hero's cell - “You are here” with his portrait.
+                if (GameWorld.HeroTile(_settings) == (h.x, h.y))
+                {
+                    terrain = title == biomeName ? biomeName.ToLowerInvariant() : title.ToLowerInvariant();
+                    (title, image, color) = (L.T("You are here"), _settings.Hero?.Image ?? image, _settings.Hero?.Color ?? color);
+                }
+                string second = string.Join(" · ", new[] { terrain, land }.Where(t => t.Length > 0));
+                SetMapImage(image, title + (second.Length > 0 ? "\n" + second : ""), color);
+            }
+            else ShowWorldPlaceCard(_display.SelectedWorldPlace);
+            RerenderRightPanelKeepCursor();
+        }
+
+        // World place card in the picture block (hover or select).
+        void ShowWorldPlaceCard(int place)
+        {
+            var world = _mapDisplay.WorldView.World;
+            if (place < 0 || place >= world.Places.Count) { SetMapImage(null, null, null); return; }
+            var pl = world.Places[place];
+            string kingdom = pl.Kingdom >= 0 && pl.Kingdom < world.Kingdoms.Count ? " · " + world.Kingdoms[pl.Kingdom].Name : "";
+            SetMapImage(WorldMapView.PlaceImage(pl.Type), pl.Name + "\n" + L.T(WorldPlaceTypes.Label(pl.Type)) + kingdom,
+                _mapDisplay.WorldView.PlaceLabelColor(pl));
+        }
+
+        void RerenderRightPanelKeepCursor()
+        {
+            bool vis = Term.CursorVisible;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            Term.CursorVisible = false;
+            hoverDialog?.RerenderRightPanel();
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
+        }
+
+        // Tab / Shift+Tab on the world map - the next/previous place from those in the map window (as in the
+        // legend); the map does not move, the set of places does not change.
+        void SelectWorldPlace(int delta)
+        {
+            var list = _mapDisplay.VisibleWorldPlaces();
+            if (list.Count == 0) return;
+            int pos = list.IndexOf(_display.SelectedWorldPlace);
+            pos = pos < 0 ? (delta > 0 ? 0 : list.Count - 1) : (pos + delta + list.Count) % list.Count;
+            _display.SelectedWorldPlace = list[pos];
+            Sound.PlayClick();
+            ShowWorldPlaceCard(_display.SelectedWorldPlace);
+            RedrawWorldKeepCursor();
+            RerenderRightPanelKeepCursor();
+        }
+
+        // The goal of the path on the world map: the route from the hero (click on the hero’s cell to remove the goal).
+        void SetTravelTarget((int x, int y) target)
+        {
+            bool heroTile = GameWorld.HeroTile(_settings) == target;
+            var plan = heroTile ? null : TravelService.PlanTo(_settings, target);
+            if (plan == null && !heroTile && GameWorld.HeroTile(_settings) != null)
+                SetMapImage("lorc/waves", L.T("Unreachable on foot\nwater or mountain peaks in the way"), [110, 150, 200]);
+            _display.WorldTarget = plan != null ? target : null;
+            _display.WorldRoute = plan?.Route.Path;
+            var w = _mapDisplay.WorldView.World;
+            _display.WorldRouteInfo = plan == null ? null
+                : (plan.TargetPlace ?? NaviDnD.MapGen.Generators.WorldAtlas.TileName(w, target.x, target.y), plan.Route.Days, plan.Route.RoadShare);
+        }
+
+        // On the road: the code leads the hero along the route (days, meetings), the GM describes the road with one call.
+        async Task StartTravel(DialogDisplay dialog)
+        {
+            _settings.History ??= [];
+            if (_display.WorldTarget is not { } target || TravelService.PlanTo(_settings, target) is not { } plan)
+            {
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Pick a destination by clicking the world map, then [F10] to travel.") });
+                _storage.Save();
+                return;
+            }
+            if (_settings.Combat?.Active == true)
+            {
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Combat is on — you can't travel now.") });
+                _storage.Save();
+                return;
+            }
+            var pace = (TravelService.Pace)_display.TravelPace;
+            string dest = plan.TargetPlace ?? (GameWorld.ForMaster(_settings) is { } tw ? NaviDnD.MapGen.Generators.WorldAtlas.TileName(tw, target.x, target.y) : L.W("the unknown"));
+            string report = TravelService.Go(_settings, plan, pace, new Random());
+            // I came to a place with a saved location - “everything is as it was,” the hero is at the entrance.
+            if (plan.TargetPlace != null && _settings.World?.Place == plan.TargetPlace && GameWorld.Geo(_settings) is { } geo
+                && GameWorld.SavedLocationJson(geo, plan.TargetPlace) is { } json)
+            {
+                _storage.ApplyUpdateWorldState("{\"map\":" + json + "}");
+                if (_settings.Hero != null && LocationGrower.EntranceCell(_settings.Map) is var (ec, er)) _settings.Hero.Position = [ec, er];
+            }
+            _display.WorldTarget = null;
+            _display.WorldRoute = null;
+            _display.WorldRouteInfo = null;
+            if (GameWorld.HeroTile(_settings) is { } h) { _display.WorldCenterX = h.x + 0.5; _display.WorldCenterY = h.y + 0.5; }
+            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = L.WF("Setting off: {0} ({1} pace).", dest, L.W(TravelService.PaceName(pace))) });
+            _storage.Save();
+            _display.DialogScrollOffset = 0;
+            _aiClient.ActiveDialog = dialog;
+            dialog.PrepareStreaming();
+            _display.PendingCommand = "F1";
+            dialog.PollOnly(); // open the adventure/tactical scene while the GM describes the journey
+            MusicDirector.Traveling = true;   // while the GM describes the road - the music of the path
+            try { await _aiClient.Travel(report, dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, null); }
+            finally { MusicDirector.Traveling = false; }
+            dialog.FinalizeStreaming();
+            Term.FlushKeys();
+            _display.PendingCommand = "F1";
+            RedrawWorldKeepCursor();
+        }
+
+        // key == null - “All”: enable all categories (if already all, disable all).
+        void ToggleWorldFilter(string? key)
+        {
+            if (key == null)
+            {
+                bool all = WorldMapView.Categories.All(c => _display.WorldFilter.Contains(c.key));
+                _display.WorldFilter.Clear();
+                if (!all) foreach (var c in WorldMapView.Categories) _display.WorldFilter.Add(c.key);
+            }
+            else if (!_display.WorldFilter.Remove(key)) _display.WorldFilter.Add(key);
+            Sound.PlayClick();
+            var world = _mapDisplay.WorldView.World;
+            int sel = _display.SelectedWorldPlace;
+            if (sel >= 0 && sel < world.Places.Count && !_display.WorldFilter.Contains(WorldMapView.Category(world.Places[sel].Type)))
+            {
+                _display.SelectedWorldPlace = -1;
+                SetMapImage(null, null, null);
+            }
+            RedrawWorldKeepCursor();
+        }
+
+        void RedrawWorldKeepCursor(bool refreshLegend = true)
+        {
+            bool vis = Term.CursorVisible;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            Term.CursorVisible = false;
+            _mapDisplay.RedrawWorldViewport(refreshLegend);
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
+        }
+
+        // Hover tooltip - battle block line: distance, and in battle on the hero's turn - path; illumination of
+        // the room/zone under the cursor (we do not touch the picture panel, there is only the picture of the
+        // selected one). Only changed legend lines are redrawn.
+        void UpdateHoverInfo((int col, int row)? c)
+        {
+            _display.HoverPath = ComputeHoverPath(c);
+            _mapDisplay.RefreshLegend();
+        }
+
+        // The distance to the cell is always; in battle, on the hero’s turn, there is also a path (to the cell adjacent to the creature, if the cursor is on it).
+        HoverPathInfo? ComputeHoverPath((int col, int row)? c)
+        {
+            if (c is not { } t || _settings.Hero?.Position is not { Count: >= 2 } hp || (hp[0], hp[1]) == t) return null;
+            int distanceFt = TargetGeometry.DistanceFt(hp[0], hp[1], t.col, t.row);
+            if (_settings.Combat?.Active != true || _settings.Combat.CurrentTurn != _settings.Hero.Symbol)
+                return new HoverPathInfo(distanceFt, false, null, null);
+
+            var origin = (hp[0], hp[1], _storage.DiagonalUsed > 0);
+            if (hoverSearchOrigin != origin) hoverReachability = null;
+            hoverSearchOrigin = origin;
+            var reached = hoverReachability ??= MovementCalculator.Dijkstra(
+                _settings, hp[0], hp[1], 1000, -1, origin.Item3, passPeaceful: true);
+            int? Cost(int col, int row)
+            {
+                if ((col, row) == (hp[0], hp[1])) return 0;
+                int? best = null;
+                foreach (bool d in (bool[])[false, true])
+                    if (reached.TryGetValue((col, row, d), out var v) && (best == null || v.cost < best)) best = v.cost;
+                return best;
+            }
+
+            var occupant = (_settings.Map.Entities ?? []).FirstOrDefault(e => e.Deleted != true
+                && e.Position is { Count: >= 2 } p && p[0] == t.col && p[1] == t.row);
+            if (occupant == null) return new HoverPathInfo(distanceFt, true, Cost(t.col, t.row), null);
+
+            int? toNeighbour = null;
+            for (int dc = -1; dc <= 1; dc++)
+            for (int dr = -1; dr <= 1; dr++)
+                if ((dc != 0 || dr != 0) && Cost(t.col + dc, t.row + dr) is int v && (toNeighbour == null || v < toNeighbour))
+                    toNeighbour = v;
+            return new HoverPathInfo(distanceFt, true, toNeighbour, occupant.Symbol);
+        }
+
+        // The cursor has left the map: return the pinned one by clicking (if it is still on the map and visible) or deselect it.
+        void RestorePinnedOrClear()
+        {
+            var pinned = _display.PinnedMapEntity;
+            int pinnedIdx = pinned?.Position is { Count: >= 2 } pp && pinned.Deleted != true
+                ? _legendDisplay.GetSelectableIndexForCell(pp[0], pp[1]) : -1;
+            if (pinnedIdx < 0) _display.PinnedMapEntity = null;
+            SelectMapItem(pinnedIdx);
+        }
+
+        void SelectMapItem(int idx)
+        {
+            _display.SelectedMapItemIndex = idx;
+            if (idx >= 0) SetMapEntityImage();
+            else
+            {
+                SetMapImage(null, null, null);
+                _display.NotePage = 0;
+                _display.NotePageCount = 0;
+            }
+        }
+
+        int PinnedIndex() => _display.PinnedMapEntity?.Position is { Count: >= 2 } p
+            ? _legendDisplay.GetSelectableIndexForCell(p[0], p[1]) : -1;
+
+        // Click on the map: ◄ ► monster cards in the picture panel - scrolling (keyboard arrows on the map are
+        // busy with movement); creature/object - pin its picture (repeat click does not change anything); empty
+        // studied cell - unpin.
+        void HandleMapClick((short x, short y) click)
+        {
+            var na = hoverDialog?.NotePageArrowPositions;
+            if (na is { } a && a.arrowY >= 0 && click.y == a.arrowY && _display.NotePageCount > 1
+                && (click.x == a.leftX || click.x == a.rightX))
+            {
+                int page = Math.Clamp(_display.NotePage + (click.x == a.leftX ? -1 : 1), 0, _display.NotePageCount - 1);
+                if (page == _display.NotePage) return;
+                Sound.PlayClick();
+                SetMapEntityImage(page);
+                hoverDialog?.RerenderRightPanel();
+                return;
+            }
+
+            var clicked = KnownCellOrNull(_mapDisplay.ScreenToCell(click.x, click.y));
+            if (clicked is not { } cc) return;
+
+            int idx = _legendDisplay.GetSelectableIndexForCell(cc.col, cc.row);
+            if (idx < 0)
+            {
+                if (_display.PinnedMapEntity == null) return;
+                _display.PinnedMapEntity = null;
+                Sound.PlayClick();
+                SelectMapItem(-1);
+                RedrawSelection(true);
+                return;
+            }
+
+            pendingHoverCell = null;
+            hoverSince = null;
+            bool selectionChanged = idx != _display.SelectedMapItemIndex;
+            _display.SelectedMapItemIndex = idx;
+            var entity = _legendDisplay.GetSelectedEntity();
+            if (entity == null) return;
+            if (entity != _display.PinnedMapEntity) Sound.PlayClick(); // is already pinned - clicking again does not change anything
+            _display.PinnedMapEntity = entity;
+            if (!selectionChanged) return;
+            SetMapEntityImage();
+            RedrawSelection(true);
+        }
+
+        // The selection of a map element has changed: the legend (marker “←” of the selected one - complete redrawing of the map) and the picture panel.
+        void RedrawSelection(bool redrawMap)
+        {
+            bool vis = Term.CursorVisible;
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            Term.CursorVisible = false;
+            if (redrawMap)
+            {
+                _mapDisplay.RefreshLegend();
+            }
+            (hoverDialog ?? _aiClient.ActiveDialog)?.RerenderRightPanel();
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
+        }
+        _display.MapOnTabKey = _display.OnTabKey;
+        _display.MapOnShiftTabKey = _display.OnShiftTabKey;
+        _display.RedrawCurrentContent = () =>
+        {
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            Term.CursorVisible = false;
+            Term.SetCursorPosition(0, mapDrawTop);
+            hoverReachability = null;
+            mapObjectsProvider.Refresh();
+            _mapDisplay.DrawMap(mapObjectsProvider);
+            Term.SetCursorPosition(sl, st);
+        };
+
+        async Task RunEnemyTurn()
+        {
+            if (_settings.Combat?.Active != true) return;
+            if (string.IsNullOrEmpty(_settings.Combat.CurrentTurn)) return;
+            var entitySymbols = _settings.Map.Entities?
+                .Where(e => e.Deleted != true)
+                .Select(e => e.Symbol)
+                .ToHashSet() ?? [];
+            if (!entitySymbols.Contains(_settings.Combat.CurrentTurn)) return;
+
+            Term.SetCursorPosition(0, mapDrawTop);
+            hoverReachability = null;
+            mapObjectsProvider.Refresh();
+            _mapDisplay.DrawMap(mapObjectsProvider);
+            var enemyHistory = new DialogDisplay(_settings, _display, _storage);
+            _aiClient.ActiveDialog = (enemyHistory);
+            enemyHistory.PrepareStreaming();
+            await _aiClient.FireEnemyTurn(
+                enemyHistory.AppendStreamChunk,
+                enemyHistory.NewStreamingMessage,
+                enemyHistory.TickSpinner,
+                onRedraw: redrawAction);
+            enemyHistory.FinalizeStreaming();
+            Term.FlushKeys();
+        }
+
+        // spotted is checked not only at the hero’s step (TryMove): the AI’s response could open a door or
+        // remove an obstacle, and enemies in battle could approach an ally who had not yet joined. Without this
+        // check, the enemies who saw the hero were silent until his next step, and he managed to leave. Filling
+        // the location by blocks (LocationGrower): the geometry of all blocks of the plan is already there, one
+        // request to the AI fills block when the hero approaches it - before he enters there.
+        async Task<bool> GrowLocationIfNeeded()
+        {
+            if (_display.MapLevel != MapLevel.Location || _mapDisplay.ShowsAdventureScene || _config.DisableTriggers) return false;
+            // One attempt per block per run: if the AI response fails, do not hammer with requests at each step.
+            if (await _aiClient.FlushPopulationAsync()) return true;
+            var chunk = LocationGrower.UnpopulatedNearHero(_settings);
+            if (chunk == null)
+            {
+                if (LocationGrower.UnpopulatedNearHero(_settings, LocationGrower.TriggerDistance + 6) is { } ahead)
+                    _aiClient.TryPrefetchChunk(ahead);
+                return false;
+            }
+
+            var dialog = new DialogDisplay(_settings, _display, _storage);
+            dialog.PrepareStreaming();
+            await _aiClient.PopulateChunk(chunk, dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, redrawAction);
+            dialog.FinalizeStreaming();
+            _aiClient.ActiveDialog = null;
+            // We do not clear the key buffer: it was not the player who started the filling, and what was typed
+            // during this time is his next action (previously, the text silently disappeared, and a turn in
+            // battle was wasted).
+            return chunk.Populated;
+        }
+
+        async Task FireEncounterTriggers(DialogDisplay dialog)
+        {
+            if (_config.DisableTriggers || _config.RevealMap) return;
+            var encounters = movementHandler.CollectEncounterTriggers();
+            if (encounters.Count == 0) return;
+
+            redrawAction();
+            _aiClient.ActiveDialog = dialog;
+            dialog.PrepareStreaming();
+            await _aiClient.FireTrigger(encounters, [], [], dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, redrawAction);
+            dialog.FinalizeStreaming();
+            _aiClient.ActiveDialog = null;
+            Term.FlushKeys();
+        }
+
+        // The final recording of enemies' turns can also advance the round (totalRounds+1, see § COMBAT) - the
+        // same reminder about onRound/onExpire effects should work here too through the same deduplicated path,
+        // otherwise periodic effects (for example, a burning enemy) never tick during combat - the same class
+        // of bug that was fixed for SendAction outside of combat.
+        async Task RunEnemyTurnAndCheckRoundEnd()
+        {
+            await RunEnemyTurn();
+            if (_settings.Combat?.Active == true)
+                await FireEncounterTriggers(new DialogDisplay(_settings, _display, _storage));
+
+            var bundle = _storage.TakeRoundBundle();
+            if (bundle != null && !_config.DisableTriggers && !_config.RevealMap)
+            {
+                var roundHistory = new DialogDisplay(_settings, _display, _storage);
+                _aiClient.ActiveDialog = (roundHistory);
+                roundHistory.PrepareStreaming();
+                await _aiClient.FireRoundTransition(bundle, roundHistory.AppendStreamChunk, roundHistory.NewStreamingMessage, roundHistory.TickSpinner, redrawAction);
+                roundHistory.FinalizeStreaming();
+                _aiClient.ActiveDialog = (null);
+                Term.FlushKeys();
+            }
+        }
+
+        bool IsHeroTurnOver()
+        {
+            if (_settings.Combat?.Active != true) return false;
+            if (_settings.Combat.CurrentTurn != _settings.Hero?.Symbol) return false;
+            var actions = _settings.Hero?.Actions;
+            if (actions == null || actions.Count == 0) return false;
+            return actions.All(a => a.Deleted == true || a.Value == 0)
+                && (_settings.Hero!.SpeedLeft ?? 1) == 0;
+        }
+
+        void PanByKey(string input)
+        {
+            if (_mapDisplay.ShowsAdventureScene) return;
+            var (dx, dy) = input switch
+            {
+                "PanLeft" => (-1, 0),
+                "PanRight" => (1, 0),
+                "PanUp" => (0, 1),
+                _ => (0, -1),
+            };
+            int sl = Term.CursorLeft, st = Term.CursorTop;
+            bool vis = Term.CursorVisible;
+            Term.CursorVisible = false;
+            if (_display.MapLevel == MapLevel.World)
+            {
+                // World map: Y grows down, step is a few screen symbols.
+                _mapDisplay.PanWorld(_display.WorldCenterX, _display.WorldCenterY, -dx * 6, dy * 3);
+                _mapDisplay.RedrawWorldViewport();
+            }
+            else
+            {
+                const int step = 2;
+                _display.CameraCol += dx * step;
+                _display.CameraRow += dy * step;
+                _mapDisplay.ClampCamera();
+                _display.HoveredCell = null;
+                _mapDisplay.RedrawLocationViewport(mapObjectsProvider);
+            }
+            Term.SetCursorPosition(sl, st);
+            Term.CursorVisible = vis;
+        }
+
+        bool movedFrameDrawn = false;
+        int downTurnRound = -1;
+
+        // Service line in dialogue without repetition (the player presses the same thing).
+        void AddNoteOnce(string text)
+        {
+            _settings.History ??= [];
+            if (_settings.History.LastOrDefault()?.Text == text) return;
+            _settings.History.Add(new Data.Models.DialogMessage { Text = text });
+            _storage.Save();
+        }
+
+        // The hero's turn is over - to the next living participant on the initiative (in a circle). false - there is no one to pass on.
+        bool PassTurnToNext()
+        {
+            if (_settings.Combat is not { Active: true, Initiative: { Count: > 0 } init } combat) return false;
+            var order = init.Where(i => i.Deleted != true).OrderByDescending(i => i.Score).ToList();
+            int at = order.FindIndex(i => i.Symbol == combat.CurrentTurn);
+            var next = order.Skip(at + 1).Concat(order.Take(at + 1)).FirstOrDefault(i => i.Symbol != _settings.Hero?.Symbol
+                && _settings.Map.Entities?.Any(e => e.Deleted != true && e.Symbol == i.Symbol) == true);
+            if (next == null) return false;
+            _settings.History ??= [];
+            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = L.W("I end my turn.") });
+            combat.CurrentTurn = next.Symbol;
+            _storage.Save();
+            return true;
+        }
+
+        while (true)
+        {
+            // Hide cursor before any repositioning/drawing to avoid visual jumping
+            Term.CursorVisible = false;
+
+            // On movement: restore cursor and redraw in-place (no Console.Clear)
+            if (!firstMapDraw)
+                Term.SetCursorPosition(0, mapDrawTop);
+            firstMapDraw = false;
+
+            // The hero has moved / the AI has changed the world - recalculate the path to the cell under the
+            // cursor. After a simple step, the frame is already drawn in a quick way (RedrawAfterMove) - no
+            // need for a second time.
+            if (!movedFrameDrawn)
+            {
+                hoverReachability = null;
+                _display.HoverPath = ComputeHoverPath(KnownCellOrNull(_display.HoveredCell));
+                mapObjectsProvider.Refresh();
+                FollowHeroIfMoved();
+                _mapDisplay.DrawMap(mapObjectsProvider);
+            }
+            else
+                Term.SetCursorPosition(_mapDisplay.DrawEndLeft, _mapDisplay.DrawEndTop);
+            movedFrameDrawn = false;
+
+            // New game: GM's introduction - character by character, with sound, like a regular answer.
+            if (_aiClient.HasPendingIntro)
+            {
+                var introDialog = new DialogDisplay(_settings, _display, _storage);
+                _aiClient.ActiveDialog = introDialog;
+                introDialog.PrepareStreaming();
+                await _aiClient.PlayIntro(introDialog.AppendStreamChunk, introDialog.NewStreamingMessage, redrawAction);
+                introDialog.FinalizeStreaming();
+                _aiClient.ActiveDialog = null;
+                Term.FlushKeys();
+                continue;
+            }
+
+            // The hero approached the exit to a block that had not yet been created - the code generates it, the AI fills it.
+            if (await GrowLocationIfNeeded()) continue;
+
+            var mapHistory = new DialogDisplay(_settings, _display, _storage);
+            hoverDialog = mapHistory;
+            // The hero’s turn, but he is unconscious (0 hit points): he himself does not act - the GM leads his
+            // turn (death saving throw, etc. according to the TTRPG rules), once per round, the player has
+            // nothing to write.
+            string? downTurn = null;
+            if (_settings.Hero?.Dead == true) AddNoteOnce(L.F("{0} is dead. Game over — [Esc] menu.", _settings.Hero.Name));
+            if (_settings.Combat is { Active: true } dc && dc.CurrentTurn == _settings.Hero?.Symbol
+                && _settings.Hero is { IsDown: true, Dead: not true } && downTurnRound != _settings.Time.TotalRounds)
+            {
+                downTurnRound = _settings.Time.TotalRounds;
+                downTurn = L.WF("[{0} is unconscious — the DM plays the turn]", _settings.Hero.Name);
+            }
+            var mapInput = downTurn ?? mapHistory.Draw();
+            hoverDialog = null;
+
+            // The hero died - the game is over: actions and movement are not accepted (tabs and menus - as usual).
+            if (_settings.Hero?.Dead == true && mapInput is { Length: > 0 } && !mapInput.StartsWith('F') && mapInput != "Esc")
+            {
+                AddNoteOnce(L.F("{0} is dead. Game over — [Esc] menu.", _settings.Hero.Name));
+                continue;
+            }
+
+            if (_mapDisplay.ShowsAdventureScene && mapInput != null && (mapInput.StartsWith("Move") || mapInput.StartsWith("Pan")
+                || mapInput is "F6" or "F7" or "F8" or "F9" or "F10" or "Tab" or "ShiftTab" or "ZoomIn" or "ZoomOut"))
+            {
+                movedFrameDrawn = true;
+                continue;
+            }
+
+            // [F10] (or button in the battle block) - end of the hero’s turn: move to the next one on the
+            // initiative, enemy moves - with the usual call “enemies move”. Previously, the text “I’m finishing
+            // my move” was left from the hero, and the GM would add what was not stated for him (“you retreat
+            // half a step”, “take a breath”).
+            if (mapInput == "F10" && _display.MapLevel == MapLevel.Location)
+            {
+                if (!_legendDisplay.IsHeroTurn) continue;
+                if (PassTurnToNext())
+                {
+                    await RunEnemyTurnAndCheckRoundEnd();
+                    break;
+                }
+                mapInput = L.W("I end my turn.");
+            }
+            if (mapInput == "F9" && _display.MapLevel == MapLevel.Location) {
+                var braille = File.ReadAllText(Path.Combine(AppConfig.DataRoot, "Storage", "test.txt"));
+                _settings.Images ??= [];
+                _settings.Images.RemoveAll(i => i.Key == "test");
+                _settings.Images.Add(new WorldImage { Key = "test", Content = braille, Height = braille.Split('\n').Length });
+                _settings.ActiveImageKey = "test";
+                continue;
+            } // DEBUG
+
+            if (_mapDisplay.ShowsAdventureScene && mapInput is "F11" or "F12")
+            {
+                if (mapInput == "F11") _display.OnSceneVariant();
+                else _display.OnSceneAnimation();
+                movedFrameDrawn = true;
+                continue;
+            }
+
+            // World map: [F10] - on the way to the selected goal, [F5] - temp.
+            if (_display.MapLevel == MapLevel.World && mapInput == "F10")
+            {
+                await StartTravel(mapHistory);
+                if (_display.PendingCommand != null) break;
+                continue;
+            }
+            // [F12] - path pace (slow / normal / fast).
+            if (_display.MapLevel == MapLevel.World && mapInput == "F12")
+            {
+                _display.TravelPace = (_display.TravelPace + 1) % 3;
+                RedrawWorldKeepCursor();
+                continue;
+            }
+
+            if (string.IsNullOrEmpty(mapInput)) break;
+            if (screen.Commands.TryGetValue(mapInput, out var screenCmd)) { screenCmd(); break; }
+            if (_display.MapLevel == MapLevel.World && mapInput is "F6" or "F7" or "F8" or "F9")
+            {
+                ToggleWorldFilter(mapInput == "F6" ? null : WorldMapView.Categories[int.Parse(mapInput[1..]) - 7].key);
+                movedFrameDrawn = true;
+                continue;
+            }
+            if (_display.MapLevel == MapLevel.World && mapInput is "Tab" or "ShiftTab")
+            {
+                SelectWorldPlace(mapInput == "Tab" ? 1 : -1);
+                Term.FlushKeys();
+                movedFrameDrawn = true;
+                continue;
+            }
+            if (mapInput is "F6" or "F7" or "F8" or "NoteLeft" or "NoteRight") continue;   // service commands - not text to the GM
+
+            // Ctrl+arrows - camera shift without hero movement (like dragging with the mouse). Ctrl+“+”/“−” —
+            // scale of the world map (there is no scale on the location map).
+            if (mapInput is "ZoomIn" or "ZoomOut")
+            {
+                if (_display.MapLevel == MapLevel.World)
+                {
+                    int sl = Term.CursorLeft, st = Term.CursorTop;
+                    bool vis = Term.CursorVisible;
+                    Term.CursorVisible = false;
+                    _mapDisplay.ZoomWorldAtCenter(mapInput == "ZoomIn" ? 1 : -1);
+                    _mapDisplay.RedrawWorldViewport();
+                    Term.SetCursorPosition(sl, st);
+                    Term.CursorVisible = vis;
+                }
+                movedFrameDrawn = true;
+                continue;
+            }
+
+            if (mapInput.StartsWith("Pan"))
+            {
+                PanByKey(mapInput);
+                movedFrameDrawn = true; // frame has already been redrawn - full DrawMap is not needed
+                continue;
+            }
+            // Alt+←/→ - leafing through the card in the picture panel (regular arrows on the map - movement).
+            // Without a card, the command is simply ignored and does not go to the AI as an action text.
+            if (mapInput is "Left" or "Right")
+            {
+                int page = Math.Clamp(_display.NotePage + (mapInput == "Left" ? -1 : 1), 0, Math.Max(0, _display.NotePageCount - 1));
+                if (_display.SelectedMapItemIndex >= 0 && _display.NotePageCount > 1 && page != _display.NotePage)
+                {
+                    Sound.PlayClick();
+                    SetMapEntityImage(page);
+                }
+                continue;
+            }
+
+            if (mapInput == "Tab" || mapInput == "ShiftTab")
+            {
+                int totalCount = _legendDisplay.GetSelectableMapItemCount();
+                if (totalCount > 0)
+                {
+                    if (mapInput == "Tab")
+                        _display.SelectedMapItemIndex = _display.SelectedMapItemIndex < 0 ? 0
+                            : (_display.SelectedMapItemIndex + 1) % totalCount;
+                    else
+                        _display.SelectedMapItemIndex = _display.SelectedMapItemIndex <= 0 ? totalCount - 1
+                            : _display.SelectedMapItemIndex - 1;
+                    SetMapEntityImage();
+                }
+                Term.FlushKeys();
+                continue;
+            }
+
+            // On the world map, arrows move the map, not the hero (he is on the location).
+            if (_display.MapLevel == MapLevel.World && mapInput.StartsWith("Move"))
+            {
+                if (mapInput.Contains("North")) PanByKey("PanUp");
+                if (mapInput.Contains("South")) PanByKey("PanDown");
+                if (mapInput.Contains("West")) PanByKey("PanLeft");
+                if (mapInput.Contains("East")) PanByKey("PanRight");
+                movedFrameDrawn = true;
+                continue;
+            }
+
+            var moved = movementHandler.TryMove(mapInput, out var aiInput, out var activatedTriggers, out var activatedAreaTriggers, out var activatedDoorTriggers);
+            if (movementHandler.LeaveRequested)
+            {
+                // Save the tactical location and return to adventure scenery on F1.
+                movementHandler.LeaveRequested = false;
+                string where = _settings.World?.Place ?? L.T("the location");
+                GameWorld.LeaveLocation(_settings);
+                _settings.History ??= [];
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.F("You leave {0}. Open [F2] to choose a route and [F10] to travel.", where) });
+                _storage.Save();
+                _display.PendingCommand = "F1";
+                break;
+            }
+            if (moved == null)
+            {
+                _settings.History ??= [];
+                _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = mapInput });
+                _display.DialogScrollOffset = 0;
+                _aiClient.ActiveDialog = (mapHistory);
+                mapHistory.PrepareStreaming();
+                await _aiClient.SendAction(aiInput, mapHistory.AppendStreamChunk, mapHistory.NewStreamingMessage, mapHistory.TickSpinner, redrawAction);
+                mapHistory.FinalizeStreaming();
+                Term.FlushKeys();
+                // The GM built a scene (plan_location) - on the area map; the tactical map has disappeared - on the world.
+                if (_display.MapLevel == MapLevel.World && GameWorld.HasLocation(_settings))
+                {
+                    _display.PendingCommand = "F1";
+                    break;
+                }
+                await FireEncounterTriggers(mapHistory);
+
+                // SendAction himself can advance the round (depleting action resources outside of combat) - the
+                // reminder of onRound/onExpire effects should go the same deduplicated path as after the
+                // movement, and not rely on AI himself figuring out to apply them inside his own response (was
+                // the cause of repeated/unauthorized damage from periodic effects).
+                var sendActionRoundBundle = _storage.TakeRoundBundle();
+                if (sendActionRoundBundle != null && !_config.DisableTriggers && !_config.RevealMap)
+                {
+                    _aiClient.ActiveDialog = (mapHistory);
+                    mapHistory.PrepareStreaming();
+                    await _aiClient.FireRoundTransition(sendActionRoundBundle, mapHistory.AppendStreamChunk, mapHistory.NewStreamingMessage, mapHistory.TickSpinner, redrawAction);
+                    mapHistory.FinalizeStreaming();
+                    _aiClient.ActiveDialog = (null);
+                    Term.FlushKeys();
+                    break;
+                }
+
+                await RunEnemyTurnAndCheckRoundEnd();
+                break;
+            }
+            // Hero moved — show new position before any AI call
+            Term.CursorVisible = false;
+            hoverReachability = null;
+            _display.HoverPath = ComputeHoverPath(KnownCellOrNull(_display.HoveredCell));
+            mapObjectsProvider.Refresh();
+            FollowHeroIfMoved();
+            _mapDisplay.RedrawAfterMove(mapObjectsProvider);
+            movedFrameDrawn = true;
+            var roundBundle = _storage.TakeRoundBundle();
+            if (roundBundle != null && !_config.DisableTriggers && !_config.RevealMap)
+            {
+                _aiClient.ActiveDialog = (mapHistory);
+                mapHistory.PrepareStreaming();
+                await _aiClient.FireRoundTransition(roundBundle, mapHistory.AppendStreamChunk, mapHistory.NewStreamingMessage, mapHistory.TickSpinner, redrawAction);
+                mapHistory.FinalizeStreaming();
+                _aiClient.ActiveDialog = (null);
+                Term.FlushKeys();
+                break;
+            }
+            if (moved == true && !_config.DisableTriggers && !_config.RevealMap)
+            {
+                _aiClient.ActiveDialog = (mapHistory);
+                mapHistory.PrepareStreaming();
+                await _aiClient.FireTrigger(activatedTriggers, activatedAreaTriggers, activatedDoorTriggers, mapHistory.AppendStreamChunk, mapHistory.NewStreamingMessage, mapHistory.TickSpinner, redrawAction);
+                mapHistory.FinalizeStreaming();
+                _aiClient.ActiveDialog = (null);
+                Term.FlushKeys();
+                await FireEncounterTriggers(mapHistory);
+                await RunEnemyTurnAndCheckRoundEnd();
+                break;
+            }
+            if (IsHeroTurnOver())
+            {
+                await RunEnemyTurnAndCheckRoundEnd();
+                break;
+            }
+            // Local move: loop back for in-place redraw. Pressed arrow: keyboard auto-repeat accumulates events
+            // faster than the redraw step - without resetting, the hero “reached” the accumulated buffer after
+            // releasing it (as before with Tab). Bye the key is held down, new repetitions continue to come -
+            // the movement is not interrupted.
+            Term.FlushKeys();
+        }
+
+        _display.ArrowKeysMovement = false;
+        _display.PollAction = null;
+        // OnMapRedraw is intentionally kept so tab-switching from Character/Abilities
+        // screens can still show the map view during streaming.
+        _display.HoveredCell = null;
+        _display.HoveredDoor = null;
+        ConsoleMouseReader.SetCursorShape(false);
+    }
+}

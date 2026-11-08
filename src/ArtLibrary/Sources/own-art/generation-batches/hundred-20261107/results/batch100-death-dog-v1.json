@@ -1,0 +1,13 @@
+{
+  "index": 95,
+  "key": "batch100-death-dog-v1",
+  "category": "monster",
+  "name": "Death Dog",
+  "nameRu": "Пес Смерти",
+  "usage": "map_actor",
+  "transparent": true,
+  "description": "A dark canine monster with exactly two separate dog heads on one four-legged body.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: A dark canine monster with exactly two separate dog heads on one four-legged body. Genuine transparent background. One complete centered subject with a one-pixel clear margin. Full body for creatures, full object for equipment. No scenery or extra objects beyond the stated subject.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-25d19993-7f93-40d4-8cc4-da203ff66ce0.png",
+  "status": "generated"
+}

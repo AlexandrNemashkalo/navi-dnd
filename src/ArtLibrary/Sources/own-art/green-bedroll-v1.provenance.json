@@ -1,0 +1,22 @@
+{
+  "id": "own-art:green-bedroll-v1",
+  "file": "green-bedroll-v1.png",
+  "subject": "Rolled wool bedroll",
+  "nameRu": "Свёрнутый спальный мешок",
+  "width": 32,
+  "height": 32,
+  "sha256": "7cc64968b9db44075d6ab3beac4dc88166b9fb036794a8d902deb1c80106126b",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "Complete moss-green blanket roll with a visible spiral end and two brown straps. Exact 32x32 prepared generated image.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/green-bedroll-v1/original.png",
+  "sourceDimensions": [
+    1262,
+    1246
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_16_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

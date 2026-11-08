@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-emblem-v1",
+  "file": "batch100-emblem-v1.png",
+  "subject": "Emblem",
+  "nameRu": "Эмблема",
+  "width": 32,
+  "height": 32,
+  "sha256": "860d60f5708d23661ae408b11f775b5bef031f652e7386aee994045f1cca059a",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "A round silver holy emblem pendant bearing a simple golden sun disk with eight rays, no writing.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-emblem-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-emblem-v1.json",
+  "batch": "hundred-20261107"
+}

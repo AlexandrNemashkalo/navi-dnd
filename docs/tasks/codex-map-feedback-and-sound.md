@@ -8,9 +8,9 @@
 Правила прежние:
 - по коммиту на шаг, без push и переписывания истории;
 - сохранения, настройки и портреты пользователя не трогай;
-- юнит-тесты: dotnet test NaviDnD.Tests/NaviDnD.Tests.csproj (если файлы заняты игрой — -o NaviDnD.Tests/bin/alt);
+- юнит-тесты: dotnet test src/NaviDnD.Tests/NaviDnD.Tests.csproj (если файлы заняты игрой — -o src/NaviDnD.Tests/bin/alt);
 - UI-тесты и тесты всего решения не запускай;
-- новый текст интерфейса — L.T/L.F с переводом в NaviDnD.Data/Localization/en.json (проверь LocalizationTests);
+- новый текст интерфейса — L.T/L.F с переводом в src/NaviDnD.Data/Localization/en.json (проверь LocalizationTests);
 - изменил формат сохранения — StorageFormat.Current + шаг миграции;
 - правки промптов — одной строкой, заменой.
 Обе задачи не должны добавлять вызовов модели и заметно увеличивать ответ мастера: всё определяет и показывает игра.
@@ -34,9 +34,9 @@
 
 Пример: подходишь к костру — треск громче, отходишь — стихает. Звучит поверх музыки и окружения.
 
-Что уже есть: Helpers/Music.cs — микшер NAudio со слоями (Play с id, SetLayerVolume, плавное затухание, приглушение под речь мастера, Ducked); MusicDirector выбирает музыку и окружение; AudioOutput работает на Windows (WaveOut) и macOS (AudioQueue); звуки лежат в NaviDnD/sound (ambience/hearth/fireplace.wav и др.), лицензии — в sound/CREDITS.md.
+Что уже есть: Helpers/Music.cs — микшер NAudio со слоями (Play с id, SetLayerVolume, плавное затухание, приглушение под речь мастера, Ducked); MusicDirector выбирает музыку и окружение; AudioOutput работает на Windows (WaveOut) и macOS (AudioQueue); звуки лежат в src/NaviDnD/sound (ambience/hearth/fireplace.wav и др.), лицензии — в sound/CREDITS.md.
 
-1. Каталог звуков: файл данных (например, NaviDnD/sound/sources.json) — ключ → файл, радиус слышимости в футах, громкость, непрерывный или по событию. Начальный набор: campfire/hearth, forge, river, sea, waterfall, wind, crowd/tavern, swarm, ghost.
+1. Каталог звуков: файл данных (например, src/NaviDnD/sound/sources.json) — ключ → файл, радиус слышимости в футах, громкость, непрерывный или по событию. Начальный набор: campfire/hearth, forge, river, sea, waterfall, wind, crowd/tavern, swarm, ghost.
 2. Кто звучит:
    - игра определяет сама по объекту: горящий источник света с огнём, имя или icon «костёр/очаг/горн», клетки рельефа «вода/река/море» (источник — ближайшая клетка, без слоя на каждую клетку);
    - нестандартное мастер задаёт полем sound с ключом каталога у объекта или существа, как icon. Добавь поле в модель, Storage.Apply, AiContextBuilder (если нужно мастеру) и одну строку в промпты SendAction, StartNewGame, PopulateChunk;
@@ -48,7 +48,7 @@
 7. Звуки:
    - если есть доступ к вебу, бери только CC0 или явно разрешённые для свободного распространения (например, Kenney, OpenGameArt CC0, Freesound CC0). Короткие зацикленные фрагменты, ogg, разумный размер (ориентир — до 300 КБ на петлю). Каждый файл — в sound/CREDITS.md с источником и лицензией;
    - если веба нет — используй то, что уже есть, а для остального оставь записи каталога без файла (игра молчит) и перечисли в отчёте, какие звуки нужны.
-   Проверь, что новые файлы попадают в сборку Windows и в архив macOS (build-release.ps1, build-macos.ps1, macos/package.py) — посмотри, как туда попадает папка sound.
+   Проверь, что новые файлы попадают в сборку Windows и в архив macOS (scripts/build-release.ps1, scripts/build-macos.ps1, src/macos/package.py) — посмотри, как туда попадает папка sound.
 8. Тесты: расчёт громкости от расстояния, дверей и стен; выбор 3–4 ближайших; определение источника по объекту и рельефу; разбор каталога и неизвестного ключа; миграция, если меняется формат. Звуковое устройство в тестах не нужно — вынеси расчёт в чистые функции.
 
 ## Отчёт

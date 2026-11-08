@@ -1,0 +1,18 @@
+{
+  "id": "own-art:mountains-horizon-32x32",
+  "file": "mountains-horizon-32x32.png",
+  "origin": "AI-generated with OpenAI image generation; requested by the project owner",
+  "createdDate": "2026-11-06",
+  "subject": "Mountains / horizon view",
+  "usage": "biome_view",
+  "width": 32,
+  "height": 32,
+  "mode": "RGBA",
+  "sha256": "b72637ce35c22bde548cee4d38c3c98e72081a98f675f5a1bb19159820e5bf01",
+  "processing": "Area averaging (BOX) to a fixed 32x32 grid; median-cut 16-color palette; no dithering.",
+  "artApproved": false,
+  "styleId": "fantasy.pixel.landscape.32",
+  "framing": "horizon_view",
+  "descriptionEn": "Rocky foreground and layered snow-capped mountain peaks beneath a cloudy sky.",
+  "generationSource": "generation-sources/mountains-horizon.png"
+}

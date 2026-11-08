@@ -1,0 +1,11 @@
+{
+  "candidates": 4080,
+  "aliases": [],
+  "skipped": [
+    {
+      "collection": "portraits-native-32",
+      "pack": "halflings",
+      "reason": "excluded_64px_source_family"
+    }
+  ]
+}

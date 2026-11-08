@@ -1,0 +1,2191 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "assetId": "dcss/monster/animals/wolf",
+      "sha256": "e560446c4bcefd0380e90318f98f03fd5da69a9eadc126c72007dd934ab52343",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: pale grey canine."
+    },
+    {
+      "assetId": "dcss/monster/animals/war_dog",
+      "sha256": "d47f04fc1b754add2df8fd1bb0a04d2a046ec1b43f4bbc39ae2074c5be31df48",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: dark brown wolf."
+    },
+    {
+      "assetId": "dcss/monster/animals/warg",
+      "sha256": "6b3c42d0e9f7c719d00b74253d894d69d7f0a3547dbd196cb528ce71c472a6d5",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: pale grey wolf with red mouth."
+    },
+    {
+      "assetId": "dcss/monster/undead/skeletons/skeleton_humanoid_small_new",
+      "sha256": "369575ae594eb690949047c6c651ca0c9f2c9049c10b994365dbf1076f374dc3",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Undead/icy creature sprite: small humanoid skeleton."
+    },
+    {
+      "assetId": "dcss/monster/undead/skeletons/skeleton_humanoid_small_old",
+      "sha256": "b29f8d330dd8cb7ca671ea28763e89ca3f1792dba4c35c1923fb110f9a45914f",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Undead/icy creature sprite: small thin humanoid skeleton."
+    },
+    {
+      "assetId": "dcss/monster/ogre_new",
+      "sha256": "ca7bb3d39de4ee595258a5caa4718cfcff077970a0175024117e087449f3c34f",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full creature or multipart creature layer: pale large humanoid with hands at waist."
+    },
+    {
+      "assetId": "dcss/monster/ogre_old",
+      "sha256": "83e8b83f80679fe64de72b1e3c847cbeca902ec7dae725265bc3c8e51a77f7d9",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full creature or multipart creature layer: pale large humanoid carrying brown club."
+    },
+    {
+      "assetId": "dcss/monster/troll",
+      "sha256": "1f975764860573ae211fd419e4ab2b6169fbcd49aafb153930cc7f268e59437e",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature or effect sprite: tall green shaggy humanoid."
+    },
+    {
+      "assetId": "dcss/monster/undead/phantom_new",
+      "sha256": "f0421fdf2bca7db35eb942b98017ff84357da085807af7f1e1e2714309eb23b0",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole translucent cyan humanoid shape."
+    },
+    {
+      "assetId": "dcss/monster/undead/phantom_old",
+      "sha256": "147c88bbe559cec44202bda6d1d52bad6f210fbdbe5fa42919d7db25659af209",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole translucent cyan humanoid shape."
+    },
+    {
+      "assetId": "dcss/dungeon/altars/altar_old",
+      "sha256": "1abd7c37231a2c6772ddbf5e08962e40078c308d3b428b882daaceee29ad186e",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Dungeon prop: cracked grey altar between candles."
+    },
+    {
+      "assetId": "dcss/dungeon/altars/misc_altar",
+      "sha256": "3172a81913bcdec3d0a6ed909923a872667ffc145312a14f67374d30ac5293d4",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Dungeon prop/entrance: white draped altar between candles."
+    },
+    {
+      "assetId": "dcss/dungeon/altars/cheibriados",
+      "sha256": "c2040b94f00543e56ee3b3bb28cf78340428df53e4367d68a4d8a9865760676f",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Dungeon prop/entrance: brown stone altar with green moss."
+    },
+    {
+      "assetId": "dcss/dungeon/doors/closed_door",
+      "sha256": "1dd473c3bc25e6dd9d3acffc3110d4ff73c6dd628bbbe5ac2f9027276092be89",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Dungeon prop/entrance: closed brown arched door in grey wall."
+    },
+    {
+      "assetId": "dcss/dungeon/doors/open_door",
+      "sha256": "fe421229940cab027fb10a07d4d4cd48e07a59b2f798cb50342fd94bfe72cbc0",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Dungeon prop/entrance: open dark doorway with brown door swung aside."
+    },
+    {
+      "assetId": "dcss/monster/animals/alligator",
+      "sha256": "874bd0550abf54d11c8958df396507ee6a2f7c1dee1429bbeb4c9c1898a85a2c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: green crocodile with pale teeth."
+    },
+    {
+      "assetId": "dcss/monster/animals/alligator_baby",
+      "sha256": "1bf0a289793280892d3ba60ba1063694dac9676677da8ce57e9b3c5b1e27c099",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: smaller green crocodile."
+    },
+    {
+      "assetId": "dcss/monster/animals/black_bear_new",
+      "sha256": "0071909ef5127bfe359f1e994d85728ba2c89b255a1c26a6a20c142756539e95",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: grey bear-like quadruped."
+    },
+    {
+      "assetId": "dcss/monster/animals/black_bear_old",
+      "sha256": "b7be5ccf0d4e0b9250ec45132f7059b273a39c67bbab5f1bccb363c812c5e372",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: dark grey long-snouted bear."
+    },
+    {
+      "assetId": "dcss/monster/animals/polar_bear",
+      "sha256": "ad5827cc0e39e8ddc1301be6c739b5c2551a9794b00a37b9cb9a6b967fb7688f",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: large pale white bear."
+    },
+    {
+      "assetId": "dcss/monster/animals/elephant_new",
+      "sha256": "cee1584daa55e888c0511ac956f00f36b5fc10e62912157624cf55c04bcb94a0",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: pale grey elephant."
+    },
+    {
+      "assetId": "dcss/monster/animals/elephant_old",
+      "sha256": "8313ee26501e7058dff20c01a3c9c212314e6062e095a8264ba3888215fc5467",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: pale grey elephant variant."
+    },
+    {
+      "assetId": "dcss/monster/animals/elephant_dire_new",
+      "sha256": "4e750cba415ca1ebb4f13b235070a3afa57ec19ffdb150657080ecaa0bc53183",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: blue-grey elephant with pale tusks."
+    },
+    {
+      "assetId": "dcss/monster/animals/elephant_dire_old",
+      "sha256": "1d8bf5e5ee2e39270df15e2ebd149fd8a8838397d68fc58eec2f5157fc618397",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: blue-grey tusked elephant variant."
+    },
+    {
+      "assetId": "dcss/monster/animals/hound",
+      "sha256": "418aaa3f7b1d6de83ea5d62518e8cdbf48d38d614bcf29bbbbc7ba501a236c3c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: brown running hound."
+    },
+    {
+      "assetId": "dcss/monster/animals/jackal_new",
+      "sha256": "6bdcb126959dc7dfe8dc114598a8d57a9a40c5eec6a278a68e15ccdef99acb22",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: brown striped dog."
+    },
+    {
+      "assetId": "dcss/monster/animals/jackal_old",
+      "sha256": "6755f36684526a5be128788790e2724fbb39ec30201ccf0c15e0d189f6e10ba8",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: grey-green dog."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_frog",
+      "sha256": "ae4a2a6e5142b455e1402378d094b8e0307598dac2ed82f4214199c327ba5872",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: green frog."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_toad",
+      "sha256": "5ec77a8867e3bee44234acfa26e826aeda2f5ac27bc548967a15677b32d72fc0",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: gold-brown frog."
+    },
+    {
+      "assetId": "dcss/monster/animals/iguana",
+      "sha256": "e1b3eed5d4e60b35202aecddf34e6a157c64e6d1ad424078a1f4721c80fc70ae",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: grey-green long-tailed reptile."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_lizard",
+      "sha256": "b6b0896c116822e582c31a07d43dfc769a853639500cff3d98d429d363a6ffd3",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: teal small lizard."
+    },
+    {
+      "assetId": "dcss/monster/animals/adder",
+      "sha256": "25fb263a52929bc6de25db56e0a2251a0e833d8a8cbf1726379d5c8ceaa8e72f",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: small green snake."
+    },
+    {
+      "assetId": "dcss/monster/animals/small_snake",
+      "sha256": "e7269b595c6b3ba46b289033c36aa0d38aef81936231d9d1991c64546dd9ce9b",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: green coiled snake."
+    },
+    {
+      "assetId": "dcss/monster/animals/viper",
+      "sha256": "3c941baeeae2ea15a7f4624c1d7482a2298a7dbf4324c8f8e50ff964f37921a3",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: large grey-green snake."
+    },
+    {
+      "assetId": "dcss/monster/animals/black_mamba_new",
+      "sha256": "5b54b4f89432f61d42e76c4102aa9e634d793cc61cf523e1ea4d8d2c4ccd646f",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: blue coiled snake."
+    },
+    {
+      "assetId": "dcss/monster/animals/black_mamba_old",
+      "sha256": "516c6f4bc38131f407b42629f24671b01150f9ad7706979341b512e6fb25d86b",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: grey-green upright snake."
+    },
+    {
+      "assetId": "dcss/monster/animals/ball_python",
+      "sha256": "c482f729907a90aaa56e8a99b3456b94d4eb6c50e505fa5d36262f948d2212c1",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: small gold coiled snake."
+    },
+    {
+      "assetId": "dcss/monster/animals/anaconda_new",
+      "sha256": "b861e7335de0b6a7f2a72aa9c0d67aeabd922da33a13b2cb2545b22d80c3416d",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: gold-brown coiled snake."
+    },
+    {
+      "assetId": "dcss/monster/animals/anaconda_old",
+      "sha256": "0ceb37fc6e8c0296815e977a8236a1e5851ecc4461c4751903f2202169f326bd",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: large gold-brown coiled snake."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_centipede",
+      "sha256": "2d924570c2b6ab055dfe268d34f32be7672fcaf9c541e72c2c67f79503549a8c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: green many-legged creature."
+    },
+    {
+      "assetId": "dcss/monster/animals/hell_hound_new",
+      "sha256": "069ee64f82cd18877f6807b495f1ecdc5d467e36bdb070b7b09baf60b64fea63",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: dark red hound with orange markings."
+    },
+    {
+      "assetId": "dcss/monster/animals/hell_hound_old",
+      "sha256": "0e1a914acb7c9f2c834b1d7ccbcdb7e31966a1d3c50353e5fe779a33d8aac503",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Full-body creature sprite: red hound."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/hand_crossbow",
+      "sha256": "d91edd1f1a39f8580788238bd89cd5950477bc9cc0f882e2cdeedd586740b12f",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated weapon: small brown hand crossbow."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/hand_crossbow_2",
+      "sha256": "53e2f840dfd8cedec930e3f0a01ed43631f2b93ada795b241e29ed62579ada95",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated weapon: small dark hand crossbow."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/hand_crossbow_3",
+      "sha256": "ae676ec11169ffebda1aa458ba7563b70be6e7211b80c6f20304ae237e7b453c",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated weapon: ornate gold-red hand crossbow."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/crossbow_1",
+      "sha256": "59a817ec4bd36e908df8d53ccf50b5a3a011122a6c1c0a3328ef400c06e8edef",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated weapon: grey-brown crossbow."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/crossbow_2",
+      "sha256": "f76918a745e318cd3c03909d84410332181191e461cd698521cf46a2aa0f9122",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated weapon: gold-grey crossbow."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/arbalest_1",
+      "sha256": "4cafcecd79325e5f7b83bbaee26fde475bed4ea4427242020e1469dc8ed7fedf",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated weapon: wooden crossbow."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/arbalest_2",
+      "sha256": "70093a7b68b239054859ea9807fb907244511c0e64cbc6c675257fc8a7f0895b",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated weapon: gold crossbow."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/arbalest_3",
+      "sha256": "e89bfc094d47d6cb3876af1b85d6da6f5f65449a8048834a7bce8462236ef742",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated weapon: blue-silver crossbow."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/sling_1",
+      "sha256": "c49d236280055158ebc8b398c76bce2a6910602bd0c1cadc2f7a5c12c2777099",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated ranged weapon/projectile/weapon: gold coiled sling."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/sling_2",
+      "sha256": "5b2821a726f06e7611135123fad62909685f1638137e8c29d6a6d8f27d50f5fa",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated ranged weapon/projectile/weapon: brown coiled sling."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/plate_1",
+      "sha256": "7de29509aa674daddf52d28180d5644ddbb8b34d0ead5c0cd93e639b01b192ff",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated armour/material/book: dark rounded plate torso."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/plate_mail_2",
+      "sha256": "210b3b5971d8f47e7cba1734e81b11e85cf9453f64eadb446d752cea1a550348",
+      "usages": [
+        "item"
+      ],
+      "reason": "Isolated armour/material/book: dark plate torso with gold trim."
+    },
+    {
+      "assetId": "dcss/dungeon/traps/trap_blade",
+      "sha256": "93cb97181ca48b1762290afbf3d7cd441ce9b82e621ba02f37910b5c32339b8d",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Dungeon prop/overlay: trap plate with curved sword."
+    },
+    {
+      "assetId": "dcss/dungeon/traps/trap_axe",
+      "sha256": "797bcd3824c39c9b7494435a9ae033f9dcfa6f3b69b759f62bbfe259c25f82e3",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Dungeon prop/overlay: grey trap with red-pale blade."
+    },
+    {
+      "assetId": "dcss/dungeon/traps/trap_dart",
+      "sha256": "4e30d735ed7b17fa1f8b82e847c2a33b15f90accfbbb139c42a6bf0e88c0fffe",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Dungeon prop/overlay: trap plate with red-orange central point."
+    },
+    {
+      "assetId": "dcss/item/weapon/greatsword_1_new",
+      "sha256": "bd82c629609e86a5cc5748509e0f34ff584b188597b7546fb6741b3357aa14e8",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete long sword with substantial blade and guard."
+    },
+    {
+      "assetId": "dcss/item/weapon/greatsword_1_old",
+      "sha256": "f280f6f55c8879b57d751448bfb58e177634e04d9ee42addad7e33c54b7467bf",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete long sword with substantial blade and guard."
+    },
+    {
+      "assetId": "dcss/item/weapon/greatsword_2",
+      "sha256": "ceabacf5d3e94968901ebe96d3b2bb343bc055e314b00634856b54ef017c5569",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete long sword with substantial blade and guard."
+    },
+    {
+      "assetId": "dcss/item/weapon/greatsword_3_new",
+      "sha256": "215bbab3d17a071363e55e6b95cf2680d8d4cd7ea6be21fd132b1310f838ff53",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete long sword with substantial blade and guard."
+    },
+    {
+      "assetId": "dcss/item/weapon/greatsword_3_old",
+      "sha256": "ec27e3b3fa3116b380c57e0b4763b5079071eed843dc00e6bd1f11efeb90053d",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete long sword with substantial blade and guard."
+    },
+    {
+      "assetId": "dcss/item/weapon/greatsword_4",
+      "sha256": "7efab9e41e2d8956820f293556d0f6678dfeda84de255cb226f9f31ea7760b1f",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete long sword with substantial blade and guard."
+    },
+    {
+      "assetId": "dcss/item/weapon/short_sword_1_new",
+      "sha256": "6c9d021438b3cdd66da83c7cbac846cd48be43ed260d28dc63275edcecdae747",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete short sword; knife-like variants excluded."
+    },
+    {
+      "assetId": "dcss/item/weapon/short_sword_2_old",
+      "sha256": "cf210c9bf881934a86d20dfc4550878664386ccae2d04569ad8cc27223bda0cb",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete short sword; knife-like variants excluded."
+    },
+    {
+      "assetId": "dcss/item/weapon/halberd_1",
+      "sha256": "cc96611f75b8d5d3d246c23da2a949029c76a643ab5d945e25c1aa26c95c1564",
+      "usages": [
+        "item"
+      ],
+      "reason": "Long shaft with a combined pointed/hooked axe head."
+    },
+    {
+      "assetId": "dcss/item/weapon/halberd_2",
+      "sha256": "ed579cdf70f0adafec7fc7152e07cfc1a1a3eac491a8f11ce5076eea46496bc2",
+      "usages": [
+        "item"
+      ],
+      "reason": "Long shaft with a combined pointed/hooked axe head."
+    },
+    {
+      "assetId": "dcss/item/weapon/halberd_4",
+      "sha256": "954997a9745c3cd56f31eed7744e8a43060d3ab4be9413e86c60bad6ebeb4ca1",
+      "usages": [
+        "item"
+      ],
+      "reason": "Long shaft with a combined pointed/hooked axe head."
+    },
+    {
+      "assetId": "dcss/item/weapon/halberd_5",
+      "sha256": "af76610a2d9f52331744d16f84848884ce5dcdff8dda8a20588ba1d4f983c09c",
+      "usages": [
+        "item"
+      ],
+      "reason": "Long shaft with a combined pointed/hooked axe head."
+    },
+    {
+      "assetId": "dcss/item/weapon/giant_club_new",
+      "sha256": "4dcfabc07b79a3505c84a1ff182aa72ad3201b83b408281a2afa04af12b8f900",
+      "usages": [
+        "item"
+      ],
+      "reason": "Large complete wooden club; exact dimensions are game data."
+    },
+    {
+      "assetId": "dcss/item/weapon/giant_club_old",
+      "sha256": "aae29efd7426da72b29f9eb53d2de07747bd8972d3bd270475b1e3e35e01b71c",
+      "usages": [
+        "item"
+      ],
+      "reason": "Large complete wooden club; exact dimensions are game data."
+    },
+    {
+      "assetId": "dcss/item/weapon/giant_club_2",
+      "sha256": "c30c08bf1897e0de2a635200d14b129c620cca14ce0ea60226ae6acf2c756ff5",
+      "usages": [
+        "item"
+      ],
+      "reason": "Large complete wooden club; exact dimensions are game data."
+    },
+    {
+      "assetId": "dcss/item/weapon/giant_club_3",
+      "sha256": "faf61eb6d6da972d1784974da78aa78eca43adce79083ceb33144dd15ea337f6",
+      "usages": [
+        "item"
+      ],
+      "reason": "Large complete wooden club; exact dimensions are game data."
+    },
+    {
+      "assetId": "dcss/item/weapon/hammer_1_old",
+      "sha256": "f4386da0d9f4282d9c45b544ff0d62b0600cf7f5d197da652f86a3b1c2119211",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete pointed pick head on a handle; file names are not treated as descriptions."
+    },
+    {
+      "assetId": "dcss/item/weapon/hammer_2_new",
+      "sha256": "81e0cc3db702678bd02a30100055a547b03efb635c97c696d64b83648f486126",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete pointed pick head on a handle; file names are not treated as descriptions."
+    },
+    {
+      "assetId": "dcss/item/weapon/hammer_2_old",
+      "sha256": "85d5bcc25fa921b88f663849bc3a9db0a52d356f54e0e3247317fb8bc11d7fb9",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete pointed pick head on a handle; file names are not treated as descriptions."
+    },
+    {
+      "assetId": "dcss/item/weapon/hammer_3",
+      "sha256": "f9ddf123d9254fdb3e8896074d36c08317a6eeb235cc4449e844677537b60634",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete pointed pick head on a handle; file names are not treated as descriptions."
+    },
+    {
+      "assetId": "dcss/item/weapon/war_hammer",
+      "sha256": "69772421f894c7e33c5c962d55d04665f3c96eb473ff0e7f2f1c96d06daef250",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete heavy double hammer; weapon statistics supplied by the game."
+    },
+    {
+      "assetId": "dcss/item/weapon/lucern_hammer",
+      "sha256": "eab9cb2cd7572a974579f9618412346d67a5c1d6c1471ea4b74384f131eadc2d",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete heavy double hammer; weapon statistics supplied by the game."
+    },
+    {
+      "assetId": "dcss/item/weapon/spear",
+      "sha256": "a8e0157ab85ceafdf5d3174c5158085bff41ede01538d702a30a183ef040958e",
+      "usages": [
+        "item"
+      ],
+      "reason": "Slender complete pointed shaft; throwing use and length are game data."
+    },
+    {
+      "assetId": "dcss/item/weapon/spear_1",
+      "sha256": "fa868081c42681801ec6a0c8d22b5bdfb84d22f23567079de7ec5658afd85864",
+      "usages": [
+        "item"
+      ],
+      "reason": "Slender complete pointed shaft; throwing use and length are game data."
+    },
+    {
+      "assetId": "dcss/item/weapon/spear_4",
+      "sha256": "096bd5c15337059adc432a9339d14b2ffc6be87fef28ed00f58c398a814d61af",
+      "usages": [
+        "item"
+      ],
+      "reason": "Long-shafted pointed polearm; exact length is supplied by the equipment record."
+    },
+    {
+      "assetId": "dcss/item/weapon/spear_6",
+      "sha256": "58c497e52c3cc4919030f2974ab7f643ecb0f324730622fbaa90b38909c7c1d6",
+      "usages": [
+        "item"
+      ],
+      "reason": "Long-shafted pointed polearm; exact length is supplied by the equipment record."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/animal_skin_1_new",
+      "sha256": "5146edd20a0de811d5d0ab9364e2db88dae701e9997d216c0a8805a7f82130c4",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete hide garment with straps or a torso outline."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/animal_skin_1_old",
+      "sha256": "40a8550e5d759b9904fa214bdaf96e7213dc735f740b38e3172a2244770b8c14",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete hide garment with straps or a torso outline."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/animal_skin_2_new",
+      "sha256": "05a1e503d5460d4b4953d0fd213dd2f7a417f12c5004d55867343c272995e394",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete hide garment with straps or a torso outline."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/animal_skin_2_old",
+      "sha256": "acf4c1b800be3e1756185f064c66bf7385fcae89263c4edc93ab4b3f71c05620",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete hide garment with straps or a torso outline."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/chain_mail_1",
+      "sha256": "3bc0f26408fe0ec0dff50659c1dba795553ef4d4064a842a1971aabc0f52741d",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete chain-textured torso armour."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/chain_mail_2",
+      "sha256": "bb7bbb0e7356491b31169855c62675a4a29ba3cffdb9f2f1f20fec5c1e83a80e",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete chain-textured torso armour."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/chain_mail_3",
+      "sha256": "178fc43ad1d778077b567ecb4683876c85e9211ed39bf55dd64afb36409aec0b",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete chain-textured torso armour."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/orcish_chain_mail",
+      "sha256": "c0902a27190da4824a2876760208b40014159238a5eacef2625ded1b9617508f",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete chain-textured torso armour."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/dwarven_ringmail",
+      "sha256": "9897e9ebe7852f3518410037de468feb1e13f68524f35a33fd1a18e915c163d8",
+      "usages": [
+        "item"
+      ],
+      "reason": "Short chain-textured torso garment, selected by appearance rather than filename."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/scale_mail_1_new",
+      "sha256": "95d0d78c98c2a68d22872e863d2ad33807318d47363d103b13c941b46204ec5c",
+      "usages": [
+        "item"
+      ],
+      "reason": "Short chain-textured torso garment, selected by appearance rather than filename."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/scale_mail_1_old",
+      "sha256": "067ffb00fcf8eaff32b1d68f46cf54bd34ea98b34d7e6d7e39df4a578b5f8cda",
+      "usages": [
+        "item"
+      ],
+      "reason": "Short chain-textured torso garment, selected by appearance rather than filename."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/ring_mail_1_new",
+      "sha256": "632680408a14f84dc512f2c057d0c7e16b7c7cf8f66f8f52611d85246d73ee21",
+      "usages": [
+        "item"
+      ],
+      "reason": "Dark or brown torso with visible studs; historical filename ignored."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/ring_mail_2_new",
+      "sha256": "90ddfbefb7d063ef197bce8bb4731b30a0d6624e3a550d0c86af911aed6740f8",
+      "usages": [
+        "item"
+      ],
+      "reason": "Dark or brown torso with visible studs; historical filename ignored."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/robe_1_new",
+      "sha256": "b799ce6c3bc0a89bf7c4d41ab59efab1b20effca00eefbe56967bc5adbfc18a4",
+      "usages": [
+        "item"
+      ],
+      "reason": "Plain complete belted robe as everyday clothing."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/robe_1_old",
+      "sha256": "7989e17d11e035498bc0b671e0202efa94fe948908554cf2a8fa6a755ba83c34",
+      "usages": [
+        "item"
+      ],
+      "reason": "Plain complete belted robe as everyday clothing."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/robe_2_new",
+      "sha256": "33995e80a2f0d60416e88509966c272c31d127df57e4f228cd82ee405a111ba5",
+      "usages": [
+        "item"
+      ],
+      "reason": "Plain complete belted robe as everyday clothing."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/robe_art_1",
+      "sha256": "ce12495d9c434c296ff6f180ecee37c475665933bd3dfd64df4942fa81bc47f2",
+      "usages": [
+        "item"
+      ],
+      "reason": "Decorated complete robe with gold trim or belt."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/robe_art_2",
+      "sha256": "f44408c0242f157438d3a7e79a0f7fa6ac9c05d98cd83da465ce4dc594746d1e",
+      "usages": [
+        "item"
+      ],
+      "reason": "Decorated complete robe with gold trim or belt."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/robe_ego_1",
+      "sha256": "de2da19c17d76a591d6d557f81bfe9ccc50e6db7cadbea18ae4f3c6cafc549de",
+      "usages": [
+        "item"
+      ],
+      "reason": "Decorated complete robe with gold trim or belt."
+    },
+    {
+      "assetId": "dcss/item/armor/torso/robe_ego_2",
+      "sha256": "51f54cca61764a75635e6bc773501444b1743e584c1c692c226102dce85a71ed",
+      "usages": [
+        "item"
+      ],
+      "reason": "Decorated complete robe with gold trim or belt."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/haste_old",
+      "sha256": "c765ecb3dbc60bd5b6acc0711a56adaf3ea2de602bfcf16d52619842a6547d4a",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Running figure or boot with motion streaks."
+    },
+    {
+      "assetId": "dcss/gui/spells/air/swiftness_new",
+      "sha256": "bdcc4f9e862967d0705fd805e99cbc5236c63c849817678f5c41f79f1ce99c21",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Running figure or boot with motion streaks."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/slow_new",
+      "sha256": "8c11a4d75547464e34efd98ab751166bce454d7b315d7569ba8a1f5b0db1fc11",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Hourglass or hand beside an hourglass; timing rules remain separate."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/extension",
+      "sha256": "317758e751b7d43ff0907544e5f747384a3829113d3bfa0722728730dd1bbcc0",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Hourglass or hand beside an hourglass; timing rules remain separate."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/invisibility_new",
+      "sha256": "db45b32bf6969683eddabdb910896f491abb8e47a7af5449a69ff520a806b765",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Faint outlined humanoid."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/invisibility_old",
+      "sha256": "eeaf58b1a5792eed124251c0a58397d8724a77a80d06de222566590702b5fd93",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Faint outlined humanoid."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/see_invisible",
+      "sha256": "cf6d7b5fcaacb3d79278d4c154cf08c05fee998b5b67db7f3a38a94e2f9170d7",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Eye above a faint figure as a perception motif."
+    },
+    {
+      "assetId": "dcss/gui/spells/divination/detect_traps",
+      "sha256": "68401a8ce6e5c8648e763f144dcfbaf0f79489553564364f214bf40344e48186",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Eye above a floor trap; does not reveal traps without the game check."
+    },
+    {
+      "assetId": "dcss/gui/spells/divination/detect_creatures",
+      "sha256": "5f002f86f2766d11492f842e16dcd61e44eca1d9b2ccacfd0cfb7126ff58d7c3",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Eye over a humanoid target."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/mass_confusion_new",
+      "sha256": "50910e45800768796da848ef5159b09a655d50186d2e0842030ba8ef1c327ac5",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Question marks as a confusion motif."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/enslavement_new",
+      "sha256": "bbc1c26a08edae911e7e72d03fee589a9925e45a37e0c0ac2fcb99f2261d4344",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Heart motif; charm rules are not imported from DCSS."
+    },
+    {
+      "assetId": "dcss/gui/spells/translocation/phase_shift_old",
+      "sha256": "b1a247f6f653fef809906cdae8edaa388e970f7f1cc137334b26741f2bc156e6",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Humanoid beside a pale duplicate."
+    },
+    {
+      "assetId": "dcss/gui/spells/translocation/apportation_new",
+      "sha256": "e7009f47e2baab1f6b4d274199334221641faeb76d9ac702671a9ed04c054e63",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Hand under an object with a dotted movement trail."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/spectral_weapon",
+      "sha256": "b2b40fe1c73d7b0ab0d3d254974ac284745eb4322222799386d2656afaea19d2",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Glowing or spectral sword motif."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/sure_blade_old",
+      "sha256": "ef2bfa78af2069da6a1fd6abb6f2f49b0f55e758ef5d7ea29024f9cd22da6dc7",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Glowing or spectral sword motif."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/cause_fear_new",
+      "sha256": "740c6964b56a95d395465fc1ee1c03b0aa3fe4efc5516dca52e2613bc6817154",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Hooded skull or screaming face."
+    },
+    {
+      "assetId": "dcss/gui/spells/enchantment/cause_fear_old",
+      "sha256": "e43b360c43ad976c5913f66d2d3064ef458492a974ab43d31dccbd735d6f3766",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Hooded skull or screaming face."
+    },
+    {
+      "assetId": "dcss/dungeon/trees/mangrove_1",
+      "sha256": "a460cb1f9d355a91869f12cf87c867a05bef2e312aae13cb610dcb0715fbbf4b",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Whole leafy tree with exposed roots; a map prop, not a completed forest landscape."
+    },
+    {
+      "assetId": "dcss/dungeon/trees/mangrove_2",
+      "sha256": "6abad2b87a67dc62c95a5e94a274055c6886d0ad52991eb6ad2f175362515642",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Whole leafy tree with exposed roots; a map prop, not a completed forest landscape."
+    },
+    {
+      "assetId": "dcss/dungeon/trees/mangrove_3",
+      "sha256": "933886600301c5fe067684c7f02b4ac2f784256b0605436929d0ab61bdc8b79c",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Whole leafy tree with exposed roots; a map prop, not a completed forest landscape."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/gargoyle",
+      "sha256": "a5e6a72d555be0779d23f7ff9e0228c9e9f9bed85c62a685f2b96bccac421dd7",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole winged stone statue creature."
+    },
+    {
+      "assetId": "dcss/monster/yaktaur_new",
+      "sha256": "342f8bf507712c6abf9f04cbe9ccd625a23930e67bc73c616f578d82828c1d21",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete humanoid torso joined to a horse body; weapon variants remain scene choices."
+    },
+    {
+      "assetId": "dcss/monster/yaktaur_old",
+      "sha256": "2e4dda40a4538f0de9c4428ac17a3e9ba5b59da4edeff08976422123f7918a24",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete humanoid torso joined to a horse body; weapon variants remain scene choices."
+    },
+    {
+      "assetId": "dcss/monster/yaktaur-melee_new",
+      "sha256": "c79372643aa1eb6ac8e8e4960d7fdfd2f135c0cfa2b97ae4bedff29aca9d2bac",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete humanoid torso joined to a horse body; weapon variants remain scene choices."
+    },
+    {
+      "assetId": "dcss/monster/yaktaur-melee_old",
+      "sha256": "867f30ebdd70c0557cba39f711d2c364325e615dd6902df48b385722ab0fcade",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete humanoid torso joined to a horse body; weapon variants remain scene choices."
+    },
+    {
+      "assetId": "dcss/monster/dragons/dragon",
+      "sha256": "4901b805c883240c310d39fa61010ab6806c9f911bec2c2235c3a068f20c45d4",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole winged or long-tailed dragon silhouette; no species colour or age inferred."
+    },
+    {
+      "assetId": "dcss/monster/dragons/iron_dragon",
+      "sha256": "283b3a39145b25b371c4fc41ca1334b17fc48297cf68513c052bb29df87258bf",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole winged or long-tailed dragon silhouette; no species colour or age inferred."
+    },
+    {
+      "assetId": "dcss/monster/dragons/steam_dragon",
+      "sha256": "966f95a105614449176c0525ac4dbabbe99c62c827f64bae5aa8a5c4f4cb3be9",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole winged or long-tailed dragon silhouette; no species colour or age inferred."
+    },
+    {
+      "assetId": "dcss/monster/dragons/storm_dragon_new",
+      "sha256": "6869ddd9c830d2b1fe7547bf5cf13f65e405b1b9156bc635194329d1b9c5a2c0",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole winged or long-tailed dragon silhouette; no species colour or age inferred."
+    },
+    {
+      "assetId": "dcss/item/misc/magic_lamp",
+      "sha256": "ecd6a146817bc6af176eedce484f02a46e70f9d281a0fe857015692447b889b8",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete shallow oil-lamp silhouette; no magical ability is inferred."
+    },
+    {
+      "assetId": "dcss/item/armor/headgear/hat_1",
+      "sha256": "8af7a6a31e628205cade07b755869c467f580a8be0bcaba3def998ccfc47a9a8",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete pointed hat; its powers are supplied by game data."
+    },
+    {
+      "assetId": "dcss/item/armor/headgear/hat_2",
+      "sha256": "484720ebe9d1f7d5414a33c52ec605caaad4ef547901db1f69cddcf59709f606",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete pointed hat; its powers are supplied by game data."
+    },
+    {
+      "assetId": "dcss/item/armor/headgear/hat_3",
+      "sha256": "4c4f626336c7c21b7ce72114680f0bdd40cb4008c406d12ca9a9b282ff0908b0",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete pointed hat; its powers are supplied by game data."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_deck_new",
+      "sha256": "a0ce88be718d109f58cc18051f676bcfe7726e9fc5a665e9767b03cca42cce1e",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete patterned card deck; effects are not imported from the source game."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_deck_old",
+      "sha256": "ed5f2e144f89cb03315aedb21fb3d8027353517521c2c38184c9f20f836f9ae4",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete patterned card deck; effects are not imported from the source game."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_deck_rare_new",
+      "sha256": "0a246ef3cd566efb715207d9dca50b99cb372db5174367ed3eac592670226cca",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete patterned card deck; effects are not imported from the source game."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_deck_rare_old",
+      "sha256": "7ff111f8b59ff87dbbb353e6039c5bf21b273ffa53da87d2717a68fb61ba31ba",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete patterned card deck; effects are not imported from the source game."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_fan_new",
+      "sha256": "cda89c62d8e4a7d51b3b6dff377fda9604d070bebc8787f1d0939c5b4d2a4ae1",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete handheld folding fan; wind power remains an item property."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_fan_old",
+      "sha256": "460fa7d880ffd9f11c1ec1ef3aaaaa8291f61364b06827b1441d2f98938a02d7",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete handheld folding fan; wind power remains an item property."
+    },
+    {
+      "assetId": "dcss/item/armor/back/cloak_1_leather",
+      "sha256": "57c505dcd93506c3709038964cae1e8286e00d32f5a09be5b1935d82ebf8b3f8",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete cloak as a base-form proposal; transformed wings/fins and hidden powers are not depicted."
+    },
+    {
+      "assetId": "dcss/item/armor/back/cloak_2",
+      "sha256": "c072e5656fd5dcaf8991974d996a1302f1840c82643c333f5d71ac2ad8d5e171",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete cloak as a base-form proposal; transformed wings/fins and hidden powers are not depicted."
+    },
+    {
+      "assetId": "dcss/item/armor/back/cloak_3",
+      "sha256": "942aeab8417e0f29524c5392afecc8c38aaf9fc42b93536174effc7ccfaa9aa5",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete cloak as a base-form proposal; transformed wings/fins and hidden powers are not depicted."
+    },
+    {
+      "assetId": "dcss/item/armor/back/cloak_4",
+      "sha256": "a94608f8729bdd3883f6d663c2215a190f16d0b3b7c168a9b0710144181db30f",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete cloak as a base-form proposal; transformed wings/fins and hidden powers are not depicted."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_stone_new",
+      "sha256": "914d8084d525d53c5e52035970109558ac28394ac16678bfbcb9e6dc93b1d25a",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete stone; luck and elemental control are hidden item properties."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_stone_old",
+      "sha256": "84d80ac19a6d1706a800b90a0d644d40f396af2b88dedc90a332184e670048e8",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete stone; luck and elemental control are hidden item properties."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/air_elemental_old",
+      "sha256": "449232da1d5c7be385db277d5966b7ecfb73d14ee655e466e74eaa1d0d90e533",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole translucent tornado-like air creature."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/clay_golem",
+      "sha256": "d4b1c20ecc05f2da6b9354d2b7b29a20325a41492abf1c76a3c391da11493a0b",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole tan blocky humanoid statue."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/iron_golem",
+      "sha256": "6527899baff552ae87ff2fd5c504e676455c05415ad85dd9e5722c7aa2409ee8",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole grey segmented metal statue."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/flesh_golem",
+      "sha256": "b96076db12bfaaa55cc4aa0ee5d6d1716a7e3114d60489f7ebf5e6e723e536f0",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole broad brown stone humanoid; chosen by visible stone form, not the source filename."
+    },
+    {
+      "assetId": "dcss/monster/undead/wraith",
+      "sha256": "141ff41df1c34981bdc717b7f2a5780d28a8c7273e33f842a530db00b2c7d159",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Whole grey spectral skeletal figure."
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-36-kobolds:icon-034",
+      "sha256": "9a2a260363eddf2e355090070bfe22763254d7a8f9f553d918d40d144c910b1a",
+      "usages": [
+        "map_actor"
+      ],
+      "replace": true,
+      "reason": "Visually rechecked complete toothed open chest creature; not an ordinary container."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/sling_bullet_1_old",
+      "sha256": "008d8f2365c047ecdc829ee3d11c4a280aff061c7c66c0432ac6e492760cbec0",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete rounded sling projectile; quantity and material are game data."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/sling_bullet_2_new",
+      "sha256": "57e871b76c8a2f63e757d024224f5eaa70694957c9ac8a6d6acbef371a9e3912",
+      "usages": [
+        "item"
+      ],
+      "reason": "Complete rounded sling projectile; quantity and material are game data."
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/needle-c",
+      "sha256": "5c746f3bc43d6273b981559082a479163da88d041d7cc50ad8e29034fddcafca",
+      "usages": [
+        "item"
+      ],
+      "reason": "Small complete narrow dart; quantity and poison coating are not visually inferred."
+    },
+    {
+      "assetId": "dcss/monster/animals/fire_crab",
+      "sha256": "8958cf54c5bbbb72f2e56e579d6bfffd585f52e8b9d87d758dbd34f396fb5dd1",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete crab; giant size is supplied by the scene."
+    },
+    {
+      "assetId": "dcss/monster/animals/moth_of_wrath_new",
+      "sha256": "d16996911be030b8294fcd1da89ba95a0cca51559fa2bb4188786a2b1cf543df",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete crab; giant size is supplied by the scene."
+    },
+    {
+      "assetId": "dcss/monster/animals/moth_of_wrath_old",
+      "sha256": "c7eaea4b99828bc3850f6e80bb8bc86246abf82320ca71405bb734649ed2256c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete crab; giant size is supplied by the scene."
+    },
+    {
+      "assetId": "dcss/monster/animals/wolf_spider_old",
+      "sha256": "a3b025bd307e8f695525037e58ea03f6a3ea5768d9bdb24c0ff507e6d60750b1",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete brown many-legged spider; giant scale is a game property."
+    },
+    {
+      "assetId": "dcss/monster/undead/mummy",
+      "sha256": "723300c71148cf2b4980f412799c1ef20e3e61912405a31b420945568071edbb",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete wrapped humanoid, optionally with a headdress."
+    },
+    {
+      "assetId": "dcss/monster/undead/guardian_mummy",
+      "sha256": "8efdd47f2b71650f6b923906a05f64489aca36eca701a687879053745d430c51",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete wrapped humanoid, optionally with a headdress."
+    },
+    {
+      "assetId": "dcss/monster/undead/greater_mummy",
+      "sha256": "6ac3019806d9499b0b368b9a693fa262209cccb7f7aebaebb8d65b7dcada7919",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete wrapped humanoid with ornate headdress or staff."
+    },
+    {
+      "assetId": "dcss/monster/undead/mummy_priest",
+      "sha256": "68ea1297d8f1e3eefaee94849c0fad7e9e2d09c51eac15de398b20545dd6184a",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete wrapped humanoid with ornate headdress or staff."
+    },
+    {
+      "assetId": "dcss/monster/hippogriff_new",
+      "sha256": "48804b23b4dfae7ecdc32559375acc21d7c23dfc843387274279e99081af7c13",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete eagle-headed winged quadruped as the mythic creature illustration."
+    },
+    {
+      "assetId": "dcss/monster/hippogriff_old",
+      "sha256": "d2a2fa263fe5023cb5b21787e6146beaae91c53a880bab8e6544968f0e63faba",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete eagle-headed winged quadruped as the mythic creature illustration."
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-36-kobolds:icon-001",
+      "sha256": "943ed55620d62f663c19006e36d03c86fccfcf8c234a09d5bae8d86cf5cffb53",
+      "usages": [
+        "map_actor"
+      ],
+      "replace": true,
+      "reason": "Visually rechecked small whole red reptilian humanoid with tail and blade; not an inventory item."
+    },
+    {
+      "assetId": "dcss/gui/spells/earth/passwall_new",
+      "sha256": "8e54f7348e78387420e35e54b75ff30bbb093465828c37472b6cd6df154780b6",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Narrow stone doorway as passage through a wall motif."
+    },
+    {
+      "assetId": "dcss/gui/spells/earth/shatter_old",
+      "sha256": "b460d3202ba2363255d836de6c78784f91c06221d778bbc496a1e278baef4b6a",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Burst over a stone base."
+    },
+    {
+      "assetId": "dcss/gui/spells/earth/statue_form_old",
+      "sha256": "ad91f6d6b168a35bd40f944a5e6b02c19b8ff651d899b64d4b0ec22410781c0e",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Grey statue-like humanoid with segmented limbs."
+    },
+    {
+      "assetId": "dcss/gui/spells/ice/freezing_cloud_new",
+      "sha256": "d9575db641a0111a87ba2416dc0065e45035944262878fd8ff5303a11dcfebfc",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Icy cloud or vortex with snow-like sparkles."
+    },
+    {
+      "assetId": "dcss/gui/spells/ice/ice_storm_old",
+      "sha256": "600739815a130837fb54862f18328a97833b245f2e3f86494f8e74b130b21e18",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Icy cloud or vortex with snow-like sparkles."
+    },
+    {
+      "assetId": "dcss/gui/spells/poison/venom_bolt_new",
+      "sha256": "b828af53041e7ade39d867d6087409e441eb47c229352971b6a81834471fb332",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Green beam or projectile with a droplet; poison/acid distinction comes from the named spell."
+    },
+    {
+      "assetId": "dcss/gui/spells/poison/venom_bolt_old",
+      "sha256": "e0891a1f50906da7ced10bcf10e0086473cebeac7e108ce3e0c769e3ed811830",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Green beam or projectile with a droplet; poison/acid distinction comes from the named spell."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/call_canine_familiar_old",
+      "sha256": "2485975e67b78d6b1eb7e06bed371f28db340d4b26b6862a168b5ef99b3c780a",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Small animal above a summoning ring; selected familiar species must match."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/summon_small_mammals",
+      "sha256": "7f1ff309be8f86b98d748d374ef68cf9d4ba323eee5bfc7cf7d6e8a4e1cc307d",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Small animal above a summoning ring; selected familiar species must match."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/monstrous_menagerie",
+      "sha256": "50d048998658a825da5cbe05e999dd871701cbc3f19e33ca1cca681ad1cd10d9",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Animal above a summoning ring; exact species and count remain game data."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/summon_small_mammal",
+      "sha256": "c328fadf17cd78aa26ba8d568e31ee99fd4588d607ee9206b1d5d246a5b5f740",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Animal above a summoning ring; exact species and count remain game data."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/summon_elemental",
+      "sha256": "d590323a17f1e8ad0c5427ac6016af29e44e12976a9b9cd97e58ff9c269cd470",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Four coloured elemental drops above a summoning ring."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/summon_demon_new",
+      "sha256": "a6921deabe744596b3c35c822b9bffa96b917de97af689484e8ffa3e7427390b",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Horned or winged creature above a summoning ring."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/summon_demon_old",
+      "sha256": "c3731a1761d3fff7c443b57f670ea4fc0e2326587ee340881150bb428982f5b2",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Horned or winged creature above a summoning ring."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/summon_horrible_things",
+      "sha256": "61f1e42e9a31155d9ea0bddc2b9cd87818046c9d413024b5ce52e8df3b48f096",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Tentacles rising from a summoning ring."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/summon_shadow_creatures_new",
+      "sha256": "6aafdd2ceda4d4cadcec5ebe22f4064f9096b055f378d4a0e673e16336f301fb",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Dark humanoid within a magical frame."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/summon_dragon",
+      "sha256": "9e08d788e8eb86121023b414e27d30d99d41ce7b9606e869e4bc939ba38c7e4d",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Horned winged draconic head as a conjuration motif."
+    },
+    {
+      "assetId": "dcss/gui/spells/summoning/summon_forest",
+      "sha256": "0f012237b50d04c7df605d3b6f38c526bdadd5c12b1211f3cbf9754d6690a93a",
+      "usages": [
+        "spell"
+      ],
+      "reason": "Tree standing over a magical ground ring."
+    },
+    {
+      "assetId": "dcss/gui/spells/components/stone",
+      "sha256": "6ef30dd9dd204cc9ef500311691fc97756a35c2fa2af416d5a90587cf670d12d",
+      "usages": [
+        "terrain_tile"
+      ],
+      "reason": "Visually inspected unframed grey stone surface filling a 32x32 square."
+    },
+    {
+      "assetId": "dcss/gui/spells/components/stone_cracked",
+      "sha256": "d9b8692f8c423ba8a82538b5f96f7bec6ff9070fa704067c0745b0ff9bd5b792",
+      "usages": [
+        "terrain_tile"
+      ],
+      "reason": "Visually inspected cracked grey stone slab filling a 32x32 square."
+    },
+    {
+      "assetId": "dcss/gui/spells/components/stones",
+      "sha256": "a22e2b2e3beef040173ab52113f93577d998652a11dd355982558a7d01632399",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Scattered broken stones as a rubble overlay; no intact column or creature."
+    },
+    {
+      "assetId": "dcss/dungeon/boulder",
+      "sha256": "12eaaf1a31e912811c07de885e12440ea143d75fe97db52fb8852d5fe15a9aab",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Visually inspected large rounded brown boulder; transparent background remains intact."
+    },
+    {
+      "assetId": "dcss/dungeon/mold_large_1",
+      "sha256": "45cef4330b4c9ed6bddd0584553d9ee736269eaf06a4a39940cffe25bf3cd929",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Scattered dark-green organic patches as moss-like ground cover; overlay, not a full ground texture."
+    },
+    {
+      "assetId": "dcss/dungeon/mold_large_2",
+      "sha256": "1d8623f6643e065f0a30749b18eefa21d194855cc74f019b4314a1b70d833611",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Scattered dark-green organic patches as moss-like ground cover; overlay, not a full ground texture."
+    },
+    {
+      "assetId": "dcss/dungeon/mold_large_3",
+      "sha256": "be65dd628fe5d50a45a767f057e8f9f313097b30b884a0ba1613c90cd1e3ae68",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Scattered dark-green organic patches as moss-like ground cover; overlay, not a full ground texture."
+    },
+    {
+      "assetId": "dcss/dungeon/mold_large_4",
+      "sha256": "ceb1e3d0bd157b027c2e46fc5ab510a7b082b889afdf39f8dd4424a501921a7e",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Scattered dark-green organic patches as moss-like ground cover; overlay, not a full ground texture."
+    },
+    {
+      "assetId": "dcss/dungeon/statues/crumbled_column_2",
+      "sha256": "f44d71d8b322e3b7f1c3cee2be0858cd036f86fcca14ad883ea6438228661998",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Visually inspected grey column on a base, including damaged variants."
+    },
+    {
+      "assetId": "dcss/dungeon/statues/crumbled_column_3",
+      "sha256": "76b21c08a14bded81f2c29f610a4e001f9ac5f556e66b4295ae56354bafad8a9",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Visually inspected grey column on a base, including damaged variants."
+    },
+    {
+      "assetId": "dcss/dungeon/gateways/stone_stairs_up",
+      "sha256": "f64a06e867ea63117250d78afef926733f0b078d662c85564dc403292013acdc",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Visually inspected stone steps rising diagonally."
+    },
+    {
+      "assetId": "dcss/dungeon/gateways/stone_stairs_down",
+      "sha256": "3bd84b18c0ad24584cb80dd0948908c91546cb0364c00359b6fa75b4574482c9",
+      "usages": [
+        "prop"
+      ],
+      "reason": "Visually inspected stairwell descending into a dark rectangular pit."
+    },
+    {
+      "assetId": "dcss/monster/animals/basilisk",
+      "sha256": "8f53b7fc1435a257397079bcb097c26b374003dbb74b265b2b74d9515d0559e9",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Basilisk."
+    },
+    {
+      "assetId": "dcss/monster/cyclops_new",
+      "sha256": "9a630b4cb1699af6f2e1eee056ba99272f4aa7cb0b18318ad4a020536cef9844",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Cyclops."
+    },
+    {
+      "assetId": "dcss/monster/death_knight",
+      "sha256": "da1ddd4500b411966e39d84a2d8fe75d510736bebe3ba100ed9622215cb06800",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Death Knight."
+    },
+    {
+      "assetId": "dcss/monster/dryad",
+      "sha256": "cd3d69eccc4e8926db2d8ad19c495b1a84bb959e3018f30415050600701a3c8d",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Dryad."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/earth_elemental",
+      "sha256": "03c31782f8047f92d6662701565a1aa6599d862f5bd852c950736d379dc83596",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Earth Elemental."
+    },
+    {
+      "assetId": "dcss/monster/ettin_new",
+      "sha256": "3bd1c7c2de9bcb720c81554ec256b4ef99bcfbdd6040b731a1979d51e5855c03",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Ettin."
+    },
+    {
+      "assetId": "dcss/monster/fire_giant_new",
+      "sha256": "71a2fc3b1ebd46f2a69da5a75657b5814a54893ce6462a86d0b16b9d06b15010",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Fire Giant."
+    },
+    {
+      "assetId": "dcss/monster/frost_giant_new",
+      "sha256": "430ec28c6219976662242fbd736c3bacca40b3629c66f6351754b92cf075df89",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Frost Giant."
+    },
+    {
+      "assetId": "dcss/monster/undead/ghoul",
+      "sha256": "741793801a46abb50e67c7b7b0c788b91cef5b8f84d555a2d15b1e14077e92e9",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Ghoul."
+    },
+    {
+      "assetId": "dcss/monster/gnoll_new",
+      "sha256": "793fe68a7be967c82718b77ca1b87443814b5566ac96d0f15df8f156e04b6a1b",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Gnoll."
+    },
+    {
+      "assetId": "dcss/monster/goblin_new",
+      "sha256": "984333374dee954ca7c44062b2d963e37e62f28ecbdfe2200183a5e2510da93c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Goblin."
+    },
+    {
+      "assetId": "dcss/monster/griffon",
+      "sha256": "3fcd80675751b891fd272d8bf73fbf4c4c718411a6d7365912cf3474d16ffbad",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Griffon."
+    },
+    {
+      "assetId": "dcss/monster/harpy",
+      "sha256": "eaaf3dc866bc919c45100dbc20d710315a06ab83f0129880af05f61917a7e1da",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Harpy."
+    },
+    {
+      "assetId": "dcss/monster/hill_giant_new",
+      "sha256": "b5ff9e23e21b85a19638de659eb18944c0d579456b5deb593c89f1b127841926",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Hill Giant."
+    },
+    {
+      "assetId": "dcss/monster/hobgoblin_new",
+      "sha256": "ffd6e23a2df1653e68e3e3c0a6fddca6bcc4b59682b372f93878cf4affc03a8f",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Hobgoblin."
+    },
+    {
+      "assetId": "dcss/monster/dragons/hydra_1_new",
+      "sha256": "d0fa844fe279adc95b5dca632ebfe3ca6c6168b967db04d5b21fd47b88792257",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Hydra."
+    },
+    {
+      "assetId": "dcss/monster/demons/ice_devil",
+      "sha256": "115e552ad2f8df78a1bf3a293f68d0b3f2a99410343e10ef2e242d36d292dfcb",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Ice Devil."
+    },
+    {
+      "assetId": "dcss/monster/undead/lich",
+      "sha256": "3c8d49538f2901a7f853646848978014b98bef538ce1b06beb81859b6f3233bf",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Lich."
+    },
+    {
+      "assetId": "dcss/monster/undead/manes",
+      "sha256": "a0c6ca47f595e06c819711d48ba450c0d127284c8cbeeb87d0d06f939eff69e2",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Manes."
+    },
+    {
+      "assetId": "dcss/monster/manticore",
+      "sha256": "4e1ee263cecad6d0a8a59737016c6afd3f63645df7a95bb8368fa67e69816ab1",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Manticore."
+    },
+    {
+      "assetId": "dcss/monster/merfolk",
+      "sha256": "43aec9964b260aa354f9341cefa5dc535e2a914e80a8549863a81633cded819e",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Merfolk."
+    },
+    {
+      "assetId": "dcss/monster/minotaur",
+      "sha256": "a4226d5296ab9f677d2ebff083f477caea6b8a6e6c14c1dab472bfc6525452c7",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Minotaur."
+    },
+    {
+      "assetId": "dcss/monster/orc_new",
+      "sha256": "d07423296bcd9dfe2ba4c4284c65ea94860de57e5c772b8fa34e1c6d21b855a1",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Orc."
+    },
+    {
+      "assetId": "dcss/monster/demons/pit_fiend",
+      "sha256": "76f2ffcfe014f9576cedba81e635d51ab728927fe5171c586433f2a0d6ba2657",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Pit Fiend."
+    },
+    {
+      "assetId": "dcss/monster/demons/quasit_new",
+      "sha256": "dd3653c2f922f9930dc03a471b9965cbd9fa6f781e92d0441852fd43e2857cd5",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Quasit."
+    },
+    {
+      "assetId": "dcss/monster/demons/rakshasa",
+      "sha256": "0b7b49173ce997cd2cce21c8b2c25cd240a273fdf886387b69fc0a30186ae80c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Rakshasa."
+    },
+    {
+      "assetId": "dcss/monster/raven",
+      "sha256": "ea6ff7ad45168dc4eae0b8c3c3ac253ed2419b6a602577e87c6f6d262e058cd3",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Raven."
+    },
+    {
+      "assetId": "dcss/monster/animals/salamander",
+      "sha256": "0cafe36246f42c76d21076f4f8f0ccc68e4102d76cbc3cc88935befdf02f24ac",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Salamander."
+    },
+    {
+      "assetId": "dcss/monster/satyr",
+      "sha256": "70115dbb8c75ce3c5eb0ced2e5274f0b29f5ff4021a520aafc6844d69187ca81",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Satyr."
+    },
+    {
+      "assetId": "dcss/monster/undead/shadow_new",
+      "sha256": "47729c5f96a77ff7a46d25d80b26a87ea39b6e4bce3ba230a900d57efaa73976",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Shadow."
+    },
+    {
+      "assetId": "dcss/monster/demons/shadow_demon",
+      "sha256": "abee0eba2e45f791c1abc06f57b62f564d77a031c35eb658bc589bae7db9f7dd",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Shadow Demon."
+    },
+    {
+      "assetId": "dcss/monster/stone_giant_new",
+      "sha256": "8583d363d909cce892e4050beade2c3e46161aa0cc2d97daebd2f826122bc2cc",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Stone Giant."
+    },
+    {
+      "assetId": "dcss/monster/fungi_plants/treant",
+      "sha256": "a2231517918397c63f389d7a522daa1e1f57fcb251d473b0cfb467a6026ff8ef",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Treant."
+    },
+    {
+      "assetId": "dcss/monster/undead/vampire_new",
+      "sha256": "b0d1346d767c7e98119c6a2ae753878eec6660a2258c98fb7b4927362720e7e3",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Vampire."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/water_elemental_new",
+      "sha256": "328f61c7e13803b3bf01edfde18e9ffdeaff1c7d45d3b6eded4c99f32e773d46",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Water Elemental."
+    },
+    {
+      "assetId": "dcss/monster/undead/wight_new",
+      "sha256": "6df9fd64d4b033bc4b91b326f106ecc893d15d4aa182248976953899db5e6b18",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Wight."
+    },
+    {
+      "assetId": "dcss/monster/dragons/wyvern_new",
+      "sha256": "b809d90ea34ae3a1747eada5dec698225ec4a0e7c7f899a31c92ecc4c3511240",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Wyvern."
+    },
+    {
+      "assetId": "dcss/monster/animals/catoblepas",
+      "sha256": "d01111b444d46417f772ff55bdfc36b9277441d4ccdefaa54f25c2f06f97718c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Individually inspected complete creature silhouette; source-name anatomy matches Catoblepas."
+    },
+    {
+      "assetId": "dcss/monster/animals/grizzly_bear",
+      "sha256": "afb6273770f3e5cfc6b2e13ac7aa8a5594b5e4d0128d53d79d0994cc4af651d2",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/animals/bat",
+      "sha256": "3c894b51f7b1fc4d8d3d097ee9ed39b0f9a60a0ea3a1f9947cde0010359436c6",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_beetle",
+      "sha256": "3c111194786bc90e755836f019dc0f20dff44fc069f88739be56f72c0b23867c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_blowfly",
+      "sha256": "f8efec9fe4a029636e0c41c0d52b03ecb9b4725aa3dc0f990b90acf582d367e1",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_cockroach_new",
+      "sha256": "9277a7f3985f5af80d76a957a5783dabc7c95375de86b4c0ce9f99918b16e4c0",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/animals/rat",
+      "sha256": "bad85cdda98e618d00bee98446c322d4f23ec88a00a28a801c3b705d60ccf512",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/animals/spider",
+      "sha256": "bc94f876ed363b17f04d6437c5840296be7e0a48067c9df158a335bf778d0532",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/animals/yellow_wasp",
+      "sha256": "75e020230789d4dc5939ba50e26061644dfb5a8522becff3197a5dee83289a2c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/animals/snake",
+      "sha256": "0906c7341e8a4704eebebe2df2fe760666cebf7554320bd51d0bb17ce0b17649",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/animals/alligator_snapping_turtle_new",
+      "sha256": "2f86c0f2ef25efab78f408d59d48caf94fa2f7acb9461e8a2068ead59098f662",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/undead/zombies/zombie_small",
+      "sha256": "406ce655c40f7db9fa7e92fef7741c3aab1fd29b4cdf69972a7d7d8c861629ee",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/undead/skeletons/skeleton_dragon",
+      "sha256": "7b66d3d68598a532513b2d1662ffb382b3cf22640d230537c1cad2be02b4c654",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/undead/skeletons/skeleton_snake",
+      "sha256": "633d7fd962bb81a75bcd7cb205d81e62fe5f8c75ba42c71b16442d5e6efb0419",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/ogre_mage_new",
+      "sha256": "790ce18b3544260b8ab10a31969e52dc84f0cbf012dc7d99367f3785b62cea2d",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/orc_warrior_new",
+      "sha256": "5e18152eb14f41389b0f2d92227268f061d8945186b07cd89e0db570cdf10ed9",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/orc_priest_new",
+      "sha256": "4daf5fdc9dd50ae0875e17d8e7f26daa8486a7346c67069fc20a8411db91ebf8",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/gnoll_sergeant",
+      "sha256": "57e668e1edc49f8489dcbacca981f017ea887a14727b188197ca5268adc32afe",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/gnoll_shaman",
+      "sha256": "529b74e7f711097dfc49dc5c634b579bb7a3cd89ffa271291e8f48970cb43484",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/deep_dwarf",
+      "sha256": "16d97920e9e5af440584001ecb17db4e789e32fe48623fecbcce5105f8dc0f1f",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/wizard",
+      "sha256": "fa6716e464001b83314d452027f6c2761c324ed5a116229553d83a625f89e5b0",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/human_new",
+      "sha256": "9cc25af557c796419303b7cedd1f5f563c2340ecd79c7be6067b96754cb73b7b",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/tengu",
+      "sha256": "87e420219af8a1a5ea74fa4a33001fcfa7931656ec23409e852360d5d33447e3",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/dragons/shadow_dragon",
+      "sha256": "4fec72e4ae63e35b525d843a22800fe4fd2148c87279852e85c359d5a472df39",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/dragons/ice_dragon_new",
+      "sha256": "c779f95a41454e2633e95d48837fd98ce74509e5b170e20a2d859cc75d33353e",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/dragons/golden_dragon",
+      "sha256": "41c3616b6792f4baef74ed23c1c25564e0664277ab1a4a318a155f759d6768e2",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/dragons/swamp_dragon_new",
+      "sha256": "973304d600910d72ccb309e86705f0a3155d1ae712758898c6f32d53e1ad01af",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/demons/balrug_new",
+      "sha256": "31cb5cfe8bbe766b2385666bf6bccca3fb5abd8c26399f3f4b59a84809772d9f",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/demons/efreet",
+      "sha256": "54e55ff5e0a6e845df8e03ded6064b3952f50d4a3be5a06b7629f5f5f3bc0b6e",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/demons/reaper_new",
+      "sha256": "34135ca731f96c23dc985fbb5482a751b001f0171f7e9e901c0d1566fa33f7ac",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/demons/green_death",
+      "sha256": "444f082875810776cbeafd8a70a54fc98b8a41996550200250085fef2fcd8c6c",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/demons/neqoxec_new",
+      "sha256": "213aed11350a2595fdc33f6ddd7c663fcc197b868e199d80e8c911be3b690597",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/guardian_golem",
+      "sha256": "6ed5c241b2515c92c945a41a95d0d114b39eeff009bda09817f7556cd61e1f51",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/spectral_sbl",
+      "sha256": "dbd305e110f4a53d714099623d522c08d532d59779ee6a2a4207432ff169deed",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "Complete creature body individually inspected in the anatomy-family review."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_box",
+      "sha256": "6542848a73d6464de2f7200835e759f23be8dde1400f835622b73e4cee608294",
+      "usages": [
+        "item"
+      ],
+      "reason": "A complete grey cube with visible top, front and side faces."
+    },
+    {
+      "assetId": "dcss/monster/holy/paladin",
+      "sha256": "bcd1736f041f916efe244bc877fd418f949fbd8c3ee57b15486a180a7199f96d",
+      "usages": [
+        "map_actor"
+      ],
+      "reason": "A complete humanoid in gold armor with a decorated chest; an armor appearance, not proof of class."
+    },
+    {
+      "assetId": "craftpix-986554:icon-038",
+      "sha256": "14e00ce4b49755f75b1e936f03d5d1bdcc7ab75729a53ded01a90d0fc03ba37f",
+      "usages": [
+        "item"
+      ],
+      "reason": "A complete brown humanoid doll, with limbs and stitched features."
+    },
+    {
+      "assetId": "prepared-items-native-32-01-loot:icon-026",
+      "sha256": "05905ee9dd3cb9a04ccc4bed3a2bdf33a82ae26c0d06e7888ecd50334923ecde",
+      "usages": [
+        "item"
+      ],
+      "reason": "A complete pale eye with a pink iris; represents the prosthetic eye shape."
+    }
+  ]
+}

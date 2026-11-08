@@ -1,0 +1,3193 @@
+{
+  "schemaVersion": 1,
+  "method": "Visual inspection of four numbered contact sheets at native integer scale; artwork roles checked against explicit requirement bindings.",
+  "assets": [
+    {
+      "assetId": "dcss/item/weapon/halberd_1",
+      "sha256": "cc96611f75b8d5d3d246c23da2a949029c76a643ab5d945e25c1aa26c95c1564",
+      "sheet": "current-picks-1.png",
+      "position": 1
+    },
+    {
+      "assetId": "prepared-items-native-32-29-potions:icon-003",
+      "sha256": "48503a3f2a98f2c1043c46b313ff25f82d3612c64e4485c68d5b9b33cefd4302",
+      "sheet": "current-picks-1.png",
+      "position": 2
+    },
+    {
+      "assetId": "craftpix-883583:icon-037",
+      "sha256": "327d619174b036b14140251155c6ea90a283fcbdabe97c769d5f03605d398e21",
+      "sheet": "current-picks-1.png",
+      "position": 3
+    },
+    {
+      "assetId": "craftpix-996288:icon-027_no_effect",
+      "sha256": "b2e055681a415d9cc445a0bb34c3209642fc6d9858da536a8a865fe78bb0bff7",
+      "sheet": "current-picks-1.png",
+      "position": 4
+    },
+    {
+      "assetId": "craftpix-996288:icon-025_no_effect",
+      "sha256": "29a629cddee73ae9a7c47444e778a56159a4d39b04f4c12d263e7f0860fa23e5",
+      "sheet": "current-picks-1.png",
+      "position": 5
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/arbalest_1",
+      "sha256": "4cafcecd79325e5f7b83bbaee26fde475bed4ea4427242020e1469dc8ed7fedf",
+      "sheet": "current-picks-1.png",
+      "position": 6
+    },
+    {
+      "assetId": "dcss/item/weapon/hammer_1_old",
+      "sha256": "f4386da0d9f4282d9c45b544ff0d62b0600cf7f5d197da652f86a3b1c2119211",
+      "sheet": "current-picks-1.png",
+      "position": 7
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-28-dwarf-loot:icon-002",
+      "sha256": "c488e0bf8c8b23f5c08d62c10bd61b20d5412d2650d7ba31d1badd0e68506774",
+      "sheet": "current-picks-1.png",
+      "position": 8
+    },
+    {
+      "assetId": "prepared-items-native-32-40-staves:icon-038",
+      "sha256": "1028fae492d07418f1105289c81767a237f398424f21e6604d9f9e9719d0585e",
+      "sheet": "current-picks-1.png",
+      "position": 9
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-02-axes:icon-001",
+      "sha256": "bfc0aabe834332dc9e75c0f5c13b31494f1f395f4e41d3f3830a25e8f10b61ab",
+      "sheet": "current-picks-1.png",
+      "position": 10
+    },
+    {
+      "assetId": "prepared-items-native-32-23-farming:icon-018",
+      "sha256": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
+      "sheet": "current-picks-1.png",
+      "position": 11
+    },
+    {
+      "assetId": "dcss/item/armor/torso/animal_skin_1_new",
+      "sha256": "5146edd20a0de811d5d0ab9364e2db88dae701e9997d216c0a8805a7f82130c4",
+      "sheet": "current-picks-1.png",
+      "position": 12
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-02-axes:icon-015",
+      "sha256": "3d087e779790a264b9d32798f445b9a200462ae76b8be63a32b70e4ab892dea8",
+      "sheet": "current-picks-1.png",
+      "position": 13
+    },
+    {
+      "assetId": "prepared-items-native-32-18-fruit-vegetables:icon-041",
+      "sha256": "7b66f3235dfc6f966c96230ed32e8dfe04ffa2e3368b8bef13ff7668789584ff",
+      "sheet": "current-picks-1.png",
+      "position": 14
+    },
+    {
+      "assetId": "prepared-items-native-32-23-farming:icon-047",
+      "sha256": "4a79c1afdeda3c33ca17a0f9159e5275d4ff253258475a95cf8b596b478f9ab5",
+      "sheet": "current-picks-1.png",
+      "position": 15
+    },
+    {
+      "assetId": "prepared-items-native-32-02-crafting:icon-010",
+      "sha256": "aed4de55837eed0916df21bc1efce64285e66eb5054a9442f072cdeab7b1ad0f",
+      "sheet": "current-picks-1.png",
+      "position": 16
+    },
+    {
+      "assetId": "prepared-items-native-32-40-staves:icon-017",
+      "sha256": "6bdae69a4935052c7dfcff15642e82484dd9149481366a7f8e551a031a348906",
+      "sheet": "current-picks-1.png",
+      "position": 17
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-13-spears:icon-023",
+      "sha256": "60a7cf12d3656b62e8c4250815acf3348ee4112915a3a70fd390b9e613ae562e",
+      "sheet": "current-picks-1.png",
+      "position": 18
+    },
+    {
+      "assetId": "dcss/item/weapon/greatsword_1_new",
+      "sha256": "bd82c629609e86a5cc5748509e0f34ff584b188597b7546fb6741b3357aa14e8",
+      "sheet": "current-picks-1.png",
+      "position": 19
+    },
+    {
+      "assetId": "prepared-items-native-32-40-staves:icon-023",
+      "sha256": "850d60a729265bae07cb267c3849f362534d9bef2fa1e32692c82f30c793c61d",
+      "sheet": "current-picks-1.png",
+      "position": 20
+    },
+    {
+      "assetId": "prepared-items-native-32-33-spears:icon-023",
+      "sha256": "5b7639669acf31d5df1051cdb5410bddcca652773984fcfd6ab01c6fec4152c3",
+      "sheet": "current-picks-1.png",
+      "position": 21
+    },
+    {
+      "assetId": "prepared-items-native-32-36-swords:icon-001",
+      "sha256": "d57a488835df018ce628184ed6ea7f58517d4fab6c5f35c0d35f06ed00ad8f27",
+      "sheet": "current-picks-1.png",
+      "position": 22
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-31-exotic-weapons:icon-014",
+      "sha256": "cc9dc231c5ded0ebba260b42d9b34db421cad68fa079bdc6c02a996527eef2a9",
+      "sheet": "current-picks-1.png",
+      "position": 23
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-31-exotic-weapons:icon-036",
+      "sha256": "900dfc46d23d5e74dae829ac19153903765ff75c1517004b55480b3b4bfb84a8",
+      "sheet": "current-picks-1.png",
+      "position": 24
+    },
+    {
+      "assetId": "prepared-items-native-32-40-staves:icon-014",
+      "sha256": "863e0f638f176c6364947dc406fd29e8489418a737f591e59925336ccbc23a96",
+      "sheet": "current-picks-1.png",
+      "position": 25
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/needle-c",
+      "sha256": "5c746f3bc43d6273b981559082a479163da88d041d7cc50ad8e29034fddcafca",
+      "sheet": "current-picks-1.png",
+      "position": 26
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-31-exotic-weapons:icon-016",
+      "sha256": "cc446de0989ce60ff10805128788b43acf222f7d4e0f247441dbb8fe1747d5b3",
+      "sheet": "current-picks-1.png",
+      "position": 27
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-05-cuirasses:icon-003",
+      "sha256": "ab88ec7c3922393d45062c256ac2c9265f06f867cf770521ff26e0f57c9080f3",
+      "sheet": "current-picks-1.png",
+      "position": 28
+    },
+    {
+      "assetId": "prepared-items-native-32-10-mining:icon-025",
+      "sha256": "0c7564dc70e4d314d0e524e786f46b697c52a03359a582ab87f033a8896d1b73",
+      "sheet": "current-picks-1.png",
+      "position": 29
+    },
+    {
+      "assetId": "dcss/item/armor/torso/ring_mail_1_new",
+      "sha256": "632680408a14f84dc512f2c057d0c7e16b7c7cf8f66f8f52611d85246d73ee21",
+      "sheet": "current-picks-1.png",
+      "position": 30
+    },
+    {
+      "assetId": "prepared-items-native-32-13-books:icon-001",
+      "sha256": "845cac254607633d04f5ee942684e268c7d6b4a770b22dd6b738214ca4173768",
+      "sheet": "current-picks-1.png",
+      "position": 31
+    },
+    {
+      "assetId": "prepared-items-native-32-13-books:icon-003",
+      "sha256": "44a973af9f8515e275ce82e0dd2da33b3721baa6dca9dbb092cea7afd1025a96",
+      "sheet": "current-picks-1.png",
+      "position": 32
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-22-undead-loot:icon-031",
+      "sha256": "e79c93e117bb548671664c76f2782f44d2374e8f8ec5d0a7ec7ed1778ecf34d0",
+      "sheet": "current-picks-1.png",
+      "position": 33
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-05-cuirasses:icon-007",
+      "sha256": "64b949cab9b3261179fe7df545dc09f6d7c041954ae6ae66f89a41c09f3bc8a7",
+      "sheet": "current-picks-1.png",
+      "position": 34
+    },
+    {
+      "assetId": "prepared-items-native-32-31-jewellery:icon-005",
+      "sha256": "74243022ba9a3252b611f26493d271c4a9c9b684429dbd642c9b23e32d2dba2d",
+      "sheet": "current-picks-1.png",
+      "position": 35
+    },
+    {
+      "assetId": "dcss/item/armor/torso/chain_mail_1",
+      "sha256": "3bc0f26408fe0ec0dff50659c1dba795553ef4d4064a842a1971aabc0f52741d",
+      "sheet": "current-picks-1.png",
+      "position": 36
+    },
+    {
+      "assetId": "dcss/item/armor/torso/dwarven_ringmail",
+      "sha256": "9897e9ebe7852f3518410037de468feb1e13f68524f35a33fd1a18e915c163d8",
+      "sheet": "current-picks-1.png",
+      "position": 37
+    },
+    {
+      "assetId": "prepared-items-native-32-20-fishing:icon-034",
+      "sha256": "570420e44430ea0bfdf16417e14cc4a89a2a1e9cdb662da28cd25ec169e80a8e",
+      "sheet": "current-picks-1.png",
+      "position": 38
+    },
+    {
+      "assetId": "prepared-items-native-32-33-spears:icon-003",
+      "sha256": "31d6f6b4f72dc5ab061c49e61178701813757388f5f0b8d836546292236ca448",
+      "sheet": "current-picks-1.png",
+      "position": 39
+    },
+    {
+      "assetId": "prepared-items-native-32-23-farming:icon-044",
+      "sha256": "7ae3ca5789c1ee1cabd8a19986c52757d86c5034b73ea9bfbe919f302fe30a75",
+      "sheet": "current-picks-1.png",
+      "position": 40
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-31-exotic-weapons:icon-011",
+      "sha256": "790ebe1b339c8b316a6c38c8b385eb3b00bd335a6426f4a704232b6789423ed3",
+      "sheet": "current-picks-1.png",
+      "position": 41
+    },
+    {
+      "assetId": "dcss/item/weapon/short_sword_1_new",
+      "sha256": "6c9d021438b3cdd66da83c7cbac846cd48be43ed260d28dc63275edcecdae747",
+      "sheet": "current-picks-1.png",
+      "position": 42
+    },
+    {
+      "assetId": "prepared-items-native-32-23-farming:icon-016",
+      "sha256": "27b342812e34e6a5f104ef8ce352771ec0998001651b9febaa629e6137a58a96",
+      "sheet": "current-picks-1.png",
+      "position": 43
+    },
+    {
+      "assetId": "prepared-items-native-32-05-gems:icon-002",
+      "sha256": "855a7f1abfeeb29e6056b39da0b911fdd44fd5458dd8326a4d61f2843bf5eeea",
+      "sheet": "current-picks-1.png",
+      "position": 44
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-31-exotic-weapons:icon-048",
+      "sha256": "d2c01cdf17e49e5c1e750761e50ed3e2939a6d6795b229d59b4a4360b9f7892b",
+      "sheet": "current-picks-1.png",
+      "position": 45
+    },
+    {
+      "assetId": "prepared-items-native-32-18-fruit-vegetables:icon-037",
+      "sha256": "d67c29eb0dc27a83ecb032c76b1a6f726b95d478b1edc3c5532d863975c449cb",
+      "sheet": "current-picks-1.png",
+      "position": 46
+    },
+    {
+      "assetId": "dcss/item/misc/magic_lamp",
+      "sha256": "ecd6a146817bc6af176eedce484f02a46e70f9d281a0fe857015692447b889b8",
+      "sheet": "current-picks-1.png",
+      "position": 47
+    },
+    {
+      "assetId": "dcss/item/armor/torso/plate_1",
+      "sha256": "7de29509aa674daddf52d28180d5644ddbb8b34d0ead5c0cd93e639b01b192ff",
+      "sheet": "current-picks-1.png",
+      "position": 48
+    },
+    {
+      "assetId": "prepared-items-native-32-10-mining:icon-032",
+      "sha256": "bb3d0623e22318000cc00df92765b8d0dbf14572c7d69c7b9e63450c3f46ab64",
+      "sheet": "current-picks-2.png",
+      "position": 49
+    },
+    {
+      "assetId": "prepared-items-native-32-04-crafting-materials:icon-047",
+      "sha256": "f8ab83ae6e7834bcee50812070b841abafb9ecd0365a464a9b4cad3a73fdcf21",
+      "sheet": "current-picks-2.png",
+      "position": 50
+    },
+    {
+      "assetId": "dcss/item/weapon/spear",
+      "sha256": "a8e0157ab85ceafdf5d3174c5158085bff41ede01538d702a30a183ef040958e",
+      "sheet": "current-picks-2.png",
+      "position": 51
+    },
+    {
+      "assetId": "prepared-items-native-32-23-farming:icon-001",
+      "sha256": "19b791e91ce96c1b525cae72401f410e92c4c1e2ce703440ce8885c1247fe946",
+      "sheet": "current-picks-2.png",
+      "position": 52
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-22-undead-loot:icon-013",
+      "sha256": "962388262ab36ccba9896c319a6c3d2f26bf8c70ada872996280a11091acbbc1",
+      "sheet": "current-picks-2.png",
+      "position": 53
+    },
+    {
+      "assetId": "dcss/item/weapon/war_hammer",
+      "sha256": "69772421f894c7e33c5c962d55d04665f3c96eb473ff0e7f2f1c96d06daef250",
+      "sheet": "current-picks-2.png",
+      "position": 54
+    },
+    {
+      "assetId": "prepared-items-native-32-02-crafting:icon-005",
+      "sha256": "ee364294bdb87c530466f89664c2158bd6e5e7d634fd22375672487d42a5d5c9",
+      "sheet": "current-picks-2.png",
+      "position": 55
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-02-axes:icon-016",
+      "sha256": "aacdbc7ae547174c25c5bc532f5366e60fbc6aed2f46963708fcdedbe7121788",
+      "sheet": "current-picks-2.png",
+      "position": 56
+    },
+    {
+      "assetId": "dcss/item/armor/torso/robe_1_new",
+      "sha256": "b799ce6c3bc0a89bf7c4d41ab59efab1b20effca00eefbe56967bc5adbfc18a4",
+      "sheet": "current-picks-2.png",
+      "position": 57
+    },
+    {
+      "assetId": "dcss/item/armor/torso/robe_art_1",
+      "sha256": "ce12495d9c434c296ff6f180ecee37c475665933bd3dfd64df4942fa81bc47f2",
+      "sheet": "current-picks-2.png",
+      "position": 58
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-28-dwarf-loot:icon-037",
+      "sha256": "e3c8c9c000ecf438eb7078405c179299d4b6444ea6112fd4ff6c004fe745a51b",
+      "sheet": "current-picks-2.png",
+      "position": 59
+    },
+    {
+      "assetId": "dcss/item/weapon/giant_club_new",
+      "sha256": "4dcfabc07b79a3505c84a1ff182aa72ad3201b83b408281a2afa04af12b8f900",
+      "sheet": "current-picks-2.png",
+      "position": 60
+    },
+    {
+      "assetId": "dcss/item/weapon/spear_4",
+      "sha256": "096bd5c15337059adc432a9339d14b2ffc6be87fef28ed00f58c398a814d61af",
+      "sheet": "current-picks-2.png",
+      "position": 61
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-22-undead-loot:icon-004",
+      "sha256": "4716b4ae7ebc876699baff5f7101c2589dc6ccf848711eb7c338832da8d1faed",
+      "sheet": "current-picks-2.png",
+      "position": 62
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/sling_1",
+      "sha256": "c49d236280055158ebc8b398c76bce2a6910602bd0c1cadc2f7a5c12c2777099",
+      "sheet": "current-picks-2.png",
+      "position": 63
+    },
+    {
+      "assetId": "prepared-items-native-32-36-swords:icon-012",
+      "sha256": "01a5b1397573e5bd99961c2fb02a06d4baebfb7167682c245056d36ab97ab1b7",
+      "sheet": "current-picks-2.png",
+      "position": 64
+    },
+    {
+      "assetId": "prepared-items-native-32-28-food:icon-011",
+      "sha256": "128200342e6a84b7b950b228ca22096c617d03d18ef9e3d3c39c56fc56d63176",
+      "sheet": "current-picks-2.png",
+      "position": 65
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-35-kobold-loot:icon-002",
+      "sha256": "c211d41c13be9a533b5f74b783f65f56c1d4adaa1ad0e5e8f22134d694de9b5e",
+      "sheet": "current-picks-2.png",
+      "position": 66
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-05-cuirasses:icon-009",
+      "sha256": "ff54e2d38b2c99e9925403ba97741504076c4e6e8d0866513cc16eafa74c63cf",
+      "sheet": "current-picks-2.png",
+      "position": 67
+    },
+    {
+      "assetId": "prepared-items-native-32-12-artifacts:icon-035",
+      "sha256": "b99cb3a000517bad10cc344c070fe529cd9c93f00213ece3ecbae56b70c763d1",
+      "sheet": "current-picks-2.png",
+      "position": 68
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-02-axes:icon-014",
+      "sha256": "a29a63143add20690e9b27f0f3958cd2b7c9c72b6a4fc120a4d3b1ff7c84fab9",
+      "sheet": "current-picks-2.png",
+      "position": 69
+    },
+    {
+      "assetId": "prepared-items-native-32-23-farming:icon-027",
+      "sha256": "349b741020ee620727db0969355205f099963443f4ac2802375c5fbf2aaef77d",
+      "sheet": "current-picks-2.png",
+      "position": 70
+    },
+    {
+      "assetId": "prepared-items-native-32-20-fishing:icon-041",
+      "sha256": "a6e1b1692348e72b998998ef8b61cd94339c8e1a766010d39913b54c73bffe21",
+      "sheet": "current-picks-2.png",
+      "position": 71
+    },
+    {
+      "assetId": "prepared-items-native-32-36-swords:icon-006",
+      "sha256": "a178af6d26d1fdceb937e7497727b4bcc83c9c62c443cab3f5a1c7ea7ff82625",
+      "sheet": "current-picks-2.png",
+      "position": 72
+    },
+    {
+      "assetId": "dcss/item/weapon/ranged/sling_bullet_1_old",
+      "sha256": "008d8f2365c047ecdc829ee3d11c4a280aff061c7c66c0432ac6e492760cbec0",
+      "sheet": "current-picks-2.png",
+      "position": 73
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-35-kobold-loot:icon-037",
+      "sha256": "b9b194bbeb39c363fabf40e9024a5567623e6f9d06868d63e5892cdedea064e0",
+      "sheet": "current-picks-2.png",
+      "position": 74
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-11-arrows:icon-001",
+      "sha256": "854873c9291336e05c8714ae3b510f9b10dba8a6171b2808af4d642516125f07",
+      "sheet": "current-picks-2.png",
+      "position": 75
+    },
+    {
+      "assetId": "prepared-items-native-32-32-treasure:icon-001",
+      "sha256": "c57edbdadd9b25991d6ac30e1d0ed7b7941dc833eb206a56c6ce0f2f38cf1793",
+      "sheet": "current-picks-2.png",
+      "position": 76
+    },
+    {
+      "assetId": "prepared-items-native-32-12-artifacts:icon-002",
+      "sha256": "6869e6e4bb35397fd18a6fecf6890aaced79eb5ea996177d18d4dcdccde5886d",
+      "sheet": "current-picks-2.png",
+      "position": 77
+    },
+    {
+      "assetId": "prepared-items-native-32-40-staves:icon-036",
+      "sha256": "583caf41b4508852d8d896cf109979fd49119d50736ede36cbf5be22c3280029",
+      "sheet": "current-picks-2.png",
+      "position": 78
+    },
+    {
+      "assetId": "prepared-items-native-32-33-spears:icon-018",
+      "sha256": "fde4461dd0c7e574577cb269fc08e2e1e68e4b3e9ad59cf54a13699f2857f266",
+      "sheet": "current-picks-2.png",
+      "position": 79
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-35-kobold-loot:icon-045",
+      "sha256": "f0ce56d239fbb821343f20af28d7fe2dbde6526ad00af6440a8d59bb1ed9705d",
+      "sheet": "current-picks-2.png",
+      "position": 80
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-22-undead-loot:icon-029",
+      "sha256": "0267fe372ab230753a5d72a5ca5a6b960b8fd0c609df9c7b2059dc4830747926",
+      "sheet": "current-picks-2.png",
+      "position": 81
+    },
+    {
+      "assetId": "prepared-items-native-32-28-food:icon-037",
+      "sha256": "39ab27dcaa90277ee3dc38263967c410fe1828998765f7fe1c590f558ac642c6",
+      "sheet": "current-picks-2.png",
+      "position": 82
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-31-exotic-weapons:icon-008",
+      "sha256": "7b44a86e73fcaba0575cf214af04f2a4fc3a233327f330f6440ab0961257cc6a",
+      "sheet": "current-picks-2.png",
+      "position": 83
+    },
+    {
+      "assetId": "prepared-items-native-32-04-crafting-materials:icon-010",
+      "sha256": "8653e257cf1f677f0bfe8cd9cf0f485e5c34b195dbee2ae244fa13851e2167d9",
+      "sheet": "current-picks-2.png",
+      "position": 84
+    },
+    {
+      "assetId": "prepared-items-native-32-02-crafting:icon-017",
+      "sha256": "265a71ef176e6b8c5b8463aa6a71a6b0913815938b91a43ba72d45d813a1b42c",
+      "sheet": "current-picks-2.png",
+      "position": 85
+    },
+    {
+      "assetId": "craftpix-883583:icon-001",
+      "sha256": "cf8047e965c988f64ba3f67ed81bfdac693f085b0e6f7353760a3ed27b37d4d5",
+      "sheet": "current-picks-2.png",
+      "position": 86
+    },
+    {
+      "assetId": "prepared-items-native-32-23-farming:icon-046",
+      "sha256": "98d805edc51c361ee01898bdadb87c1a5fabad3fb5dcdaf0ce1f84d0c80e3ce9",
+      "sheet": "current-picks-2.png",
+      "position": 87
+    },
+    {
+      "assetId": "prepared-items-native-32-40-staves:icon-002",
+      "sha256": "0551bc597194edaa801f057dba3680f76021f8aed54ec0533d65ba7b6c434995",
+      "sheet": "current-picks-2.png",
+      "position": 88
+    },
+    {
+      "assetId": "dcss/item/armor/back/cloak_1_leather",
+      "sha256": "57c505dcd93506c3709038964cae1e8286e00d32f5a09be5b1935d82ebf8b3f8",
+      "sheet": "current-picks-2.png",
+      "position": 89
+    },
+    {
+      "assetId": "prepared-items-native-32-12-artifacts:icon-014",
+      "sha256": "6c550bd19dda602c8b4d9820303ac92b809c1f3ea4a8d7ecc96ec2be35c196f2",
+      "sheet": "current-picks-2.png",
+      "position": 90
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-04-boots:icon-002",
+      "sha256": "b52245ecbd38ab3a6b8e0599652925f3ada98a9e0644a97ab45aa28382f587f9",
+      "sheet": "current-picks-2.png",
+      "position": 91
+    },
+    {
+      "assetId": "prepared-items-native-32-24-scrolls:icon-001",
+      "sha256": "64a5a480afee32b787383e21795781f5a64968c12244f381dbe083633cbfae66",
+      "sheet": "current-picks-2.png",
+      "position": 92
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-28-dwarf-loot:icon-001",
+      "sha256": "fd302d158730d79bec3647224317e0a9cce26d44fd81d7130b86bcee80282a96",
+      "sheet": "current-picks-2.png",
+      "position": 93
+    },
+    {
+      "assetId": "dcss/item/armor/headgear/hat_1",
+      "sha256": "8af7a6a31e628205cade07b755869c467f580a8be0bcaba3def998ccfc47a9a8",
+      "sheet": "current-picks-2.png",
+      "position": 94
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-28-dwarf-loot:icon-015",
+      "sha256": "b4e7e479045c6133f1421005ddc5eb3805b7ebc5a2c96f03d24b3db33da9583d",
+      "sheet": "current-picks-2.png",
+      "position": 95
+    },
+    {
+      "assetId": "dcss/item/misc/misc_fan_new",
+      "sha256": "cda89c62d8e4a7d51b3b6dff377fda9604d070bebc8787f1d0939c5b4d2a4ae1",
+      "sheet": "current-picks-2.png",
+      "position": 96
+    },
+    {
+      "assetId": "prepared-items-native-32-04-crafting-materials:icon-012",
+      "sha256": "1a92b57cd262f2c422353b41726a531b2ae6f8f626fa544fa17f3a575c48f75f",
+      "sheet": "current-picks-3.png",
+      "position": 97
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-28-dwarf-loot:icon-013",
+      "sha256": "ded3a4dcb3181b0d95c1576b1b5801c96b59d468cb850649fe8c846124afdbe5",
+      "sheet": "current-picks-3.png",
+      "position": 98
+    },
+    {
+      "assetId": "dcss/item/misc/misc_stone_new",
+      "sha256": "914d8084d525d53c5e52035970109558ac28394ac16678bfbcb9e6dc93b1d25a",
+      "sheet": "current-picks-3.png",
+      "position": 99
+    },
+    {
+      "assetId": "dcss/item/misc/misc_deck_new",
+      "sha256": "a0ce88be718d109f58cc18051f676bcfe7726e9fc5a665e9767b03cca42cce1e",
+      "sheet": "current-picks-3.png",
+      "position": 100
+    },
+    {
+      "assetId": "prepared-items-native-32-31-jewellery:icon-001",
+      "sha256": "ec8dcde2c6c72b150e5bba34fe43f63a2cc750ad3816fa1d1d1cfba3a6beec74",
+      "sheet": "current-picks-3.png",
+      "position": 101
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-01-bracers:icon-007",
+      "sha256": "6a9c4beb9f1c18a9d126ab6555f4f59770d1b86ab9e0dabc8a113ab37930da79",
+      "sheet": "current-picks-3.png",
+      "position": 102
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-28-dwarf-loot:icon-040",
+      "sha256": "9ee75183813e5bb545a269b9b1d65febf57274604592cc4830867a39e276bc16",
+      "sheet": "current-picks-3.png",
+      "position": 103
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-01-bracers:icon-008",
+      "sha256": "b66ef8db59813112ec376d4f57d3dfcd1590a7db99589fae5451f134e9983f5c",
+      "sheet": "current-picks-3.png",
+      "position": 104
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-01-bracers:icon-003",
+      "sha256": "edc727c0ed1b55648672f8cde204353d330b1624f9d2ee6ed773a51560bcbb17",
+      "sheet": "current-picks-3.png",
+      "position": 105
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-01-bracers:icon-013",
+      "sha256": "d3d984acff0540ad3d6a52e063c258ab5e43fef273ceaded681cf8a628479b71",
+      "sheet": "current-picks-3.png",
+      "position": 106
+    },
+    {
+      "assetId": "prepared-items-native-32-23-farming:icon-023",
+      "sha256": "193872d8a05601f16d6a6589f9620c7cdabdc3b0501f691018b405dd33e9114c",
+      "sheet": "current-picks-3.png",
+      "position": 107
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-35-kobold-loot:icon-001",
+      "sha256": "e6f29add14cf81fd0de29d586b03c2b63797ead76a62e41c09977bf5cd6e052e",
+      "sheet": "current-picks-3.png",
+      "position": 108
+    },
+    {
+      "assetId": "prepared-items-native-32-10-mining:icon-042",
+      "sha256": "43a062569058f9989ce4e9b314866a6e03086940c82bf9f6000a5d11aba30bee",
+      "sheet": "current-picks-3.png",
+      "position": 109
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-28-dwarf-loot:icon-023",
+      "sha256": "3974d01f2e824408e6a8db94d79fc83fbc62e4c6066a02203c6c0e3ded7642b1",
+      "sheet": "current-picks-3.png",
+      "position": 110
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-28-dwarf-loot:icon-036",
+      "sha256": "d2eae0e018beed6215b483a3c44481661729a2eb014ec5defdb6b31c5a0e5d39",
+      "sheet": "current-picks-3.png",
+      "position": 111
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-22-undead-loot:icon-038",
+      "sha256": "6e0b6bc8b26888408bc3ea0a05aa961e57a8fed41a17f743cbbcd332ca8e1de7",
+      "sheet": "current-picks-3.png",
+      "position": 112
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-35-kobold-loot:icon-020",
+      "sha256": "4764ccee2468373244bf507a7197d13f3e8953d4b05d8ec01f6a590b33ccea89",
+      "sheet": "current-picks-3.png",
+      "position": 113
+    },
+    {
+      "assetId": "dcss/monster/nonliving/air_elemental_old",
+      "sha256": "449232da1d5c7be385db277d5966b7ecfb73d14ee655e466e74eaa1d0d90e533",
+      "sheet": "current-picks-3.png",
+      "position": 114
+    },
+    {
+      "assetId": "craftpix-459799:icon-017",
+      "sha256": "bc03fc1e0bb8182fa642339faa2f3d0f833528e4ed2af21fbba11bbd4d9efb9a",
+      "sheet": "current-picks-3.png",
+      "position": 115
+    },
+    {
+      "assetId": "craftpix-737210:icon-012",
+      "sha256": "ec14961dcf39a465708c1514fc814fee9e76aee52b1de627dc234196b756be85",
+      "sheet": "current-picks-3.png",
+      "position": 116
+    },
+    {
+      "assetId": "craftpix-459799:icon-033",
+      "sha256": "a5048a70b477439e0496c22fdaa56607eb884552ed9f586ab52ca6a872f4c069",
+      "sheet": "current-picks-3.png",
+      "position": 117
+    },
+    {
+      "assetId": "dcss/monster/animals/black_bear_new",
+      "sha256": "0071909ef5127bfe359f1e994d85728ba2c89b255a1c26a6a20c142756539e95",
+      "sheet": "current-picks-3.png",
+      "position": 118
+    },
+    {
+      "assetId": "dcss/monster/yaktaur_new",
+      "sha256": "342f8bf507712c6abf9f04cbe9ccd625a23930e67bc73c616f578d82828c1d21",
+      "sheet": "current-picks-3.png",
+      "position": 119
+    },
+    {
+      "assetId": "dcss/monster/nonliving/clay_golem",
+      "sha256": "d4b1c20ecc05f2da6b9354d2b7b29a20325a41492abf1c76a3c391da11493a0b",
+      "sheet": "current-picks-3.png",
+      "position": 120
+    },
+    {
+      "assetId": "dcss/monster/animals/ball_python",
+      "sha256": "c482f729907a90aaa56e8a99b3456b94d4eb6c50e505fa5d36262f948d2212c1",
+      "sheet": "current-picks-3.png",
+      "position": 121
+    },
+    {
+      "assetId": "dcss/monster/animals/fire_crab",
+      "sha256": "8958cf54c5bbbb72f2e56e579d6bfffd585f52e8b9d87d758dbd34f396fb5dd1",
+      "sheet": "current-picks-3.png",
+      "position": 122
+    },
+    {
+      "assetId": "dcss/monster/animals/alligator",
+      "sha256": "874bd0550abf54d11c8958df396507ee6a2f7c1dee1429bbeb4c9c1898a85a2c",
+      "sheet": "current-picks-3.png",
+      "position": 123
+    },
+    {
+      "assetId": "dcss/monster/animals/warg",
+      "sha256": "6b3c42d0e9f7c719d00b74253d894d69d7f0a3547dbd196cb528ce71c472a6d5",
+      "sheet": "current-picks-3.png",
+      "position": 124
+    },
+    {
+      "assetId": "dcss/monster/animals/elephant_new",
+      "sha256": "cee1584daa55e888c0511ac956f00f36b5fc10e62912157624cf55c04bcb94a0",
+      "sheet": "current-picks-3.png",
+      "position": 125
+    },
+    {
+      "assetId": "craftpix-737210:icon-047",
+      "sha256": "80c18a2d43d5e5e47208303094650c32e0e7c98795344fb6ce4877ca8c6aeff4",
+      "sheet": "current-picks-3.png",
+      "position": 126
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_frog",
+      "sha256": "ae4a2a6e5142b455e1402378d094b8e0307598dac2ed82f4214199c327ba5872",
+      "sheet": "current-picks-3.png",
+      "position": 127
+    },
+    {
+      "assetId": "dcss/monster/nonliving/gargoyle",
+      "sha256": "a5e6a72d555be0779d23f7ff9e0228c9e9f9bed85c62a685f2b96bccac421dd7",
+      "sheet": "current-picks-3.png",
+      "position": 128
+    },
+    {
+      "assetId": "dcss/monster/undead/phantom_new",
+      "sha256": "f0421fdf2bca7db35eb942b98017ff84357da085807af7f1e1e2714309eb23b0",
+      "sheet": "current-picks-3.png",
+      "position": 129
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_centipede",
+      "sha256": "2d924570c2b6ab055dfe268d34f32be7672fcaf9c541e72c2c67f79503549a8c",
+      "sheet": "current-picks-3.png",
+      "position": 130
+    },
+    {
+      "assetId": "dcss/monster/animals/anaconda_new",
+      "sha256": "b861e7335de0b6a7f2a72aa9c0d67aeabd922da33a13b2cb2545b22d80c3416d",
+      "sheet": "current-picks-3.png",
+      "position": 131
+    },
+    {
+      "assetId": "dcss/monster/animals/iguana",
+      "sha256": "e1b3eed5d4e60b35202aecddf34e6a157c64e6d1ad424078a1f4721c80fc70ae",
+      "sheet": "current-picks-3.png",
+      "position": 132
+    },
+    {
+      "assetId": "dcss/monster/animals/viper",
+      "sha256": "3c941baeeae2ea15a7f4624c1d7482a2298a7dbf4324c8f8e50ff964f37921a3",
+      "sheet": "current-picks-3.png",
+      "position": 133
+    },
+    {
+      "assetId": "craftpix-459799:icon-031",
+      "sha256": "f8788d947b16e18d7e45dcaec62eef2cec48f3378a3680aa1d5eb8c0b7caa2af",
+      "sheet": "current-picks-3.png",
+      "position": 134
+    },
+    {
+      "assetId": "craftpix-737210:icon-048",
+      "sha256": "45b23b999016056c0cf778f52a6b9ea6194312de354e8eef9eb8a3e4df598f47",
+      "sheet": "current-picks-3.png",
+      "position": 135
+    },
+    {
+      "assetId": "craftpix-737210:icon-033",
+      "sha256": "6bb34c34e235dbd56f8b9a76ae1a86cff13806ac16ce0f1451b427679b836084",
+      "sheet": "current-picks-3.png",
+      "position": 136
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_toad",
+      "sha256": "5ec77a8867e3bee44234acfa26e826aeda2f5ac27bc548967a15677b32d72fc0",
+      "sheet": "current-picks-3.png",
+      "position": 137
+    },
+    {
+      "assetId": "craftpix-459799:icon-042",
+      "sha256": "b22c053525905c8f58ffe315a7e1285f35476e6a593a36d6419079e412ba8677",
+      "sheet": "current-picks-3.png",
+      "position": 138
+    },
+    {
+      "assetId": "dcss/monster/animals/wolf_spider_old",
+      "sha256": "a3b025bd307e8f695525037e58ea03f6a3ea5768d9bdb24c0ff507e6d60750b1",
+      "sheet": "current-picks-3.png",
+      "position": 139
+    },
+    {
+      "assetId": "dcss/monster/animals/hell_hound_new",
+      "sha256": "069ee64f82cd18877f6807b495f1ecdc5d467e36bdb070b7b09baf60b64fea63",
+      "sheet": "current-picks-3.png",
+      "position": 140
+    },
+    {
+      "assetId": "dcss/monster/hippogriff_new",
+      "sha256": "48804b23b4dfae7ecdc32559375acc21d7c23dfc843387274279e99081af7c13",
+      "sheet": "current-picks-3.png",
+      "position": 141
+    },
+    {
+      "assetId": "craftpix-737210:icon-022",
+      "sha256": "2ea8e912717dad51c7bb22f2e62559e78d618a42f813fb466d9f36ae9d573804",
+      "sheet": "current-picks-3.png",
+      "position": 142
+    },
+    {
+      "assetId": "dcss/monster/nonliving/iron_golem",
+      "sha256": "6527899baff552ae87ff2fd5c504e676455c05415ad85dd9e5722c7aa2409ee8",
+      "sheet": "current-picks-3.png",
+      "position": 143
+    },
+    {
+      "assetId": "dcss/monster/animals/jackal_new",
+      "sha256": "6bdcb126959dc7dfe8dc114598a8d57a9a40c5eec6a278a68e15ccdef99acb22",
+      "sheet": "current-picks-3.png",
+      "position": 144
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-36-kobolds:icon-001",
+      "sha256": "943ed55620d62f663c19006e36d03c86fccfcf8c234a09d5bae8d86cf5cffb53",
+      "sheet": "current-picks-4.png",
+      "position": 145
+    },
+    {
+      "assetId": "dcss/monster/animals/hound",
+      "sha256": "418aaa3f7b1d6de83ea5d62518e8cdbf48d38d614bcf29bbbbc7ba501a236c3c",
+      "sheet": "current-picks-4.png",
+      "position": 146
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-36-kobolds:icon-034",
+      "sha256": "9a2a260363eddf2e355090070bfe22763254d7a8f9f553d918d40d144c910b1a",
+      "sheet": "current-picks-4.png",
+      "position": 147
+    },
+    {
+      "assetId": "dcss/monster/undead/mummy",
+      "sha256": "723300c71148cf2b4980f412799c1ef20e3e61912405a31b420945568071edbb",
+      "sheet": "current-picks-4.png",
+      "position": 148
+    },
+    {
+      "assetId": "dcss/monster/undead/greater_mummy",
+      "sha256": "6ac3019806d9499b0b368b9a693fa262209cccb7f7aebaebb8d65b7dcada7919",
+      "sheet": "current-picks-4.png",
+      "position": 149
+    },
+    {
+      "assetId": "craftpix-459799:icon-003",
+      "sha256": "8a5d9ed59d2ee66807d16b74aa4a209ec665e0d7855162fc6bea3d5ca27738b9",
+      "sheet": "current-picks-4.png",
+      "position": 150
+    },
+    {
+      "assetId": "craftpix-459799:icon-001",
+      "sha256": "3b4721804455da76a28a8af73b469269ba2b4609dd67c20952ad3e2fe22f0f90",
+      "sheet": "current-picks-4.png",
+      "position": 151
+    },
+    {
+      "assetId": "dcss/monster/ogre_new",
+      "sha256": "ca7bb3d39de4ee595258a5caa4718cfcff077970a0175024117e087449f3c34f",
+      "sheet": "current-picks-4.png",
+      "position": 152
+    },
+    {
+      "assetId": "dcss/monster/animals/adder",
+      "sha256": "25fb263a52929bc6de25db56e0a2251a0e833d8a8cbf1726379d5c8ceaa8e72f",
+      "sheet": "current-picks-4.png",
+      "position": 153
+    },
+    {
+      "assetId": "dcss/monster/animals/polar_bear",
+      "sha256": "ad5827cc0e39e8ddc1301be6c739b5c2551a9794b00a37b9cb9a6b967fb7688f",
+      "sheet": "current-picks-4.png",
+      "position": 154
+    },
+    {
+      "assetId": "dcss/monster/undead/skeletons/skeleton_humanoid_small_new",
+      "sha256": "369575ae594eb690949047c6c651ca0c9f2c9049c10b994365dbf1076f374dc3",
+      "sheet": "current-picks-4.png",
+      "position": 155
+    },
+    {
+      "assetId": "dcss/monster/nonliving/flesh_golem",
+      "sha256": "b96076db12bfaaa55cc4aa0ee5d6d1716a7e3114d60489f7ebf5e6e723e536f0",
+      "sheet": "current-picks-4.png",
+      "position": 156
+    },
+    {
+      "assetId": "dcss/monster/troll",
+      "sha256": "1f975764860573ae211fd419e4ab2b6169fbcd49aafb153930cc7f268e59437e",
+      "sheet": "current-picks-4.png",
+      "position": 157
+    },
+    {
+      "assetId": "dcss/monster/animals/wolf",
+      "sha256": "e560446c4bcefd0380e90318f98f03fd5da69a9eadc126c72007dd934ab52343",
+      "sheet": "current-picks-4.png",
+      "position": 158
+    },
+    {
+      "assetId": "dcss/monster/undead/wraith",
+      "sha256": "141ff41df1c34981bdc717b7f2a5780d28a8c7273e33f842a530db00b2c7d159",
+      "sheet": "current-picks-4.png",
+      "position": 159
+    },
+    {
+      "assetId": "prepared-portraits-native-32-dwarves:icon-009",
+      "sha256": "e9a8e6fe6920e3d2a0be58fe74fad8e992b7465b34f9e024a7e0cf29713e3aaa",
+      "sheet": "current-picks-4.png",
+      "position": 160
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-027",
+      "sha256": "34463faf5027f50e2af692c6532409875a2459a4a03825ad1e43935036d3b780",
+      "sheet": "current-picks-4.png",
+      "position": 161
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-025",
+      "sha256": "8fa5dbba015e5286752a6c75b0f29f15046d53f67b76dda4e291ad84ee88c6f0",
+      "sheet": "current-picks-4.png",
+      "position": 162
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-006",
+      "sha256": "70df25e6ab4083c476cc2c25657575885734bf372264a3a9dd9f312437cd25ca",
+      "sheet": "current-picks-4.png",
+      "position": 163
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-008",
+      "sha256": "5ff10adaeae82024ea3152da8594d15a6c7cb4a9a6f55c673f585428be756d48",
+      "sheet": "current-picks-4.png",
+      "position": 164
+    },
+    {
+      "assetId": "dcss/dungeon/altars/altar_old",
+      "sha256": "1abd7c37231a2c6772ddbf5e08962e40078c308d3b428b882daaceee29ad186e",
+      "sheet": "current-picks-4.png",
+      "position": 165
+    },
+    {
+      "assetId": "gwiztiles:grass",
+      "sha256": "4abe6001cd9d13f96895c65d49a31b76603ead7211e8e6ded9d3334c284d2447",
+      "sheet": "current-picks-4.png",
+      "position": 166
+    },
+    {
+      "assetId": "dcss/dungeon/trees/mangrove_1",
+      "sha256": "a460cb1f9d355a91869f12cf87c867a05bef2e312aae13cb610dcb0715fbbf4b",
+      "sheet": "current-picks-4.png",
+      "position": 167
+    },
+    {
+      "assetId": "dcss/gui/spells/components/stones",
+      "sha256": "a22e2b2e3beef040173ab52113f93577d998652a11dd355982558a7d01632399",
+      "sheet": "current-picks-4.png",
+      "position": 168
+    },
+    {
+      "assetId": "dcss/dungeon/boulder",
+      "sha256": "12eaaf1a31e912811c07de885e12440ea143d75fe97db52fb8852d5fe15a9aab",
+      "sheet": "current-picks-4.png",
+      "position": 169
+    },
+    {
+      "assetId": "gwiztiles:water",
+      "sha256": "5193f5526ddc6cfff42759efa2f1c48b3b1c85b8d0477dc6dd4215db35fcb6b6",
+      "sheet": "current-picks-4.png",
+      "position": 170
+    },
+    {
+      "assetId": "gwiztiles:road",
+      "sha256": "3acfc826601c053b9792670d9b9dde709873ce20db95b6f45cb00957ec731a54",
+      "sheet": "current-picks-4.png",
+      "position": 171
+    },
+    {
+      "assetId": "gwiztiles:sand",
+      "sha256": "91ed57fe11c488c5218cdb1701ae9e20adaa4cadb4784bab5081105a22b2d1de",
+      "sheet": "current-picks-4.png",
+      "position": 172
+    },
+    {
+      "assetId": "gwiztiles:snow",
+      "sha256": "97278756f137f2a51f3d856212797f7d611320ec539b8b74d4aa97703c9b6c51",
+      "sheet": "current-picks-4.png",
+      "position": 173
+    },
+    {
+      "assetId": "dcss/gui/spells/components/stone_cracked",
+      "sha256": "d9b8692f8c423ba8a82538b5f96f7bec6ff9070fa704067c0745b0ff9bd5b792",
+      "sheet": "current-picks-4.png",
+      "position": 174
+    },
+    {
+      "assetId": "dcss/gui/spells/components/stone",
+      "sha256": "6ef30dd9dd204cc9ef500311691fc97756a35c2fa2af416d5a90587cf670d12d",
+      "sheet": "current-picks-4.png",
+      "position": 175
+    },
+    {
+      "assetId": "dcss/dungeon/mold_large_1",
+      "sha256": "45cef4330b4c9ed6bddd0584553d9ee736269eaf06a4a39940cffe25bf3cd929",
+      "sheet": "current-picks-4.png",
+      "position": 176
+    },
+    {
+      "assetId": "dcss/dungeon/gateways/stone_stairs_up",
+      "sha256": "f64a06e867ea63117250d78afef926733f0b078d662c85564dc403292013acdc",
+      "sheet": "current-picks-4.png",
+      "position": 177
+    },
+    {
+      "assetId": "dcss/dungeon/gateways/stone_stairs_down",
+      "sha256": "3bd84b18c0ad24584cb80dd0948908c91546cb0364c00359b6fa75b4574482c9",
+      "sheet": "current-picks-4.png",
+      "position": 178
+    },
+    {
+      "assetId": "dcss/dungeon/statues/crumbled_column_2",
+      "sha256": "f44d71d8b322e3b7f1c3cee2be0858cd036f86fcca14ad883ea6438228661998",
+      "sheet": "current-picks-4.png",
+      "position": 179
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-011",
+      "sha256": "cdcb3ce4c6cf0b54a7e59674fd4fb4690c912c074ed1135e6875af7082fad2ee",
+      "sheet": "current-picks-4.png",
+      "position": 180
+    },
+    {
+      "assetId": "prepared-portraits-native-32-pirates:icon-002",
+      "sha256": "db43c22bb1bef2b65562b19e7eef4ff681783b957605439dc326261e8652bbbb",
+      "sheet": "current-picks-4.png",
+      "position": 181
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-033",
+      "sha256": "539d1d51ae0b2a2d1690ad0c5461615254eb5218cb67d42e3597c25cef809b7c",
+      "sheet": "current-picks-4.png",
+      "position": 182
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-041",
+      "sha256": "dcd05ee6cadbe7a979bdfd982cd1e6cf4b3d173f93bc6df7cd3cd7334717061f",
+      "sheet": "current-picks-4.png",
+      "position": 183
+    },
+    {
+      "assetId": "craftpix-459799:icon-022",
+      "sha256": "49a9207290551bbcbc9df6951ad7d067d80fe25e179f7a489b11f89fb227e62c",
+      "sheet": "current-picks-4.png",
+      "position": 184
+    },
+    {
+      "assetId": "dcss/monster/dragons/dragon",
+      "sha256": "4901b805c883240c310d39fa61010ab6806c9f911bec2c2235c3a068f20c45d4",
+      "sheet": "current-picks-4.png",
+      "position": 185
+    },
+    {
+      "assetId": "dcss/dungeon/doors/closed_door",
+      "sha256": "1dd473c3bc25e6dd9d3acffc3110d4ff73c6dd628bbbe5ac2f9027276092be89",
+      "sheet": "current-picks-4.png",
+      "position": 186
+    },
+    {
+      "assetId": "prepared-items-native-32-32-treasure:icon-025",
+      "sha256": "a9d2e632102ce189a6a8abeff99e7d111ce72d52dc170c24039e8fb834b5fdc2",
+      "sheet": "current-picks-4.png",
+      "position": 187
+    },
+    {
+      "assetId": "dcss/dungeon/traps/trap_blade",
+      "sha256": "93cb97181ca48b1762290afbf3d7cd441ce9b82e621ba02f37910b5c32339b8d",
+      "sheet": "current-picks-4.png",
+      "position": 188
+    },
+    {
+      "assetId": "wizard-furniture-32:chair_oak",
+      "sha256": "c8ebd2ca5c936f1b05076a586747136dc5e34ee2fac3af7bbb3457fd37fc429e",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:chair_dark",
+      "sha256": "48a24d2c5b26b0966a797d3cee61d93c690565dd92949b905b83850df0da4d17",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:chair_ebony",
+      "sha256": "49beedd25c5a0544787efa4fa5210689202d5ae7ac47e9a19d4e38a89998b1fa",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:chair_pale",
+      "sha256": "e35beb27bcc8de643103c44ce483786d96a7aae9acf5e07630e4f9a3746d67b2",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:stool_oak",
+      "sha256": "5203bc3bc8a50414355e4e5dab57e007a21dddc9cfd95c52d479df7ceb416880",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:stool_dark",
+      "sha256": "819f5dc0b34b2e1a8b969687e3c1a97944e1fb3c4a4779eb6e0711b03b368aa0",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:stool_ebony",
+      "sha256": "f5f2558767251d06dfd048d2432f2c7a1b6e226fe416ffa5241fc4e7598cd352",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:throne_purple",
+      "sha256": "9b208d7cedf473686dfc8c273f1b22b5b5e6689e0f05d30f648ac8c274b3285c",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:throne_red",
+      "sha256": "00495e5bcfb6c09a8cf936c47604f9d0fae3bb25451ef8d5b52b09ff757f1e58",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:cushion_purple",
+      "sha256": "5b7d24e0901d0946570864931c3d7c89d5b1c93d916aa46811495392b0c1b143",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:cushion_blue",
+      "sha256": "6163da6e1f1f417ed49d2b7f19c61ee12088428d945dbf45dfcc93fdedc25455",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:cushion_red",
+      "sha256": "235d565c55800a20a02c1130115c2f2134c9066d808ef93a15d2b2b4a07dc263",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:cushion_green",
+      "sha256": "e776994b0482b23825e2ccb9b36fc4c31578d58ff0c885ba73d7300df135c296",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:bench_oak",
+      "sha256": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:bench_dark",
+      "sha256": "950ffa22ddba117970fdc0f4ee4e4ca4876d1088ffbdae7fa9293409f2a78e6a",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:bed_purple",
+      "sha256": "3f8715489d1ad3bda97eb133146f7d55123c9481db6f60abce87f0c7aae6db0c",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:bed_blue",
+      "sha256": "eebb4011c450eb0044c725057e70278e15f819f24d4670f908454ecd21669840",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:bed_red",
+      "sha256": "abd5f9ad11f22be8a2e7c1a742502e23f0f24cbb4b340c517f6307f995a835c5",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:bed_green",
+      "sha256": "dcf7e6b68fb176e4af4221e7c4ffcd5a3f15d2aeaf327064b5ace7068b1d5a7a",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:hammock_blue",
+      "sha256": "e7548ba11400c7d28f591f9165c1fb038e6edb6c85d0739ee658c9e3bbefe15a",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:hammock_green",
+      "sha256": "75191d609dd595a47078fac2c19b69063d91aa1c8267367ee1c7393f153480e5",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:quilt_purple",
+      "sha256": "068af07ddd9cdcaee6a8d3931ea947b81e184208688dfe270b70e4fab58bc62f",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:quilt_blue",
+      "sha256": "e9dc272e646fa9171c589d71038fd776c402cc8c0a1722968c094b1dc63f793d",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:quilt_red",
+      "sha256": "4f3f137e38a32b64bd2316633cb8e73085f10a241e356729df8c4934516e8e4f",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:chest_oak",
+      "sha256": "dba5ccc4d9305f231ca92c4eef4edb634c2edcf0000d957e10ac8d2aec0046cd",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:chest_dark",
+      "sha256": "7ec800fb7a31032010db22e199771d8a6dd4c2443727b207e71669319dd66327",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:chest_ebony",
+      "sha256": "83eac3c91125e52de4f559cea031357b62415625963f1b9c55bfbff41fc02e53",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:chest_pale",
+      "sha256": "3b115ad4f3fda599839da241d4905dd12fc36c377b6f348edc546ea2c93f6a5c",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:wardrobe_oak",
+      "sha256": "66cfd1d77438cc031d4aaa65492b041497179042844c6abf57ef800b4fdea2d1",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:wardrobe_dark",
+      "sha256": "ec16b9fa9b0e63bc1dc0fb8c1528efc24cf105b5caafd0ccd9a88a347d8c2f00",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:wardrobe_ebony",
+      "sha256": "fd85b2b8bceca60b77a89c51402d9fa59abac788c87edbb699d1306c7a933335",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:drawers_oak",
+      "sha256": "c4509b898aba9bf4155b2de520c47dca8defe6a59b7a19a88aeac9cebddc3a14",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:drawers_dark",
+      "sha256": "b278f39fa17bf4dffe0a2a7002d9327e4d2412101729eaac11def79aed331fe6",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:drawers_ebony",
+      "sha256": "8e996a2389c0ca3a57f2c9f4eecd82f8104573cb55cfd103fd555daafa885b77",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:barrel_oak",
+      "sha256": "20240ab357e7ee7c8beb01ad51f05c18e14e6fbcd6d25578df2debe5c5d9c50c",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:barrel_dark",
+      "sha256": "ec9d020f69806420d46d44ec2051f90a982d0237ca7fb5a0280c8340c65ef6f2",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:crate_oak",
+      "sha256": "74897d4212efe9555dbfd216227b5219c2b099f6e8f79980702a20d5230d611d",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:potion_shelf",
+      "sha256": "1aa231d59351a76024829c26bc2ae216030e8668334ca4ccf6ec87016c172636",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:trunk_arcane",
+      "sha256": "457c486cad0ff999f7a4dde2d3cb62ef1d82d073ae93ac0130f09c6b50c67fe3",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:desk_oak",
+      "sha256": "02e4c32077cf6606447e72550b904a681160354247e3379f72bdb5172c1e127a",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:desk_dark",
+      "sha256": "5bbe1a995638204199aee8d368c2e8fd17caa3327391f07a78f31c8cc1af72a3",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:desk_ebony",
+      "sha256": "d77b1c7ae4b6e091fee82ae17ba9dbfef5c6b878d6e3a3992c0a67f7bd8450ba",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:bookcase_arcane",
+      "sha256": "4bb48b8a1601e087a06b7226ffe28d7692ce974a1c02c94f1b3b0790148bcb12",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:bookcase_ancient",
+      "sha256": "3314e2fc58a6b9f82d959762a3a2ad233ca365e9bbd92d58afe0d8581ab9f7c3",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:lectern_oak",
+      "sha256": "391bad2f4a001bbc56da6b79371661bdd2964a50a5a6e019b1645e51f3a24d40",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:lectern_dark",
+      "sha256": "315561c1da2366ae26e7f3df0d5f601f60031da3fbcb6841c0bc4be1ce620738",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:spellbook_purple",
+      "sha256": "bc24d3c0ffe691d103f437222b3b812019b6bacdff167de4f5d4b7e408a26295",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:spellbook_blue",
+      "sha256": "b1d848211790892b4b7c85848973fc5cd8d4dc273344ed71f55709a2e21487ae",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:spellbook_red",
+      "sha256": "b23d6b0ce30fbf623487fb823291b9e45fe011be5a0ae0733d82b1efb9cc7070",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:spellbook_green",
+      "sha256": "ad8145504d124670999866089482a21b7d36c198010f7b104373f52df83ff392",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:scroll_rack",
+      "sha256": "aa98edc1d2f80b0bd5481b10fbcb8960683dc842e40a45274a54d7b56476d321",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:celestial_globe",
+      "sha256": "0227b7a1e856019312a2986ad832057621d666ebb0681ef1bdefc13ab383c10b",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:candle_stand",
+      "sha256": "8cb006357a6b97bba68cda9f8dc2139f9ec67939b58709d6d3de646c349ce086",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:candelabra_three",
+      "sha256": "10c52598143f8298df2181c3a1efb098d6c9491dc9ef3f33ac65d018b300f07b",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:magic_lamp_amber",
+      "sha256": "3bc503ca3660dd33955f0686d92b0df1551ac1b049fc761de2f5b1f78ec55a70",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:magic_lamp_blue",
+      "sha256": "32a8edd008821c0c56f8917d8d88b72fe566624b21dc6aacae1489b00a1e17e5",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:magic_lamp_green",
+      "sha256": "b9e831f89f8936b370327f8fa8f6d1ace7711316e0a58cdf009679c79f34ee22",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:magic_lamp_violet",
+      "sha256": "cb735c71030e1eca3b5eae6e22380d5fcf3eb5d8f3f133ac6ecd2ea5b92bfbf4",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:crystal_orb_lamp",
+      "sha256": "4a497980d53d068be60e8047e4358811c3863271d7753d246b8035129b95763b",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:sun_orb_lamp",
+      "sha256": "1bcbb5b30a52aabdb2b4bc382ccb8c0bb9e388e06d912ff68cf8a34032e8e8fc",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:chandelier_gold",
+      "sha256": "5da74d39a412ee3817f01a27daad825ca2e76066d5e5e81557cc67b5a2a81339",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:wall_torch",
+      "sha256": "e78be77027a289a5302885332a75655005e4c6f4f65265493db8b7a341084a0e",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:hanging_lantern",
+      "sha256": "528799273a8bd16d9eb178582a32f2025f031d9eb1cd1b6b4ed174e07125bbc7",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:rug_purple",
+      "sha256": "10d79efb5c76184d3ebb57afbbc49a30df0e4e09f6928059c84564388b18e26a",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:rug_blue",
+      "sha256": "a63aa30da044b8945243073f43598886e1dc1e35dbe8bc6ffb974555ea794f5d",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:rug_red",
+      "sha256": "97ea88e62c96d0953e7e83a5ef428fd7ae1cf545af5818d2986187eea0f9e7a0",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:rug_green",
+      "sha256": "dc854bfed910a2862234bfff6fea5115109bda3c130e27cac18ecad748ae39bc",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:magic_mirror",
+      "sha256": "845785076281bde33c8fd34c545b937c4a240b522c6504158870c5ffe6824556",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:cauldron",
+      "sha256": "54eff4704c3fe447f075b3c7af9805e841ed29087fea8ef22b42314795be9e5a",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:fireplace",
+      "sha256": "a71f40526c2ed948bcbc873ccdb2987730e117cbd3398315cb5b584ce4fbcc3d",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:potted_plant",
+      "sha256": "53021394d299df9f8c282bb5ad1294761725e5e2acd2d86ebb8c6cf4b1a5b9c8",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:potted_moon_fern",
+      "sha256": "aedaad74fe9d07c1c98d5ce6350b1943b4e703b04490ae31b3c222856015cc79",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:desk_skull",
+      "sha256": "daa38ea1f60862924fdcfd4f8b239ac02d1c0b4dd0e40962a451831e9bbe88ab",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:brass_telescope",
+      "sha256": "82981bab5c71d5b968888edaaa150711a9e3aaa5942ab9b282c673d55baf5e11",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:hourglass",
+      "sha256": "c771311ff1e0dbb4795ff57f3d67298d6ec8c0834f77d33ae5fe96a63e4cf8df",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:banner_purple",
+      "sha256": "d85c9f00095d17eeb4a0f0da34d0ddc016a36ddd6627b8e9809edb2153a44c89",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:banner_blue",
+      "sha256": "bb26daeab06bda7e6ec77ea5f528ddc96cf59ac685c502d9de1fb852ad80a884",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:banner_red",
+      "sha256": "2014d2fd348e54b58811ec6607382673cbda1b991cc4c8d853ba89d62be0043b",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:round_table_oak",
+      "sha256": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:round_table_dark",
+      "sha256": "2f1990285574dd49d614c2ef04d89782c83c759245a21c92e01a83b51367a2a7",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:round_table_ebony",
+      "sha256": "cf20f907d89ad7be580813a732f391fb7181cba7753216b6fcf077582e7b1597",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:long_table_oak",
+      "sha256": "a429cecf5e0df7e323477c2fb5855e8c777c3f94f6d12fc014b498eb865e70b0",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:long_table_dark",
+      "sha256": "eb4ed2a37eaffd9c770d27aa336e1bd571bc18e42e481fa4e1bb69bd5e46ee7b",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:long_table_ebony",
+      "sha256": "003b15f845619661b31708a4a62c7f3aaa17d3c8c36db409405525a25ae3319b",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:arcane_altar",
+      "sha256": "b1ccac052e47b4152fb5cc3ad40d00086d888fd09c211cd282b03978d04ed7f4",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "wizard-furniture-32:alchemy_table",
+      "sha256": "a6499bf57d53e63bb325649eebe71284ec45bcfea455931d0b09b8cc55cae010",
+      "sheet": "furniture-sheet.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:campfire",
+      "sha256": "c050310175e965a3cc1930a1c50348f0611682a2c92720453d7edd89da9085c3",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:tent",
+      "sha256": "30d9678745736c2b1b8d94aa9a19371e8399cebadf619ca30b255d98605f05bc",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:spyglass",
+      "sha256": "dda9eaa0ae2564f2ad259777febf871e3152b8a9c117bf84b3103f376c0e3c93",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:magnifying-glass",
+      "sha256": "4e202f174e8a2c010ffa3d525e06dabfca8755e41b089e2ea342907db61385e8",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:hunting-trap",
+      "sha256": "25b526e71192e814b3eb2b772b78ddef00add53a5addce49bd910bfcad8ab9a7",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:hourglass",
+      "sha256": "44c962afc07635ab5b2f8fb12fa4da5b2a7858edf81914d4112f58402588764c",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:mirror",
+      "sha256": "b177fd4262a9670f63c40fa444cdf85e711dd00a903f58d34fcddd42e191522b",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:manacles",
+      "sha256": "11c417e887e69f57d32c88803f7e90e9fb7ecb950051b41b385dc0be100bf031",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:lyre",
+      "sha256": "fe7c82f68207e4a04d1ee803317f220063417b32b9c252ac3d979abde9a8df44",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:viol",
+      "sha256": "4ea86fa3c578919dd67dc48297b268384d589c3029317cd13b3609212a54fd70",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:ocarina",
+      "sha256": "b27e4f626e0cdb6ad979cf41a8c4b025c0027f94342693d38c479a2d6c0a7982",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:flute",
+      "sha256": "28ad8954c9218c0c54b024c5deb7d001ed5af8f29c64cabfe9a37886a206134f",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:pan-flute",
+      "sha256": "e67d694e5814984dca17e9506e36ed245ae35cd684fe2accb1384f0dc4651ef0",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:horn",
+      "sha256": "02a7b21c959cb899e054f903e75ba460f3efc69b06daceac78b091d421a2a80e",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:mortar",
+      "sha256": "da2777f33523c866e0d74f4ec51996c08bccf46d8101058df57e1393c4401596",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:herbs",
+      "sha256": "4cc7992fecdb3a034d54fc571d18968a7a1dcd12c096952d4eb2f649c1f6246a",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:dice",
+      "sha256": "b770ef3e06aac02868041dce920a6470747c9684e3e9c4c01810a78a131bb423",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:sack-powder",
+      "sha256": "c3c9e0b22d286a8da7e21dc26de031bdce91798d49b709a452a1c74676ac0430",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:cauldron",
+      "sha256": "9f1e7b0c3995bcd3b41af6f84290aa7cee08a1480ebf3812e7aa772434bdece7",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:cotton",
+      "sha256": "e10a2024c66c4e9ba9d2e249fc949a3e0860a3db48b3bb27e1c8ebc081d6ac9b",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "idylwild-inventory-32:parchment",
+      "sha256": "781682096d52bda730fc8aaa8f1ec16e4f720016878e875049a4ed30c289fdc9",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "idylwild-inventory-32:cloth",
+      "sha256": "c6ca312d990d866b1f351167440f0f1ccee3b90cd7c7b9cb9d52a2ec3ddc8df2",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "idylwild-inventory-32:urn",
+      "sha256": "cf98ed7c57351cd842353f70ee2211a42edd6f0e5bf57f44a3fe452a7f6e1b4d",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "idylwild-inventory-32:herb",
+      "sha256": "847140e8ed47fc7ee3253b4023b1db98cb8e14398e2e274f5f646d94a4ba12aa",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "shikashi-utility-32:brass-key",
+      "sha256": "fcd34b595976df9440ef01fee3e4f909871f79de3740fb1ac68cd63c28aab9b7",
+      "sheet": "new-utility-review.png",
+      "method": "Inspected transparent native 32px sprite; coordinate and object identity checked against author source."
+    },
+    {
+      "assetId": "dcss/monster/animals/basilisk",
+      "sha256": "8f53b7fc1435a257397079bcb097c26b374003dbb74b265b2b74d9515d0559e9",
+      "sheet": "monster-exact-review.png",
+      "position": 1,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/cyclops_new",
+      "sha256": "9a630b4cb1699af6f2e1eee056ba99272f4aa7cb0b18318ad4a020536cef9844",
+      "sheet": "monster-exact-review.png",
+      "position": 2,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/death_knight",
+      "sha256": "da1ddd4500b411966e39d84a2d8fe75d510736bebe3ba100ed9622215cb06800",
+      "sheet": "monster-exact-review.png",
+      "position": 3,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/dryad",
+      "sha256": "cd3d69eccc4e8926db2d8ad19c495b1a84bb959e3018f30415050600701a3c8d",
+      "sheet": "monster-exact-review.png",
+      "position": 4,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/earth_elemental",
+      "sha256": "03c31782f8047f92d6662701565a1aa6599d862f5bd852c950736d379dc83596",
+      "sheet": "monster-exact-review.png",
+      "position": 5,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/ettin_new",
+      "sha256": "3bd1c7c2de9bcb720c81554ec256b4ef99bcfbdd6040b731a1979d51e5855c03",
+      "sheet": "monster-exact-review.png",
+      "position": 6,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/fire_giant_new",
+      "sha256": "71a2fc3b1ebd46f2a69da5a75657b5814a54893ce6462a86d0b16b9d06b15010",
+      "sheet": "monster-exact-review.png",
+      "position": 7,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/frost_giant_new",
+      "sha256": "430ec28c6219976662242fbd736c3bacca40b3629c66f6351754b92cf075df89",
+      "sheet": "monster-exact-review.png",
+      "position": 9,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/undead/ghoul",
+      "sha256": "741793801a46abb50e67c7b7b0c788b91cef5b8f84d555a2d15b1e14077e92e9",
+      "sheet": "monster-exact-review.png",
+      "position": 10,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/gnoll_new",
+      "sha256": "793fe68a7be967c82718b77ca1b87443814b5566ac96d0f15df8f156e04b6a1b",
+      "sheet": "monster-exact-review.png",
+      "position": 11,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/goblin_new",
+      "sha256": "984333374dee954ca7c44062b2d963e37e62f28ecbdfe2200183a5e2510da93c",
+      "sheet": "monster-exact-review.png",
+      "position": 12,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/griffon",
+      "sha256": "3fcd80675751b891fd272d8bf73fbf4c4c718411a6d7365912cf3474d16ffbad",
+      "sheet": "monster-exact-review.png",
+      "position": 13,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/harpy",
+      "sha256": "eaaf3dc866bc919c45100dbc20d710315a06ab83f0129880af05f61917a7e1da",
+      "sheet": "monster-exact-review.png",
+      "position": 15,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/hill_giant_new",
+      "sha256": "b5ff9e23e21b85a19638de659eb18944c0d579456b5deb593c89f1b127841926",
+      "sheet": "monster-exact-review.png",
+      "position": 16,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/hobgoblin_new",
+      "sha256": "ffd6e23a2df1653e68e3e3c0a6fddca6bcc4b59682b372f93878cf4affc03a8f",
+      "sheet": "monster-exact-review.png",
+      "position": 17,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/dragons/hydra_1_new",
+      "sha256": "d0fa844fe279adc95b5dca632ebfe3ca6c6168b967db04d5b21fd47b88792257",
+      "sheet": "monster-exact-review.png",
+      "position": 18,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/ice_devil",
+      "sha256": "115e552ad2f8df78a1bf3a293f68d0b3f2a99410343e10ef2e242d36d292dfcb",
+      "sheet": "monster-exact-review.png",
+      "position": 19,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/undead/lich",
+      "sha256": "3c8d49538f2901a7f853646848978014b98bef538ce1b06beb81859b6f3233bf",
+      "sheet": "monster-exact-review.png",
+      "position": 22,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/undead/manes",
+      "sha256": "a0c6ca47f595e06c819711d48ba450c0d127284c8cbeeb87d0d06f939eff69e2",
+      "sheet": "monster-exact-review.png",
+      "position": 23,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/manticore",
+      "sha256": "4e1ee263cecad6d0a8a59737016c6afd3f63645df7a95bb8368fa67e69816ab1",
+      "sheet": "monster-exact-review.png",
+      "position": 24,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/merfolk",
+      "sha256": "43aec9964b260aa354f9341cefa5dc535e2a914e80a8549863a81633cded819e",
+      "sheet": "monster-exact-review.png",
+      "position": 25,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/minotaur",
+      "sha256": "a4226d5296ab9f677d2ebff083f477caea6b8a6e6c14c1dab472bfc6525452c7",
+      "sheet": "monster-exact-review.png",
+      "position": 26,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/orc_new",
+      "sha256": "d07423296bcd9dfe2ba4c4284c65ea94860de57e5c772b8fa34e1c6d21b855a1",
+      "sheet": "monster-exact-review.png",
+      "position": 27,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/pit_fiend",
+      "sha256": "76f2ffcfe014f9576cedba81e635d51ab728927fe5171c586433f2a0d6ba2657",
+      "sheet": "monster-exact-review.png",
+      "position": 28,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/quasit_new",
+      "sha256": "dd3653c2f922f9930dc03a471b9965cbd9fa6f781e92d0441852fd43e2857cd5",
+      "sheet": "monster-exact-review.png",
+      "position": 29,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/rakshasa",
+      "sha256": "0b7b49173ce997cd2cce21c8b2c25cd240a273fdf886387b69fc0a30186ae80c",
+      "sheet": "monster-exact-review.png",
+      "position": 30,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/raven",
+      "sha256": "ea6ff7ad45168dc4eae0b8c3c3ac253ed2419b6a602577e87c6f6d262e058cd3",
+      "sheet": "monster-exact-review.png",
+      "position": 31,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/salamander",
+      "sha256": "0cafe36246f42c76d21076f4f8f0ccc68e4102d76cbc3cc88935befdf02f24ac",
+      "sheet": "monster-exact-review.png",
+      "position": 33,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/satyr",
+      "sha256": "70115dbb8c75ce3c5eb0ced2e5274f0b29f5ff4021a520aafc6844d69187ca81",
+      "sheet": "monster-exact-review.png",
+      "position": 34,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/undead/shadow_new",
+      "sha256": "47729c5f96a77ff7a46d25d80b26a87ea39b6e4bce3ba230a900d57efaa73976",
+      "sheet": "monster-exact-review.png",
+      "position": 35,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/shadow_demon",
+      "sha256": "abee0eba2e45f791c1abc06f57b62f564d77a031c35eb658bc589bae7db9f7dd",
+      "sheet": "monster-exact-review.png",
+      "position": 36,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/stone_giant_new",
+      "sha256": "8583d363d909cce892e4050beade2c3e46161aa0cc2d97daebd2f826122bc2cc",
+      "sheet": "monster-exact-review.png",
+      "position": 37,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/fungi_plants/treant",
+      "sha256": "a2231517918397c63f389d7a522daa1e1f57fcb251d473b0cfb467a6026ff8ef",
+      "sheet": "monster-exact-review.png",
+      "position": 38,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/undead/vampire_new",
+      "sha256": "b0d1346d767c7e98119c6a2ae753878eec6660a2258c98fb7b4927362720e7e3",
+      "sheet": "monster-exact-review.png",
+      "position": 39,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/water_elemental_new",
+      "sha256": "328f61c7e13803b3bf01edfde18e9ffdeaff1c7d45d3b6eded4c99f32e773d46",
+      "sheet": "monster-exact-review.png",
+      "position": 40,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/undead/wight_new",
+      "sha256": "6df9fd64d4b033bc4b91b326f106ecc893d15d4aa182248976953899db5e6b18",
+      "sheet": "monster-exact-review.png",
+      "position": 41,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/dragons/wyvern_new",
+      "sha256": "b809d90ea34ae3a1747eada5dec698225ec4a0e7c7f899a31c92ecc4c3511240",
+      "sheet": "monster-exact-review.png",
+      "position": 42,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/catoblepas",
+      "sha256": "d01111b444d46417f772ff55bdfc36b9277441d4ccdefaa54f25c2f06f97718c",
+      "sheet": "monster-exact-review.png",
+      "position": 43,
+      "method": "Inspected complete native-32 creature; incompatible source-name lookalikes excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/grizzly_bear",
+      "sha256": "afb6273770f3e5cfc6b2e13ac7aa8a5594b5e4d0128d53d79d0994cc4af651d2",
+      "sheet": "monster-families-1.png",
+      "position": 1,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/bat",
+      "sha256": "3c894b51f7b1fc4d8d3d097ee9ed39b0f9a60a0ea3a1f9947cde0010359436c6",
+      "sheet": "monster-families-1.png",
+      "position": 2,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_beetle",
+      "sha256": "3c111194786bc90e755836f019dc0f20dff44fc069f88739be56f72c0b23867c",
+      "sheet": "monster-families-1.png",
+      "position": 5,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_blowfly",
+      "sha256": "f8efec9fe4a029636e0c41c0d52b03ecb9b4725aa3dc0f990b90acf582d367e1",
+      "sheet": "monster-families-1.png",
+      "position": 6,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/giant_cockroach_new",
+      "sha256": "9277a7f3985f5af80d76a957a5783dabc7c95375de86b4c0ce9f99918b16e4c0",
+      "sheet": "monster-families-1.png",
+      "position": 7,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/rat",
+      "sha256": "bad85cdda98e618d00bee98446c322d4f23ec88a00a28a801c3b705d60ccf512",
+      "sheet": "monster-families-1.png",
+      "position": 8,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/spider",
+      "sha256": "bc94f876ed363b17f04d6437c5840296be7e0a48067c9df158a335bf778d0532",
+      "sheet": "monster-families-1.png",
+      "position": 9,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/yellow_wasp",
+      "sha256": "75e020230789d4dc5939ba50e26061644dfb5a8522becff3197a5dee83289a2c",
+      "sheet": "monster-families-1.png",
+      "position": 10,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/snake",
+      "sha256": "0906c7341e8a4704eebebe2df2fe760666cebf7554320bd51d0bb17ce0b17649",
+      "sheet": "monster-families-1.png",
+      "position": 12,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/animals/alligator_snapping_turtle_new",
+      "sha256": "2f86c0f2ef25efab78f408d59d48caf94fa2f7acb9461e8a2068ead59098f662",
+      "sheet": "monster-families-1.png",
+      "position": 14,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/undead/zombies/zombie_small",
+      "sha256": "406ce655c40f7db9fa7e92fef7741c3aab1fd29b4cdf69972a7d7d8c861629ee",
+      "sheet": "monster-families-1.png",
+      "position": 16,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/undead/skeletons/skeleton_dragon",
+      "sha256": "7b66d3d68598a532513b2d1662ffb382b3cf22640d230537c1cad2be02b4c654",
+      "sheet": "monster-families-1.png",
+      "position": 18,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/undead/skeletons/skeleton_snake",
+      "sha256": "633d7fd962bb81a75bcd7cb205d81e62fe5f8c75ba42c71b16442d5e6efb0419",
+      "sheet": "monster-families-1.png",
+      "position": 19,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/ogre_mage_new",
+      "sha256": "790ce18b3544260b8ab10a31969e52dc84f0cbf012dc7d99367f3785b62cea2d",
+      "sheet": "monster-families-1.png",
+      "position": 22,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/orc_warrior_new",
+      "sha256": "5e18152eb14f41389b0f2d92227268f061d8945186b07cd89e0db570cdf10ed9",
+      "sheet": "monster-families-1.png",
+      "position": 25,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/orc_priest_new",
+      "sha256": "4daf5fdc9dd50ae0875e17d8e7f26daa8486a7346c67069fc20a8411db91ebf8",
+      "sheet": "monster-families-1.png",
+      "position": 26,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/gnoll_sergeant",
+      "sha256": "57e668e1edc49f8489dcbacca981f017ea887a14727b188197ca5268adc32afe",
+      "sheet": "monster-families-1.png",
+      "position": 28,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/gnoll_shaman",
+      "sha256": "529b74e7f711097dfc49dc5c634b579bb7a3cd89ffa271291e8f48970cb43484",
+      "sheet": "monster-families-1.png",
+      "position": 29,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/deep_dwarf",
+      "sha256": "16d97920e9e5af440584001ecb17db4e789e32fe48623fecbcce5105f8dc0f1f",
+      "sheet": "monster-families-1.png",
+      "position": 30,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/wizard",
+      "sha256": "fa6716e464001b83314d452027f6c2761c324ed5a116229553d83a625f89e5b0",
+      "sheet": "monster-families-1.png",
+      "position": 34,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/human_new",
+      "sha256": "9cc25af557c796419303b7cedd1f5f563c2340ecd79c7be6067b96754cb73b7b",
+      "sheet": "monster-families-1.png",
+      "position": 35,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/tengu",
+      "sha256": "87e420219af8a1a5ea74fa4a33001fcfa7931656ec23409e852360d5d33447e3",
+      "sheet": "monster-families-1.png",
+      "position": 36,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/dragons/shadow_dragon",
+      "sha256": "4fec72e4ae63e35b525d843a22800fe4fd2148c87279852e85c359d5a472df39",
+      "sheet": "monster-families-1.png",
+      "position": 37,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/dragons/storm_dragon_new",
+      "sha256": "6869ddd9c830d2b1fe7547bf5cf13f65e405b1b9156bc635194329d1b9c5a2c0",
+      "sheet": "monster-families-1.png",
+      "position": 38,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/dragons/ice_dragon_new",
+      "sha256": "c779f95a41454e2633e95d48837fd98ce74509e5b170e20a2d859cc75d33353e",
+      "sheet": "monster-families-1.png",
+      "position": 39,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/dragons/golden_dragon",
+      "sha256": "41c3616b6792f4baef74ed23c1c25564e0664277ab1a4a318a155f759d6768e2",
+      "sheet": "monster-families-1.png",
+      "position": 40,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/dragons/swamp_dragon_new",
+      "sha256": "973304d600910d72ccb309e86705f0a3155d1ae712758898c6f32d53e1ad01af",
+      "sheet": "monster-families-1.png",
+      "position": 41,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/dragons/iron_dragon",
+      "sha256": "283b3a39145b25b371c4fc41ca1334b17fc48297cf68513c052bb29df87258bf",
+      "sheet": "monster-families-1.png",
+      "position": 42,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/balrug_new",
+      "sha256": "31cb5cfe8bbe766b2385666bf6bccca3fb5abd8c26399f3f4b59a84809772d9f",
+      "sheet": "monster-families-1.png",
+      "position": 44,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/efreet",
+      "sha256": "54e55ff5e0a6e845df8e03ded6064b3952f50d4a3be5a06b7629f5f5f3bc0b6e",
+      "sheet": "monster-families-1.png",
+      "position": 45,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/reaper_new",
+      "sha256": "34135ca731f96c23dc985fbb5482a751b001f0171f7e9e901c0d1566fa33f7ac",
+      "sheet": "monster-families-2.png",
+      "position": 49,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/green_death",
+      "sha256": "444f082875810776cbeafd8a70a54fc98b8a41996550200250085fef2fcd8c6c",
+      "sheet": "monster-families-2.png",
+      "position": 50,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/demons/neqoxec_new",
+      "sha256": "213aed11350a2595fdc33f6ddd7c663fcc197b868e199d80e8c911be3b690597",
+      "sheet": "monster-families-2.png",
+      "position": 52,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/guardian_golem",
+      "sha256": "6ed5c241b2515c92c945a41a95d0d114b39eeff009bda09817f7556cd61e1f51",
+      "sheet": "monster-families-2.png",
+      "position": 53,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "dcss/monster/nonliving/spectral_sbl",
+      "sha256": "dbd305e110f4a53d714099623d522c08d532d59779ee6a2a4207432ff169deed",
+      "sheet": "monster-families-2.png",
+      "position": 54,
+      "method": "Individually checked complete silhouette, body plan and defining colours; anatomically incompatible proposals excluded."
+    },
+    {
+      "assetId": "village-market-32:red_awning_stall",
+      "sha256": "e2b55d5a1c0ca047c4c3dd14cbc0f62c6c44f7505e8a54fe5bb8e73a5f9e2708",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:blue_awning_stall",
+      "sha256": "5878e2146e4f3f0ed0077ac6e27e6171317fbf91cccfc9c18b49008d51b610f8",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:green_awning_stall",
+      "sha256": "85bfebd76a8682f2ae39c56d8acb3066a47f8e12ef8ac497e0f6a834bd1a322e",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:handcart",
+      "sha256": "e9c2cec4a25cdc7e5e492959d67e13e1053fec5db462bd2897afaeb04f3406e7",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:scales",
+      "sha256": "534286e76b70fb967ea1077679e80320e6ad3a26f6f47cd2de253e5486403f48",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:well",
+      "sha256": "e1a750eabb69092ce7fee3fe16ff85ef1b67b35a18c6ff99ed9231f9c5c10e51",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:padlock",
+      "sha256": "ee58aa578f03e0169baeb90b71319fff94bce27a897211f6b3d6e984479189b7",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:horse_saddle",
+      "sha256": "2ab54de39d18ffc038201b18090686f2db8bd71619e26580a4f98daaa3fac483",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:cloth_roll_red",
+      "sha256": "707449d64f60b71dbc5cca9aca62d0a08310657b8e1e4f64e29508e18a6c473a",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:cloth_roll_blue",
+      "sha256": "a3fad5341d16a809fb0d631d9f5e8c4eae1b390f87b7e8e83e7a7a538f2aed06",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:wax_seal_letter",
+      "sha256": "83b97c1b4087a6a9853165d28d78af30239fb62e997c617566b4dabbdde33803",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "village-market-32:gold_coins",
+      "sha256": "4da48814ec88a0024f2cc2d074d770de1acd2c1c4f22006d62a1605ac4cbb1cd",
+      "sheet": "market-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "workshop-tools-32:horseshoe",
+      "sha256": "1c79fcd60b45031bf3aa4640bb97ef9ab2427c5f2b3672ad19462c0fb0f31153",
+      "sheet": "tools-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "workshop-tools-32:padlock",
+      "sha256": "4ac293d429b557872cce59d3ae20514a0f0c3f454fec4c701a0c6bac0fa6900c",
+      "sheet": "tools-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "workshop-tools-32:chain",
+      "sha256": "a63f75f088e5da151ef99e51e3f514bd390a4e2e304551cc54b016f8a9f9a7d0",
+      "sheet": "tools-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "workshop-tools-32:sledgehammer",
+      "sha256": "5a56ff770e60b245387c04a9d82b0bf0e914153051c425fafc32cc28a4cb3f7f",
+      "sheet": "tools-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "workshop-tools-32:anvil",
+      "sha256": "a45938ec9edddabecb9e9b0e8eef03abd7e56659cae52ba58a0476d23ec5c710",
+      "sheet": "tools-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "workshop-tools-32:file_rasp",
+      "sha256": "7202e17e25a83b525d5b8631b08f3ce54eac8a97dbda749ae50233f3d880c7d1",
+      "sheet": "tools-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "workshop-tools-32:chisel",
+      "sha256": "71c21701c57853b82ef12a138fe7727896e993cfe0007b62dbf094b3598b3fc8",
+      "sheet": "tools-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "workshop-tools-32:mallet",
+      "sha256": "95219b211d77753ffa5a8c3f8ecc54ed200086fded73074f9917a3a8a449bd56",
+      "sheet": "tools-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "harbor-props-32:rowboat",
+      "sha256": "dceaae4ddf8b6d6d70f827459a51ef9eb2735bd21b33aaf39344f3a913fddf4e",
+      "sheet": "harbor-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "harbor-props-32:canoe",
+      "sha256": "ee5e854e5db9f96d5dc9d88fe16008e917612295859d8691a092a657611a90f3",
+      "sheet": "harbor-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "harbor-props-32:sailboat_red",
+      "sha256": "9aaf700f600e0c8f916d426e9822586edd9cfabf3ca45953c02f25bd11cbf2f9",
+      "sheet": "harbor-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "harbor-props-32:ship_anchor",
+      "sha256": "7cfecb7daf983648afc256812ae8a8563637aa2b698e9d6ef384551ead4aca04",
+      "sheet": "harbor-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "harbor-props-32:oar",
+      "sha256": "360868aef664ca3e3827af70f54b928da60d3b9d83b4ec05a5bf61ee9f28087c",
+      "sheet": "harbor-sheet.png",
+      "method": "Inspected full native 32px object and matched author filename; transparent background."
+    },
+    {
+      "assetId": "dcss/item/misc/misc_box",
+      "sha256": "6542848a73d6464de2f7200835e759f23be8dde1400f835622b73e4cee608294",
+      "sheet": "roles-extras-review.png",
+      "method": "A complete grey cube with visible top, front and side faces."
+    },
+    {
+      "assetId": "dcss/monster/holy/paladin",
+      "sha256": "bcd1736f041f916efe244bc877fd418f949fbd8c3ee57b15486a180a7199f96d",
+      "sheet": "roles-extras-review.png",
+      "method": "A complete humanoid in gold armor with a decorated chest; an armor appearance, not proof of class."
+    },
+    {
+      "assetId": "craftpix-986554:icon-038",
+      "sha256": "14e00ce4b49755f75b1e936f03d5d1bdcc7ab75729a53ded01a90d0fc03ba37f",
+      "sheet": "roles-extras-review.png",
+      "method": "A complete brown humanoid doll, with limbs and stitched features."
+    },
+    {
+      "assetId": "prepared-items-native-32-01-loot:icon-026",
+      "sha256": "05905ee9dd3cb9a04ccc4bed3a2bdf33a82ae26c0d06e7888ecd50334923ecde",
+      "sheet": "roles-extras-review.png",
+      "method": "A complete pale eye with a pink iris; represents the prosthetic eye shape."
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-003",
+      "sha256": "52ff88c29a58576b8381b6cba0f5001198994f6db57dcd9cbc275d0445dee58f",
+      "sheet": "humans-gallery-review.png",
+      "method": "Ordinary townspeople in simple clothing, offered as role illustrations; occupation is supplied by game facts."
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-010",
+      "sha256": "ded4c7d9474b0220d796f46cc45346fb3eef29cdf65c32a6a1de8dcd81c51b82",
+      "sheet": "humans-gallery-review.png",
+      "method": "Ordinary townspeople in simple clothing, offered as role illustrations; occupation is supplied by game facts."
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-020",
+      "sha256": "b4151c795e5887bced1ec449304391bff8b9ed5f33a4eab80d9b1d5685fecaae",
+      "sheet": "humans-gallery-review.png",
+      "method": "Ordinary townspeople in simple clothing, offered as role illustrations; occupation is supplied by game facts."
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-029",
+      "sha256": "a26cde785acd6f26fad4ada58d5a4836ca32d467b78c66b00e5114c9e9e6d740",
+      "sheet": "humans-gallery-review.png",
+      "method": "Townspeople wearing decorative hats or collars; a role illustration, not an inferred profession or wealth."
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-031",
+      "sha256": "698cabc30cf9c7a2bf9f259b6809e4f88d559e0bd7e123f7cbcdc62d2a3ab880",
+      "sheet": "humans-gallery-review.png",
+      "method": "Townspeople wearing decorative hats or collars; a role illustration, not an inferred profession or wealth."
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-039",
+      "sha256": "890e2a92a1b9d4e08f46b19afd9c7ccd19aef094c7084cb545dc748d42a3258c",
+      "sheet": "humans-gallery-review.png",
+      "method": "Townspeople wearing decorative hats or collars; a role illustration, not an inferred profession or wealth."
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-005",
+      "sha256": "db3f17d05f9db996096bb711e2bc3dc78048159e8a321e5531564af89a086276",
+      "sheet": "humans-gallery-review.png",
+      "method": "Faces with visibly grey hair or beards and age lines; no specific chronological age is assigned."
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-017",
+      "sha256": "109a8771e1c07ae2b03d40f351ada30928571586992384321b61a7e0ac2475d0",
+      "sheet": "humans-gallery-review.png",
+      "method": "Faces with visibly grey hair or beards and age lines; no specific chronological age is assigned."
+    },
+    {
+      "assetId": "prepared-portraits-native-32-humans:icon-022",
+      "sha256": "61b9cefe7f7fed00f2253994ae22c5f242c847e9818ef6a3a93d75c503d6293f",
+      "sheet": "humans-gallery-review.png",
+      "method": "Faces with visibly grey hair or beards and age lines; no specific chronological age is assigned."
+    },
+    {
+      "assetId": "own-art:brass-bell-v1",
+      "sha256": "8e3c2237a7c58d061a4e74861ee87927e102d8c192034499608b1cd5998907fe",
+      "method": "Inspected final 32x32 silhouette and identifying details at nearest-neighbor enlargement.",
+      "sheet": "brass-bell-v1.png"
+    },
+    {
+      "assetId": "own-art:leather-waterskin-v1",
+      "sha256": "9ba586fabf794637e7b7b8f997f46159032f7c47a3999fc1e395ec6433b8fd2e",
+      "method": "Inspected final 32x32 silhouette and identifying details at nearest-neighbor enlargement.",
+      "sheet": "leather-waterskin-v1.png"
+    },
+    {
+      "assetId": "own-art:leather-quiver-v1",
+      "sha256": "227accbb17a30c0ce80f60e4ee42ce719af25873548ec078f690652e00efaedc",
+      "method": "Inspected final 32x32 silhouette and identifying details at nearest-neighbor enlargement.",
+      "sheet": "leather-quiver-v1.png"
+    },
+    {
+      "assetId": "own-art:plains-horizon-v3",
+      "sha256": "01f886ccb637ae069a4f225d810e4df59eccee9f92b26d5ddd19a5f0f3e4590e",
+      "method": "Inspected final 32x32 silhouette and identifying details at nearest-neighbor enlargement.",
+      "sheet": "plains-horizon-v3.png"
+    },
+    {
+      "assetId": "own-art:iron-crowbar-v1",
+      "sha256": "df05954b163d26fd1be219440a0790fef751a5b7ab1f156d1abc3b865526235d",
+      "method": "Inspected final 32x32 silhouette and identifying details at nearest-neighbor enlargement.",
+      "sheet": "iron-crowbar-v1.png"
+    },
+    {
+      "assetId": "own-art:ivory-soap-v1",
+      "sha256": "43cec03391aa905341766eaeede2f127486aee1570301aebde4f26b61f9c820b",
+      "method": "Inspected final 32x32 silhouette and identifying details at nearest-neighbor enlargement.",
+      "sheet": "ivory-soap-v1.png"
+    },
+    {
+      "assetId": "own-art:wooden-ladder-v1",
+      "sha256": "427e1e835272371e4c091b3e4d10f1de87243c6ffdc94cbad367c2a4d2a3332d",
+      "method": "Inspected final 32x32 silhouette and identifying details at nearest-neighbor enlargement.",
+      "sheet": "wooden-ladder-v1.png"
+    },
+    {
+      "assetId": "own-art:green-bedroll-v1",
+      "sha256": "7cc64968b9db44075d6ab3beac4dc88166b9fb036794a8d902deb1c80106126b",
+      "method": "Inspected final 32x32 silhouette and identifying details at nearest-neighbor enlargement.",
+      "sheet": "green-bedroll-v1.png"
+    },
+    {
+      "assetId": "own-art:sea-horizon-v1",
+      "sha256": "dfd503bd044d99394451cc325b9037e0c737279ec3a654b913b92841b3359f55",
+      "method": "Inspected final 32x32 silhouette and identifying details at nearest-neighbor enlargement.",
+      "sheet": "sea-horizon-v1.png"
+    },
+    {
+      "assetId": "own-art:batch100-block-and-tackle-v1",
+      "sha256": "43a513409a4b5706dcb94620491a170dfe365e41205377bc70857d15367e2965",
+      "method": "Reviewed final 32x32: two linked wooden pulley housings, connecting rope and end hooks remain visible.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-chalk-1-piece-v1",
+      "sha256": "7d63d13b29cd44e369866b0eae01aa245fee04fe8ac0fd9bfdc26f3aed22a57d",
+      "method": "Reviewed final 32x32: one complete white chalk stick with squared ends and a gray side shadow.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-unarmed-strike-v1",
+      "sha256": "51ee8c155336d06c2ba9f3e587a08b1358c5f918157635a5ddb436cfe7208c21",
+      "method": "Inspected final 32x32 and integer enlargement: Clenched bare fist with folded fingers, thumb and short wrist.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-lance-v1",
+      "sha256": "4997cf9bd03142e16083ceda67332bbfeed4e45d08d354fa4db9444861f05c58",
+      "method": "Reviewed 32x32: complete long diagonal cavalry lance, pointed metal tip, wooden shaft and hand guard.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-caltrops-bag-of-20-v1",
+      "sha256": "0d003488a3c359c45905832f82a325d85920a6a25d2cd82f9863881ad6985c8c",
+      "method": "Inspected final 32x32 and integer enlargement: Open leather pouch beside two pointed iron caltrops.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-climber-s-kit-v1",
+      "sha256": "fd830e7803ff5c7cc7f0140540dd14d05efc0e66f1afd540ed13c22c247b2e59",
+      "method": "Inspected final 32x32 and integer enlargement: Coiled rope with metal climbing tools and a hammer.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-healer-s-kit-v1",
+      "sha256": "99ced6f4b43338671f25def0ab0e16fce0bc84b0076f3e895f155f0baacdc1e5",
+      "method": "Inspected final 32x32 and integer enlargement: Open leather medical satchel with pale bandage and medicine bottle.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-ball-bearings-bag-of-1000-v1",
+      "sha256": "2e703bd5c934ac2fdcdbe0b7926ff9a73582de1c700df6fa9d51b45e19a5d638",
+      "method": "Reviewed 32x32: open brown pouch and separated round steel balls. Inventory quantity remains a data property.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-sealing-wax-v1",
+      "sha256": "083b1b786e7e0f7893672000e425d1b043c89bbec77db638a1ca73f2946c0c96",
+      "method": "Inspected final 32x32 and integer enlargement: Red wax stick and separate round wax seal.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-abacus-v1",
+      "sha256": "0d48018550764d604643411f73bb227d1b749f661c62aee19f6ad61255fd4f20",
+      "method": "Inspected final 32x32 and integer enlargement: Wooden abacus frame with four horizontal rows of colored beads.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-ram-portable-v1",
+      "sha256": "631ff4efae1b458fbe7df011f75c797199de8d687b273e2b7b0e20420337314a",
+      "method": "Inspected final 32x32 and integer enlargement: Horizontal wooden battering ram with iron cap and carrying handles.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-totem-v1",
+      "sha256": "05152f0a923735d648e9b54f4ff7fe7b0884e32198f1ec7ddf1fd0e0c1eddad0",
+      "method": "Inspected final 32x32 and integer enlargement: Carved wooden owl totem with broad base.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-whetstone-v1",
+      "sha256": "a2fe424cd45ac7526da4841318239f8279984bb1486b1d0722b1cfdca70302f2",
+      "method": "Inspected final 32x32 and integer enlargement: Oblong gray sharpening stone with flat pale top and darker side.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-reliquary-v1",
+      "sha256": "3ff1a3d597f821276b972a1ecf792ebd331994d7662e266341f990e07385a430",
+      "method": "Inspected final 32x32 and integer enlargement: Golden peaked reliquary casket with central red jewel and short feet.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-signal-whistle-v1",
+      "sha256": "b513eb3d4e47e072629e2754500ff53dd8930d7a736481ded10f7f687faa7743",
+      "method": "Inspected final 32x32 and integer enlargement: Brass whistle with mouthpiece, circular body and hanging loop.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-tinderbox-v1",
+      "sha256": "5e7367d434ba9c88de65f1d0cb1ea34437b725412bc093b4d8695c2abf12edb0",
+      "method": "Inspected final 32x32 and integer enlargement: Open metal tinderbox containing flint and striker, no modern lighter.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-case-crossbow-bolt-v1",
+      "sha256": "ebc28a84c071115f4e24824c65706aed7e5d34c3547746af64647a4b72a5d452",
+      "method": "Inspected final 32x32 and integer enlargement: Short rigid leather case with visible crossbow bolts.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-case-map-or-scroll-v1",
+      "sha256": "48fc53b1e78e3106cb43045e78753b981ca704f7d010138dc38824ef7c0a1278",
+      "method": "Inspected final 32x32 and integer enlargement: Complete cylindrical leather scroll case with lid and strap.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-emblem-v1",
+      "sha256": "860d60f5708d23661ae408b11f775b5bef031f652e7386aee994045f1cca059a",
+      "method": "Inspected final 32x32 and integer enlargement: Silver pendant with central golden sun and distinct rays.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-capital-v1",
+      "sha256": "8e7a0be239796213ce7e6fc652be9c240a1412839b3bfe3793f219236f2bc718",
+      "method": "Inspected final 32x32 and integer enlargement: Eye-level royal capital view with central palace, towers, city wall and sky; no overhead map geometry.",
+      "sheet": "hundred/review-001-020.png"
+    },
+    {
+      "assetId": "own-art:batch100-city-v1",
+      "sha256": "abb95348fd2f9824aef561d4e855bfa2069f2c058b07b1ee560e24d32efa2663",
+      "method": "city: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-town-v1",
+      "sha256": "725d591c4c362e046012bae082abd2df5bbf1042a7510f1afb601838db9c7065",
+      "method": "town: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-village-v1",
+      "sha256": "bd7e59ea9f004582f6c029c9b548c23f058105401c2f9de5f49d68ca58f90d2e",
+      "method": "village: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-castle-v1",
+      "sha256": "1dad2c1569a42272125521564230d2bc941ee34f4d6529a23ec83daa3792dd32",
+      "method": "castle: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-port-v1",
+      "sha256": "e99b047407bd1f44ff535ca8cce77ac52c7bbbf3a6c4dd24f8549614e8f8f235",
+      "method": "port: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-ruins-v1",
+      "sha256": "99c4d34ff329d1bd908369137afcfd661b0484a5b03fd94477de14b33c3b15f5",
+      "method": "ruins: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-dungeon-v1",
+      "sha256": "c6b5e67e78d7c985ce920b821bc1132615b38d4447b08b2900a5ac1747318861",
+      "method": "dungeon: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-cave-v1",
+      "sha256": "146305440c1fc9f28fe25843b759deaa897b0898300041cf71d83359e7d336ad",
+      "method": "cave: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-shrine-v1",
+      "sha256": "741b11f440b6a7e7db722ef313d0a78ae57d9294482f744d4338dc4a4e9e15fa",
+      "method": "shrine: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-lake-v1",
+      "sha256": "57bf5e863f53854462e714877ae491c3edd947d95d6f53f2a27455034d811390",
+      "method": "Lake: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-beach-v1",
+      "sha256": "0ec18de67f14247ccc04f1e9519ecace793c35bbd7ea14bb903bede0a10e42c1",
+      "method": "Beach: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-forest-v1",
+      "sha256": "8f1281a1ab171e52629b4e0e2d895a1208ec5dc725fadcf742180799b9a123f4",
+      "method": "Forest: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-deepforest-v1",
+      "sha256": "8575b2d6ab4bfae0b189e6e208d367d6d8e6d340877b780e7ce34d199df83e5e",
+      "method": "DeepForest: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-hills-v1",
+      "sha256": "250a19954ac08f05a9460c129df56ee085b7538fc5969e492212388c1efaa19e",
+      "method": "Hills: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-mountains-v1",
+      "sha256": "48251eb18b7b5a691ac216e85aa7ecb41b0e6d5b1faac2bac1923525e8662255",
+      "method": "Mountains: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-peaks-v1",
+      "sha256": "dfa3c406d478509ef0a319511fd88709573995e2aaabcbf87e3c774db160bad3",
+      "method": "Peaks: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-swamp-v1",
+      "sha256": "9815c4649a6d19136f900f1643bc9929ae8968096c794e15cb92551f1e3c00d8",
+      "method": "Swamp: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-desert-v1",
+      "sha256": "454d908898875f8b870e78e610dd9ef60a02bded02544d7c4da7492c7ea34aa0",
+      "method": "Desert: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-tundra-v1",
+      "sha256": "e64df3b0bebba41e3279e0c4cd4b392d38901ac278ba5031ed0cda85b6fbf3e7",
+      "method": "Tundra: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-snow-v1",
+      "sha256": "d081c84be340bbdc3915c399f25bc9cc14fbb0525472f3820506d0badb57c371",
+      "method": "Snow: Inspected final 32x32 and integer enlargement: recognizable setting, coherent foreground and distant horizon or opening, distinct terrain or architecture; no overhead map view.",
+      "sheet": "hundred/review-021-040.png"
+    },
+    {
+      "assetId": "own-art:batch100-snowforest-v1",
+      "sha256": "e5e88c8c6ad509f5e155d8843abdfa7c568eb22ec21b56c1061f419b120eab14",
+      "method": "SnowForest: Inspected native 32x32 and integer enlargement: snowy conifers, snow-covered ground and distant sky, eye-level landscape.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-ape-v1",
+      "sha256": "9a9b89cd25280bfe0de8f878d24fe85646f1924c1da03f404dba527dd9360c4c",
+      "method": "Ape: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-baboon-v1",
+      "sha256": "2b222ddb7576ff82ef25b280ceb2136c17fb2ebeb368f4523e70a08f66021a79",
+      "method": "Baboon: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-badger-v1",
+      "sha256": "baf04de46a6da8a890fa4ce1fcb2ed76eba84f378dcdfb9798e1ebe528963386",
+      "method": "Badger: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-boar-v1",
+      "sha256": "9c1178ca1dbaf6fe085e7df8a0639ba2946145e3a98b63ecbc793a84e70a827c",
+      "method": "Boar: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-camel-v1",
+      "sha256": "0abefaa7438e3617cd785983d32f25fd171aed36e61fd6ae833bae8b5951900b",
+      "method": "Camel: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-cat-v1",
+      "sha256": "b12a1042dd7644e7ddf30633256302a1a360ce58847187040d3f1ded2d94bf53",
+      "method": "Cat: Inspected actual 32x32 PNG: complete striped cat with pointed ears, muzzle, four legs and raised curved tail on transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-deer-v1",
+      "sha256": "1a37653920107abedcea05ceddc84774173558e7ce54b04d64cb940718e371fa",
+      "method": "Deer: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head, limbs and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-draft-horse-v1",
+      "sha256": "6d8f9aa8d42a629dbb72b3a6eded39bb5f6cbefc210370fcbe838826a8f11298",
+      "method": "Draft Horse: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-eagle-v1",
+      "sha256": "0c4fa88be5bc05af26a5ab578b3aa82f5c76a5290b0a691050a80d914bd678b9",
+      "method": "Eagle: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-elk-v1",
+      "sha256": "aea9c64f4bf3bea0f2423d8cbf2d5db98155baa6a2ccef8d24383b3354093f46",
+      "method": "Elk: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-goat-v1",
+      "sha256": "a05bc9daaa8ac3d029fc8ce0db0dd8cff01bd5dbddf76e9418d12ed162c61aa1",
+      "method": "Goat: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-hyena-v1",
+      "sha256": "386e6b0bc4141d238974be8c7944922fcd68e6b506ee6bb0a80dafe1d832be8d",
+      "method": "Hyena: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-killer-whale-v1",
+      "sha256": "56eb7d6838b115ecfa9f73a1a83abfca2620a4479f5dbe55bd71545b5b4993ed",
+      "method": "Killer Whale: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-lion-v1",
+      "sha256": "538ff7e58a886d30f1f0234664b68c8856abd77dfca6865f48a49972230f7942",
+      "method": "Lion: Inspected native 32x32 and integer enlargement: complete animal silhouette, recognizable head and characteristic species features; transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-hawk-v1",
+      "sha256": "aabd15ae52b9bab58e1e19d9d6825e06b09a67144f6924a88918990895da02af",
+      "method": "Hawk: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-hunter-shark-v1",
+      "sha256": "4e384ec1d424b288f21286f492e0fa7ca496cceb790d3e77973735a29b5a8707",
+      "method": "Hunter Shark: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-mammoth-v1",
+      "sha256": "8a63bd8a5d9b2ed3c3fbcc7979932cdbf3a4cbbb5e0f11c1e8ca4710b5695655",
+      "method": "Mammoth: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-mule-v1",
+      "sha256": "ba2d3d485648fe96654428ce2c5d12ca6e434b62c0a69499a2d6a7ff3acf7be3",
+      "method": "Mule: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-octopus-v1",
+      "sha256": "5ffff58d90967576c1716e7fbd84859d02c33e6e2d9f559d0e1e9140b93f6752",
+      "method": "Octopus: Inspected native 32x32 and integer enlargement: recognizable complete animal with defining beak/fins/tusks/ears/tentacles as applicable, preserved silhouette and transparent background.",
+      "sheet": "hundred/review-041-060.png"
+    },
+    {
+      "assetId": "own-art:batch100-owl-v1",
+      "sha256": "2791cccf061d1b102e60cc2d185b110776df200560f4f3824badca59370141e0",
+      "method": "Owl: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-panther-v1",
+      "sha256": "c05d521d1aa3fa980469f504359af78a350851a8e5e532fb42ddb278661a1acc",
+      "method": "Panther: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-pony-v1",
+      "sha256": "e4ee23e70ac55bebaf25a2f1f381cc40adfe68175a71287d5315d53584e2b2f1",
+      "method": "Pony: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-quipper-v1",
+      "sha256": "0624b1f334c2a219dcca35c9a377270ac80f5d3af63aad66ebbdc38ba1257a5d",
+      "method": "Quipper: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-reef-shark-v1",
+      "sha256": "07864130897c228d3d93cc805ca17d00f3316bec5de7450aa72fbf9b3a4d4611",
+      "method": "Reef Shark: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-rhinoceros-v1",
+      "sha256": "b7e3cf3319219a1537833adccf7e4b19f512133a69575b441ee412ec698d7412",
+      "method": "Rhinoceros: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-riding-horse-v1",
+      "sha256": "362fab50d70277a814e4a684a4c18fe9718fc0038735949037ba593fe38f6df1",
+      "method": "Riding Horse: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-tiger-v1",
+      "sha256": "780197a0506d5f49415760679aa739728ab36c22edfbe418fa23272758f706a9",
+      "method": "Tiger: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-vulture-v1",
+      "sha256": "0a79f9d91fedf1130e4826f6e44ec17e8bad98fbbe79022803a2c8a3f04d99e2",
+      "method": "Vulture: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-warhorse-v1",
+      "sha256": "285424755c17481327103cdd8401af7a650c7d28f8215685883af26da222ae7b",
+      "method": "Warhorse: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-weasel-v1",
+      "sha256": "2064682b775b82496d224eae291a21a1df8b9a56ce0eccba76b6b0f30952ddbe",
+      "method": "Weasel: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-allosaurus-v1",
+      "sha256": "fcd9decf295a0495ac8d04968b743f19fcd864358ee934015abe7efd865181ac",
+      "method": "Allosaurus: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-ankylosaurus-v1",
+      "sha256": "d77098bda728c90ae7fd87d4c35576069e44528278fa6c7a39b4da0eb6c2decc",
+      "method": "Ankylosaurus: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-pteranodon-v1",
+      "sha256": "42b782d83e89916dda3ca8cccb1f2bdc62b80e4344f6dec34e9487819da916fb",
+      "method": "Pteranodon: Inspected native 32x32 and integer enlargement: complete recognizable creature silhouette and characteristic head, limbs, fins, armor or wings; no frame or unrelated background marks.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-sea-horse-v2",
+      "sha256": "9981a2659bf953bfc23b0aa2c2fcd84bfe24e0b086e1bbffee35f511a2f99cab",
+      "method": "Sea Horse: Inspected exact 32x32 replacement: golden seahorse and curled tail preserved, unrelated white stripe removed, background transparent.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-triceratops-v1",
+      "sha256": "2db167f77c18d58a0227e61d3761398308c978ec33d37ab2e2d091d9f8a9c294",
+      "method": "Triceratops: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-tyrannosaurus-rex-v1",
+      "sha256": "0b88e57f76e795dcfa7f2c64b7836867795dc25296703eb8092c0d91046bd2bb",
+      "method": "Tyrannosaurus Rex: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-plesiosaurus-v1",
+      "sha256": "b585be44bbebe0c9b4532259ddc75fe5ffc8bdc7519f1272000b469b2c9390c8",
+      "method": "Plesiosaurus: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-saber-toothed-tiger-v1",
+      "sha256": "df24117322a765dde70cdcb14e426cb353dac1f2a85290165e3bddf5e69f41d0",
+      "method": "Saber-Toothed Tiger: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-unicorn-v1",
+      "sha256": "8a21694910b36cb78fd5348d8446dfed41f5c5b3b24506ce414f34b925e2c20b",
+      "method": "Unicorn: Reviewed actual 32x32 and integer enlargement: defining horns/frill, large theropod head, long neck and flippers, saber teeth or single unicorn horn remain readable; complete silhouette.",
+      "sheet": "hundred/review-061-080.png"
+    },
+    {
+      "assetId": "own-art:batch100-pegasus-v1",
+      "sha256": "fab83bd8b1f6d7ba5438e1fee3a11621549145d93352705a95c79c26c8036732",
+      "method": "Pegasus: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-owlbear-v1",
+      "sha256": "c99afbb721c15e4455eb3b55e2a09bc61a2b256054b36c837f6068099b9d6039",
+      "method": "Owlbear: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-nightmare-v1",
+      "sha256": "47b96a16fb38c0ee65b588df4ad92e0245168d3d956509c52f42ff36b400915f",
+      "method": "Nightmare: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-scarecrow-v1",
+      "sha256": "5319be90968f3737bf157034b7318d348997f6239fd7f09880cc3b4f3f304ec4",
+      "method": "Scarecrow: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-gelatinous-cube-v1",
+      "sha256": "3ef3a2e9cc49e814a2b55799065d82ee41ee245d10d64821eccd9a0f1338e377",
+      "method": "Gelatinous Cube: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-gray-ooze-v1",
+      "sha256": "9a4b44802169a775c31d1249ae5e7615405a54dba6fe29789fd4287c45ffe212",
+      "method": "Gray Ooze: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-black-pudding-v1",
+      "sha256": "eb26815d3ebde869abfb1c6567ce12cefbe5fd89fde32472f1cdff62d03c0158",
+      "method": "Black Pudding: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-ochre-jelly-v1",
+      "sha256": "eb0fed549e750ac9a8e627784320898f9a3df0f8515343f741c7ef40e6541010",
+      "method": "Ochre jelly: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-flameskull-v1",
+      "sha256": "a2a5470c1adf9fe4bbe524ce7468e2aa0ebe16135a3f8b4f5c22cc3027078d62",
+      "method": "Flameskull: Reviewed actual 32x32 and integer enlargement: distinctive fantasy creature form and identifying wings, owl face, flames, straw body, cubic/slime silhouette or flaming skull remain recognizable; no unrelated marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-crawling-claw-v1",
+      "sha256": "a032f85aeb0cf68e3451a71bae414866ad7b49c1fc215d9c4f130a24ed0547ef",
+      "method": "Crawling Claw: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-purple-worm-v1",
+      "sha256": "80b6e6fcbabe07a5a8deff22b6660e0be6451811f1481e9c7aa4ddb276b9a683",
+      "method": "Purple Worm: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-rust-monster-v1",
+      "sha256": "b248c6f08e2e036aaef6c80d09f4f57d3c9446715e9df71971007874fe5b2bf8",
+      "method": "Rust Monster: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-winter-wolf-v1",
+      "sha256": "5419363f2eca969347bcc799b4075b1f8c29e4d8aa4aea8fcf55c1a5035bc095",
+      "method": "Winter Wolf: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-yeti-v1",
+      "sha256": "3d431d5b43e7ad98a9ac0ddf2724c60fc43aa422ecf33840406666a01e152196",
+      "method": "Yeti: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-death-dog-v1",
+      "sha256": "3f8f58fc8a2f0555db1de60c759d2a76f8c10963d79f4e4febb5205ab814c022",
+      "method": "Death Dog: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-giant-goat-v1",
+      "sha256": "8c94905cc239b932ef35e17ce345ea615f588d02083b61b69e6584d717ff2ba9",
+      "method": "Giant Goat: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-giant-hyena-v1",
+      "sha256": "2825df13c31df316c8f4d61c1973dc63c0315da44a1876207ef5da8917d90e19",
+      "method": "Giant Hyena: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-giant-octopus-v1",
+      "sha256": "4e08074a7bd5980de328ef1d26cce27b05d6ae615a36d097738cf7126a7e4276",
+      "method": "Giant Octopus: Inspected actual 32x32 and integer enlargement: recognizable slime, crawling hand, segmented tooth-ring worm, antennaed rust monster, white wolf, yeti, two-headed dog or named giant animal; complete silhouette without unrelated background marks.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-giant-owl-v1",
+      "sha256": "52c0456ac343a9e33fc24a6849b52fae02296a085e52ea82d6f6b9334cb5d98f",
+      "method": "Giant Owl: Inspected actual 32x32 and integer enlargement: complete giant owl with facial disks and feathered silhouette, or elongated giant weasel with short legs and long tail; transparent background.",
+      "sheet": "hundred/review-081-100.png"
+    },
+    {
+      "assetId": "own-art:batch100-giant-weasel-v1",
+      "sha256": "07ac907b58b9f5a7ec7eb164d8b2e24cfb0b7a609d310e07f9c87c2b282c5409",
+      "method": "Giant Weasel: Inspected actual 32x32 and integer enlargement: complete giant owl with facial disks and feathered silhouette, or elongated giant weasel with short legs and long tail; transparent background.",
+      "sheet": "hundred/review-081-100.png"
+    }
+  ]
+}

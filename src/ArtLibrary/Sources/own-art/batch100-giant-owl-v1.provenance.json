@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-giant-owl-v1",
+  "file": "batch100-giant-owl-v1.png",
+  "subject": "Giant Owl",
+  "nameRu": "Гигантская сова",
+  "width": 32,
+  "height": 32,
+  "sha256": "52c0456ac343a9e33fc24a6849b52fae02296a085e52ea82d6f6b9334cb5d98f",
+  "usage": "map_actor",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.map_actor.32",
+  "descriptionEn": "A complete giant owl with recognizable species anatomy and characteristic silhouette, natural colors, side or three-quarter view. Oversized powerful proportions; preserve the actual animal species, no extra limbs.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-giant-owl-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-giant-owl-v1.json",
+  "batch": "hundred-20261107"
+}

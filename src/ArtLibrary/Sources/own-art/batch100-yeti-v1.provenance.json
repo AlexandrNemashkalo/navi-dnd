@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-yeti-v1",
+  "file": "batch100-yeti-v1.png",
+  "subject": "Yeti",
+  "nameRu": "Йети",
+  "width": 32,
+  "height": 32,
+  "sha256": "3d431d5b43e7ad98a9ac0ddf2724c60fc43aa422ecf33840406666a01e152196",
+  "usage": "map_actor",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.map_actor.32",
+  "descriptionEn": "A hulking white-furred bipedal ape monster with broad shoulders, blue face, long arms and large feet.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-yeti-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-yeti-v1.json",
+  "batch": "hundred-20261107"
+}

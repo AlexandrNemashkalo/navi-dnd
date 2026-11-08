@@ -1,0 +1,5 @@
+GwizTiles by David Gwizdala. CC BY 4.0.
+https://gwizkid.com/GwizTiles/
+https://creativecommons.org/licenses/by/4.0/
+Commit 258b2c92d782fe1e57f52b68a7e8fa6dec04be03
+Imported PNGs are unchanged. Trees are 16x16 and not admitted to the catalog. Bridge retained as source only.

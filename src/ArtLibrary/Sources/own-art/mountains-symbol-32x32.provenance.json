@@ -1,0 +1,22 @@
+{
+  "id": "own-art:mountains-symbol-32x32",
+  "file": "mountains-symbol-32x32.png",
+  "origin": "Pixel derivative of lorc/mountains.svg. Icons made by Lorc.",
+  "sourceKind": "svg_derivative",
+  "sourcePath": "src/icons/000000/ffffff/1x1/lorc/mountains.svg",
+  "sourceSha256": "9941d59e0f554466a08ea41767aef548a95113b849a94fa750ee1c6bb8a62b42",
+  "license": "CC BY 3.0",
+  "licenseRef": "src/icons/license.txt",
+  "author": "Lorc",
+  "subject": "Mountains / pixel symbol",
+  "usage": "biome_view",
+  "width": 32,
+  "height": 32,
+  "mode": "RGBA",
+  "sha256": "3eaf1a44f8f51ad24891bfddc7127dda7f4fb38bdfa916d4baa8dde71c7c4a6c",
+  "processing": "SVG coverage rasterization; BOX to 32x32; binary threshold 128; two solid colors, no antialiasing.",
+  "artApproved": false,
+  "styleId": "fantasy.pixel.landscape-symbol.32",
+  "framing": "landscape_symbol",
+  "descriptionEn": "Circular mountain symbol with angular peaks and light snow caps."
+}

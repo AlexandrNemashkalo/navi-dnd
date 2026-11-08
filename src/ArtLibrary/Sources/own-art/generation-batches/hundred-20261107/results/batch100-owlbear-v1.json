@@ -1,0 +1,13 @@
+{
+  "index": 82,
+  "key": "batch100-owlbear-v1",
+  "category": "monster",
+  "name": "Owlbear",
+  "nameRu": "Совомедведь",
+  "usage": "map_actor",
+  "transparent": true,
+  "description": "A bulky brown bear body with large owl head, round facial disks, hooked beak and heavy clawed paws.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: A bulky brown bear body with large owl head, round facial disks, hooked beak and heavy clawed paws. Genuine transparent background. One complete centered subject with a one-pixel clear margin. Full body for creatures, full object for equipment. No scenery or extra objects beyond the stated subject.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-99fbd7a4-7d9a-42d1-b4be-cc88aea52d87.png",
+  "status": "generated"
+}

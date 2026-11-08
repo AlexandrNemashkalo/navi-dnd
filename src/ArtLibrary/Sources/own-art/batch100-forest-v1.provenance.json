@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-forest-v1",
+  "file": "batch100-forest-v1.png",
+  "subject": "Forest",
+  "nameRu": "Лес",
+  "width": 32,
+  "height": 32,
+  "sha256": "8f1281a1ab171e52629b4e0e2d895a1208ec5dc725fadcf742180799b9a123f4",
+  "usage": "place_view",
+  "framing": "landscape",
+  "styleId": "fantasy.pixel.place_view.32",
+  "descriptionEn": "Open woodland with distinct brown trunks and green canopies, a path receding toward pale distant sky.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-forest-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-forest-v1.json",
+  "batch": "hundred-20261107"
+}

@@ -1,0 +1,13 @@
+{
+  "index": 10,
+  "key": "batch100-signal-whistle-v1",
+  "category": "equipment",
+  "name": "Signal whistle",
+  "nameRu": "Сигнальный свисток",
+  "usage": "item",
+  "transparent": true,
+  "description": "One small brass pea whistle with a clear mouthpiece and circular body, simple loop at rear.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: One small brass pea whistle with a clear mouthpiece and circular body, simple loop at rear. Genuine transparent background. One complete centered subject with a one-pixel clear margin. Full body for creatures, full object for equipment. No scenery or extra objects beyond the stated subject.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-6c165b2c-dd8f-4525-9b88-8d3146627cea.png",
+  "status": "generated"
+}

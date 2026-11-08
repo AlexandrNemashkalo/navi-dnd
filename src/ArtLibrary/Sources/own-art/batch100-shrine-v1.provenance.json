@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-shrine-v1",
+  "file": "batch100-shrine-v1.png",
+  "subject": "shrine",
+  "nameRu": "святилище",
+  "width": 32,
+  "height": 32,
+  "sha256": "741b11f440b6a7e7db722ef313d0a78ae57d9294482f744d4338dc4a4e9e15fa",
+  "usage": "place_view",
+  "framing": "landscape",
+  "styleId": "fantasy.pixel.place_view.32",
+  "descriptionEn": "A small outdoor stone shrine with two pillars, simple roof and central candle altar against distant trees.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-shrine-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-shrine-v1.json",
+  "batch": "hundred-20261107"
+}

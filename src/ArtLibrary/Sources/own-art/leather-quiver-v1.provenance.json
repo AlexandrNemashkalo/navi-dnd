@@ -1,0 +1,22 @@
+{
+  "id": "own-art:leather-quiver-v1",
+  "file": "leather-quiver-v1.png",
+  "subject": "Leather quiver",
+  "nameRu": "Кожаный колчан",
+  "width": 32,
+  "height": 32,
+  "sha256": "227accbb17a30c0ce80f60e4ee42ce719af25873548ec078f690652e00efaedc",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "Complete leather quiver with pale arrow fletching, three shafts and carrying strap. Exact 32x32 prepared generated image.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/leather-quiver-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

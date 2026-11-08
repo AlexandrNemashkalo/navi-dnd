@@ -1,0 +1,17 @@
+{
+  "importedDescribed": 4794,
+  "preparedDescribed": 4080,
+  "contactSheets": 85,
+  "artApproved": 0,
+  "humanGenderAnnotationsPreserved": 99,
+  "legacyDcssDetailedDescriptionsPending": 0,
+  "rulesMappingsDeferred": false,
+  "platformTested": "Windows",
+  "dcssDescribed": 4670,
+  "requirementMappings": {
+    "withCandidates": 612,
+    "candidateLinks": 4489,
+    "runtimeAssignments": 0
+  },
+  "retentionDecisionsPreserved": 104
+}

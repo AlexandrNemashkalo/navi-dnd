@@ -1,0 +1,14 @@
+{
+  "index": 68,
+  "key": "batch100-sea-horse-v2",
+  "category": "monster",
+  "name": "Sea Horse",
+  "nameRu": "Морской конек",
+  "usage": "map_actor",
+  "transparent": true,
+  "description": "A complete sea horse with recognizable species anatomy and characteristic silhouette, natural colors, side or three-quarter view.",
+  "prompt": "Edit this exact pixel sprite. Remove ONLY the disconnected white horizontal stripe above the seahorse. Preserve the complete golden seahorse, its position, proportions, curled tail, outline, palette and pixel-art shapes. Everything outside the seahorse must be genuinely transparent. No water surface, text, lines, bars, grid or border. It is a 32x32 game sprite; if output must be larger use uniform nearest-neighbor enlargement with no smoothing, retaining the original composition.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-697d1caa-12c3-4587-ad17-ca3f7af8876f.png",
+  "status": "generated",
+  "replaces": "batch100-sea-horse-v1"
+}

@@ -6,7 +6,7 @@ alacritty-protocol-tests:
   script:
     - git clone --quiet --no-checkout https://github.com/alacritty/alacritty.git /tmp/navidnd-alacritty
     - git -C /tmp/navidnd-alacritty checkout --quiet --detach 94e7c8874e526b1e67b349d9ba30ddf81669119e
-    - git -C /tmp/navidnd-alacritty apply "$CI_PROJECT_DIR/macos/alacritty-osc22.patch"
+    - git -C /tmp/navidnd-alacritty apply "$CI_PROJECT_DIR/src/macos/alacritty-osc22.patch"
     - cd /tmp/navidnd-alacritty
     - rustc --edition 2021 --test alacritty/src/renderer/text/braille.rs -o /tmp/braille-tests > "$CI_PROJECT_DIR/alacritty-tests.log" 2>&1
     - /tmp/braille-tests >> "$CI_PROJECT_DIR/alacritty-tests.log" 2>&1
@@ -28,7 +28,7 @@ alacritty-macos-build:
   rules:
     - if: '$CI_COMMIT_BRANCH == "build-macos-cursor"'
   script:
-    - bash macos/build-alacritty.sh > alacritty-build.log 2>&1
+    - bash src/macos/build-alacritty.sh > alacritty-build.log 2>&1
     - |
       for file in alacritty alacritty-LICENSE build.json; do
         curl --fail --silent --show-error --header "JOB-TOKEN:$CI_JOB_TOKEN" \

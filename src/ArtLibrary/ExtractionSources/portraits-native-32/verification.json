@@ -1,0 +1,2322 @@
+{
+  "pngCount": 384,
+  "packCount": 8,
+  "size": [
+    32,
+    32
+  ],
+  "alphaValues": [
+    0,
+    255
+  ],
+  "duplicates": 0,
+  "accessoryChecks": "passed",
+  "forcedPadding": false,
+  "outlineErosion": false,
+  "files": [
+    {
+      "file": "png/elves/elves-01.png",
+      "opaquePixels": 637,
+      "transparentPixels": 387,
+      "sha256": "5583f65daed1148ce4013b0b958f917cb36749999f0c7e73a5b568abb51a9564"
+    },
+    {
+      "file": "png/elves/elves-02.png",
+      "opaquePixels": 722,
+      "transparentPixels": 302,
+      "sha256": "082d0b67ad90b59dafa90781e6740f79e6789ca01cfbee57a56e85fde014d5e4"
+    },
+    {
+      "file": "png/elves/elves-03.png",
+      "opaquePixels": 619,
+      "transparentPixels": 405,
+      "sha256": "c8cf4aa531333630c0aa8a32a9f12d5b575713e8ce2f0887afa1813f5c38b5de"
+    },
+    {
+      "file": "png/elves/elves-04.png",
+      "opaquePixels": 639,
+      "transparentPixels": 385,
+      "sha256": "64e11a30201d714f7e2ae11c5cb6dc224ceea86cbb319e9d7471e625dea82203"
+    },
+    {
+      "file": "png/elves/elves-05.png",
+      "opaquePixels": 636,
+      "transparentPixels": 388,
+      "sha256": "ccb76a7dd70433705aa9a198ef6cd2a46804ec74d938ee62fe67e7ed2b23f590"
+    },
+    {
+      "file": "png/elves/elves-06.png",
+      "opaquePixels": 692,
+      "transparentPixels": 332,
+      "sha256": "e2ccb69ef01860ae93358e690399ea4283677d7ff2d3843a75556a8eb4b206c3"
+    },
+    {
+      "file": "png/elves/elves-07.png",
+      "opaquePixels": 641,
+      "transparentPixels": 383,
+      "sha256": "27f4378ac1f92cded9804ec2ad238cad87051510da807584f60be5eefb239c46"
+    },
+    {
+      "file": "png/elves/elves-08.png",
+      "opaquePixels": 610,
+      "transparentPixels": 414,
+      "sha256": "b990bc336a398b8a69ab2033d16f3ab74d284be738e0d71c8786de333a1380f8"
+    },
+    {
+      "file": "png/elves/elves-09.png",
+      "opaquePixels": 619,
+      "transparentPixels": 405,
+      "sha256": "bef749352e99e28c6549230e5fb7aba923d47a566cc49f858c4dd985536e6f9b"
+    },
+    {
+      "file": "png/elves/elves-10.png",
+      "opaquePixels": 674,
+      "transparentPixels": 350,
+      "sha256": "e1e5936778c147ff6053db076cf0748466cbf8bca30218ff4cb595a27374f82d"
+    },
+    {
+      "file": "png/elves/elves-11.png",
+      "opaquePixels": 734,
+      "transparentPixels": 290,
+      "sha256": "bf3dfeeff3cb4a363d62f0153dc0ad49b1664952e9441d0c2bcd7d5ea4a71b12"
+    },
+    {
+      "file": "png/elves/elves-12.png",
+      "opaquePixels": 693,
+      "transparentPixels": 331,
+      "sha256": "92989dd56f2a07cd8f5bfa7472cfb9d9a85a6e2e6721876fadbed6a0854e3cfd"
+    },
+    {
+      "file": "png/elves/elves-13.png",
+      "opaquePixels": 645,
+      "transparentPixels": 379,
+      "sha256": "16bc2681a47fc3944c5731ddccf1f286c6823ef89fddf6b80692f848b1f1c6cf"
+    },
+    {
+      "file": "png/elves/elves-14.png",
+      "opaquePixels": 663,
+      "transparentPixels": 361,
+      "sha256": "815c7c75e5b866ee32c0e2ffa2eb2690c454d048bebc91e964d7552437db1084"
+    },
+    {
+      "file": "png/elves/elves-15.png",
+      "opaquePixels": 643,
+      "transparentPixels": 381,
+      "sha256": "d504b38423130aaf1cdf0506232e7608c62eaefce71ae165aa96b522a09c4857"
+    },
+    {
+      "file": "png/elves/elves-16.png",
+      "opaquePixels": 707,
+      "transparentPixels": 317,
+      "sha256": "72c61703a17f7bf3e874490a4e3faa3eb68824d504fb4d5239760c3de04f9f36"
+    },
+    {
+      "file": "png/elves/elves-17.png",
+      "opaquePixels": 652,
+      "transparentPixels": 372,
+      "sha256": "b390e12716899661d5ce20cbb3aa5166bc5ddddc56f25bfed91bf12edd98af4b"
+    },
+    {
+      "file": "png/elves/elves-18.png",
+      "opaquePixels": 628,
+      "transparentPixels": 396,
+      "sha256": "59bbd840e377e0ac73c4f8c71878e5f3c19f0676a62931b3b84298db51330f1f"
+    },
+    {
+      "file": "png/elves/elves-19.png",
+      "opaquePixels": 605,
+      "transparentPixels": 419,
+      "sha256": "1460ae26fcf28ed86dc4d60a07c2a6434f896aac530be52560fba6b55cef0959"
+    },
+    {
+      "file": "png/elves/elves-20.png",
+      "opaquePixels": 713,
+      "transparentPixels": 311,
+      "sha256": "d867673b245015d66e57ffc8c701c736e3d6ad73d1f172bc684a17f046fe2eb8"
+    },
+    {
+      "file": "png/elves/elves-21.png",
+      "opaquePixels": 696,
+      "transparentPixels": 328,
+      "sha256": "a7f7f49739405582449a619af953c1039ceefcb336951c18e81e13fb6ea713df"
+    },
+    {
+      "file": "png/elves/elves-22.png",
+      "opaquePixels": 673,
+      "transparentPixels": 351,
+      "sha256": "88f66622c91fbdf34c1fcc7a3834f4e3d5d013615190d57c88cc8fca255d0983"
+    },
+    {
+      "file": "png/elves/elves-23.png",
+      "opaquePixels": 575,
+      "transparentPixels": 449,
+      "sha256": "7d4753735dc94fcedf092462320a488da86bc911e410873fa9b9f9a29001905c"
+    },
+    {
+      "file": "png/elves/elves-24.png",
+      "opaquePixels": 631,
+      "transparentPixels": 393,
+      "sha256": "760fef09426528e67198b67622484b24ab15b5e07952779f0a3a10103127dd58"
+    },
+    {
+      "file": "png/elves/elves-25.png",
+      "opaquePixels": 713,
+      "transparentPixels": 311,
+      "sha256": "c7ea6e847f29360b0cee5b8dd5f4e17211012555d1c5d93a618019bddea77354"
+    },
+    {
+      "file": "png/elves/elves-26.png",
+      "opaquePixels": 686,
+      "transparentPixels": 338,
+      "sha256": "7a39b0eabdfa79367faa5c52a0aac39d95ea6308ac61fa6c69b3b07f3c78469c"
+    },
+    {
+      "file": "png/elves/elves-27.png",
+      "opaquePixels": 637,
+      "transparentPixels": 387,
+      "sha256": "e80b75f94678596858a42b6df86d2813f972aef4a73e6d7d5abe335871f7d55b"
+    },
+    {
+      "file": "png/elves/elves-28.png",
+      "opaquePixels": 649,
+      "transparentPixels": 375,
+      "sha256": "8095bc477f943f671d1fed443322e822ff4d1765437c39a2d5c9dafda8110147"
+    },
+    {
+      "file": "png/elves/elves-29.png",
+      "opaquePixels": 699,
+      "transparentPixels": 325,
+      "sha256": "5b6b06df9905a963f716c1dff69b3840b0d20ab237863995faf0620378d05c79"
+    },
+    {
+      "file": "png/elves/elves-30.png",
+      "opaquePixels": 653,
+      "transparentPixels": 371,
+      "sha256": "6244f09304753ca2c6e11a1baf47f95578e7049f01d1c5f4f8e83048e451077c"
+    },
+    {
+      "file": "png/elves/elves-31.png",
+      "opaquePixels": 710,
+      "transparentPixels": 314,
+      "sha256": "484872f81f919fdbc05aba99cab587cc92048c12eac7976626d8dcd909fb86ba"
+    },
+    {
+      "file": "png/elves/elves-32.png",
+      "opaquePixels": 653,
+      "transparentPixels": 371,
+      "sha256": "6a2122a6c86ab8fd1002b3ae8ec4bf6de65e198ca54e5dca7df707e42df01e45"
+    },
+    {
+      "file": "png/elves/elves-33.png",
+      "opaquePixels": 583,
+      "transparentPixels": 441,
+      "sha256": "ab19f2965687b79a737464fc6d193d3d0ecd311d088c9b40152f35897cbc54d4"
+    },
+    {
+      "file": "png/elves/elves-34.png",
+      "opaquePixels": 681,
+      "transparentPixels": 343,
+      "sha256": "ccdfc0a12389d18baa45e9d51727094d97a30d931716b9725ae7b5e38311fe0d"
+    },
+    {
+      "file": "png/elves/elves-35.png",
+      "opaquePixels": 631,
+      "transparentPixels": 393,
+      "sha256": "52765f5e13c881716428490bc3a8bfbe644f476b9e3ba14112a6047cf6baaeef"
+    },
+    {
+      "file": "png/elves/elves-36.png",
+      "opaquePixels": 669,
+      "transparentPixels": 355,
+      "sha256": "9cf03320164fde333c1ab88377b91d46e836e9f470ed55e83470015b05d7cb4f"
+    },
+    {
+      "file": "png/elves/elves-37.png",
+      "opaquePixels": 692,
+      "transparentPixels": 332,
+      "sha256": "1ca4374511bb6cd8d8934de92d7fef64f462c48cba98f42cc1f0750a7a2bdddf"
+    },
+    {
+      "file": "png/elves/elves-38.png",
+      "opaquePixels": 664,
+      "transparentPixels": 360,
+      "sha256": "da2f7d76e9a5fe07b507935dc231981419458d37cd17d2b4dcc925c236d429be"
+    },
+    {
+      "file": "png/elves/elves-39.png",
+      "opaquePixels": 597,
+      "transparentPixels": 427,
+      "sha256": "9d2e794abf688702d0d651e7e4d5d07fb24526a4dd951037caa8a3b4e07f27b5"
+    },
+    {
+      "file": "png/elves/elves-40.png",
+      "opaquePixels": 643,
+      "transparentPixels": 381,
+      "sha256": "986449c9d10b9dc2a33f07b0b99d7bddff51c2fd7e28c3103ad3fb00551800d0"
+    },
+    {
+      "file": "png/elves/elves-41.png",
+      "opaquePixels": 669,
+      "transparentPixels": 355,
+      "sha256": "407fe08df0cac061beee55de9aa7126922e854c74858e348e80ccaab0917cd26"
+    },
+    {
+      "file": "png/elves/elves-42.png",
+      "opaquePixels": 717,
+      "transparentPixels": 307,
+      "sha256": "e73721c95bed4bf3d9d6c0092e9fa0fdf995ef2560e96763b974ee39e2e8645a"
+    },
+    {
+      "file": "png/elves/elves-43.png",
+      "opaquePixels": 655,
+      "transparentPixels": 369,
+      "sha256": "f3f4579b94266a57909655075939209316ea8ad3ada8e1d3fcaf1b141fc90108"
+    },
+    {
+      "file": "png/elves/elves-44.png",
+      "opaquePixels": 682,
+      "transparentPixels": 342,
+      "sha256": "fb339583569d34a1d8072e5f5901325cc8fdcc4a4c85f5086bae1a1e5c4b3b0c"
+    },
+    {
+      "file": "png/elves/elves-45.png",
+      "opaquePixels": 735,
+      "transparentPixels": 289,
+      "sha256": "e240f081077fd99fdc04e57017740ac02147670460e85c8008d9a9fd915c1291"
+    },
+    {
+      "file": "png/elves/elves-46.png",
+      "opaquePixels": 652,
+      "transparentPixels": 372,
+      "sha256": "8b84d23b927e7b8a43a2dcea610e3aecf6b97ada2762da6c4a9325a4a5ecddec"
+    },
+    {
+      "file": "png/elves/elves-47.png",
+      "opaquePixels": 611,
+      "transparentPixels": 413,
+      "sha256": "19837e1b6d0fb70314c03e4d788e10cd28615401d7a43ba9543186257872ee6e"
+    },
+    {
+      "file": "png/elves/elves-48.png",
+      "opaquePixels": 648,
+      "transparentPixels": 376,
+      "sha256": "3c843feaba2f0753aa7a67b5c5fc365672d267eecf7c5462bcb9b82699109d7c"
+    },
+    {
+      "file": "png/humans/humans-01.png",
+      "opaquePixels": 519,
+      "transparentPixels": 505,
+      "sha256": "cd57082f6259762754fedb863c11b82f00aa75a2584af1928c36655f654aac82"
+    },
+    {
+      "file": "png/humans/humans-02.png",
+      "opaquePixels": 614,
+      "transparentPixels": 410,
+      "sha256": "0353fb74164560024708609d7dcdcba4320ba2de1a1b1deea36b0696cc4a3872"
+    },
+    {
+      "file": "png/humans/humans-03.png",
+      "opaquePixels": 586,
+      "transparentPixels": 438,
+      "sha256": "52ff88c29a58576b8381b6cba0f5001198994f6db57dcd9cbc275d0445dee58f"
+    },
+    {
+      "file": "png/humans/humans-04.png",
+      "opaquePixels": 644,
+      "transparentPixels": 380,
+      "sha256": "f7ba564f1095f0bf7d2a8e8160cab0adec737731103b2d0272940e352be69951"
+    },
+    {
+      "file": "png/humans/humans-05.png",
+      "opaquePixels": 679,
+      "transparentPixels": 345,
+      "sha256": "db3f17d05f9db996096bb711e2bc3dc78048159e8a321e5531564af89a086276"
+    },
+    {
+      "file": "png/humans/humans-06.png",
+      "opaquePixels": 639,
+      "transparentPixels": 385,
+      "sha256": "70df25e6ab4083c476cc2c25657575885734bf372264a3a9dd9f312437cd25ca"
+    },
+    {
+      "file": "png/humans/humans-07.png",
+      "opaquePixels": 612,
+      "transparentPixels": 412,
+      "sha256": "8fc1063181f2cc0938c6c372dc95aa63ade2f399f503cf066fcaede2d738ad27"
+    },
+    {
+      "file": "png/humans/humans-08.png",
+      "opaquePixels": 713,
+      "transparentPixels": 311,
+      "sha256": "5ff10adaeae82024ea3152da8594d15a6c7cb4a9a6f55c673f585428be756d48"
+    },
+    {
+      "file": "png/humans/humans-09.png",
+      "opaquePixels": 693,
+      "transparentPixels": 331,
+      "sha256": "3dee63163787d342e78985fa38890c60d1bb0b94ee564301cea9efeb941e6c9f"
+    },
+    {
+      "file": "png/humans/humans-10.png",
+      "opaquePixels": 644,
+      "transparentPixels": 380,
+      "sha256": "ded4c7d9474b0220d796f46cc45346fb3eef29cdf65c32a6a1de8dcd81c51b82"
+    },
+    {
+      "file": "png/humans/humans-11.png",
+      "opaquePixels": 700,
+      "transparentPixels": 324,
+      "sha256": "cdcb3ce4c6cf0b54a7e59674fd4fb4690c912c074ed1135e6875af7082fad2ee"
+    },
+    {
+      "file": "png/humans/humans-12.png",
+      "opaquePixels": 720,
+      "transparentPixels": 304,
+      "sha256": "6f665d159c6eb6b51616510ece4046519cf4e9228a28e4acff23ff342f816aad"
+    },
+    {
+      "file": "png/humans/humans-13.png",
+      "opaquePixels": 664,
+      "transparentPixels": 360,
+      "sha256": "b94b11688ce0b7edb85f516473fa9f0f7df259555166a87588f92948bfa3ba01"
+    },
+    {
+      "file": "png/humans/humans-14.png",
+      "opaquePixels": 572,
+      "transparentPixels": 452,
+      "sha256": "844e35e2856461f48ca8fc0510ec7269e791863ace5bce73476f349f2eb2c2a5"
+    },
+    {
+      "file": "png/humans/humans-15.png",
+      "opaquePixels": 564,
+      "transparentPixels": 460,
+      "sha256": "e282b37700fe3998a6700e814523973fd8e0d4021551a74b825d6b1f8f6819cf"
+    },
+    {
+      "file": "png/humans/humans-16.png",
+      "opaquePixels": 690,
+      "transparentPixels": 334,
+      "sha256": "4192dd36ae8aba80fda42d2379994c6fcd4efba9fe6662f604f185eb80ea19f6"
+    },
+    {
+      "file": "png/humans/humans-17.png",
+      "opaquePixels": 617,
+      "transparentPixels": 407,
+      "sha256": "109a8771e1c07ae2b03d40f351ada30928571586992384321b61a7e0ac2475d0"
+    },
+    {
+      "file": "png/humans/humans-18.png",
+      "opaquePixels": 652,
+      "transparentPixels": 372,
+      "sha256": "8ede5acae2fb757420661d98e07289e80d981f1f0770b0a3d5d6447c68d728b3"
+    },
+    {
+      "file": "png/humans/humans-19.png",
+      "opaquePixels": 613,
+      "transparentPixels": 411,
+      "sha256": "93d2c86aea6e41b3d66729ae01b1193a1623946f33623e3f2630333ac221f715"
+    },
+    {
+      "file": "png/humans/humans-20.png",
+      "opaquePixels": 551,
+      "transparentPixels": 473,
+      "sha256": "b4151c795e5887bced1ec449304391bff8b9ed5f33a4eab80d9b1d5685fecaae"
+    },
+    {
+      "file": "png/humans/humans-21.png",
+      "opaquePixels": 718,
+      "transparentPixels": 306,
+      "sha256": "c1acc6acd67e91739e2a7d5f6071d3c0046f5672243badfe5e5a2c4fa278f3a0"
+    },
+    {
+      "file": "png/humans/humans-22.png",
+      "opaquePixels": 701,
+      "transparentPixels": 323,
+      "sha256": "61b9cefe7f7fed00f2253994ae22c5f242c847e9818ef6a3a93d75c503d6293f"
+    },
+    {
+      "file": "png/humans/humans-23.png",
+      "opaquePixels": 941,
+      "transparentPixels": 83,
+      "sha256": "51a6548a4a59e0ddc8506bd20691277cfde6872598cc7c9cbec446994b7b2db2"
+    },
+    {
+      "file": "png/humans/humans-24.png",
+      "opaquePixels": 895,
+      "transparentPixels": 129,
+      "sha256": "c7cc53cb851243ce924f915303e3f75bee7a0d62b66d7d4f758a9e58e471e21e"
+    },
+    {
+      "file": "png/humans/humans-25.png",
+      "opaquePixels": 773,
+      "transparentPixels": 251,
+      "sha256": "8fa5dbba015e5286752a6c75b0f29f15046d53f67b76dda4e291ad84ee88c6f0"
+    },
+    {
+      "file": "png/humans/humans-26.png",
+      "opaquePixels": 654,
+      "transparentPixels": 370,
+      "sha256": "9153165e2a346702986d8ad0a5474d87c3c817e63f7bb990051b045ef7427bfe"
+    },
+    {
+      "file": "png/humans/humans-27.png",
+      "opaquePixels": 713,
+      "transparentPixels": 311,
+      "sha256": "34463faf5027f50e2af692c6532409875a2459a4a03825ad1e43935036d3b780"
+    },
+    {
+      "file": "png/humans/humans-28.png",
+      "opaquePixels": 677,
+      "transparentPixels": 347,
+      "sha256": "68df322c90f96bc3888e890f4114a667094257fde7fe454f5e5c8bd873be5aaa"
+    },
+    {
+      "file": "png/humans/humans-29.png",
+      "opaquePixels": 704,
+      "transparentPixels": 320,
+      "sha256": "a26cde785acd6f26fad4ada58d5a4836ca32d467b78c66b00e5114c9e9e6d740"
+    },
+    {
+      "file": "png/humans/humans-30.png",
+      "opaquePixels": 695,
+      "transparentPixels": 329,
+      "sha256": "8af4a209d3854089101268d909c16a540d6ffc7280014e01bfd171a63b79a577"
+    },
+    {
+      "file": "png/humans/humans-31.png",
+      "opaquePixels": 635,
+      "transparentPixels": 389,
+      "sha256": "698cabc30cf9c7a2bf9f259b6809e4f88d559e0bd7e123f7cbcdc62d2a3ab880"
+    },
+    {
+      "file": "png/humans/humans-32.png",
+      "opaquePixels": 605,
+      "transparentPixels": 419,
+      "sha256": "d9fc63466f39c8f4f13cc21692dca8758d7b2b42b1a2e98635a4933af6232f78"
+    },
+    {
+      "file": "png/humans/humans-33.png",
+      "opaquePixels": 667,
+      "transparentPixels": 357,
+      "sha256": "539d1d51ae0b2a2d1690ad0c5461615254eb5218cb67d42e3597c25cef809b7c"
+    },
+    {
+      "file": "png/humans/humans-34.png",
+      "opaquePixels": 694,
+      "transparentPixels": 330,
+      "sha256": "e4871ecd4d7f823b8c610dff67028ec04754d533bf6c710f8a856ccf6f36ce3c"
+    },
+    {
+      "file": "png/humans/humans-35.png",
+      "opaquePixels": 681,
+      "transparentPixels": 343,
+      "sha256": "de8009389996d72621ee7dca973a5076117c5f7c6c3e4901704cc45185dfb112"
+    },
+    {
+      "file": "png/humans/humans-36.png",
+      "opaquePixels": 631,
+      "transparentPixels": 393,
+      "sha256": "279a2280ff9cc333f732de411e245fac6a362f5b98a1f031b9fb78cbec94e6b7"
+    },
+    {
+      "file": "png/humans/humans-37.png",
+      "opaquePixels": 608,
+      "transparentPixels": 416,
+      "sha256": "f4a479b57e497ff50e1eb622730b09d5c77389f1b24fc02d0d8ad87a66bea468"
+    },
+    {
+      "file": "png/humans/humans-38.png",
+      "opaquePixels": 679,
+      "transparentPixels": 345,
+      "sha256": "2f27ab16b52138b02f230316b9b396843bdccf4909474318daa7eacfba1338ff"
+    },
+    {
+      "file": "png/humans/humans-39.png",
+      "opaquePixels": 615,
+      "transparentPixels": 409,
+      "sha256": "890e2a92a1b9d4e08f46b19afd9c7ccd19aef094c7084cb545dc748d42a3258c"
+    },
+    {
+      "file": "png/humans/humans-40.png",
+      "opaquePixels": 619,
+      "transparentPixels": 405,
+      "sha256": "59cb4c7a6aa9e58bcd78c7d809e324494f74e2db74767bb5bf9bb1927e82e438"
+    },
+    {
+      "file": "png/humans/humans-41.png",
+      "opaquePixels": 628,
+      "transparentPixels": 396,
+      "sha256": "dcd05ee6cadbe7a979bdfd982cd1e6cf4b3d173f93bc6df7cd3cd7334717061f"
+    },
+    {
+      "file": "png/humans/humans-42.png",
+      "opaquePixels": 633,
+      "transparentPixels": 391,
+      "sha256": "fdd728a1e06b27f9706231871d85b6cc7f44bcbb8cad1ce3249aa86b97a0f703"
+    },
+    {
+      "file": "png/humans/humans-43.png",
+      "opaquePixels": 604,
+      "transparentPixels": 420,
+      "sha256": "4cbbf7667bd86191b72bd6005d69e64ca8d0e1fe14471fd2b919cb416517ce37"
+    },
+    {
+      "file": "png/humans/humans-44.png",
+      "opaquePixels": 620,
+      "transparentPixels": 404,
+      "sha256": "392eebceffd24c4b2d208433f03076806c0cde156ae8386c2ca6404539c3af1a"
+    },
+    {
+      "file": "png/humans/humans-45.png",
+      "opaquePixels": 694,
+      "transparentPixels": 330,
+      "sha256": "3a9aad79a6ba69c3a932a6fbe36fbd79a4fbad9c060a281feff835f61045dbb8"
+    },
+    {
+      "file": "png/humans/humans-46.png",
+      "opaquePixels": 738,
+      "transparentPixels": 286,
+      "sha256": "7ee5e72aa11b0e670a9710e8083287532b41c85e5ad712d9daa8fc5b684eec0b"
+    },
+    {
+      "file": "png/humans/humans-47.png",
+      "opaquePixels": 763,
+      "transparentPixels": 261,
+      "sha256": "38503e1de750d500f6cb0b6d9d20df85a81043ca553cf0124daacc04282ccd42"
+    },
+    {
+      "file": "png/humans/humans-48.png",
+      "opaquePixels": 710,
+      "transparentPixels": 314,
+      "sha256": "64db31088108a25ea0acc7dc61fa4d86f143518521e8ba781cdbf6542d068593"
+    },
+    {
+      "file": "png/halflings/halflings-01.png",
+      "opaquePixels": 655,
+      "transparentPixels": 369,
+      "sha256": "6fb7ee5aee6861a2748d5c6786f990864812a7bf1ec24fec70d027fe27214335"
+    },
+    {
+      "file": "png/halflings/halflings-02.png",
+      "opaquePixels": 625,
+      "transparentPixels": 399,
+      "sha256": "5e9836c1ff9653e98232ea2b8a2e4e1e7deba3dfb89e65e62e986bedaac2ac69"
+    },
+    {
+      "file": "png/halflings/halflings-03.png",
+      "opaquePixels": 578,
+      "transparentPixels": 446,
+      "sha256": "2685210a2dcb38164749caa70dd5aa3df240b85aa33f7c853fddfd7681cdcda1"
+    },
+    {
+      "file": "png/halflings/halflings-04.png",
+      "opaquePixels": 589,
+      "transparentPixels": 435,
+      "sha256": "6293af38af3a73324aa987a9046b09f445f166ef0efb18003a249d276e4372a0"
+    },
+    {
+      "file": "png/halflings/halflings-05.png",
+      "opaquePixels": 594,
+      "transparentPixels": 430,
+      "sha256": "c45dba1096d5bc84dab739ef8ed0d5e10bb4e8e2cf76932ba9912f9655c3e239"
+    },
+    {
+      "file": "png/halflings/halflings-06.png",
+      "opaquePixels": 597,
+      "transparentPixels": 427,
+      "sha256": "ab6bd97b19994bfc09b6af94577dda6267dcb66d85b578c6ee06d74a2f358a70"
+    },
+    {
+      "file": "png/halflings/halflings-07.png",
+      "opaquePixels": 657,
+      "transparentPixels": 367,
+      "sha256": "bee0acf5e342362afc2bb3b9fb875e1448797c9dae958847cfb768ce3a196c6f"
+    },
+    {
+      "file": "png/halflings/halflings-08.png",
+      "opaquePixels": 615,
+      "transparentPixels": 409,
+      "sha256": "3132ab0a59f78f858191cd7d6e57ea4c251f7da9b768fd7dcf2a3c26046dac36"
+    },
+    {
+      "file": "png/halflings/halflings-09.png",
+      "opaquePixels": 515,
+      "transparentPixels": 509,
+      "sha256": "d5b95ab11da9b7091b99f329ee88eb4132a00af152f532b047ba8d1b6e0cee48"
+    },
+    {
+      "file": "png/halflings/halflings-10.png",
+      "opaquePixels": 616,
+      "transparentPixels": 408,
+      "sha256": "45a6626cfd5ae4076a80ecc164c9813d5a6440699a2e3af1c4a4d3fe32ba16a8"
+    },
+    {
+      "file": "png/halflings/halflings-11.png",
+      "opaquePixels": 671,
+      "transparentPixels": 353,
+      "sha256": "e04a1b620927081ef8111e390c35fe96f0a5320b8973e3c4c9ec06ce066bce2e"
+    },
+    {
+      "file": "png/halflings/halflings-12.png",
+      "opaquePixels": 666,
+      "transparentPixels": 358,
+      "sha256": "d1d10c0793443e59107ecf30c3dd57ec2bd5ef71163747cf2903c285b2fdee12"
+    },
+    {
+      "file": "png/halflings/halflings-13.png",
+      "opaquePixels": 534,
+      "transparentPixels": 490,
+      "sha256": "e35ee575a9cda276186950d808e0d791676c4f6478cd2b4d6b8b21fc80f04d4d"
+    },
+    {
+      "file": "png/halflings/halflings-14.png",
+      "opaquePixels": 689,
+      "transparentPixels": 335,
+      "sha256": "9decc65566bf6d340fd6b005ad8f27d0709b06816395786616f3bc78ab4ff02d"
+    },
+    {
+      "file": "png/halflings/halflings-15.png",
+      "opaquePixels": 602,
+      "transparentPixels": 422,
+      "sha256": "984ff093cfe8435e6a0984d0ece78dd801598639e6ac58c0e90726a6a2f4da98"
+    },
+    {
+      "file": "png/halflings/halflings-16.png",
+      "opaquePixels": 641,
+      "transparentPixels": 383,
+      "sha256": "ac71f867ee1c8dd9895df8b884c4c56d858067306324f2d149be14392b02d9cb"
+    },
+    {
+      "file": "png/halflings/halflings-17.png",
+      "opaquePixels": 664,
+      "transparentPixels": 360,
+      "sha256": "f860e9a126bd90cf37ab8246a1254bf208de992191530ddf38d84044f07f62b3"
+    },
+    {
+      "file": "png/halflings/halflings-18.png",
+      "opaquePixels": 575,
+      "transparentPixels": 449,
+      "sha256": "10720ead93ebe75be4503399cef833c67da37d5c7f7afda8abbb681995dbe1e0"
+    },
+    {
+      "file": "png/halflings/halflings-19.png",
+      "opaquePixels": 584,
+      "transparentPixels": 440,
+      "sha256": "858207ebd21b20fa01c4a54048a4368a1544f0d4218c8f061c87434bb8c3a168"
+    },
+    {
+      "file": "png/halflings/halflings-20.png",
+      "opaquePixels": 631,
+      "transparentPixels": 393,
+      "sha256": "5df5199f0f358412fa0f8e22aca639230990945860040177aeb70b64f9c55214"
+    },
+    {
+      "file": "png/halflings/halflings-21.png",
+      "opaquePixels": 672,
+      "transparentPixels": 352,
+      "sha256": "09f84acc41a3ce22d54be5be4d8f9fa2a10d7690911b8cef2105b35f154037b6"
+    },
+    {
+      "file": "png/halflings/halflings-22.png",
+      "opaquePixels": 676,
+      "transparentPixels": 348,
+      "sha256": "ea9a432c32566d6fe49d4e3144a1745a5efe150dd7352ecbc6874c9c0acb063a"
+    },
+    {
+      "file": "png/halflings/halflings-23.png",
+      "opaquePixels": 629,
+      "transparentPixels": 395,
+      "sha256": "2107b6b399eadfa82fbd1615efbe7eec12e0f7b14b0851daa9bf07161db18052"
+    },
+    {
+      "file": "png/halflings/halflings-24.png",
+      "opaquePixels": 716,
+      "transparentPixels": 308,
+      "sha256": "d435442e92a070bdb0333734e827dc5fd676a5fd0066465d49bfc72cb6defbc4"
+    },
+    {
+      "file": "png/halflings/halflings-25.png",
+      "opaquePixels": 590,
+      "transparentPixels": 434,
+      "sha256": "1e5b0d01b6ee0db08ac722ac00809d703e04349668689fd22a4d7d35db8c42fa"
+    },
+    {
+      "file": "png/halflings/halflings-26.png",
+      "opaquePixels": 612,
+      "transparentPixels": 412,
+      "sha256": "3ff3a46ff25e0a2acc287fafb8138df436771cd07f30445effd2db0064e5cc31"
+    },
+    {
+      "file": "png/halflings/halflings-27.png",
+      "opaquePixels": 640,
+      "transparentPixels": 384,
+      "sha256": "ab6311bcb88cdb5885285b42f3cd404cfe1a85059f06a9bc8a5272598b299993"
+    },
+    {
+      "file": "png/halflings/halflings-28.png",
+      "opaquePixels": 615,
+      "transparentPixels": 409,
+      "sha256": "808f40f34b20061eae30ffa6bd3371ea5fb92724c7c3eea80a0a3cbb5cb80b4d"
+    },
+    {
+      "file": "png/halflings/halflings-29.png",
+      "opaquePixels": 629,
+      "transparentPixels": 395,
+      "sha256": "e2743c9e8fa813d9602e99b742b57f383734ce490749dcc35a80d6cf6e32bb62"
+    },
+    {
+      "file": "png/halflings/halflings-30.png",
+      "opaquePixels": 668,
+      "transparentPixels": 356,
+      "sha256": "319a2f78abae984a7bcf7cc672a62bfd6a7a708f2d21ebb73f4582ec4febec25"
+    },
+    {
+      "file": "png/halflings/halflings-31.png",
+      "opaquePixels": 525,
+      "transparentPixels": 499,
+      "sha256": "7df7bb666dfe47888c32a248b46cda7706fa937da62fe3404396dbe80689a20f"
+    },
+    {
+      "file": "png/halflings/halflings-32.png",
+      "opaquePixels": 595,
+      "transparentPixels": 429,
+      "sha256": "51d1158ddc595a714a6537fcf0033220ec4434e3d4d1bdf5bb6462d58835db6e"
+    },
+    {
+      "file": "png/halflings/halflings-33.png",
+      "opaquePixels": 596,
+      "transparentPixels": 428,
+      "sha256": "78eb818caf0e49923a1d4fb65e153e100b030b422cbc45be9bcb9a21a8ac0959"
+    },
+    {
+      "file": "png/halflings/halflings-34.png",
+      "opaquePixels": 619,
+      "transparentPixels": 405,
+      "sha256": "85fb534a0378c1edd676a94330a8639627ddf16d0dfa48225d7392d98faf3fc5"
+    },
+    {
+      "file": "png/halflings/halflings-35.png",
+      "opaquePixels": 584,
+      "transparentPixels": 440,
+      "sha256": "fb1bffe953a75d473dbbb9789d1fc51d61b080d63f4aa02ba7b2829a9fdc74ab"
+    },
+    {
+      "file": "png/halflings/halflings-36.png",
+      "opaquePixels": 610,
+      "transparentPixels": 414,
+      "sha256": "1120fd925c2fb9409355f0f46b23b1a7be7f438b2af2e09e27358c98c53f963d"
+    },
+    {
+      "file": "png/halflings/halflings-37.png",
+      "opaquePixels": 619,
+      "transparentPixels": 405,
+      "sha256": "8b6e8d258313c46253a6acd3dbd97e2637f8edd676ef6506e7f6084572bda900"
+    },
+    {
+      "file": "png/halflings/halflings-38.png",
+      "opaquePixels": 577,
+      "transparentPixels": 447,
+      "sha256": "0d0025ef836d95bee602ed5a4f315b5647e5a385d19c7b2371232a1e374a6f1c"
+    },
+    {
+      "file": "png/halflings/halflings-39.png",
+      "opaquePixels": 612,
+      "transparentPixels": 412,
+      "sha256": "a65165b064ea926720ef07bb015a1a6f0128d8e291153fab1d0bf31e4e01af7a"
+    },
+    {
+      "file": "png/halflings/halflings-40.png",
+      "opaquePixels": 581,
+      "transparentPixels": 443,
+      "sha256": "b3e76ef41b807af60106565beafdb227364682a7276821e5d9867e0a3011edb2"
+    },
+    {
+      "file": "png/halflings/halflings-41.png",
+      "opaquePixels": 596,
+      "transparentPixels": 428,
+      "sha256": "c959ea5c979d6a1b3d1e860bef0b85dec495f616b29efe111531e52640434f3b"
+    },
+    {
+      "file": "png/halflings/halflings-42.png",
+      "opaquePixels": 563,
+      "transparentPixels": 461,
+      "sha256": "ed0643362c3506c53e977f59267c23e0ebb8d94d0e442fa42cd9163bde41a9ce"
+    },
+    {
+      "file": "png/halflings/halflings-43.png",
+      "opaquePixels": 563,
+      "transparentPixels": 461,
+      "sha256": "cc3c8602784ee0a1008d6a634d09cab26d0a6074106c747fa6ffb9928cf4d6d4"
+    },
+    {
+      "file": "png/halflings/halflings-44.png",
+      "opaquePixels": 589,
+      "transparentPixels": 435,
+      "sha256": "71858e7d6b7ef961c02319905cbe200741401ba377d388f19a7532d7aea1668b"
+    },
+    {
+      "file": "png/halflings/halflings-45.png",
+      "opaquePixels": 548,
+      "transparentPixels": 476,
+      "sha256": "a3e50f2a54e808fb799e36225e329d9da1b8cb75def0220503ce56f376102b98"
+    },
+    {
+      "file": "png/halflings/halflings-46.png",
+      "opaquePixels": 655,
+      "transparentPixels": 369,
+      "sha256": "31c85dddedb5fd69e6f8a6f72a111e02d62e0547bb2e3c1f4839a4cfcccf97d1"
+    },
+    {
+      "file": "png/halflings/halflings-47.png",
+      "opaquePixels": 664,
+      "transparentPixels": 360,
+      "sha256": "fa2f7d99a0691830d03241ca1f538fb6b3b2f56c065edf7b7558938da8653657"
+    },
+    {
+      "file": "png/halflings/halflings-48.png",
+      "opaquePixels": 617,
+      "transparentPixels": 407,
+      "sha256": "0f4b1475a6889e6e5d6313de905a4dd864240aa3e01d45954d7311c3339aaa68"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-01.png",
+      "opaquePixels": 666,
+      "transparentPixels": 358,
+      "sha256": "2a70b16b6097c0d17a2f98a4569e1d833f60dd60f2bba61348659936c0d10969"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-02.png",
+      "opaquePixels": 723,
+      "transparentPixels": 301,
+      "sha256": "f5b4763321535ad198256c31e4b28243f88962423262edc4d0acc9e8afae63f3"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-03.png",
+      "opaquePixels": 658,
+      "transparentPixels": 366,
+      "sha256": "278b35c124b1456042ec35e6365129d8a10ed91bf5d476b3c5c631e89d62f38b"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-04.png",
+      "opaquePixels": 701,
+      "transparentPixels": 323,
+      "sha256": "7c703b4e97721cba2f45adab0c3d2203f323b392a94de0f0e51da2ebd53b39f4"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-05.png",
+      "opaquePixels": 615,
+      "transparentPixels": 409,
+      "sha256": "8475800f137d365b187d0253411138aec76041200d597681a850a0331997cea5"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-06.png",
+      "opaquePixels": 650,
+      "transparentPixels": 374,
+      "sha256": "fe54d943185ea85b4a0c813a47c2afb6297c0abf3f2ff7e8c461974c0828d3da"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-07.png",
+      "opaquePixels": 734,
+      "transparentPixels": 290,
+      "sha256": "61d03c062755836c89e47c01b2a72b78f3002b8921e802f57730579a5580658f"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-08.png",
+      "opaquePixels": 693,
+      "transparentPixels": 331,
+      "sha256": "42466b770a73bdc31dd9665bd14d0442d760e4a957820698504e91fbe0038391"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-09.png",
+      "opaquePixels": 642,
+      "transparentPixels": 382,
+      "sha256": "84c59b54bb78686b3eac748c2b64bce91e90545b8246432b8607c3938d469f1a"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-10.png",
+      "opaquePixels": 696,
+      "transparentPixels": 328,
+      "sha256": "c976fafc0a92c1f55b005b4f8da14117af3b4d5b7e4b26461f6b5d17a7f2d7ae"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-11.png",
+      "opaquePixels": 744,
+      "transparentPixels": 280,
+      "sha256": "cd4937e2d6c063f1cb2bc5eae259effcceb4b5d61e4fbc57f2a738c0d70fe49e"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-12.png",
+      "opaquePixels": 693,
+      "transparentPixels": 331,
+      "sha256": "5febbafa939e89129a10d9e5ce40b57209b6cb7500717550136a9ddc75b20bde"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-13.png",
+      "opaquePixels": 686,
+      "transparentPixels": 338,
+      "sha256": "2085cb6bdc38cf1f17dffd41b05f88057441add1e980e7794833240fbef8391b"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-14.png",
+      "opaquePixels": 710,
+      "transparentPixels": 314,
+      "sha256": "49f3a396b4a13ed482c5dbd9511f69eed5efe2a48105b04a9e5bd114c617da57"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-15.png",
+      "opaquePixels": 668,
+      "transparentPixels": 356,
+      "sha256": "fc9fd15cc17e003fd9a21a533b8da8ef04da8d612fa199e786a9629ea56a206e"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-16.png",
+      "opaquePixels": 723,
+      "transparentPixels": 301,
+      "sha256": "c8f88f60763c6e3aeb18177769254ae9a14d34e81eef52eccbcbc6b51e5d5c32"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-17.png",
+      "opaquePixels": 701,
+      "transparentPixels": 323,
+      "sha256": "afa17079794ee11972f16bd8ef621b11e1975b4621edd06c2ce2755e2c992ec0"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-18.png",
+      "opaquePixels": 675,
+      "transparentPixels": 349,
+      "sha256": "95ab2eb4dee30add940ca64f85d0d883ec81f5d21d05223f62e072fa535a5bdb"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-19.png",
+      "opaquePixels": 678,
+      "transparentPixels": 346,
+      "sha256": "5a60a701c0a18f9005eac460b6980ad63660cdf874facc2a6700f638ff055ae6"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-20.png",
+      "opaquePixels": 677,
+      "transparentPixels": 347,
+      "sha256": "2c8c72d2fc44055ad6161b0a84bce24992e284472d1ef90a4b4009cb979d1c95"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-21.png",
+      "opaquePixels": 679,
+      "transparentPixels": 345,
+      "sha256": "dc821ace91135c07350fce531b1222474b266d5696d39424159e2648a580083b"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-22.png",
+      "opaquePixels": 634,
+      "transparentPixels": 390,
+      "sha256": "c61cf862180a59bec083728913bf0ffa1d6f5a9361931870e6a4f2a8d65b3af1"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-23.png",
+      "opaquePixels": 728,
+      "transparentPixels": 296,
+      "sha256": "a433cefb151969ad58864ad9b04510488383f87a4167ca82c07451ae30366c42"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-24.png",
+      "opaquePixels": 655,
+      "transparentPixels": 369,
+      "sha256": "11a9d0abde35f72c32cbc8ef474452993140f97d21ebd6fa37947bf070c17bf3"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-25.png",
+      "opaquePixels": 733,
+      "transparentPixels": 291,
+      "sha256": "a601488c45397cb4f7851f973f9f82bebf090cd97dcffdbdc726539749d05f0a"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-26.png",
+      "opaquePixels": 712,
+      "transparentPixels": 312,
+      "sha256": "418103b6eb36b1430eee106d905e9581ae90835a85a804240081ad54ea135d82"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-27.png",
+      "opaquePixels": 640,
+      "transparentPixels": 384,
+      "sha256": "855ef3fbc8e909d734e936e267795e09623e99e49b70cd30299854fafbb05ecf"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-28.png",
+      "opaquePixels": 708,
+      "transparentPixels": 316,
+      "sha256": "b1ba82a9fd7e854131affd37a928a4026383ab1c6311a8c4d3316d6cffd2372f"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-29.png",
+      "opaquePixels": 708,
+      "transparentPixels": 316,
+      "sha256": "30205dc628ca5e70e35d84d9a497c68f7228a084f5e4f9b98a8493a52ec08bc9"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-30.png",
+      "opaquePixels": 670,
+      "transparentPixels": 354,
+      "sha256": "08fff592f3a915f78725ce58ed32032cfb8aa189281678915fbb45ce790a89d3"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-31.png",
+      "opaquePixels": 733,
+      "transparentPixels": 291,
+      "sha256": "db7672876ad1da67e4ef378b21efaee8e99cf29324f1809c30233317bfcd23ca"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-32.png",
+      "opaquePixels": 687,
+      "transparentPixels": 337,
+      "sha256": "6871d02ac74d869b61c2f1255146905e8a3f348270ea48f329065192fe731f42"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-33.png",
+      "opaquePixels": 618,
+      "transparentPixels": 406,
+      "sha256": "2208f31f9ba08a6dbd89ce06a32a93d4c9a55a501324e6df0af7d2401ccc8b9b"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-34.png",
+      "opaquePixels": 706,
+      "transparentPixels": 318,
+      "sha256": "ef5c9324394812aa8d879f03a741990e2c6953952445c1a24bd25fdbed07348a"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-35.png",
+      "opaquePixels": 672,
+      "transparentPixels": 352,
+      "sha256": "8123aed8daa833f0073e25f92ebe13d8e2e4d472e787e0bc4d8251e4a9a59284"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-36.png",
+      "opaquePixels": 692,
+      "transparentPixels": 332,
+      "sha256": "9b7dd322dd52ac1484b964cb8fc9c2ed2c8687c386e799d48af16b14190b5d9d"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-37.png",
+      "opaquePixels": 731,
+      "transparentPixels": 293,
+      "sha256": "b7e6bc88ae9ac87a116f9994a04fc6b588f988c8c59bb90515f0edf10bbbbc9d"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-38.png",
+      "opaquePixels": 707,
+      "transparentPixels": 317,
+      "sha256": "2119f2bfe8cc0167120c84fcc69069e0fa70ef167ba3b4ad13e827c488ba4929"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-39.png",
+      "opaquePixels": 652,
+      "transparentPixels": 372,
+      "sha256": "fb5c261517f8ebf1e3e5831e02a995898acbfe4eb213acc47ece960aa518cbf2"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-40.png",
+      "opaquePixels": 704,
+      "transparentPixels": 320,
+      "sha256": "058d1345a3821f407bf3cf113e09c1cfcebbd1230aad4627f0234fc5b58ff9c3"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-41.png",
+      "opaquePixels": 713,
+      "transparentPixels": 311,
+      "sha256": "9b88cff77b4e28e331682f4a9ffdf8db076ee3a08b9f98abc78db92a98a359c7"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-42.png",
+      "opaquePixels": 676,
+      "transparentPixels": 348,
+      "sha256": "93fb1e60e8cbec58a255e30715d6cf18295c7f504971989e0c4564dd2a146410"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-43.png",
+      "opaquePixels": 719,
+      "transparentPixels": 305,
+      "sha256": "33e57f05bcdf962c98f4a02f49193a175af54d9316dd1f10a7f7b766414f5f05"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-44.png",
+      "opaquePixels": 705,
+      "transparentPixels": 319,
+      "sha256": "0ff742c6a1d090d574a00eb2d6edeab15a9557b71cafd37ec32ac49b64c61ba0"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-45.png",
+      "opaquePixels": 718,
+      "transparentPixels": 306,
+      "sha256": "590da4c8a2c45b4e052b2e673085eca96e4fe52acaa52e8a9d124d2096d6eb6c"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-46.png",
+      "opaquePixels": 700,
+      "transparentPixels": 324,
+      "sha256": "6e0578a24ba09236fb706d9be08644405dbe98675f32a17fa5d181b111c03872"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-47.png",
+      "opaquePixels": 717,
+      "transparentPixels": 307,
+      "sha256": "49d5de8f6c8a3bcc64ad41dd71b4ed9980345664b5a8c1d8b5874d96747a3554"
+    },
+    {
+      "file": "png/dark-elves/dark-elves-48.png",
+      "opaquePixels": 751,
+      "transparentPixels": 273,
+      "sha256": "afb69486156444a91c2ea21e58e124a6fcedc4c4ad47a43edeafe5f8677019a0"
+    },
+    {
+      "file": "png/undead/undead-01.png",
+      "opaquePixels": 705,
+      "transparentPixels": 319,
+      "sha256": "ad8027ef6f1478edfed7e05254407f4b7d9af42319f698de60ac3a6c2c8b8081"
+    },
+    {
+      "file": "png/undead/undead-02.png",
+      "opaquePixels": 820,
+      "transparentPixels": 204,
+      "sha256": "8e7420124a1821776f789254cd58d9cfdd96044ba755a86fd44b4598e7c82e0f"
+    },
+    {
+      "file": "png/undead/undead-03.png",
+      "opaquePixels": 582,
+      "transparentPixels": 442,
+      "sha256": "779d36cc4e55d5402f350cf9aafc09e00d2ce4559055f0a8039165dec9decc79"
+    },
+    {
+      "file": "png/undead/undead-04.png",
+      "opaquePixels": 725,
+      "transparentPixels": 299,
+      "sha256": "43a91ba100a3f16e7f490f69dae737225a97e54042bb1c1f9df3c959f3389e80"
+    },
+    {
+      "file": "png/undead/undead-05.png",
+      "opaquePixels": 750,
+      "transparentPixels": 274,
+      "sha256": "d906af2dc1c03df89f4aa45e405636a7bab3aaf99b4b352f120d163afa59ae50"
+    },
+    {
+      "file": "png/undead/undead-06.png",
+      "opaquePixels": 608,
+      "transparentPixels": 416,
+      "sha256": "ca74dd11edb27176b789311641bfec334d3b3a548253479627f7432394c3fdca"
+    },
+    {
+      "file": "png/undead/undead-07.png",
+      "opaquePixels": 516,
+      "transparentPixels": 508,
+      "sha256": "b3c23b9b3eda6f6598f2c58d802651ca003bb2f37ce4a2b21aa8a9552dc91934"
+    },
+    {
+      "file": "png/undead/undead-08.png",
+      "opaquePixels": 607,
+      "transparentPixels": 417,
+      "sha256": "1ee2cba74cc925e805ecbcae7155f7f2ca00817e63091170de750c4cd2e942de"
+    },
+    {
+      "file": "png/undead/undead-09.png",
+      "opaquePixels": 687,
+      "transparentPixels": 337,
+      "sha256": "03d6d61b463ec4b8e145d2d0bd923b0f84f77062be2659b644056741382e419c"
+    },
+    {
+      "file": "png/undead/undead-10.png",
+      "opaquePixels": 679,
+      "transparentPixels": 345,
+      "sha256": "55b6418c926b0baf40b1f857bd3d64caf5e71da682de78887acdb98e0b56d588"
+    },
+    {
+      "file": "png/undead/undead-11.png",
+      "opaquePixels": 635,
+      "transparentPixels": 389,
+      "sha256": "88f00661e507c427f41aa06443cd84c8096c790634fbc76874f65df93ea9a183"
+    },
+    {
+      "file": "png/undead/undead-12.png",
+      "opaquePixels": 745,
+      "transparentPixels": 279,
+      "sha256": "14fb811db7f3b6050652cca56edbcef5f389ff34085e9f1b9f8bf1840832dfb1"
+    },
+    {
+      "file": "png/undead/undead-13.png",
+      "opaquePixels": 763,
+      "transparentPixels": 261,
+      "sha256": "9e5f83b2dbe91e79a1ad57b3c01e808acc28b826a92a9eec9dbd11c087abac38"
+    },
+    {
+      "file": "png/undead/undead-14.png",
+      "opaquePixels": 603,
+      "transparentPixels": 421,
+      "sha256": "93577df0d0104056a89d38dab988126445af377facffdba3cbd6c326fe347760"
+    },
+    {
+      "file": "png/undead/undead-15.png",
+      "opaquePixels": 761,
+      "transparentPixels": 263,
+      "sha256": "494a61d476661d95a3bd300996a3e5f7069543087c927f31cfd5a457bbb0d525"
+    },
+    {
+      "file": "png/undead/undead-16.png",
+      "opaquePixels": 873,
+      "transparentPixels": 151,
+      "sha256": "e65b230f1bc088e5bc01e74ce156d7312bf7e164b07412282a5e45293b2616d2"
+    },
+    {
+      "file": "png/undead/undead-17.png",
+      "opaquePixels": 743,
+      "transparentPixels": 281,
+      "sha256": "51f5747de0b02474526186320d324c7273ee7d06ae1bd9907b7a00f3bbb28a79"
+    },
+    {
+      "file": "png/undead/undead-18.png",
+      "opaquePixels": 742,
+      "transparentPixels": 282,
+      "sha256": "3a32519cfc8d3a19466ea9322fd516bef4240d65f2f697ac2aa309cbec555777"
+    },
+    {
+      "file": "png/undead/undead-19.png",
+      "opaquePixels": 637,
+      "transparentPixels": 387,
+      "sha256": "dcfa66273f048315c594fc83312d150c1f2e259c84704ed12e6929010e495582"
+    },
+    {
+      "file": "png/undead/undead-20.png",
+      "opaquePixels": 845,
+      "transparentPixels": 179,
+      "sha256": "e1efa41149163f1c0c84f7cf40c533b03b021315d657448eea9c0149c2819dff"
+    },
+    {
+      "file": "png/undead/undead-21.png",
+      "opaquePixels": 748,
+      "transparentPixels": 276,
+      "sha256": "9c596acf33d59db9c3b9dcd7c7a50c8c893e62d1a39479dfd7d7cfe5bcc069b5"
+    },
+    {
+      "file": "png/undead/undead-22.png",
+      "opaquePixels": 681,
+      "transparentPixels": 343,
+      "sha256": "12a09a5304236a02e9a6555993b92bb3816e5c75fcef8e5944c7dfde80dde670"
+    },
+    {
+      "file": "png/undead/undead-23.png",
+      "opaquePixels": 617,
+      "transparentPixels": 407,
+      "sha256": "df48df4168c700661cf9b67c368f791593aa87ac25b4bcf4e408a57cb19e19ea"
+    },
+    {
+      "file": "png/undead/undead-24.png",
+      "opaquePixels": 716,
+      "transparentPixels": 308,
+      "sha256": "44496af4b8350d232c80f5be6b7c780c5d495f42f01aa4a7dfc707246373ff7f"
+    },
+    {
+      "file": "png/undead/undead-25.png",
+      "opaquePixels": 724,
+      "transparentPixels": 300,
+      "sha256": "ff3c03c6b5899e983e60add9e706765cbbc4a2f481b444fc060139bd11db9409"
+    },
+    {
+      "file": "png/undead/undead-26.png",
+      "opaquePixels": 778,
+      "transparentPixels": 246,
+      "sha256": "cd985344c28817344309444c0a738cfdd8ebdb2712e9bd038c48bf0a794acb3a"
+    },
+    {
+      "file": "png/undead/undead-27.png",
+      "opaquePixels": 678,
+      "transparentPixels": 346,
+      "sha256": "9ca61c7ef1875c83c3e9b7afa72f54ed98678951a51f92ef75179f96880b686e"
+    },
+    {
+      "file": "png/undead/undead-28.png",
+      "opaquePixels": 802,
+      "transparentPixels": 222,
+      "sha256": "fe11d04a5c430dac0820c8a08f11e757bd4e400db1adcf83ce2c1f2df2d2bbb1"
+    },
+    {
+      "file": "png/undead/undead-29.png",
+      "opaquePixels": 650,
+      "transparentPixels": 374,
+      "sha256": "73b83ea297af657a762c84e965eb870aedf83e21034a60ee7742a67ec836f8e2"
+    },
+    {
+      "file": "png/undead/undead-30.png",
+      "opaquePixels": 674,
+      "transparentPixels": 350,
+      "sha256": "4019853f3da84db37696fb540ac52ee1df25346e53e4587f36b488b94d40d4b0"
+    },
+    {
+      "file": "png/undead/undead-31.png",
+      "opaquePixels": 678,
+      "transparentPixels": 346,
+      "sha256": "3d3286b9ed40a4d341eda0dd44bc8ecbfabe109a2a808c5e9c72e62da518c04d"
+    },
+    {
+      "file": "png/undead/undead-32.png",
+      "opaquePixels": 650,
+      "transparentPixels": 374,
+      "sha256": "6cbf2a17d56f5e4a4491feb4745e0a7ac1450a8d6908b41e0f4c5cf34d4264cd"
+    },
+    {
+      "file": "png/undead/undead-33.png",
+      "opaquePixels": 793,
+      "transparentPixels": 231,
+      "sha256": "eb76440967820af7776118c9582b224ceaaa4f1c591bc9bb00ae326ec2518cf8"
+    },
+    {
+      "file": "png/undead/undead-34.png",
+      "opaquePixels": 610,
+      "transparentPixels": 414,
+      "sha256": "93f1001d9b492f9cf9fc7ab485c1c3ee31833bdfaae026ad9804618169f362d2"
+    },
+    {
+      "file": "png/undead/undead-35.png",
+      "opaquePixels": 573,
+      "transparentPixels": 451,
+      "sha256": "3e6d83a10494e01efb236391142ed87be137937580277ce3196e88fd51c8b384"
+    },
+    {
+      "file": "png/undead/undead-36.png",
+      "opaquePixels": 666,
+      "transparentPixels": 358,
+      "sha256": "ac27d31799f8573cd858f372437a2d987885bd266e741721ed8cdd9f747b2c28"
+    },
+    {
+      "file": "png/undead/undead-37.png",
+      "opaquePixels": 638,
+      "transparentPixels": 386,
+      "sha256": "6999014d98beb60090d58c7955f14d2384fef043e64c69885a433ca4b75343e2"
+    },
+    {
+      "file": "png/undead/undead-38.png",
+      "opaquePixels": 625,
+      "transparentPixels": 399,
+      "sha256": "7317578eadc4eb39ffe9df0568be8ab441e19f8d6a64fae003eaddba29c88ec5"
+    },
+    {
+      "file": "png/undead/undead-39.png",
+      "opaquePixels": 678,
+      "transparentPixels": 346,
+      "sha256": "d64f08245012996e658d7177f2d9a9eb0635ef9170148ba643a893dd97d1f9a8"
+    },
+    {
+      "file": "png/undead/undead-40.png",
+      "opaquePixels": 563,
+      "transparentPixels": 461,
+      "sha256": "217ab61e590ba33fef8e87ee60d3e389d6f3a8d3c307f393e2616d95d1d78263"
+    },
+    {
+      "file": "png/undead/undead-41.png",
+      "opaquePixels": 729,
+      "transparentPixels": 295,
+      "sha256": "d372ed897aa35e6ad3f78dd2227fd3159a1048f05ec1ca8bc3e793faeb96402c"
+    },
+    {
+      "file": "png/undead/undead-42.png",
+      "opaquePixels": 660,
+      "transparentPixels": 364,
+      "sha256": "733f4346066abba007982ba37a9b74a1b3435cfe8c8d49cffb96d2ca27b819de"
+    },
+    {
+      "file": "png/undead/undead-43.png",
+      "opaquePixels": 672,
+      "transparentPixels": 352,
+      "sha256": "fc6b7faf965ea4917dc0bc374a8241644abad9a1ef25148eb6ddff8a2df2567b"
+    },
+    {
+      "file": "png/undead/undead-44.png",
+      "opaquePixels": 617,
+      "transparentPixels": 407,
+      "sha256": "70529d3c7023e620d954dcb0fc30695421ecd0449bc20101f49b6fd79db49382"
+    },
+    {
+      "file": "png/undead/undead-45.png",
+      "opaquePixels": 736,
+      "transparentPixels": 288,
+      "sha256": "c56cc2bcf538d90322e5b4d3747e30409607e7cb170041d8ebb6bd4bdfca8387"
+    },
+    {
+      "file": "png/undead/undead-46.png",
+      "opaquePixels": 809,
+      "transparentPixels": 215,
+      "sha256": "4096a40b85dd0a260acdc3e0052d4a1693641815bf5b136f68519d0cbb558d08"
+    },
+    {
+      "file": "png/undead/undead-47.png",
+      "opaquePixels": 753,
+      "transparentPixels": 271,
+      "sha256": "8612cecc44de46bae6d258f30343bf1d5a443f25d9c7acf7d96a6b8dac3cb82a"
+    },
+    {
+      "file": "png/undead/undead-48.png",
+      "opaquePixels": 584,
+      "transparentPixels": 440,
+      "sha256": "7f3a89340b67c39046af14aa3764d6267156ea475dd4621dbfef0b0a8758db2f"
+    },
+    {
+      "file": "png/demons/demons-01.png",
+      "opaquePixels": 716,
+      "transparentPixels": 308,
+      "sha256": "566870cfab3e9ab823d8df131254eceb2aae44e274580b62a5569ea7539cda13"
+    },
+    {
+      "file": "png/demons/demons-02.png",
+      "opaquePixels": 689,
+      "transparentPixels": 335,
+      "sha256": "110d43b06ca3d13f7b0cabfc5fffb159dd5725059406d1b95bb4e9bb55358cb0"
+    },
+    {
+      "file": "png/demons/demons-03.png",
+      "opaquePixels": 653,
+      "transparentPixels": 371,
+      "sha256": "123d805f058e150514111648684011611a3a6ea2b52d06d0738c0bc0ede8b1f4"
+    },
+    {
+      "file": "png/demons/demons-04.png",
+      "opaquePixels": 699,
+      "transparentPixels": 325,
+      "sha256": "0da151e1e1a28f1658282342b010223293d8a1ad4ee6f0ba31c42c0a71e740b0"
+    },
+    {
+      "file": "png/demons/demons-05.png",
+      "opaquePixels": 671,
+      "transparentPixels": 353,
+      "sha256": "2a546afe8c03f82f552ac0ac69827f5555490d02945213a99927f1920825388e"
+    },
+    {
+      "file": "png/demons/demons-06.png",
+      "opaquePixels": 709,
+      "transparentPixels": 315,
+      "sha256": "0391f1fcfad052ebebd63c82ad4a8ce74d6b8f6b07bf3cc5b81843cfad567cfa"
+    },
+    {
+      "file": "png/demons/demons-07.png",
+      "opaquePixels": 624,
+      "transparentPixels": 400,
+      "sha256": "4eefeb80d2de7d69033a4e2da7a9f35cc3469b6b78e73137ed4ca59710d742a6"
+    },
+    {
+      "file": "png/demons/demons-08.png",
+      "opaquePixels": 665,
+      "transparentPixels": 359,
+      "sha256": "e8e712b291346c9540eb384afcf531983d29a8624c59d142ba27287a0c4b76fe"
+    },
+    {
+      "file": "png/demons/demons-09.png",
+      "opaquePixels": 684,
+      "transparentPixels": 340,
+      "sha256": "4c281bdfa7bc8cc8a7fb18196629c29cb71d208169a3c9b369c2f39d26b5041b"
+    },
+    {
+      "file": "png/demons/demons-10.png",
+      "opaquePixels": 661,
+      "transparentPixels": 363,
+      "sha256": "1487f6fae74465e26a3dbc56a8137dfb09220b119972d84b052fd8c08f7ad9e8"
+    },
+    {
+      "file": "png/demons/demons-11.png",
+      "opaquePixels": 634,
+      "transparentPixels": 390,
+      "sha256": "1f5d3a1332bd0f65bde236ebf183fca8325ce86ce9a4f398355cd6c10765b8eb"
+    },
+    {
+      "file": "png/demons/demons-12.png",
+      "opaquePixels": 655,
+      "transparentPixels": 369,
+      "sha256": "9fe34774d8aa4a5f4790be87de67abd34295d3136cb8f507f9cab9075c1f55bf"
+    },
+    {
+      "file": "png/demons/demons-13.png",
+      "opaquePixels": 702,
+      "transparentPixels": 322,
+      "sha256": "7205a58e2acabbc344e0df4c2d0ef206518bfadc09bd34da27cf07ea2accde40"
+    },
+    {
+      "file": "png/demons/demons-14.png",
+      "opaquePixels": 643,
+      "transparentPixels": 381,
+      "sha256": "f8cd54a513cb0bbcd5edca35f9b048e7bf6554ee9d1a573ab5d90ac924234d4c"
+    },
+    {
+      "file": "png/demons/demons-15.png",
+      "opaquePixels": 627,
+      "transparentPixels": 397,
+      "sha256": "853285ac9c1522ca8aafbd37932bc50fbdeec69eb9077d0c7919809ba89cb1e1"
+    },
+    {
+      "file": "png/demons/demons-16.png",
+      "opaquePixels": 662,
+      "transparentPixels": 362,
+      "sha256": "166378d54965ecca5e77c7e9d118ef8167ea2a72bfcdc7476694aeb86ddb6254"
+    },
+    {
+      "file": "png/demons/demons-17.png",
+      "opaquePixels": 678,
+      "transparentPixels": 346,
+      "sha256": "5094072ed5a92c2462622114d124b3a5973858b6ec1e5529250042209a55ed01"
+    },
+    {
+      "file": "png/demons/demons-18.png",
+      "opaquePixels": 704,
+      "transparentPixels": 320,
+      "sha256": "88ca8ef8d5d5689c44e69760bf4b7af2a290c2f67b9ac407533927411f94fff9"
+    },
+    {
+      "file": "png/demons/demons-19.png",
+      "opaquePixels": 668,
+      "transparentPixels": 356,
+      "sha256": "3d734156789c8e6b12674f1cd3223390b523c88b9c1c28ea7a4793b153329bb6"
+    },
+    {
+      "file": "png/demons/demons-20.png",
+      "opaquePixels": 698,
+      "transparentPixels": 326,
+      "sha256": "eecfea90d2c433cad234c0895950caa5c523f59749e3ff579078e2140eb4afe3"
+    },
+    {
+      "file": "png/demons/demons-21.png",
+      "opaquePixels": 669,
+      "transparentPixels": 355,
+      "sha256": "2e0be48a57594fc44ad3d14bf273d7dae4f594d68f8aaf9f526346f2723d29cf"
+    },
+    {
+      "file": "png/demons/demons-22.png",
+      "opaquePixels": 658,
+      "transparentPixels": 366,
+      "sha256": "7ac17198ce27a4a93bfdd8d304e94bbf2ea59585fcb579d55c7d0d0a0e305db2"
+    },
+    {
+      "file": "png/demons/demons-23.png",
+      "opaquePixels": 565,
+      "transparentPixels": 459,
+      "sha256": "db1eedacb344c2e47e34e26dcac4c87ba8872352bff9463f0c66e39b2703356e"
+    },
+    {
+      "file": "png/demons/demons-24.png",
+      "opaquePixels": 739,
+      "transparentPixels": 285,
+      "sha256": "cc02d9b72e23d741b9a4851441de84d4bbc64a87bd2196edb05c81e6aff0f053"
+    },
+    {
+      "file": "png/demons/demons-25.png",
+      "opaquePixels": 665,
+      "transparentPixels": 359,
+      "sha256": "88a66d26a0255980c06bedfc175daedaa60b064133d2ed9d31de8ee55dedbb36"
+    },
+    {
+      "file": "png/demons/demons-26.png",
+      "opaquePixels": 729,
+      "transparentPixels": 295,
+      "sha256": "ea2cb752d4d0c974619afad56b542e9deb67db6df89c8a31842df0c9ed204273"
+    },
+    {
+      "file": "png/demons/demons-27.png",
+      "opaquePixels": 706,
+      "transparentPixels": 318,
+      "sha256": "714b5fddfaf8fee76f25e9f438e081d2a6e2d20773fa6f57f16c43590da6de3d"
+    },
+    {
+      "file": "png/demons/demons-28.png",
+      "opaquePixels": 660,
+      "transparentPixels": 364,
+      "sha256": "ddebe027b735cd23aaa23e5eb5cdce8437e9d4a71c24ebc1f96f725413f02e0d"
+    },
+    {
+      "file": "png/demons/demons-29.png",
+      "opaquePixels": 599,
+      "transparentPixels": 425,
+      "sha256": "0fa468ad8b4ce43c6d410c66d4852e6760a58957b3188f08b7fdf149fc9615c1"
+    },
+    {
+      "file": "png/demons/demons-30.png",
+      "opaquePixels": 667,
+      "transparentPixels": 357,
+      "sha256": "c115bc8b27b312f896b154df3caf2b549930591a2ea5be52ba25356b6f7c5e95"
+    },
+    {
+      "file": "png/demons/demons-31.png",
+      "opaquePixels": 791,
+      "transparentPixels": 233,
+      "sha256": "d27f39b4de1ce5acba2438c1768a9d6b7f79e2388d1d597faf72da1e95598333"
+    },
+    {
+      "file": "png/demons/demons-32.png",
+      "opaquePixels": 740,
+      "transparentPixels": 284,
+      "sha256": "86e0dba9345679beed46331d52717581fbe7137c6a3322eb11af86fd3379adcf"
+    },
+    {
+      "file": "png/demons/demons-33.png",
+      "opaquePixels": 742,
+      "transparentPixels": 282,
+      "sha256": "48132ebedaede4da373937e860f9c6bf8fb0854582225a8ac0b3f38ea5c44e91"
+    },
+    {
+      "file": "png/demons/demons-34.png",
+      "opaquePixels": 660,
+      "transparentPixels": 364,
+      "sha256": "1064a2f068638d74776ccf86a0d5df9504aaa62ab7e339fc1fc7608d172b5796"
+    },
+    {
+      "file": "png/demons/demons-35.png",
+      "opaquePixels": 658,
+      "transparentPixels": 366,
+      "sha256": "2ab02e3e9dad483fff47c91d208e9c1f3dabdb31ad8166097fe6c141b6835374"
+    },
+    {
+      "file": "png/demons/demons-36.png",
+      "opaquePixels": 747,
+      "transparentPixels": 277,
+      "sha256": "3dd87a7de87f48bb940b7eea445ae67b3efbd7c70e1967cc14b5eccf16066700"
+    },
+    {
+      "file": "png/demons/demons-37.png",
+      "opaquePixels": 741,
+      "transparentPixels": 283,
+      "sha256": "1c56eae503d2839826e87c7a076184379ae795c61c3508de49e124cbd6884373"
+    },
+    {
+      "file": "png/demons/demons-38.png",
+      "opaquePixels": 709,
+      "transparentPixels": 315,
+      "sha256": "000cb55539568a7f20e433338b5831345b113a99258c336acae5cd0fc7617297"
+    },
+    {
+      "file": "png/demons/demons-39.png",
+      "opaquePixels": 734,
+      "transparentPixels": 290,
+      "sha256": "04e9f320fb57ed3b17504549f8e4296afd05abdd1760bdb259a7a8f2649f5bc2"
+    },
+    {
+      "file": "png/demons/demons-40.png",
+      "opaquePixels": 640,
+      "transparentPixels": 384,
+      "sha256": "212047f224dfb579ef867d9a611d9609f9c3b0a9d967226625673d29518878d7"
+    },
+    {
+      "file": "png/demons/demons-41.png",
+      "opaquePixels": 705,
+      "transparentPixels": 319,
+      "sha256": "4822b736e0b4dfd2a3295bd779d6b3617bf3d83f33d19d35a50fe86827ccfea8"
+    },
+    {
+      "file": "png/demons/demons-42.png",
+      "opaquePixels": 761,
+      "transparentPixels": 263,
+      "sha256": "170eefd857eecd0fefb553272b343ea4a231d725d23141da635b1985474d5af9"
+    },
+    {
+      "file": "png/demons/demons-43.png",
+      "opaquePixels": 692,
+      "transparentPixels": 332,
+      "sha256": "4e4286ac4f4c5c7dd9819230236ee666ac2b21e6dbd32e62566e9a872de283e8"
+    },
+    {
+      "file": "png/demons/demons-44.png",
+      "opaquePixels": 617,
+      "transparentPixels": 407,
+      "sha256": "ac42a5019c747b71ff349f30246a5123555b49d25afe9fc305fb6cf8d8eb0591"
+    },
+    {
+      "file": "png/demons/demons-45.png",
+      "opaquePixels": 640,
+      "transparentPixels": 384,
+      "sha256": "340df9fbdae9c80e0784bd1bd298afe921f9e9f4071510fdd09d1fa8cca9ce4a"
+    },
+    {
+      "file": "png/demons/demons-46.png",
+      "opaquePixels": 675,
+      "transparentPixels": 349,
+      "sha256": "f863d3d34643a4e95bdf473ca47a8936496d414382b693addcc49560fc87b90d"
+    },
+    {
+      "file": "png/demons/demons-47.png",
+      "opaquePixels": 689,
+      "transparentPixels": 335,
+      "sha256": "c638c8b0dc02d5005a505d0426bbbfc3f68121bd8c6e1e27e03de418643e8535"
+    },
+    {
+      "file": "png/demons/demons-48.png",
+      "opaquePixels": 664,
+      "transparentPixels": 360,
+      "sha256": "5070630fa650e04be06e76efbee4f1e113756e89582f7cc7385dcddcb1a48223"
+    },
+    {
+      "file": "png/pirates/pirates-01.png",
+      "opaquePixels": 817,
+      "transparentPixels": 207,
+      "sha256": "f12bb16f0479916ca64c6d865968fe29784e3f592ee6be09cd41935836a1e27e"
+    },
+    {
+      "file": "png/pirates/pirates-02.png",
+      "opaquePixels": 736,
+      "transparentPixels": 288,
+      "sha256": "db43c22bb1bef2b65562b19e7eef4ff681783b957605439dc326261e8652bbbb"
+    },
+    {
+      "file": "png/pirates/pirates-03.png",
+      "opaquePixels": 739,
+      "transparentPixels": 285,
+      "sha256": "9eca3daf8581c9f3986c7ed0bc61e3067481a29164d25c7d8e43bd670833b179"
+    },
+    {
+      "file": "png/pirates/pirates-04.png",
+      "opaquePixels": 672,
+      "transparentPixels": 352,
+      "sha256": "66f52cc4a09793b9675f2c20b4963fc204fba481b18682ed3059027791c7628a"
+    },
+    {
+      "file": "png/pirates/pirates-05.png",
+      "opaquePixels": 859,
+      "transparentPixels": 165,
+      "sha256": "85cd1c6962f733a0f54d399b4b998024d0a44a09ba4dd005734e9728fd14e4dc"
+    },
+    {
+      "file": "png/pirates/pirates-06.png",
+      "opaquePixels": 628,
+      "transparentPixels": 396,
+      "sha256": "3b9c8f27fd62e48e7e96735d554e8a709375c0289b520209634b6b09ad35d512"
+    },
+    {
+      "file": "png/pirates/pirates-07.png",
+      "opaquePixels": 654,
+      "transparentPixels": 370,
+      "sha256": "b9f32f0c6f28d43bb1c1fafb1905eb5bde2f93d655654ba3d1b36209ad7b52d6"
+    },
+    {
+      "file": "png/pirates/pirates-08.png",
+      "opaquePixels": 642,
+      "transparentPixels": 382,
+      "sha256": "5ffeaddc78fccaf9dbc627fb638f6d086c8637c0743bc6c859dce5898b604917"
+    },
+    {
+      "file": "png/pirates/pirates-09.png",
+      "opaquePixels": 811,
+      "transparentPixels": 213,
+      "sha256": "ed2d1c7b003e8713ba42864553d9bd4f641f06264e09d6da9fba18e480b270b6"
+    },
+    {
+      "file": "png/pirates/pirates-10.png",
+      "opaquePixels": 673,
+      "transparentPixels": 351,
+      "sha256": "69aa169c8d8778d734383c58a5ec56e3ddde2d07ded59f9e97d6bae14dbc90c3"
+    },
+    {
+      "file": "png/pirates/pirates-11.png",
+      "opaquePixels": 788,
+      "transparentPixels": 236,
+      "sha256": "77ae678ac3cf44d3c598cf693cb43f06a50bb1e8788c359478de28345805a79e"
+    },
+    {
+      "file": "png/pirates/pirates-12.png",
+      "opaquePixels": 697,
+      "transparentPixels": 327,
+      "sha256": "69e85b6b9de2cd9bbab562b559003c66c6a6f0b25fb6e5c8a6dafca19e8fce56"
+    },
+    {
+      "file": "png/pirates/pirates-13.png",
+      "opaquePixels": 855,
+      "transparentPixels": 169,
+      "sha256": "cba76604c8a95c32b214892bec0d0d080d03c8a692967949c984985e73d77ece"
+    },
+    {
+      "file": "png/pirates/pirates-14.png",
+      "opaquePixels": 889,
+      "transparentPixels": 135,
+      "sha256": "aa049ad7b0ff93c83062cb2343b744dc6a5dd6a2818e82348d7297782289f603"
+    },
+    {
+      "file": "png/pirates/pirates-15.png",
+      "opaquePixels": 625,
+      "transparentPixels": 399,
+      "sha256": "79f2e80778a8cfd925c0e3bb7e2306d2930fb793d8853290906623d2a481e1a3"
+    },
+    {
+      "file": "png/pirates/pirates-16.png",
+      "opaquePixels": 822,
+      "transparentPixels": 202,
+      "sha256": "6dd92b0d2a921917db8d4901e8596450680369c5f328e0546f506e89d6d26855"
+    },
+    {
+      "file": "png/pirates/pirates-17.png",
+      "opaquePixels": 776,
+      "transparentPixels": 248,
+      "sha256": "4fc31495855db5825bcb694c0033cc29bc050a6f5b03ce10f24d8834187b5d1b"
+    },
+    {
+      "file": "png/pirates/pirates-18.png",
+      "opaquePixels": 773,
+      "transparentPixels": 251,
+      "sha256": "f18cc20694775ba1df6409825aa0d457cf99acef4c16b7a3f8490539d0914d24"
+    },
+    {
+      "file": "png/pirates/pirates-19.png",
+      "opaquePixels": 684,
+      "transparentPixels": 340,
+      "sha256": "307a25b200f58cae8ab8591d5407845aca767294b9302ff5355ea6059a5bdac9"
+    },
+    {
+      "file": "png/pirates/pirates-20.png",
+      "opaquePixels": 767,
+      "transparentPixels": 257,
+      "sha256": "44cfacd0c0ca31aa8233249f99fbe7e2503b692d8d5f32ef7a60e8ab1f639850"
+    },
+    {
+      "file": "png/pirates/pirates-21.png",
+      "opaquePixels": 826,
+      "transparentPixels": 198,
+      "sha256": "13c81bf7d50415f6824c33c0b7213ceefa039d1c49c042e2522d8ff98f47a866"
+    },
+    {
+      "file": "png/pirates/pirates-22.png",
+      "opaquePixels": 672,
+      "transparentPixels": 352,
+      "sha256": "95ea1b8aea307f34978a4ae5245184df5a1207c82d98037c6ac69737f2331ed4"
+    },
+    {
+      "file": "png/pirates/pirates-23.png",
+      "opaquePixels": 729,
+      "transparentPixels": 295,
+      "sha256": "52eb9d53ff7f6ca143034bbb785c48e35ce2d2f53a7479bd1be369e280bcc970"
+    },
+    {
+      "file": "png/pirates/pirates-24.png",
+      "opaquePixels": 741,
+      "transparentPixels": 283,
+      "sha256": "337cc0abefae110e99ea586fbb31b9b719d10a750f0d774d464354a2a7090b37"
+    },
+    {
+      "file": "png/pirates/pirates-25.png",
+      "opaquePixels": 712,
+      "transparentPixels": 312,
+      "sha256": "0a394673b8f0e241952f9a87f5c3b10abb6a6071c3449cbeb0e07054315fa50b"
+    },
+    {
+      "file": "png/pirates/pirates-26.png",
+      "opaquePixels": 686,
+      "transparentPixels": 338,
+      "sha256": "601a25a2ff1b2754e78ece7937731f1e07200e92772bd20a3bf810448b1d6411"
+    },
+    {
+      "file": "png/pirates/pirates-27.png",
+      "opaquePixels": 811,
+      "transparentPixels": 213,
+      "sha256": "06f0dbd8a21cef044ce38952d41f0fb70fa68ed6cb1b0a12e1884bf98153ed36"
+    },
+    {
+      "file": "png/pirates/pirates-28.png",
+      "opaquePixels": 590,
+      "transparentPixels": 434,
+      "sha256": "300793b84994a58b155e0cacd2321394ac7b6f38797dc364249deb767ff3b7a9"
+    },
+    {
+      "file": "png/pirates/pirates-29.png",
+      "opaquePixels": 702,
+      "transparentPixels": 322,
+      "sha256": "3215b42cef7d36ca8c59b07f09b4ce301ff9446d12790293e4207e390b345c7f"
+    },
+    {
+      "file": "png/pirates/pirates-30.png",
+      "opaquePixels": 728,
+      "transparentPixels": 296,
+      "sha256": "ba7b59c027246cbd1607ebe32a9ac69d78dfd6d94e672e4397c735aa6efed2af"
+    },
+    {
+      "file": "png/pirates/pirates-31.png",
+      "opaquePixels": 734,
+      "transparentPixels": 290,
+      "sha256": "99982d367f58ba5c71cca76a3b8cc3793fa725a8c4e214d4b6f14b0fd47d3deb"
+    },
+    {
+      "file": "png/pirates/pirates-32.png",
+      "opaquePixels": 650,
+      "transparentPixels": 374,
+      "sha256": "1c1cc04f0f9b12fe5aa6926824cbc028bbc48279eacff384fad9f717fffec045"
+    },
+    {
+      "file": "png/pirates/pirates-33.png",
+      "opaquePixels": 769,
+      "transparentPixels": 255,
+      "sha256": "07cb73645ae768d1336eefcafc12d9a55bae3ef68bd1c9146d3993c5aa04169c"
+    },
+    {
+      "file": "png/pirates/pirates-34.png",
+      "opaquePixels": 619,
+      "transparentPixels": 405,
+      "sha256": "d42dbb2cddddc961cbd81d1d2435161ca7bec49382dee9d2aaa9f2b280831b80"
+    },
+    {
+      "file": "png/pirates/pirates-35.png",
+      "opaquePixels": 646,
+      "transparentPixels": 378,
+      "sha256": "5724e83434ca17a36b212d17b9ce35692942e8352e79bbe7c517ac3ae56d7626"
+    },
+    {
+      "file": "png/pirates/pirates-36.png",
+      "opaquePixels": 734,
+      "transparentPixels": 290,
+      "sha256": "fa5d2dba810c0ec8274dab16b58f9a45909efaaba9e6e437858b772b87cadedd"
+    },
+    {
+      "file": "png/pirates/pirates-37.png",
+      "opaquePixels": 702,
+      "transparentPixels": 322,
+      "sha256": "c0e337d79b1bfb94815142eccd79b111820c78f392cfa3ed32dff88a376a7593"
+    },
+    {
+      "file": "png/pirates/pirates-38.png",
+      "opaquePixels": 573,
+      "transparentPixels": 451,
+      "sha256": "28989c3726e07ee181db2b94a2a2f257b6ade0636d02534246ab7f105d188bc7"
+    },
+    {
+      "file": "png/pirates/pirates-39.png",
+      "opaquePixels": 676,
+      "transparentPixels": 348,
+      "sha256": "508a6cbb776f126feb987e0ffb886cd20f1e17f3497970d278953e65c982448b"
+    },
+    {
+      "file": "png/pirates/pirates-40.png",
+      "opaquePixels": 711,
+      "transparentPixels": 313,
+      "sha256": "3bff137f36877145dc37f273ca5dbe45da296546cf2191f1e52581b320f81861"
+    },
+    {
+      "file": "png/pirates/pirates-41.png",
+      "opaquePixels": 899,
+      "transparentPixels": 125,
+      "sha256": "8d86edef3eee9d27bbfbdda14c5d62287649bbed35a176048ab5bbcbb817e485"
+    },
+    {
+      "file": "png/pirates/pirates-42.png",
+      "opaquePixels": 725,
+      "transparentPixels": 299,
+      "sha256": "57467dc3e43335afbafd15327b9eddec4a5164ccbe4abe51473f1a676b9fdad0"
+    },
+    {
+      "file": "png/pirates/pirates-43.png",
+      "opaquePixels": 744,
+      "transparentPixels": 280,
+      "sha256": "e02621fbfaf84504c716d0e42df369f970f58974429a7ca256d8394780a9bbbe"
+    },
+    {
+      "file": "png/pirates/pirates-44.png",
+      "opaquePixels": 687,
+      "transparentPixels": 337,
+      "sha256": "8f458f220c79c6d1875cae3d7c59b17eb24a95883a0c1f8e13751144970a7d21"
+    },
+    {
+      "file": "png/pirates/pirates-45.png",
+      "opaquePixels": 754,
+      "transparentPixels": 270,
+      "sha256": "da33ebe6eaf1f902abaf7152566a25e6282d0ea78a4ce3ee6901180c771bbff0"
+    },
+    {
+      "file": "png/pirates/pirates-46.png",
+      "opaquePixels": 764,
+      "transparentPixels": 260,
+      "sha256": "140277d86c459a043dd7b7fcf256bff86c5883a7c290d97aeefdb2681e43fda7"
+    },
+    {
+      "file": "png/pirates/pirates-47.png",
+      "opaquePixels": 745,
+      "transparentPixels": 279,
+      "sha256": "e3622255e79b698323d9f079a6f3b2808d7a26b83994b0cac077a26aba9d8ad0"
+    },
+    {
+      "file": "png/pirates/pirates-48.png",
+      "opaquePixels": 620,
+      "transparentPixels": 404,
+      "sha256": "a09d3df311f96fc2b1cd28e211c8185dd00cad77b0de801db98fbb81b87ead5b"
+    },
+    {
+      "file": "png/dwarves/dwarves-01.png",
+      "opaquePixels": 805,
+      "transparentPixels": 219,
+      "sha256": "ae95c019cbbd2065180adbb8d2ccc2d4c042a4e20923cff7b7f98069eff34ac1"
+    },
+    {
+      "file": "png/dwarves/dwarves-02.png",
+      "opaquePixels": 807,
+      "transparentPixels": 217,
+      "sha256": "d5da495795365803c51af3e5314e95dc88048c19243843274334e1590db61f61"
+    },
+    {
+      "file": "png/dwarves/dwarves-03.png",
+      "opaquePixels": 792,
+      "transparentPixels": 232,
+      "sha256": "d34d57c4d2b88f84ad160b9dd0a4287cf6ee0d05299041991fbcb9211f8fc829"
+    },
+    {
+      "file": "png/dwarves/dwarves-04.png",
+      "opaquePixels": 809,
+      "transparentPixels": 215,
+      "sha256": "042b1da6c02f395c5c161aaf575eee7633cb290fb1549f18015a11045195cd3e"
+    },
+    {
+      "file": "png/dwarves/dwarves-05.png",
+      "opaquePixels": 803,
+      "transparentPixels": 221,
+      "sha256": "7830ef72dc939d2a131b29ac31b92551c6028398516335484b7ce34b97fb4918"
+    },
+    {
+      "file": "png/dwarves/dwarves-06.png",
+      "opaquePixels": 809,
+      "transparentPixels": 215,
+      "sha256": "f6a2d72f3eb7eb9323eb1d66aeaaf5faf9e8d9404ddfdbb9dd0da318fd8fab5c"
+    },
+    {
+      "file": "png/dwarves/dwarves-07.png",
+      "opaquePixels": 823,
+      "transparentPixels": 201,
+      "sha256": "d84a83937e1cc4d98118ba062e59073375e450ff4de0b57c3608f5851406fcff"
+    },
+    {
+      "file": "png/dwarves/dwarves-08.png",
+      "opaquePixels": 743,
+      "transparentPixels": 281,
+      "sha256": "0fc5deb06d381ac9744c3539c0be464101400de27fd75ada76eeb7ee52082a0c"
+    },
+    {
+      "file": "png/dwarves/dwarves-09.png",
+      "opaquePixels": 727,
+      "transparentPixels": 297,
+      "sha256": "e9a8e6fe6920e3d2a0be58fe74fad8e992b7465b34f9e024a7e0cf29713e3aaa"
+    },
+    {
+      "file": "png/dwarves/dwarves-10.png",
+      "opaquePixels": 735,
+      "transparentPixels": 289,
+      "sha256": "bb09d2613d966ecce6868afc22cdd0281889ea8b93e1a8c7d35f56947d9e7ace"
+    },
+    {
+      "file": "png/dwarves/dwarves-11.png",
+      "opaquePixels": 788,
+      "transparentPixels": 236,
+      "sha256": "b7c0113bc5c942bf5baf71586d55f7bbbc1e6532504ad272c0a9594ebb1d7548"
+    },
+    {
+      "file": "png/dwarves/dwarves-12.png",
+      "opaquePixels": 741,
+      "transparentPixels": 283,
+      "sha256": "f0d550afb0912e63e12339f5a25e03ebc8a8b84f39fb5909e23846ed124b0b64"
+    },
+    {
+      "file": "png/dwarves/dwarves-13.png",
+      "opaquePixels": 770,
+      "transparentPixels": 254,
+      "sha256": "7f5628289e54b7f0ec5bc249ea04c3de8b43a9a7c6df23b83e7ccf65f726cb6a"
+    },
+    {
+      "file": "png/dwarves/dwarves-14.png",
+      "opaquePixels": 741,
+      "transparentPixels": 283,
+      "sha256": "12a378cb9cf24ce58315a5f8c01d46fd3fda985fb6b77b59def6fda09f2895f9"
+    },
+    {
+      "file": "png/dwarves/dwarves-15.png",
+      "opaquePixels": 728,
+      "transparentPixels": 296,
+      "sha256": "b8eb4787bb02c897ba92660e7980f1ac66b06da1aa2f8457a49654a46392805b"
+    },
+    {
+      "file": "png/dwarves/dwarves-16.png",
+      "opaquePixels": 813,
+      "transparentPixels": 211,
+      "sha256": "c6e8431d382f4cd9dd5ae2483fdf833a48a3ebd0a3caa79ef73e91459ff4e0fc"
+    },
+    {
+      "file": "png/dwarves/dwarves-17.png",
+      "opaquePixels": 697,
+      "transparentPixels": 327,
+      "sha256": "47b1351a6d781f7b81cdb5dd473b57dbe7112ce6df8a007835a9529617d61769"
+    },
+    {
+      "file": "png/dwarves/dwarves-18.png",
+      "opaquePixels": 663,
+      "transparentPixels": 361,
+      "sha256": "041998e2ac60c82fb09187aed82487174e5b2abe7d297940e3a63c3be3f37b11"
+    },
+    {
+      "file": "png/dwarves/dwarves-19.png",
+      "opaquePixels": 777,
+      "transparentPixels": 247,
+      "sha256": "b26f15eecadf0cea558b710eca1b71c2f5bf51a0b00986f455f8bed71bab690a"
+    },
+    {
+      "file": "png/dwarves/dwarves-20.png",
+      "opaquePixels": 759,
+      "transparentPixels": 265,
+      "sha256": "9ced1222b4c4c079dcdb3437f1e01c10041b84fe49c326dc5f1d27ed07fbc090"
+    },
+    {
+      "file": "png/dwarves/dwarves-21.png",
+      "opaquePixels": 784,
+      "transparentPixels": 240,
+      "sha256": "8823c5ab03981c41ffd44cb9240471ad6a933e788f68144df2b27d3ba852f46c"
+    },
+    {
+      "file": "png/dwarves/dwarves-22.png",
+      "opaquePixels": 755,
+      "transparentPixels": 269,
+      "sha256": "0d69dbe11c1c7f93c6aed87ee66851084697e1ab411b448c9a2c7a7820be7b55"
+    },
+    {
+      "file": "png/dwarves/dwarves-23.png",
+      "opaquePixels": 871,
+      "transparentPixels": 153,
+      "sha256": "b1fcd5ea2c83089c6d9e18a0c5ed1f6832c2a5c3527683f580233ece685c69e7"
+    },
+    {
+      "file": "png/dwarves/dwarves-24.png",
+      "opaquePixels": 777,
+      "transparentPixels": 247,
+      "sha256": "6b5e419b80643fc1f83693b0dfcef605509c14c53236d7616ea3e3b8672a3359"
+    },
+    {
+      "file": "png/dwarves/dwarves-25.png",
+      "opaquePixels": 799,
+      "transparentPixels": 225,
+      "sha256": "63f61c7d19657499888d552c951942ce404819f9575cf1804dc1e43306ff4fe9"
+    },
+    {
+      "file": "png/dwarves/dwarves-26.png",
+      "opaquePixels": 647,
+      "transparentPixels": 377,
+      "sha256": "83186ca8a3927e9199b9595751b829c33a110d2fa160a8a54b0d2d1632ec644a"
+    },
+    {
+      "file": "png/dwarves/dwarves-27.png",
+      "opaquePixels": 775,
+      "transparentPixels": 249,
+      "sha256": "0a3fba30aa8b51dc01461b3d59d7c892d71ad8c690af87507ab9de83573b084d"
+    },
+    {
+      "file": "png/dwarves/dwarves-28.png",
+      "opaquePixels": 796,
+      "transparentPixels": 228,
+      "sha256": "6edd34c495e5157a015dd6ecdcf39b56ae640217097c18b6c1dfcd9b3a0ff517"
+    },
+    {
+      "file": "png/dwarves/dwarves-29.png",
+      "opaquePixels": 871,
+      "transparentPixels": 153,
+      "sha256": "4433cff2740072b1b7abdc1d528237f6cfa78ed5fafd98f141c53db6e26c3d63"
+    },
+    {
+      "file": "png/dwarves/dwarves-30.png",
+      "opaquePixels": 698,
+      "transparentPixels": 326,
+      "sha256": "87f5b432e7e6d794b5d294d3303a95cb1f6b5d8a3f65379a3757ad80c1eb611a"
+    },
+    {
+      "file": "png/dwarves/dwarves-31.png",
+      "opaquePixels": 837,
+      "transparentPixels": 187,
+      "sha256": "91ae2eade37079473079acffe69189441d557ed763a7df720556126f73342a77"
+    },
+    {
+      "file": "png/dwarves/dwarves-32.png",
+      "opaquePixels": 787,
+      "transparentPixels": 237,
+      "sha256": "ff1255e321ba66ec916c6aeb5da1b3254a80032ce83ccc0341e92d0622086190"
+    },
+    {
+      "file": "png/dwarves/dwarves-33.png",
+      "opaquePixels": 690,
+      "transparentPixels": 334,
+      "sha256": "8649927080dd4f8e6ff8c77312b5eb79be9f123b39173ba4a0a439eba786fa7a"
+    },
+    {
+      "file": "png/dwarves/dwarves-34.png",
+      "opaquePixels": 766,
+      "transparentPixels": 258,
+      "sha256": "89f27d53af1e3259cc363c0c35cfb7751c96f484f4a8a1fb532d81c91e6595f6"
+    },
+    {
+      "file": "png/dwarves/dwarves-35.png",
+      "opaquePixels": 707,
+      "transparentPixels": 317,
+      "sha256": "a424f30f908dec10e9a7e74017e3dd958ac8be4a2e44a6adac8ae03e04968bef"
+    },
+    {
+      "file": "png/dwarves/dwarves-36.png",
+      "opaquePixels": 801,
+      "transparentPixels": 223,
+      "sha256": "db47100e3689ebbc09a79d0d927fa96e8b3ec62567012031c74f2d331d6043ee"
+    },
+    {
+      "file": "png/dwarves/dwarves-37.png",
+      "opaquePixels": 831,
+      "transparentPixels": 193,
+      "sha256": "a70e9fd07a5ce903d2346277b3d39372c8eac38cd0b57ab9f0b32992f38c9bd0"
+    },
+    {
+      "file": "png/dwarves/dwarves-38.png",
+      "opaquePixels": 791,
+      "transparentPixels": 233,
+      "sha256": "48f8fce78c8f85e381bb51dcf81f35ba4576fe1d076bf5b79cbb34824f5a4551"
+    },
+    {
+      "file": "png/dwarves/dwarves-39.png",
+      "opaquePixels": 839,
+      "transparentPixels": 185,
+      "sha256": "8c2c174af4a2fbd56298b46f425e1c9378336aa018242bcd9ab39157d8f1a98b"
+    },
+    {
+      "file": "png/dwarves/dwarves-40.png",
+      "opaquePixels": 764,
+      "transparentPixels": 260,
+      "sha256": "e2913945b1482c58890b6d98dcbc65d7f8e573d2e68660aa544d89c20435cfc1"
+    },
+    {
+      "file": "png/dwarves/dwarves-41.png",
+      "opaquePixels": 765,
+      "transparentPixels": 259,
+      "sha256": "0c20c13a2bc0416fc8ccf0a640688c164d1859607a6cac19273f3232a6edadcf"
+    },
+    {
+      "file": "png/dwarves/dwarves-42.png",
+      "opaquePixels": 739,
+      "transparentPixels": 285,
+      "sha256": "7c40950d0f6536bf91f3819e27864593a14ebe125437f23919b9240f4629c8c8"
+    },
+    {
+      "file": "png/dwarves/dwarves-43.png",
+      "opaquePixels": 742,
+      "transparentPixels": 282,
+      "sha256": "ebf7beb693485522fcf96cee3afb65d0bbb4cc55825cec2a5ee72681fd4de32f"
+    },
+    {
+      "file": "png/dwarves/dwarves-44.png",
+      "opaquePixels": 770,
+      "transparentPixels": 254,
+      "sha256": "1d18e21b639ef83908acfcb702948e7058bf724aead922f67c9cc5f6a9153118"
+    },
+    {
+      "file": "png/dwarves/dwarves-45.png",
+      "opaquePixels": 793,
+      "transparentPixels": 231,
+      "sha256": "ee91c675a9498ada9d5db2f59abb5aa1a308cab49cb443e8e3b87c21734b2c92"
+    },
+    {
+      "file": "png/dwarves/dwarves-46.png",
+      "opaquePixels": 797,
+      "transparentPixels": 227,
+      "sha256": "51f45cd189a7129610036d2e3c6410f9a80e84366a62099977426c71ad96679f"
+    },
+    {
+      "file": "png/dwarves/dwarves-47.png",
+      "opaquePixels": 749,
+      "transparentPixels": 275,
+      "sha256": "6c8d6e51fba106c162b11d8e87787c0ea358558f94bc228bad3ce4adf6c21ff9"
+    },
+    {
+      "file": "png/dwarves/dwarves-48.png",
+      "opaquePixels": 821,
+      "transparentPixels": 203,
+      "sha256": "3bfa189d661ee7993489a97b4756c4118615938cd5f6199e27308b50d9831fb0"
+    }
+  ]
+}

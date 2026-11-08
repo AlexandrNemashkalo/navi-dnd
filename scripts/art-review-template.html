@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaviDnD · библиотека изображений V2</title>
+<style>
+:root{color-scheme:dark;--bg:#15191d;--panel:#20262c;--line:#35414a;--text:#edf0ed;--muted:#a8b3b7;--accent:#d2b775}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}main{max-width:1600px;margin:auto;padding:32px}h1{font:500 32px Georgia,serif;margin:4px 0 12px}h2{font-size:17px;margin:8px 0}.eyebrow{color:var(--accent);letter-spacing:2px;font-size:12px}.muted,small{color:var(--muted)}.intro{max-width:920px}.stats{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}.stat{padding:12px 20px;border:1px solid var(--line);border-radius:8px}.stat b{font-size:25px;margin-right:8px;color:var(--accent)}.toolbar{position:sticky;top:0;background:#15191df5;z-index:2;padding:12px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px}input,select,button,textarea{font:inherit;color:var(--text);background:#262f36;border:1px solid #4a5760;border-radius:5px;padding:8px}button{cursor:pointer}button:hover{border-color:var(--accent)}button:disabled{opacity:.4;cursor:default}input[type=search]{min-width:240px;flex:1}textarea{width:100%;min-height:76px;resize:vertical}#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:16px;overflow-wrap:anywhere}.art{display:flex;align-items:center;justify-content:center;gap:20px;min-height:168px;border-radius:6px;margin-bottom:14px;cursor:zoom-in}.checker{background:repeating-conic-gradient(#50565b 0% 25%,#3b4248 0% 50%) 50%/16px 16px}.dark{background:#171b20}.light{background:#dedacf}.card img{width:128px;height:128px;object-fit:contain;image-rendering:pixelated}.card img.actual{width:32px;height:32px}.card select{max-width:100%}.description{min-height:65px;font-size:14px}.tag{display:inline-block;border:1px solid #52606a;border-radius:20px;padding:2px 8px;font-size:12px;margin:3px 3px 3px 0;color:#c8d5d7}.review{border-top:1px solid var(--line);padding-top:10px;margin-top:12px}.review label{display:block;margin:8px 0 3px;font-size:13px;color:var(--muted)}.inline{display:flex;gap:8px}.inline>*{min-width:0;flex:1}details{font-size:12px;color:var(--muted);margin-top:10px}summary{cursor:pointer}#notice{color:var(--accent);min-height:24px}#paging{display:flex;gap:12px;align-items:center;margin-top:20px}dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);max-width:94vw}dialog::backdrop{background:#000b}dialog img{width:384px;height:384px;object-fit:contain;image-rendering:pixelated;max-width:75vw}#dialog-caption{max-width:600px}a{color:var(--accent)}.empty{padding:40px;border:1px dashed var(--line);grid-column:1/-1}
+.coverage-section{margin:20px 0}.coverage-section p{margin:4px 0 12px}#category-coverage{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:8px}#category-coverage button{display:grid;grid-template-columns:1fr auto;gap:4px 12px;text-align:left;background:var(--panel);border-color:var(--line);padding:10px 14px}#category-coverage button:hover,#category-coverage button[aria-pressed=true]{border-color:var(--accent)}#category-coverage strong{color:var(--accent);font-size:18px;white-space:nowrap}#category-coverage small{grid-column:1/-1;font-size:12px}#category-coverage progress{grid-column:1/-1;width:100%;height:4px;accent-color:var(--accent);border:0;border-radius:2px;overflow:hidden}#category-coverage progress::-webkit-progress-bar{background:var(--line)}#category-coverage progress::-webkit-progress-value{background:var(--accent)}#category-coverage progress::-moz-progress-bar{background:var(--accent)}
+</style>
+<style>.card{position:relative}.card.deletable{padding-top:56px}.delete-file{position:absolute;right:12px;top:10px;color:#ffbaa8;border-color:#a35f52;background:#412e2c;padding:5px 12px}.inline input,.inline select{width:100%}</style>
+<style>.inline input,.inline select{width:100%}pre{overflow-wrap:anywhere;white-space:pre-wrap}</style>
+<style>.candidate-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px;max-height:300px;overflow:auto;margin-top:12px}.candidate-art{padding:4px;background:#34383c;cursor:zoom-in}.card .candidate-art img{display:block;width:48px;height:48px;image-rendering:pixelated;margin:auto}</style>
+<main>
+<div class="eyebrow">NAVIDND / ART LIBRARY / V2</div>
+<h1>Сначала образ. Затем история.</h1>
+<p class="intro muted">Проверка существующей пиксельной библиотеки. Слева в карточке — увеличение, справа — настоящий размер 32×32. Описание лица подготовлено по изображению; неизвестные пол, вид и возраст оставлены открытыми. Для DCSS обзор контактных листов подтверждает роли групп, но не заменяет подробную разметку каждого файла. Брайль V1 и пак 000000 сюда не входят.</p>
+<div class="stats" id="stats"></div>
+<section class="coverage-section" aria-labelledby="coverage-title">
+<h2 id="coverage-title">Подобрано по разделам</h2>
+<p class="muted">Подобрано / всего. Нажмите раздел, чтобы открыть его список.</p>
+<div id="category-coverage"></div>
+</section>
+<div class="toolbar">
+<select id="mode" aria-label="Раздел"><option value="portraits">Лица · 50</option><option value="assets">Все пиксельные ресурсы</option><option value="removal">На согласование исключения</option><option value="requirements">Что нужно игре</option><option value="sheets">Контактные листы DCSS</option></select>
+<select id="change-batch" aria-label="Порция изменений" hidden></select>
+<select id="coverage" aria-label="Подготовленность соответствий" hidden><option value="with">Есть варианты</option><option value="">Все потребности</option><option value="without">Пока без вариантов</option></select>
+<input id="query" type="search" placeholder="Имя, описание, признак, путь…" aria-label="Поиск">
+<select id="category" aria-label="Назначение"></select><select id="pack" aria-label="Пак"></select>
+<select id="status" aria-label="Статус проверки"><option value="">Все отметки</option><option value="unreviewed">Не проверено мной</option><option value="approved_portrait">Подходит: лицо</option><option value="approved_other">Подходит: другое</option><option value="rejected">Не подходит</option><option value="needs_generation">Нужна подготовка</option></select>
+<select id="background" aria-label="Фон"><option value="checker">Шахматный фон</option><option value="dark">Тёмный фон</option><option value="light">Светлый фон</option></select>
+<button id="export">Экспорт отметок</button><button id="import">Импорт отметок</button><input id="file" type="file" accept="application/json,.json" hidden>
+</div>
+<p id="notice" role="status"></p><div id="count" class="muted"></div><div id="grid"></div>
+<div id="paging"><button id="prev">← Назад</button><span id="page"></span><button id="next">Далее →</button></div>
+<p class="muted">Отметки хранятся в браузере. Экспортируйте JSON, чтобы сохранить их независимо от браузера. Одобрение здесь — редакторская отметка, оно не меняет игру автоматически.</p>
+<details><summary>Результаты автоматической проверки и границы готовности</summary><pre id="summary"></pre></details>
+</main>
+<dialog id="dialog"><button id="close">Закрыть</button><div id="dialog-art"></div><p id="dialog-caption"></p></dialog>
+<script>
+const data=PAYLOAD;
+const server=window.ART_REVIEW_SERVER||{deleteEnabled:false,deletedIds:[]};
+const tombstones=new Set(server.deletedIds||[]);data.assets=data.assets.filter(a=>!tombstones.has(a.id));data.summary.assets=data.assets.length;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const idMap=new Map([...data.assets,...data.requirements].map(a=>[a.id,a]));
+const fingerprint=a=>a.sha256||JSON.stringify([a.id,a.name,a.source]);
+let reviews=Object.create(null),page=0;
+for(const a of data.assets)if(a.humanReview)reviews[a.id]=a.humanReview;
+try{const raw=JSON.parse(localStorage.getItem('navidnd-art-review-v1')||'{}');for(const [id,r] of Object.entries(raw))if(r&&typeof r==='object')reviews[id]=r}catch{}
+for(const [id,r] of Object.entries(server.reviews||{}))if(!reviews[id]||(r.updatedAt||0)>=(reviews[id].updatedAt||0))reviews[id]=r;
+async function persistReview(id,review){if(!server.deleteEnabled||!server.reviewApiBase)return;try{const response=await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json','X-Art-Token':server.token},body:JSON.stringify({id,review})});const result=await response.json();if(!response.ok)throw Error(result.error);if(reviews[id]?.updatedAt===review.updatedAt){reviews[id]=result.review;save()}$('notice').textContent='Отметка сохранена в файл на компьютере.'}catch(e){$('notice').textContent='Отметка пока сохранена только в браузере: '+e.message+' · используйте экспорт JSON.'}}
+const reviewFor=a=>{const r=reviews[a.id];return r&&(!r.fingerprint||r.fingerprint===fingerprint(a))?r:{}};
+const candidatesFor=a=>(a.candidates||[]).filter(c=>{const asset=idMap.get(c.assetId);return asset&&asset.sha256===c.sha256&&!['rejected','needs_generation'].includes(reviewFor(asset).status)});
+const packLabels={'dcss':'DCSS','craftpix-305321':'Остроухие лица','craftpix-415209':'Орки и гоблины','craftpix-459799':'Небольшие монстры','craftpix-737210':'Монстры хаоса','craftpix-780987':'Добыча и материалы','craftpix-986554':'Добыча нежити','craftpix-128598':'Флаконы зелий','craftpix-253495':'Краски','craftpix-688754':'Минералы','craftpix-883583':'Щиты и амулеты','craftpix-996288':'Луки и арбалеты','craftpix-495817':'Воинские приёмы','craftpix-523115':'Тёмная магия','craftpix-909691':'Светлая магия'};
+const usages=a=>a.proposedUsages||a.usages||[a.category||'unknown'];
+const save=()=>{try{localStorage.setItem('navidnd-art-review-v1',JSON.stringify(reviews))}catch{$('notice').textContent='Не удалось сохранить отметки в браузере. Используйте экспорт JSON.'}};
+const pendingRemoval=a=>a.retentionReview?.recommendation==='review_removal'&&!['approved_portrait','approved_other'].includes(reviewFor(a).status);
+function records(){const mode=$('mode').value;return mode==='portraits'?data.assets.filter(a=>usages(a).includes('portrait')):mode==='removal'?data.assets.filter(pendingRemoval):mode==='requirements'?data.requirements:mode==='sheets'?(data.sheets||[]).map(s=>({id:s.sheet,name:s.sheet,preview:'contact-sheets/'+s.sheet,category:'contact_sheet',descriptionEn:`${s.assets.length} ресурсов · ${s.visualReview}`,sheet:true})):data.assets}
+packLabels['own-art']='Свои генерации';
+const generatedMode=document.createElement('option');generatedMode.value='generated';generatedMode.textContent='Свои генерации · 32×32';$('mode').append(generatedMode);
+function controls(){const rows=records();$('coverage').hidden=$('mode').value!=='requirements';$('category').innerHTML='<option value="">Все назначения</option>'+[...new Set(rows.flatMap(usages))].sort().map(c=>`<option value="${esc(c)}">${esc(categoryLabels[c]||c)}</option>`).join('');$('pack').innerHTML='<option value="">Все паки</option>'+[...new Set(rows.map(a=>a.pack).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">${esc(packLabels[c]||c)}</option>`).join('');page=0;render()}
+function openArt(a,context=''){$('dialog-art').className=$('background').value;const im=document.createElement('img');im.src=a.preview;im.alt=displayName(a);$('dialog-art').replaceChildren(im);$('dialog-caption').textContent=[context,displayName(a),a.descriptionEn].filter(Boolean).join('\n\n');$('dialog').showModal()}
+const changeOption=document.createElement('option');changeOption.value='changes';changeOption.textContent='Новые изменения';$('mode').prepend(changeOption);
+$('change-batch').innerHTML=(data.changes||[]).map((b,i)=>`<option value="${esc(b.id)}">${i===0?'Последние изменения · ':''}${esc(new Date(b.at).toLocaleString('ru-RU'))} · ${b.events.length}</option>`).join('');
+const bg3Mode=document.createElement('option');bg3Mode.value='bg3';bg3Mode.textContent='BG3 · заклинания';$('mode').append(bg3Mode);
+const baseRecords=records;
+records=function(){return $('mode').value==='generated'?data.assets.filter(a=>a.pack==='own-art'&&a.provenance?.sourceKind==='ai_generated'): $('mode').value==='bg3'?data.assets.filter(a=>a.provenance?.sourceKind==='bg3_spell_lines'):baseRecords()};
+const originalRecords=records;
+records=function(){if($('mode').value!=='changes')return originalRecords();const batch=(data.changes||[]).find(b=>b.id===$('change-batch').value);return (batch?.events||[]).map(e=>{const r=data.requirements.find(r=>r.category===e.category&&r.name===e.name);return {...(r||{id:'removed:'+e.category+':'+e.name,name:e.name,category:e.category,candidates:[]}),changeEvent:e}})};
+const originalControls=controls;
+controls=function(){$('change-batch').hidden=$('mode').value!=='changes';originalControls()};
+$('change-batch').onchange=()=>{page=0;controls()};
+RENDER_CODE
+$('mode').onchange=()=>{location.hash=$('mode').value;controls()};if([...$('mode').options].some(o=>o.value===location.hash.slice(1)))$('mode').value=location.hash.slice(1);for(const id of ['query','category','pack','status','coverage'])$(id)[id==='query'?'oninput':'onchange']=()=>{page=0;render()};$('background').onchange=render;$('prev').onclick=()=>{page--;render()};$('next').onclick=()=>{page++;render()};$('close').onclick=()=>$('dialog').close();
+$('export').onclick=()=>{const a=document.createElement('a');const url=URL.createObjectURL(new Blob([JSON.stringify({schemaVersion:1,reviews},null,2)],{type:'application/json'}));a.href=url;a.download='art-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+$('import').onclick=()=>$('file').click();$('file').onchange=async()=>{try{const file=$('file').files[0];if(!file)return;const imported=JSON.parse(await file.text());if(imported.schemaVersion!==1||!imported.reviews||typeof imported.reviews!=='object')throw Error('Неверный формат файла');let accepted=0,skipped=0;for(const [id,r]of Object.entries(imported.reviews)){const asset=idMap.get(id);if(!asset||!r||typeof r!=='object'||r.fingerprint!==fingerprint(asset)){skipped++;continue}const allowed=['unreviewed','approved_portrait','approved_other','rejected','needs_generation'];if(!allowed.includes(r.status)||typeof r.notes!=='string'){skipped++;continue}reviews[id]={status:r.status,notes:r.notes,fingerprint:r.fingerprint,gender:['male','female'].includes(r.gender)?r.gender:'unknown',species:typeof r.species==='string'?r.species:''};accepted++}save();render();$('notice').textContent=`Импортировано ${accepted}; пропущено ${skipped} (неизвестные или изменённые ресурсы / неверные поля).`}catch(e){$('notice').textContent='Импорт не выполнен: '+e.message}finally{$('file').value=''}};
+$('stats').innerHTML=`<div class="stat"><b id="asset-count">${data.summary.assets}</b>ресурсов</div><div class="stat"><b>${data.summary.describedPortraits}</b>описанных лиц</div><div class="stat"><b>${data.requirements.length}</b>потребностей</div><div class="stat"><b>0</b>новых генераций</div>`;$('summary').textContent=JSON.stringify(data.summary,null,2);if(!server.deleteEnabled)$('notice').innerHTML='Для удаления файлов откройте <a href="http://127.0.0.1:8765/artifacts/art-catalog-review/index.html">каталог через локальный сервер</a>. Открытая с диска HTML-страница не может удалять файлы.';controls();
+</script>
+</html>

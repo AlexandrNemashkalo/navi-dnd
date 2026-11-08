@@ -1,0 +1,13 @@
+{
+  "index": 39,
+  "key": "batch100-tundra-v1",
+  "category": "biome_view",
+  "name": "Tundra",
+  "nameRu": "Тундра",
+  "usage": "place_view",
+  "transparent": false,
+  "description": "Low treeless ochre tundra with sparse gray stones, distant cold hills and gray blue sky.",
+  "prompt": "Use case: stylized-concept. Create ONE original fantasy RPG pixel-art asset. Design for an actual 32 by 32 pixel canvas. If output is larger, show only a nearest-neighbor enlarged 32x32 sprite: one consistent square pixel grid, no drawn grid. Broad flat color clusters, 12-20 colors, dark one-logical-pixel outline, light from upper left, strong readable silhouette. No gradients, blur, dithering, texture noise, text, watermark, UI panel, border, ground shadow or tiny decoration. Keep all identifying features readable after reduction to 32x32. Subject: Low treeless ochre tundra with sparse gray stones, distant cold hills and gray blue sky. Opaque square landscape, eye-level view toward the horizon or distant opening, foreground at bottom, distant scenery above. No overhead map view. Fill the square.",
+  "source": "C:\\Users\\alisa\\.codex\\generated_images\\01a1b116-2988-7d80-b071-38f41ab0ccac\\exec-22094e9f-e538-4709-b01d-8487dead96a1.png",
+  "status": "generated"
+}

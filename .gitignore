@@ -47,5 +47,5 @@ packages/
 .publication-check/
 /test.json
 /sound/
-/NaviDnD/Prompts/**/response*.json
-/icons/000000/ffffff/1x1/1navidnd/
+/src/NaviDnD/Prompts/**/response*.json
+/src/icons/000000/ffffff/1x1/1navidnd/

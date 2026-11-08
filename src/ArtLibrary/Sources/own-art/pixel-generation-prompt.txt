@@ -1,0 +1,42 @@
+PROMPT TEMPLATE — SIMPLE READABLE FANTASY PIXEL ART
+
+Generate ONE original asset for a fantasy terminal RPG. Final delivery will be
+EXACTLY 32 columns by 32 rows, so design the entire image for this tiny canvas.
+Subject: [one named object or character]. Purpose: [inventory / portrait / scene].
+
+Composition: one subject, centered, complete silhouette, with a one-pixel clear
+margin. For portraits show ONLY head and the top of shoulders. For objects show
+the complete object at a clear side or three-quarter angle. Avoid foreshortening
+that hides its identifying feature. No extra props or decorative scenery.
+
+The intended style is classic hand-clustered fantasy pixel art, like the game's
+32x32 avatar and inventory collections: dark one-pixel outline, warm directional
+light from the upper left, compact shadows, clean stepped diagonals and large
+flat color clusters. Prefer 12-24 colors; three tones per main material are enough.
+Keep the character's expression calm and readable. Do not make a mascot or emoji.
+
+The silhouette and three identifying features must remain understandable at 1x.
+Reserve enough pixels for each identifying feature. A portrait eye needs a dark
+socket and a bright pixel; a handle or opening needs a clear gap. Use broad shapes
+instead of scales, stitches, engraved filigree or individually rendered hairs.
+Describe metal with two highlight clusters, leather with two or three broad tones.
+
+If the output must be larger than 32x32, render an enlarged view of a conceptual
+32x32 sprite: each logical pixel is the same square size, aligned to one grid.
+Do not draw a pixel grid. Do not simulate pixel art with differently sized blocks.
+No gradients, antialiasing, blur, dithering, tiny texture, bevels, glow, particles,
+out-of-focus shading, text, watermark, UI frame, button border or cast ground shadow.
+Use genuine alpha transparency, never a painted checkerboard or black backdrop.
+
+Portrait-specific: keep horns, ears and hair within the canvas. Face occupies most
+of the upper 24 rows; a simple collar occupies the last 5-7 rows. Do not draw a
+full-body actor. All essential facial features must be several logical pixels wide.
+
+LOCAL DELIVERY CONTRACT (performed by the build script, not guaranteed by a prompt):
+Keep the generator output as an archived source. Prepare a separate RGBA PNG whose
+actual dimensions are 32x32 using nearest-neighbor sampling and binary alpha.
+Never stretch the aspect ratio. Inspect at native size and integer enlargement.
+Do not indiscriminately quantize: it can erase rare but essential eye highlights.
+Reject or regenerate images with unreadable features or broken silhouettes.
+Record source dimensions, generation prompt, transform and hashes. Only the final
+32x32 PNG enters the gallery/runtime. Enlarged previews are NOT production assets.

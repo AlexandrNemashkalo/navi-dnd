@@ -1,0 +1,22 @@
+{
+  "id": "own-art:sea-horizon-v1",
+  "file": "sea-horizon-v1.png",
+  "subject": "Sea horizon",
+  "nameRu": "Море с горизонтом",
+  "width": 32,
+  "height": 32,
+  "sha256": "dfd503bd044d99394451cc325b9037e0c737279ec3a654b913b92841b3359f55",
+  "usage": "place_view",
+  "framing": "landscape",
+  "styleId": "fantasy.pixel.place_view.32",
+  "descriptionEn": "Open blue sea seen toward a distant horizontal horizon, pale clouds and broad turquoise ripples. Opaque 32x32 scene, not a top-down tile.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/sea-horizon-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_12_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt"
+}

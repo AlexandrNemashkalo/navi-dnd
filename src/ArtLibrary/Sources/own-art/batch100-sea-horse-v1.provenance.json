@@ -1,0 +1,27 @@
+{
+  "id": "own-art:batch100-sea-horse-v1",
+  "file": "batch100-sea-horse-v1.png",
+  "subject": "Sea Horse",
+  "nameRu": "Морской конек",
+  "width": 32,
+  "height": 32,
+  "sha256": "a9df64341e8322445f26df2de94baa5f5566f5642f8a7a8f5a2d63cd462de3ec",
+  "usage": "map_actor",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.map_actor.32",
+  "descriptionEn": "A complete sea horse with recognizable species anatomy and characteristic silhouette, natural colors, side or three-quarter view.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; generated source prepared as an unreviewed exact 32x32 draft.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-sea-horse-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": false,
+  "reviewStatus": "rejected",
+  "rejectionReason": "Unrelated disconnected white stripe above the seahorse; replaced by v2 before publication.",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-sea-horse-v1.json",
+  "batch": "hundred-20261107"
+}

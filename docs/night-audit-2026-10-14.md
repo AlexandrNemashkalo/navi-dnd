@@ -34,7 +34,7 @@
 
 ## Проверки
 
-- Финальный `dotnet test NaviDnD.Tests/NaviDnD.Tests.csproj`: **401/401** (до изменений 310/310). Тесты решения и UI не запускались.
+- Финальный `dotnet test src/NaviDnD.Tests/NaviDnD.Tests.csproj`: **401/401** (до изменений 310/310). Тесты решения и UI не запускались.
 - Локальный `PromptScenarioTests.StreamedToolHistoryAppliesPatchesInOrder`: **1/1**, без вызова модели. Проект PromptTests собирается.
 - Карты: 60 случаев реки (3 темы × 10 сидов × 2 оси); выходы достижимы. Двери и выходы зданий с рвом и всех деревень проверены на 10 сидах. Ров имеет ровно одну проходимую клетку-брод.
 - Геометрия building/village без новых опций на seeds 1–5 побайтно сравнена с генератором из `e366b68`; сохранены SHA-256 отпечатки полного результата (комнаты, двери, рельеф, мебель). Совместимость касается этих проверенных сидов; ветка без новых опций сохраняет прежнюю последовательность случайных чисел.
@@ -55,7 +55,7 @@
 
 Наложение «Схвачен» прошло, но продолжение освобождения уже получило 429. Одновременный урон эффектов, Ничком и долгий отдых также упёрлись в 429; каждый сценарий повторён один раз с тем же результатом. Фильтр повторного прогона дополнительно выбрал TimeOfDayPromptTests.LongRest — он также вернул 429 (учтён в числах выше). Сообщение CLI: обновление лимита в **04:50 по Москве 14 октября**. Живые прогоны после изменения автоответчика и исправления runtime эффектов не выполнялись.
 
-Логи локальных запусков: `NaviDnD.PromptTests/logs/ai_2026-10-14.log`, подробности повторного прогона: `artifacts/effects-retry.log` (не добавлены в Git).
+Логи локальных запусков: `src/NaviDnD.PromptTests/logs/ai_2026-10-14.log`, подробности повторного прогона: `artifacts/effects-retry.log` (не добавлены в Git).
 
 ## Образцы карт и решения
 
@@ -72,8 +72,8 @@
 После сброса лимита запустить только выбранные новые сценарии (имена классов в фильтре обязательны), затем упавшие EffectsPromptTests; не весь проект:
 
 ```powershell
-dotnet test NaviDnD.PromptTests/NaviDnD.PromptTests.csproj --filter 'FullyQualifiedName~CombatPromptTests.ShieldReaction|FullyQualifiedName~CombatPromptTests.LivingEnemyFlees|FullyQualifiedName~CombatPromptTests.AttackingEndsInvisibility|FullyQualifiedName~EffectsPromptTests.RestKeepsCurseAndDisease' 
-dotnet test NaviDnD.PromptTests/NaviDnD.PromptTests.csproj --filter 'FullyQualifiedName~EffectsPromptTests.Grabbed_|FullyQualifiedName~EffectsPromptTests.SimultaneousEffects_|FullyQualifiedName~EffectsPromptTests.Prone_|FullyQualifiedName~EffectsPromptTests.LongRest_'
+dotnet test src/NaviDnD.PromptTests/NaviDnD.PromptTests.csproj --filter 'FullyQualifiedName~CombatPromptTests.ShieldReaction|FullyQualifiedName~CombatPromptTests.LivingEnemyFlees|FullyQualifiedName~CombatPromptTests.AttackingEndsInvisibility|FullyQualifiedName~EffectsPromptTests.RestKeepsCurseAndDisease'
+dotnet test src/NaviDnD.PromptTests/NaviDnD.PromptTests.csproj --filter 'FullyQualifiedName~EffectsPromptTests.Grabbed_|FullyQualifiedName~EffectsPromptTests.SimultaneousEffects_|FullyQualifiedName~EffectsPromptTests.Prone_|FullyQualifiedName~EffectsPromptTests.LongRest_'
 ```
 
 В игре проверить рендер рва и брода, стены/ворота и мебель деревень, выбор реакции «Щит», восстановление скорости после освобождения, долгий/короткий отдых со сложными эффектами. UI и реальные ответы после последних исправлений остаются непроверенными. Не следует считать добавленные сценарии Щита, бегства, невидимости и сложных эффектов подтверждёнными живым прогоном.
@@ -132,7 +132,7 @@ UI-тесты по-прежнему не запускались. Работа и
 
 ### Итог проверок и учёт модели
 
-- `dotnet test NaviDnD.Tests/NaviDnD.Tests.csproj`: **501/501**. Промежуточные проверки выполнялись также с `-o NaviDnD.Tests/bin/alt`; финальный обычный прогон собрал актуальные игру и MCP-сервер.
+- `dotnet test src/NaviDnD.Tests/NaviDnD.Tests.csproj`: **501/501**. Промежуточные проверки выполнялись также с `-o src/NaviDnD.Tests/bin/alt`; финальный обычный прогон собрал актуальные игру и MCP-сервер.
 - Локальные `PromptScenarioTests` с фильтром, без модели: **4/4**.
 - Реальные проверки: **7 запусков команды с фильтром**, **24 выполнения тестовых случаев**, **26 вызовов Codex**, **16 разных сценариев**. Все 16 имеют успешный прогон после исправлений; это не один общий зелёный прогон после всех изменений.
 - Модель только `NAVIDND_PROMPT_PROVIDER=codex`, `NAVIDND_CODEX_MODEL=gpt-6.1-sol`, reasoning `medium`. Claude в этом заходе не использовался.
@@ -184,7 +184,7 @@ UI-тесты по-прежнему не запускались. Работа и
 
 ### Логи и коммиты
 
-Реальные логи в artifacts, не в Git: third-pass-codex.log, third-pass-codex-retry.log, third-pass-codex-extra.log, third-pass-ambush-retry.log, third-pass-expanded.log, third-pass-expanded-retry.log, third-pass-cube-final.log. Подробные запросы и MCP — NaviDnD.PromptTests/logs/ai_2026-10-14.log.
+Реальные логи в artifacts, не в Git: third-pass-codex.log, third-pass-codex-retry.log, third-pass-codex-extra.log, third-pass-ambush-retry.log, third-pass-expanded.log, third-pass-expanded-retry.log, third-pass-cube-final.log. Подробные запросы и MCP — src/NaviDnD.PromptTests/logs/ai_2026-10-14.log.
 
 Основные исправления дополнительно: `4fca2b0` — мировой выход, `a73b6c5` — свет героя, `1dd5856` — удалённые источники, `fc68f10` — диагональный радиус, `1e77628` — скрытые в области, `7d75741` — засада, `bcb6bbb` — map/hero и отношение NPC, `4002c82` — автоответчик области на себе. Дополнительные новые юнит-проверки — `55a18e5`, `0575601`.
 

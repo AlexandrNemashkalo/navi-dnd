@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-draft-horse-v1",
+  "file": "batch100-draft-horse-v1.png",
+  "subject": "Draft Horse",
+  "nameRu": "Лошадь",
+  "width": 32,
+  "height": 32,
+  "sha256": "6d8f9aa8d42a629dbb72b3a6eded39bb5f6cbefc210370fcbe838826a8f11298",
+  "usage": "map_actor",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.map_actor.32",
+  "descriptionEn": "A sturdy brown draft horse with heavy hooves, thick neck and plain working harness.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-draft-horse-v1/original.png",
+  "sourceDimensions": [
+    1261,
+    1247
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-draft-horse-v1.json",
+  "batch": "hundred-20261107"
+}

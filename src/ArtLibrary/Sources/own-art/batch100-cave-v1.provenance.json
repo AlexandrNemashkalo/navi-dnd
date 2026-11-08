@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-cave-v1",
+  "file": "batch100-cave-v1.png",
+  "subject": "cave",
+  "nameRu": "пещера",
+  "width": 32,
+  "height": 32,
+  "sha256": "146305440c1fc9f28fe25843b759deaa897b0898300041cf71d83359e7d336ad",
+  "usage": "place_view",
+  "framing": "landscape",
+  "styleId": "fantasy.pixel.place_view.32",
+  "descriptionEn": "Interior of a natural rock cave with angular stone walls and a bright distant opening, no architecture.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-cave-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-cave-v1.json",
+  "batch": "hundred-20261107"
+}

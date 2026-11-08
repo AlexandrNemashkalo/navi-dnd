@@ -1,0 +1,261 @@
+using System.Runtime.InteropServices;
+
+namespace NaviDnD.Helpers;
+
+// “Full screen” mode (SCREEN setting): the game window remains its size and is drawn as usual, and below it
+// there is a background window covering the entire monitor (with the taskbar) in the game background color; The
+// game window is in the center of the monitor, on top of the background. The background is a separate Win32-
+// window in its own thread: not activated by clicking, not visible in the taskbar and Alt+Tab.
+public static class FullscreenBackdrop
+{
+    public static bool Active { get; private set; }
+
+    public static void SetMinimized(bool minimized)
+    {
+        lock (_lock)
+        {
+            if (_backdrop == IntPtr.Zero) return;
+            if (minimized)
+            {
+                ShowWindow(_backdrop, 0);
+                return;
+            }
+            var console = WindowControls.NativeWindow;
+            if (console == IntPtr.Zero || IsIconic(console)) return;
+            // Showing a topmost backdrop by itself puts it above the restored console.
+            // Restore the pair in order, placing the backdrop immediately behind the game.
+            const uint flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE;
+            SetWindowPos(console, HWND_TOPMOST, 0, 0, 0, 0, flags);
+            SetWindowPos(_backdrop, console, 0, 0, 0, 0, flags | SWP_SHOWWINDOW);
+        }
+    }
+
+    private static IntPtr _backdrop;
+    private static (int x, int y)? _windowedPos;     // where the game window was before the mode - return when turned off
+    private static WndProc? _wndProc;                // keep the delegate - otherwise it will be collected by GC
+    private static readonly object _lock = new();
+
+    // Enable/disable (calling again with the same value does nothing). color - game background.
+    public static void Set(bool on, List<int> color)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        lock (_lock)
+        {
+            if (on == Active) { if (on) Recenter(); return; }
+            var console = WindowControls.NativeWindow;
+            if (console == IntPtr.Zero) return;
+            // Windows Terminal supplies a message-only pseudoconsole window. A topmost
+            // backdrop there covers the actual terminal instead of sitting behind the game.
+            if (on && !(WindowsAlacritty.Active ? IsWindowVisible(console) : IsVisibleClassicConsole(console))) return;
+            if (on)
+            {
+                if (GetWindowRect(console, out var r))
+                    _windowedPos = WindowsAlacritty.AwaitingFirstFrame ? WindowsAlacritty.InitialWindowPosition() : (r.Left, r.Top);
+                var mon = MonitorRect(WindowsAlacritty.AwaitingFirstFrame ? IntPtr.Zero : console);
+                var ready = new ManualResetEventSlim();
+                var thread = new Thread(() => RunBackdrop(mon, color, ready)) { IsBackground = true, Name = "FullscreenBackdrop" };
+                thread.SetApartmentState(ApartmentState.STA);
+                thread.Start();
+                ready.Wait(2000);
+                Active = _backdrop != IntPtr.Zero;
+                if (Active) Borderless(console, true);
+                Recenter();
+                if (!WindowsAlacritty.AwaitingFirstFrame) SetForegroundWindow(console);
+            }
+            else
+            {
+                if (_backdrop != IntPtr.Zero) PostMessage(_backdrop, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+                _backdrop = IntPtr.Zero;
+                Active = false;
+                Borderless(console, false);
+                SetWindowPos(console, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                if (_windowedPos is var (x, y))
+                    SetWindowPos(console, IntPtr.Zero, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+        }
+    }
+
+    // Without Windows: design, no system frame, no rounded corners, no shadow (Windows 11) - only the game’s
+    // own frame remains. Switching off - styles and design as they were.
+    private static (int style, int exStyle)? _savedStyles;
+
+    private static void Borderless(IntPtr console, bool on)
+    {
+        if (on)
+        {
+            int style = GetWindowLong(console, GWL_STYLE), ex = GetWindowLong(console, GWL_EXSTYLE);
+            _savedStyles = (style, ex);
+            SetWindowLong(console, GWL_STYLE, style & ~(WS_BORDER | WS_DLGFRAME | WS_THICKFRAME));
+            SetWindowLong(console, GWL_EXSTYLE, ex & ~(WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE | WS_EX_DLGMODALFRAME));
+        }
+        else if (_savedStyles is var (style, ex))
+        {
+            SetWindowLong(console, GWL_STYLE, style);
+            SetWindowLong(console, GWL_EXSTYLE, ex);
+        }
+        int corner = on ? DWMWCP_DONOTROUND : DWMWCP_ROUND;
+        DwmSetWindowAttribute(console, DWMWA_WINDOW_CORNER_PREFERENCE, ref corner, sizeof(int));
+        int border = on ? DWMWA_COLOR_NONE : DWMWA_COLOR_DEFAULT;
+        DwmSetWindowAttribute(console, DWMWA_BORDER_COLOR, ref border, sizeof(int));
+        int nc = on ? DWMNCRP_DISABLED : DWMNCRP_USEWINDOWSTYLE;   // no non-client rendering - no shadow
+        DwmSetWindowAttribute(console, DWMWA_NCRENDERING_POLICY, ref nc, sizeof(int));
+        SetWindowPos(console, IntPtr.Zero, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+    }
+
+    // The game window is in the center of the monitor on top of the background (after changing the window size - again).
+    public static void Recenter()
+    {
+        if (!Active || !OperatingSystem.IsWindows() || WindowsAlacritty.AwaitingFirstFrame) return;
+        var console = WindowControls.NativeWindow;
+        if (console == IntPtr.Zero || !GetWindowRect(console, out var r)) return;
+        var mon = MonitorRect(console);
+        int w = r.Right - r.Left, h = r.Bottom - r.Top;
+        int x = mon.Left + Math.Max(0, (mon.Right - mon.Left - w) / 2), y = mon.Top + Math.Max(0, (mon.Bottom - mon.Top - h) / 2);
+        SetWindowPos(console, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+    }
+
+    internal static void RevealStartup()
+    {
+        lock (_lock)
+        {
+            if (_backdrop == IntPtr.Zero) return;
+            SetMinimized(false);
+            int cloak = 0;
+            DwmSetWindowAttribute(_backdrop, 13, ref cloak, sizeof(int));
+        }
+    }
+
+    // Size of the monitor on which the game window is displayed (for full-screen scaling).
+    public static (int width, int height) MonitorSize()
+    {
+        if (!OperatingSystem.IsWindows()) return (1920, 1080);
+        var r = MonitorRect(WindowControls.NativeWindow);
+        return (r.Right - r.Left, r.Bottom - r.Top);
+    }
+
+    private static RECT MonitorRect(IntPtr window)
+    {
+        var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+        var monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
+        return GetMonitorInfo(monitor, ref info) ? info.rcMonitor : new RECT { Right = 1920, Bottom = 1080 };
+    }
+
+    private static void RunBackdrop(RECT mon, List<int> color, ManualResetEventSlim ready)
+    {
+        try
+        {
+            _wndProc = BackdropProc;
+            var hInstance = GetModuleHandle(null);
+            string cls = "NaviDnDBackdrop";
+            var wc = new WNDCLASSEX
+            {
+                cbSize = Marshal.SizeOf<WNDCLASSEX>(),
+                lpfnWndProc = Marshal.GetFunctionPointerForDelegate(_wndProc),
+                hInstance = hInstance,
+                hbrBackground = CreateSolidBrush((uint)(color[0] | color[1] << 8 | color[2] << 16)),
+                hCursor = LoadCursor(IntPtr.Zero, IDC_ARROW),
+                lpszClassName = cls,
+            };
+            RegisterClassEx(ref wc);   // re-registration after shutdown - error, class already exists: does not interfere
+            _backdrop = CreateWindowEx(WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, cls, "NaviDnD", WS_POPUP,
+                mon.Left, mon.Top, mon.Right - mon.Left, mon.Bottom - mon.Top, IntPtr.Zero, IntPtr.Zero, hInstance, IntPtr.Zero);
+            if (_backdrop != IntPtr.Zero)
+            {
+                // Do not expose the new surface until its background has actually been painted.
+                int enabled = 1;
+                DwmSetWindowAttribute(_backdrop, 3, ref enabled, sizeof(int)); // no OS show animation
+                DwmSetWindowAttribute(_backdrop, 13, ref enabled, sizeof(int)); // cloak
+                ShowWindow(_backdrop, 4); // SW_SHOWNOACTIVATE
+                RedrawWindow(_backdrop, IntPtr.Zero, IntPtr.Zero, 0x0001 | 0x0004 | 0x0100); // INVALIDATE | ERASE | UPDATENOW
+                DwmFlush();
+                if (!WindowsAlacritty.AwaitingFirstFrame)
+                {
+                    enabled = 0;
+                    DwmSetWindowAttribute(_backdrop, 13, ref enabled, sizeof(int));
+                }
+            }
+        }
+        finally { ready.Set(); }
+        if (_backdrop == IntPtr.Zero) return;
+        while (GetMessage(out var msg, IntPtr.Zero, 0, 0) > 0)
+        {
+            TranslateMessage(ref msg);
+            DispatchMessage(ref msg);
+        }
+    }
+
+    private static IntPtr BackdropProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
+    {
+        switch (msg)
+        {
+            case WM_MOUSEACTIVATE: return MA_NOACTIVATE;   // clicking on the background does not take focus away from the game
+            case WM_CLOSE: DestroyWindow(hWnd); return IntPtr.Zero;
+            case WM_DESTROY: PostQuitMessage(0); return IntPtr.Zero;
+        }
+        return DefWindowProc(hWnd, msg, wParam, lParam);
+    }
+
+    // ── Win32 ──
+    private static bool IsVisibleClassicConsole(IntPtr window)
+    {
+        var name = new System.Text.StringBuilder(128);
+        return IsWindowVisible(window) && GetClassName(window, name, name.Capacity) > 0
+            && name.ToString() == "ConsoleWindowClass";
+    }
+
+    [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll")] private static extern bool IsIconic(IntPtr hWnd);
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int command);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder name, int count);
+    private delegate IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    [StructLayout(LayoutKind.Sequential)] private struct RECT { public int Left, Top, Right, Bottom; }
+    [StructLayout(LayoutKind.Sequential)] private struct MONITORINFO { public int cbSize; public RECT rcMonitor, rcWork; public uint dwFlags; }
+    [StructLayout(LayoutKind.Sequential)] private struct MSG { public IntPtr hwnd; public uint message; public IntPtr wParam, lParam; public uint time; public int x, y; }
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct WNDCLASSEX
+    {
+        public int cbSize; public uint style; public IntPtr lpfnWndProc; public int cbClsExtra, cbWndExtra;
+        public IntPtr hInstance, hIcon, hCursor, hbrBackground; public string? lpszMenuName; public string lpszClassName; public IntPtr hIconSm;
+    }
+
+    private const uint WS_POPUP = 0x80000000, WS_VISIBLE = 0x10000000;
+    private const uint WS_EX_TOPMOST = 0x8, WS_EX_TOOLWINDOW = 0x80, WS_EX_NOACTIVATE = 0x08000000;
+    private const uint WM_CLOSE = 0x10, WM_DESTROY = 0x2, WM_MOUSEACTIVATE = 0x21;
+    private static readonly IntPtr MA_NOACTIVATE = 3, HWND_TOPMOST = -1, HWND_NOTOPMOST = -2, IDC_ARROW = 32512;
+    private const uint SWP_NOSIZE = 0x1, SWP_NOMOVE = 0x2, SWP_NOZORDER = 0x4, SWP_NOACTIVATE = 0x10, SWP_SHOWWINDOW = 0x40;
+    private const uint MONITOR_DEFAULTTONEAREST = 2, SWP_FRAMECHANGED = 0x20;
+    private const int GWL_STYLE = -16, GWL_EXSTYLE = -20;
+    private const int WS_BORDER = 0x00800000, WS_DLGFRAME = 0x00400000, WS_THICKFRAME = 0x00040000;
+    private const int WS_EX_WINDOWEDGE = 0x100, WS_EX_CLIENTEDGE = 0x200, WS_EX_STATICEDGE = 0x20000, WS_EX_DLGMODALFRAME = 0x1;
+    private const int DWMWA_NCRENDERING_POLICY = 2, DWMWA_WINDOW_CORNER_PREFERENCE = 33, DWMWA_BORDER_COLOR = 34;
+    private const int DWMNCRP_USEWINDOWSTYLE = 0, DWMNCRP_DISABLED = 1, DWMWCP_ROUND = 2, DWMWCP_DONOTROUND = 1;
+    private const int DWMWA_COLOR_NONE = unchecked((int)0xFFFFFFFE), DWMWA_COLOR_DEFAULT = unchecked((int)0xFFFFFFFF);
+
+    [DllImport("user32.dll")] private static extern int GetWindowLong(IntPtr hWnd, int index);
+    [DllImport("user32.dll")] private static extern int SetWindowLong(IntPtr hWnd, int index, int value);
+    [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+    [DllImport("dwmapi.dll")] private static extern int DwmFlush();
+    [DllImport("user32.dll")] private static extern bool RedrawWindow(IntPtr window, IntPtr rect, IntPtr region, uint flags);
+
+    [DllImport("kernel32.dll")] private static extern IntPtr GetConsoleWindow();
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] private static extern IntPtr GetModuleHandle(string? name);
+    [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
+    [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+    [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] private static extern IntPtr MonitorFromWindow(IntPtr hWnd, uint flags);
+    [DllImport("user32.dll")] private static extern bool GetMonitorInfo(IntPtr monitor, ref MONITORINFO info);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern ushort RegisterClassEx(ref WNDCLASSEX wc);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr CreateWindowEx(uint exStyle, string cls, string name, uint style, int x, int y, int w, int h,
+        IntPtr parent, IntPtr menu, IntPtr instance, IntPtr param);
+    [DllImport("user32.dll")] private static extern IntPtr DefWindowProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+    [DllImport("user32.dll")] private static extern bool DestroyWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] private static extern void PostQuitMessage(int code);
+    [DllImport("user32.dll")] private static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+    [DllImport("user32.dll")] private static extern int GetMessage(out MSG msg, IntPtr hWnd, uint min, uint max);
+    [DllImport("user32.dll")] private static extern bool TranslateMessage(ref MSG msg);
+    [DllImport("user32.dll")] private static extern IntPtr DispatchMessage(ref MSG msg);
+    [DllImport("user32.dll")] private static extern IntPtr LoadCursor(IntPtr instance, IntPtr name);
+    [DllImport("gdi32.dll")] private static extern IntPtr CreateSolidBrush(uint color);
+}

@@ -1,0 +1,26 @@
+{
+  "id": "own-art:batch100-climber-s-kit-v1",
+  "file": "batch100-climber-s-kit-v1.png",
+  "subject": "Climber's kit",
+  "nameRu": "Комплект для лазания",
+  "width": 32,
+  "height": 32,
+  "sha256": "fd830e7803ff5c7cc7f0140540dd14d05efc0e66f1afd540ed13c22c247b2e59",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "A compact climbing kit: coiled rope, one hooked piton and a small climbing hammer grouped together.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-climber-s-kit-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_20_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "published": true,
+  "reviewStatus": "approved",
+  "promptFile": "src/ArtLibrary/Sources/own-art/generation-batches/hundred-20261107/results/batch100-climber-s-kit-v1.json",
+  "batch": "hundred-20261107"
+}
