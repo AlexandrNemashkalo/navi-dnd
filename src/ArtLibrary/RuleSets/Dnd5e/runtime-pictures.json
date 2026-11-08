@@ -20202,6 +20202,20 @@
       "match": "visual_representation"
     },
     {
+      "key": "engine:terrain:Thicket",
+      "names": [
+        "Thicket",
+        "Чаща"
+      ],
+      "categories": [
+        "feature",
+        "terrain"
+      ],
+      "usage": "place_view",
+      "imageId": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+      "match": "visual_representation"
+    },
+    {
       "key": "engine:terrain:Rocks",
       "names": [
         "Rocks",
@@ -21137,20 +21151,6 @@
       ],
       "usage": "prop",
       "imageId": "dceaae4ddf8b6d6d70f827459a51ef9eb2735bd21b33aaf39344f3a913fddf4e",
-      "match": "visual_representation"
-    },
-    {
-      "key": "engine:terrain:Thicket",
-      "names": [
-        "Thicket",
-        "Чаща"
-      ],
-      "categories": [
-        "feature",
-        "terrain"
-      ],
-      "usage": "place_view",
-      "imageId": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
       "match": "visual_representation"
     },
     {
@@ -22245,5 +22245,5 @@
     "dcss/player/base/halfling": "halfling",
     "dcss/player/base/draconian": "dragonborn"
   },
-  "revision": "0d4d118bfbfe4b16ba2bee2fb3dad60e9e74e35c5184440a3298dc49a457f768"
+  "revision": "369e76bd2ab4722aafaaba1b667f51008c7634864aa805ca9c90bf61275e16fb"
 }

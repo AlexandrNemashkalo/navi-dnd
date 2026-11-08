@@ -12,7 +12,7 @@ from pathlib import Path
 from PIL import Image
 from art_review_metadata import load_reviews, apply_review
 from art_visual_metadata import load_annotations, apply_annotation
-from art_requirement_bindings import load_bindings, save_bindings, attach_bindings, apply_reviewed_usages
+from art_requirement_bindings import load_bindings, save_bindings, attach_bindings, apply_reviewed_usages, add_runtime_requirements
 from art_change_history import update_history
 from art_own_assets import load_own_assets
 from art_spell_assets import load_spell_assets, merge_spell_bindings
@@ -174,6 +174,7 @@ for category, words in common.items():
                                  name=word, source='editorial_starter_list',
                                  status='needs_mapping', assetId=None,
                                  note='Suggested priority, not measured gameplay frequency.'))
+add_runtime_requirements(ROOT, requirements)
 add_russian_names(ROOT, requirements, assets)
 apply_reviewed_usages(ROOT, assets)
 bindings = merge_spell_bindings(ROOT, load_bindings(ROOT), assets)

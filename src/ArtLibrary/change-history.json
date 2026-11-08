@@ -83483,6 +83483,33 @@
       },
       "note": "Reviewed visible form only; game properties remain separate."
     },
+    "[\"terrain\", \"Thicket\"]": {
+      "category": "terrain",
+      "name": "Thicket",
+      "candidates": [
+        {
+          "assetId": "own-art:forest-thicket-v1",
+          "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+          "usage": "place_view",
+          "reason": "Dense overlapping green foliage, three gnarled trunks and tangled roots blocking passage.",
+          "match": "visual_representation",
+          "sourcePriority": 0,
+          "style": "fantasy.pixel.place_view.32",
+          "identityFamily": "own-art:forest-thicket-v1",
+          "runtimeApproved": false
+        }
+      ],
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Original generated artwork, visually reviewed at 32x32 for the game and shared library."
+    },
     "[\"terrain\", \"Rocks\"]": {
       "category": "terrain",
       "name": "Rocks",
@@ -86605,9 +86632,60 @@
         ]
       },
       "note": "Reviewed object shape; magical powers and exact materials remain reference facts."
+    },
+    "[\"equipment\", \"Incense\"]": {
+      "category": "equipment",
+      "name": "Incense",
+      "candidates": [
+        {
+          "assetId": "own-art:incense-sticks-v3",
+          "sha256": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
+          "usage": "item",
+          "reason": "Three separate tan incense sticks, glowing tips and a short grey smoke wisp, in a wooden holder; clean transparent gaps.",
+          "match": "visual_representation",
+          "sourcePriority": 0,
+          "style": "fantasy.pixel.item.32",
+          "identityFamily": "own-art:incense-sticks-v3",
+          "runtimeApproved": false
+        }
+      ],
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Original generated artwork, visually reviewed at 32x32 for the game and shared library."
     }
   },
   "batches": [
+    {
+      "id": "34",
+      "at": "2026-11-08T14:04:45.961371+00:00",
+      "events": [
+        {
+          "category": "equipment",
+          "name": "Incense",
+          "kind": "added",
+          "added": [
+            "own-art:incense-sticks-v3"
+          ],
+          "removed": []
+        },
+        {
+          "category": "terrain",
+          "name": "Thicket",
+          "kind": "added",
+          "added": [
+            "own-art:forest-thicket-v1"
+          ],
+          "removed": []
+        }
+      ]
+    },
     {
       "id": "33",
       "at": "2026-11-07T18:22:16.990290+00:00",

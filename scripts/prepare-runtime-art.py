@@ -8,6 +8,7 @@ import json
 import re
 from pathlib import Path
 from PIL import Image
+from art_requirement_bindings import add_runtime_requirements
 
 ROOT = Path(__file__).resolve().parents[1]
 LIBRARY = ROOT / 'src/ArtLibrary'
@@ -18,11 +19,7 @@ def prepare():
     assets = {a['id']: a for a in json.loads((REVIEW / 'assets.json').read_text(encoding='utf-8'))}
     requirements = json.loads((REVIEW / 'requirements.json').read_text(encoding='utf-8'))
     additions = json.loads((LIBRARY/'RuleSets/Dnd5e/runtime-additions.json').read_text(encoding='utf-8'))
-    for extra in additions['bindings']:
-        asset = assets[extra['assetId']]
-        requirements = [r for r in requirements if r['id'] != extra['id']]
-        requirements.append(dict(extra, name=extra['names'][0], candidates=[dict(assetId=asset['id'],
-            sha256=asset['sha256'], usage=extra['usage'], match='visual_representation')]))
+    add_runtime_requirements(ROOT, requirements)
     approved = {a['assetId']: a['sha256'] for a in json.loads((LIBRARY / 'runtime-review.json').read_text(encoding='utf-8'))['assets']}
     images, bindings, engine_aliases, credits = {}, [], {}, {}
     furniture_source = (ROOT/'src/NaviDnD.Data/Models/Furniture.cs').read_text(encoding='utf-8-sig')

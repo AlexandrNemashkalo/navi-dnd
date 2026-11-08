@@ -3,6 +3,24 @@ import json
 import hashlib
 
 
+def add_runtime_requirements(root, requirements):
+    """Register extra subjects and aliases; artwork choices stay in requirement-bindings.json."""
+    path = root/'src/ArtLibrary/RuleSets/Dnd5e/runtime-additions.json'
+    if not path.exists():
+        return
+    by_id = {r['id']: r for r in requirements}
+    for extra in json.loads(path.read_text(encoding='utf-8'))['requirements']:
+        row = by_id.get(extra['id'])
+        if row is None:
+            row = dict(id=extra['id'], category=extra['category'], name=extra['names'][0],
+                       source='runtime-additions.json', status='needs_mapping', assetId=None)
+            requirements.append(row)
+            by_id[row['id']] = row
+        if (row['category'], row['name']) != (extra['category'], extra['names'][0]):
+            raise ValueError('Extra requirement conflicts with catalog: ' + extra['id'])
+        row.update(names=extra['names'], nameRu=extra['nameRu'], engineAliases=extra.get('engineAliases', []))
+
+
 def apply_reviewed_usages(root, assets):
     """Promote only explicitly reviewed roles with unchanged image bytes."""
     path = root/'src/ArtLibrary/reviewed-usages.json'

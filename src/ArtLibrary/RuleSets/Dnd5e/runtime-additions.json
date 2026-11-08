@@ -1,22 +1,4 @@
 {
-  "bindings": [
-    {
-      "id": "engine:terrain:Thicket",
-      "category": "terrain",
-      "names": ["Thicket", "Чаща"],
-      "assetId": "own-art:forest-thicket-v1",
-      "usage": "place_view",
-      "engineAliases": ["delapouite/forest"]
-    },
-    {
-      "id": "curated:item:incense",
-      "category": "equipment",
-      "names": ["Incense", "Incense sticks", "Благовония", "Благовонья", "Благовоние", "Ароматические палочки"],
-      "assetId": "own-art:incense-sticks-v3",
-      "usage": "item",
-      "engineAliases": ["lorc/incense"]
-    }
-  ],
   "npcSpriteGroups": {
     "dcss/monster/human": "human",
     "dcss/player/base/human": "human",
@@ -33,5 +15,35 @@
     "dcss/player/base/dwarf": "dwarf",
     "dcss/player/base/halfling": "halfling",
     "dcss/player/base/draconian": "dragonborn"
-  }
+  },
+  "requirements": [
+    {
+      "id": "engine:terrain:Thicket",
+      "category": "terrain",
+      "nameRu": "Чаща",
+      "names": [
+        "Thicket",
+        "Чаща"
+      ],
+      "engineAliases": [
+        "delapouite/forest"
+      ]
+    },
+    {
+      "id": "curated:item:incense",
+      "category": "equipment",
+      "nameRu": "Благовония",
+      "names": [
+        "Incense",
+        "Incense sticks",
+        "Благовония",
+        "Благовонья",
+        "Благовоние",
+        "Ароматические палочки"
+      ],
+      "engineAliases": [
+        "lorc/incense"
+      ]
+    }
+  ]
 }

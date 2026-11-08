@@ -68512,6 +68512,54 @@
         ]
       },
       "note": "Original generated representation. Inspected at final 32x32; game statistics and scale remain data properties."
+    },
+    {
+      "category": "terrain",
+      "name": "Thicket",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Original generated artwork, visually reviewed at 32x32 for the game and shared library.",
+      "candidates": [
+        {
+          "assetId": "own-art:forest-thicket-v1",
+          "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+          "usage": "place_view",
+          "reason": "Dense overlapping green foliage, three gnarled trunks and tangled roots blocking passage.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "Incense",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Original generated artwork, visually reviewed at 32x32 for the game and shared library.",
+      "candidates": [
+        {
+          "assetId": "own-art:incense-sticks-v3",
+          "sha256": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
+          "usage": "item",
+          "reason": "Three separate tan incense sticks, glowing tips and a short grey smoke wisp, in a wooden holder; clean transparent gaps.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
     }
   ]
 }
