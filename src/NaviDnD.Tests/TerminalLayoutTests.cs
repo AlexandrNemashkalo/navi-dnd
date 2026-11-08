@@ -9,6 +9,42 @@ namespace NaviDnD.Tests;
 public class TerminalLayoutTests
 {
     [Theory]
+    [InlineData("ru", "Bonus Action")]
+    [InlineData("ru", "Бонусное действие")]
+    [InlineData("en", "Bonus Action")]
+    public void ActionLabelsRemainCompleteAndIndicatorsAlign(string language, string bonusName)
+    {
+        string previousLanguage = L.Language;
+        var original = Console.Out;
+        try
+        {
+            L.SetLanguage(language);
+            var storage = new Storage();
+            storage.WorldState.Hero = new() { Actions = [
+                new() { Name = "Action", Value = 1, MaxValue = 1 },
+                new() { Name = bonusName, Value = 1, MaxValue = 1 },
+                new() { Name = "Reaction", Value = 1, MaxValue = 1 }] };
+            var legend = new LegendDisplay(storage, new DisplayConfig(), new AppConfig());
+            var build = typeof(LegendDisplay).GetMethod("BuildCombatLines", BindingFlags.NonPublic | BindingFlags.Instance)!;
+            var lines = (List<Action>)build.Invoke(legend, [60])!;
+            string Capture(int index)
+            {
+                using var output = new StringWriter();
+                Console.SetOut(output);
+                lines[index]();
+                Console.SetOut(original);
+                return Regex.Replace(output.ToString(), "\u001b\\[[0-9;]*m", "");
+            }
+            string action = Capture(1), bonus = Capture(2), reaction = Capture(3);
+            Assert.Contains(L.T(bonusName) + ": ", bonus);
+            Assert.Equal(action.IndexOf('●'), bonus.IndexOf('■'));
+            Assert.Equal(bonus.IndexOf('■'), reaction.IndexOf('▲'));
+            Assert.True(bonus.Length <= 60);
+        }
+        finally { Console.SetOut(original); L.SetLanguage(previousLanguage); }
+    }
+
+    [Theory]
     [InlineData("HRO", "HRO")]
     [InlineData("ОРК", "ОРК")]
     [InlineData("🐉X", "?X ")]

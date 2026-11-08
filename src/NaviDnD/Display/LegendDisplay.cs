@@ -542,6 +542,8 @@ public class LegendDisplay
 
 
         var actions = hero?.Actions?.Where(a => a.Deleted != true).ToList() ?? [];
+        var actionLabels = actions.Select(a => L.T(a.Name) + ": ").ToArray();
+        int actionLabelWidth = Math.Max(15, actionLabels.Select(label => label.Length).DefaultIfEmpty(0).Max());
 
         var lines = new List<Action>
         {
@@ -589,7 +591,7 @@ public class LegendDisplay
             var a = actions[i];
             var color = i < _actionColors.Count ? _actionColors[i] : bright;
             string sym = i < _actionSymbols.Length ? _actionSymbols[i] : "●";
-            string label = PadActionLabel(L.T(a.Name));
+            string label = actionLabels[i].PadRight(actionLabelWidth);
             int activeCount = a.Value;
             int spentCount  = a.MaxValue - a.Value;
 
@@ -692,12 +694,6 @@ public class LegendDisplay
         var entity = world.Map.Entities?.FirstOrDefault(e => e.Symbol == symbol && e.Deleted != true);
         if (entity?.Color != null) return entity.Color;
         return _display.MainForeground;
-    }
-
-    private static string PadActionLabel(string name)
-    {
-        string raw = name + ": ";
-        return raw.Length <= 15 ? raw.PadRight(15) : raw[..15];
     }
 
     // Only ONE symbol per cell is drawn on the grid - entities always overlap objects (see
