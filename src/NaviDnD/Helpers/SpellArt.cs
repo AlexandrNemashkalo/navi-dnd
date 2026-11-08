@@ -22,29 +22,6 @@ public sealed class SpellArt
 
     private SpellArt(string images) => _images = images;
 
-    private sealed class PreviewSpell : HeroSpell { }
-    internal static bool IsPreview(HeroSpell spell) => spell is PreviewSpell;
-
-    // Temporary in-game gallery: UI rows only, never attached to Hero.Spells or saved.
-    // Real spells keep their names, preparation state and colors; match both world languages.
-    internal List<HeroSpell> WithPreviews(IEnumerable<HeroSpell> spells)
-    {
-        var result = spells.ToList();
-        var present = result.Select(s => GetIconId(s.Name)).Where(id => id != null).ToHashSet(StringComparer.Ordinal);
-        foreach (var (canonicalName, icon) in _icons)
-        {
-            if (!present.Add(icon.Id)) continue;
-            var info = SpellDatabase.Find(canonicalName);
-            result.Add(new PreviewSpell
-            {
-                Name = info?.Localized.Name ?? canonicalName,
-                Level = info?.Level ?? 0,
-                Color = [.. icon.NameColor],
-            });
-        }
-        return result;
-    }
-
     public static SpellArt Load(string ruleSet, SpellArtMode? mode = null)
     {
         string root = Path.Combine(AppContext.BaseDirectory, "SpellArt");

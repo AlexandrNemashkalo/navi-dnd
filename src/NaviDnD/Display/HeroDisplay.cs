@@ -67,7 +67,7 @@ public class HeroDisplay
         return (hero.VisionFt is > 0 and var own ? L.F("{0} ft", own) : L.T("by light")) + dark;
     }
 
-    // F9 also opens for a non-caster while the temporary spell art gallery is available.
+    // F9 is available only when the hero has spells.
     public bool HasSpells => (Preview ?? _settings.Hero) is { } hero && SortedSpells(hero).Count > 0;
 
     // “New level” mode (LevelUpDisplay): card shows the hero after promotion (Preview), differences from the
@@ -965,8 +965,7 @@ public class HeroDisplay
     public static List<HeroSpell> SortedSpells(Hero hero)
     {
         var actual = (hero.Spells ?? []).Where(s => s.Deleted != true);
-        var visible = SpellArt.Current?.WithPreviews(actual) ?? actual.ToList();
-        return visible.OrderBy(s => s.Level).ThenBy(s => s.Name).ToList();
+        return actual.OrderBy(s => s.Level).ThenBy(s => s.Name).ToList();
     }
 
     // 4 columns, each with its own circle of spells. A circle that does not fit into one column occupies
@@ -1068,8 +1067,7 @@ public class HeroDisplay
             InvLine Line(int c)
             {
                 var spell = visible[c].Items[r];
-                bool artPreview = SpellArt.IsPreview(spell);
-                bool isNew = !artPreview && IsNewInPreview(spell.Name);
+                bool isNew = IsNewInPreview(spell.Name);
                 string marker = isNew ? "+" : spell.Prepared == true ? "•" : " ";
                 int width = c switch { 0 => col1W, 1 => col2W, 2 => col3W, _ => col4W };
                 // Leave room for the marker and selection arrow; long spell names must not shift columns.

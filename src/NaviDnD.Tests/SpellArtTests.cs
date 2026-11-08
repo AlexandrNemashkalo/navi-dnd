@@ -9,11 +9,11 @@ namespace NaviDnD.Tests;
 
 public class SpellArtTests
 {
-    private static int PreparedSpellCount()
+    private static string[] PreparedSpellNames()
     {
         using var manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(
             Path.Combine(AppContext.BaseDirectory, "SpellArt", "RuleSets", "Dnd5e", "spell-icons.json")));
-        return manifest.RootElement.GetProperty("icons").GetArrayLength();
+        return manifest.RootElement.GetProperty("icons").EnumerateArray().Select(icon => icon.GetProperty("name").GetString()!).ToArray();
     }
 
     [Theory]
@@ -21,7 +21,7 @@ public class SpellArtTests
     [InlineData(L.English, CatalogSearch.GameIconsPack, SpellArtMode.Pixels)]
     [InlineData(L.Russian, CatalogSearch.DcssPack, SpellArtMode.Pixels)]
     [InlineData(L.English, CatalogSearch.DcssPack, SpellArtMode.Braille)]
-    public void AllSpellArtAppearsForNonCasterWithoutChangingSavedHero(string language, string pack, SpellArtMode mode)
+    public void AllSpellArtRemainsAvailableWithoutAddingGallerySpellsToNonCaster(string language, string pack, SpellArtMode mode)
     {
         var current = typeof(SpellArt).GetProperty("Current", BindingFlags.Static | BindingFlags.NonPublic)!;
         var previous = current.GetValue(null);
@@ -35,16 +35,17 @@ public class SpellArtTests
             var hero = new Hero { Spells = [], Inventory = [] };
             string before = System.Text.Json.JsonSerializer.Serialize(hero);
             var visible = HeroDisplay.SortedSpells(hero);
-            Assert.Equal(PreparedSpellCount(), visible.Count);
-            Assert.Equal(visible.Count, visible.Select(s => s.Name).Distinct().Count());
-            Assert.True(new HeroDisplay(new WorldState { Hero = hero }, new DisplayConfig()).HasSpells);
+            Assert.Empty(visible);
+            Assert.False(new HeroDisplay(new WorldState { Hero = hero }, new DisplayConfig()).HasSpells);
             var display = new DisplayConfig();
-            // All rows, including the final pages, must select their own image through the real UI path.
-            foreach (var spell in visible)
+            // Exercise every prepared image directly, without injecting a gallery into the game.
+            var names = PreparedSpellNames();
+            Assert.NotEmpty(names);
+            foreach (var name in names)
             {
-                var info = SpellDatabase.Find(spell.Name)!;
+                var info = SpellDatabase.Find(name)!;
                 Assert.NotNull(info);
-                Assert.Equal(info.Localized.Name, spell.Name);
+                var spell = new HeroSpell { Name = info.Localized.Name, Level = info.Level };
                 SelectCard("SetSelectedSpell", display, spell, 0);
                 Assert.Equal(catalog.Render(info.NameEn, mode: SpellArtMode.Braille), display.SelectedImageLines!.Take(18));
                 Assert.All(display.SelectedImageLines.Take(18), line =>
@@ -63,7 +64,7 @@ public class SpellArtTests
     [Theory]
     [InlineData(L.Russian)]
     [InlineData(L.English)]
-    public void PreviewDoesNotDuplicateLearnedSpellOrReplaceItsProperties(string language)
+    public void OnlyLearnedSpellsAppearAndKeepTheirProperties(string language)
     {
         var current = typeof(SpellArt).GetProperty("Current", BindingFlags.Static | BindingFlags.NonPublic)!;
         var previous = current.GetValue(null);
@@ -73,17 +74,18 @@ public class SpellArtTests
             L.SetWorld(language);
             current.SetValue(null, SpellArt.Load("Dnd5e"));
             var entry = SpellDatabase.Find("Fireball")!;
-            // Existing spell deliberately uses the opposite language from the gallery.
+            // Existing spell deliberately uses the opposite language from the world.
             var learned = new HeroSpell { Name = language == L.English ? entry.Name : "Fireball", Level = 3, Prepared = true, Color = [1, 2, 3] };
             var custom = new HeroSpell { Name = "Custom spell", Level = 1, Color = [4, 5, 6] };
-            var hero = new Hero { Spells = [learned, custom] };
+            var removed = new HeroSpell { Name = "Light", Level = 0, Deleted = true };
+            var hero = new Hero { Spells = [learned, custom, removed] };
             var visible = HeroDisplay.SortedSpells(hero);
-            Assert.Equal(PreparedSpellCount() + 1, visible.Count);
+            Assert.Equal(new[] { custom, learned }, visible);
             Assert.Same(learned, Assert.Single(visible, s => SpellDatabase.Find(s.Name)?.NameEn == "Fireball"));
             Assert.Contains(custom, visible);
             Assert.True(learned.Prepared);
             Assert.Equal(new[] { 1, 2, 3 }, learned.Color);
-            Assert.Equal(new[] { learned, custom }, hero.Spells);
+            Assert.Equal(new[] { learned, custom, removed }, hero.Spells);
         }
         finally { current.SetValue(null, previous); L.SetWorld(world); }
     }

@@ -201,6 +201,52 @@ public class AlacrittyAdventureSceneTests
     }
 
     [AlacrittyFact]
+    public void SpellStatsAppearOnLeftAndOnlyLearnedSpellsAreListed()
+    {
+        string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;
+        var fixture = JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Fixtures", "world_game.json")))!;
+        fixture["formatVersion"] = NaviDnD.StorageFormat.Current;
+        fixture["hero"]!["stats"] = JsonNode.Parse("""[{"name":"Сила","value":"+0 (10)"},{"name":"Сложность спасброска от заклинаний","value":"DC 12"}]""");
+        fixture["hero"]!["spells"] = JsonNode.Parse("""[{"name":"Свет","level":0,"color":[240,220,120]},{"name":"Огненный шар","level":3,"deleted":true}]""");
+        string fixturePath = Path.Combine(output, "spell-stats-fixture.json");
+        File.WriteAllText(fixturePath, fixture.ToJsonString());
+        var start = new ProcessStartInfo(Path.Combine(runtime, "NaviDnD.Launcher.exe")) { WorkingDirectory = runtime, UseShellExecute = false };
+        Configure(start);
+        start.Environment["NAVIDND_TEST_WORLDSTATE"] = fixturePath;
+        using var launcher = Process.Start(start)!;
+        Process? terminal = null;
+        try
+        {
+            var watch = Stopwatch.StartNew();
+            while (terminal == null && watch.Elapsed < TimeSpan.FromSeconds(15)) { terminal = FindTerminal(runtime); Thread.Sleep(100); }
+            Assert.NotNull(terminal);
+            Thread.Sleep(2000);
+            Press(terminal, ConsoleKey.Enter);
+            WaitForInput(runtime);
+            int pid = GamePid(runtime);
+            Press(terminal, ConsoleKey.F4);
+            Press(terminal, ConsoleKey.F9);
+            string label = NaviDnD.L.T("Spell save DC");
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 2, 18, 150, label, 5000));
+            var rows = GameConsole.ReadRows(pid, 0, 63, 150);
+            string statRow = Assert.Single(rows.Where(row => row.Contains(label)));
+            Assert.InRange(statRow.IndexOf(label, StringComparison.Ordinal), 0, 48);
+            Assert.InRange(statRow.IndexOf("DC 12", StringComparison.Ordinal), 0, 48);
+            Assert.DoesNotContain(rows, row => row.Contains("Сложность спасброска от заклинаний"));
+            Assert.Contains(rows, row => row.Contains("Свет"));
+            Assert.DoesNotContain(rows, row => row.Contains("Огненный шар") || row.Contains("Волшебная рука"));
+            ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, Path.Combine(output, "spell-stats-fixed.png"));
+            Press(terminal, ConsoleKey.F6);
+            Assert.True(SpinWait.SpinUntil(() => !GameConsole.ReadRows(pid, 2, 18, 150).Any(row => row.Contains(label)), 5000));
+        }
+        finally
+        {
+            if (terminal is { HasExited: false }) { terminal.Kill(entireProcessTree: true); terminal.WaitForExit(5000); }
+            terminal?.Dispose();
+        }
+    }
+
+    [AlacrittyFact]
     public void NpcFacesAndTerrainPicturesUsePixelsInMapAndJournal()
     {
         string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;
