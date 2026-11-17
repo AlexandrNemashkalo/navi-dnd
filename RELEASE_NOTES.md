@@ -1,19 +1,15 @@
-# NaviDnD 2.2.10
+# NaviDnD 2.2.11
 
-- Переработана тактическая карта: постоянные полублочные кроны деревьев, коричневые стволы, текстуры травы и пола, согласованные стены, окна, двери и мебель.
-- Сглажена граница видимости на улице и внутри зданий; изученные кроны сохраняют форму при затемнении.
-- Улучшены подбор предметных иллюстраций, портреты и карточки окружения. Картинки на вкладке «Мир» всегда отображаются Брайлем; заклинания сохраняют цветной Брайль.
-- Улучшены исследование мира, память о посещённых местах, маршруты и восстановление локаций, связанные игровые состояния и миграции сохранений.
-- Поиск Codex поддерживает установку в %LOCALAPPDATA%/OpenAI/Codex/bin/<версия>, нестандартные папки npm, кириллицу и пробелы в путях.
+- Исправлено применение патчей: изменённый или отсутствующий файл не требует скачивать полную игру, если патч содержит его полную замену или удаляет его.
+- Файлы, которые первый патч оставляет нетронутыми, по-прежнему проверяются. Новые файлы проверяются по SHA256 до установки; при ошибке возвращаются исходные локальные файлы.
+- Исправление включено в игру и установщик Windows, а также в обновление macOS.
 
-Обновления для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Работа и внешний вид на настоящем Mac в этом выпуске не проверялись.
+Сохранения и настройки сохраняются. Уже установленный старый загрузчик продолжает использовать прежнюю проверку до обновления. Запуск на настоящем Mac не проверялся.
 
 ## English
 
-- Updated tactical maps with persistent block-based tree crowns, brown trunks, textured ground, and consistent walls, windows, doors and furniture.
-- Smoothed fog boundaries outdoors and indoors without changing remembered crown shapes.
-- Improved item artwork, portraits and environment cards. World-map cards always use Braille; spells retain colored Braille.
-- Improved exploration, visited-place memory, routes, location restoration and related save migrations.
-- Codex discovery supports the local OpenAI installation, custom npm prefixes, Cyrillic paths and spaces.
+- Patches can repair modified or missing files when a complete replacement is included, or the file is removed, without downloading the entire game.
+- Files retained by the first patch are still verified. New payloads are checked against SHA256 before installation; rollback restores the original local files.
+- Includes the Windows game and installer, and the macOS updater.
 
-Windows and macOS (Apple Silicon) updates retain saves and settings. Native macOS execution and appearance have not been verified for this release.
+Saves and settings are retained. Older installed updaters keep their previous validation until upgraded. Native macOS execution has not been verified.

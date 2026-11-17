@@ -61,6 +61,39 @@ public class PatchUpdateTests
         });
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CompleteReplacementRepairsModifiedOrMissingFiles(bool missing)
+    {
+        var installed=new Dictionary<string,string>(Base) { ["NaviDnD.dll"]="local build", ["old/legacy.txt"]="edited" };
+        if(missing) { installed.Remove("NaviDnD.dll"); installed.Remove("old/legacy.txt"); }
+        WithGame(installed,(root,temp)=>
+        {
+            string zip=MakePatch(temp,"1.0.0","1.0.1",Base,[("release-version.txt","1.0.1"),("NaviDnD.dll","a2")],["old/legacy.txt"]);
+            using(var archive=ZipFile.OpenRead(zip)) Patch.Read(archive).VerifyBase(root,full:true);
+            Assert.Equal("1.0.1",PatchInstaller.ApplyChain(root,[zip]));
+            Assert.Equal("a2",Read(root,"NaviDnD.dll"));
+            Assert.Equal("prompt",Read(root,"Prompts/x.md"));
+            Assert.False(File.Exists(Path.Combine(root,"old/legacy.txt")));
+        });
+    }
+
+    [Fact]
+    public void FailedRepairRestoresLocallyModifiedOriginal()
+    {
+        var installed=new Dictionary<string,string>(Base) { ["NaviDnD.dll"]="local build" };
+        WithGame(installed,(root,temp)=>
+        {
+            string first=MakePatch(temp,"1.0.0","1.0.1",Base,[("release-version.txt","1.0.1"),("NaviDnD.dll","a2")],[]);
+            var mid=new Dictionary<string,string>(Base) { ["release-version.txt"]="1.0.1",["NaviDnD.dll"]="a2" };
+            string second=MakePatch(temp,"1.0.1","1.0.2",mid,[("release-version.txt","1.0.2"),("NaviDnD.dll","a3")],[],corrupt:"NaviDnD.dll");
+            Assert.Throws<InvalidDataException>(()=>PatchInstaller.ApplyChain(root,[first,second]));
+            Assert.Equal("local build",Read(root,"NaviDnD.dll"));
+            Assert.Equal("1.0.0",Read(root,"release-version.txt"));
+        });
+    }
+
     [Fact]
     public void DamagedPatchFileIsRejectedBeforeAnyReplacement()
     {

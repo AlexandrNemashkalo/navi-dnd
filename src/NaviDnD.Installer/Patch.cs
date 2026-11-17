@@ -45,15 +45,23 @@ internal sealed record Patch(string BaseVersion, string Version, Dictionary<stri
         return patch;
     }
 
-    // Whether the original version of the patch is installed. full - all database files (damaged installation),
-    // otherwise - only those that the patch replaces or deletes (the next patches in the chain: the rest has
-    // already been checked first).
+    // Replacement files are complete, SHA256-checked copies, not binary deltas. Their old bytes
+    // need not match. Only files retained by this patch must match the installed version.
+    // Later patches need only path/version checks: retained files were checked before the chain,
+    // and newly installed files were checked against their payload hashes.
     internal void VerifyBase(string root, bool full, Action<double>? progress = null)
     {
         string versionFile = Path.Combine(root, VersionPath);
         string version = File.Exists(versionFile) ? File.ReadAllText(versionFile).Trim() : "";
         if (version != BaseVersion) throw new InvalidDataException(L.F("The patch is for version {0}, installed is {1}.", BaseVersion, version.Length > 0 ? version : L.T("unknown")));
-        var check = full ? BaseFiles.ToList() : BaseFiles.Where(f => Files.ContainsKey(f.Key) || Removed.Contains(f.Key)).ToList();
+        var replaced = new HashSet<string>(Files.Keys.Concat(Removed), StringComparer.OrdinalIgnoreCase);
+        foreach (string name in replaced)
+        {
+            string path=Path.Combine(root,RelativePath(name));
+            RejectLinks(root,path);
+            if(Directory.Exists(path)) throw new IOException(L.T("A folder is in place of the file: ") + name);
+        }
+        var check = full ? BaseFiles.Where(f => !replaced.Contains(f.Key)).ToList() : [];
         for (int i = 0; i < check.Count; i++)
         {
             var (name, sha) = (check[i].Key, check[i].Value);
@@ -87,8 +95,8 @@ internal sealed record Patch(string BaseVersion, string Version, Dictionary<stri
 
 internal static class PatchInstaller
 {
-    // Patches in order with one operation: the first one checks the entire database, each next one checks what
-    // starts with the version of the previous one. Files are extracted and checked against SHA256 before
+    // Patches in one transaction: the first checks retained files, each next checks version and paths.
+    // Complete replacement files are extracted and checked against SHA256 before
     // replacement; replaced and deleted ones go into reserve; in case of any error, everything returns as it
     // was. Storage/ and logs/ are not affected. Returns the installed version.
     internal static string ApplyChain(string root, IReadOnlyList<string> patchZips, Action<string, double?>? progress = null)

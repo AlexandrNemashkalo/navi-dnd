@@ -208,8 +208,8 @@ internal static class GameUpdates
         UnixUpdate.Restart();
     }
 
-    // Patches from the installed version - downloaded and checked along with the database (entirely). Damaged
-    // database or off-chain version - null: downloaded parts of the full database and the entire chain of
+    // Patches from the installed version validate files that the first patch retains. Damaged retained
+    // files or an off-chain version return null: download the full base and the entire chain of
     // patches from it. An empty array - there is nothing to update.
     private static async Task<UpdatePatch[]?> DownloadPatchesAsync(UpdateDisplay view, UpdateManifest manifest, string root,
         string directory, CancellationTokenSource cancellation)
