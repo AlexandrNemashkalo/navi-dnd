@@ -489,6 +489,28 @@ public class StorageTakeRoundBundleTests
         Assert.Null(storage.TakeRoundBundle());
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CalendarRebaseDoesNotRedeliverCallbacksRegardlessOfRootPropertyOrder(bool timeFirst)
+    {
+        var storage = MakeStorage(3500);
+        storage.WorldState.Time.PartOfDay = "evening";
+        storage.WorldState.Time.Day = 1;
+        storage.WorldState.Hero = MakeHero();
+        storage.WorldState.Hero.Effects = [new() { Name = "Expired", ExpiresAtRound = 3499, OnExpire = new() { Effect = "Already handled" } }];
+        storage.WorldState.ScheduledEvents = [new() { Name = "Done", FireAtRound = 3499, Effect = "Already handled" }];
+        Assert.NotNull(storage.TakeRoundBundle());
+        const string time = "\"time\":{\"day\":2,\"partOfDay\":\"night\",\"totalRounds\":500}";
+        const string timers = "\"hero\":{\"effects\":[{\"id\":0,\"expiresAtRound\":0}]},\"scheduledEvents\":[{\"id\":0,\"fireAtRound\":1}]";
+        storage.ApplyUpdateWorldState("{" + (timeFirst ? time + "," + timers : timers + "," + time) + "}");
+        Assert.Null(storage.TakeRoundBundle());
+        // An actual new deadline remains a reschedule, not a coordinate change.
+        storage.ApplyUpdateWorldState("""{"scheduledEvents":[{"id":0,"fireAtRound":501}]}""");
+        storage.WorldState.Time.TotalRounds = 501;
+        Assert.Single(storage.TakeRoundBundle()!.FiredScheduledEvents);
+    }
+
     [Fact]
     public void PatchingEffectAndMovingItsOwnerDoesNotRepeatTick()
     {

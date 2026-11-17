@@ -144,6 +144,33 @@ public class ChunkPopulationTests
         Assert.Empty(world.Map.Objects??[]);
     }
 
+    [Theory]
+    [InlineData("entities", 22)]
+    [InlineData("objects", 22)]
+    [InlineData("entities", 21)]
+    [InlineData("objects", 21)]
+    public void PopulationKeepsBothDoorThresholdsClearWithoutMovingAcrossTheWall(string kind, int col)
+    {
+        var (world, chunk) = Scene();
+        chunk.Terrain = Enumerable.Repeat(new string('.', 20), 15).ToList();
+        world.Map.Doors = [new() { From = [22,3], To = [21,3], IsDoor = true }];
+        var originalRoom = world.Map.RoomAt(col,3);
+        string before = JsonSerializer.Serialize(world);
+        string json = JsonSerializer.Serialize(new { map = new Dictionary<string,object>
+            { [kind] = new[] { new { name = "Clerk or supply crate", symbol = "NEW", position = new[] { col,3 } } } } });
+        string patch = ChunkPopulationPatch.Prepare(world,new(world.Map,chunk,json))!;
+        Assert.Equal(before,JsonSerializer.Serialize(world));
+        var storage = new Storage();
+        storage.WorldState.Map = world.Map;
+        storage.ApplyUpdateWorldState(patch);
+        var added = kind == "entities" ? (CellEntity)Assert.Single(world.Map.Entities!) : Assert.Single(world.Map.Objects!);
+        Assert.DoesNotContain(added.Position[0], new[] { 21,22 }.Where(c => added.Position[1] == 3));
+        Assert.Same(originalRoom,world.Map.RoomAt(added.Position[0],added.Position[1]));
+        Assert.True(chunk.Contains(added.Position[0],added.Position[1]));
+        Assert.Equal(new[] {22,3},world.Map.Doors[0].From);
+        Assert.Equal(new[] {21,3},world.Map.Doors[0].To);
+    }
+
     [Fact]
     public void PrefetchThresholdIsEarlierAndStaysOnSameFloor()
     {

@@ -22208,13 +22208,13 @@
         ],
         "variantFamilyCountsAsOne": true
       },
-      "note": "Visual representation of the requested object; does not establish size, material or rules properties.",
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked.",
       "candidates": [
         {
-          "assetId": "prepared-items-native-32-23-farming:icon-018",
-          "sha256": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
-          "usage": "item",
-          "reason": "A complete brown barrel with side handles.",
+          "assetId": "own-art:barrel-shaded-v1",
+          "sha256": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
+          "usage": "prop",
+          "reason": "A complete upright wooden storage barrel, three-quarter view from slightly above with visible elliptical wooden lid, bulging vertical oak staves and two dark iron hoops. Strong dark outline, warm golden-brown illuminated left side, deep shaded right side, clear curved volume. No spout, handle, horn, cup, contents or surrounding floor.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -22235,13 +22235,13 @@
         ],
         "variantFamilyCountsAsOne": true
       },
-      "note": "Visual representation of the requested object; does not establish size, material or rules properties.",
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked.",
       "candidates": [
         {
-          "assetId": "prepared-items-native-32-23-farming:icon-018",
-          "sha256": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
-          "usage": "item",
-          "reason": "A barrel illustration; object count is supplied by the scene.",
+          "assetId": "own-art:barrel-shaded-v1",
+          "sha256": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
+          "usage": "prop",
+          "reason": "A complete upright wooden storage barrel, three-quarter view from slightly above with visible elliptical wooden lid, bulging vertical oak staves and two dark iron hoops. Strong dark outline, warm golden-brown illuminated left side, deep shaded right side, clear curved volume. No spout, handle, horn, cup, contents or surrounding floor.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -44577,13 +44577,13 @@
         ],
         "variantFamilyCountsAsOne": true
       },
-      "note": "Visual representation of the requested object; does not establish size, material or rules properties.",
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked.",
       "candidates": [
         {
-          "assetId": "prepared-items-native-32-23-farming:icon-018",
-          "sha256": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
-          "usage": "item",
-          "reason": "Complete barrel as a map prop illustration.",
+          "assetId": "own-art:barrel-shaded-v1",
+          "sha256": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
+          "usage": "prop",
+          "reason": "A complete upright wooden storage barrel, three-quarter view from slightly above with visible elliptical wooden lid, bulging vertical oak staves and two dark iron hoops. Strong dark outline, warm golden-brown illuminated left side, deep shaded right side, clear curved volume. No spout, handle, horn, cup, contents or surrounding floor.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -60866,26 +60866,10 @@
       "name": "counter",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:desk_oak",
-          "sha256": "02e4c32077cf6606447e72550b904a681160354247e3379f72bdb5172c1e127a",
+          "assetId": "own-art:bar-counter-shaded-v1",
+          "sha256": "acbbca525cde1dc83f70a8248840f4995ff450271d2c3136b4efeeca1c5308f1",
           "usage": "prop",
-          "reason": "Complete wooden desk/counter with a tabletop and front storage; a base-form counter illustration.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:desk_dark",
-          "sha256": "5bbe1a995638204199aee8d368c2e8fd17caa3327391f07a78f31c8cc1af72a3",
-          "usage": "prop",
-          "reason": "Complete wooden desk/counter with a tabletop and front storage; a base-form counter illustration.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:desk_ebony",
-          "sha256": "d77b1c7ae4b6e091fee82ae17ba9dbfef5c6b878d6e3a3992c0a67f7bd8450ba",
-          "usage": "prop",
-          "reason": "Complete wooden desk/counter with a tabletop and front storage; a base-form counter illustration.",
+          "reason": "A substantial closed oak tavern serving counter with a thick beveled countertop, three recessed front panels, carved posts and visible shaded right side; dark outline and detailed wood grain, transparent background.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -60900,33 +60884,17 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed closed bar counter silhouette with solid paneled front, not a desk with an open arch."
     },
     {
       "category": "terrain",
       "name": "Counter",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:desk_oak",
-          "sha256": "02e4c32077cf6606447e72550b904a681160354247e3379f72bdb5172c1e127a",
+          "assetId": "own-art:bar-counter-shaded-v1",
+          "sha256": "acbbca525cde1dc83f70a8248840f4995ff450271d2c3136b4efeeca1c5308f1",
           "usage": "prop",
-          "reason": "Complete wooden desk/counter with a tabletop and front storage; a base-form counter illustration.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:desk_dark",
-          "sha256": "5bbe1a995638204199aee8d368c2e8fd17caa3327391f07a78f31c8cc1af72a3",
-          "usage": "prop",
-          "reason": "Complete wooden desk/counter with a tabletop and front storage; a base-form counter illustration.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:desk_ebony",
-          "sha256": "d77b1c7ae4b6e091fee82ae17ba9dbfef5c6b878d6e3a3992c0a67f7bd8450ba",
-          "usage": "prop",
-          "reason": "Complete wooden desk/counter with a tabletop and front storage; a base-form counter illustration.",
+          "reason": "A substantial closed oak tavern serving counter with a thick beveled countertop, three recessed front panels, carved posts and visible shaded right side; dark outline and detailed wood grain, transparent background.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -60941,7 +60909,7 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed closed bar counter silhouette with solid paneled front, not a desk with an open arch."
     },
     {
       "category": "furniture",
@@ -61030,34 +60998,10 @@
       "name": "table",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:round_table_oak",
-          "sha256": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+          "assetId": "own-art:table-shaded-v1",
+          "sha256": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
           "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:round_table_dark",
-          "sha256": "2f1990285574dd49d614c2ef04d89782c83c759245a21c92e01a83b51367a2a7",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:long_table_oak",
-          "sha256": "a429cecf5e0df7e323477c2fb5855e8c777c3f94f6d12fc014b498eb865e70b0",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:long_table_dark",
-          "sha256": "eb4ed2a37eaffd9c770d27aa336e1bd571bc18e42e481fa4e1bb69bd5e46ee7b",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
+          "reason": "A complete rustic rectangular oak table, three-quarter view from slightly above: thick plank tabletop with clear board seams, four stout legs with the rear legs partly visible, cross support underneath. Dark outlines and detailed wood-grain shading, lighter tabletop and dark underside. No cloth, food, items, chairs, room or floor.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -61072,41 +61016,17 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
     },
     {
       "category": "terrain",
       "name": "Table",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:round_table_oak",
-          "sha256": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+          "assetId": "own-art:table-shaded-v1",
+          "sha256": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
           "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:round_table_dark",
-          "sha256": "2f1990285574dd49d614c2ef04d89782c83c759245a21c92e01a83b51367a2a7",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:long_table_oak",
-          "sha256": "a429cecf5e0df7e323477c2fb5855e8c777c3f94f6d12fc014b498eb865e70b0",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:long_table_dark",
-          "sha256": "eb4ed2a37eaffd9c770d27aa336e1bd571bc18e42e481fa4e1bb69bd5e46ee7b",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
+          "reason": "A complete rustic rectangular oak table, three-quarter view from slightly above: thick plank tabletop with clear board seams, four stout legs with the rear legs partly visible, cross support underneath. Dark outlines and detailed wood-grain shading, lighter tabletop and dark underside. No cloth, food, items, chairs, room or floor.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -61121,7 +61041,7 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
     },
     {
       "category": "furniture",
@@ -61226,26 +61146,10 @@
       "name": "cabinet",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:wardrobe_oak",
-          "sha256": "66cfd1d77438cc031d4aaa65492b041497179042844c6abf57ef800b4fdea2d1",
+          "assetId": "own-art:cabinet-shaded-v1",
+          "sha256": "2deffd0cfeaac62ddae0df05441e7608b856b5c3785797c773a360ba628dc9f7",
           "usage": "prop",
-          "reason": "Complete tall wooden cabinet with doors.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:wardrobe_dark",
-          "sha256": "ec16b9fa9b0e63bc1dc0fb8c1528efc24cf105b5caafd0ccd9a88a347d8c2f00",
-          "usage": "prop",
-          "reason": "Complete tall wooden cabinet with doors.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:wardrobe_ebony",
-          "sha256": "fd85b2b8bceca60b77a89c51402d9fa59abac788c87edbb699d1306c7a933335",
-          "usage": "prop",
-          "reason": "Complete tall wooden cabinet with doors.",
+          "reason": "A complete sturdy medieval oak storage cupboard with two closed paneled wooden doors, two small iron handles, short feet, carved top cornice and a visible narrow right side. Three-quarter front view. Strong wood-grain pixel texture, bevel highlights, darker recesses, a substantial shaded object. No books, no contents, no room.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -61260,33 +61164,17 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
     },
     {
       "category": "terrain",
       "name": "Cabinet",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:wardrobe_oak",
-          "sha256": "66cfd1d77438cc031d4aaa65492b041497179042844c6abf57ef800b4fdea2d1",
+          "assetId": "own-art:cabinet-shaded-v1",
+          "sha256": "2deffd0cfeaac62ddae0df05441e7608b856b5c3785797c773a360ba628dc9f7",
           "usage": "prop",
-          "reason": "Complete tall wooden cabinet with doors.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:wardrobe_dark",
-          "sha256": "ec16b9fa9b0e63bc1dc0fb8c1528efc24cf105b5caafd0ccd9a88a347d8c2f00",
-          "usage": "prop",
-          "reason": "Complete tall wooden cabinet with doors.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:wardrobe_ebony",
-          "sha256": "fd85b2b8bceca60b77a89c51402d9fa59abac788c87edbb699d1306c7a933335",
-          "usage": "prop",
-          "reason": "Complete tall wooden cabinet with doors.",
+          "reason": "A complete sturdy medieval oak storage cupboard with two closed paneled wooden doors, two small iron handles, short feet, carved top cornice and a visible narrow right side. Three-quarter front view. Strong wood-grain pixel texture, bevel highlights, darker recesses, a substantial shaded object. No books, no contents, no room.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -61301,17 +61189,17 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
     },
     {
       "category": "furniture",
       "name": "hearth",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:fireplace",
-          "sha256": "a71f40526c2ed948bcbc873ccdb2987730e117cbd3398315cb5b584ce4fbcc3d",
+          "assetId": "own-art:hearth-shaded-v1",
+          "sha256": "51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c",
           "usage": "prop",
-          "reason": "Complete stone fireplace with visible flame.",
+          "reason": "A small complete medieval stone fireplace/hearth as one freestanding architectural sprite, thick grey stone jambs and lintel surround a dark opening with two logs and a small warm orange fire. Three-quarter front view with a little right-side stone depth, visible stone blocks, strong highlights and deep cavity shading. No room, no wall beyond the hearth, no cooking pot.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -61326,17 +61214,17 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
     },
     {
       "category": "terrain",
       "name": "Hearth",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:fireplace",
-          "sha256": "a71f40526c2ed948bcbc873ccdb2987730e117cbd3398315cb5b584ce4fbcc3d",
+          "assetId": "own-art:hearth-shaded-v1",
+          "sha256": "51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c",
           "usage": "prop",
-          "reason": "Complete stone fireplace with visible flame.",
+          "reason": "A small complete medieval stone fireplace/hearth as one freestanding architectural sprite, thick grey stone jambs and lintel surround a dark opening with two logs and a small warm orange fire. Three-quarter front view with a little right-side stone depth, visible stone blocks, strong highlights and deep cavity shading. No room, no wall beyond the hearth, no cooking pot.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -61351,25 +61239,17 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
     },
     {
       "category": "furniture",
       "name": "bench",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:bench_oak",
-          "sha256": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
+          "assetId": "own-art:bench-shaded-v1",
+          "sha256": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
           "usage": "prop",
-          "reason": "Complete freestanding wooden bench with two legs.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:bench_dark",
-          "sha256": "950ffa22ddba117970fdc0f4ee4e4ca4876d1088ffbdae7fa9293409f2a78e6a",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden bench with two legs.",
+          "reason": "A complete low backless oak bench with thick beveled plank seat, two sturdy trestle supports and a horizontal stretcher; detailed wood grain, dark outline and warm shaded volume, transparent background.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -61384,25 +61264,17 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed at final 32x32: backless oak bench with a thick seat, trestle supports and shaded outlined wood."
     },
     {
       "category": "terrain",
       "name": "Bench",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:bench_oak",
-          "sha256": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
+          "assetId": "own-art:bench-shaded-v1",
+          "sha256": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
           "usage": "prop",
-          "reason": "Complete freestanding wooden bench with two legs.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:bench_dark",
-          "sha256": "950ffa22ddba117970fdc0f4ee4e4ca4876d1088ffbdae7fa9293409f2a78e6a",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden bench with two legs.",
+          "reason": "A complete low backless oak bench with thick beveled plank seat, two sturdy trestle supports and a horizontal stretcher; detailed wood grain, dark outline and warm shaded volume, transparent background.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -61417,7 +61289,7 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed at final 32x32: backless oak bench with a thick seat, trestle supports and shaded outlined wood."
     },
     {
       "category": "prop_priority",
@@ -61473,34 +61345,10 @@
       "name": "table",
       "candidates": [
         {
-          "assetId": "wizard-furniture-32:round_table_oak",
-          "sha256": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+          "assetId": "own-art:table-shaded-v1",
+          "sha256": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
           "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:round_table_dark",
-          "sha256": "2f1990285574dd49d614c2ef04d89782c83c759245a21c92e01a83b51367a2a7",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:long_table_oak",
-          "sha256": "a429cecf5e0df7e323477c2fb5855e8c777c3f94f6d12fc014b498eb865e70b0",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
-          "match": "visual_representation",
-          "sourcePriority": 0
-        },
-        {
-          "assetId": "wizard-furniture-32:long_table_dark",
-          "sha256": "eb4ed2a37eaffd9c770d27aa336e1bd571bc18e42e481fa4e1bb69bd5e46ee7b",
-          "usage": "prop",
-          "reason": "Complete freestanding wooden tables.",
+          "reason": "A complete rustic rectangular oak table, three-quarter view from slightly above: thick plank tabletop with clear board seams, four stout legs with the rear legs partly visible, cross support underneath. Dark outlines and detailed wood-grain shading, lighter tabletop and dark underside. No cloth, food, items, chairs, room or floor.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -61515,7 +61363,7 @@
           "subject_facts"
         ]
       },
-      "note": "Explicit object-form match. Game facts define exact dimensions, materials, quantities and hidden powers."
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
     },
     {
       "category": "prop_priority",
@@ -68525,13 +68373,13 @@
           "subject_facts"
         ]
       },
-      "note": "Original generated artwork, visually reviewed at 32x32 for the game and shared library.",
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked.",
       "candidates": [
         {
-          "assetId": "own-art:forest-thicket-v2",
-          "sha256": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
-          "usage": "prop",
-          "reason": "Three clearly separated overlapping evergreen crowns with brown trunks on a small mossy base; restrained colors and transparent padding.",
+          "assetId": "own-art:forest-thicket-v1",
+          "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+          "usage": "place_view",
+          "reason": "Dense overlapping green foliage, three gnarled trunks and tangled roots blocking passage.",
           "match": "visual_representation",
           "sourcePriority": 0
         }
@@ -68549,13 +68397,685 @@
           "subject_facts"
         ]
       },
-      "note": "Original generated artwork, visually reviewed at 32x32 for the game and shared library.",
+      "note": "Reviewed compact bundle with an ember and smoke; replaces thin holder silhouette. Older source images remain archived.",
+      "candidates": [
+        {
+          "assetId": "own-art:incense-sticks-v4",
+          "sha256": "42fe5e050daa3e7e09a03b81bfd8b6698f3e43be601c7e7649211b0de856678f",
+          "usage": "item",
+          "reason": "A compact diagonal bundle of warm brown incense sticks bound with red thread, one glowing ember and a clear pale smoke curl; transparent background.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "Copper piece",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "seedScope": "world_and_subject",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "style_profile",
+          "art_approval",
+          "subject_facts"
+        ],
+        "variantFamilyCountsAsOne": true
+      },
+      "note": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-32-treasure:icon-037",
+          "sha256": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+          "usage": "item",
+          "reason": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "Silver piece",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "seedScope": "world_and_subject",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "style_profile",
+          "art_approval",
+          "subject_facts"
+        ],
+        "variantFamilyCountsAsOne": true
+      },
+      "note": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-32-treasure:icon-037",
+          "sha256": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+          "usage": "item",
+          "reason": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "Electrum piece",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "seedScope": "world_and_subject",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "style_profile",
+          "art_approval",
+          "subject_facts"
+        ],
+        "variantFamilyCountsAsOne": true
+      },
+      "note": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-32-treasure:icon-037",
+          "sha256": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+          "usage": "item",
+          "reason": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "Gold piece",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "seedScope": "world_and_subject",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "style_profile",
+          "art_approval",
+          "subject_facts"
+        ],
+        "variantFamilyCountsAsOne": true
+      },
+      "note": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-32-treasure:icon-037",
+          "sha256": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+          "usage": "item",
+          "reason": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "Platinum piece",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "seedScope": "world_and_subject",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "style_profile",
+          "art_approval",
+          "subject_facts"
+        ],
+        "variantFamilyCountsAsOne": true
+      },
+      "note": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-32-treasure:icon-037",
+          "sha256": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+          "usage": "item",
+          "reason": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "Coins",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "seedScope": "world_and_subject",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "style_profile",
+          "art_approval",
+          "subject_facts"
+        ],
+        "variantFamilyCountsAsOne": true
+      },
+      "note": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-32-treasure:icon-037",
+          "sha256": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+          "usage": "item",
+          "reason": "Reviewed complete coin stack; denomination palette is applied at render time, source PNG unchanged.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "Vestments",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "seedScope": "world_and_subject",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "style_profile",
+          "art_approval",
+          "subject_facts"
+        ],
+        "variantFamilyCountsAsOne": true
+      },
+      "note": "Reviewed complete red ceremonial robe with gold trim; garment silhouette, no person or book.",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-batch2-05-cuirasses:icon-020",
+          "sha256": "ab77232d02bd4695b28faa5ea65881846d04f64abd0f56e3185409913a983fd1",
+          "usage": "item",
+          "reason": "Reviewed complete red ceremonial robe with gold trim; garment silhouette, no person or book.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "incense-sticks-v3",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "seedScope": "world_and_subject",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "style_profile",
+          "art_approval",
+          "subject_facts"
+        ],
+        "variantFamilyCountsAsOne": true
+      },
+      "note": "Compatibility-only binding keeps the old content-addressed image readable; normal incense names select v4.",
       "candidates": [
         {
           "assetId": "own-art:incense-sticks-v3",
           "sha256": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
           "usage": "item",
-          "reason": "Three separate tan incense sticks, glowing tips and a short grey smoke wisp, in a wooden holder; clean transparent gaps.",
+          "reason": "Previously published incense image retained for saved image IDs.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-round_table_oak",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:round_table_oak",
+          "sha256": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+          "usage": "prop",
+          "reason": "Complete freestanding wooden tables.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-round_table_dark",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:round_table_dark",
+          "sha256": "2f1990285574dd49d614c2ef04d89782c83c759245a21c92e01a83b51367a2a7",
+          "usage": "prop",
+          "reason": "Complete freestanding wooden tables.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-long_table_oak",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:long_table_oak",
+          "sha256": "a429cecf5e0df7e323477c2fb5855e8c777c3f94f6d12fc014b498eb865e70b0",
+          "usage": "prop",
+          "reason": "Complete freestanding wooden tables.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-long_table_dark",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:long_table_dark",
+          "sha256": "eb4ed2a37eaffd9c770d27aa336e1bd571bc18e42e481fa4e1bb69bd5e46ee7b",
+          "usage": "prop",
+          "reason": "Complete freestanding wooden tables.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-wardrobe_oak",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:wardrobe_oak",
+          "sha256": "66cfd1d77438cc031d4aaa65492b041497179042844c6abf57ef800b4fdea2d1",
+          "usage": "prop",
+          "reason": "Complete tall wooden cabinet with doors.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-wardrobe_dark",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:wardrobe_dark",
+          "sha256": "ec16b9fa9b0e63bc1dc0fb8c1528efc24cf105b5caafd0ccd9a88a347d8c2f00",
+          "usage": "prop",
+          "reason": "Complete tall wooden cabinet with doors.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-wardrobe_ebony",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:wardrobe_ebony",
+          "sha256": "fd85b2b8bceca60b77a89c51402d9fa59abac788c87edbb699d1306c7a933335",
+          "usage": "prop",
+          "reason": "Complete tall wooden cabinet with doors.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-fireplace",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:fireplace",
+          "sha256": "a71f40526c2ed948bcbc873ccdb2987730e117cbd3398315cb5b584ce4fbcc3d",
+          "usage": "prop",
+          "reason": "Complete stone fireplace with visible flame.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-prepared-items-native-32-23-farming-icon-018",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-23-farming:icon-018",
+          "sha256": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
+          "usage": "item",
+          "reason": "A barrel illustration; object count is supplied by the scene.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "prop_priority",
+      "name": "window",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "candidates": [
+        {
+          "assetId": "own-art:window-shaded-v1",
+          "sha256": "b945fc8c2ebf42e0072f78918c94d2b71c7a1d34aeeb52f8881ea56ffb691fc8",
+          "usage": "prop",
+          "reason": "A complete ordinary medieval wooden window frame, seen nearly front-on: thick oak sill and frame, one wooden cross mullion dividing four clearly blue-grey GLASS panes with small sky highlights. The glass is visible and opaque blue-grey, only outside the wooden outline is transparent. It is not iron bars, not a prison grate, not a door. No surrounding wall.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ],
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
+    },
+    {
+      "category": "terrain",
+      "name": "Plank floor",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "candidates": [
+        {
+          "assetId": "own-art:plank-floor-shaded-v1",
+          "sha256": "0e8c9a19a5c835f1d2aed3c94fa3d001788eeb6367c1ba550bd4a1dc1a2fc5ad",
+          "usage": "prop",
+          "reason": "A top-down square swatch of installed wooden plank flooring: five wide parallel warm oak boards joined edge to edge, staggered short end joints, subtle dark grain and a few small nailheads. This is a FLAT WALKABLE FLOOR SURFACE, not a stack of lumber, not loose boards, not a table. Square block fills 28x28 logical pixels, dark perimeter outline and four logical pixel transparent outside margin; do not tilt the square.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ],
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
+    },
+    {
+      "category": "equipment",
+      "name": "Cart axle",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "candidates": [
+        {
+          "assetId": "own-art:cart-axle-shaded-v1",
+          "sha256": "9aa2a0791f3dc1047b3f87237ff50d5ed1ea101c4f6a2a6e58ee9d7a8259ced6",
+          "usage": "item",
+          "reason": "A single replacement axle for a wooden medieval cart, a stout horizontal oak shaft slightly diagonal from lower left to upper right, symmetric iron bearing collars and short metal spindle ends on BOTH ends. Thick squared central timber clearly connects the ends. No wheels, no cart, no flame, no torch, no handle, no spear tip. Make it substantial and recognizable as a mechanical part.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ],
+      "note": "Reviewed at final 32x32 and integer enlargement; semantic object and shaded pixel silhouette checked."
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-own-art-forest-thicket-v2",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: retain previously published image IDs without ordinary subject names.",
+      "candidates": [
+        {
+          "assetId": "own-art:forest-thicket-v2",
+          "sha256": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
+          "usage": "prop",
+          "reason": "Three clearly separated overlapping evergreen crowns with brown trunks on a small mossy base; restrained colors and transparent padding.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "terrain",
+      "name": "Tall grass",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Reviewed final 32x32 tall meadow grass silhouette in muted sage and olive, shaded layered blades; ordinary grass unchanged.",
+      "candidates": [
+        {
+          "assetId": "own-art:tall-grass-shaded-v1",
+          "sha256": "be1e4c819f901fcb5d7b11d57d7693755c31c81fb6768d31d021f0d8af2552a3",
+          "usage": "prop",
+          "reason": "A lush tall meadow grass clump with long curved sage and olive blades, soft seed stems, dark layered foliage and pale warm highlights; transparent background.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-desk_oak",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: keep previously published desk sprite readable by saved image ID.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:desk_oak",
+          "sha256": "02e4c32077cf6606447e72550b904a681160354247e3379f72bdb5172c1e127a",
+          "usage": "prop",
+          "reason": "Complete wooden desk/counter with a tabletop and front storage; a base-form counter illustration.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-desk_dark",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: keep previously published desk sprite readable by saved image ID.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:desk_dark",
+          "sha256": "5bbe1a995638204199aee8d368c2e8fd17caa3327391f07a78f31c8cc1af72a3",
+          "usage": "prop",
+          "reason": "Complete wooden desk/counter with a tabletop and front storage; a base-form counter illustration.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-desk_ebony",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: keep previously published desk sprite readable by saved image ID.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:desk_ebony",
+          "sha256": "d77b1c7ae4b6e091fee82ae17ba9dbfef5c6b878d6e3a3992c0a67f7bd8450ba",
+          "usage": "prop",
+          "reason": "Complete wooden desk/counter with a tabletop and front storage; a base-form counter illustration.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-bench_oak",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: keep previously published bench sprite readable by saved image ID.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:bench_oak",
+          "sha256": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
+          "usage": "prop",
+          "reason": "Complete freestanding wooden bench with two legs.",
+          "match": "visual_representation",
+          "sourcePriority": 0
+        }
+      ]
+    },
+    {
+      "category": "equipment",
+      "name": "legacy-scenery-wizard-furniture-32-bench_dark",
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Compatibility only: keep previously published bench sprite readable by saved image ID.",
+      "candidates": [
+        {
+          "assetId": "wizard-furniture-32:bench_dark",
+          "sha256": "950ffa22ddba117970fdc0f4ee4e4ca4876d1088ffbdae7fa9293409f2a78e6a",
+          "usage": "prop",
+          "reason": "Complete freestanding wooden bench with two legs.",
           "match": "visual_representation",
           "sourcePriority": 0
         }

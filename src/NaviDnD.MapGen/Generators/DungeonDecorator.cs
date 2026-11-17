@@ -40,10 +40,14 @@ public static class DungeonDecorator
                     0 => p < 0.07 ? 'K' : p < 0.09 ? 'b' : 'p',                                 // plates
                     1 => p < 0.05 ? 'r' : p < 0.08 ? 'k' : p < 0.095 ? 'b' : 'q',              // rough stone
                     2 => p < 0.14 ? 'm' : p < 0.19 ? 'u' : p < 0.23 ? 'k' : p < 0.25 ? 'b' : 'q', // dampness
-                    _ => p < 0.10 ? 'm' : p < 0.16 ? 'u' : p < 0.24 ? 'r' : p < 0.26 ? 'b' : 'q', // cave
+                    _ => p is >= 0.24 and < 0.26 ? 'b' : 'q', // cave details are grouped below
                 };
             }
-            if (corridor || cells.Count < 20) continue;
+            if (corridor || cells.Count < 20)
+            {
+                if (cave && !corridor) CavePatches(g, cells, doorCells, chunk);
+                continue;
+            }
 
             var set = cells.ToHashSet();
             bool Interior((int c, int r) x)
@@ -71,6 +75,7 @@ public static class DungeonDecorator
                 for (int i = 0; i < cells.Count / 20 + rng.Next(2); i++)
                     TryBlock(cells[rng.Next(cells.Count)], 'S');
                 if (rng.Next(4) == 0) TryBlock(cells[rng.Next(cells.Count)], 'R');
+                CavePatches(g, cells, doorCells, chunk);
                 continue;
             }
 
@@ -101,6 +106,46 @@ public static class DungeonDecorator
             rows.Add(new string(line));
         }
         return rows;
+    }
+
+    // Compact natural patches give halls landmarks without slowing narrow tunnels or door approaches.
+    private static void CavePatches(char[,] g, List<(int c, int r)> cells,
+        HashSet<(int, int)> doors, MapChunk chunk)
+    {
+        if (cells.Count < 12) return;
+        var room = cells.ToHashSet();
+        static IEnumerable<(int c, int r)> Neighbors((int c, int r) p) =>
+            [(p.c - 1, p.r), (p.c + 1, p.r), (p.c, p.r - 1), (p.c, p.r + 1)];
+        var available = cells.Where(p => TerrainCatalog.Get(g[p.c, p.r])?.BlocksMove != true
+            && Neighbors(p).Count(room.Contains) >= 3
+            && !doors.Any(d => Math.Abs(d.Item1 - (p.c + chunk.OriginCol + 1))
+                + Math.Abs(d.Item2 - (p.r + chunk.OriginRow + 1)) <= 1)).ToHashSet();
+        // Separate random stream preserves the existing stalagmite/collapse placement sequence.
+        var random = new Random(unchecked(chunk.Seed * 397 ^ cells.Min(p => p.c) * 31 ^ cells.Min(p => p.r)));
+        int size = Math.Clamp(cells.Count / 12, 3, 9);
+        int character = random.Next(3); // damp niche, dry scree, or both
+        int count = character == 2 ? 2 : 1;
+        for (int patch = 0; patch < count && available.Count >= 3; patch++)
+        {
+            var candidates = available.OrderBy(p => p.r).ThenBy(p => p.c).ToList();
+            var center = candidates[random.Next(candidates.Count)];
+            var selected = new HashSet<(int c, int r)> { center };
+            available.Remove(center);
+            while (selected.Count < size)
+            {
+                var fringe = selected.SelectMany(Neighbors).Where(available.Contains).Distinct()
+                    .OrderBy(p => Math.Abs(p.c - center.c) + Math.Abs(p.r - center.r))
+                    .ThenBy(p => p.r).ThenBy(p => p.c).ToList();
+                if (fringe.Count == 0) break;
+                var next = fringe[random.Next(Math.Min(3, fringe.Count))];
+                selected.Add(next);
+                available.Remove(next);
+            }
+            bool wet = character == 0 || character == 2 && patch == 0;
+            foreach (var p in selected) g[p.c, p.r] = wet ? (p == center ? 'u' : 'm') : 'r';
+            // Leave dry ground between the wet niche and the scree patch.
+            foreach (var p in selected.SelectMany(Neighbors)) available.Remove(p);
+        }
     }
 
     // All passable cells in the room are connected to each other (4 neighbors).

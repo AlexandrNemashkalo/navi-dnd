@@ -1,0 +1,22 @@
+{
+  "id": "own-art:incense-sticks-v4",
+  "file": "incense-sticks-v4.png",
+  "subject": "Incense",
+  "nameRu": "Благовония",
+  "width": 32,
+  "height": 32,
+  "sha256": "42fe5e050daa3e7e09a03b81bfd8b6698f3e43be601c7e7649211b0de856678f",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "A compact diagonal bundle of warm brown incense sticks bound with red thread, one glowing ember and a clear pale smoke curl; transparent background.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/incense-sticks-v4/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/incense-sticks-v4/prompt.txt"
+}

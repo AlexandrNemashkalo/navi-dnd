@@ -1,0 +1,22 @@
+{
+  "id": "own-art:table-shaded-v1",
+  "file": "table-shaded-v1.png",
+  "subject": "Table",
+  "nameRu": "Стол",
+  "width": 32,
+  "height": 32,
+  "sha256": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
+  "usage": "prop",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.prop.32",
+  "descriptionEn": "A complete rustic rectangular oak table, three-quarter view from slightly above: thick plank tabletop with clear board seams, four stout legs with the rear legs partly visible, cross support underneath. Dark outlines and detailed wood-grain shading, lighter tabletop and dark underside. No cloth, food, items, chairs, room or floor.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/table-shaded-v1/original.png",
+  "sourceDimensions": [
+    1312,
+    1199
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/table-shaded-v1/prompt.txt"
+}

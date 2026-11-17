@@ -12,6 +12,36 @@ namespace NaviDnD.Tests;
 [Collection(IconPackCollection.Name)]
 public sealed class ArtPicturesTests
 {
+    [Theory]
+    [InlineData("item: wooden pegs,wood")]
+    [InlineData("item: wooden peg")]
+    public void RepairPegsUseWoodRatherThanAProstheticLeg(string query)
+    {
+        Assert.Equal("delapouite/wood-stick", CatalogSearch.IconsFor(query, pack: CatalogSearch.GameIconsPack).Slugs.First());
+    }
+
+    [Theory]
+    [InlineData("creature: human forester,human")]
+    [InlineData("human forester,human")]
+    [InlineData("creature: human")]
+    [InlineData("creature: villagers")]
+    [InlineData("creature: commoner")]
+    [InlineData("creature: citizen")]
+    public void HumanCreatureFallbackUsesAPersonInsteadOfAnUnrelatedCompoundIcon(string query)
+    {
+        string previous = CatalogSearch.IconPack;
+        try
+        {
+            CatalogSearch.IconPack = CatalogSearch.GameIconsPack;
+            string response = JsonSerializer.Serialize(new { map = new { entities = new[] { new { name = "Forester", icon = query } } } });
+            var parsed = JsonNode.Parse(CatalogReferences.Resolve(response))!;
+            Assert.Equal("delapouite/person", (string?)parsed["map"]!["entities"]![0]!["image"]);
+            Assert.NotNull(SvgToBrailleConverter.Convert("delapouite/person", "", applyPackMapping: false));
+            Assert.Equal("delapouite/human-ear", CatalogSearch.IconsFor("item: human ear").Slugs.First());
+        }
+        finally { CatalogSearch.IconPack = previous; }
+    }
+
     [Fact]
     public void CharacterCreationOffersReviewedFacesInsteadOfMapActors()
     {
@@ -90,6 +120,7 @@ public sealed class ArtPicturesTests
             foreach (var binding in bindings.EnumerateArray())
             {
                 string slug = ArtPictures.Prefix + binding.GetProperty("imageId").GetString();
+                if (binding.TryGetProperty("palette", out var palette)) slug += "~" + palette.GetString();
                 foreach (var name in binding.GetProperty("names").EnumerateArray())
                     foreach (var category in binding.GetProperty("categories").EnumerateArray())
                         Assert.Contains(slug, art.Find(name.GetString()!, category.GetString()));

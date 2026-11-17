@@ -9,6 +9,119 @@ namespace NaviDnD.Tests;
 [Collection(IconPackCollection.Name)]
 public class DcssIconsTests
 {
+    [Theory]
+    [InlineData("dcss", "weapon: knives", "weapon: knife")]
+    [InlineData("dcss", "weapon: weathered knives", "weapon: knife")]
+    public void PluralKnivesKeepTheirWeaponIdentity(string pack, string query, string singular)
+    {
+        var expected = CatalogSearch.IconsFor(singular, pack);
+        var actual = CatalogSearch.IconsFor(query, pack);
+        Assert.NotEmpty(expected.Slugs);
+        Assert.Equal(expected.Slugs[0], Assert.Single(actual.Slugs.Take(1)));
+    }
+
+    [Fact]
+    public void ExistingPluralIllustrationStillWinsWithinGameIcons()
+    {
+        Assert.Equal("lorc/kitchen-knives", CatalogSearch.IconsFor("weapon: knives", CatalogSearch.GameIconsPack).Slugs[0]);
+    }
+
+    [Theory]
+    [InlineData("item: weathered fishing basket", "basket")]
+    [InlineData("item: reinforced leather pouch", "pouch")]
+    [InlineData("item: painted wooden chest", "chest")]
+    [InlineData("item: carved wooden flute", "flute")]
+    [InlineData("item: weathered pouch of coins", "pouch")]
+    [InlineData("creature: goblin with spear", "goblin")]
+    public void DescriptiveFallbackKeepsTheObjectBeforeItsModifiers(string query, string noun)
+    {
+        foreach (string pack in new[] { CatalogSearch.GameIconsPack, CatalogSearch.DcssPack })
+            Assert.Contains(noun, CatalogSearch.IconsFor(query, pack, "item").Slugs[0]);
+    }
+
+    public static IEnumerable<object[]> EverydayProps() =>
+        from pack in new[] { CatalogSearch.GameIconsPack, CatalogSearch.DcssPack }
+        from prop in new[] {
+            ("wooden bucket", "delapouite/empty-wood-bucket"),
+            ("coil of rope", "delapouite/rope-coil"),
+            ("wooden cart", "delapouite/old-wagon"),
+            ("signpost", "delapouite/direction-signs") }
+        select new object[] { pack, prop.Item1, prop.Item2 };
+
+    public static IEnumerable<object[]> StoneLandmarks() =>
+        from pack in new[] { CatalogSearch.GameIconsPack, CatalogSearch.DcssPack }
+        from landmark in new[] { ("standing stone", "delapouite/menhir"),
+            ("standing stones", "delapouite/menhir"), ("stone cairns", "delapouite/stone-pile"),
+            ("stone cairn", "delapouite/stone-pile"), ("cairn", "delapouite/stone-pile"),
+            ("stacked stones", "delapouite/stone-stack") }
+        select new object[] { pack, landmark.Item1, landmark.Item2 };
+
+    [Theory, MemberData(nameof(StoneLandmarks))]
+    public void StoneLandmarksRetainTheirShapeBeforeGenericStoneFallback(string pack, string name, string expected)
+    {
+        Assert.Equal(expected, CatalogSearch.IconsFor("feature: " + name + ",stone", pack, "feature").Slugs[0]);
+    }
+
+    [Theory, MemberData(nameof(EverydayProps))]
+    public void EverydayPropsKeepTheirPhysicalMeaning(string pack, string query, string expected)
+    {
+        Assert.Equal(expected, CatalogSearch.IconsFor("item: " + query, pack, "item").Slugs[0]);
+    }
+
+    [Theory]
+    [InlineData(CatalogSearch.GameIconsPack)]
+    [InlineData(CatalogSearch.DcssPack)]
+    public void FishingBasketKeepsTheObjectRatherThanTheActivity(string pack)
+    {
+        Assert.Equal("delapouite/basket", CatalogSearch.IconsFor("item: fishing basket", pack, "item").Slugs[0]);
+    }
+
+    [Theory]
+    [InlineData("potion: red", "potion")]
+    [InlineData("book: green", "book")]
+    [InlineData("ring: golden", "ring")]
+    public void AppearanceTermsDoNotReplaceTheKindOfItem(string query, string kind)
+    {
+        var result = CatalogSearch.IconsFor(query, CatalogSearch.GameIconsPack, "item");
+        Assert.NotEmpty(result.Slugs);
+        Assert.All(result.Slugs, slug => Assert.Contains(kind, slug));
+    }
+
+    [Fact]
+    public void ImplicitCategoryRestrictsTheSameCatalogAsExplicitCategory()
+    {
+        Assert.Equal(CatalogSearch.IconsFor("creature: butterfly", CatalogSearch.DcssPack, "creature").Slugs,
+            CatalogSearch.IconsFor("butterfly", CatalogSearch.DcssPack, "creature").Slugs);
+        Assert.Equal(CatalogSearch.IconsFor("feature: dragon", CatalogSearch.DcssPack, "feature").Slugs,
+            CatalogSearch.IconsFor("dragon", CatalogSearch.DcssPack, "feature").Slugs);
+    }
+
+    [Theory]
+    [InlineData("amulet: gem pendant", "lorc/gem-pendant")]
+    [InlineData("potion: standing potion", "lorc/standing-potion")]
+    [InlineData("book: spell book", "delapouite/spell-book")]
+    public void ItemKindFilteringPreservesSpecificShapes(string query, string expected)
+    {
+        Assert.Equal(expected, CatalogSearch.IconsFor(query, CatalogSearch.GameIconsPack).Slugs[0]);
+    }
+
+    [Fact]
+    public void ItemKindIsPreservedWhenApplyingARealCatalogReference()
+    {
+        string previous = CatalogSearch.IconPack;
+        try
+        {
+            CatalogSearch.IconPack = CatalogSearch.GameIconsPack;
+            var storage = new Storage();
+            storage.ApplyUpdateWorldState(CatalogReferences.Resolve("""{"hero":{"inventory":[{"name":"Red tonic","icon":"potion: red","quantity":2}]}}"""));
+            var item = Assert.Single(storage.WorldState.Hero!.Inventory);
+            Assert.Contains("potion", item.Image);
+            Assert.Equal(2, item.Quantity);
+            Assert.NotNull(SvgToBrailleConverter.Convert(item.Image!, "", applyPackMapping: false));
+        }
+        finally { CatalogSearch.IconPack = previous; }
+    }
+
     private static List<string> Find(string term) => CatalogSearch.Icons(term, pack: CatalogSearch.DcssPack);
 
     [Fact]

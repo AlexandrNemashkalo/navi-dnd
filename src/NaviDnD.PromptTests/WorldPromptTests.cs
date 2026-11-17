@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 namespace NaviDnD.PromptTests;
 
 // World map with a real AI (expensive - run consciously, like other tests of the project): StartNewGame on a
-// fresh world (world/kingdom concept, starting place through add_place, location by world cell), travel
+// test world (world/kingdom concept, starting place through add_place, location by world cell), travel
 // (TravelService + GameAiClient.Travel), question about ruins (add_place during the game). Worlds - in
 // NaviDnD.PromptTests/Storage/Worlds (AppConfig.ProjectRoot of this project), the combat ones are not touched.
 public class WorldPromptTests(ITestOutputHelper output)
@@ -36,8 +36,10 @@ public class WorldPromptTests(ITestOutputHelper output)
     }
 
     // New Game GM, step “World” → “IMAGE”: concept of a new world (name, essence, all kingdoms with capitals).
-    [Fact]
-    public async Task CreateWorld_GivesConceptForEveryKingdom()
+    [Theory]
+    [InlineData("суровый север, викинги и древние руины на юге")]
+    [InlineData("Индустриальный прибрежный регион без магии: пароходы, железные дороги, портовые города. Приключение об исследовании, торговле и местных тайнах; без конца света и обязательного злодея. Политические регионы могут быть республиками или союзами городов.")]
+    public async Task CreateWorld_GivesConceptForEveryKingdom(string settingWish)
     {
         string prompts = CopyPrompts();
         try
@@ -46,13 +48,19 @@ public class WorldPromptTests(ITestOutputHelper output)
             var storage = new Storage();
             var config = PromptScenario.TestConfig();
             var client = new GameAiClient(storage.WorldState, storage, new SwitchableAiProvider(config, new AiLogger()), config);
-            bool ok = await client.CreateWorld(world, "суровый север, викинги и древние руины на юге");
+            bool ok = await client.CreateWorld(world, settingWish);
             var chron = world.Chronicle;
             output.WriteLine($"{chron.Name}: {chron.Description} | {chron.DmNotes}");
             foreach (var k in chron.Kingdoms)
                 output.WriteLine($"  K{k.Id} {k.Name} (столица {chron.Places.FirstOrDefault(p => p.Slot == world.Kingdoms[k.Id].Capital)?.Name}): {k.Description} | {k.DmNotes}");
             Assert.True(ok, "CreateWorld не применился");
             Assert.False(string.IsNullOrEmpty(chron.Name));
+            Assert.False(string.IsNullOrWhiteSpace(chron.DmNotes));
+            Assert.All(chron.Kingdoms, k =>
+            {
+                Assert.False(string.IsNullOrWhiteSpace(k.Description));
+                Assert.False(string.IsNullOrWhiteSpace(k.DmNotes));
+            });
             Assert.Equal(world.Kingdoms.Count, chron.Kingdoms.Count);
             Assert.Equal(world.Kingdoms.Count, chron.Places.Count(p => p.Type == WorldPlaceTypes.Capital));
         }
@@ -145,8 +153,9 @@ public class WorldPromptTests(ITestOutputHelper output)
         // 3. Rumor about a place - the GM adds it to the map.
         int placesBefore = geo.Chronicle.Places.Count;
         var knownBefore = (ws.World?.Known ?? []).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        string familiarPlaces = string.Join(", ", GameWorld.ForDisplay(ws).Places.Select(p => p.Name));
         historyBefore = ws.History!.Count;
-        await client.SendAction("Спрашиваю у первого встречного, где ближайшая деревня или городок, куда он сам держит путь, — как она называется и далеко ли.");
+        await client.SendAction($"Спрашиваю у первого встречного о небольшой деревне или городке, которого я ещё не знаю. Мне уже известны: {familiarPlaces}. Хочу узнать название другого места, что там интересного и как туда добраться; никаких поручений пока не принимаю.");
         foreach (var m in ws.History.Skip(historyBefore)) output.WriteLine($"  > {m.Author}: {m.Text}");
         foreach (var p in geo.Chronicle.Places.Skip(placesBefore)) output.WriteLine($"  новое место {p.Name} ({p.Type}) [{p.X},{p.Y}] trail={p.Trail?.Count / 2}: {p.Description} | {p.DmNotes}");
         output.WriteLine($"Знает: {string.Join(", ", ws.World!.Known)}");

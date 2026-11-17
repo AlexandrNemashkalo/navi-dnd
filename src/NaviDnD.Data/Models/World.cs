@@ -64,6 +64,8 @@ public static class WorldSizes
 public class WorldPlace
 {
     public string Name { get; set; } = "";
+    [System.Text.Json.Serialization.JsonIgnore]
+    public List<string> FormerNames { get; set; } = [];
     public string Type { get; set; } = WorldPlaceTypes.Village;
     public int X { get; set; }
     public int Y { get; set; }
@@ -134,6 +136,8 @@ public class GameKingdom
 public class GamePlace
 {
     public string Name { get; set; } = "";
+    // Engine-maintained exact aliases preserve links from other heroes and old exploration records.
+    public List<string> FormerNames { get; set; } = [];
     public string Type { get; set; } = "";
     public int X { get; set; }
     public int Y { get; set; }

@@ -488,6 +488,21 @@
       }
     },
     {
+      "id": "0e8c9a19a5c835f1d2aed3c94fa3d001788eeb6367c1ba550bd4a1dc1a2fc5ad",
+      "path": "Runtime/Images/0e8c9a19a5c835f1d2aed3c94fa3d001788eeb6367c1ba550bd4a1dc1a2fc5ad.png",
+      "sha256": "0e8c9a19a5c835f1d2aed3c94fa3d001788eeb6367c1ba550bd4a1dc1a2fc5ad",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:plank-floor-shaded-v1",
+      "description": "A top-down square swatch of installed wooden plank flooring: five wide parallel warm oak boards joined edge to edge, staggered short end joints, subtle dark grain and a few small nailheads. This is a FLAT WALKABLE FLOOR SURFACE, not a stack of lumber, not loose boards, not a table. Square block fills 28x28 logical pixels, dark perimeter outline and four logical pixel transparent outside margin; do not tilt the square.",
+      "provenance": {
+        "member": "plank-floor-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/plank-floor-shaded-v1/original.png"
+      }
+    },
+    {
       "id": "0ec18de67f14247ccc04f1e9519ecace793c35bbd7ea14bb903bede0a10e42c1",
       "path": "Runtime/Images/0ec18de67f14247ccc04f1e9519ecace793c35bbd7ea14bb903bede0a10e42c1.png",
       "sha256": "0ec18de67f14247ccc04f1e9519ecace793c35bbd7ea14bb903bede0a10e42c1",
@@ -946,6 +961,25 @@
         "sourceKind": "ai_generated",
         "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
         "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-castle-v1/original.png"
+      }
+    },
+    {
+      "id": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+      "path": "Runtime/Images/1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09.png",
+      "sha256": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "prepared-items-native-32-32-treasure:icon-037",
+      "description": "Isolated treasure/container icon: stack of gold coins.",
+      "provenance": {
+        "member": "32-treasure-37.png",
+        "collection": "items-native-32",
+        "stagedPath": "artifacts/items-native-32/png/32-treasure/32-treasure-37.png",
+        "sourceUrl": "https://img.craftpix.net/2021/04/Chest-and-Treasure-Pixel-Art-Game-Icons2.jpg",
+        "page": "https://craftpix.net/product/chest-and-treasure-pixel-art-game-icons/",
+        "sourceKind": "preview_extraction",
+        "licenseStatus": "not_recorded_in_staged_collection",
+        "originalPaletteRecovered": false
       }
     },
     {
@@ -1450,6 +1484,21 @@
       }
     },
     {
+      "id": "2deffd0cfeaac62ddae0df05441e7608b856b5c3785797c773a360ba628dc9f7",
+      "path": "Runtime/Images/2deffd0cfeaac62ddae0df05441e7608b856b5c3785797c773a360ba628dc9f7.png",
+      "sha256": "2deffd0cfeaac62ddae0df05441e7608b856b5c3785797c773a360ba628dc9f7",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:cabinet-shaded-v1",
+      "description": "A complete sturdy medieval oak storage cupboard with two closed paneled wooden doors, two small iron handles, short feet, carved top cornice and a visible narrow right side. Three-quarter front view. Strong wood-grain pixel texture, bevel highlights, darker recesses, a substantial shaded object. No books, no contents, no room.",
+      "provenance": {
+        "member": "cabinet-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/cabinet-shaded-v1/original.png"
+      }
+    },
+    {
       "id": "2e703bd5c934ac2fdcdbe0b7926ff9a73582de1c700df6fa9d51b45e19a5d638",
       "path": "Runtime/Images/2e703bd5c934ac2fdcdbe0b7926ff9a73582de1c700df6fa9d51b45e19a5d638.png",
       "sha256": "2e703bd5c934ac2fdcdbe0b7926ff9a73582de1c700df6fa9d51b45e19a5d638",
@@ -1492,6 +1541,24 @@
         "archiveSha256": "a5babbab314f9c881c7f9129156cd27731940eb089e1cf5ab84a1814b63b9e6c",
         "member": "PNG/Transperent/Icon22.png",
         "licenseRef": "imported/craftpix-737210/source/License.txt"
+      }
+    },
+    {
+      "id": "2f1990285574dd49d614c2ef04d89782c83c759245a21c92e01a83b51367a2a7",
+      "path": "Runtime/Images/2f1990285574dd49d614c2ef04d89782c83c759245a21c92e01a83b51367a2a7.png",
+      "sha256": "2f1990285574dd49d614c2ef04d89782c83c759245a21c92e01a83b51367a2a7",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "wizard-furniture-32:round_table_dark",
+      "description": "Complete isolated round table dark; transparent background, no UI frame.",
+      "provenance": {
+        "member": "PNG/32x32/tables/round_table_dark.png",
+        "sourceKind": "original_png",
+        "sourceUrl": "https://reodesuxz.itch.io/free-pixel-wizard-tower-furniture-icons-32x32",
+        "license": "Custom: use in games permitted; no standalone redistribution",
+        "author": "reodesuxz",
+        "commit": null,
+        "licenseFile": "Sources/wizard-furniture-32/LICENSE.txt"
       }
     },
     {
@@ -2170,6 +2237,21 @@
       }
     },
     {
+      "id": "42fe5e050daa3e7e09a03b81bfd8b6698f3e43be601c7e7649211b0de856678f",
+      "path": "Runtime/Images/42fe5e050daa3e7e09a03b81bfd8b6698f3e43be601c7e7649211b0de856678f.png",
+      "sha256": "42fe5e050daa3e7e09a03b81bfd8b6698f3e43be601c7e7649211b0de856678f",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:incense-sticks-v4",
+      "description": "A compact diagonal bundle of warm brown incense sticks bound with red thread, one glowing ember and a clear pale smoke curl; transparent background.",
+      "provenance": {
+        "member": "incense-sticks-v4.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/incense-sticks-v4/original.png"
+      }
+    },
+    {
       "id": "430ec28c6219976662242fbd736c3bacca40b3629c66f6351754b92cf075df89",
       "path": "Runtime/Images/430ec28c6219976662242fbd736c3bacca40b3629c66f6351754b92cf075df89.png",
       "sha256": "430ec28c6219976662242fbd736c3bacca40b3629c66f6351754b92cf075df89",
@@ -2255,7 +2337,7 @@
       "width": 32,
       "height": 32,
       "sourceAssetId": "prepared-items-native-32-23-farming:icon-018",
-      "description": "Isolated farming/tool icon: small brown barrel with side handles.",
+      "description": "Small horizontal ribbed brown object with narrow side projections; not a complete upright barrel.",
       "provenance": {
         "member": "23-farming-18.png",
         "collection": "items-native-32",
@@ -2833,6 +2915,21 @@
       }
     },
     {
+      "id": "51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c",
+      "path": "Runtime/Images/51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c.png",
+      "sha256": "51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:hearth-shaded-v1",
+      "description": "A small complete medieval stone fireplace/hearth as one freestanding architectural sprite, thick grey stone jambs and lintel surround a dark opening with two logs and a small warm orange fire. Three-quarter front view with a little right-side stone depth, visible stone blocks, strong highlights and deep cavity shading. No room, no wall beyond the hearth, no cooking pot.",
+      "provenance": {
+        "member": "hearth-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/hearth-shaded-v1/original.png"
+      }
+    },
+    {
       "id": "51a6548a4a59e0ddc8506bd20691277cfde6872598cc7c9cbec446994b7b2db2",
       "path": "Runtime/Images/51a6548a4a59e0ddc8506bd20691277cfde6872598cc7c9cbec446994b7b2db2.png",
       "sha256": "51a6548a4a59e0ddc8506bd20691277cfde6872598cc7c9cbec446994b7b2db2",
@@ -3093,6 +3190,21 @@
       }
     },
     {
+      "id": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
+      "path": "Runtime/Images/579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8.png",
+      "sha256": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:bench-shaded-v1",
+      "description": "A complete low backless oak bench with thick beveled plank seat, two sturdy trestle supports and a horizontal stretcher; detailed wood grain, dark outline and warm shaded volume, transparent background.",
+      "provenance": {
+        "member": "bench-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/bench-shaded-v1/original.png"
+      }
+    },
+    {
       "id": "57bf5e863f53854462e714877ae491c3edd947d95d6f53f2a27455034d811390",
       "path": "Runtime/Images/57bf5e863f53854462e714877ae491c3edd947d95d6f53f2a27455034d811390.png",
       "sha256": "57bf5e863f53854462e714877ae491c3edd947d95d6f53f2a27455034d811390",
@@ -3182,6 +3294,24 @@
         "sourceKind": "preview_extraction",
         "licenseStatus": "not_recorded_in_staged_collection",
         "originalPaletteRecovered": false
+      }
+    },
+    {
+      "id": "5bbe1a995638204199aee8d368c2e8fd17caa3327391f07a78f31c8cc1af72a3",
+      "path": "Runtime/Images/5bbe1a995638204199aee8d368c2e8fd17caa3327391f07a78f31c8cc1af72a3.png",
+      "sha256": "5bbe1a995638204199aee8d368c2e8fd17caa3327391f07a78f31c8cc1af72a3",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "wizard-furniture-32:desk_dark",
+      "description": "Complete isolated desk dark; transparent background, no UI frame.",
+      "provenance": {
+        "member": "PNG/32x32/study/desk_dark.png",
+        "sourceKind": "original_png",
+        "sourceUrl": "https://reodesuxz.itch.io/free-pixel-wizard-tower-furniture-icons-32x32",
+        "license": "Custom: use in games permitted; no standalone redistribution",
+        "author": "reodesuxz",
+        "commit": null,
+        "licenseFile": "Sources/wizard-furniture-32/LICENSE.txt"
       }
     },
     {
@@ -3689,6 +3819,21 @@
       "provenance": {}
     },
     {
+      "id": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
+      "path": "Runtime/Images/6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926.png",
+      "sha256": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:table-shaded-v1",
+      "description": "A complete rustic rectangular oak table, three-quarter view from slightly above: thick plank tabletop with clear board seams, four stout legs with the rear legs partly visible, cross support underneath. Dark outlines and detailed wood-grain shading, lighter tabletop and dark underside. No cloth, food, items, chairs, room or floor.",
+      "provenance": {
+        "member": "table-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/table-shaded-v1/original.png"
+      }
+    },
+    {
       "id": "6bb34c34e235dbd56f8b9a76ae1a86cff13806ac16ce0f1451b427679b836084",
       "path": "Runtime/Images/6bb34c34e235dbd56f8b9a76ae1a86cff13806ac16ce0f1451b427679b836084.png",
       "sha256": "6bb34c34e235dbd56f8b9a76ae1a86cff13806ac16ce0f1451b427679b836084",
@@ -4113,6 +4258,21 @@
         "author": "Craftpix",
         "commit": null,
         "licenseFile": null
+      }
+    },
+    {
+      "id": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+      "path": "Runtime/Images/7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644.png",
+      "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:forest-thicket-v1",
+      "description": "Dense overlapping green foliage, three gnarled trunks and tangled roots blocking passage.",
+      "provenance": {
+        "member": "forest-thicket-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/forest-thicket-v1/original.png"
       }
     },
     {
@@ -5117,6 +5277,24 @@
       }
     },
     {
+      "id": "950ffa22ddba117970fdc0f4ee4e4ca4876d1088ffbdae7fa9293409f2a78e6a",
+      "path": "Runtime/Images/950ffa22ddba117970fdc0f4ee4e4ca4876d1088ffbdae7fa9293409f2a78e6a.png",
+      "sha256": "950ffa22ddba117970fdc0f4ee4e4ca4876d1088ffbdae7fa9293409f2a78e6a",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "wizard-furniture-32:bench_dark",
+      "description": "Complete isolated bench dark; transparent background, no UI frame.",
+      "provenance": {
+        "member": "PNG/32x32/seating/bench_dark.png",
+        "sourceKind": "original_png",
+        "sourceUrl": "https://reodesuxz.itch.io/free-pixel-wizard-tower-furniture-icons-32x32",
+        "license": "Custom: use in games permitted; no standalone redistribution",
+        "author": "reodesuxz",
+        "commit": null,
+        "licenseFile": "Sources/wizard-furniture-32/LICENSE.txt"
+      }
+    },
+    {
       "id": "962388262ab36ccba9896c319a6c3d2f26bf8c70ada872996280a11091acbbc1",
       "path": "Runtime/Images/962388262ab36ccba9896c319a6c3d2f26bf8c70ada872996280a11091acbbc1.png",
       "sha256": "962388262ab36ccba9896c319a6c3d2f26bf8c70ada872996280a11091acbbc1",
@@ -5337,6 +5515,21 @@
         "sourceKind": "ai_generated",
         "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
         "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-ape-v1/original.png"
+      }
+    },
+    {
+      "id": "9aa2a0791f3dc1047b3f87237ff50d5ed1ea101c4f6a2a6e58ee9d7a8259ced6",
+      "path": "Runtime/Images/9aa2a0791f3dc1047b3f87237ff50d5ed1ea101c4f6a2a6e58ee9d7a8259ced6.png",
+      "sha256": "9aa2a0791f3dc1047b3f87237ff50d5ed1ea101c4f6a2a6e58ee9d7a8259ced6",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:cart-axle-shaded-v1",
+      "description": "A single replacement axle for a wooden medieval cart, a stout horizontal oak shaft slightly diagonal from lower left to upper right, symmetric iron bearing collars and short metal spindle ends on BOTH ends. Thick squared central timber clearly connects the ends. No wheels, no cart, no flame, no torch, no handle, no spear tip. Make it substantial and recognizable as a mechanical part.",
+      "provenance": {
+        "member": "cart-axle-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/cart-axle-shaded-v1/original.png"
       }
     },
     {
@@ -5649,6 +5842,24 @@
       "provenance": {}
     },
     {
+      "id": "a429cecf5e0df7e323477c2fb5855e8c777c3f94f6d12fc014b498eb865e70b0",
+      "path": "Runtime/Images/a429cecf5e0df7e323477c2fb5855e8c777c3f94f6d12fc014b498eb865e70b0.png",
+      "sha256": "a429cecf5e0df7e323477c2fb5855e8c777c3f94f6d12fc014b498eb865e70b0",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "wizard-furniture-32:long_table_oak",
+      "description": "Complete isolated long table oak; transparent background, no UI frame.",
+      "provenance": {
+        "member": "PNG/32x32/tables/long_table_oak.png",
+        "sourceKind": "original_png",
+        "sourceUrl": "https://reodesuxz.itch.io/free-pixel-wizard-tower-furniture-icons-32x32",
+        "license": "Custom: use in games permitted; no standalone redistribution",
+        "author": "reodesuxz",
+        "commit": null,
+        "licenseFile": "Sources/wizard-furniture-32/LICENSE.txt"
+      }
+    },
+    {
       "id": "a460cb1f9d355a91869f12cf87c867a05bef2e312aae13cb610dcb0715fbbf4b",
       "path": "Runtime/Images/a460cb1f9d355a91869f12cf87c867a05bef2e312aae13cb610dcb0715fbbf4b.png",
       "sha256": "a460cb1f9d355a91869f12cf87c867a05bef2e312aae13cb610dcb0715fbbf4b",
@@ -5853,6 +6064,25 @@
       }
     },
     {
+      "id": "ab77232d02bd4695b28faa5ea65881846d04f64abd0f56e3185409913a983fd1",
+      "path": "Runtime/Images/ab77232d02bd4695b28faa5ea65881846d04f64abd0f56e3185409913a983fd1.png",
+      "sha256": "ab77232d02bd4695b28faa5ea65881846d04f64abd0f56e3185409913a983fd1",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "prepared-items-native-32-batch2-05-cuirasses:icon-020",
+      "description": "Isolated torso garment/armour: plain red-gold robe.",
+      "provenance": {
+        "member": "05-cuirasses-20.png",
+        "collection": "items-native-32-batch2",
+        "stagedPath": "artifacts/items-native-32-batch2/png/05-cuirasses/05-cuirasses-20.png",
+        "sourceUrl": "https://img.craftpix.net/2021/08/Cuirass-RPG-Pixel-Art-Icons2.jpg",
+        "page": "https://craftpix.net/product/cuirass-rpg-pixel-art-icons/",
+        "sourceKind": "preview_extraction",
+        "licenseStatus": "not_recorded_in_staged_collection",
+        "originalPaletteRecovered": false
+      }
+    },
+    {
       "id": "ab88ec7c3922393d45062c256ac2c9265f06f867cf770521ff26e0f57c9080f3",
       "path": "Runtime/Images/ab88ec7c3922393d45062c256ac2c9265f06f867cf770521ff26e0f57c9080f3.png",
       "sha256": "ab88ec7c3922393d45062c256ac2c9265f06f867cf770521ff26e0f57c9080f3",
@@ -5912,6 +6142,21 @@
         "author": "Craftpix",
         "commit": null,
         "licenseFile": null
+      }
+    },
+    {
+      "id": "acbbca525cde1dc83f70a8248840f4995ff450271d2c3136b4efeeca1c5308f1",
+      "path": "Runtime/Images/acbbca525cde1dc83f70a8248840f4995ff450271d2c3136b4efeeca1c5308f1.png",
+      "sha256": "acbbca525cde1dc83f70a8248840f4995ff450271d2c3136b4efeeca1c5308f1",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:bar-counter-shaded-v1",
+      "description": "A substantial closed oak tavern serving counter with a thick beveled countertop, three recessed front panels, carved posts and visible shaded right side; dark outline and detailed wood grain, transparent background.",
+      "provenance": {
+        "member": "bar-counter-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/bar-counter-shaded-v1/original.png"
       }
     },
     {
@@ -6369,6 +6614,21 @@
       }
     },
     {
+      "id": "b945fc8c2ebf42e0072f78918c94d2b71c7a1d34aeeb52f8881ea56ffb691fc8",
+      "path": "Runtime/Images/b945fc8c2ebf42e0072f78918c94d2b71c7a1d34aeeb52f8881ea56ffb691fc8.png",
+      "sha256": "b945fc8c2ebf42e0072f78918c94d2b71c7a1d34aeeb52f8881ea56ffb691fc8",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:window-shaded-v1",
+      "description": "A complete ordinary medieval wooden window frame, seen nearly front-on: thick oak sill and frame, one wooden cross mullion dividing four clearly blue-grey GLASS panes with small sky highlights. The glass is visible and opaque blue-grey, only outside the wooden outline is transparent. It is not iron bars, not a prison grate, not a door. No surrounding wall.",
+      "provenance": {
+        "member": "window-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/window-shaded-v1/original.png"
+      }
+    },
+    {
       "id": "b94b11688ce0b7edb85f516473fa9f0f7df259555166a87588f92948bfa3ba01",
       "path": "Runtime/Images/b94b11688ce0b7edb85f516473fa9f0f7df259555166a87588f92948bfa3ba01.png",
       "sha256": "b94b11688ce0b7edb85f516473fa9f0f7df259555166a87588f92948bfa3ba01",
@@ -6591,6 +6851,21 @@
       "sourceAssetId": "dcss/item/weapon/greatsword_1_new",
       "description": "Isolated weapon: long silver sword with gold guard.",
       "provenance": {}
+    },
+    {
+      "id": "be1e4c819f901fcb5d7b11d57d7693755c31c81fb6768d31d021f0d8af2552a3",
+      "path": "Runtime/Images/be1e4c819f901fcb5d7b11d57d7693755c31c81fb6768d31d021f0d8af2552a3.png",
+      "sha256": "be1e4c819f901fcb5d7b11d57d7693755c31c81fb6768d31d021f0d8af2552a3",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:tall-grass-shaded-v1",
+      "description": "A lush tall meadow grass clump with long curved sage and olive blades, soft seed stems, dark layered foliage and pale warm highlights; transparent background.",
+      "provenance": {
+        "member": "tall-grass-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/tall-grass-shaded-v1/original.png"
+      }
     },
     {
       "id": "bee0acf5e342362afc2bb3b9fb875e1448797c9dae958847cfb768ce3a196c6f",
@@ -7484,6 +7759,24 @@
       }
     },
     {
+      "id": "d77b1c7ae4b6e091fee82ae17ba9dbfef5c6b878d6e3a3992c0a67f7bd8450ba",
+      "path": "Runtime/Images/d77b1c7ae4b6e091fee82ae17ba9dbfef5c6b878d6e3a3992c0a67f7bd8450ba.png",
+      "sha256": "d77b1c7ae4b6e091fee82ae17ba9dbfef5c6b878d6e3a3992c0a67f7bd8450ba",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "wizard-furniture-32:desk_ebony",
+      "description": "Complete isolated desk ebony; transparent background, no UI frame.",
+      "provenance": {
+        "member": "PNG/32x32/study/desk_ebony.png",
+        "sourceKind": "original_png",
+        "sourceUrl": "https://reodesuxz.itch.io/free-pixel-wizard-tower-furniture-icons-32x32",
+        "license": "Custom: use in games permitted; no standalone redistribution",
+        "author": "reodesuxz",
+        "commit": null,
+        "licenseFile": "Sources/wizard-furniture-32/LICENSE.txt"
+      }
+    },
+    {
       "id": "d84a83937e1cc4d98118ba062e59073375e450ff4de0b57c3608f5851406fcff",
       "path": "Runtime/Images/d84a83937e1cc4d98118ba062e59073375e450ff4de0b57c3608f5851406fcff.png",
       "sha256": "d84a83937e1cc4d98118ba062e59073375e450ff4de0b57c3608f5851406fcff",
@@ -8232,6 +8525,24 @@
       }
     },
     {
+      "id": "eb4ed2a37eaffd9c770d27aa336e1bd571bc18e42e481fa4e1bb69bd5e46ee7b",
+      "path": "Runtime/Images/eb4ed2a37eaffd9c770d27aa336e1bd571bc18e42e481fa4e1bb69bd5e46ee7b.png",
+      "sha256": "eb4ed2a37eaffd9c770d27aa336e1bd571bc18e42e481fa4e1bb69bd5e46ee7b",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "wizard-furniture-32:long_table_dark",
+      "description": "Complete isolated long table dark; transparent background, no UI frame.",
+      "provenance": {
+        "member": "PNG/32x32/tables/long_table_dark.png",
+        "sourceKind": "original_png",
+        "sourceUrl": "https://reodesuxz.itch.io/free-pixel-wizard-tower-furniture-icons-32x32",
+        "license": "Custom: use in games permitted; no standalone redistribution",
+        "author": "reodesuxz",
+        "commit": null,
+        "licenseFile": "Sources/wizard-furniture-32/LICENSE.txt"
+      }
+    },
+    {
       "id": "ebaa54029afe1355f46f690da0ca468f9fe4f5f9bd6a7f75bcd705daeb5e61d0",
       "path": "Runtime/Images/ebaa54029afe1355f46f690da0ca468f9fe4f5f9bd6a7f75bcd705daeb5e61d0.png",
       "sha256": "ebaa54029afe1355f46f690da0ca468f9fe4f5f9bd6a7f75bcd705daeb5e61d0",
@@ -8274,6 +8585,24 @@
         "archiveSha256": "a5babbab314f9c881c7f9129156cd27731940eb089e1cf5ab84a1814b63b9e6c",
         "member": "PNG/Transperent/Icon12.png",
         "licenseRef": "imported/craftpix-737210/source/License.txt"
+      }
+    },
+    {
+      "id": "ec16b9fa9b0e63bc1dc0fb8c1528efc24cf105b5caafd0ccd9a88a347d8c2f00",
+      "path": "Runtime/Images/ec16b9fa9b0e63bc1dc0fb8c1528efc24cf105b5caafd0ccd9a88a347d8c2f00.png",
+      "sha256": "ec16b9fa9b0e63bc1dc0fb8c1528efc24cf105b5caafd0ccd9a88a347d8c2f00",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "wizard-furniture-32:wardrobe_dark",
+      "description": "Complete isolated wardrobe dark; transparent background, no UI frame.",
+      "provenance": {
+        "member": "PNG/32x32/storage/wardrobe_dark.png",
+        "sourceKind": "original_png",
+        "sourceUrl": "https://reodesuxz.itch.io/free-pixel-wizard-tower-furniture-icons-32x32",
+        "license": "Custom: use in games permitted; no standalone redistribution",
+        "author": "reodesuxz",
+        "commit": null,
+        "licenseFile": "Sources/wizard-furniture-32/LICENSE.txt"
       }
     },
     {
@@ -8630,6 +8959,21 @@
       "provenance": {}
     },
     {
+      "id": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
+      "path": "Runtime/Images/f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c.png",
+      "sha256": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:barrel-shaded-v1",
+      "description": "A complete upright wooden storage barrel, three-quarter view from slightly above with visible elliptical wooden lid, bulging vertical oak staves and two dark iron hoops. Strong dark outline, warm golden-brown illuminated left side, deep shaded right side, clear curved volume. No spout, handle, horn, cup, contents or surrounding floor.",
+      "provenance": {
+        "member": "barrel-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/barrel-shaded-v1/original.png"
+      }
+    },
+    {
       "id": "fa2f7d99a0691830d03241ca1f538fb6b3b2f56c065edf7b7558938da8653657",
       "path": "Runtime/Images/fa2f7d99a0691830d03241ca1f538fb6b3b2f56c065edf7b7558938da8653657.png",
       "sha256": "fa2f7d99a0691830d03241ca1f538fb6b3b2f56c065edf7b7558938da8653657",
@@ -8774,6 +9118,24 @@
         "sourceKind": "ai_generated",
         "origin": "Built-in image_gen; final 32x32 silhouette and identifying features visually reviewed.",
         "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/batch100-climber-s-kit-v1/original.png"
+      }
+    },
+    {
+      "id": "fd85b2b8bceca60b77a89c51402d9fa59abac788c87edbb699d1306c7a933335",
+      "path": "Runtime/Images/fd85b2b8bceca60b77a89c51402d9fa59abac788c87edbb699d1306c7a933335.png",
+      "sha256": "fd85b2b8bceca60b77a89c51402d9fa59abac788c87edbb699d1306c7a933335",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "wizard-furniture-32:wardrobe_ebony",
+      "description": "Complete isolated wardrobe ebony; transparent background, no UI frame.",
+      "provenance": {
+        "member": "PNG/32x32/storage/wardrobe_ebony.png",
+        "sourceKind": "original_png",
+        "sourceUrl": "https://reodesuxz.itch.io/free-pixel-wizard-tower-furniture-icons-32x32",
+        "license": "Custom: use in games permitted; no standalone redistribution",
+        "author": "reodesuxz",
+        "commit": null,
+        "licenseFile": "Sources/wizard-furniture-32/LICENSE.txt"
       }
     },
     {
@@ -19687,10 +20049,11 @@
       "key": "engine:place:capital",
       "names": [
         "capital",
-        "столица"
+        "Столица"
       ],
       "categories": [
         "feature",
+        "place",
         "place_view"
       ],
       "usage": "place_view",
@@ -19729,10 +20092,11 @@
       "key": "engine:place:village",
       "names": [
         "village",
-        "деревня"
+        "Деревня"
       ],
       "categories": [
         "feature",
+        "place",
         "place_view"
       ],
       "usage": "place_view",
@@ -20051,6 +20415,9 @@
       "key": "engine:furniture:counter",
       "names": [
         "counter",
+        "Bar counter",
+        "Counter",
+        "Барная стойка",
         "Стойка"
       ],
       "categories": [
@@ -20058,7 +20425,7 @@
         "furniture"
       ],
       "usage": "prop",
-      "imageId": "02e4c32077cf6606447e72550b904a681160354247e3379f72bdb5172c1e127a",
+      "imageId": "acbbca525cde1dc83f70a8248840f4995ff450271d2c3136b4efeeca1c5308f1",
       "match": "visual_representation"
     },
     {
@@ -20079,6 +20446,7 @@
       "key": "engine:furniture:table",
       "names": [
         "table",
+        "Table",
         "Стол"
       ],
       "categories": [
@@ -20086,7 +20454,7 @@
         "furniture"
       ],
       "usage": "prop",
-      "imageId": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+      "imageId": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
       "match": "visual_representation"
     },
     {
@@ -20107,6 +20475,7 @@
       "key": "engine:furniture:cabinet",
       "names": [
         "cabinet",
+        "Cabinet",
         "Шкаф"
       ],
       "categories": [
@@ -20114,35 +20483,42 @@
         "furniture"
       ],
       "usage": "prop",
-      "imageId": "66cfd1d77438cc031d4aaa65492b041497179042844c6abf57ef800b4fdea2d1",
+      "imageId": "2deffd0cfeaac62ddae0df05441e7608b856b5c3785797c773a360ba628dc9f7",
       "match": "visual_representation"
     },
     {
       "key": "engine:furniture:hearth",
       "names": [
         "hearth",
-        "Очаг"
+        "Hearth",
+        "Очаг",
+        "Fireplace",
+        "Камин"
       ],
       "categories": [
         "feature",
         "furniture"
       ],
       "usage": "prop",
-      "imageId": "a71f40526c2ed948bcbc873ccdb2987730e117cbd3398315cb5b584ce4fbcc3d",
+      "imageId": "51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c",
       "match": "visual_representation"
     },
     {
       "key": "engine:furniture:barrels",
       "names": [
         "barrels",
-        "Бочки"
+        "Barrels",
+        "Бочки",
+        "Barrel",
+        "barrel",
+        "Бочка"
       ],
       "categories": [
-        "furniture",
-        "item"
+        "feature",
+        "furniture"
       ],
-      "usage": "item",
-      "imageId": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
+      "usage": "prop",
+      "imageId": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
       "match": "visual_representation"
     },
     {
@@ -20163,14 +20539,18 @@
       "key": "engine:furniture:bench",
       "names": [
         "bench",
-        "Скамья"
+        "Bench",
+        "Wooden bench",
+        "Скамья",
+        "Скамейка",
+        "Деревянная скамья"
       ],
       "categories": [
         "feature",
         "furniture"
       ],
       "usage": "prop",
-      "imageId": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
+      "imageId": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
       "match": "visual_representation"
     },
     {
@@ -20185,6 +20565,20 @@
       ],
       "usage": "terrain_tile",
       "imageId": "4abe6001cd9d13f96895c65d49a31b76603ead7211e8e6ded9d3334c284d2447",
+      "match": "visual_representation"
+    },
+    {
+      "key": "engine:terrain:Tall grass",
+      "names": [
+        "Tall grass",
+        "Высокая трава"
+      ],
+      "categories": [
+        "feature",
+        "terrain"
+      ],
+      "usage": "prop",
+      "imageId": "be1e4c819f901fcb5d7b11d57d7693755c31c81fb6768d31d021f0d8af2552a3",
       "match": "visual_representation"
     },
     {
@@ -20211,8 +20605,8 @@
         "feature",
         "terrain"
       ],
-      "usage": "prop",
-      "imageId": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
+      "usage": "place_view",
+      "imageId": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
       "match": "visual_representation"
     },
     {
@@ -20384,6 +20778,22 @@
       "match": "visual_representation"
     },
     {
+      "key": "engine:terrain:Plank floor",
+      "names": [
+        "Plank floor",
+        "Дощатый пол",
+        "Wooden floor",
+        "Деревянный пол"
+      ],
+      "categories": [
+        "feature",
+        "terrain"
+      ],
+      "usage": "prop",
+      "imageId": "0e8c9a19a5c835f1d2aed3c94fa3d001788eeb6367c1ba550bd4a1dc1a2fc5ad",
+      "match": "visual_representation"
+    },
+    {
       "key": "engine:terrain:Table",
       "names": [
         "Table",
@@ -20394,7 +20804,7 @@
         "terrain"
       ],
       "usage": "prop",
-      "imageId": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+      "imageId": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
       "match": "visual_representation"
     },
     {
@@ -20408,7 +20818,7 @@
         "terrain"
       ],
       "usage": "prop",
-      "imageId": "66cfd1d77438cc031d4aaa65492b041497179042844c6abf57ef800b4fdea2d1",
+      "imageId": "2deffd0cfeaac62ddae0df05441e7608b856b5c3785797c773a360ba628dc9f7",
       "match": "visual_representation"
     },
     {
@@ -20429,34 +20839,41 @@
       "key": "engine:terrain:Hearth",
       "names": [
         "Hearth",
-        "Очаг"
+        "Очаг",
+        "Fireplace",
+        "Камин"
       ],
       "categories": [
         "feature",
         "terrain"
       ],
       "usage": "prop",
-      "imageId": "a71f40526c2ed948bcbc873ccdb2987730e117cbd3398315cb5b584ce4fbcc3d",
+      "imageId": "51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c",
       "match": "visual_representation"
     },
     {
       "key": "engine:terrain:Barrels",
       "names": [
         "Barrels",
-        "Бочки"
+        "Бочки",
+        "Barrel",
+        "barrel",
+        "Бочка"
       ],
       "categories": [
-        "item",
+        "feature",
         "terrain"
       ],
-      "usage": "item",
-      "imageId": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
+      "usage": "prop",
+      "imageId": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
       "match": "visual_representation"
     },
     {
       "key": "engine:terrain:Counter",
       "names": [
         "Counter",
+        "Bar counter",
+        "Барная стойка",
         "Стойка"
       ],
       "categories": [
@@ -20464,7 +20881,7 @@
         "terrain"
       ],
       "usage": "prop",
-      "imageId": "02e4c32077cf6606447e72550b904a681160354247e3379f72bdb5172c1e127a",
+      "imageId": "acbbca525cde1dc83f70a8248840f4995ff450271d2c3136b4efeeca1c5308f1",
       "match": "visual_representation"
     },
     {
@@ -20499,14 +20916,17 @@
       "key": "engine:terrain:Bench",
       "names": [
         "Bench",
-        "Скамья"
+        "Wooden bench",
+        "Скамья",
+        "Скамейка",
+        "Деревянная скамья"
       ],
       "categories": [
         "feature",
         "terrain"
       ],
       "usage": "prop",
-      "imageId": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
+      "imageId": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
       "match": "visual_representation"
     },
     {
@@ -21045,6 +21465,7 @@
       "key": "curated:prop_priority:table",
       "names": [
         "table",
+        "Table",
         "Стол"
       ],
       "categories": [
@@ -21052,21 +21473,25 @@
         "prop_priority"
       ],
       "usage": "prop",
-      "imageId": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+      "imageId": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
       "match": "visual_representation"
     },
     {
       "key": "curated:prop_priority:barrel",
       "names": [
         "barrel",
+        "Barrels",
+        "Бочки",
+        "Barrel",
+        "barrel",
         "Бочка"
       ],
       "categories": [
-        "item",
+        "feature",
         "prop_priority"
       ],
-      "usage": "item",
-      "imageId": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
+      "usage": "prop",
+      "imageId": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
       "match": "visual_representation"
     },
     {
@@ -21161,7 +21586,157 @@
         "Благовония",
         "Благовонья",
         "Благовоние",
-        "Ароматические палочки"
+        "Ароматические палочки",
+        "Палочка благовоний",
+        "Палочки благовоний",
+        "Stick of incense",
+        "Sticks of incense",
+        "Incense stick"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "42fe5e050daa3e7e09a03b81bfd8b6698f3e43be601c7e7649211b0de856678f",
+      "match": "visual_representation"
+    },
+    {
+      "key": "curated:item:copper-coins",
+      "names": [
+        "Copper piece",
+        "Copper pieces",
+        "Copper coin",
+        "Copper coins",
+        "Медная монета",
+        "Медные монеты"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+      "match": "visual_representation",
+      "palette": "copper"
+    },
+    {
+      "key": "curated:item:silver-coins",
+      "names": [
+        "Silver piece",
+        "Silver pieces",
+        "Silver coin",
+        "Silver coins",
+        "Серебряная монета",
+        "Серебряные монеты"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+      "match": "visual_representation",
+      "palette": "silver"
+    },
+    {
+      "key": "curated:item:electrum-coins",
+      "names": [
+        "Electrum piece",
+        "Electrum pieces",
+        "Electrum coin",
+        "Electrum coins",
+        "Электрумовая монета",
+        "Электрумовые монеты",
+        "Электровая монета",
+        "Электровые монеты"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+      "match": "visual_representation",
+      "palette": "electrum"
+    },
+    {
+      "key": "curated:item:gold-coins",
+      "names": [
+        "Gold piece",
+        "Gold pieces",
+        "Gold coin",
+        "Gold coins",
+        "Золотая монета",
+        "Золотые монеты"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+      "match": "visual_representation"
+    },
+    {
+      "key": "curated:item:platinum-coins",
+      "names": [
+        "Platinum piece",
+        "Platinum pieces",
+        "Platinum coin",
+        "Platinum coins",
+        "Платиновая монета",
+        "Платиновые монеты"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+      "match": "visual_representation",
+      "palette": "platinum"
+    },
+    {
+      "key": "curated:item:coins",
+      "names": [
+        "Coins",
+        "Coin",
+        "Money",
+        "Монеты",
+        "Монета",
+        "Деньги"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+      "match": "visual_representation"
+    },
+    {
+      "key": "curated:item:vestments",
+      "names": [
+        "Vestments",
+        "Vestment",
+        "Priestly vestments",
+        "Облачение",
+        "Одежды священника",
+        "Священническое облачение"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "ab77232d02bd4695b28faa5ea65881846d04f64abd0f56e3185409913a983fd1",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:item:incense-sticks-v3",
+      "names": [
+        "incense-sticks-v3"
       ],
       "categories": [
         "equipment",
@@ -21170,20 +21745,263 @@
       "usage": "item",
       "imageId": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
       "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:round_table_oak",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-round_table_oak"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:round_table_dark",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-round_table_dark"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "2f1990285574dd49d614c2ef04d89782c83c759245a21c92e01a83b51367a2a7",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:long_table_oak",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-long_table_oak"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "a429cecf5e0df7e323477c2fb5855e8c777c3f94f6d12fc014b498eb865e70b0",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:long_table_dark",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-long_table_dark"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "eb4ed2a37eaffd9c770d27aa336e1bd571bc18e42e481fa4e1bb69bd5e46ee7b",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:wardrobe_oak",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-wardrobe_oak"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "66cfd1d77438cc031d4aaa65492b041497179042844c6abf57ef800b4fdea2d1",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:wardrobe_dark",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-wardrobe_dark"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "ec16b9fa9b0e63bc1dc0fb8c1528efc24cf105b5caafd0ccd9a88a347d8c2f00",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:wardrobe_ebony",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-wardrobe_ebony"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "fd85b2b8bceca60b77a89c51402d9fa59abac788c87edbb699d1306c7a933335",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:fireplace",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-fireplace"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "a71f40526c2ed948bcbc873ccdb2987730e117cbd3398315cb5b584ce4fbcc3d",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:prepared-items-native-32-23-farming:icon-018",
+      "names": [
+        "legacy-scenery-prepared-items-native-32-23-farming-icon-018"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
+      "match": "visual_representation"
+    },
+    {
+      "key": "curated:prop:window",
+      "names": [
+        "window",
+        "Window",
+        "Окно",
+        "Wooden window",
+        "Деревянное окно"
+      ],
+      "categories": [
+        "feature",
+        "prop_priority"
+      ],
+      "usage": "prop",
+      "imageId": "b945fc8c2ebf42e0072f78918c94d2b71c7a1d34aeeb52f8881ea56ffb691fc8",
+      "match": "visual_representation"
+    },
+    {
+      "key": "curated:item:cart-axle",
+      "names": [
+        "Cart axle",
+        "Spare axle",
+        "Axle",
+        "Wagon axle",
+        "Запасная ось",
+        "Ось повозки",
+        "Ось телеги",
+        "Ось"
+      ],
+      "categories": [
+        "equipment",
+        "feature",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "9aa2a0791f3dc1047b3f87237ff50d5ed1ea101c4f6a2a6e58ee9d7a8259ced6",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:own-art:forest-thicket-v2",
+      "names": [
+        "legacy-scenery-own-art-forest-thicket-v2"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:desk_oak",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-desk_oak"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "02e4c32077cf6606447e72550b904a681160354247e3379f72bdb5172c1e127a",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:desk_dark",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-desk_dark"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "5bbe1a995638204199aee8d368c2e8fd17caa3327391f07a78f31c8cc1af72a3",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:desk_ebony",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-desk_ebony"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "d77b1c7ae4b6e091fee82ae17ba9dbfef5c6b878d6e3a3992c0a67f7bd8450ba",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:bench_oak",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-bench_oak"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:scenery:wizard-furniture-32:bench_dark",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-bench_dark"
+      ],
+      "categories": [
+        "equipment",
+        "feature"
+      ],
+      "usage": "prop",
+      "imageId": "950ffa22ddba117970fdc0f4ee4e4ca4876d1088ffbdae7fa9293409f2a78e6a",
+      "match": "visual_representation"
     }
   ],
   "engineAliases": {
-    "delapouite/bar-stool": "02e4c32077cf6606447e72550b904a681160354247e3379f72bdb5172c1e127a",
+    "delapouite/castle": "8e7a0be239796213ce7e6fc652be9c240a1412839b3bfe3793f219236f2bc718",
+    "delapouite/village": "bd7e59ea9f004582f6c029c9b548c23f058105401c2f9de5f49d68ca58f90d2e",
+    "delapouite/bar-stool": "acbbca525cde1dc83f70a8248840f4995ff450271d2c3136b4efeeca1c5308f1",
     "delapouite/shop": "e2b55d5a1c0ca047c4c3dd14cbc0f62c6c44f7505e8a54fe5bb8e73a5f9e2708",
-    "delapouite/table": "b6849cb5f0b0d46da79edc93f21c77e93671bddab40ea16337012a34e9787b38",
+    "delapouite/table": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
     "delapouite/bed": "eebb4011c450eb0044c725057e70278e15f819f24d4670f908454ecd21669840",
-    "delapouite/bookshelf": "66cfd1d77438cc031d4aaa65492b041497179042844c6abf57ef800b4fdea2d1",
-    "delapouite/fireplace": "a71f40526c2ed948bcbc873ccdb2987730e117cbd3398315cb5b584ce4fbcc3d",
-    "delapouite/barrel": "4482c67ad532344411c676721ea69004a2968ea4f768b72d2c245d13d3eca46b",
+    "delapouite/bookshelf": "2deffd0cfeaac62ddae0df05441e7608b856b5c3785797c773a360ba628dc9f7",
+    "delapouite/fireplace": "51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c",
+    "delapouite/barrel": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
     "delapouite/star-altar": "1abd7c37231a2c6772ddbf5e08962e40078c308d3b428b882daaceee29ad186e",
-    "delapouite/park-bench": "6e8cecbc0ccffc8f09d545321517245ab4395ea74beefaf235bbec1f4ac26713",
-    "delapouite/forest": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
-    "lorc/incense": "f1f3739686afca2849e74664747c0f3d498a35f96b07cd52581ecf902cb333b7",
+    "delapouite/park-bench": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
+    "delapouite/high-grass": "be1e4c819f901fcb5d7b11d57d7693755c31c81fb6768d31d021f0d8af2552a3",
+    "delapouite/forest": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+    "lorc/incense": "42fe5e050daa3e7e09a03b81bfd8b6698f3e43be601c7e7649211b0de856678f",
+    "delapouite/two-coins": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+    "delapouite/coins": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+    "lorc/coins": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+    "lorc/crown-coin": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+    "delapouite/coins-pile": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+    "delapouite/window-bars": "b945fc8c2ebf42e0072f78918c94d2b71c7a1d34aeeb52f8881ea56ffb691fc8",
+    "delapouite/window": "b945fc8c2ebf42e0072f78918c94d2b71c7a1d34aeeb52f8881ea56ffb691fc8",
     "delapouite/grass": "4abe6001cd9d13f96895c65d49a31b76603ead7211e8e6ded9d3334c284d2447",
     "lorc/oak": "a460cb1f9d355a91869f12cf87c867a05bef2e312aae13cb610dcb0715fbbf4b",
     "lorc/mountains": "a22e2b2e3beef040173ab52113f93577d998652a11dd355982558a7d01632399",
@@ -21475,7 +22293,7 @@
       "imageId": "8af4a209d3854089101268d909c16a540d6ffc7280014e01bfd171a63b79a577",
       "framing": "head_shoulders",
       "group": "human",
-      "gender": "female"
+      "gender": "unknown"
     },
     {
       "imageId": "698cabc30cf9c7a2bf9f259b6809e4f88d559e0bd7e123f7cbcdc62d2a3ab880",
@@ -21553,7 +22371,7 @@
       "imageId": "4cbbf7667bd86191b72bd6005d69e64ca8d0e1fe14471fd2b919cb416517ce37",
       "framing": "head_shoulders",
       "group": "human",
-      "gender": "male"
+      "gender": "unknown"
     },
     {
       "imageId": "392eebceffd24c4b2d208433f03076806c0cde156ae8386c2ca6404539c3af1a",
@@ -21565,19 +22383,19 @@
       "imageId": "3a9aad79a6ba69c3a932a6fbe36fbd79a4fbad9c060a281feff835f61045dbb8",
       "framing": "head_shoulders",
       "group": "human",
-      "gender": "female"
+      "gender": "unknown"
     },
     {
       "imageId": "7ee5e72aa11b0e670a9710e8083287532b41c85e5ad712d9daa8fc5b684eec0b",
       "framing": "head_shoulders",
       "group": "human",
-      "gender": "female"
+      "gender": "male"
     },
     {
       "imageId": "38503e1de750d500f6cb0b6d9d20df85a81043ca553cf0124daacc04282ccd42",
       "framing": "head_shoulders",
       "group": "human",
-      "gender": "female"
+      "gender": "male"
     },
     {
       "imageId": "64db31088108a25ea0acc7dc61fa4d86f143518521e8ba781cdbf6542d068593",
@@ -22245,5 +23063,5 @@
     "dcss/player/base/halfling": "halfling",
     "dcss/player/base/draconian": "dragonborn"
   },
-  "revision": "b48e6158d53073aa499d6e879531ced1cd1535a837a3fc67bb7ac7a4e1082916"
+  "revision": "4a1a3fdfaadf73d179f451d4352b60ba707627c2b0146363c2b921bcc2e6aa82"
 }

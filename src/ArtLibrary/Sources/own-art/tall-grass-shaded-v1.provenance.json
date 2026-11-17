@@ -1,0 +1,22 @@
+{
+  "id": "own-art:tall-grass-shaded-v1",
+  "file": "tall-grass-shaded-v1.png",
+  "subject": "Tall grass",
+  "nameRu": "Высокая трава",
+  "width": 32,
+  "height": 32,
+  "sha256": "be1e4c819f901fcb5d7b11d57d7693755c31c81fb6768d31d021f0d8af2552a3",
+  "usage": "prop",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.prop.32",
+  "descriptionEn": "A lush tall meadow grass clump with long curved sage and olive blades, soft seed stems, dark layered foliage and pale warm highlights; transparent background.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/tall-grass-shaded-v1/original.png",
+  "sourceDimensions": [
+    1254,
+    1254
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/tall-grass-shaded-v1/prompt.txt"
+}

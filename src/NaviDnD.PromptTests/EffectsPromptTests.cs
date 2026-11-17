@@ -213,19 +213,9 @@ public class EffectsPromptTests
         PromptScenario.RecordAsMock(grabResult.RawResponse, mockResponsesFolder: "GrabbedEffect", action: "SendAction");
     }
 
-    // Long rest - HP is restored, untilLongRest- effects are removed, the time of day is shifted by 2 steps
-    // according to the cycle Night→Morning→Day→Evening→Night (see § Prompt system time). The engine does not
-    // track rest - it is entirely the responsibility of the AI through the usual SendAction, without a separate
-    // game action “rest”. The action is formulated WITHOUT a specific destination time (“until morning”, etc.)
-    // so as not to create a conflict between the player’s narrative response and the mechanical rule “+2 steps”
-    // - we are testing the rule, and not whether the AI can count the hours until dawn.  Fixture -
-    // burning_effect_game.json (empty map.entities), not full_game.json: first attempt on full_game.json The AI
-    // CORRECTLY refused to rest - there is a hostile cultist and goblins nearby, there cannot be a safe camp in
-    // the midst of a dungeon teeming with enemies, according to the plot (the same class of “refusal according
-    // to § ABSOLUTE PROHIBITIONS”, which we have already caught twice above). Here we are checking exactly the
-    // mechanics of rest, and not whether the AI will allow you to sleep in the middle of a battle.
+    // Safe camp: recovery and eight hours of elapsed time, not an arbitrary two-part calendar jump.
     [Fact]
-    public async Task LongRest_RestoresHp_RemovesUntilLongRestEffects_AndAdvancesTimeOfDayByTwoSteps()
+    public async Task LongRest_RestoresHp_RemovesUntilLongRestEffects_AndAdvancesEightHours()
     {
         var storage = PromptScenario.LoadUiTestFixture("burning_effect_game.json");
         // id:0 - the “Burning” preset in the fixture (not needed for this scenario - the AI will reasonably
@@ -234,7 +224,7 @@ public class EffectsPromptTests
         storage.ApplyUpdateWorldState("""
             {"hero":{"hp":"3/10","effects":[{"id":0,"deleted":true},
               {"name":"Истощение","description":"Ты вымотан долгим переходом.","color":[160,160,160],"untilLongRest":true}]},
-             "time":{"partOfDay":"Вечер"}}
+             "time":{"partOfDay":"Вечер","totalRounds":1,"day":1}}
             """);
 
         var effectBefore = storage.WorldState.Hero!.Effects!.Single(e => e.Deleted != true);
@@ -242,7 +232,7 @@ public class EffectsPromptTests
         Assert.True(effectBefore.UntilLongRest, "Предусловие: эффект должен быть помечен untilLongRest:true.");
 
         var ctx = new AiContextBuilder(storage.WorldState);
-        string restMessage = ctx.MinimalState("останавливаюсь на долгий привал, разбиваю лагерь и отдыхаю");
+        string restMessage = ctx.MinimalState("отдыхаю ровно восемь часов в готовом безопасном лагере");
         var result = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage, restMessage);
         _output.WriteLine("Ответ модели (долгий отдых):\n" + result.RawResponse);
 
@@ -255,8 +245,9 @@ public class EffectsPromptTests
         var stillActive = storage.WorldState.Hero!.Effects?.Where(e => e.Deleted != true).ToList() ?? [];
         Assert.DoesNotContain(stillActive, e => e.Name == "Истощение");
 
-        _output.WriteLine($"partOfDay после отдыха: {storage.WorldState.Time.PartOfDay} (было «Вечер», ожидаем +2 шага = «Утро»)");
-        Assert.Equal("morning", storage.WorldState.Time.PartOfDay);
+        Assert.Equal("night", storage.WorldState.Time.PartOfDay);
+        Assert.Equal(2, storage.WorldState.Time.Day);
+        Assert.Equal(1201, storage.WorldState.Time.TotalRounds);
 
         PromptScenario.RecordAsMock(result.RawResponse, mockResponsesFolder: "LongRest", action: "SendAction");
     }
@@ -268,11 +259,13 @@ public class EffectsPromptTests
     public async Task RestKeepsCurseAndDiseaseAndRemovesOnlyEligibleEffects(bool isLong)
     {
         var storage = PromptScenario.LoadUiTestFixture("burning_effect_game.json");
+        storage.WorldState.Time = new() { Day = 1, PartOfDay = "evening", TotalRounds = 3500 };
         storage.WorldState.Hero!.Effects = [
             new() { Name = "Щит", Description = "Временная магическая защита", ExpiresAtRound = storage.WorldState.Time.TotalRounds + 1 },
             new() { Name = "Усталость", Description = "Проходит после долгого отдыха", UntilLongRest = true },
             new() { Name = "Проклятие", Description = "Проклятие чёрного алтаря. Только Снятие проклятия; отдых не помогает." },
-            new() { Name = "Болезнь", Description = "Гниющая лихорадка. До магического исцеления; отдых не лечит." }];
+            new() { Name = "Болезнь", Description = "Гниющая лихорадка. До магического исцеления; отдых не лечит." },
+            new() { Name = "Оберег", Description = "Безвредная защита на сутки; не требует концентрации и не мешает отдыху.", ExpiresAtRound = 17900 }];
         string action = isLong ? "разбиваю безопасный лагерь и отдыхаю восемь часов" : "сижу в безопасном лагере и отдыхаю один час";
         var result = await PromptScenario.CallRealAiWithAutoAnswersAsync("Dnd5e", "SendAction", storage,
             new AiContextBuilder(storage.WorldState).MinimalState(action));
@@ -283,6 +276,10 @@ public class EffectsPromptTests
         Assert.Equal(!isLong, effects.Any(e => e.Deleted != true && e.Name == "Усталость"));
         Assert.Contains(effects, e => e.Deleted != true && e.Name == "Проклятие");
         Assert.Contains(effects, e => e.Deleted != true && e.Name == "Болезнь");
+        Assert.Equal(isLong ? 10700 : 14300, effects.Single(e => e.Name == "Оберег").ExpiresAtRound);
+        Assert.Equal(isLong ? "morning" : "night", storage.WorldState.Time.PartOfDay);
+        Assert.Equal(isLong ? 1100 : 500, storage.WorldState.Time.TotalRounds);
+        Assert.Equal(2, storage.WorldState.Time.Day);
         Assert.Contains(isLong ? "long_rest →" : "short_rest →", result.ToolTrace);
     }
 

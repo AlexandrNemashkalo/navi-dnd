@@ -1,0 +1,22 @@
+{
+  "id": "own-art:cart-axle-shaded-v1",
+  "file": "cart-axle-shaded-v1.png",
+  "subject": "Cart axle",
+  "nameRu": "Ось повозки",
+  "width": 32,
+  "height": 32,
+  "sha256": "9aa2a0791f3dc1047b3f87237ff50d5ed1ea101c4f6a2a6e58ee9d7a8259ced6",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "A single replacement axle for a wooden medieval cart, a stout horizontal oak shaft slightly diagonal from lower left to upper right, symmetric iron bearing collars and short metal spindle ends on BOTH ends. Thick squared central timber clearly connects the ends. No wheels, no cart, no flame, no torch, no handle, no spear tip. Make it substantial and recognizable as a mechanical part.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/cart-axle-shaded-v1/original.png",
+  "sourceDimensions": [
+    1312,
+    1199
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/cart-axle-shaded-v1/prompt.txt"
+}

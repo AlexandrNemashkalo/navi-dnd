@@ -191,7 +191,7 @@ public class ThirdPassPromptTests(ITestOutputHelper output)
         await Act(s,"Мира, какой мой любимый цвет? Передаю тебе обещанное лекарство для сына, этим выполняю твою просьбу.");
         Assert.DoesNotContain(s.WorldState.Hero.Inventory,i=>i.Deleted!=true && i.Name=="Лекарство");
         Assert.NotEqual("нейтральная",s.WorldState.Narrative.Npcs[0].Attitude);
-        Assert.Equal("завершена",s.WorldState.Narrative.PlotThreads[0].Status);
+        Assert.Equal(PlotThreadStatuses.Completed,s.WorldState.Narrative.PlotThreads[0].Status);
         Assert.NotEmpty(s.WorldState.Narrative.PlotThreads[0].Steps??[]);
         Assert.Contains(s.WorldState.Narrative.Npcs[0].Memory??[],n=>n.Contains("лекарств",StringComparison.OrdinalIgnoreCase));
     }

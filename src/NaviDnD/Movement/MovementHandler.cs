@@ -49,8 +49,9 @@ public class MovementHandler
         int newCol  = heroCol + dir.Value.dcol;
         int newRow  = heroRow + dir.Value.drow;
 
-        // Step outside through the exit to the world map (outside of combat) - leave the location (MapScreenLoop → GameWorld.LeaveLocation).
-        if (_world.Combat?.Active != true && (_world.Map.Doors ?? []).Any(d => d.IsWorldExit == true && d.From is { Count: >= 2 } f && d.To is { Count: >= 2 } t
+        // World exits use a closed door glyph to seal the map edge; IsDoorOpen is not their traversal state.
+        // Hidden/removed exits cannot be used to discover or leave the location. Combat keeps normal movement rules.
+        if (_world.Combat?.Active != true && (_world.Map.Doors ?? []).Any(d => d.IsWorldExit == true && d.Hidden != true && d.From is { Count: >= 2 } f && d.To is { Count: >= 2 } t
                 && ((f[0] == heroCol && f[1] == heroRow && t[0] == newCol && t[1] == newRow) || (t[0] == heroCol && t[1] == heroRow && f[0] == newCol && f[1] == newRow))))
         {
             LeaveRequested = true;
@@ -192,12 +193,12 @@ public class MovementHandler
             if (entity.Deleted == true) continue;
             if (entity.Hidden != true) continue;
             if (entity.Triggers?.OnVisible == null) continue;
-            if (entity.Position?.Count < 2) continue;
+            if (entity.Position is not { Count: >= 2 }) continue;
 
             double dist = Math.Sqrt(
                 Math.Pow(entity.Position[0] - heroCol, 2) +
                 Math.Pow(entity.Position[1] - heroRow, 2));
-            if (dist <= visionCells)
+            if (dist <= visionCells && MovementCalculator.HasLineOfSight(_world, heroCol, heroRow, entity.Position[0], entity.Position[1]))
                 yield return (entity, "onVisible");
         }
     }
@@ -317,7 +318,7 @@ public class MovementHandler
     private bool IsAreaCell(int col, int row) => _world.Map.AreasAt(col, row).Any(a => a.Deleted != true);
 
     private bool IsLocationExit(int fromCol, int fromRow, int toCol, int toRow) =>
-        (_world.Map.Doors ?? []).Any(d => d.IsEntry == true && d.From is { Count: >= 2 } f && d.To is { Count: >= 2 } t
+        (_world.Map.Doors ?? []).Any(d => d.IsEntry == true && d.Hidden != true && d.From is { Count: >= 2 } f && d.To is { Count: >= 2 } t
             && ((f[0] == fromCol && f[1] == fromRow && t[0] == toCol && t[1] == toRow)
              || (t[0] == fromCol && t[1] == fromRow && f[0] == toCol && f[1] == toRow)));
 
@@ -353,11 +354,13 @@ public class MovementHandler
         {
             if (door.Hidden != true) continue;
             if (door.Triggers?.OnVisible == null) continue;
-            if (door.From?.Count < 2 || door.To?.Count < 2) continue;
+            if (door.From is not { Count: >= 2 } || door.To is not { Count: >= 2 }) continue;
 
             double distFrom = Math.Sqrt(Math.Pow(door.From[0] - heroCol, 2) + Math.Pow(door.From[1] - heroRow, 2));
             double distTo   = Math.Sqrt(Math.Pow(door.To[0]   - heroCol, 2) + Math.Pow(door.To[1]   - heroRow, 2));
-            if (distFrom <= visionCells || distTo <= visionCells)
+            // Inspect the door from either side, but never through another room's wall.
+            if ((distFrom <= visionCells && MovementCalculator.HasLineOfSight(_world, heroCol, heroRow, door.From[0], door.From[1]))
+                || (distTo <= visionCells && MovementCalculator.HasLineOfSight(_world, heroCol, heroRow, door.To[0], door.To[1])))
                 yield return (door, "onVisible");
         }
     }

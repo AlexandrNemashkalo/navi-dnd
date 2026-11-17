@@ -1,0 +1,22 @@
+{
+  "id": "own-art:bench-shaded-v1",
+  "file": "bench-shaded-v1.png",
+  "subject": "Bench",
+  "nameRu": "Скамья",
+  "width": 32,
+  "height": 32,
+  "sha256": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
+  "usage": "prop",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.prop.32",
+  "descriptionEn": "A complete low backless oak bench with thick beveled plank seat, two sturdy trestle supports and a horizontal stretcher; detailed wood grain, dark outline and warm shaded volume, transparent background.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/bench-shaded-v1/original.png",
+  "sourceDimensions": [
+    1402,
+    1122
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/bench-shaded-v1/prompt.txt"
+}

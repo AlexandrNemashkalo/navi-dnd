@@ -236,10 +236,7 @@ public class GameAiClient
         L.SetWorld(world.Language);   // description of the world - in its language
         try
         {
-            string userMessage = WorldAtlas.TerrainSummary(world)
-                                 + (string.IsNullOrWhiteSpace(name) ? "" : $"\nThe player chose the world name: «{name.Trim()}» — preserve it (name).")
-                                 + (string.IsNullOrWhiteSpace(description) ? "" : $"\nCurrent world description (from the player): revise as requested and preserve everything not requested to change:\n{description.Trim()}")
-                                 + (string.IsNullOrWhiteSpace(wish) ? "" : $"\nPlayer request: {wish}");
+            string userMessage = AiContextBuilder.WorldConcept(world, wish, name, description);
             string response = await CompleteConfigured([ReadPrompt(actionPath)], userMessage, actionPath, _appConfig.ClaudeStartNewGameModel);
             using var doc = JsonDocument.Parse(ExtractJson(response));
             bool ok = GameWorld.ApplyChronicle(world, doc.RootElement);
@@ -390,7 +387,7 @@ public class GameAiClient
     {
         if (_requestGate.CurrentCount == 0 || !_population.CanStart(_settings.Map, chunk)) return false;
         var ctx = new AiContextBuilder(_settings, _storage.VisibleCells);
-        string message = "## Current state\n" + ctx.PopulationState() + "\n" + ctx.LocationPlan(chunk) + "\n" + ctx.ChunkState(chunk);
+        string message = "## Current state\n" + ctx.PopulationState(chunk) + "\n" + ctx.LocationPlan(chunk) + "\n" + ctx.ChunkState(chunk);
         string snapshot = JsonSerializer.Serialize(_settings, _serializeOptions);
         string actionPath = Path.Combine(AppConfig.ProjectRoot, "Prompts", _ruleSet, nameof(PopulateChunk));
         return _population.TryStart(_settings.Map, chunk, async () =>
@@ -452,8 +449,8 @@ public class GameAiClient
             string pending = _settings.PendingTravel is { Length: > 0 } pt ? pt + "\n\n## Player action after travel\n" : "";
             response = await CompleteWithSpinner(systemBlocks, ctx.MinimalState(pending + playerAction), actionPath, _appConfig.ClaudeModel, onIdle);
             ReloadPlannedLocation();
-            _settings.PendingTravel = null;
-            await PlayResponse(ExtractJson(response), onChunk, onNewMessage, onRedraw);
+            await PlayResponse(ExtractJson(response), onChunk, onNewMessage, onRedraw,
+                beforeApply: () => _settings.PendingTravel = null);
             _storage.Save();
         }
         catch (Exception ex)
@@ -470,27 +467,34 @@ public class GameAiClient
         Action<string>? onChunk = null,
         Action<string>? onNewMessage = null,
         Action? onIdle = null,
-        Action? onRedraw = null)
+        Action? onRedraw = null,
+        bool localEntry = false)
     {
-        await FlushPopulationAsync(true, onIdle);
-        var (actionPath, systemBlocks, ctx) = BuildSendActionContext();
         string response = "";
         try
         {
-            _storage.Save();
             // The past path not described by the GM is along with this (its result is also needed).
             if (_settings.PendingTravel is { Length: > 0 } earlier) travelReport = earlier + "\n\n" + travelReport;
             _settings.PendingTravel = travelReport;   // before the wizard's response, the path is “not described”
+            _storage.Save(); // Preserve the report even if the process stops while waiting for the model.
+            await FlushPopulationAsync(true, onIdle);
+            var (actionPath, systemBlocks, ctx) = BuildSendActionContext();
             response = await CompleteWithSpinner(systemBlocks, ctx.MinimalState(travelReport), actionPath, _appConfig.ClaudeModel, onIdle);
             ReloadPlannedLocation();
-            _settings.PendingTravel = null;
-            await PlayResponse(ExtractJson(response), onChunk, onNewMessage, onRedraw);
+            await PlayResponse(ExtractJson(response), onChunk, onNewMessage, onRedraw,
+                beforeApply: () => _settings.PendingTravel = null);
             _storage.Save();
         }
         catch (Exception ex)
         {
-            RecordError(ex, response, L.T("Travel error"));
-            _settings.History.Add(new DialogMessage { Text = L.T("The DM didn't respond, but the journey is done: the road, food and encounters will be described with your next action.") });
+            RecordError(ex, response, localEntry ? L.T("Location entry error") : L.T("Travel error"));
+            _settings.History.Add(new DialogMessage { Text = _settings.PendingTravel is { Length: > 0 }
+                ? localEntry
+                    ? L.T("The DM did not respond, but your arrival is saved. It will be described with your next action.")
+                    : L.T("The DM didn't respond, but the journey is done: the road, food and encounters will be described with your next action.")
+                : localEntry
+                    ? L.T("The arrival response could not be fully applied. Some changes may already be recorded; entry will not be repeated automatically.")
+                    : L.T("The travel response could not be fully applied. Some changes may already be recorded; the journey will not be repeated automatically.") });
             _storage.Save();
         }
     }
@@ -815,14 +819,15 @@ public class GameAiClient
         string json,
         Action<string>? onChunk,
         Action<string>? onNewMessage,
-        Action? onRedraw)
+        Action? onRedraw,
+        Action? beforeApply = null)
     {
         json = await EnsureValidJson(json);
         var player = new SequentialHistoryPlayer(
             _settings, _storage, _serializeOptions, onChunk, onNewMessage, onRedraw,
             onPoll: ActiveDialog != null ? ActiveDialog.PollOnly : null,
             animations: ActiveDialog?.Animations);
-        var history = await player.PlayAsync(json);
+        var history = await player.PlayValidatedAsync(json, beforeApply);
         (_settings.History ??= []).AddRange(history);
         AddEngineNotices();
     }

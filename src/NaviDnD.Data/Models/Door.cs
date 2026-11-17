@@ -28,8 +28,9 @@ public class Door
     // One of From/To will have a coordinate outside the grid bounds.
     public bool? IsEntry { get; set; }
 
-    // true = exit from the location to the world map (entrance outside the starting block). Draws a door of its
-    // own color (LocationGrower.WorldExitColor); step outside through it - the hero goes to the world map.
+    // true = exit from the location to the world map (entrance outside the starting block).
+    // Drawn as an outward arrow on the approach terrain; a visible exit allows departure outside combat.
+    // Generated exits use IsDoorOpen=false as a boundary drawing marker, not a travel lock.
     public bool? IsWorldExit { get; set; }
 
     // true = window (IsDoor = true): always visible through, pass through only if open (IsDoorOpen).

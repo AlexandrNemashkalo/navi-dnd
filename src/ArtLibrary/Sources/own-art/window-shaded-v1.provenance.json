@@ -1,0 +1,22 @@
+{
+  "id": "own-art:window-shaded-v1",
+  "file": "window-shaded-v1.png",
+  "subject": "Window",
+  "nameRu": "Окно",
+  "width": 32,
+  "height": 32,
+  "sha256": "b945fc8c2ebf42e0072f78918c94d2b71c7a1d34aeeb52f8881ea56ffb691fc8",
+  "usage": "prop",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.prop.32",
+  "descriptionEn": "A complete ordinary medieval wooden window frame, seen nearly front-on: thick oak sill and frame, one wooden cross mullion dividing four clearly blue-grey GLASS panes with small sky highlights. The glass is visible and opaque blue-grey, only outside the wooden outline is transparent. It is not iron bars, not a prison grate, not a door. No surrounding wall.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/window-shaded-v1/original.png",
+  "sourceDimensions": [
+    1261,
+    1247
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/window-shaded-v1/prompt.txt"
+}

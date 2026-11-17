@@ -10,6 +10,53 @@ namespace NaviDnD.Tests;
 public sealed class NpcPortraitTests
 {
     [Fact]
+    public void NewJournalNpcCannotTakeAnExistingMapNpcsFace()
+    {
+        var previous = ArtPictures.Current;
+        try
+        {
+            var art = ArtPictures.Current = ArtPictures.Load("Dnd5e");
+            string face = art.ChooseNpcPortrait("First", "female", null, new HashSet<string>())!;
+            string name = Enumerable.Range(0, 10000).Select(i => $"New NPC {i}").First(n =>
+                art.ChooseNpcPortrait(n, "female", null, new HashSet<string>()) == face);
+            var storage = new Storage();
+            storage.ApplyUpdateWorldState(JsonSerializer.Serialize(new
+            {
+                map = new { entities = new[] { new { name = "First", image = face } } },
+                narrative = new { npcs = new[] { new { name, gender = "female", met = true } } }
+            }));
+            Assert.Equal(face, Assert.Single(storage.WorldState.Map.Entities!).Image);
+            Assert.NotEqual(face, Assert.Single(storage.WorldState.Narrative!.Npcs).Portrait);
+            Assert.NotNull(storage.WorldState.Narrative.Npcs[0].Portrait);
+        }
+        finally { ArtPictures.Current = previous; }
+    }
+
+    [Fact]
+    public void IncompletePortraitPackNeverSubstitutesAnExplicitlyDifferentGender()
+    {
+        string root = Path.Combine(Path.GetTempPath(), "navidnd-portrait-test-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            string source = Path.Combine(AppContext.BaseDirectory, "ArtLibrary");
+            var manifest = JsonNode.Parse(File.ReadAllText(Path.Combine(source, "RuleSets/Dnd5e/runtime-pictures.json")))!;
+            var female = manifest["portraits"]!.AsArray().First(p =>
+                (string?)p!["group"] == "human" && (string?)p["gender"] == "female")!;
+            string id = (string)female["imageId"]!;
+            Directory.CreateDirectory(Path.Combine(root, "Runtime/Images"));
+            Directory.CreateDirectory(Path.Combine(root, "RuleSets/Dnd5e"));
+            File.Copy(Path.Combine(source, "Runtime/Images", id + ".png"), Path.Combine(root, "Runtime/Images", id + ".png"));
+            File.WriteAllText(Path.Combine(root, "RuleSets/Dnd5e/runtime-pictures.json"), manifest.ToJsonString());
+            var art = ArtPictures.Load("Dnd5e", root);
+            Assert.Single(art.Portraits);
+            Assert.Null(art.ChooseNpcPortrait("Man", "male", null, new HashSet<string>()));
+            Assert.Equal(ArtPictures.Prefix + id, art.ChooseNpcPortrait("Woman", "female", null, new HashSet<string>()));
+            Assert.Null(art.ChooseNpcPortrait("Unknown", null, null, new HashSet<string>()));
+        }
+        finally { if (Directory.Exists(root)) Directory.Delete(root, true); }
+    }
+
+    [Fact]
     public void FacesPersistAcrossMapChangesSaveReloadAndModelPatches()
     {
         var previous = ArtPictures.Current;
@@ -95,7 +142,7 @@ public sealed class NpcPortraitTests
     }
 
     [Fact]
-    public void TerrainHasArtworkAndFineVectorFallbackPreservesDotsAndAddsColor()
+    public void TerrainHasArtworkAndPixelFallbackDoesNotSwitchToBraille()
     {
         var previous = ArtPictures.Current;
         string pack = CatalogSearch.IconPack;
@@ -113,7 +160,8 @@ public sealed class NpcPortraitTests
             var braille = SvgToBrailleConverter.Convert(fallback, "", applyPackMapping: false)!;
             Assert.Contains(braille, line => line.Any(c => c is >= '\u2800' and <= '\u28ff'));
             var detailed = SvgToBrailleConverter.Convert(fallback, "")!;
-            Assert.Equal(braille, detailed);
+            Assert.DoesNotContain(detailed, line => line.Any(c => c is >= '\u2800' and <= '\u28ff'));
+            Assert.Contains(detailed, line => line.Contains('▀') || line.Contains('▄') || line.Contains('█'));
             Assert.True(detailed.SelectMany(line => PixelArt.Colors(line) ?? []).Where(c => c.Fg != null)
                 .Select(c => string.Join(',', c.Fg!)).Distinct().Count() > 1);
             Assert.All(braille, line => Assert.Null(PixelArt.Colors(line)));

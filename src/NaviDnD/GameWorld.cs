@@ -14,6 +14,13 @@ public static class GameWorld
     private static (GameWorldLink link, int version, bool hidden, WorldMap geo, WorldMap result)? _cacheHidden, _cacheVisible;
     private static readonly GameWorldLink _noGame = new();
 
+    // Chronicles are shared by several heroes; a link version alone cannot track their edits.
+    internal static void Invalidate(WorldMap geo)
+    {
+        if (_cacheHidden is { } hidden && ReferenceEquals(hidden.geo, geo)) _cacheHidden = null;
+        if (_cacheVisible is { } visible && ReferenceEquals(visible.geo, geo)) _cacheVisible = null;
+    }
+
     // Without tactical geometry, the Map tab shows the current place's illustration; World stays a separate tab.
     public static bool HasLocation(WorldState ws) =>
         ws.Map.Chunks is { Count: > 0 } || ws.Map.Rooms is { Count: > 0 } || ws.Map.Area is { Count: > 0 } || ws.Map.Doors is { Count: > 0 };
@@ -38,7 +45,41 @@ public static class GameWorld
         ws.World = link;
     }
 
-    public static WorldMap? Geo(WorldState ws) => ws.World is { } link ? WorldLibrary.Get(link.Id) : null;
+    public static WorldMap? Geo(WorldState ws)
+    {
+        if (ws.World is not { } link) return null;
+        var geo = WorldLibrary.Get(link.Id);
+        if (geo != null) NormalizeLink(geo, link);
+        return geo;
+    }
+
+    public static GamePlace? ResolvePlace(WorldMap geo, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return null;
+        string key = name.Trim();
+        var matches = geo.Chronicle.Places.Where(p => p.Name.Equals(key, StringComparison.OrdinalIgnoreCase)
+            || (p.FormerNames ?? []).Contains(key, StringComparer.OrdinalIgnoreCase)).Take(2).ToList();
+        return matches.Count == 1 ? matches[0] : null;
+    }
+
+    public static void NormalizeLink(WorldMap geo, GameWorldLink link)
+    {
+        bool changed = false;
+        if (link.Place is { } name && ResolvePlace(geo, name) is { } current && link.Place != current.Name)
+        {
+            link.Place = current.Name;
+            changed = true;
+        }
+        foreach (var names in new[] { link.Known, link.Visited })
+        {
+            var normalized = names.Select(n => ResolvePlace(geo, n)?.Name ?? n).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (names.SequenceEqual(normalized)) continue;
+            names.Clear();
+            names.AddRange(normalized);
+            changed = true;
+        }
+        if (changed) link.Version++;
+    }
 
     // World for the hero map (known places only); Old saves without a game world have an active world, only capitals.
     public static WorldMap ForDisplay(WorldState ws) =>
@@ -60,6 +101,7 @@ public static class GameWorld
 
     public static WorldMap Compose(WorldMap geo, GameWorldLink link, bool includeHidden)
     {
+        NormalizeLink(geo, link);
         var cache = includeHidden ? _cacheHidden : _cacheVisible;
         if (cache is { } c && ReferenceEquals(c.link, link) && c.version == link.Version && ReferenceEquals(c.geo, geo)) return c.result;
 
@@ -72,7 +114,7 @@ public static class GameWorld
             if (!includeHidden && !known) continue;
             places.Add(new WorldPlace
             {
-                Name = gp.Name, Type = gp.Type, X = gp.X, Y = gp.Y, Kingdom = geo.OwnerAt(gp.X, gp.Y),
+                Name = gp.Name, FormerNames = [.. gp.FormerNames ?? []], Type = gp.Type, X = gp.X, Y = gp.Y, Kingdom = geo.OwnerAt(gp.X, gp.Y),
                 Description = gp.Description, DmNotes = includeHidden ? gp.DmNotes : null, Hidden = !known,
             });
             if (known && gp.Trail != null) trailCells.AddRange(gp.Trail);
@@ -132,18 +174,21 @@ public static class GameWorld
         if (patch.ValueKind != JsonValueKind.Object) return;
         var link = ws.World ??= new GameWorldLink { Id = WorldLibrary.Current.Id };
         var geo = WorldLibrary.Get(link.Id) ?? WorldLibrary.Current;
+        if (!ValidCapitalNames(geo, patch)) return;
+        NormalizeLink(geo, link);
         var chron = geo.Chronicle;
         bool chronChanged = ApplyChronicle(geo, patch);
+        NormalizeLink(geo, link);
 
         if (Get(patch, "places") is { ValueKind: JsonValueKind.Array } ps)
             foreach (var pe in ps.EnumerateArray())
             {
                 if (pe.ValueKind != JsonValueKind.Object || Str(pe, "name") is not { Length: > 0 } name) continue;
-                var gp = chron.Places.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                var gp = ResolvePlace(geo, name);
                 if (Get(pe, "deleted") is { ValueKind: JsonValueKind.True })
                 {
                     if (gp != null) { chron.Places.Remove(gp); chronChanged = true; }
-                    link.Known.RemoveAll(n => n.Equals(name, StringComparison.OrdinalIgnoreCase));
+                    link.Known.RemoveAll(n => n.Equals(gp?.Name ?? name, StringComparison.OrdinalIgnoreCase));
                     continue;
                 }
                 bool isNew = gp == null;
@@ -169,10 +214,12 @@ public static class GameWorld
                 chronChanged = true;
                 // Does the hero know: hidden:true - no; hidden:false or a new place without hidden - yes.
                 bool? hidden = Get(pe, "hidden") is { ValueKind: JsonValueKind.True or JsonValueKind.False } h ? h.GetBoolean() : null;
-                if (hidden == true) link.Known.RemoveAll(n => n.Equals(name, StringComparison.OrdinalIgnoreCase));
+                if (hidden == true) link.Known.RemoveAll(n => n.Equals(gp!.Name, StringComparison.OrdinalIgnoreCase));
                 else if ((hidden == false || isNew) && !link.Knows(gp!.Name)) Reveal(geo, link, gp!);
             }
 
+        // Resolve the destination against this patch, including newly created or renamed places.
+        if (chronChanged) Invalidate(geo);
         if (Str(patch, "place") is { Length: > 0 } here)
         {
             var all = Compose(geo, link, includeHidden: true);
@@ -193,7 +240,7 @@ public static class GameWorld
     // game questionnaire, step “World”). true - the chronicle has changed.
     public static bool ApplyChronicle(WorldMap geo, JsonElement patch)
     {
-        if (patch.ValueKind != JsonValueKind.Object) return false;
+        if (patch.ValueKind != JsonValueKind.Object || !ValidCapitalNames(geo, patch)) return false;
         var chron = geo.Chronicle;
         bool chronChanged = false;
         if (Str(patch, "name") is { Length: > 0 } wn) { chron.Name = wn; chronChanged = true; }
@@ -203,8 +250,7 @@ public static class GameWorld
             foreach (var k in ks.EnumerateArray())
             {
                 if (k.ValueKind != JsonValueKind.Object || Get(k, "id") is not { } idEl) continue;
-                int id = idEl.ValueKind == JsonValueKind.Number ? idEl.GetInt32()
-                    : idEl.GetString() is { } sid && int.TryParse(sid.TrimStart('K', 'k'), out int pid) ? pid : -1;
+                int id = KingdomId(idEl);
                 if (id < 0 || id >= geo.Kingdoms.Count) continue;
                 var gk = chron.Kingdoms.FirstOrDefault(x => x.Id == id);
                 if (gk == null) { gk = new GameKingdom { Id = id, Name = geo.Kingdoms[id].Name }; chron.Kingdoms.Add(gk); }
@@ -215,19 +261,54 @@ public static class GameWorld
                 {
                     var cap = chron.Places.FirstOrDefault(p => p.Slot == cs);
                     if (cap == null)
-                        chron.Places.Add(cap = new GamePlace { Slot = cs, Type = WorldPlaceTypes.Capital, X = geo.Places[cs].X, Y = geo.Places[cs].Y });
-                    cap.Name = capName;
+                        chron.Places.Add(cap = new GamePlace { Name = geo.Places[cs].Name, Slot = cs, Type = WorldPlaceTypes.Capital, X = geo.Places[cs].X, Y = geo.Places[cs].Y });
+                    if (!cap.Name.Equals(capName, StringComparison.Ordinal))
+                    {
+                        cap.FormerNames ??= [];
+                        if (!string.IsNullOrWhiteSpace(cap.Name) && !cap.FormerNames.Contains(cap.Name, StringComparer.OrdinalIgnoreCase)) cap.FormerNames.Add(cap.Name);
+                        cap.FormerNames.RemoveAll(n => n.Equals(capName, StringComparison.OrdinalIgnoreCase));
+                        cap.Name = capName;
+                    }
                     if (Str(k, "capitalDescription") is { } cd) cap.Description = cd;
                 }
                 chronChanged = true;
             }
 
+        if (chronChanged) Invalidate(geo);
         return chronChanged;
+    }
+
+    private static int KingdomId(JsonElement id) => id.ValueKind == JsonValueKind.Number && id.TryGetInt32(out int number) ? number
+        : id.ValueKind == JsonValueKind.String && int.TryParse(id.GetString()?.TrimStart('K', 'k'), out number) ? number : -1;
+
+    // Historical names are reserved as well: reusing one would redirect another hero's save.
+    private static bool ValidCapitalNames(WorldMap geo, JsonElement patch)
+    {
+        if (Get(patch, "kingdoms") is not { ValueKind: JsonValueKind.Array } kingdoms) return true;
+        var proposed = new Dictionary<int, string>();
+        foreach (var kingdom in kingdoms.EnumerateArray())
+        {
+            if (Get(kingdom, "id") is not { } idValue || Str(kingdom, "capital") is not { Length: > 0 } name) continue;
+            int id = KingdomId(idValue);
+            if (id < 0 || id >= geo.Kingdoms.Count) continue;
+            int slot = geo.Kingdoms[id].Capital;
+            if (slot < 0 || slot >= geo.Places.Count) continue;
+            if (proposed.TryGetValue(slot, out var earlier) && !earlier.Equals(name, StringComparison.OrdinalIgnoreCase)) return false;
+            if (proposed.Any(p => p.Key != slot && p.Value.Equals(name, StringComparison.OrdinalIgnoreCase))) return false;
+            if (geo.Chronicle.Places.Any(p => p.Slot != slot && (p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
+                || (p.FormerNames ?? []).Contains(name, StringComparer.OrdinalIgnoreCase)))) return false;
+            if (geo.Kingdoms.Any(k => k.Capital != slot && k.Capital >= 0 && k.Capital < geo.Places.Count
+                && !geo.Chronicle.Places.Any(p => p.Slot == k.Capital)
+                && geo.Places[k.Capital].Name.Equals(name, StringComparison.OrdinalIgnoreCase))) return false;
+            proposed[slot] = name;
+        }
+        return true;
     }
 
     // The hero learned about the place: in the famous, path to the nearest road (one per place - common to all games in the world).
     public static void Reveal(WorldMap geo, GameWorldLink link, GamePlace gp)
     {
+        NormalizeLink(geo, link);
         if (!link.Knows(gp.Name)) link.Known.Add(gp.Name);
         link.Version++;
         if (gp.Trail == null && gp.Type != WorldPlaceTypes.Capital
@@ -284,19 +365,12 @@ public static class GameWorld
 
     // ── Locations of places: “everything is as it was” when returning (common for games in the world) ──
 
-    private static readonly JsonSerializerOptions _mapJson = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All),
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
-    };
-
     // The hero leaves the location (goes to the world map): the location is saved for the place where he is (if
     // he is in the chronicle location), the tactical map is cleared (in place - its object is kept by drawing
     // and movement).
-    public static void LeaveLocation(WorldState ws)
+    public static bool LeaveLocation(WorldState ws)
     {
-        if (!HasLocation(ws)) return;
+        if (!HasLocation(ws)) return true;
         // Capital from the generator (not yet in the chronicle) - add it so that the location has someone to save.
         if (Geo(ws) is { } g0 && ws.World?.Place is { } h0 && !g0.Chronicle.Places.Any(p => p.Name.Equals(h0, StringComparison.OrdinalIgnoreCase)))
         {
@@ -304,23 +378,38 @@ public static class GameWorld
             if (slot >= 0)
                 g0.Chronicle.Places.Add(new GamePlace { Name = g0.Places[slot].Name, Type = WorldPlaceTypes.Capital, X = g0.Places[slot].X, Y = g0.Places[slot].Y, Slot = slot });
         }
+        if (ws.World?.Place is { Length: > 0 } namedPlace
+            && (Geo(ws) is not { } archive || !archive.Chronicle.Places.Any(p => p.Name.Equals(namedPlace, StringComparison.OrdinalIgnoreCase))))
+            return false;
         if (Geo(ws) is { } geo && ws.World?.Place is { } here
             && geo.Chronicle.Places.FirstOrDefault(p => p.Name.Equals(here, StringComparison.OrdinalIgnoreCase)) is { } gp)
         {
+            string? previousLocation = gp.Location;
             try
             {
                 string dir = WorldLibrary.LocationsDir(geo.Id);
                 Directory.CreateDirectory(dir);
                 gp.Location ??= $"{Slug(gp.Name)}-{Guid.NewGuid().ToString("N")[..6]}.json";
-                File.WriteAllText(Path.Combine(dir, gp.Location), JsonSerializer.Serialize(ws.Map, _mapJson), Encoding.UTF8);
-                WorldLibrary.Save(geo);
+                AtomicFile.WriteAllText(Path.Combine(dir, gp.Location), LocationRestoration.SerializeSnapshot(ws.Map, ws.Time));
+                if (!WorldLibrary.Save(geo))
+                {
+                    gp.Location = previousLocation;
+                    return false;
+                }
             }
-            catch { /*was not saved - upon return the GM will build it again*/ }
+            catch { gp.Location = previousLocation; return false; }
         }
         ClearMap(ws.Map);
         if (ws.Hero != null) ws.Hero.Position = [1, 1];   // stub: there is no tactical map, rendering is waiting for position
         ws.Combat = null;
+        return true;
     }
+
+    public static string LocationSaveFailureMessage(WorldState ws) =>
+        ws.World?.Place is { Length: > 0 } name
+        && (Geo(ws) is not { } geo || !geo.Chronicle.Places.Any(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+            ? L.T("The current place is missing from the world. You have not left; the current map is preserved.")
+            : L.T("Could not save this location. You remain here; check free disk space and folder permissions, then try again.");
 
     public static void ClearMap(MapConfig m)
     {
@@ -330,9 +419,11 @@ public static class GameWorld
     }
 
     // Saved location location - JSON maps (patch "map" for Storage), if available.
+    public static bool HasSavedLocation(WorldMap geo, string placeName) => ResolvePlace(geo, placeName)?.Location is { Length: > 0 };
+
     public static string? SavedLocationJson(WorldMap geo, string placeName)
     {
-        var gp = geo.Chronicle.Places.FirstOrDefault(p => p.Name.Equals(placeName, StringComparison.OrdinalIgnoreCase));
+        var gp = ResolvePlace(geo, placeName);
         if (gp?.Location is not { } file) return null;
         try
         {

@@ -2,7 +2,7 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD.Helpers;
 
-// Assign once from the bundled face gallery, without model calls or changes to map symbols.
+// Retain identity unless an explicit character fact contradicts the bundled portrait metadata.
 public static class NpcPortraits
 {
     public static NpcRecord? Find(WorldState world, string? name) => world.Narrative?.Npcs
@@ -13,20 +13,28 @@ public static class NpcPortraits
         if (ArtPictures.Current is not { } art) return;
         var npcs = world.Narrative?.Npcs ?? [];
         var used = npcs.Where(n => !string.IsNullOrEmpty(n.Portrait)).Select(n => n.Portrait!).ToHashSet(StringComparer.Ordinal);
+        // A face can already belong to a map NPC before the journal learns their name.
+        foreach (var entity in world.Map?.Entities ?? [])
+            if (art.IsPortrait(entity.Image)) used.Add(entity.Image!);
         if (world.Hero?.Image is { } hero) used.Add(hero);
         foreach (var npc in npcs.Where(n => n.Deleted != true && !string.IsNullOrWhiteSpace(n.Name)))
         {
-            if (!string.IsNullOrEmpty(npc.Portrait)) continue;
-            var same = npcs.FirstOrDefault(n => n.Portrait != null && string.Equals(n.Name?.Trim(), npc.Name.Trim(), StringComparison.OrdinalIgnoreCase));
             var entity = world.Map?.Entities?.FirstOrDefault(e => e.Deleted != true && string.Equals(e.Name?.Trim(), npc.Name.Trim(), StringComparison.OrdinalIgnoreCase));
-            npc.Portrait = same?.Portrait ?? art.ChooseNpcPortrait(npc.Name, npc.Gender, entity?.Image, used);
+            string? gender = NpcGenders.Known(npc.Gender) ?? NpcGenders.Known(entity?.Gender);
+            if (!string.IsNullOrEmpty(npc.Portrait) && !art.PortraitNeedsGenderUpdate(npc.Portrait, gender)) continue;
+            var same = npcs.FirstOrDefault(n => n != npc && n.Deleted != true && n.Portrait != null
+                && !art.PortraitNeedsGenderUpdate(n.Portrait, gender)
+                && string.Equals(n.Name?.Trim(), npc.Name.Trim(), StringComparison.OrdinalIgnoreCase));
+            npc.Portrait = same?.Portrait ?? art.ChooseNpcPortrait(npc.Name, gender, npc.Portrait ?? entity?.Image, used);
             if (npc.Portrait != null) used.Add(npc.Portrait);
         }
         // Map NPCs can precede their journal record. Persist the face in their existing image field.
         foreach (var entity in world.Map?.Entities ?? [])
         {
             if (entity.Deleted == true || !string.IsNullOrEmpty(entity.MonsterKey) || string.IsNullOrWhiteSpace(entity.Name)) continue;
-            string? face = Find(world, entity.Name)?.Portrait ?? art.ChooseNpcPortrait(entity.Name, null, entity.Image, used);
+            var record = Find(world, entity.Name);
+            string? gender = NpcGenders.Known(record?.Gender) ?? NpcGenders.Known(entity.Gender);
+            string? face = record?.Portrait ?? art.ChooseNpcPortrait(entity.Name, gender, entity.Image, used);
             if (face == null) continue;
             entity.Image = face;
             used.Add(face);

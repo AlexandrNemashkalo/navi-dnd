@@ -201,6 +201,64 @@ public class AlacrittyAdventureSceneTests
     }
 
     [AlacrittyFact]
+    public void EditorShowsAdventureHintInDialogueAndF4ContinuesCreation()
+    {
+        string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;
+        var start = new ProcessStartInfo(Path.Combine(runtime, "NaviDnD.Launcher.exe")) { WorkingDirectory = runtime, UseShellExecute = false };
+        Configure(start, "full_game.json");
+        start.Environment["NAVIDND_TEST_MOCK_RESPONSES_DIR"] = Path.Combine(AppContext.BaseDirectory, "Fixtures", "MockResponses");
+        using var launcher = Process.Start(start)!;
+        Process? terminal = null;
+        const string hint = "Герой готов. Нажмите [F4], чтобы перейти к приключению.";
+        try
+        {
+            var watch = Stopwatch.StartNew();
+            while (terminal == null && watch.Elapsed < TimeSpan.FromSeconds(15)) { terminal = FindTerminal(runtime); Thread.Sleep(100); }
+            Assert.NotNull(terminal);
+            Thread.Sleep(2000);
+            int pid = GamePid(runtime);
+            Assert.True(Navigation.ToAnketa(pid));
+            foreach (string field in new[] { "Test Hero", "TST", "A traveller." })
+            {
+                GameConsole.SendText(pid, field);
+                Press(terminal, ConsoleKey.Enter);
+                Thread.Sleep(150);
+            }
+            Press(terminal, ConsoleKey.F3);
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 2, 60, 150, hint, 20000));
+            var rows = GameConsole.ReadRows(pid, 0, 63, 150);
+            int hintRow = rows.FindIndex(row => row.Contains(hint));
+            Assert.True(hintRow > rows.FindIndex(row => row.Contains("ДИАЛОГОВОЕ ОКНО")));
+            Assert.Single(rows.Where(row => row.Contains(hint)));
+            Assert.DoesNotContain(rows.Take(25), row => row.Contains("К ПРИКЛЮЧЕНИЮ") || row.Contains("Герой готов."));
+            ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, Path.Combine(output, "editor-dialogue-hint.png"));
+            Press(terminal, ConsoleKey.F4);
+            Assert.True(GameConsole.WaitForRowContains(pid, 1, 150, "→ ПРИКЛЮЧЕНИЕ ←", 5000));
+            Press(terminal, ConsoleKey.F3);
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 2, 60, 150, hint, 5000));
+            Press(terminal, ConsoleKey.F4);
+            Assert.True(GameConsole.WaitForAnyRowContains(pid, 2, 60, 150, "НАЧАТЬ ИГРУ", 5000));
+            int fields = JsonNode.Parse(File.ReadAllText(Path.Combine(runtime, "Prompts", "Dnd5e", "adventureOptions.json")))!["params"]!.AsArray().Count + 2;
+            for (int i = 0; i < fields; i++) Press(terminal, ConsoleKey.Tab);
+            Press(terminal, ConsoleKey.Enter);
+            Assert.True(GameConsole.WaitForRowContains(pid, 1, 150, "→ КАРТА ←", 20000));
+            WaitForInput(runtime);
+            Press(terminal, ConsoleKey.F4);
+            Assert.True(GameConsole.WaitForRowContains(pid, 1, 150, "→ ПЕРСОНАЖ ←", 5000));
+            Assert.DoesNotContain(GameConsole.ReadRows(pid, 0, 63, 150), row => row.Contains(hint));
+        }
+        finally
+        {
+            if (terminal is { HasExited: false })
+            {
+                ScreenCapture.SaveTerminalWindow(terminal.MainWindowHandle, Path.Combine(output, "editor-dialogue-flow-last.png"));
+                terminal.Kill(entireProcessTree: true); terminal.WaitForExit(5000);
+            }
+            terminal?.Dispose();
+        }
+    }
+
+    [AlacrittyFact]
     public void SpellStatsAppearOnLeftAndOnlyLearnedSpellsAreListed()
     {
         string runtime = Runtime(), output = Path.GetDirectoryName(runtime)!;

@@ -1,0 +1,22 @@
+{
+  "id": "own-art:hearth-shaded-v1",
+  "file": "hearth-shaded-v1.png",
+  "subject": "Hearth",
+  "nameRu": "Очаг",
+  "width": 32,
+  "height": 32,
+  "sha256": "51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c",
+  "usage": "prop",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.prop.32",
+  "descriptionEn": "A small complete medieval stone fireplace/hearth as one freestanding architectural sprite, thick grey stone jambs and lintel surround a dark opening with two logs and a small warm orange fire. Three-quarter front view with a little right-side stone depth, visible stone blocks, strong highlights and deep cavity shading. No room, no wall beyond the hearth, no cooking pot.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/hearth-shaded-v1/original.png",
+  "sourceDimensions": [
+    1295,
+    1214
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/hearth-shaded-v1/prompt.txt"
+}

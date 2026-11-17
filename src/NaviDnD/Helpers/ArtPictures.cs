@@ -23,7 +23,7 @@ public sealed class ArtPictures
     private readonly Dictionary<string, string> _npcSpriteGroups = new(StringComparer.Ordinal);
     public IReadOnlyList<string> PortraitsForGroup(string group) =>
         _portraitGroups.TryGetValue(group, out var portraits) ? portraits : [];
-    private sealed record Binding(string ImageId, HashSet<string> Categories, string Usage);
+    private sealed record Binding(string ImageId, HashSet<string> Categories, string Usage, string? Palette);
 
     private static string Normalize(string name) => string.Join(' ', name.Normalize(NormalizationForm.FormKC)
         .Replace('ё', 'е').Replace('Ё', 'Е').Replace('’', '\'').Replace('—', '-').ToLowerInvariant()
@@ -63,7 +63,9 @@ public sealed class ArtPictures
                 string usage = row.GetProperty("usage").GetString()!;
                 if (!result._paths.ContainsKey(id) || usage is not ("item" or "map_actor" or "portrait" or "prop" or "terrain_tile" or "place_view")) continue;
                 if (usage == "portrait") result._portraitImages.Add(Prefix + id);
-                var binding = new Binding(id, row.GetProperty("categories").EnumerateArray().Select(x => x.GetString()!).ToHashSet(StringComparer.Ordinal), usage);
+                string? palette = row.TryGetProperty("palette", out var p) ? p.GetString() : null;
+                if (!MetalPalettes.Contains(palette ?? "")) palette = null;
+                var binding = new Binding(id, row.GetProperty("categories").EnumerateArray().Select(x => x.GetString()!).ToHashSet(StringComparer.Ordinal), usage, palette);
                 foreach (var name in row.GetProperty("names").EnumerateArray())
                 {
                     string key = Normalize(name.GetString()!);
@@ -107,11 +109,44 @@ public sealed class ArtPictures
     {
         if (!_names.TryGetValue(Normalize(name), out var bindings)) return [];
         return bindings.Where(b => category == null || b.Categories.Contains(category))
-            .Select(b => Prefix + b.ImageId).Distinct(StringComparer.Ordinal).ToList();
+            .Select(b => Prefix + b.ImageId + (b.Palette == null ? "" : "~" + b.Palette)).Distinct(StringComparer.Ordinal).ToList();
     }
 
-    public string? ResolvePath(string slug) => slug.StartsWith(Prefix, StringComparison.Ordinal)
-        ? _paths.GetValueOrDefault(slug[Prefix.Length..]) : null;
+    public string? ResolvePath(string slug)
+    {
+        if (!slug.StartsWith(Prefix, StringComparison.Ordinal)) return null;
+        string[] parts = slug[Prefix.Length..].Split('~');
+        if (parts.Length > 2 || (parts.Length == 2 && !MetalPalettes.Contains(parts[1]))) return null;
+        return _paths.GetValueOrDefault(parts[0]);
+    }
+
+    private static readonly HashSet<string> MetalPalettes = ["silver", "copper", "electrum", "platinum"];
+
+    internal static void ApplyPalette(SKBitmap bitmap, string slug)
+    {
+        if (!slug.StartsWith(Prefix, StringComparison.Ordinal)) return;
+        string palette = slug.Split('~').Last();
+        if (!MetalPalettes.Contains(palette)) return;
+        var (dark, mid, light) = palette switch
+        {
+            "copper" => (new SKColor(67, 30, 22), new SKColor(185, 98, 52), new SKColor(255, 211, 155)),
+            "electrum" => (new SKColor(66, 62, 40), new SKColor(181, 170, 113), new SKColor(249, 245, 208)),
+            "platinum" => (new SKColor(35, 51, 70), new SKColor(160, 191, 211), new SKColor(243, 253, 255)),
+            _ => (new SKColor(43, 45, 52), new SKColor(166, 171, 185), new SKColor(251, 251, 255))
+        };
+        for (int y = 0; y < bitmap.Height; y++)
+            for (int x = 0; x < bitmap.Width; x++)
+            {
+                var source = bitmap.GetPixel(x, y);
+                if (source.Alpha == 0) continue;
+                double value = Math.Max(source.Red, Math.Max(source.Green, source.Blue)) / 255d;
+                var a = value < .65 ? dark : mid;
+                var b = value < .65 ? mid : light;
+                double t = value < .65 ? value / .65 : (value - .65) / .35;
+                bitmap.SetPixel(x, y, new SKColor((byte)(a.Red + (b.Red - a.Red) * t),
+                    (byte)(a.Green + (b.Green - a.Green) * t), (byte)(a.Blue + (b.Blue - a.Blue) * t), source.Alpha));
+            }
+    }
 
     public string? EngineIcon(string slug) => _engineAliases.GetValueOrDefault(slug);
 
@@ -126,15 +161,29 @@ public sealed class ArtPictures
 
     public string? ChooseNpcPortrait(string name, string? gender, string? original, ISet<string> used)
     {
-        if (IsPortrait(original)) return original;
-        if (original != null) original = _sourceSprites.GetValueOrDefault(original, original);
+        gender = Data.Models.NpcGenders.Known(gender);
+        string? portraitGroup = null;
+        if (IsPortrait(original))
+        {
+            if (!PortraitNeedsGenderUpdate(original, gender)) return original;
+            portraitGroup = _portraitGroups.FirstOrDefault(p => p.Value.Contains(original!)).Key;
+            if (portraitGroup == null) return original;
+        }
+        else if (original != null) original = _sourceSprites.GetValueOrDefault(original, original);
         // Explicit sprite families belong to the rule-set manifest; never infer species from localized prose.
-        string? group = string.IsNullOrEmpty(original) ? "human" : _npcSpriteGroups
-            .OrderByDescending(p => p.Key.Length).FirstOrDefault(p => original.StartsWith(p.Key, StringComparison.Ordinal)).Value;
+        string? group = portraitGroup ?? (string.IsNullOrEmpty(original) ? "human" : _npcSpriteGroups
+            .OrderByDescending(p => p.Key.Length).FirstOrDefault(p => original.StartsWith(p.Key, StringComparison.Ordinal)).Value);
         if (group == null) return null; // Keep non-humanoid or unknown creatures intact.
         var pool = PortraitsForGroup(group);
-        var matching = pool.Where(p => _portraitGenders.GetValueOrDefault(p) == gender).ToArray();
-        if (matching.Length > 0) pool = matching;
+        if (gender is "male" or "female")
+        {
+            var matching = pool.Where(p => _portraitGenders.GetValueOrDefault(p) == gender).ToArray();
+            // An unclassified face may fit; a face explicitly classified otherwise does not.
+            pool = matching.Length > 0 ? matching : pool.Where(p =>
+                _portraitGenders.GetValueOrDefault(p) is null or "unknown").ToArray();
+        }
+        else
+            pool = pool.Where(p => _portraitGenders.GetValueOrDefault(p) is null or "unknown").ToArray();
         if (pool.Count == 0) return null;
         uint hash = 2166136261;
         foreach (char c in name.Trim().ToUpperInvariant()) hash = unchecked((hash ^ c) * 16777619);
@@ -146,11 +195,26 @@ public sealed class ArtPictures
         return pool[(int)(hash % (uint)pool.Count)];
     }
 
-    // Custom portraits and assigned art retain their identity. Only a known reference illustration is upgraded.
+    public bool PortraitConflictsWithGender(string? portrait, string? gender) =>
+        portrait != null && Data.Models.NpcGenders.Known(gender) is { } known
+        && _portraitGenders.TryGetValue(portrait, out var assigned)
+        && Data.Models.NpcGenders.Known(assigned) is { } portraitGender && known != portraitGender;
+
+    public bool PortraitNeedsGenderUpdate(string? portrait, string? gender)
+    {
+        if (PortraitConflictsWithGender(portrait, gender)) return true;
+        if (portrait == null || Data.Models.NpcGenders.Known(gender) is not { } known
+            || !_portraitGenders.TryGetValue(portrait, out var assigned)
+            || Data.Models.NpcGenders.Known(assigned) != null) return false;
+        return _portraitGroups.Any(group => group.Value.Contains(portrait)
+            && group.Value.Any(face => _portraitGenders.GetValueOrDefault(face) == known));
+    }
+
+    // Custom files and portraits retain their identity; named inventory references follow corrected bindings.
     internal static string? Prefer(string? name, string category, string? existing)
     {
         if (CatalogSearch.IconPack != CatalogSearch.DcssPack || string.IsNullOrWhiteSpace(name)) return existing;
-        if (!string.IsNullOrEmpty(existing) && (existing.StartsWith(Prefix, StringComparison.Ordinal)
+        if (!string.IsNullOrEmpty(existing) && ((category is not ("item" or "feature") && existing.StartsWith(Prefix, StringComparison.Ordinal))
             || existing.StartsWith(SvgToBrailleConverter.PortraitsPrefix, StringComparison.OrdinalIgnoreCase)
             || Path.IsPathRooted(existing))) return existing;
         return Current?.Find(name, category).FirstOrDefault() ?? existing;

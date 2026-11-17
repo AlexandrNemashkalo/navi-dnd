@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Unicode;
+using NaviDnD.Data.Models;
 
 namespace NaviDnD.Migrations;
 
@@ -10,7 +11,8 @@ namespace NaviDnD.Migrations;
 // game: the installer assistant after patches calls “NaviDnD.exe --migrate <game folder>”; backup call - at
 // startup, if the files are still old (build from source, update failure). The game code reads only the current
 // format. Files and version (field formatVersion, without register): saves - game*.json, newGameState.json,
-// worldState.json; notes - *.notes.json (old - bare array); hero cards - Heroes/*.json (hero inside - line
+// worldState.json; notes - *.notes.json (old - bare array); exploration - *.explored.json (old - cell array);
+// hero cards - Heroes/*.json (hero inside - line
 // HeroJson); worlds - Worlds/*/world.json, their locations (locations/*.json) - according to the version of
 // their world. Reliability: before the first record - a copy of all translated files in
 // Storage/Backup/format-<N>-<time>; if a copy does not come out - we do not touch anything. Each file - through
@@ -25,7 +27,7 @@ public static class StorageMigration
         public bool Ok => Errors.Count == 0;
     }
 
-    private enum Kind { Save, Notes, Hero, World }
+    private enum Kind { Save, Notes, Hero, World, Exploration }
 
     private sealed record Job(Kind Kind, string Path, int Version, List<string> Locations);
 
@@ -70,7 +72,7 @@ public static class StorageMigration
         {
             string name = System.IO.Path.GetFileName(f);
             Kind? kind = name.EndsWith(".notes.json", StringComparison.OrdinalIgnoreCase) ? Kind.Notes
-                : name.EndsWith(".explored.json", StringComparison.OrdinalIgnoreCase) ? null
+                : name.EndsWith(".explored.json", StringComparison.OrdinalIgnoreCase) ? Kind.Exploration
                 : name.StartsWith("game", StringComparison.OrdinalIgnoreCase) && char.IsDigit(name[4..].FirstOrDefault())
                   || name is "newGameState.json" or "worldState.json" ? Kind.Save
                 : null;
@@ -125,6 +127,11 @@ public static class StorageMigration
     {
         var root = JsonNode.Parse(File.ReadAllText(job.Path, Encoding.UTF8))
                    ?? throw new InvalidDataException("пустой файл");
+        if (job.Kind == Kind.Exploration)
+        {
+            MigrateExploration(job.Path, root, job.Version);
+            return;
+        }
         // First, the world locations (if they fall, the world will remain old and will be transferred entirely again).
         foreach (string location in job.Locations)
         {
@@ -167,7 +174,122 @@ public static class StorageMigration
         Func<JsonObject, JsonObject> World,
         Action<JsonObject> Location);
 
-    private static readonly Step[] Steps = [Migration1.Step, Migration2.Step, Migration3.Step, Migration4.Step];
+    private static readonly Step[] Steps = [Migration1.Step, Migration2.Step, Migration3.Step, Migration4.Step, Migration5.Step, Migration6.Step, Migration7.Step, Migration8.Step, Migration9.Step];
+
+    private static class Migration9
+    {
+        // 8 → 9: map creatures can carry explicit gender before a journal entry exists.
+        // Backfill only known journal facts; names, prose and existing portraits are not evidence.
+        public static readonly Step Step = new(SaveFile, notes => notes, hero => hero, world => world, LocationFile);
+
+        private static JsonObject SaveFile(JsonObject save)
+        {
+            var known = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (Get(save, "narrative") is JsonObject narrative && Get(narrative, "npcs") is JsonArray npcs)
+                foreach (var npc in npcs.OfType<JsonObject>())
+                    if (Get(npc, "deleted")?.ToString() != "true"
+                        && Get(npc, "name") is JsonValue name && name.TryGetValue<string>(out var text)
+                        && NpcGenders.Known(Get(npc, "gender")?.ToString()) is { } gender)
+                        known.TryAdd(text.Trim(), gender);
+            FillMap(Get(save, "map") as JsonObject, known);
+            return save;
+        }
+
+        private static void LocationFile(JsonObject location) => FillMap(location, null);
+
+        private static void FillMap(JsonObject? map, Dictionary<string, string>? known)
+        {
+            if (map == null || Get(map, "entities") is not JsonArray entities) return;
+            foreach (var entity in entities.OfType<JsonObject>())
+            {
+                if (Get(entity, "gender") != null) continue;
+                string? gender = null;
+                if (known != null && Get(entity, "name") is JsonValue name && name.TryGetValue<string>(out var text))
+                    known.TryGetValue(text.Trim(), out gender);
+                Set(entity, "gender", gender, map.ContainsKey("Entities") ? "Gender" : "gender");
+            }
+        }
+    }
+
+    private static class Migration8
+    {
+        // 7 → 8: recognized journal statuses become stable keys; custom labels and unknown state stay intact.
+        public static readonly Step Step = new(SaveFile, notes => notes, hero => hero, world => world, _ => { });
+
+        private static JsonObject SaveFile(JsonObject save)
+        {
+            if (Get(save, "narrative") is JsonObject narrative && Get(narrative, "plotThreads") is JsonArray threads)
+                foreach (var thread in threads.OfType<JsonObject>())
+                    if (Get(thread, "status") is JsonValue status && status.TryGetValue<string>(out var label))
+                        Set(thread, "status", PlotThreadStatuses.Normalize(label));
+            return save;
+        }
+    }
+
+    private static class Migration7
+    {
+        // 6 → 7: legacy location snapshots have no known clock origin; never infer one from the active hero.
+        public static readonly Step Step = new(save => save, notes => notes, hero => hero, world => world, LocationFile);
+
+        private static void LocationFile(JsonObject location)
+        {
+            if (Get(location, "snapshotTime") == null)
+                Set(location, "snapshotTime", null, "snapshotTime");
+        }
+    }
+
+    private static class Migration6
+    {
+        // 5 → 6: shared places retain former names so older hero links remain resolvable.
+        // Alias history is engine-owned; missing history cannot be reconstructed from coordinates.
+        public static readonly Step Step = new(save => save, notes => notes, hero => hero, WorldFile, _ => { });
+
+        private static JsonObject WorldFile(JsonObject world)
+        {
+            if (Get(world, "chronicle") is JsonObject chronicle && Get(chronicle, "places") is JsonArray places)
+                foreach (var place in places.OfType<JsonObject>())
+                    if (Get(place, "formerNames") == null)
+                        Set(place, "formerNames", new JsonArray(), "FormerNames");
+            return world;
+        }
+    }
+
+    private static class Migration5
+    {
+        // 4 → 5: exploration moves to a versioned per-location sidecar; game/world records are unchanged.
+        public static readonly Step Step = new(save => save, notes => notes, hero => hero, world => world, _ => { });
+    }
+
+    private static void MigrateExploration(string path, JsonNode root, int version)
+    {
+        // V5 already contains every visited location, including inactive maps and seen objects.
+        // Preserve the complete document; alias resolution happens against the loaded shared world.
+        if (version >= 5)
+        {
+            var document = AsObject(root);
+            if (Get(document, "locations") is not JsonObject)
+                throw new InvalidDataException("Exploration locations must be an object.");
+            Set(document, "formatVersion", Current, "formatVersion");
+            Save(path, document);
+            return;
+        }
+        if (root is not JsonArray cells) throw new InvalidDataException("ожидался массив исследованных клеток");
+        string savePath = path[..^".explored.json".Length] + ".json";
+        var locations = new JsonObject();
+        // Deleted drafts may leave an orphaned sidecar. Its cells survive in the backup,
+        // but must not become knowledge of the next adventure created in that slot.
+        if (File.Exists(savePath))
+        {
+            var state = JsonSerializer.Deserialize<WorldState>(File.ReadAllText(savePath, Encoding.UTF8), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters = { new LenientStringListConverter() },
+            }) ?? throw new InvalidDataException("пустое сохранение для привязки исследованных клеток");
+            if (ExplorationMemory.LocationKey(state) is { } key)
+                locations[key] = new JsonObject { ["cells"] = cells.DeepClone(), ["seenObjects"] = new JsonArray() };
+        }
+        Save(path, new JsonObject { ["formatVersion"] = Current, ["locations"] = locations });
+    }
 
     private static class Migration4
     {

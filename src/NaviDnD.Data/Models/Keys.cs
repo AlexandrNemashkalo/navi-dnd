@@ -4,6 +4,16 @@ namespace NaviDnD.Data.Models;
 // Armor Class); Storage normalizes them to keys after each patch, and migration converts old saves.
 // Code compares keys; the UI and GM receive labels in the appropriate language.
 
+// Known protocol values for character facts; unknown/custom values never imply a portrait gender.
+public static class NpcGenders
+{
+    public const string Male = "male", Female = "female";
+    public static string? Known(string? value) => value?.Trim().ToLowerInvariant() switch
+    {
+        Male => Male, Female => Female, _ => null,
+    };
+}
+
 // Part of the day: 4 in a circle night → morning → day → evening.
 public static class PartsOfDay
 {
@@ -26,6 +36,37 @@ public static class PartsOfDay
     {
         Night => "Night", Morning => "Morning", Day => "Day", Evening => "Evening", _ => key ?? "",
     };
+}
+
+public static class PlotThreadStatuses
+{
+    public const string Rumor = "rumor", Offered = "offered", Active = "active",
+        Revealed = "revealed", Completed = "completed", Failed = "failed", Declined = "declined";
+
+    // Recognize whole aliases only; custom story statuses and absent values remain untouched.
+    public static string? Normalize(string? value) => value?.Trim().ToLowerInvariant() switch
+    {
+        "rumor" or "rumour" or "слух" or "слухи" => Rumor,
+        "offered" or "предложено" or "предложен" or "предложена" or "предложенный" => Offered,
+        "active" or "активно" or "активен" or "активна" or "активный" => Active,
+        "revealed" or "раскрыто" or "раскрыт" or "раскрыта" or "раскрытый" => Revealed,
+        "completed" or "done" or "finished" or "завершено" or "завершён" or "завершен" or "завершена" or "завершённый" or "завершенный"
+            or "выполнено" or "выполнен" or "выполнена" => Completed,
+        "failed" or "провалено" or "провален" or "провалена" or "проваленный" => Failed,
+        _ => value,
+    };
+
+    // English localization source label; unfamiliar statuses are story text.
+    public static string? Label(string? key) => key switch
+    {
+        Rumor => "Rumor", Offered => "Offered", Active => "Active",
+        Revealed => "Revealed", Completed => "Completed", Failed => "Failed", Declined => "Declined", _ => key,
+    };
+}
+
+public static class NpcAttitudes
+{
+    public const string Friendly = "friendly", Neutral = "neutral", Hostile = "hostile", Unknown = "unknown";
 }
 
 // Special characteristics of the hero (hero.stats), which the code reads. The rest of the stats are without a key, just text.

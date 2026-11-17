@@ -19,14 +19,14 @@ public class GameActionToolsTests : IDisposable
                 try { File.Delete(file); } catch (IOException) { }
     }
 
-    private GameActionTools CreateTools(string heroPositionJson, string doorsJson)
+    private GameActionTools CreateTools(string heroPositionJson, string doorsJson, string entitiesJson = "[]")
     {
         string json = """
             {"hero":{"symbol":"HRO","name":"Тестер","hp":"10/10","position":HERO_POSITION},
-             "map":{"cols":20,"rows":15,"doors":DOORS}}
+             "map":{"cols":20,"rows":15,"doors":DOORS,"entities":ENTITIES}}
             """
             .Replace("HERO_POSITION", heroPositionJson)
-            .Replace("DOORS", doorsJson);
+            .Replace("DOORS", doorsJson).Replace("ENTITIES", entitiesJson);
         string tempPath = Path.Combine(Path.GetTempPath(), $"navidnd_test_{Guid.NewGuid():N}.json");
         _files.Add(tempPath);
         File.WriteAllText(tempPath, json);
@@ -34,6 +34,34 @@ public class GameActionToolsTests : IDisposable
     }
 
     private const string OneDoor = """[{"from":[5,5],"to":[6,5],"isDoor":true,"color":[139,90,43],"isDoorOpen":false}]""";
+
+    [Fact]
+    public void NpcAtDoorCanOpenItWithoutMovingTheDistantHero()
+    {
+        var tools = CreateTools("[15,10]", OneDoor, """[{"name":"Keeper","hp":"10/10","position":[5,5]}]""");
+        using var result = Parse(tools.DoorAction(0, "open", 0));
+        Assert.True(result.RootElement.GetProperty("success").GetBoolean());
+        var storage = new Storage();
+        storage.ApplySavedState("""{"hero":{"position":[15,10]},"map":{"doors":[{"from":[5,5],"to":[6,5],"isDoor":true,"isDoorOpen":false}]}}""");
+        storage.ApplyUpdateWorldState(result.RootElement.GetProperty("patch").GetRawText());
+        Assert.True(storage.WorldState.Map.Doors![0].IsDoorOpen);
+        Assert.Equal(new[] { 15, 10 }, storage.WorldState.Hero!.Position);
+        Assert.False(Parse(tools.DoorAction(0, "open")).RootElement.GetProperty("success").GetBoolean());
+    }
+
+    [Theory]
+    [InlineData("[{\"position\":[7,5],\"hp\":\"10/10\"}]", 0)]
+    [InlineData("[{\"position\":[5,5],\"hp\":\"10/10\",\"deleted\":true}]", 0)]
+    [InlineData("[{\"position\":[5,5],\"hp\":\"0/10\"}]", 0)]
+    [InlineData("[]", 0)]
+    [InlineData("[]", -2)]
+    public void InvalidOrDistantNpcCannotBorrowTheHerosPosition(string entities, int id)
+    {
+        var tools = CreateTools("[5,5]", OneDoor, entities);
+        using var result = Parse(tools.DoorAction(0, "open", id));
+        Assert.False(result.RootElement.GetProperty("success").GetBoolean());
+        Assert.False(result.RootElement.TryGetProperty("patch", out _));
+    }
 
     [Theory]
     [InlineData("open")]
@@ -127,8 +155,8 @@ public class GameActionToolsTests : IDisposable
     private static JsonDocument Parse(string json) => JsonDocument.Parse(json);
 
     [Theory]
-    [InlineData(true, 5, "morning")]
-    [InlineData(false, 5, "night")]
+    [InlineData(true, 5, "night")]
+    [InlineData(false, 4, "evening")]
     public async Task DetourThenRestKeepsFinalTimeConsistentWithHistory(bool isLong, int expectedDay, string expectedPart)
     {
         string path = Path.Combine(Path.GetTempPath(), $"navidnd_test_{Guid.NewGuid():N}.json");
@@ -177,8 +205,45 @@ public class GameActionToolsTests : IDisposable
         Assert.Contains(hero.Effects!, e => e.Name == "Болезнь");
         Assert.Equal(30, hero.SpeedLeft);
         Assert.Equal(1, hero.Actions![0].Value);
-        Assert.Equal(isLong ? "morning" : "night", storage.WorldState.Time.PartOfDay);
+        Assert.Equal(isLong ? "night" : "evening", storage.WorldState.Time.PartOfDay);
         Assert.Equal(5, int.Parse(hero.Hp.Split('/')[0])); // healing and resources - separate wizard patch
+    }
+
+    [Theory]
+    [InlineData(100, "morning", 1, 700, "morning", 1, 0)]
+    [InlineData(3500, "evening", 1, 500, "night", 2, 3600)]
+    public void ShortRestPreservesFutureDeadlinesAndDeliversDueConsequences(int round, string part, int day,
+        int expectedRound, string expectedPart, int expectedDay, int offset)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"navidnd_test_{Guid.NewGuid():N}.json");
+        _files.Add(path);
+        string state = JsonSerializer.Serialize(new
+        {
+            time = new { totalRounds = round, partOfDay = part, day },
+            hero = new { name = "Sleeper", position = new[] { 1, 1 }, effects = new object[] {
+                new { name = "Day-long protection", expiresAtRound = round + 14400 },
+                new { name = "Delayed consequence", expiresAtRound = round + 10, onExpire = new { effect = "A bell rings" } } },
+                inventory = new[] { new { name = "Lantern", effects = new[] { new { name = "Light", expiresAtRound = round + 14400 } } } } },
+            map = new { entities = new[] { new { name = "Watcher", hp = "10/10", position = new[] { 2, 1 }, effects = new[] {
+                new { name = "Delayed waking", expiresAtRound = round + 10, onExpire = new { effect = "Wake up" } } } } },
+                objects = new[] { new { name = "Seal", position = new[] { 3, 1 }, effects = new[] { new { name = "Protection", expiresAtRound = round + 14400 } } } } },
+            scheduledEvents = new[] { new { name = "Courier", fireAtRound = round + 20, effect = "Arrives" },
+                new { name = "Tomorrow", fireAtRound = round + 14400, effect = "Later" } }
+        });
+        File.WriteAllText(path, state);
+        var storage = new Storage();
+        storage.ApplySavedState(state);
+        storage.ApplyUpdateWorldState(new GameActionTools(new McpServerConfig(path, LogPath: null)).ShortRest());
+        var ws = storage.WorldState;
+        Assert.Equal((expectedRound, expectedPart, expectedDay), (ws.Time.TotalRounds, ws.Time.PartOfDay, ws.Time.Day));
+        Assert.Equal(round + 14400 - offset, ws.Hero!.Effects![0].ExpiresAtRound);
+        Assert.Equal(round + 14400 - offset, ws.Hero.Inventory[0].Effects![0].ExpiresAtRound);
+        Assert.Equal(round + 14400 - offset, ws.Map.Objects![0].Effects![0].ExpiresAtRound);
+        Assert.Equal(round + 14400 - offset, ws.ScheduledEvents![1].FireAtRound);
+        var due = storage.TakeRoundBundle()!;
+        Assert.Equal(2, due.ExpiredEffects.Count);
+        Assert.Equal("Courier", Assert.Single(due.FiredScheduledEvents).Item2.Name);
+        Assert.Null(storage.TakeRoundBundle());
     }
 
 }

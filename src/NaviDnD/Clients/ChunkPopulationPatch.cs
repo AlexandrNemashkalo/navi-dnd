@@ -6,6 +6,23 @@ namespace NaviDnD.Clients;
 // Validate against current geometry and occupied cells before one atomic Storage patch.
 public static class ChunkPopulationPatch
 {
+    internal static HashSet<(int, int)> ReservedCells(MapConfig map, MapChunk chunk)
+    {
+        var reserved = chunk.Exits.Select(e => e.AnchorCell(chunk)).ToHashSet();
+        foreach (var door in map.Doors ?? [])
+        {
+            if (door.IsWindow == true) continue;
+            if (door.From is { Count: >= 2 } from) reserved.Add((from[0], from[1]));
+            if (door.To is { Count: >= 2 } to) reserved.Add((to[0], to[1]));
+        }
+        foreach (var stairs in map.Stairs ?? [])
+        {
+            if (stairs.A.Count >= 2) reserved.Add((stairs.A[0], stairs.A[1]));
+            if (stairs.B.Count >= 2) reserved.Add((stairs.B[0], stairs.B[1]));
+        }
+        return reserved;
+    }
+
     public static string? Prepare(WorldState world,ChunkPopulationQueue.Result result)
     {
         if(!ReferenceEquals(world.Map,result.Map) || world.Map.Chunks?.Contains(result.Chunk)!=true || result.Chunk.Populated) return null;
@@ -16,12 +33,7 @@ public static class ChunkPopulationPatch
         var symbols=(world.Map.Entities??[]).Cast<CellEntity>().Concat(world.Map.Objects??[]).Where(e=>e.Deleted!=true).Select(e=>e.Symbol).Append(world.Hero?.Symbol??"HRO").ToHashSet(StringComparer.OrdinalIgnoreCase);
         var occupied=(world.Map.Entities??[]).Cast<CellEntity>().Concat(world.Map.Objects??[]).Where(e=>e.Deleted!=true && e.Position?.Count>=2).Select(e=>(e.Position[0],e.Position[1])).ToHashSet();
         if(world.Hero?.Position is {Count:>=2} hp) occupied.Add((hp[0],hp[1]));
-        var reserved = result.Chunk.Exits.Select(e => e.AnchorCell(result.Chunk)).ToHashSet();
-        foreach (var stairs in world.Map.Stairs ?? [])
-        {
-            if (stairs.A.Count >= 2) reserved.Add((stairs.A[0], stairs.A[1]));
-            if (stairs.B.Count >= 2) reserved.Add((stairs.B[0], stairs.B[1]));
-        }
+        var reserved = ReservedCells(world.Map, result.Chunk);
         foreach(var key in new[]{"entities","objects"})
         {
             if(map[key] is not JsonArray items) continue;
@@ -33,13 +45,13 @@ public static class ChunkPopulationPatch
                 if(pos?.Count!=2) throw new InvalidDataException("Missing population position.");
                 int c=pos[0]!.GetValue<int>(),r=pos[1]!.GetValue<int>();
                 if(!result.Chunk.Contains(c,r) || occupied.Contains((c,r))) throw new InvalidDataException($"Population cell [{c},{r}] is outside the chunk or occupied.");
-                if(world.Map.TerrainAt(c,r)?.BlocksMove==true || world.Map.FurnitureAt(c,r)!=null || reserved.Contains((c,r)))
+                if(world.Map.TerrainAt(c,r)?.BlocksMove==true || reserved.Contains((c,r)))
                 {
                     var room = world.Map.RoomAt(c,r);
                     var replacement = Enumerable.Range(c - 2, 5)
                         .SelectMany(x => Enumerable.Range(r - 2, 5).Select(y => (x,y)))
                         .Where(p => result.Chunk.Contains(p.x,p.y) && !occupied.Contains(p) && !reserved.Contains(p)
-                            && world.Map.FurnitureAt(p.x,p.y)==null && world.Map.TerrainAt(p.x,p.y)?.BlocksMove!=true
+                            && world.Map.TerrainAt(p.x,p.y)?.BlocksMove!=true
                             && ReferenceEquals(world.Map.RoomAt(p.x,p.y), room)
                             && (room!=null || world.Map.TerrainAt(p.x,p.y)!=null))
                         .OrderBy(p => (p.x-c)*(p.x-c)+(p.y-r)*(p.y-r))

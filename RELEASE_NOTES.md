@@ -1,15 +1,19 @@
-﻿# NaviDnD 2.2.9
+# NaviDnD 2.2.10
 
-- На macOS высота ячейки терминала теперь ровно вдвое больше ширины: рисунки сохраняют пропорции при смене размера шрифта и масштаба экрана.
-- Точки рисунков отрисовывает сам терминал с равномерными промежутками внутри и между символами. Их геометрия больше не зависит от Menlo и подстановки шрифтов.
-- Автоматический размер шрифта учитывает новую высоту строки. Смена указателя сохранена; отображение Windows не меняется.
+- Переработана тактическая карта: постоянные полублочные кроны деревьев, коричневые стволы, текстуры травы и пола, согласованные стены, окна, двери и мебель.
+- Сглажена граница видимости на улице и внутри зданий; изученные кроны сохраняют форму при затемнении.
+- Улучшены подбор предметных иллюстраций, портреты и карточки окружения. Картинки на вкладке «Мир» всегда отображаются Брайлем; заклинания сохраняют цветной Брайль.
+- Улучшены исследование мира, память о посещённых местах, маршруты и восстановление локаций, связанные игровые состояния и миграции сохранений.
+- Поиск Codex поддерживает установку в %LOCALAPPDATA%/OpenAI/Codex/bin/<версия>, нестандартные папки npm, кириллицу и пробелы в путях.
 
-Патчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Внешний вид на настоящем Mac требует проверки после обновления.
+Обновления для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Работа и внешний вид на настоящем Mac в этом выпуске не проверялись.
 
 ## English
 
-- On macOS, terminal cells now have an exact 1:2 width-to-height ratio, preserving artwork proportions across font sizes and display scales.
-- Braille artwork uses built-in dots with uniform spacing within and between characters, independent of Menlo and font fallback.
-- Automatic font sizing accounts for the new line height. Mouse pointer support is retained; Windows rendering is unchanged.
+- Updated tactical maps with persistent block-based tree crowns, brown trunks, textured ground, and consistent walls, windows, doors and furniture.
+- Smoothed fog boundaries outdoors and indoors without changing remembered crown shapes.
+- Improved item artwork, portraits and environment cards. World-map cards always use Braille; spells retain colored Braille.
+- Improved exploration, visited-place memory, routes, location restoration and related save migrations.
+- Codex discovery supports the local OpenAI installation, custom npm prefixes, Cyrillic paths and spaces.
 
-Patches for Windows and macOS (Apple Silicon). Saves and settings are retained. Appearance on a physical Mac still needs validation after updating.
+Windows and macOS (Apple Silicon) updates retain saves and settings. Native macOS execution and appearance have not been verified for this release.

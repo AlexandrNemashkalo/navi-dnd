@@ -2,6 +2,8 @@ namespace NaviDnD.Data.Models;
 
 public class LivingEntity : CellEntity
 {
+    // Explicit character fact; never inferred from a localized name or portrait.
+    public string? Gender { get; set; } // male | female | null
     public string Hp { get; set; } = "";
     public int? SpeedMax { get; set; }
     public int? SpeedLeft { get; set; }

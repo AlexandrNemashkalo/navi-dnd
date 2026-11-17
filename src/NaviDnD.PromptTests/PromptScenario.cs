@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using NaviDnD.Clients;
+using NaviDnD.Helpers;
 
 namespace NaviDnD.PromptTests;
 
@@ -268,10 +269,29 @@ public static class PromptScenario
     // COMBAT). Throws an exception if the AI returned an invalid/inapplicable diff. Returns the texts of
     // history- records - it is convenient to use them to check that the mechanics actually ended up in “[...]”,
     // as required by the prompt.
-    public static PromptResult ApplyAndParse(Storage storage, string response)
+    public static PromptResult ApplyAndParse(Storage storage, string response, bool retainHistory = false)
     {
-        string json = ExtractJson(response);
-        var root = ParseMergingDuplicateRootKeys(json)
+        var previousArt = ArtPictures.Current;
+        string previousPack = CatalogSearch.IconPack;
+        try
+        {
+            // Match the running game's catalog normalization without loading any personal configuration.
+            ArtPictures.Current ??= ArtPictures.Load("Dnd5e");
+            CatalogSearch.IconPack = CatalogSearch.NormalizePack(storage.WorldState.IconPack);
+            return ApplyAndParseCore(storage, response, retainHistory);
+        }
+        finally
+        {
+            ArtPictures.Current = previousArt;
+            CatalogSearch.IconPack = previousPack;
+        }
+    }
+
+    private static PromptResult ApplyAndParseCore(Storage storage, string response, bool retainHistory)
+    {
+        var merged = ParseMergingDuplicateRootKeys(ExtractJson(response));
+        var root = merged == null ? null : JsonNode.Parse(CatalogReferences.Resolve(merged.ToJsonString())) as JsonObject;
+        root = root
             ?? throw new InvalidOperationException($"Ответ ИИ не распарсился как JSON-объект:\n{response}");
 
         var historyNode = root["history"]?.DeepClone();
@@ -298,6 +318,11 @@ public static class PromptScenario
                             entityNode.Remove("movePath");
                     storage.ApplyUpdateWorldState(patch.ToJsonString());
                 }
+                if (retainHistory && entry["text"]?.GetValue<string>() is { Length: > 0 } historyText)
+                    storage.ApplyUpdateWorldState(JsonSerializer.Serialize(new
+                    {
+                        history = new[] { new { author = entry["author"]?.GetValue<string>() ?? "DM", text = historyText } }
+                    }, JsonOptions));
             }
         }
 

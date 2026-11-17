@@ -1,4 +1,4 @@
-﻿using NaviDnD.Data;
+using NaviDnD.Data;
 using NaviDnD.Data.Models;
 using NaviDnD.Helpers;
 using System.Linq;
@@ -152,6 +152,7 @@ public class LegendDisplay
     {
         if (WorldLegend == null) return;
         var (world, places) = WorldLegend();
+        places = places.Where(i => i >= 0 && i < world.Places.Count && !world.Places[i].Hidden).ToList();
         var dim = new List<int> { 110, 115, 125 };
         var bg = _display.MainBackground;
         int capacity = _display.ViewRows(_storage.WorldState.Map) * 2 + 3;
@@ -211,7 +212,8 @@ public class LegendDisplay
 
         // List of places in the window - in two columns “● Title │ ○ Title ”, by lines; selected (Tab) is
         // always in the visible part of the list.
-        int room = capacity - lines.Count - 3;
+        int room = capacity - lines.Count - 4;
+        if (places.Count > Math.Max(0, room) * 2) room--; // Reserve the overflow summary too.
         int fit = Math.Max(0, room) * 2;
         int selPos = places.IndexOf(_display.SelectedWorldPlace);
         int skip = fit > 0 && selPos >= fit ? (selPos - fit) / 2 * 2 + 2 : 0;
@@ -242,13 +244,31 @@ public class LegendDisplay
             });
         }
         if (places.Count > skip + shown.Count || skip > 0) Line(L.F("… {0} more", places.Count - shown.Count), dim);
-        while (lines.Count < capacity - 3) lines.Add(() => Console.Write(new string(' ', legendWidth)));
+        while (lines.Count < capacity - 4) lines.Add(() => Console.Write(new string(' ', legendWidth)));
+        int inspected = places.Contains(_display.HoveredWorldPlace) ? _display.HoveredWorldPlace
+            : places.Contains(_display.SelectedWorldPlace) ? _display.SelectedWorldPlace : -1;
+        if (inspected >= 0)
+        {
+            var place = world.Places[inspected];
+            bool Matches(string? name) => !string.IsNullOrWhiteSpace(name)
+                && (place.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
+                    || place.FormerNames.Contains(name, StringComparer.OrdinalIgnoreCase));
+            string status = Matches(ws.World?.Place) ? L.T("You are here")
+                : ws.World?.Visited.Any(Matches) == true ? L.T("You've been here") : L.T("Known by hearsay");
+            Line(status + " \u00b7 " + place.Name, dim);
+        }
+        else Line("", dim);
         // Time - day and part of a day (travel shifts them by days).
         var now = _storage.WorldState.Time;
         Line(L.F("Time: Day {0} · {1}", now.Day, GameTime.PartOfDayText(now.PartOfDay)), _display.MainForeground);
         // Path: target by clicking on the map, [F10] - go, [F5] - temp.
         string pace = L.T(TravelService.PaceName((TravelService.Pace)_display.TravelPace));
-        if (_display.WorldTarget != null && _display.WorldRouteInfo is { } info)
+        if (LocalPlaceEntry.Find(_storage.WorldState, _display.WorldTarget, world) is { } localPlace)
+        {
+            Line(L.F("Here: {0} — no travel", localPlace.Name), _display.MainForeground);
+            Line(L.T("[F10] enter"), ColorHelper.Pale(_display.MainForeground, 0.3));
+        }
+        else if (_display.WorldTarget != null && _display.WorldRouteInfo is { } info)
         {
             double days = TravelService.DaysAt(info.days, (TravelService.Pace)_display.TravelPace);
             Line(L.F("Route: {0} — {1}, by road {2:P0}", info.dest, TravelService.DaysLabel(days), info.road), _display.MainForeground);
@@ -256,7 +276,8 @@ public class LegendDisplay
         }
         else
         {
-            Line(L.T("Click the map — destination · Tab — places"), dim);
+            Line(L.T(_display.WorldRouteUnavailable ? "No walking route from your current location."
+                : "Click the map — destination · Tab — places"), dim);
             Line(L.F("[F12] pace: {0}", pace), dim);
         }
     }
@@ -419,11 +440,20 @@ public class LegendDisplay
         bool isHovered = kind == hovered;
         var color = kind.LegendColor ?? kind.Fg;
         if (isHovered) color = ColorHelper.Pale(color, 0.25);
-        string name = L.T(kind.Name) + (kind.StepCostFt > 5 ? $" ×{kind.StepCostFt / 5}" : "");
+        string name = L.T(kind.Code == 'F' ? "Dense trees" : kind.Name) + (kind.StepCostFt > 5 ? $" ×{kind.StepCostFt / 5}" : "");
         int nameWidth = width - kind.LegendGlyph.Length - 3 - 1;
         if (name.Length > nameWidth) name = name[..Math.Max(0, nameWidth - 1)] + "…";
         // There is a pillow by the bed (the first symbol is light).
-        if (FurnitureCatalog.ByCode(kind.Code)?.HeadBg is { } head && kind.LegendGlyph.Length > 1)
+        if (kind.Code is 'T' or 'F')
+        {
+            var leaf = kind.Bg;
+            var trunk = kind.Fg;
+            if (isHovered) { leaf = ColorHelper.Pale(leaf,.25); trunk = ColorHelper.Pale(trunk,.25); }
+            ColorHelper.WriteColored(kind.LegendGlyph[..1],leaf,bg);
+            ColorHelper.WriteColored(kind.LegendGlyph.Substring(1,1),trunk,leaf);
+            ColorHelper.WriteColored(kind.LegendGlyph[2..],leaf,bg);
+        }
+        else if (FurnitureCatalog.ByCode(kind.Code)?.HeadBg is { } head && kind.LegendGlyph.Length > 1)
         {
             ColorHelper.WriteColored(kind.LegendGlyph[..1], isHovered ? ColorHelper.Pale(head, 0.25) : head, bg);
             ColorHelper.WriteColored(kind.LegendGlyph[1..], color, bg);

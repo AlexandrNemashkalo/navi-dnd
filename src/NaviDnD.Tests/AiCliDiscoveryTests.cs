@@ -5,6 +5,67 @@ namespace NaviDnD.Tests;
 public class AiCliDiscoveryTests
 {
     [Fact]
+    public void CodexLocalInstallationUnderCyrillicProfileUsesNewestCompleteBin()
+    {
+        if(!OperatingSystem.IsWindows()) return;
+        string temp=Path.Combine(Path.GetTempPath(),"discovery-"+Guid.NewGuid().ToString("N"));
+        string root=Path.Combine(temp,"Григорий","AppData","Local","OpenAI","Codex");
+        try
+        {
+            string old=Fixture(Path.Combine(root,"bin","old-hash","codex.exe"));
+            string current=Fixture(Path.Combine(root,"bin","new-hash","codex.exe"));
+            Directory.SetLastWriteTimeUtc(Path.GetDirectoryName(old)!,DateTime.UtcNow.AddDays(-1));
+            Directory.CreateDirectory(Path.Combine(root,"bin","unfinished"));
+            Fixture(Path.Combine(root,"runtimes","not-cli","codex.exe"));
+            Assert.Equal(current,AiCliDiscovery.FindCodexInstallation(root));
+            Assert.Equal(current,AiCliDiscovery.Resolve("codex",root));
+            Assert.True(AiCliDiscovery.IsAvailable("codex",root));
+            File.Delete(current);
+            Assert.Equal(old,AiCliDiscovery.FindCodexInstallation(root));
+        }
+        finally { if(Directory.Exists(temp)) Directory.Delete(temp,true); }
+    }
+
+    [Fact]
+    public void CyrillicProfileAndQuotedExecutableArePreserved()
+    {
+        string root=Path.Combine(Path.GetTempPath(),"discovery-"+Guid.NewGuid().ToString("N"),"Иван Петров");
+        try
+        {
+            string exe=Fixture(Path.Combine(root,"Мои программы",Exe("codex")));
+            Assert.Equal(exe,AiCliDiscovery.Find("codex",["\""+Path.GetDirectoryName(exe)+"\""],[]));
+            Assert.Equal(exe,AiCliDiscovery.Resolve("codex","'"+exe+"'"));
+            Assert.True(AiCliDiscovery.IsAvailable("codex","\""+exe+"\""));
+        }
+        finally { Directory.Delete(Path.GetDirectoryName(root)!,true); }
+    }
+
+    [Fact]
+    public void NpmConfigFindsUnicodePrefixOutsidePath()
+    {
+        string root=Path.Combine(Path.GetTempPath(),"discovery-"+Guid.NewGuid().ToString("N"),"Иван Петров");
+        string? previous=Environment.GetEnvironmentVariable("NPM_CONFIG_USERCONFIG");
+        try
+        {
+            Directory.CreateDirectory(root);
+            string config=Path.Combine(root,".npmrc");
+            File.WriteAllText(config,"prefix=\"~/Мои программы/npm\"\n");
+            Environment.SetEnvironmentVariable("NPM_CONFIG_USERCONFIG",config);
+            string prefix=Path.Combine(root,"Мои программы","npm");
+            Assert.Contains(prefix,AiCliDiscovery.NpmPrefixes(root));
+            string directory=OperatingSystem.IsWindows()?prefix:Path.Combine(prefix,"bin");
+            string exe=Fixture(Path.Combine(directory,Exe("codex")));
+            var paths=AiCliDiscovery.NpmPrefixes(root).Select(p=>OperatingSystem.IsWindows()?p:Path.Combine(p,"bin"));
+            Assert.Equal(exe,AiCliDiscovery.Find("codex",paths,[]));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("NPM_CONFIG_USERCONFIG",previous);
+            Directory.Delete(Path.GetDirectoryName(root)!,true);
+        }
+    }
+
+    [Fact]
     public void StaleCodexPathFallsBackToInstalledCli()
     {
         string missing = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "codex.exe");

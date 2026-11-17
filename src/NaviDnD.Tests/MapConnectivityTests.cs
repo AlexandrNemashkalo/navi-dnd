@@ -5,6 +5,77 @@ namespace NaviDnD.Tests;
 
 public class MapConnectivityTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    [InlineData(false, "palisade")]
+    [InlineData(true, "palisade")]
+    [InlineData(false, "square")]
+    [InlineData(true, "square")]
+    [InlineData(false, "road")]
+    [InlineData(true, "road")]
+    public void RiverVillagePreservesWorldChannelAndAccessibleDryHouses(bool horizontal, string layout = "river")
+    {
+        for (int seed = 1; seed <= 40; seed++)
+        {
+            var chunk = new MapChunk { Theme = "village", Seed = seed };
+            var bands = Enum.GetValues<ChunkSide>().ToDictionary(side => side, _ => 'F');
+            var river = new OutdoorGenerator.RiverSpec(horizontal, horizontal ? 8 : 10, 3, seed);
+            var natural = OutdoorGenerator.Generate(chunk, [], bands, seed, river);
+            var result = BuildingGenerator.GenerateVillage(chunk, MapSampleTests.Exits, bands, layout, river, seed);
+            chunk.Terrain = result.Terrain;
+            var map = new MapConfig { Chunks = [chunk], Rooms = result.Rooms, Doors = result.Doors, Furniture = result.Furniture };
+            Assert.NotEmpty(result.Rooms);
+            Check(map, chunk);
+            foreach (var room in result.Rooms)
+                foreach (var cell in room.Positions)
+                    Assert.DoesNotContain(natural.Terrain[cell[1] - 1][cell[0] - 1], new[] { 'W', '~' });
+            for (int r = 0; r < MapChunk.Rows; r++)
+                for (int c = 0; c < MapChunk.Cols; c++)
+                    if (natural.Terrain[r][c] is 'W' or '~')
+                        Assert.True(result.Terrain[r][c] is 'W' or '~', $"seed {seed}, [{c},{r}]: river replaced by {result.Terrain[r][c]}");
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void VillageOnlyLocationStillUsesWorldRiver(bool horizontal)
+    {
+        var state = new WorldState { Hero = new() { Name = "Explorer" } };
+        var (chunk, error) = LocationGrower.CreatePlanned(state,
+            [new(0, 0, "Riverside settlement", "village")],
+            site: new("plains", horizontal, 3, []));
+        Assert.Null(error);
+        Assert.NotNull(chunk);
+        Assert.Contains(chunk.Terrain, row => row.Contains('W'));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    [InlineData(false, "palisade")]
+    [InlineData(true, "palisade")]
+    public void WorldRiverContinuesFromVillageIntoNeighboringForest(bool horizontal, string? layout = null)
+    {
+        for (int attempt = 0; attempt < 10; attempt++)
+        {
+            var state = new WorldState { Hero = new() { Name = "Explorer" } };
+            var (village, error) = LocationGrower.CreatePlanned(state,
+                [new(0, 0, "Riverside settlement", "village", Layout: layout),
+                 new(horizontal ? 1 : 0, horizontal ? 0 : 1, "Riverbank", "forest")],
+                site: new("forest", horizontal, 3, []));
+            Assert.Null(error);
+            Assert.NotNull(village);
+            var forest = Assert.Single(state.Map.Chunks, c => c.Theme == "forest");
+            bool Water(char code) => code is 'W' or '~';
+            var villageEdge = horizontal ? village.Terrain.Select(row => row[^1]).ToArray() : village.Terrain[^1].ToCharArray();
+            var forestEdge = horizontal ? forest.Terrain.Select(row => row[0]).ToArray() : forest.Terrain[0].ToCharArray();
+            Assert.True(villageEdge.Zip(forestEdge).Any(pair => Water(pair.First) && Water(pair.Second)),
+                "The river must share water cells across the village/forest seam.");
+        }
+    }
+
     public static IEnumerable<object[]> OutdoorCases() =>
         from theme in new[] { "forest", "hills", "swamp" }
         from seed in Enumerable.Range(1, 10)

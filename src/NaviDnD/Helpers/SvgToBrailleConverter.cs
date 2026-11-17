@@ -33,21 +33,21 @@ public static class SvgToBrailleConverter
     /// widthChars: output width in terminal characters (each char = 2 braille pixels).
     /// Returns null if the file is not found or rendering fails.
     /// </summary>
-    public static string[]? Convert(string imagePath, string name, int widthChars = 36, bool applyPackMapping = true)
+    public static string[]? Convert(string imagePath, string name, int widthChars = 36, bool applyPackMapping = true, bool forceBraille = false)
     {
         // Prepared colored masks belong only to SpellArt; reject them before cache lookup.
         if (imagePath.StartsWith("bg3-lines/", StringComparison.OrdinalIgnoreCase)
             || imagePath.EndsWith(".mask.png", StringComparison.OrdinalIgnoreCase)) return null;
         if (applyPackMapping) imagePath = PackPictures.ForPack(imagePath);
-        bool coloredLines = applyPackMapping && CatalogSearch.IconPack == CatalogSearch.DcssPack;
-        string cacheKey = imagePath + "|" + widthChars + "|" + coloredLines;
+        bool pixelMode = !forceBraille && applyPackMapping && CatalogSearch.IconPack == CatalogSearch.DcssPack;
+        string cacheKey = imagePath + "|" + widthChars + "|" + pixelMode + "|" + forceBraille;
         if (_cache.TryGetValue(cacheKey, out var cached)) return AppendName(cached, name, widthChars);
 
         if (imagePath.StartsWith(HeroDoll.Prefix, StringComparison.Ordinal))
         {
             using var doll = HeroDoll.Render(imagePath);
             if (doll == null) return null;
-            _cache[cacheKey] = PixelArt.Render(doll, widthChars);
+            _cache[cacheKey] = forceBraille ? ColoredBraille.Render(doll,doll,widthChars) : PixelArt.Render(doll, widthChars);
             return AppendName(_cache[cacheKey], name, widthChars);
         }
 
@@ -56,7 +56,7 @@ public static class SvgToBrailleConverter
 
         if (!fullPath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
         {
-            var raster = ConvertRaster(fullPath, widthChars);
+            var raster = ConvertRaster(fullPath, widthChars, pixelMode, imagePath);
             if (raster == null) return null;
             _cache[cacheKey] = raster;
             return AppendName(raster, name, widthChars);
@@ -76,9 +76,9 @@ public static class SvgToBrailleConverter
 
             using var bmp = RenderSvg(fullPath, pixelW, pixelH);
             if (bmp == null) return null;
-            if (coloredLines)
+            if (pixelMode)
             {
-                // Preserve all 2x4 samples of the source linework; color is independent of its geometry.
+                // Keep the selected pixel technique even when a native sprite is unavailable.
                 using var colors = new SKBitmap(pixelW, pixelH);
                 bool foliage = imagePath is "delapouite/high-grass" or "delapouite/grass" or "delapouite/vines"
                     or "delapouite/forest" or "lorc/oak" or "lorc/pine-tree";
@@ -90,9 +90,14 @@ public static class SvgToBrailleConverter
                     double t = y / (double)Math.Max(1, pixelH - 1);
                     var color = new SKColor((byte)(top.Red * (1 - t) + bottom.Red * t),
                         (byte)(top.Green * (1 - t) + bottom.Green * t), (byte)(top.Blue * (1 - t) + bottom.Blue * t));
-                    for (int x = 0; x < pixelW; x++) colors.SetPixel(x, y, color);
+                    for (int x = 0; x < pixelW; x++)
+                    {
+                        var mask = bmp.GetPixel(x, y);
+                        byte alpha = (byte)(mask.Alpha * Math.Max(mask.Red, Math.Max(mask.Green, mask.Blue)) / 255);
+                        colors.SetPixel(x, y, color.WithAlpha(alpha));
+                    }
                 }
-                var detailedLines = ColoredBraille.Render(bmp, colors, widthChars);
+                var detailedLines = PixelArt.Render(colors, widthChars);
                 _cache[cacheKey] = detailedLines;
                 return AppendName(detailedLines, name, widthChars);
             }
@@ -176,13 +181,14 @@ public static class SvgToBrailleConverter
     // Raster image → braille: fit into a square with a white background, the points where darker than average
     // (threshold based on average brightness - photos and drawings with any background give a readable
     // silhouette). Small sprites (Dungeon Crawl tiles 32×32) - in color with half blocks (PixelArt).
-    private static string[]? ConvertRaster(string fullPath, int widthChars)
+    private static string[]? ConvertRaster(string fullPath, int widthChars, bool pixels, string imagePath)
     {
         try
         {
             using var src = SKBitmap.Decode(fullPath);
             if (src == null) return null;
-            if (PixelArt.IsSprite(src)) return PixelArt.Render(src, widthChars);
+            ArtPictures.ApplyPalette(src, imagePath);
+            if (pixels || PixelArt.IsSprite(src)) return PixelArt.Render(src, widthChars);
             int pixelW = widthChars * 2, pixelH = pixelW;
             using var bmp = new SKBitmap(new SKImageInfo(pixelW, pixelH, SKColorType.Bgra8888, SKAlphaType.Unpremul));
             using (var canvas = new SKCanvas(bmp))

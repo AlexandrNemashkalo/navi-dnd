@@ -121,8 +121,8 @@ public static class CatalogSearch
     // ("potion") is a late variant; an unknown one is ignored. A picture is found almost always, steps:
     //  1. the terms as is (Dungeon Crawl: then any tile of a look-named kind - potion, ring; then the same terms in
     //     game-icons: the pack has no everyday gear - pouch, clothes, incense);
-    //  2. the singular ("wolves" → "wolf") and single words of the terms, longest first ("leather pouch" → "leather",
-    //     "pouch"), then the category word ("weapon");
+    //  2. the singular ("wolves" → "wolf") and single words, head noun before modifiers
+    //     ("leather pouch" → "pouch", "leather"), then the category word ("weapon");
     //  A match - only a whole word or the beginning of a name, not a piece inside another word ("lute" is not "flute").
     //  3. defaultCategory != null (the engine resolving "icon" of the GM, not the MCP tools - for them an empty
     //     result is honest): the default picture of the category, of the query or this one (a bag for an item, a
@@ -137,15 +137,24 @@ public static class CatalogSearch
             if (DcssCategories.ContainsKey(prefix)) category = prefix;
             query = query[(colon + 1)..];
         }
+        category ??= defaultCategory != null && DcssCategories.ContainsKey(defaultCategory) ? defaultCategory : null;
         var terms = query.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         if (terms.Count == 0) return (null, []);
         bool dcss = (pack ?? IconPack) == DcssPack;
         string? categoryTerm = category != null && !GenericCategories.Contains(category) && !terms.Contains(category) ? category : null;
-        bool lookNamed = categoryTerm != null && LookNamedCategories.Contains(categoryTerm);
+        bool lookNamed = category != null && LookNamedCategories.Contains(category);
         string[] packs = dcss ? [DcssPack, GameIconsPack] : [GameIconsPack];
         // Resolve compound meanings before trying broad fallback terms (a notice board is not a surfboard).
-        var exactTerms = terms.SelectMany(t => IconAliases.TryGetValue(Normalize(t).Trim(), out var alias) ? new[] { t, alias } : [t]).ToList();
+        var exactTerms = terms.SelectMany(t =>
+            {
+                var forms = new[] { t }.Concat(Singulars(Normalize(t).Trim())).ToList();
+                // Semantic matches must precede fuzzy phrase matches (wooden pegs are not a pegleg).
+                return forms.Select(SemanticAlias)
+                    .OfType<string>().Concat(forms);
+            })
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var preferredSteps = (dcss ? exactTerms.SelectMany(t => DcssAliases.TryGetValue(Normalize(t).Trim(), out var alias) ? [alias, t] : new[] { t }) : exactTerms)
+            .SelectMany(t => dcss ? new[] { t }.Concat(Singulars(Normalize(t).Trim())) : [t])
             .Select(t => (t, packs[0]));
         // For scenery props, preserve the requested meaning across packs before accepting a
         // broader fallback: "footprints,mud" must show a footprint, not a plain floor tile.
@@ -153,17 +162,32 @@ public static class CatalogSearch
             preferredSteps = exactTerms.SelectMany(t => new[] { t }.Concat(Singulars(Normalize(t).Trim())))
                 .SelectMany(t => packs.Select(p => (t, p)));
         var steps = preferredSteps
-            .Concat(lookNamed ? [(categoryTerm!, packs[0])] : [])
+            .Concat(dcss && lookNamed && categoryTerm != null ? [(categoryTerm, packs[0])] : [])
             .Concat(dcss ? exactTerms.Select(t => (t, GameIconsPack)) : [])
-            .Concat(LooseWords(terms).SelectMany(w => packs.Select(p => (w, p))))
+            .Concat(LooseWords(terms, category == "creature").SelectMany(w => packs.Select(p => (w, p))))
             // game-icons has no folders: the word "food" there is a food truck - the default picture is more accurate.
-            .Concat(dcss && categoryTerm != null && !lookNamed ? [(categoryTerm, DcssPack)] : []);
+            .Concat(dcss && categoryTerm != null && !lookNamed ? [(categoryTerm, DcssPack)] : [])
+            .Concat(lookNamed && categoryTerm != null ? [(categoryTerm, GameIconsPack)] : []);
         foreach (var (term, stepPack) in steps)
         {
             if (stepPack == DcssPack && category != "spell"
                 && ArtPictures.Current?.Find(term, category ?? defaultCategory) is { Count: > 0 } reviewed)
                 return (term, reviewed);
-            if (Icons(term, pack: stepPack, category: category, minScore: 60) is { Count: > 0 } slugs) return (term, slugs);
+            // This pack has no semantic folders: "human" otherwise selects human-cannonball.
+            // Apply generic person aliases only to creatures, after the more specific terms were tried.
+            if (stepPack == GameIconsPack && (category ?? defaultCategory) == "creature"
+                && GameIconsPeople.Contains(Normalize(term).Trim()))
+                return (term, [GameIconsDefaults["creature"]]);
+            // Creature names in the untyped SVG pack must match whole words: horses are not horseshoes.
+            // Singular variants still follow, while exact plural images (e.g. moon-bats) stay preferred.
+            int minScore = stepPack == GameIconsPack && category == "creature" ? 80 : 60;
+            var slugs = Icons(term, pack: stepPack, category: category, minScore: minScore);
+            // Unlike DCSS folders, a color word in game-icons does not imply an item type:
+            // "potion: red" must not become a red carpet or traffic light.
+            if (stepPack == GameIconsPack && category != null && GameIconsItemKinds.TryGetValue(category, out var kinds))
+                slugs = slugs.Where(slug => Normalize(slug[(slug.IndexOf('/') + 1)..])
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries).Any(kinds.Contains)).ToList();
+            if (slugs.Count > 0) return (term, slugs);
         }
 
         if (defaultCategory == null) return (null, []);
@@ -171,27 +195,70 @@ public static class CatalogSearch
         return ("default", [defaults.GetValueOrDefault(category ?? defaultCategory) ?? defaults.GetValueOrDefault(defaultCategory) ?? defaults["item"]]);
     }
 
-    // Singulars, then single words (longest first) of the terms; without filler words and terms already tried.
-    private static IEnumerable<string> LooseWords(List<string> terms)
+    // Singulars, then likely English head nouns before their modifiers; exact phrases were already tried.
+    private static IEnumerable<string> LooseWords(List<string> terms, bool primaryOnly = false)
     {
         var words = new List<string>();
         foreach (string term in terms)
             words.AddRange(Singulars(Normalize(term).Trim()));
-        foreach (string word in terms.SelectMany(t => Normalize(t).Split(' ', StringSplitOptions.RemoveEmptyEntries)).OrderByDescending(w => w.Length))
+        foreach (string word in terms.SelectMany(term => HeadWordsFirst(term, primaryOnly)))
         {
             if (word.Length < 3 || FillerWords.Contains(word)) continue;
-            words.Add(word);
             words.AddRange(Singulars(word));
+            words.Add(word);
         }
         var tried = terms.Select(t => Normalize(t).Trim()).ToHashSet();
         return words.Where(tried.Add);
+    }
+
+    private static IEnumerable<string> HeadWordsFirst(string term, bool primaryOnly)
+    {
+        var words = Normalize(term).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        // "weathered pouch of coins" and "goblin with spear" keep the primary object/creature.
+        int qualifier = HeadLength(words);
+        // Collective nouns describe quantity, not species: a pack of wolves is not a battery pack.
+        if (primaryOnly && words.Length > 2 && qualifier == 1 && words[1] == "of"
+            && words[0] is "pack" or "flock" or "herd" or "swarm" or "group" or "pair" or "trio")
+            return HeadWordsFirst(string.Join(' ', words.Skip(2)), primaryOnly: true);
+        var primary = words.Take(qualifier).Reverse();
+        // An unknown creature with a known accessory must not turn into that accessory's picture.
+        return primaryOnly ? primary : primary.Concat(words.Skip(qualifier + 1).Reverse());
+    }
+
+    private static int HeadLength(string[] words)
+    {
+        int qualifier = Array.FindIndex(words, word => word is "of" or "with" or "in" or "on" or "for"
+            or "holding" or "carrying" or "wearing");
+        return qualifier < 0 ? words.Length : qualifier;
+    }
+
+    private static string? SemanticAlias(string term)
+    {
+        var words = Normalize(term).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        int length = HeadLength(words);
+        // Drop leading modifiers, preserving the longest known noun phrase and ignoring accessories.
+        // A weathered notice board is a sign; a painting of a notice board remains a painting.
+        for (int start = 0; start < length; start++)
+        {
+            string phrase = string.Join(" ", words.Skip(start).Take(length - start));
+            // Some established compounds include a preposition, e.g. "coil of rope".
+            string fullPhrase = string.Join(" ", words.Skip(start));
+            foreach (string form in new[] { fullPhrase }.Concat(Singulars(fullPhrase))
+                         .Concat(new[] { phrase }).Concat(Singulars(phrase)))
+                if (IconAliases.TryGetValue(form, out string? alias)) return alias;
+        }
+        return null;
     }
 
     // "wolves" → "wolf", "berries" → "berry", "boxes" → "box", "coins" → "coin".
     private static IEnumerable<string> Singulars(string word)
     {
         if (word.Length <= 3 || word.EndsWith("ss")) yield break;
-        if (word.EndsWith("ves")) yield return word[..^3] + "f";
+        if (word.EndsWith("ves"))
+        {
+            yield return word[..^3] + "f";
+            yield return word[..^3] + "fe";
+        }
         if (word.EndsWith("ies")) yield return word[..^3] + "y";
         if (word.EndsWith('s')) yield return word[..^1];
         if (word.EndsWith("es")) yield return word[..^2];
@@ -208,7 +275,21 @@ public static class CatalogSearch
     {
         ["notice board"] = "wooden sign", ["noticeboard"] = "wooden sign",
         ["bulletin board"] = "wooden sign", ["signboard"] = "wooden sign",
+        ["fishing basket"] = "basket",
+        ["wooden bucket"] = "empty wood bucket",
+        ["coil of rope"] = "rope coil", ["coiled rope"] = "rope coil",
+        ["wooden cart"] = "old wagon",
+        ["signpost"] = "direction signs",
+        ["standing stone"] = "menhir",
+        ["stone cairn"] = "stone pile", ["cairn"] = "stone pile",
+        ["stacked stones"] = "stone stack",
+        ["wooden peg"] = "wood stick",
+        ["rope bridge"] = "rope bridge", ["stone bridge"] = "stone bridge",
     };
+
+    private static readonly HashSet<string> GameIconsPeople =
+        ["human", "humans", "humanoid", "humanoids", "person", "people", "commoner", "commoners",
+         "villager", "villagers", "citizen", "citizens", "townsfolk"];
 
     private static readonly HashSet<string> FillerWords =
         ["the", "and", "with", "small", "large", "big", "little", "old", "new", "simple", "common", "plain", "fine", "rusty", "worn"];
@@ -233,6 +314,16 @@ public static class CatalogSearch
     public static IEnumerable<string> DefaultIcons => DcssDefaults.Values.Concat(GameIconsDefaults.Values);
 
     private static readonly HashSet<string> LookNamedCategories = ["potion", "scroll", "ring", "amulet", "wand", "book"];
+
+    private static readonly Dictionary<string, HashSet<string>> GameIconsItemKinds = new()
+    {
+        ["potion"] = ["potion", "potions", "bottle", "bottles", "flask", "vial", "elixir"],
+        ["scroll"] = ["scroll", "scrolls", "parchment"],
+        ["ring"] = ["ring", "rings"],
+        ["amulet"] = ["amulet", "pendant", "necklace", "medallion", "locket"],
+        ["wand"] = ["wand", "wands"],
+        ["book"] = ["book", "books", "tome", "grimoire"],
+    };
 
     private static List<string> LoadIconSlugs()
     {

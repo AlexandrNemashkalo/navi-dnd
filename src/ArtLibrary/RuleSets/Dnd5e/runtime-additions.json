@@ -18,18 +18,6 @@
   },
   "requirements": [
     {
-      "id": "engine:terrain:Thicket",
-      "category": "terrain",
-      "nameRu": "Чаща",
-      "names": [
-        "Thicket",
-        "Чаща"
-      ],
-      "engineAliases": [
-        "delapouite/forest"
-      ]
-    },
-    {
       "id": "curated:item:incense",
       "category": "equipment",
       "nameRu": "Благовония",
@@ -39,11 +27,559 @@
         "Благовония",
         "Благовонья",
         "Благовоние",
-        "Ароматические палочки"
+        "Ароматические палочки",
+        "Палочка благовоний",
+        "Палочки благовоний",
+        "Stick of incense",
+        "Sticks of incense",
+        "Incense stick"
       ],
       "engineAliases": [
         "lorc/incense"
       ]
+    },
+    {
+      "id": "curated:item:copper-coins",
+      "category": "equipment",
+      "nameRu": "Медная монета",
+      "names": [
+        "Copper piece",
+        "Copper pieces",
+        "Copper coin",
+        "Copper coins",
+        "Медная монета",
+        "Медные монеты"
+      ],
+      "engineAliases": [],
+      "palette": "copper"
+    },
+    {
+      "id": "curated:item:silver-coins",
+      "category": "equipment",
+      "nameRu": "Серебряная монета",
+      "names": [
+        "Silver piece",
+        "Silver pieces",
+        "Silver coin",
+        "Silver coins",
+        "Серебряная монета",
+        "Серебряные монеты"
+      ],
+      "engineAliases": [],
+      "palette": "silver"
+    },
+    {
+      "id": "curated:item:electrum-coins",
+      "category": "equipment",
+      "nameRu": "Электрумовая монета",
+      "names": [
+        "Electrum piece",
+        "Electrum pieces",
+        "Electrum coin",
+        "Electrum coins",
+        "Электрумовая монета",
+        "Электрумовые монеты",
+        "Электровая монета",
+        "Электровые монеты"
+      ],
+      "engineAliases": [],
+      "palette": "electrum"
+    },
+    {
+      "id": "curated:item:gold-coins",
+      "category": "equipment",
+      "nameRu": "Золотая монета",
+      "names": [
+        "Gold piece",
+        "Gold pieces",
+        "Gold coin",
+        "Gold coins",
+        "Золотая монета",
+        "Золотые монеты"
+      ],
+      "engineAliases": []
+    },
+    {
+      "id": "curated:item:platinum-coins",
+      "category": "equipment",
+      "nameRu": "Платиновая монета",
+      "names": [
+        "Platinum piece",
+        "Platinum pieces",
+        "Platinum coin",
+        "Platinum coins",
+        "Платиновая монета",
+        "Платиновые монеты"
+      ],
+      "engineAliases": [],
+      "palette": "platinum"
+    },
+    {
+      "id": "curated:item:coins",
+      "category": "equipment",
+      "nameRu": "Монеты",
+      "names": [
+        "Coins",
+        "Coin",
+        "Money",
+        "Монеты",
+        "Монета",
+        "Деньги"
+      ],
+      "engineAliases": [
+        "delapouite/two-coins",
+        "delapouite/coins",
+        "lorc/coins",
+        "lorc/crown-coin",
+        "delapouite/coins-pile"
+      ]
+    },
+    {
+      "id": "curated:item:vestments",
+      "category": "equipment",
+      "nameRu": "Облачение",
+      "names": [
+        "Vestments",
+        "Vestment",
+        "Priestly vestments",
+        "Облачение",
+        "Одежды священника",
+        "Священническое облачение"
+      ],
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:item:incense-sticks-v3",
+      "category": "equipment",
+      "nameRu": "Благовония (прежняя иллюстрация v3)",
+      "names": [
+        "incense-sticks-v3"
+      ],
+      "engineAliases": []
+    },
+    {
+      "id": "engine:furniture:table",
+      "category": "furniture",
+      "names": [
+        "table",
+        "Table",
+        "Стол"
+      ],
+      "nameRu": "Стол",
+      "engineAliases": [
+        "delapouite/table"
+      ]
+    },
+    {
+      "id": "engine:terrain:Table",
+      "category": "terrain",
+      "names": [
+        "Table",
+        "Стол"
+      ],
+      "nameRu": "Стол",
+      "engineAliases": []
+    },
+    {
+      "id": "curated:prop_priority:table",
+      "category": "prop_priority",
+      "names": [
+        "table",
+        "Table",
+        "Стол"
+      ],
+      "nameRu": "Стол",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:round_table_oak",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-round_table_oak"
+      ],
+      "nameRu": "legacy-scenery-wizard-furniture-32-round_table_oak",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:round_table_dark",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-round_table_dark"
+      ],
+      "nameRu": "legacy-scenery-wizard-furniture-32-round_table_dark",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:long_table_oak",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-long_table_oak"
+      ],
+      "nameRu": "legacy-scenery-wizard-furniture-32-long_table_oak",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:long_table_dark",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-long_table_dark"
+      ],
+      "nameRu": "legacy-scenery-wizard-furniture-32-long_table_dark",
+      "engineAliases": []
+    },
+    {
+      "id": "engine:furniture:cabinet",
+      "category": "furniture",
+      "names": [
+        "cabinet",
+        "Cabinet",
+        "Шкаф"
+      ],
+      "nameRu": "Шкаф",
+      "engineAliases": [
+        "delapouite/bookshelf"
+      ]
+    },
+    {
+      "id": "engine:terrain:Cabinet",
+      "category": "terrain",
+      "names": [
+        "Cabinet",
+        "Шкаф"
+      ],
+      "nameRu": "Шкаф",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:wardrobe_oak",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-wardrobe_oak"
+      ],
+      "nameRu": "legacy-scenery-wizard-furniture-32-wardrobe_oak",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:wardrobe_dark",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-wardrobe_dark"
+      ],
+      "nameRu": "legacy-scenery-wizard-furniture-32-wardrobe_dark",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:wardrobe_ebony",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-wardrobe_ebony"
+      ],
+      "nameRu": "legacy-scenery-wizard-furniture-32-wardrobe_ebony",
+      "engineAliases": []
+    },
+    {
+      "id": "engine:furniture:hearth",
+      "category": "furniture",
+      "names": [
+        "hearth",
+        "Hearth",
+        "Очаг",
+        "Fireplace",
+        "Камин"
+      ],
+      "nameRu": "Очаг",
+      "engineAliases": [
+        "delapouite/fireplace"
+      ]
+    },
+    {
+      "id": "engine:terrain:Hearth",
+      "category": "terrain",
+      "names": [
+        "Hearth",
+        "Очаг",
+        "Fireplace",
+        "Камин"
+      ],
+      "nameRu": "Очаг",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:fireplace",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-fireplace"
+      ],
+      "nameRu": "legacy-scenery-wizard-furniture-32-fireplace",
+      "engineAliases": []
+    },
+    {
+      "id": "engine:furniture:barrels",
+      "category": "furniture",
+      "names": [
+        "barrels",
+        "Barrels",
+        "Бочки",
+        "Barrel",
+        "barrel",
+        "Бочка"
+      ],
+      "nameRu": "Бочки",
+      "engineAliases": [
+        "delapouite/barrel"
+      ]
+    },
+    {
+      "id": "engine:terrain:Barrels",
+      "category": "terrain",
+      "names": [
+        "Barrels",
+        "Бочки",
+        "Barrel",
+        "barrel",
+        "Бочка"
+      ],
+      "nameRu": "Бочки",
+      "engineAliases": []
+    },
+    {
+      "id": "curated:prop_priority:barrel",
+      "category": "prop_priority",
+      "names": [
+        "barrel",
+        "Barrels",
+        "Бочки",
+        "Barrel",
+        "barrel",
+        "Бочка"
+      ],
+      "nameRu": "Бочки",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:prepared-items-native-32-23-farming:icon-018",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-prepared-items-native-32-23-farming-icon-018"
+      ],
+      "nameRu": "legacy-scenery-prepared-items-native-32-23-farming-icon-018",
+      "engineAliases": []
+    },
+    {
+      "id": "curated:prop:window",
+      "category": "prop_priority",
+      "names": [
+        "window",
+        "Window",
+        "Окно",
+        "Wooden window",
+        "Деревянное окно"
+      ],
+      "nameRu": "Окно",
+      "engineAliases": [
+        "delapouite/window-bars",
+        "delapouite/window"
+      ]
+    },
+    {
+      "id": "engine:terrain:Plank floor",
+      "category": "terrain",
+      "names": [
+        "Plank floor",
+        "Дощатый пол",
+        "Wooden floor",
+        "Деревянный пол"
+      ],
+      "nameRu": "Дощатый пол",
+      "engineAliases": [],
+      "terrainAlias": false
+    },
+    {
+      "id": "curated:item:cart-axle",
+      "category": "equipment",
+      "names": [
+        "Cart axle",
+        "Spare axle",
+        "Axle",
+        "Wagon axle",
+        "Запасная ось",
+        "Ось повозки",
+        "Ось телеги",
+        "Ось"
+      ],
+      "nameRu": "Запасная ось",
+      "engineAliases": [],
+      "categories": [
+        "feature",
+        "item"
+      ]
+    },
+    {
+      "id": "engine:terrain:Thicket",
+      "category": "terrain",
+      "names": [
+        "Thicket",
+        "Чаща"
+      ],
+      "nameRu": "Чаща",
+      "engineAliases": [
+        "delapouite/forest"
+      ]
+    },
+    {
+      "id": "legacy:scenery:own-art:forest-thicket-v2",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-own-art-forest-thicket-v2"
+      ],
+      "nameRu": "legacy-scenery-own-art-forest-thicket-v2",
+      "engineAliases": []
+    },
+    {
+      "id": "engine:place:village",
+      "category": "place_view",
+      "names": [
+        "village",
+        "Деревня"
+      ],
+      "nameRu": "Деревня",
+      "engineAliases": [
+        "delapouite/village"
+      ],
+      "categories": [
+        "place"
+      ]
+    },
+    {
+      "id": "engine:place:capital",
+      "category": "place_view",
+      "names": [
+        "capital",
+        "Столица"
+      ],
+      "nameRu": "Столица",
+      "engineAliases": [
+        "delapouite/castle"
+      ],
+      "categories": [
+        "place"
+      ]
+    },
+    {
+      "id": "engine:terrain:Tall grass",
+      "category": "terrain",
+      "names": [
+        "Tall grass",
+        "Высокая трава"
+      ],
+      "nameRu": "Высокая трава",
+      "engineAliases": [
+        "delapouite/high-grass"
+      ],
+      "categories": [
+        "feature"
+      ]
+    },
+    {
+      "id": "engine:furniture:counter",
+      "category": "furniture",
+      "names": [
+        "counter",
+        "Bar counter",
+        "Counter",
+        "Барная стойка",
+        "Стойка"
+      ],
+      "nameRu": "Барная стойка",
+      "engineAliases": [
+        "delapouite/bar-stool"
+      ]
+    },
+    {
+      "id": "engine:terrain:Counter",
+      "category": "terrain",
+      "names": [
+        "Counter",
+        "Bar counter",
+        "Барная стойка",
+        "Стойка"
+      ],
+      "nameRu": "Барная стойка",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:desk_oak",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-desk_oak"
+      ],
+      "nameRu": "Барная стойка",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:desk_dark",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-desk_dark"
+      ],
+      "nameRu": "Барная стойка",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:desk_ebony",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-desk_ebony"
+      ],
+      "nameRu": "Барная стойка",
+      "engineAliases": []
+    },
+    {
+      "id": "engine:furniture:bench",
+      "category": "furniture",
+      "names": [
+        "bench",
+        "Bench",
+        "Wooden bench",
+        "Скамья",
+        "Скамейка",
+        "Деревянная скамья"
+      ],
+      "nameRu": "Скамья",
+      "engineAliases": [
+        "delapouite/park-bench"
+      ]
+    },
+    {
+      "id": "engine:terrain:Bench",
+      "category": "terrain",
+      "names": [
+        "Bench",
+        "Wooden bench",
+        "Скамья",
+        "Скамейка",
+        "Деревянная скамья"
+      ],
+      "nameRu": "Скамья",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:bench_oak",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-bench_oak"
+      ],
+      "nameRu": "Скамья",
+      "engineAliases": []
+    },
+    {
+      "id": "legacy:scenery:wizard-furniture-32:bench_dark",
+      "category": "equipment",
+      "names": [
+        "legacy-scenery-wizard-furniture-32-bench_dark"
+      ],
+      "nameRu": "Скамья",
+      "engineAliases": []
     }
   ]
 }

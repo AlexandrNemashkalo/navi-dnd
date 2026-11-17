@@ -27,12 +27,17 @@ public class Narrative
 
 public class PlotThread : IPatchable
 {
+    // Transient UI identity survives patches and list compaction, never saves or model responses.
+    // A newly loaded game creates a new journal, so this is not a storage-format field.
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Guid RuntimeId { get; set; } = Guid.NewGuid();
+
     public bool? Deleted { get; set; }
 
     public string Name { get; set; }
 
-    /// <summary>"active" | "revealed" | "completed"</summary>
-    public string Status { get; set; }
+    /// <summary>Stable PlotThreadStatuses key: rumor, offered, active, revealed, completed, failed or declined; custom text and null are preserved.</summary>
+    public string? Status { get; set; }
 
     /// <summary>What the hero knows about the task (shown in the journal).</summary>
     public string Description { get; set; }

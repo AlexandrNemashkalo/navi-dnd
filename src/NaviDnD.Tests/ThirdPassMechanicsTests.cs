@@ -187,7 +187,7 @@ public class ThirdPassMechanicsTests
         Assert.Equal(2,s.WorldState.Narrative.Npcs[0].Memory!.Count);
         Assert.Equal("secret",s.WorldState.Narrative.Npcs[0].DmNotes);
         Assert.Equal(2,s.WorldState.Narrative.PlotThreads[0].Steps!.Count);
-        Assert.Equal("завершена",s.WorldState.Narrative.PlotThreads[0].Status);
+        Assert.Equal("completed",s.WorldState.Narrative.PlotThreads[0].Status);
     }
 
     [Fact]

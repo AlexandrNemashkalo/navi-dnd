@@ -25,7 +25,7 @@ public class MapSampleTests
         Assert.True(File.Exists(Path.GetFullPath(Path.Combine(root, "..", "..", "src", "NaviDnD.Tests", "NaviDnD.Tests.csproj"))),
             "Map samples must remain inside the repository even with alternate build output");
         Directory.CreateDirectory(root);
-        foreach (string theme in new[] { "forest", "hills", "swamp", "village", "building", "dungeon", "cave", "island", "village-road", "village-river", "village-palisade" })
+        foreach (string theme in new[] { "forest", "plains", "hills", "mountain", "swamp", "desert", "snow", "taiga", "village", "building", "dungeon", "cave", "island", "village-road", "village-river", "village-palisade" })
         for (int seed = 1; seed <= 5; seed++)
         foreach (bool river in new[] { false, true })
         {

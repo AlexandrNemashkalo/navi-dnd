@@ -51,6 +51,7 @@ public static class WorldAtlas
         {
             char b = geo.BiomeAt(x, y);
             if (WorldBiomes.IsWater(b) || b == WorldBiomes.Peaks || geo.RiverAt(x, y) > 0) return double.MaxValue;
+            if (req.Kingdom >= 0 && geo.OwnerAt(x, y) != req.Kingdom) return double.MaxValue;
             if (occupied.Any(o => Math.Abs(o.x - x) <= 2 && Math.Abs(o.y - y) <= 2)) return double.MaxValue;
             double s = slot ? -1.5 : 0;
             if (req.Near is { } n)
@@ -64,7 +65,6 @@ public static class WorldAtlas
                     s += diff / 45 * 2;
                 }
             }
-            if (req.Kingdom >= 0 && geo.OwnerAt(x, y) != req.Kingdom) s += 6;
             bool Any(int r, Func<int, int, bool> f)
             {
                 for (int dx = -r; dx <= r; dx++)
@@ -96,7 +96,8 @@ public static class WorldAtlas
             {
                 if (b is WorldBiomes.Mountains or WorldBiomes.Snow) s += 4;
                 if (req.Type is WorldPlaceTypes.City or WorldPlaceTypes.Town or WorldPlaceTypes.Port && !road) s += 4;
-                if (req.Type == WorldPlaceTypes.Port && !Any(1, (a, c) => geo.BiomeAt(a, c) is WorldBiomes.Sea or WorldBiomes.Ocean)) s += 8;
+                if (req.Type == WorldPlaceTypes.Port && !Any(1, (a, c) => geo.InBounds(a, c)
+                    && (WorldBiomes.IsWater(geo.BiomeAt(a, c)) || geo.RiverAt(a, c) > 0))) return double.MaxValue;
             }
             else if (road) s += 2;   // adventure spots - off the beaten track
             return s + 0.3 * rng.NextDouble();
@@ -127,6 +128,15 @@ public static class WorldAtlas
                 double sc = Score(x, y, slot: false);
                 if (sc < best) { best = sc; found = (x, y, -1); }
             }
+        // Sparse sampling can miss small islands and narrow strips of suitable land.
+        if (found == null && step > 1)
+            for (int y = y0; y <= y1; y++)
+                for (int x = x0; x <= x1; x++)
+                {
+                    if ((x - x0) % step == 0 && (y - y0) % step == 0) continue;
+                    double sc = Score(x, y, slot: false);
+                    if (sc < best) { best = sc; found = (x, y, -1); }
+                }
         return found;
     }
 
@@ -223,9 +233,14 @@ public static class WorldAtlas
     public static WorldPlace? FindPlace(WorldMap w, string name)
     {
         string n = name.Trim().Trim('«', '»', '"');
-        return w.Places.FirstOrDefault(p => p.Name.Equals(n, StringComparison.OrdinalIgnoreCase))
-               ?? w.Places.FirstOrDefault(p => p.Name.Contains(n, StringComparison.OrdinalIgnoreCase))
-               ?? w.Places.FirstOrDefault(p => n.Contains(p.Name, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrWhiteSpace(n)) return null;
+        var exact = w.Places.Where(p => p.Name.Equals(n, StringComparison.OrdinalIgnoreCase)
+            || (p.FormerNames ?? []).Contains(n, StringComparer.OrdinalIgnoreCase)).Take(2).ToList();
+        if (exact.Count > 0) return exact.Count == 1 ? exact[0] : null;
+        var matches = w.Places.Where(p => p.Name.Contains(n, StringComparison.OrdinalIgnoreCase)).Take(2).ToList();
+        if (matches.Count > 0) return matches.Count == 1 ? matches[0] : null;
+        matches = w.Places.Where(p => !string.IsNullOrWhiteSpace(p.Name) && n.Contains(p.Name, StringComparison.OrdinalIgnoreCase)).Take(2).ToList();
+        return matches.Count == 1 ? matches[0] : null;
     }
 
     public static string PlaceInfo(WorldMap w, WorldPlace p, bool withDmNotes)
@@ -254,6 +269,7 @@ public static class WorldAtlas
         return sb.ToString();
     }
 
+    // Days keeps the unrounded cost so pace changes do not compound rounding errors.
     public sealed record RouteInfo(double Days, double RoadShare, List<(int x, int y)> Path, string Summary);
 
     // World cell on the road - a quarter of a day on foot (travel time scale).
@@ -290,8 +306,9 @@ public static class WorldAtlas
             foreach (var n in new[] { (p.x + 1, p.y), (p.x - 1, p.y), (p.x, p.y + 1), (p.x, p.y - 1) })
             {
                 if (!w.InBounds(n.Item1, n.Item2)) continue;
-                double c = n == goal ? Math.Min(StepDays(w, n.Item1, n.Item2), 1.5 * CellDays) : StepDays(w, n.Item1, n.Item2);
+                double c = StepDays(w, n.Item1, n.Item2);
                 if (double.IsInfinity(c)) continue;
+                if (n == goal) c = Math.Min(c, 1.5 * CellDays);
                 double nd = dist[p] + c;
                 if (dist.TryGetValue(n, out var old) && old <= nd) continue;
                 dist[n] = nd;
@@ -306,10 +323,10 @@ public static class WorldAtlas
         path.Reverse();
         double road = path.Count(t => w.RoadAt(t.x, t.y) > 0) / (double)Math.Max(1, path.Count);
         var kingdoms = path.Select(t => w.OwnerAt(t.x, t.y)).Where(o => o >= 0 && o < w.Kingdoms.Count).Distinct().Select(o => w.Kingdoms[o].Name).ToList();
-        double rounded = Math.Max(0.5, Math.Round(days * 2) / 2);
+        double rounded = Math.Max(1, Math.Ceiling(days - 1e-9));
         string summary = $"{rounded:0.#} {DaysWord(rounded)} travel, {(road > 0.7 ? "by road" : road > 0.25 ? "partly by road" : "off road")}"
                          + (kingdoms.Count > 1 ? $", through {string.Join(" → ", kingdoms)}" : "");
-        return new RouteInfo(rounded, road, path, summary);
+        return new RouteInfo(days, road, path, summary);
     }
 
     public static string DaysText(double d) => $"{d:0.#} {DaysWord(d)}";

@@ -27,10 +27,13 @@ internal sealed class SequentialHistoryPlayer(
 
     // Returns the history entries that were displayed, stripped of newlines.
     // Caller is responsible for persisting them to settings.History after FinalizeStreaming.
-    public async Task<List<DialogMessage>> PlayAsync(string json)
+    public Task<List<DialogMessage>> PlayAsync(string json) => PlayValidatedAsync(json);
+
+    public async Task<List<DialogMessage>> PlayValidatedAsync(string json, Action? beforeApply = null)
     {
         var rootNode = ParseMergingDuplicateRootKeys(json);
-        if (rootNode == null) return [];
+        ValidateResponse(rootNode);
+        beforeApply?.Invoke();
 
         var historyNode = rootNode["history"]?.DeepClone();
         rootNode.Remove("history");
@@ -81,10 +84,73 @@ internal sealed class SequentialHistoryPlayer(
     // (unlike Storage.ApplyUpdateWorldState, which reads through JsonDocument. EnumerateObject and calmly
     // processes the duplicates in turn). We merge duplicates of the top-level keys before parsing history, so
     // that one typo in the model does not ruin the entire player’s answer.
-    private static JsonObject? ParseMergingDuplicateRootKeys(string json)
+    internal static void ValidateResponse(string json) => ValidateResponse(ParseMergingDuplicateRootKeys(json));
+
+    // Pure structural preflight: presentation must not fail after an earlier root patch was applied.
+    // Storage patch semantics and external side effects are deliberately not simulated here.
+    private static void ValidateResponse(JsonObject root)
+    {
+        ValidatePlayerNotes(root);
+        if (root.TryGetPropertyValue("history", out var history))
+        {
+            if (history is not JsonArray entries) throw new JsonException("history must be an array.");
+            foreach (var node in entries)
+            {
+                if (node is not JsonObject entry) throw new JsonException("history entries must be objects.");
+                foreach (string key in new[] { "text", "author" })
+                    if (entry[key] is { } value && (value is not JsonValue scalar || !scalar.TryGetValue<string>(out _)))
+                        throw new JsonException($"history.{key} must be a string or null.");
+                if (entry.TryGetPropertyValue("patch", out var patch) && patch != null)
+                {
+                    if (patch is not JsonObject obj) throw new JsonException("history.patch must be an object.");
+                    ValidatePlayerNotes(obj);
+                    if (obj["map"] is { } map && map is not JsonObject)
+                        throw new JsonException("history.patch.map must be an object or null.");
+                }
+            }
+        }
+        ValidateMovePaths(root);
+    }
+
+    // Notes write to a separate file: reject a bad later element before any earlier note is persisted.
+    private static void ValidatePlayerNotes(JsonObject patch)
+    {
+        static bool IsText(JsonNode? value) => value == null
+            || value is JsonValue scalar && scalar.TryGetValue<string>(out _);
+        foreach (var (key, value) in patch)
+        {
+            if (!key.Equals("playerNote", StringComparison.OrdinalIgnoreCase)) continue;
+            if (value is JsonArray notes ? notes.Any(note => !IsText(note)) : !IsText(value))
+                throw new JsonException("playerNote must contain only strings or null.");
+        }
+    }
+
+    private static void ValidateMovePaths(JsonNode? node)
+    {
+        if (node is JsonObject obj)
+        {
+            foreach (var (key, value) in obj)
+            {
+                if (key == "movePath")
+                {
+                    if (value == null) continue;
+                    if (value is not JsonArray path) throw new JsonException("movePath must be an array.");
+                    foreach (var step in path)
+                        if (step is not JsonArray pair || pair.Count != 2
+                            || pair.Any(coordinate => coordinate is not JsonValue number || !number.TryGetValue<int>(out _)))
+                            throw new JsonException("movePath steps must contain exactly two integer coordinates.");
+                }
+                else ValidateMovePaths(value);
+            }
+        }
+        else if (node is JsonArray array)
+            foreach (var item in array) ValidateMovePaths(item);
+    }
+
+    private static JsonObject ParseMergingDuplicateRootKeys(string json)
     {
         using var doc = JsonDocument.Parse(json);
-        if (doc.RootElement.ValueKind != JsonValueKind.Object) return null;
+        if (doc.RootElement.ValueKind != JsonValueKind.Object) throw new JsonException("Response must be an object.");
 
         var merged = new JsonObject();
         foreach (var prop in doc.RootElement.EnumerateObject())

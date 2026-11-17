@@ -53,7 +53,8 @@ public static class TravelService
         public double Days(Pace pace) => DaysAt(Route.Days, pace);
     }
 
-    public static double DaysAt(double normalDays, Pace pace) => Math.Max(0.5, Math.Round(normalDays / Speed(pace) * 2) / 2);
+    // Travel resolves in daily stages ending in the evening; preview the same charged days.
+    public static double DaysAt(double normalDays, Pace pace) => Math.Max(1, Math.Ceiling(normalDays / Speed(pace) - 1e-9));
 
     // The hero’s route to the world square (or a place on it).
     public static Plan? PlanTo(WorldState ws, (int x, int y) target)
@@ -74,7 +75,7 @@ public static class TravelService
         var world = GameWorld.ForMaster(ws)!;
         var link = ws.World!;
         string fromName = link.Place ?? WorldAtlas.TileName(world, plan.From.x, plan.From.y);
-        GameWorld.LeaveLocation(ws);
+        if (!GameWorld.LeaveLocation(ws)) return "Travel cancelled: the current location could not be saved. The hero has not left; no time or supplies were spent.";
         // Events scheduled for the round of the scene that the hero left: the count of rounds on the way is
         // reset to zero, days have passed - without cancellation they would then “work” out of place.
         var dropped = (ws.ScheduledEvents ?? []).Where(e => e.Deleted != true).Select(e => e.Name).ToList();
@@ -83,20 +84,19 @@ public static class TravelService
         // Cells of the journey by day (a quarter of a day per cell on the road, longer off the road; the pace changes with the daily transition).
         var path = plan.Route.Path;
         double perDay = 1.0 * Speed(pace);
-        // Day of the cell - according to the accumulated travel time (as in the route assessment): how many
-        // days were shown when choosing a goal, the hero walks for as long.
+        // Each day includes the cells traversed during it, including a slow crossing spanning midnight.
         var days = new List<List<(int x, int y)>>();
         double acc = 0;
         for (int i = 1; i < path.Count; i++)
         {
             double step = Math.Min(WorldAtlas.StepDays(world, path[i].x, path[i].y), 6 * WorldAtlas.CellDays);
             if (i == path.Count - 1) step = Math.Min(step, 1.5 * WorldAtlas.CellDays);   // as in WorldAtlas.Route
-            int day = Math.Max(0, (int)Math.Ceiling((acc + step) / perDay - 1e-9) - 1);
+            int firstDay = (int)Math.Floor(acc / perDay + 1e-9);
+            int lastDay = Math.Max(firstDay, (int)Math.Ceiling((acc + step) / perDay - 1e-9) - 1);
             acc += step;
-            while (days.Count <= day) days.Add([]);
-            days[day].Add(path[i]);
+            while (days.Count <= lastDay) days.Add([]);
+            for (int day = firstDay; day <= lastDay; day++) days[day].Add(path[i]);
         }
-        days.RemoveAll(d => d.Count == 0);
 
         // Meetings: chance per day according to the danger of the region, type - more often a peaceful meeting or a discovery, less often enemies.
         int stopDay = -1;
@@ -117,13 +117,30 @@ public static class TravelService
         int walked = stopDay >= 0 ? stopDay + 1 : days.Count;
         var walkedTiles = days.Take(walked).SelectMany(x => x).ToList();
         var end = walkedTiles.Count > 0 ? walkedTiles[^1] : plan.From;
-        bool arrived = stopDay < 0;
+        // A roadside encounter may happen on the destination tile. Preserve that place identity:
+        // the map cannot offer a second journey from a tile to itself just to finish arriving.
+        bool arrived = end == plan.To;
 
         // Time: on the road - in the morning (in the evening/night - from the next morning), day of travel - until the evening, halt, night.
-        int startDay = ws.Time.Day + (ws.Time.PartOfDay is PartsOfDay.Evening or PartsOfDay.Night ? 1 : 0);
+        int oldDay = ws.Time.Day;
+        int oldPart = Math.Max(0, Array.IndexOf(PartsOfDay.Cycle, PartsOfDay.Normalize(ws.Time.PartOfDay)));
+        // Night is the beginning of its calendar day; its next morning is not another day later.
+        int startDay = ws.Time.Day + (ws.Time.PartOfDay == PartsOfDay.Evening ? 1 : 0);
         ws.Time.Day = startDay + walked - 1;
         ws.Time.PartOfDay = PartsOfDay.Evening;
         ws.Time.TotalRounds = 1;
+        int elapsedBase = checked((ws.Time.Day - oldDay) * 14400 + (3 - oldPart) * 3600);
+        // The hero and carried items cross into the new local round coordinate system.
+        // Keep expired callbacks intact for the ordinary handler; arrival does not grant a free rest.
+        void RebaseEffects(List<StatusEffect>? effects)
+        {
+            foreach (var effect in effects ?? [])
+                if (effect.Deleted != true && effect.ExpiresAtRound is int deadline)
+                    effect.ExpiresAtRound = Math.Max(0, deadline - elapsedBase);
+        }
+        RebaseEffects(ws.Hero?.Effects);
+        foreach (var item in ws.Hero?.Inventory ?? [])
+            if (item.Deleted != true) RebaseEffects(item.Effects);
 
         link.X = end.x; link.Y = end.y;
         var arrivedPlace = arrived && plan.TargetPlace != null ? WorldAtlas.FindPlace(world, plan.TargetPlace) : null;
@@ -149,19 +166,32 @@ public static class TravelService
         int nights = Math.Max(walked - 1, 0);
         if (dropped.Count > 0)
             sb.AppendLine($"The engine cancelled delayed events from the previous scene (the hero left and days passed): {string.Join("; ", dropped)} — if relevant, account for their outcome in the narrative.");
-        sb.AppendLine($"Rest stops: nights on the road — {nights}; on arrival/at camp, take one long_rest unless interrupted, passing only uncommitted detour days as elapsedDays; apply its complete time patch at the final resting history entry, not before earlier travel-time patches.");
+        sb.AppendLine($"Rest stops: nights on the road — {nights}; " + (encounter != null
+            ? "the current encounter interrupts travel before camp: do not take long_rest or resolve the encounter for the player; end at an actionable situation and await their choice."
+            : "on arrival/at camp, take one long_rest unless interrupted, passing only uncommitted detour days as elapsedDays; apply its complete time patch at the final resting history entry, not before earlier travel-time patches."));
         sb.AppendLine(FoodLine(ws, walked));
         if (roadShare < 0.5) sb.AppendLine("More than half the route is off road: navigation check via roll_dice Survival DC 10 (forest/hills) to 15 (mountains/swamp/desert). Failure: lost, +1 day (time.day+1); narrate the detour.");
         if (encounter != null)
-            sb.AppendLine($"ENCOUNTER on day {walked}, {WorldBiomes.Get(world.BiomeAt(end.x, end.y)).Name.ToLowerInvariant()} ({WorldAtlas.Surroundings(world, end.x, end.y, named: true)}): {encounter}. Travel stops here; resolve the encounter according to this place and kingdom. If tactics are needed (combat, searching ruins), call plan_location (the engine supplies the cell terrain); otherwise narrate it. The player may then resume travel.");
+        {
+            bool saved = arrivedPlace != null && GameWorld.Geo(ws) is { } geo && GameWorld.HasSavedLocation(geo, arrivedPlace.Name);
+            if (arrivedPlace != null)
+            {
+                sb.AppendLine($"Destination reached: {arrivedPlace.Name} — {WorldPlaceTypes.Label(arrivedPlace.Type)}. The encounter occurs here; no further journey is needed to enter this place."
+                    + (saved ? " The engine restores this place's saved map before your response; preserve its established occupants, objects and consequences, never replace it with a new plan." : ""));
+            }
+            sb.AppendLine($"ENCOUNTER on day {walked}, {WorldBiomes.Get(world.BiomeAt(end.x, end.y)).Name.ToLowerInvariant()} ({WorldAtlas.Surroundings(world, end.x, end.y, named: true)}): {encounter}. Travel stops here; resolve the encounter according to this place and kingdom. "
+                + (saved ? "Use the archived location; if restoration failed, keep the encounter outside without regenerating it. "
+                    : "If tactics are needed (combat, searching ruins) and no map exists, call plan_location (the engine supplies the cell terrain); otherwise use the existing map or narrate it. ")
+                + (arrived ? "The player decides what to do at the destination." : "The player may then resume travel."));
+        }
         else if (arrivedPlace != null)
         {
-            bool saved = GameWorld.Geo(ws) is { } geo && GameWorld.SavedLocationJson(geo, arrivedPlace.Name) != null;
+            bool saved = GameWorld.Geo(ws) is { } geo && GameWorld.HasSavedLocation(geo, arrivedPlace.Name);
             sb.AppendLine($"Arrival: {arrivedPlace.Name} — {WorldPlaceTypes.Label(arrivedPlace.Type)}.{(arrivedPlace.Description is { Length: > 0 } ad ? " " + ad : "")}"
                           + (saved ? " This place was visited before: the engine restored its saved location and placed the hero outside the entrance. Narrate entering or finding lodging, and move the hero with a hero.position patch." : " No tactical map: narrate the scene; if needed for combat, a dungeon, or exploration, call plan_location."));
         }
         else sb.AppendLine($"Arrival: the hero is at the destination — {WorldBiomes.Get(world.BiomeAt(end.x, end.y)).Name.ToLowerInvariant()}, {WorldAtlas.Surroundings(world, end.x, end.y, named: true)}. Where no map location exists, discover something through add_place or simply make camp.");
-        sb.AppendLine("Respond with a brief travel account (2–4 history entries, not a day-by-day recap); patch food and rest.");
+        sb.AppendLine("Respond with a brief travel account (2–4 history entries, not a day-by-day recap); patch consumed food and only completed rest.");
         return sb.ToString();
     }
 

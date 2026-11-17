@@ -738,6 +738,7 @@ class Program
                     await MouseUiHelper.HandleGameScreen(settings, display, storage, screen, heroDisplay.DrawHeroCard,
                         (s, dlg) => aiClient.FixHeroForNewGame(s, dlg),
                         title,
+                        creationEditor: true,
                         heroDisplay:   heroDisplay,
                         onScrollLeft:  () =>
                         {
@@ -915,6 +916,7 @@ class Program
                     await MouseUiHelper.HandleGameScreen(settings, display, storage, screen, abilityDisplay.Draw,
                         (s, dlg) => aiClient.FixHeroForNewGame(s, dlg),
                         title,
+                        creationEditor: true,
                         onScrollUp:   () => display.AbilityScrollOffset = Math.Max(0, display.AbilityScrollOffset - 1),
                         onScrollDown: () => display.AbilityScrollOffset++,
                         setActiveDialog: d => aiClient.ActiveDialog = d);

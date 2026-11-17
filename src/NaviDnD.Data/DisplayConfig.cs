@@ -86,6 +86,8 @@ public class DisplayConfig
     public List<(int x, int y)>? WorldRoute { get; set; }
     // Summary of the selected path (for the legend without recalculation): where, days at normal pace, share of the road.
     public (string dest, double days, double road)? WorldRouteInfo { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool WorldRouteUnavailable { get; set; }
     public int TravelPace { get; set; } = 1;
     // Place of the world under the cursor (index in WorldMap.Places) or -1.
     public int HoveredWorldPlace { get; set; } = -1;

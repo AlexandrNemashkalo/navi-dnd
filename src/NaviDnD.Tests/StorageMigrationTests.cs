@@ -162,13 +162,201 @@ public class StorageMigrationTests : IDisposable
     public void CurrentFormatFilesAndOtherFilesAreNotTouched()
     {
         Write("game1.json", $$$"""{"formatVersion":{{{StorageFormat.Current}}},"time":{"partOfDay":"Утро"}}""");
-        Write("game1.explored.json", "[[1,2]]");
+        string explored = $$$"""{"formatVersion":{{{StorageFormat.Current}}},"locations":{}}""";
+        Write("game1.explored.json", explored);
         Write("settings.json", """{"Language":"en"}""");
         var result = StorageMigration.Run(Storage);
         Assert.Equal(0, result.Migrated);
         Assert.Equal("Утро", (string?)Read("game1.json")["time"]!["partOfDay"]);   // already the current format - don’t touch it
-        Assert.Equal("[[1,2]]", File.ReadAllText(Path.Combine(Storage, "game1.explored.json")));
+        Assert.Equal(explored, File.ReadAllText(Path.Combine(Storage, "game1.explored.json")));
         Assert.False(Directory.Exists(Path.Combine(Storage, "Backup")));
+    }
+
+    [Theory]
+    [InlineData("Chronicle", "Places")]
+    [InlineData("chronicle", "places")]
+    public void VersionFiveWorldInitializesAliasHistoryWithoutInventingOrReplacingIt(string chronicleKey, string placesKey)
+    {
+        string relative = Path.Combine("Worlds", "world-6", "world.json");
+        var world = new JsonObject
+        {
+            ["FormatVersion"] = 5,
+            [chronicleKey] = new JsonObject
+            {
+                [placesKey] = new JsonArray
+                {
+                    new JsonObject { ["Name"] = "New Capital", ["Slot"] = 0, ["Location"] = "capital.json", ["formerNames"] = new JsonArray("Old Capital") },
+                    new JsonObject { ["Name"] = "Village", ["Slot"] = -1, ["Description"] = "Repaired by the hero" },
+                    new JsonObject { ["Name"] = "Ruins", ["FormerNames"] = null, ["DmNotes"] = "The cache is already empty" },
+                },
+            },
+        };
+        string original = world.ToJsonString();
+        Write(relative, original);
+        string locationRelative = Path.Combine("Worlds", "world-6", "locations", "capital.json");
+        const string location = """{"objects":[{"name":"Opened cache","aiInfo":["The key was taken"]}],"entities":[{"name":"Keeper","hp":"7/10"}]}""";
+        Write(locationRelative, location);
+
+        var result = StorageMigration.Run(Storage);
+
+        Assert.True(result.Ok, string.Join("\n", result.Errors));
+        Assert.Equal(1, result.Migrated);
+        Assert.Equal(original, File.ReadAllText(Path.Combine(result.BackupDir!, relative)));
+        Assert.Equal(location, File.ReadAllText(Path.Combine(result.BackupDir!, locationRelative)));
+        var migrated = Read(relative);
+        Assert.Equal(StorageFormat.Current, (int)migrated["FormatVersion"]!);
+        var places = migrated[chronicleKey]![placesKey]!.AsArray();
+        Assert.Equal("Old Capital", (string?)Assert.Single(places[0]!["formerNames"]!.AsArray()));
+        Assert.Equal("capital.json", (string?)places[0]!["Location"]);
+        Assert.Empty(places[1]!["FormerNames"]!.AsArray());
+        Assert.Equal("Repaired by the hero", (string?)places[1]!["Description"]);
+        Assert.Empty(places[2]!["FormerNames"]!.AsArray());
+        Assert.Equal("The cache is already empty", (string?)places[2]!["DmNotes"]);
+        var expectedLocation = JsonNode.Parse(location)!.AsObject();
+        expectedLocation["snapshotTime"] = null;
+        expectedLocation["entities"]![0]!["gender"] = null; // v9 records unknown; no fact is inferred from Keeper.
+        Assert.True(JsonNode.DeepEquals(expectedLocation, Read(locationRelative)));
+        string after = File.ReadAllText(Path.Combine(Storage, relative));
+        Assert.Equal(0, StorageMigration.Run(Storage).Migrated);
+        Assert.Equal(after, File.ReadAllText(Path.Combine(Storage, relative)));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void VersionSixLocationAddsUnknownClockOriginAndPreservesExistingData(bool hasSnapshotTime)
+    {
+        string worldPath = Path.Combine("Worlds", "clock-world", "world.json");
+        string locationPath = Path.Combine("Worlds", "clock-world", "locations", "ruins.json");
+        const string world = """{"FormatVersion":6,"Chronicle":{"Places":[{"Name":"Ruins","FormerNames":["Citadel"],"Location":"ruins.json"}]}}""";
+        var originalMap = JsonNode.Parse("""{"seed":71,"rooms":[{"name":"Hall","positions":[[1,2]]}],"entities":[{"name":"Keeper","hp":"3/9","effects":[{"name":"Poison","expiresAtRound":33}]}],"objects":[{"name":"Opened cache","aiInfo":["Empty"]}],"customMetadata":{"visited":true}}""")!.AsObject();
+        if (hasSnapshotTime)
+            originalMap["snapshotTime"] = JsonNode.Parse("""{"totalRounds":17,"partOfDay":"evening","day":4}""");
+        string original = originalMap.ToJsonString();
+        Write(worldPath, world);
+        Write(locationPath, original);
+
+        var result = StorageMigration.Run(Storage);
+
+        Assert.True(result.Ok, string.Join("\n", result.Errors));
+        Assert.Equal(1, result.Migrated);
+        Assert.Equal(world, File.ReadAllText(Path.Combine(result.BackupDir!, worldPath)));
+        Assert.Equal(original, File.ReadAllText(Path.Combine(result.BackupDir!, locationPath)));
+        var expected = originalMap.DeepClone().AsObject();
+        if (!hasSnapshotTime) expected["snapshotTime"] = null;
+        expected["entities"]![0]!["gender"] = null; // v9 leaves the archived NPC's gender unknown.
+        var migrated = Read(locationPath);
+        Assert.True(migrated.ContainsKey("snapshotTime"));
+        Assert.True(JsonNode.DeepEquals(expected, migrated));
+        Assert.Equal(StorageFormat.Current, (int)Read(worldPath)["FormatVersion"]!);
+        Assert.True(JsonNode.DeepEquals(JsonNode.Parse(world)!["Chronicle"], Read(worldPath)["Chronicle"]));
+        string after = File.ReadAllText(Path.Combine(Storage, locationPath));
+
+        var second = StorageMigration.Run(Storage);
+
+        Assert.True(second.Ok);
+        Assert.Equal(0, second.Migrated);
+        Assert.Null(second.BackupDir);
+        Assert.Equal(after, File.ReadAllText(Path.Combine(Storage, locationPath)));
+        Assert.False(StorageMigration.Needed(Storage));
+    }
+
+    [Theory]
+    [InlineData(5)]
+    [InlineData(6)]
+    public void VersionedExplorationPreservesEveryLocationEvenWithoutItsSave(int version)
+    {
+        // This is already a per-location archive, not the legacy single-map cell array.
+        // A missing save must not discard earlier discoveries or restrict them to a current map.
+        string original = """{"formatVersion":5,"locations":{"[\"world-a\",\"OLD CAPITAL\",\"seed:3\"]":{"cells":[[1,2],[3,4]],"seenObjects":["Cache@3,4"]},"[\"world-a\",\"CAVE\",\"seed:7\"]":{"cells":[[8,9]],"seenObjects":["Door@8,9"]},"[\"world-b\",\"OLD CAPITAL\",\"seed:3\"]":{"cells":[[15,12]],"seenObjects":null}}}""";
+        original = original.Replace("\"formatVersion\":5", $"\"formatVersion\":{version}");
+        Write("game1.explored.json", original);
+
+        var result = StorageMigration.Run(Storage);
+
+        Assert.True(result.Ok, string.Join("\n", result.Errors));
+        Assert.Equal(1, result.Migrated);
+        Assert.Equal(original, File.ReadAllText(Path.Combine(result.BackupDir!, "game1.explored.json")));
+        var migrated = Read("game1.explored.json");
+        Assert.Equal(StorageFormat.Current, (int)migrated["formatVersion"]!);
+        Assert.True(JsonNode.DeepEquals(JsonNode.Parse(original)!["locations"], migrated["locations"]));
+        Assert.Equal(3, migrated["locations"]!.AsObject().Count);
+        string after = migrated.ToJsonString();
+        var second = StorageMigration.Run(Storage);
+        Assert.Equal(0, second.Migrated);
+        Assert.Null(second.BackupDir);
+        Assert.Equal(after, Read("game1.explored.json").ToJsonString());
+        Assert.False(StorageMigration.Needed(Storage));
+    }
+
+    [Fact]
+    public void MalformedVersionFiveExplorationIsBackedUpWithoutBeingReset()
+    {
+        const string original = """{"formatVersion":5,"locations":[[1,2]]}""";
+        Write("game1.explored.json", original);
+        var result = StorageMigration.Run(Storage);
+        Assert.False(result.Ok);
+        Assert.Equal(0, result.Migrated);
+        Assert.Single(result.Errors);
+        Assert.Equal(original, File.ReadAllText(Path.Combine(Storage, "game1.explored.json")));
+        Assert.Equal(original, File.ReadAllText(Path.Combine(result.BackupDir!, "game1.explored.json")));
+    }
+
+    [Fact]
+    public void ExplorationArrayIsBoundToItsOwnSavedLocationAndBackedUp()
+    {
+        Write("game1.json", """{"formatVersion":4,"world":{"id":"world-a","place":"Mill","x":2,"y":3},"map":{"rooms":[{"name":"Mill hall","positions":[[1,1],[1,2]]}]}}""");
+        Write("game1.explored.json", "[[1,1],[1,2]]");
+        var first = StorageMigration.Run(Storage);
+        Assert.True(first.Ok, string.Join("\n", first.Errors));
+        Assert.Equal(2, first.Migrated);
+        Assert.Equal("[[1,1],[1,2]]", File.ReadAllText(Path.Combine(first.BackupDir!, "game1.explored.json")));
+        var explored = Read("game1.explored.json");
+        Assert.Equal(StorageFormat.Current, (int)explored["formatVersion"]!);
+        var location = Assert.Single(explored["locations"]!.AsObject());
+        Assert.Equal("[[1,1],[1,2]]", location.Value!["cells"]!.ToJsonString());
+        Assert.Empty(location.Value["seenObjects"]!.AsArray());
+        var storage = new Storage();
+        storage.LoadFrom(Path.Combine(Storage, "game1.json"));
+        Assert.Contains((1, 1), storage.ExploredCells);
+        Assert.Contains((1, 2), storage.ExploredCells);
+        Assert.Equal(0, StorageMigration.Run(Storage).Migrated);
+    }
+
+    [Fact]
+    public void ExplorationWithoutATacticalLocationDoesNotRevealTheNextLocation()
+    {
+        Write("game1.json", """{"formatVersion":4,"world":{"id":"world-a","x":2,"y":3},"map":{}}""");
+        Write("game1.explored.json", "[[1,2]]");
+        var result = StorageMigration.Run(Storage);
+        Assert.True(result.Ok, string.Join("\n", result.Errors));
+        Assert.Empty(Read("game1.explored.json")["locations"]!.AsObject());
+        Assert.Equal("[[1,2]]", File.ReadAllText(Path.Combine(result.BackupDir!, "game1.explored.json")));
+    }
+
+    [Fact]
+    public void OrphanedExplorationIsArchivedWithoutLeakingIntoANewAdventure()
+    {
+        Write("newGameState.explored.json", "[[1,2]]");
+        var result = StorageMigration.Run(Storage);
+        Assert.True(result.Ok);
+        Assert.Equal(1, result.Migrated);
+        Assert.Empty(Read("newGameState.explored.json")["locations"]!.AsObject());
+        Assert.Equal("[[1,2]]", File.ReadAllText(Path.Combine(result.BackupDir!, "newGameState.explored.json")));
+        Assert.False(StorageMigration.Needed(Storage));
+    }
+
+    [Fact]
+    public void ExplorationWithBrokenSaveIsPreservedForRecovery()
+    {
+        Write("game1.json", "{ broken");
+        Write("game1.explored.json", "[[1,2]]");
+        var result = StorageMigration.Run(Storage);
+        Assert.False(result.Ok);
+        Assert.Single(result.Errors);
+        Assert.Equal(0, result.Migrated);
+        Assert.Equal("[[1,2]]", File.ReadAllText(Path.Combine(Storage, "game1.explored.json")));
+        Assert.Equal("[[1,2]]", File.ReadAllText(Path.Combine(result.BackupDir!, "game1.explored.json")));
     }
 
     [Fact]

@@ -1,0 +1,22 @@
+{
+  "id": "own-art:barrel-shaded-v1",
+  "file": "barrel-shaded-v1.png",
+  "subject": "Barrel",
+  "nameRu": "Бочка",
+  "width": 32,
+  "height": 32,
+  "sha256": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
+  "usage": "prop",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.prop.32",
+  "descriptionEn": "A complete upright wooden storage barrel, three-quarter view from slightly above with visible elliptical wooden lid, bulging vertical oak staves and two dark iron hoops. Strong dark outline, warm golden-brown illuminated left side, deep shaded right side, clear curved volume. No spout, handle, horn, cup, contents or surrounding floor.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/barrel-shaded-v1/original.png",
+  "sourceDimensions": [
+    1233,
+    1275
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; no_palette_quantization",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/generation-sources/barrel-shaded-v1/prompt.txt"
+}

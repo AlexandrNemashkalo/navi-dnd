@@ -185,6 +185,8 @@ public class MapObjectsProvider
 
     public void WriteLine(double x, double y, bool isHorisonal)
     {
+        if (TryWriteCrownEdge(x,y,isHorisonal)) return;
+        if (TryWriteGroundFogSeam(x,y,isHorisonal)) return;
         var (visible, explored) = GetWallState(x, y, isHorisonal);
         var delimetr = isHorisonal ? new string(_display.Delimetr, _display.CellWidth) : _display.Delimetr.ToString();
         if (!visible && !explored)
@@ -218,13 +220,16 @@ public class MapObjectsProvider
         var door = GetDoorAtWall(x, y, isHorisonal);
 
         // If there is a door with a color, draw a door symbol
-        if (door != null && door.IsWindow == true && door.Hidden != true)
+        if (door?.IsWorldExit == true && door.Hidden != true)
         {
-            // Window: dotted along the wall line, open - with an opening in the middle.
-            bool openWindow = door.IsDoorOpen ?? false;
+            WriteWorldExit(door, x, y, isHorisonal, visible);
+        }
+        else if (door != null && door.IsWindow == true && door.Hidden != true)
+        {
+            // A continuous blue pane stays aligned with the wall in both orientations.
             string windowText = isHorisonal
-                ? (openWindow ? "┄ ┄" : new string('┄', _display.CellWidth))
-                : (openWindow ? "╎" : "┆");
+                ? new string('═', _display.CellWidth)
+                : "║";
             var windowColor = _display.HoveredDoor == door ? ColorHelper.Pale(WindowColor, 0.6) : WindowColor;
             if (!visible) windowColor = ColorHelper.Darker(windowColor, 0.5);
             ColorHelper.WriteColored(windowText, fgColor: windowColor, bgColor: bg);
@@ -238,20 +243,20 @@ public class MapObjectsProvider
                 if (door.IsDoorOpen ?? false)
                 {
                     doorText = IsRightDoorOfHorizontalPair(x, y)
-                        ? new string(' ', _display.CellWidth - 1) + "■"
-                        : "■" + new string(' ', _display.CellWidth - 1);
+                        ? new string(' ', _display.CellWidth - 1) + "═"
+                        : "═" + new string(' ', _display.CellWidth - 1);
                 }
                 else
                 {
-                    doorText = new string('■', _display.CellWidth);
+                    doorText = new string('═', _display.CellWidth);
                 }
             }
             else
             {
                 if (door.IsDoorOpen ?? false)
-                    doorText = IsBottomDoorOfVerticalPair(x, y) ? "▄" : "▀";
+                    doorText = IsBottomDoorOfVerticalPair(x, y) ? "╥" : "╨";
                 else
-                    doorText = "█";
+                    doorText = "║";
             }
 
             var doorColor = GetDoorColor(door);
@@ -278,6 +283,10 @@ public class MapObjectsProvider
                 if (!visible) { jfg = ColorHelper.Darker(jfg, 0.5); jbg = ColorHelper.Darker(jbg, 0.5); }
                 string jointText = !isHorisonal ? join[0].ToString()
                     : k1.Code != '#' && HasRowNeighbour(c1.Item1, c1.Item2) ? new string(join[0], _display.CellWidth) : $" {join[1]} ";
+                if (k1.Code == 'J' && isHorisonal) jointText = "\u2551 \u2551";
+                if (k1.Code == 'L') jointText = isHorisonal ? "▐█▌" : "▀";
+                if (k1.Code == 'B') jointText = isHorisonal ? "║ ║" : "═";
+                if (k1.Code == 'N') jointText = isHorisonal ? "│ │" : "─";
                 ColorHelper.WriteColored(jointText, fgColor: jfg, bgColor: jbg);
                 return;
             }
@@ -355,7 +364,7 @@ public class MapObjectsProvider
             if (_terrain.TryGetValue((x, y), out var fogKind))
             {
                 fogText = JoinedGlyph(fogKind, x, y) ?? TerrainCatalog.Glyph(fogKind, x, y);
-                if (fogKind.Indoor)
+                if (fogKind.Indoor || fogKind.BgMix > 0)
                 {
                     // We count the colors according to the original floor and extinguish them entirely - otherwise the bright furniture would not dim in the fog.
                     var (lf, lb) = TerrainColors(fogKind, bg);
@@ -377,6 +386,7 @@ public class MapObjectsProvider
                 return;
             }
             if (fogKind != null && TryWriteSingleBed(fogKind, x, y, bg, fogBg, dim: true)) return;
+            if (fogKind?.Code is 'T' or 'F') { WriteTreeCell(fogText, x, y, fogFg, fogBg); return; }
             if (IsTiledFloor(x, y)) WriteTiled(fogText, 4 * x - 3, 2 * y, fogFg, fogBg, TileKind(x, y));
             else ColorHelper.WriteColored(fogText, fgColor: fogFg, bgColor: fogBg);
             return;
@@ -407,16 +417,37 @@ public class MapObjectsProvider
                 cellBg = PieceBg(kind, x, y, bg, cellBg);
                 if (isHovered && !kind.Indoor) fg = ColorHelper.Pale(fg, 0.22);
                 if (TryWriteSingleBed(kind, x, y, bg, cellBg, dim: false)) return;
+                if (kind.Code is 'T' or 'F') { WriteTreeCell(text, x, y, fg, cellBg); return; }
             }
             if (IsTiledFloor(x, y)) WriteTiled(text, 4 * x - 3, 2 * y, fg, cellBg, TileKind(x, y));
             else ColorHelper.WriteColored(text, fgColor: fg, bgColor: cellBg);
         }
     }
 
+    private void WriteWorldExit(Door door, double x, double y, bool horizontal, bool visible)
+    {
+        var from = (x: door.From[0], y: door.From[1]);
+        var to = (x: door.To[0], y: door.To[1]);
+        var inside = IsVoid(from.x, from.y) ? to : from;
+        var outside = inside == from ? to : from;
+        string arrow = horizontal ? (outside.y > inside.y ? " ↑ " : " ↓ ")
+            : outside.x > inside.x ? "→" : "←";
+        var bg = GetBackgroundColor(inside.x, inside.y);
+        if (_ground.TryGetValue(inside, out var ground)) bg = TerrainColors(ground, bg).bg;
+        List<int> fg = [210, 190, 140];
+        if (!visible) { fg = ColorHelper.Darker(fg, .5); bg = ColorHelper.Darker(bg, .5); }
+        if (_display.HoveredDoor == door) fg = ColorHelper.Pale(fg, .75);
+        bg = ApplyTargetTintBetween(bg, from, to);
+        if (IsTiledFloor(inside.x, inside.y))
+            WriteTiled(arrow, horizontal ? 4 * (int)x - 3 : (int)(4 * x) - 2,
+                (int)(2 * y), fg, bg, TileKind(inside.x, inside.y));
+        else ColorHelper.WriteColored(arrow, fgColor: fg, bgColor: bg);
+    }
+
     // Terrain colors: open area - custom; dungeon floor - mixed with the color of the room below it.
     private static (List<int> fg, List<int> bg) TerrainColors(TerrainKind kind, List<int> cellBg) => kind.Indoor
         ? (ColorHelper.MixWith(cellBg, kind.Fg, kind.FgMix), kind.BgMix > 0 ? ColorHelper.MixWith(cellBg, kind.Bg, kind.BgMix) : cellBg)
-        : (kind.Fg, cellBg);
+        : (kind.Fg, kind.BgMix > 0 ? ColorHelper.MixWith(cellBg, kind.Bg, kind.BgMix) : cellBg);
 
     // ── Dungeon floor tiles ────────────────────── ─────────────────────── The background of the floor of the
     // rooms of the block location is a small checkerboard pattern: every 2 characters horizontally and each
@@ -436,17 +467,38 @@ public class MapObjectsProvider
     // 0 - no pattern, 1 - boards (1 symbol), 2 - dungeon tile (2 symbols).
     private int TileKind(int x, int y)
     {
-        if (!_roomPositions.Contains((x, y))) return 0;
+        if (!_roomPositions.Contains((x, y)))
+            return _terrain.TryGetValue((x, y), out var ground) ? ground.Code switch
+            {
+                '.' or ',' => 3,
+                '=' => 4,
+                'T' or 'F' => 5,
+                _ => 0
+            } : 0;
         return _settings.Map.ChunkAt(x, y)?.Theme switch
         {
             "dungeon" => 2,
-            MapChunk.Building or MapChunk.Village => _terrain.TryGetValue((x, y), out var k) && k.Code is 'q' or 'k' or 'p' ? 0 : 1,
+            MapChunk.Building or MapChunk.Village => _ground.TryGetValue((x, y), out var k) && k.Code is 'q' or 'k' or 'p' or 'K' ? 2 : 1,
             _ => 0,
         };
     }
 
     private void WriteTiled(string text, int x0, int y, List<int> fg, List<int> bg, int kind)
     {
+        if (kind >= 3)
+        {
+            for (int i = 0; i < text.Length; i++)
+            {
+                int x = x0 + i;
+                double patch = GroundPatch(x, y);
+                double grain = GroundNoise(x, y);
+                double naturalShade = (patch * .7 + grain * .3) * (kind == 3 ? .075 : .055);
+                var texture = kind == 5 ? CrownShade(bg,x,y) : naturalShade > 0 ? ColorHelper.MixWith(bg, [210, 210, 150], naturalShade)
+                    : ColorHelper.MixWith(bg, [0, 0, 0], -naturalShade * 1.6);
+                ColorHelper.WriteColored(text[i].ToString(), fgColor: fg, bgColor: texture);
+            }
+            return;
+        }
         int shift = kind == 1 ? 0 : 1;
         double shade = kind == 1 ? PlankShade : TileShade;
         for (int i = 0; i < text.Length;)
@@ -460,9 +512,210 @@ public class MapObjectsProvider
         }
     }
 
-    // Symbol of a stand/bench next to neighbors of the same type: in a row - a horizontal beam, in a column - a vertical one.
+    // World-coordinate noise stays fixed while panning and revealing the map; it changes no terrain physics.
+    private static double GroundNoise(int x, int y)
+    {
+        uint h = unchecked((uint)x * 374761393u + (uint)y * 668265263u + 0x9E3779B9u);
+        h = (h ^ (h >> 13)) * 1274126177u;
+        return ((h ^ (h >> 16)) & 1023) / 511.5 - 1;
+    }
+
+    private static double GroundPatch(int x, int y)
+    {
+        double gx = x / 7d, gy = y / 5d;
+        int left = (int)Math.Floor(gx), bottom = (int)Math.Floor(gy);
+        double tx = gx - left, ty = gy - bottom;
+        tx = tx * tx * (3 - 2 * tx); ty = ty * ty * (3 - 2 * ty);
+        double low = GroundNoise(left, bottom) * (1 - tx) + GroundNoise(left + 1, bottom) * tx;
+        double high = GroundNoise(left, bottom + 1) * (1 - tx) + GroundNoise(left + 1, bottom + 1) * tx;
+        return low * (1 - ty) + high * ty;
+    }
+
+    // Unknown cells do not participate in the displayed crown, even when their saved terrain is forest.
+    private bool CrownTree((int x, int y) p) => !_roomPositions.Contains(p)
+        && _terrain.GetValueOrDefault(p)?.Code is 'T' or 'F'
+        && (IsCellVisible(p.x,p.y) || IsCellExplored(p.x,p.y));
+
+    private List<int> CrownNeighborBackground((int x,int y) p)
+    {
+        if (IsVoid(p.x,p.y) || (!IsCellVisible(p.x,p.y) && !IsCellExplored(p.x,p.y))) return MapBg;
+        var bg=GetBackgroundColor(p.x,p.y);
+        return IsCellVisible(p.x,p.y) ? bg : ColorHelper.Darker(bg,.5);
+    }
+
+    private static List<int> CrownShade(List<int> color,int x,int y)
+    {
+        double shade=(GroundPatch(x,y)*.7+GroundNoise(x,y)*.3)*.10;
+        // Relative variation keeps the whole crown dark and preserves fog attenuation.
+        return color.Select(c=>(int)Math.Clamp(Math.Round(c*(1+shade)),0,255)).ToList();
+    }
+
+    private static List<int> CrownRim(List<int> color, int x, int y) =>
+        ColorHelper.Darker(CrownShade(color, x, y), .95);
+
+    private void WriteTreeCell(string text, int x, int y, List<int> trunk, List<int> leaf)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            int sx = 4 * x - 3 + i, sy = 2 * y;
+            int dx = i == 0 ? -1 : 1;
+            bool rim = i != 1 && !CrownTree((x + dx, y)) && !IsVoid(x + dx, y)
+                && (IsCellVisible(x + dx,y) || IsCellExplored(x + dx,y))
+                && !IsWallPresent(x + dx * .5, y, false) && GetDoorAtWall(x + dx * .5, y, false) == null;
+            ColorHelper.WriteColored(rim ? (i == 0 ? "▌" : "▐") : text[i].ToString(),
+                fgColor: rim ? CrownRim(leaf, sx, sy) : trunk, bgColor: CrownShade(leaf, sx, sy));
+        }
+    }
+
+    private bool TryWriteCrownEdge(double x,double y,bool horizontal)
+    {
+        var a=horizontal ? ((int)x,(int)(y-.5)) : ((int)(x-.5),(int)y);
+        var b=horizontal ? ((int)x,(int)(y+.5)) : ((int)(x+.5),(int)y);
+        bool first=CrownTree(a), second=CrownTree(b);
+        if ((!first&&!second) || GetDoorAtWall(x,y,horizontal)!=null || IsWallPresent(x,y,horizontal)) return false;
+        var tree=first?a:b; var neighbor=first?b:a;
+        bool visible=IsCellVisible(tree.Item1,tree.Item2);
+        var leaf=_terrain[tree].Bg;
+        if(!visible) leaf=ColorHelper.Darker(leaf,.5);
+        bool fill=first&&second || IsVoid(neighbor.Item1,neighbor.Item2);
+        var bg=fill?leaf:CrownNeighborBackground(neighbor);
+        int bridge=OriginBridgeLevel(x,y,horizontal);
+        bg=bridge>0?TintByLevel(bg,bridge):ApplyTargetTintBetween(bg,a,b);
+        leaf=bridge>0?TintByLevel(leaf,bridge):ApplyTargetTintBetween(leaf,a,b);
+        int sx=horizontal?4*(int)x-3:(int)(4*x)-2, sy=(int)(2*y);
+        bool thicketTrunk = first && second && _terrain[a].Code == 'F' && _terrain[b].Code == 'F';
+        int trunkAt = horizontal ? (GroundNoise(sx, sy) > .3 ? 2 : GroundNoise(sx, sy) < -.3 ? 0 : 1) : 0;
+        for(int i=0;i<(horizontal?_display.CellWidth:1);i++)
+        {
+            char glyph=' ';
+            if(!fill)
+            {
+                // Broad foliage lobes span two or three characters; no isolated spikes.
+                glyph=horizontal ? first ? '\u2584' : '\u2580'
+                    : first ? '\u258c' : '\u2590';
+                double lobe=GroundNoise(tree.Item1*7+(horizontal?1:3),tree.Item2*11+(first?0:5));
+                if(horizontal && lobe>-.4)
+                {
+                    int start=lobe<0?1:0;
+                    int end=lobe>.55?_display.CellWidth-1:start+1;
+                    if(i>=start && i<=end)
+                        glyph=end-start==1 ? '\u2588' : i==start ? (first?'\u259f':'\u259c')
+                            : i==end ? (first?'\u2599':'\u259b') : '\u2588';
+                }
+                else if(!horizontal && lobe>.1)
+                {
+                    // A full-height side lobe is broad in both vertical half-cells,
+                    // unlike the former isolated quarter-block spikes.
+                    glyph='\u2588';
+                }
+            }
+            bool trunk = thicketTrunk && i == trunkAt;
+            var fg = trunk ? (visible ? _terrain[a].Fg : ColorHelper.Darker(_terrain[a].Fg,.5))
+                : fill ? CrownShade(leaf,sx+i,sy) : CrownRim(leaf,sx+i,sy);
+            ColorHelper.WriteColored(trunk ? "●" : glyph.ToString(),fgColor:fg,bgColor:fill?CrownShade(bg,sx+i,sy):bg);
+        }
+        return true;
+    }
+
+    private bool TryWriteCrownCorner(double x,double y)
+    {
+        var edges=new[]{(x,y+.5,false),(x+.5,y,true),(x,y-.5,false),(x-.5,y,true)};
+        if(edges.Any(e=>GetDoorAtWall(e.Item1,e.Item2,e.Item3) is {} door ? door.IsWorldExit!=true : IsWallPresent(e.Item1,e.Item2,e.Item3))) return false;
+        var cells=new[]{((int)(x-.5),(int)(y+.5)),((int)(x+.5),(int)(y+.5)),((int)(x-.5),(int)(y-.5)),((int)(x+.5),(int)(y-.5))};
+        int mask=0; for(int i=0;i<4;i++) if(CrownTree(cells[i])) mask|=1<<i;
+        if(mask==0) return false;
+        var tree=cells.First(CrownTree);
+        bool visible=IsCellVisible(tree.Item1,tree.Item2);
+        var leaf=_terrain[tree].Bg; if(!visible) leaf=ColorHelper.Darker(leaf,.5);
+        // Extend foliage through the clipped location boundary, never through unknown real ground.
+        for(int i=0;i<4;i++) if(IsVoid(cells[i].Item1,cells[i].Item2)) mask|=1<<i;
+        const string quadrants=" \u2598\u259d\u2580\u2596\u258c\u259e\u259b\u2597\u259a\u2590\u259c\u2584\u2599\u259f\u2588";
+        // The exposed ground owns the background of a crown corner. Prefer visible ground,
+        // then remembered ground: an arbitrary hidden quadrant must not punch a dark square into it.
+        var outside=cells.Where(p=>!CrownTree(p)&&!IsVoid(p.Item1,p.Item2))
+            .OrderByDescending(p=>IsCellVisible(p.Item1,p.Item2))
+            .ThenByDescending(p=>IsCellExplored(p.Item1,p.Item2)).ToArray();
+        var bg=outside.Length==0?leaf:CrownNeighborBackground(outside[0]);
+        int bridge=OriginBridgeLevel(x,y,null);
+        bg=bridge>0?TintByLevel(bg,bridge):ApplyTargetTintCorner(bg,cells);
+        leaf=bridge>0?TintByLevel(leaf,bridge):ApplyTargetTintCorner(leaf,cells);
+        ColorHelper.WriteColored(quadrants[mask].ToString(),fgColor:mask == 15 ? CrownShade(leaf,(int)(4*x)-2,(int)(2*y)) : CrownRim(leaf,(int)(4*x)-2,(int)(2*y)),bgColor:bg);
+        return true;
+    }
+
+    // Subcell shading trims fog steps over ground and room floors without changing visibility.
+    private bool TryWriteGroundFogSeam(double x,double y,bool? horizontal)
+    {
+        var cells=horizontal switch
+        {
+            true => new[]{((int)x,(int)(y-.5)),((int)x,(int)(y+.5))},
+            false => new[]{((int)(x-.5),(int)y),((int)(x+.5),(int)y)},
+            null => new[]{((int)(x-.5),(int)(y-.5)),((int)(x-.5),(int)(y+.5)),((int)(x+.5),(int)(y-.5)),((int)(x+.5),(int)(y+.5))}
+        };
+        if(cells.Any(p=>IsVoid(p.Item1,p.Item2))) return false;
+        var known=cells.Where(p=>IsCellVisible(p.Item1,p.Item2)||IsCellExplored(p.Item1,p.Item2)).ToArray();
+        bool Floor((int,int) p)
+        {
+            // Furniture does not change the floor around it or disable fog shading there.
+            var kind=_roomPositions.Contains(p) ? _ground.GetValueOrDefault(p) : _terrain.GetValueOrDefault(p);
+            return _roomPositions.Contains(p)
+                ? kind==null || kind.Code is 'w' or 'p' or 'q' or 'k' or 'K' or 'm' or 'u' or 'b' or 'r'
+                : kind?.Code is '.' or ',' or '=';
+        }
+        if(known.Length==0 || known.Any(p=>!Floor(p))) return false;
+        // Keep the actual connecting strokes of a multi-cell object, not its surrounding floor.
+        if(_terrain.GetValueOrDefault(cells[0])?.Join != null
+            && cells.Skip(1).All(p=>SamePiece(cells[0],p))) return false;
+        var edges=horizontal.HasValue ? new[]{(x,y,horizontal.Value)}
+            : new[]{(x,y+.5,false),(x+.5,y,true),(x,y-.5,false),(x-.5,y,true)};
+        if(edges.Any(e=>GetDoorAtWall(e.Item1,e.Item2,e.Item3)!=null||IsWallPresent(e.Item1,e.Item2,e.Item3))) return false;
+        bool Seen((int,int) p)=>IsCellVisible(p.Item1,p.Item2);
+        if(!cells.Any(Seen)||cells.All(Seen)) return false;
+        var ground=known.First(Seen);
+        var bright=GetBackgroundColor(ground.Item1,ground.Item2);
+        var dark=known.Length==cells.Length?ColorHelper.Darker(bright,.5):MapBg;
+        int length=horizontal==true?_display.CellWidth:1;
+        for(int i=0;i<length;i++)
+        {
+            // Corners and the end characters of horizontal seams get more shadow than the centre.
+            double light=horizontal==null ? Math.Max(0,(cells.Count(Seen)-1)/3d) : .5;
+            if(horizontal==true && (i==0||i==length-1))
+            {
+                int dx=i==0?-1:1;
+                int lit=cells.Count(Seen)+cells.Count(p=>IsCellVisible(p.Item1+dx,p.Item2));
+                light=Math.Min(light,Math.Max(0,(lit-1)/3d));
+            }
+            var bg=ColorHelper.MixWith(dark,bright,light);
+            bg=ApplyTargetTintBetween(bg,cells);
+            if(_roomPositions.Contains(ground) && TileKind(ground.Item1,ground.Item2) is var tile && tile>0)
+                WriteTiled(" ",horizontal==true?4*(int)x-3+i:(int)(4*x)-2,(int)(2*y),bg,bg,tile);
+            else ColorHelper.WriteColored(" ",fgColor:bg,bgColor:bg);
+        }
+        return true;
+    }
+
     private string? JoinedGlyph(TerrainKind kind, int x, int y)
     {
+        if (kind.Code is 'B' or 'N')
+        {
+            bool bench = kind.Code == 'N';
+            bool left = SamePiece((x, y), (x - 1, y)), right = SamePiece((x, y), (x + 1, y));
+            bool up = SamePiece((x, y), (x, y + 1)), down = SamePiece((x, y), (x, y - 1));
+            if (!left && !right && (up || down))
+                return bench ? (!up ? "┌─┐" : !down ? "└─┘" : "│ │")
+                    : (!up ? "╓─╖" : !down ? "╙─╜" : "║ ║");
+            char line = bench ? '─' : '═';
+            return $"{(left ? line : bench ? '└' : '╘')}{line}{(right ? line : bench ? '┘' : '╛')}";
+        }
+        if (kind.Code == 'L')
+        {
+            bool left = SamePiece((x, y), (x - 1, y)), right = SamePiece((x, y), (x + 1, y));
+            bool vertical = !left && !right && (SamePiece((x, y), (x, y - 1)) || SamePiece((x, y), (x, y + 1)));
+            if (vertical) return "▐█▌";
+            const char surface = '▀';
+            return $"{(left ? surface : '▐')}{surface}{(right ? surface : '▌')}";
+        }
+        if (kind.Code == 'J') return HasRowNeighbour(x, y) ? "\u256a\u2550\u2550" : "\u255f\u2500\u2562";
         if (kind.Code == '#')
         {
             bool l = SamePiece((x, y), (x - 1, y)), r = SamePiece((x, y), (x + 1, y));
@@ -693,6 +946,8 @@ public class MapObjectsProvider
 
     public void WriteCorner(double x, double y, CornerType type)
     {
+        if (TryWriteCrownCorner(x,y)) return;
+        if (TryWriteGroundFogSeam(x,y,null)) return;
         var (visible, explored) = GetCornerState(x, y);
 
         if (!visible && !explored)
@@ -794,13 +1049,6 @@ public class MapObjectsProvider
             provider = _gridProvider;
         else
         {
-            if (GridHelper.HasAdjacentTwos(wallsFlags))
-                wallsFlags = wallsFlags.Select(x => x == 1 ? 0 : x).ToList();
-
-            if (wallsFlags.Count(x => x == 1) == 3)
-                wallsFlags = GridHelper.Transform1112List(wallsFlags);
-
-            wallsFlagsStr = string.Join(string.Empty, wallsFlags);
             provider = _wallGridProvider;
         }
 
@@ -871,12 +1119,12 @@ public class MapObjectsProvider
             bool anyOpen = (leftDoor.IsDoorOpen ?? false) || (rightDoor.IsDoorOpen ?? false);
             if (anyOpen)
             {
-                ColorHelper.WriteColored(_gridProvider.GetCorner("1111").ToString(),
+                ColorHelper.WriteColored(" ",
                     fgColor: ColorHelper.Darker(bg), bgColor: bg);
             }
             else
             {
-                ColorHelper.WriteColored("■", fgColor: GetDoorColor(leftDoor), bgColor: bg);
+                ColorHelper.WriteColored("═", fgColor: GetDoorColor(leftDoor), bgColor: bg);
             }
             return true;
         }
@@ -894,12 +1142,12 @@ public class MapObjectsProvider
             bool anyOpen = (bottomDoor.IsDoorOpen ?? false) || (topDoor.IsDoorOpen ?? false);
             if (anyOpen)
             {
-                ColorHelper.WriteColored(_gridProvider.GetCorner("1111").ToString(),
+                ColorHelper.WriteColored(" ",
                     fgColor: ColorHelper.Darker(bg), bgColor: bg);
             }
             else
             {
-                ColorHelper.WriteColored("█", fgColor: GetDoorColor(bottomDoor), bgColor: bg);
+                ColorHelper.WriteColored("║", fgColor: GetDoorColor(bottomDoor), bgColor: bg);
             }
             return true;
         }
@@ -954,6 +1202,7 @@ public class MapObjectsProvider
 
     private void ComputeHeroVisibility(int heroX, int heroY)
     {
+        _storage.SelectExplorationLocation();
         _storage.VisibleCells.Clear();
         _storage.VisibleCells.Add((heroX, heroY));
 

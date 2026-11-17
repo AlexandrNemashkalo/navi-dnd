@@ -1,4 +1,4 @@
-﻿using NaviDnD.Clients;
+using NaviDnD.Clients;
 using NaviDnD.Data;
 using NaviDnD.Data.Models;
 using NaviDnD.Display;
@@ -642,7 +642,8 @@ internal class MapScreenLoop
                     else if (terrainHere != null)
                     {
                         string label = L.T(terrainHere.Name) + (TerrainCatalog.Properties(terrainHere) is { } tprops ? "\n" + tprops : "");
-                        SetMapImage(ArtPictures.TerrainImage(terrainHere), label, terrainHere.LegendColor ?? terrainHere.Fg);
+                        QueueImage(TerrainCatalog.IsBackground(terrainHere.Code) ? null : ArtPictures.TerrainImage(terrainHere),
+                            () => MouseUiHelper.SetSelectedTerrainImage(_display, terrainHere, label));
                         activeDialog?.RerenderRightPanel();
                     }
                     else if (_display.SelectedMapItemIndex < 0)
@@ -760,56 +761,89 @@ internal class MapScreenLoop
         // The goal of the path on the world map: the route from the hero (click on the hero’s cell to remove the goal).
         void SetTravelTarget((int x, int y) target)
         {
-            bool heroTile = GameWorld.HeroTile(_settings) == target;
-            var plan = heroTile ? null : TravelService.PlanTo(_settings, target);
-            if (plan == null && !heroTile && GameWorld.HeroTile(_settings) != null)
-                SetMapImage("lorc/waves", L.T("Unreachable on foot\nwater or mountain peaks in the way"), [110, 150, 200]);
-            _display.WorldTarget = plan != null ? target : null;
-            _display.WorldRoute = plan?.Route.Path;
-            var w = _mapDisplay.WorldView.World;
-            _display.WorldRouteInfo = plan == null ? null
-                : (plan.TargetPlace ?? NaviDnD.MapGen.Generators.WorldAtlas.TileName(w, target.x, target.y), plan.Route.Days, plan.Route.RoadShare);
+            WorldTravelSelection.Select(_settings, _display, _mapDisplay.WorldView.World, target);
         }
 
         // On the road: the code leads the hero along the route (days, meetings), the GM describes the road with one call.
         async Task StartTravel(DialogDisplay dialog)
         {
             _settings.History ??= [];
-            if (_display.WorldTarget is not { } target || TravelService.PlanTo(_settings, target) is not { } plan)
-            {
-                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Pick a destination by clicking the world map, then [F10] to travel.") });
-                _storage.Save();
-                return;
-            }
             if (_settings.Combat?.Active == true)
             {
                 _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Combat is on — you can't travel now.") });
                 _storage.Save();
                 return;
             }
-            var pace = (TravelService.Pace)_display.TravelPace;
-            string dest = plan.TargetPlace ?? (GameWorld.ForMaster(_settings) is { } tw ? NaviDnD.MapGen.Generators.WorldAtlas.TileName(tw, target.x, target.y) : L.W("the unknown"));
-            string report = TravelService.Go(_settings, plan, pace, new Random());
-            // I came to a place with a saved location - “everything is as it was,” the hero is at the entrance.
-            if (plan.TargetPlace != null && _settings.World?.Place == plan.TargetPlace && GameWorld.Geo(_settings) is { } geo
-                && GameWorld.SavedLocationJson(geo, plan.TargetPlace) is { } json)
+            if (LocationRestoration.CanRetryAtTarget(_settings, _display.WorldTarget))
             {
-                _storage.ApplyUpdateWorldState("{\"map\":" + json + "}");
-                if (_settings.Hero != null && LocationGrower.EntranceCell(_settings.Map) is var (ec, er)) _settings.Hero.Position = [ec, er];
+                if (LocationRestoration.TryRestoreCurrentPlace(_storage))
+                {
+                    _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Returned to the saved location.") });
+                    WorldTravelSelection.Clear(_display);
+                    _display.PendingCommand = "F1";
+                    _storage.Save();
+                }
+                else
+                    _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Could not restore this saved location. Its archive was not changed; you can retry with F10.") });
+                RedrawWorldKeepCursor();
+                return;
             }
-            _display.WorldTarget = null;
-            _display.WorldRoute = null;
-            _display.WorldRouteInfo = null;
+            if (_display.WorldTarget is not { } target)
+            {
+                _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Pick a destination by clicking the world map, then [F10] to travel.") });
+                _storage.Save();
+                return;
+            }
+            var pace = (TravelService.Pace)_display.TravelPace;
+            bool localEntry = LocalPlaceEntry.TryEnter(_settings, target, out string report);
+            string? targetPlace;
+            string dest;
+            if (localEntry)
+            {
+                targetPlace = _settings.World!.Place;
+                dest = targetPlace!;
+            }
+            else
+            {
+                if (TravelService.PlanTo(_settings, target) is not { } plan)
+                {
+                    _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Pick a destination by clicking the world map, then [F10] to travel.") });
+                    _storage.Save();
+                    return;
+                }
+                targetPlace = plan.TargetPlace;
+                dest = targetPlace ?? (GameWorld.ForMaster(_settings) is { } tw ? NaviDnD.MapGen.Generators.WorldAtlas.TileName(tw, target.x, target.y) : L.W("the unknown"));
+                report = TravelService.Go(_settings, plan, pace, new Random());
+                if (GameWorld.HasLocation(_settings))
+                {
+                    _settings.History.Add(new Data.Models.DialogMessage { Text = GameWorld.LocationSaveFailureMessage(_settings) });
+                    RedrawWorldKeepCursor();
+                    return;
+                }
+            }
+            // I came to a place with a saved location - “everything is as it was,” the hero is at the entrance.
+            if (targetPlace != null && _settings.World?.Place is { } arrivedName && GameWorld.Geo(_settings) is { } geo
+                && GameWorld.ResolvePlace(geo, targetPlace)?.Name == arrivedName
+                && GameWorld.HasSavedLocation(geo, arrivedName))
+            {
+                if (GameWorld.SavedLocationJson(geo, arrivedName) is not { } json || !LocationRestoration.TryRestore(_storage, json))
+                {
+                    report += "\nCorrection to Arrival: the archived location could not be read or restored with a free entrance cell. The hero remains outside. Do not claim entry, regenerate the location, or overwrite its saved map.";
+                    _settings.History.Add(new Data.Models.DialogMessage { Text = L.T("Could not restore this saved location. Its archive was not changed; you can retry with F10.") });
+                }
+            }
+            WorldTravelSelection.Clear(_display);
             if (GameWorld.HeroTile(_settings) is { } h) { _display.WorldCenterX = h.x + 0.5; _display.WorldCenterY = h.y + 0.5; }
-            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = L.WF("Setting off: {0} ({1} pace).", dest, L.W(TravelService.PaceName(pace))) });
+            _settings.History.Add(new Data.Models.DialogMessage { Author = _settings.Hero?.Name ?? "Hero", Text = localEntry
+                ? L.WF("Approaching {0}.", dest) : L.WF("Setting off: {0} ({1} pace).", dest, L.W(TravelService.PaceName(pace))) });
             _storage.Save();
             _display.DialogScrollOffset = 0;
             _aiClient.ActiveDialog = dialog;
             dialog.PrepareStreaming();
             _display.PendingCommand = "F1";
             dialog.PollOnly(); // open the adventure/tactical scene while the GM describes the journey
-            MusicDirector.Traveling = true;   // while the GM describes the road - the music of the path
-            try { await _aiClient.Travel(report, dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, null); }
+            MusicDirector.Traveling = !localEntry;   // local entry does not start journey music
+            try { await _aiClient.Travel(report, dialog.AppendStreamChunk, dialog.NewStreamingMessage, dialog.TickSpinner, null, localEntry: localEntry); }
             finally { MusicDirector.Traveling = false; }
             dialog.FinalizeStreaming();
             Term.FlushKeys();
@@ -1355,10 +1389,12 @@ internal class MapScreenLoop
                 // Save the tactical location and return to adventure scenery on F1.
                 movementHandler.LeaveRequested = false;
                 string where = _settings.World?.Place ?? L.T("the location");
-                GameWorld.LeaveLocation(_settings);
+                bool left = GameWorld.LeaveLocation(_settings);
                 _settings.History ??= [];
-                _settings.History.Add(new Data.Models.DialogMessage { Text = L.F("You leave {0}. Open [F2] to choose a route and [F10] to travel.", where) });
-                _storage.Save();
+                _settings.History.Add(new Data.Models.DialogMessage { Text = left
+                    ? L.F("You leave {0}. Open [F2] to choose a route and [F10] to travel.", where)
+                    : GameWorld.LocationSaveFailureMessage(_settings) });
+                if (left) _storage.Save();
                 _display.PendingCommand = "F1";
                 break;
             }

@@ -3200,6 +3200,90 @@
       "sha256": "4c204edda44a2c71e3aff9561bc5cad92b4d7fe383e465c128eb50c5cad35d22",
       "method": "Readable three-tree silhouette, inspected at native 32x32 and enlarged.",
       "sheet": "forest-thicket-v2.png"
+    },
+    {
+      "assetId": "prepared-items-native-32-32-treasure:icon-037",
+      "sha256": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
+      "sheet": "artifacts/art-fixes/coin-vestment-candidates.png",
+      "position": 18
+    },
+    {
+      "assetId": "prepared-items-native-32-batch2-05-cuirasses:icon-020",
+      "sha256": "ab77232d02bd4695b28faa5ea65881846d04f64abd0f56e3185409913a983fd1",
+      "sheet": "artifacts/art-fixes/coin-vestment-candidates.png",
+      "position": 24
+    },
+    {
+      "assetId": "own-art:incense-sticks-v4",
+      "sha256": "42fe5e050daa3e7e09a03b81bfd8b6698f3e43be601c7e7649211b0de856678f",
+      "sheet": "src/ArtLibrary/Sources/own-art/incense-sticks-v4.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:table-shaded-v1",
+      "sha256": "6b4555d2e13657d457bc6144e92afb8318182883562f2befa86bd910db0c6926",
+      "sheet": "artifacts/art-fixes/scenery-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:cabinet-shaded-v1",
+      "sha256": "2deffd0cfeaac62ddae0df05441e7608b856b5c3785797c773a360ba628dc9f7",
+      "sheet": "artifacts/art-fixes/scenery-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:hearth-shaded-v1",
+      "sha256": "51a4508f271caa581b4c8fb437a9ace2668182582b75da5d2ae4b51d3927344c",
+      "sheet": "artifacts/art-fixes/scenery-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:barrel-shaded-v1",
+      "sha256": "f96f1b123eaf916eb19e5e7e6a21146016f0d2a98409fd64f0d1dd75d2e9c80c",
+      "sheet": "artifacts/art-fixes/scenery-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:window-shaded-v1",
+      "sha256": "b945fc8c2ebf42e0072f78918c94d2b71c7a1d34aeeb52f8881ea56ffb691fc8",
+      "sheet": "artifacts/art-fixes/scenery-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:plank-floor-shaded-v1",
+      "sha256": "0e8c9a19a5c835f1d2aed3c94fa3d001788eeb6367c1ba550bd4a1dc1a2fc5ad",
+      "sheet": "artifacts/art-fixes/scenery-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:cart-axle-shaded-v1",
+      "sha256": "9aa2a0791f3dc1047b3f87237ff50d5ed1ea101c4f6a2a6e58ee9d7a8259ced6",
+      "sheet": "artifacts/art-fixes/scenery-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:forest-thicket-v1",
+      "sha256": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+      "sheet": "artifacts/art-fixes/scenery-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:tall-grass-shaded-v1",
+      "sha256": "be1e4c819f901fcb5d7b11d57d7693755c31c81fb6768d31d021f0d8af2552a3",
+      "sheet": "artifacts/art-fixes/tall-grass-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:bar-counter-shaded-v1",
+      "sha256": "acbbca525cde1dc83f70a8248840f4995ff450271d2c3136b4efeeca1c5308f1",
+      "sheet": "artifacts/art-fixes/bar-counter-final-32px.png",
+      "position": 1
+    },
+    {
+      "assetId": "own-art:bench-shaded-v1",
+      "sha256": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
+      "sheet": "artifacts/art-fixes/bench-final-32px.png",
+      "position": 1
     }
   ]
 }

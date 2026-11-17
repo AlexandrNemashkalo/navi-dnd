@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="NaviDnD.Tests" />
     <ProjectReference Include="..\NaviDnD.Data\NaviDnD.Data.csproj" />
   </ItemGroup>
 

@@ -70,6 +70,7 @@ public sealed class WorldMapView
     // goal.
     private static List<(double x, double y)> SmoothRoute(List<(int x, int y)> route)
     {
+        var corridor = route.ToHashSet();
         var mid = route.Select(t => (x: t.x + 0.5, y: t.y + 0.5)).ToList();
         var keep = new List<(double x, double y)> { mid[0] };
         int i = 0;
@@ -85,12 +86,38 @@ public sealed class WorldMapView
             var (ax, ay) = mid[a];
             var (bx, by) = mid[b];
             double len = Math.Sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+            if (!InsideCorridor(mid[a], mid[b])) return false;
             if (len < 1e-9) return true;
             for (int t = a + 1; t < b; t++)
             {
                 var (px, py) = mid[t];
                 double d = Math.Abs((bx - ax) * (ay - py) - (ax - px) * (by - ay)) / len;   // distance to straight line
                 if (d > 1.0) return false;
+            }
+            return true;
+        }
+        // Split at every grid crossing: each open interval lies in one tile. This checks the
+        // actual route corridor, not just distance from it, so water and other detours stay visible.
+        bool InsideCorridor((double x, double y) a, (double x, double y) b)
+        {
+            var cuts = new List<double> { 0, 1 };
+            void Crossings(double from, double to)
+            {
+                if (Math.Abs(to - from) < 1e-9) return;
+                for (int edge = (int)Math.Floor(Math.Min(from, to)) + 1; edge < Math.Max(from, to); edge++)
+                    cuts.Add((edge - from) / (to - from));
+            }
+            Crossings(a.x, b.x); Crossings(a.y, b.y); cuts.Sort();
+            for (int c = 1; c < cuts.Count; c++)
+            {
+                double t = (cuts[c - 1] + cuts[c]) / 2;
+                double x = a.x + (b.x - a.x) * t, y = a.y + (b.y - a.y) * t;
+                // A segment exactly on a tile boundary belongs to either adjacent route tile.
+                bool inside = false;
+                foreach (double dx in new[] { -1e-9, 1e-9 })
+                    foreach (double dy in new[] { -1e-9, 1e-9 })
+                        inside |= corridor.Contains(((int)Math.Floor(x + dx), (int)Math.Floor(y + dy)));
+                if (!inside) return false;
             }
             return true;
         }
@@ -105,16 +132,23 @@ public sealed class WorldMapView
                 if (t < keep.Count - 2) next.Add((0.25 * ax + 0.75 * bx, 0.25 * ay + 0.75 * by));
             }
             next.Add(keep[^1]);
-            keep = next;
+            if (Enumerable.Range(1, next.Count - 1).All(n => InsideCorridor(next[n - 1], next[n]))) keep = next;
+            else break;
         }
         return keep;
     }
 
     public static readonly List<int> RouteColor = [255, 60, 200];
 
-    public List<(int x, int y)>? Route { get; set; }
+    private List<(int x, int y)>? _route;
+    private int _routeVersion;
+    public List<(int x, int y)>? Route
+    {
+        get => _route;
+        set { if (!ReferenceEquals(_route, value)) { _route = value; _routeVersion++; } }
+    }
     private string _overlayKey = "";
-    private string OverlayKey => $"{Hero}|{Route?.Count}|{(Route is { Count: > 0 } r ? r[^1] : default)}|{string.Join(",", HeroColor)}";
+    private string OverlayKey => $"{Hero}|{_routeVersion}|{Route?.Count}|{(Route is { Count: > 0 } r ? r[^1] : default)}|{string.Join(",", HeroColor)}";
 
     public string RenderRow(int row, int widthChars, int heightRows, double cx, double cy, int zoom, int hoveredPlace,
         int selectedPlace = -1, HashSet<string>? filter = null)

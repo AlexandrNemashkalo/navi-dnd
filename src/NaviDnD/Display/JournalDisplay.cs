@@ -29,9 +29,19 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
     // leaves the entry - pinned again.
     private readonly Dictionary<Section, int> _pinned = [];
 
-    private sealed record Entry(string Title, string Marker, List<int> Color, List<(string text, List<int> color)> Details, string? Image, List<int>? ImageColor);
+    private sealed record Entry(string Title, string Marker, List<int> Color, List<(string text, List<int> color)> InitialDetails, string? Image, List<int>? ImageColor)
+    {
+        public Lazy<List<(string text, List<int> color)>>? DeferredDetails { get; init; }
+        public List<(string text, List<int> color)> Details => DeferredDetails?.Value ?? InitialDetails;
+        public Lazy<List<(string text, List<int> color)>>? RouteDetails { get; init; }
+        public Guid? StoryId { get; init; }
+    }
 
     private List<Entry> _entries = [];
+    private Entry? _wrappedEntry;
+    private int _wrappedWidth;
+    private List<(string text, List<int> color)>? _wrappedDetails;
+    private List<Guid?>? _previousStoryIds;
     private int _startTop = -1, _listTop, _rows, _pageCount = 1, _leftW, _rightW;
     private readonly List<(int x0, int x1, Section section)> _tabSpans = [];
     private int _barRow;
@@ -55,22 +65,39 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
             case Section.Quests:
                 // The current target is the first entry.
                 if (n?.CurrentArc is { Length: > 0 } arc)
-                    list.Add(new Entry(L.T("Current goal"), "»", Bright, [(L.T("Current goal"), Bright), ("", Fg), (arc, Fg)], "lorc/scroll-unfurled", null));
+                    list.Add(new Entry(L.T("Current goal"), "»", Bright, [(L.T("Current goal"), Bright), ("", Fg), (arc, Fg)], "lorc/scroll-unfurled", null) { StoryId = Guid.Empty });
                 // Only what the hero knows: hidden threads and notes from the GM (dmNotes) does not appear in the journal.
                 var threads = (n?.PlotThreads ?? []).Where(t => t.Deleted != true && t.Hidden != true).ToList();
-                foreach (var t in threads.Where(IsActive).Concat(threads.Where(t => !IsActive(t))))
+                foreach (var t in threads.OrderBy(t => StoryOrder(t.Status)))
                 {
-                    bool active = IsActive(t);
-                    bool failed = IsFailed(t);
-                    var details = new List<(string, List<int>)> { (t.Name ?? L.T("Quest"), Bright), (L.T("Status: ") + (t.Status ?? L.T("active")), Dim), ("", Fg) };
-                    if (!string.IsNullOrWhiteSpace(t.Description)) details.Add((t.Description, Fg));
-                    if (t.Steps is { Count: > 0 } steps)
+                    bool resolved = t.Status is PlotThreadStatuses.Completed or PlotThreadStatuses.Failed or PlotThreadStatuses.Declined;
+                    List<(string text, List<int> color)> BuildDetails()
                     {
-                        details.Add(("", Fg));
-                        details.Add((L.T("Progress:"), Dim));
-                        details.AddRange(steps.Select(s => ("· " + s, Fg)));
+                        string status = t.Status switch
+                        {
+                            PlotThreadStatuses.Rumor => L.T("Rumor"),
+                            PlotThreadStatuses.Offered => L.T("Offered"),
+                            PlotThreadStatuses.Active => L.T("Active"),
+                            PlotThreadStatuses.Revealed => L.T("Revealed"),
+                            PlotThreadStatuses.Completed => L.T("Completed"),
+                            PlotThreadStatuses.Failed => L.T("Failed"),
+                            PlotThreadStatuses.Declined => L.T("Declined"),
+                            _ => string.IsNullOrWhiteSpace(t.Status) ? "·" : t.Status,
+                        };
+                        var details = new List<(string, List<int>)> { (t.Name ?? L.T("Quest"), Bright), (L.T("Status: ") + status, Dim), ("", Fg) };
+                        if (!string.IsNullOrWhiteSpace(t.Description)) details.Add((t.Description, Fg));
+                        if (t.Steps is { Count: > 0 } steps)
+                        {
+                            details.Add(("", Fg));
+                            details.Add((L.T("Progress (newest first):"), Dim));
+                            details.AddRange(steps.AsEnumerable().Reverse().Select(s => ("· " + s, Fg)));
+                        }
+                        return details;
                     }
-                    list.Add(new Entry(t.Name ?? L.T("Quest"), active ? "▸" : failed ? "✗" : "✓", active ? Fg : Dim, details, "lorc/scroll-unfurled", null));
+                    list.Add(new Entry(t.Name ?? L.T("Quest"), StoryMarker(t.Status), resolved ? Dim : Fg, [], "lorc/scroll-unfurled", null)
+                        { StoryId = t.RuntimeId, DeferredDetails = new(BuildDetails),
+                            RouteDetails = t.Status is PlotThreadStatuses.Rumor or PlotThreadStatuses.Offered or PlotThreadStatuses.Revealed
+                                ? new(() => MentionedPlaceDetails(t)) : null });
                 }
                 break;
 
@@ -80,17 +107,22 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                 {
                     var color = AttitudeColor(p.Attitude);
                     var onMap = (settings.Map.Entities ?? []).FirstOrDefault(e => e.Deleted != true && string.Equals(e.Name, p.Name, StringComparison.OrdinalIgnoreCase));
-                    var details = new List<(string, List<int>)> { (p.Name ?? "?", color) };
-                    if (!string.IsNullOrWhiteSpace(p.Attitude)) details.Add((L.T("Attitude: ") + p.Attitude, Dim));
-                    details.Add(("", Fg));
-                    if (!string.IsNullOrWhiteSpace(p.Notes)) details.Add((p.Notes, Fg));
-                    if (p.Memory is { Count: > 0 } memory)
+                    List<(string text, List<int> color)> BuildDetails()
                     {
+                        var details = new List<(string, List<int>)> { (p.Name ?? "?", color) };
+                        if (!string.IsNullOrWhiteSpace(p.Attitude)) details.Add((L.T("Attitude: ") + AttitudeLabel(p.Attitude), Dim));
                         details.Add(("", Fg));
-                        details.Add((L.T("Remembered:"), Dim));
-                        details.AddRange(memory.Select(m => ("· " + m, Fg)));
+                        if (!string.IsNullOrWhiteSpace(p.Notes)) details.Add((p.Notes, Fg));
+                        if (p.Memory is { Count: > 0 } memory)
+                        {
+                            details.Add(("", Fg));
+                            details.Add((L.T("Remembered (newest first):"), Dim));
+                            details.AddRange(memory.AsEnumerable().Reverse().Select(m => ("· " + m, Fg)));
+                        }
+                        return details;
                     }
-                    list.Add(new Entry(p.Name ?? "?", "●", color, details, p.Portrait ?? onMap?.Image ?? "delapouite/person", onMap?.Color ?? color));
+                    list.Add(new Entry(p.Name ?? "?", "●", color, [], p.Portrait ?? onMap?.Image ?? "delapouite/person", onMap?.Color ?? color)
+                        { DeferredDetails = new(BuildDetails) });
                 }
                 break;
 
@@ -115,13 +147,12 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
                             ("", Fg),
                         };
                         if (!string.IsNullOrWhiteSpace(p.Description)) details.Add((p.Description, Fg));
-                        if (!here && hero is { } h && MapGen.Generators.WorldAtlas.Route(world, h, (p.X, p.Y)) is { } r)
-                        {
-                            details.Add(("", Fg));
-                            details.Add((L.T("From here: ") + $"{L.T(MapGen.Generators.WorldAtlas.Direction(p.X - h.x, p.Y - h.y))}, {r.Summary}", Dim));
-                        }
                         list.Add(new Entry(p.Name, here ? "@" : visited ? icon.ToString() : "·", here || visited ? Fg : Dim, details,
-                            WorldMapView.PlaceImage(p.Type), iconColor));
+                            WorldMapView.PlaceImage(p.Type), iconColor)
+                        {
+                            // Compute routes only for inspected places, once per rebuilt journal snapshot.
+                            RouteDetails = !here && hero is { } h ? new(() => PlaceRouteDetails(world, h, p)) : null,
+                        });
                     }
                 }
                 break;
@@ -164,13 +195,72 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         return list;
     }
 
-    // The GM writes the task status in words in the game language: “completed”, “failed”, “completed”, “failed”.
-    private static bool StatusIs(PlotThread t, params string[] prefixes) =>
-        t.Status is { } s && prefixes.Any(p => s.StartsWith(p, StringComparison.OrdinalIgnoreCase));
+    private List<(string text, List<int> color)> PlaceRouteDetails(WorldMap world, (int x, int y) h, WorldPlace p)
+    {
+        if (h == (p.X, p.Y))
+            return [("", Fg), (L.F("Here: {0} — no travel", p.Name), Dim)];
+        if (MapGen.Generators.WorldAtlas.Route(world, h, (p.X, p.Y)) is not { } route)
+            return [("", Fg), (L.T("No walking route from your current location."), Dim)];
+        var result = new List<(string, List<int>)>
+        {
+            ("", Fg),
+            (L.F("From here: {0} — {1}, by road {2:P0}",
+                L.T(MapGen.Generators.WorldAtlas.Direction(p.X - h.x, p.Y - h.y)),
+                TravelService.DaysLabel(TravelService.DaysAt(route.Days, (TravelService.Pace)display.TravelPace)),
+                route.RoadShare), Dim),
+        };
+        var kingdoms = route.Path.Select(t => world.OwnerAt(t.x, t.y))
+            .Where(k => k >= 0 && k < world.Kingdoms.Count).Distinct()
+            .Select(k => world.Kingdoms[k].Name).ToList();
+        if (kingdoms.Count > 1) result.Add((L.F("Through: {0}", string.Join(" → ", kingdoms)), Dim));
+        return result;
+    }
 
-    private static bool IsFailed(PlotThread t) => StatusIs(t, "провал", "fail");
+    private List<(string text, List<int> color)> MentionedPlaceDetails(PlotThread thread)
+    {
+        if (GameWorld.ForDisplay(settings) is not { } world) return [];
+        string text = string.Join("\n", new[] { thread.Name, thread.Description }.Concat(thread.Steps ?? []));
+        var places = world.Places.Where(p => new[] { p.Name }.Concat(p.FormerNames)
+            .Any(name => Clients.NarrativeRecall.Mentions(text, name))).Take(2).ToList();
+        if (places.Count == 0) return [];
+        var result = new List<(string text, List<int> color)> { ("", Fg), (L.T("Mentioned places"), Dim) };
+        var hero = GameWorld.HeroTile(settings);
+        foreach (var place in places)
+        {
+            result.Add((place.Name, Bright));
+            if (hero is { } h) result.AddRange(PlaceRouteDetails(world, h, place));
+        }
+        return result;
+    }
 
-    private static bool IsActive(PlotThread t) => !StatusIs(t, "заверш", "выполн", "complet", "done", "finish") && !IsFailed(t);
+    private static int StoryOrder(string? status) => status switch
+    {
+        PlotThreadStatuses.Active => 0,
+        PlotThreadStatuses.Offered => 1,
+        PlotThreadStatuses.Completed or PlotThreadStatuses.Failed or PlotThreadStatuses.Declined => 3,
+        _ => 2,
+    };
+
+    private static string StoryMarker(string? status) => status switch
+    {
+        PlotThreadStatuses.Active => "▸",
+        PlotThreadStatuses.Declined => "-",
+        PlotThreadStatuses.Offered => "◇",
+        PlotThreadStatuses.Rumor => "?",
+        PlotThreadStatuses.Revealed => "◆",
+        PlotThreadStatuses.Completed => "✓",
+        PlotThreadStatuses.Failed => "✗",
+        _ => "·",
+    };
+
+    private static string AttitudeLabel(string attitude) => attitude.Trim().ToLowerInvariant() switch
+    {
+        NpcAttitudes.Friendly => L.T("Friendly"),
+        NpcAttitudes.Neutral => L.T("Neutral"),
+        NpcAttitudes.Hostile => L.T("Hostile"),
+        NpcAttitudes.Unknown => L.T("Unknown"),
+        _ => attitude,
+    };
 
     private List<int> AttitudeColor(string? attitude)
     {
@@ -199,13 +289,41 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
 
     public void Draw() => DrawCore(true);
 
+    // Only stories are reordered by changing status; preserve their identities across rebuilds and tabs.
+    // Notes deliberately retain positional selection so adding a note still selects the new first row.
+    private void RebuildEntries()
+    {
+        var next = BuildEntries(Current);
+        if (Current == Section.Quests)
+        {
+            if (_previousStoryIds is { } previous)
+            {
+                int Find(int oldIndex) => oldIndex >= 0 && oldIndex < previous.Count
+                    ? next.FindIndex(e => e.StoryId == previous[oldIndex]) : -1;
+                int oldSelected = _selected.GetValueOrDefault(Current, -1);
+                int selected = Find(oldSelected);
+                int pinned = Find(_pinned.GetValueOrDefault(Current, -1));
+                if (selected < 0)
+                {
+                    selected = pinned >= 0 ? pinned : next.Count > 0 ? Math.Clamp(oldSelected, 0, next.Count - 1) : -1;
+                    _detailPage = 0;
+                }
+                _selected[Current] = selected;
+                _pinned[Current] = pinned >= 0 ? pinned : selected;
+                _page[Current] = selected >= 0 ? selected / Math.Max(1, PerPage) : 0;
+            }
+            _previousStoryIds = next.Select(e => e.StoryId).ToList();
+        }
+        _entries = next;
+    }
+
     private void DrawCore(bool rebuild)
     {
         _startTop = Term.CursorTop;
         int inner = display.InnerWidth(display.ViewCols(settings.Map));
         var border = new BorderDrawer(settings, display);
-        if (rebuild) { _entries = BuildEntries(Current); _listRegion.Invalidate(); _detailRegion.Invalidate(); }
         _rows = Math.Max(3, display.MaxHigh - 3);
+        if (rebuild) { RebuildEntries(); _listRegion.Invalidate(); _detailRegion.Invalidate(); }
         _pageCount = Math.Max(1, (_entries.Count + PerPage - 1) / PerPage);
         int page = Math.Clamp(_page.GetValueOrDefault(Current), 0, _pageCount - 1);
         _page[Current] = page;
@@ -320,12 +438,19 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
 
     private List<(string text, List<int> color)> BuildDetailLines(int sel, int width)
     {
+        width = Math.Max(10, width);
+        var entry = sel >= 0 && sel < _entries.Count ? _entries[sel] : null;
+        if (ReferenceEquals(entry, _wrappedEntry) && width == _wrappedWidth && _wrappedDetails != null)
+            return _wrappedDetails;
         var lines = new List<(string, List<int>)> { ("", Fg) };
-        if (sel < 0 || sel >= _entries.Count) return lines;
-        foreach (var (text, color) in _entries[sel].Details)
+        _wrappedEntry = entry;
+        _wrappedWidth = width;
+        _wrappedDetails = lines;
+        if (entry == null) return lines;
+        foreach (var (text, color) in entry.Details.Concat(entry.RouteDetails?.Value ?? []))
         {
             if (text.Length == 0) { lines.Add(("", color)); continue; }
-            foreach (var part in TextWrapper.WrapText(text, Math.Max(10, width))) lines.Add((part, color));
+            foreach (var part in TextWrapper.WrapText(text, width)) lines.Add((part, color));
         }
         return lines;
     }
@@ -391,7 +516,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         _selected[Current] = to * PerPage;
         _pinned[Current] = to * PerPage;
         _detailPage = 0;
-        Redraw();
+        Redraw(false);
     }
 
     // Details page (←→, ◄ ►).
@@ -401,7 +526,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         if (to == _detailPage) return;
         Sound.PlayClick();
         _detailPage = to;
-        Redraw();
+        Redraw(false);
     }
 
     public void SetSection(Section section)
@@ -450,7 +575,7 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         _pinned[Current] = sel;
         _page[Current] = sel / PerPage;
         _detailPage = 0;
-        Redraw();
+        Redraw(false);
     }
 
     // Mouse: sub-tabs, ▲ ▼ list, ◄ ► details, hover over entry. true - the picture has changed.
@@ -517,12 +642,29 @@ public class JournalDisplay(WorldState settings, DisplayConfig display)
         var n = ws.Narrative;
         return
         [
-            n == null ? "" : n.CurrentArc + "#" + string.Join(";", (n.PlotThreads ?? []).Where(t => t.Deleted != true && t.Hidden != true).Select(t => $"{t.Name}:{t.Status}:{t.Steps?.Count ?? 0}")),
-            n == null ? "" : string.Join(";", (n.Npcs ?? []).Where(p => p.Deleted != true && (p.Met == true || p.Memory is { Count: > 0 })).Select(p => $"{p.Name}:{p.Memory?.Count ?? 0}")),
-            string.Join(";", ws.World?.Known ?? []) + "#" + string.Join(";", ws.World?.Visited ?? []),
+            n == null ? "" : VisibleStamp(new { n.CurrentArc, Threads = (n.PlotThreads ?? [])
+                .Where(t => t.Deleted != true && t.Hidden != true).Select(t => new { t.Name, t.Status, t.Description, t.Steps }) }),
+            n == null ? "" : VisibleStamp((n.Npcs ?? [])
+                .Where(p => p.Deleted != true && (p.Met == true || p.Memory is { Count: > 0 }))
+                .Select(p => new { p.Name, p.Attitude, p.Notes, p.Memory })),
+            LocationStamp(ws),
             n == null ? "" : string.Join(";", n.KnownMonsters ?? []),
             PlayerNotes.All.Count(x => x.ByMaster).ToString(),   // the note was added by the GM
         ];
+    }
+
+    // Hash only displayed facts: hidden plans must not reveal themselves through an unread badge.
+    private static string VisibleStamp<T>(T value) => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+        System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(value)));
+
+    private static string LocationStamp(WorldState ws)
+    {
+        // Do not load/create a fallback world just to check the journal badge.
+        var world = ws.World is { } link && GameWorld.Geo(ws) is { } geo
+            ? GameWorld.Compose(geo, link, includeHidden: false) : null;
+        return VisibleStamp(new { ws.World?.Known, ws.World?.Visited,
+            Places = world?.Places.Select(p => new { p.Name, p.Type, p.X, p.Y, p.Description,
+                Kingdom = p.Kingdom >= 0 && p.Kingdom < world.Kingdoms.Count ? world.Kingdoms[p.Kingdom].Name : null }) });
     }
 
     // What you have already seen in the sub-tabs - about the game (save location); the first show of the magazine - everything is “seen”.

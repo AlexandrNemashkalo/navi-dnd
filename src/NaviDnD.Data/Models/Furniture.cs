@@ -21,6 +21,7 @@ public static class FurnitureCatalog
 {
     public static readonly IReadOnlyDictionary<string, FurnitureKind> Kinds = new[]
     {
+        new FurnitureKind("bridge", 'J', "Bridge", "delapouite/rope-bridge"),
         new FurnitureKind("counter", 'B', "Bar counter", "delapouite/bar-stool"),
         new FurnitureKind("stall", 'L', "Stall", "delapouite/shop"),
         new FurnitureKind("table", 'Y', "Table", "delapouite/table"),

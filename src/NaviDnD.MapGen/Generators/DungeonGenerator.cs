@@ -22,7 +22,7 @@ public class DungeonGenerator : IMapGenerator
         [RoomSize.Huge]   = (8, 10, 6, 8),
     };
 
-    private record Cell(int Col, int Row);
+    internal record Cell(int Col, int Row);
 
     private record Box(int Col, int Row, int W, int H)
     {
@@ -40,12 +40,16 @@ public class DungeonGenerator : IMapGenerator
 
     // ── Generate ─────────────────────────────────────────────────────────────
 
-    public MapConfig Generate(MapGenRequest request)
+    [ThreadStatic] private static Random? _caveRng;
+    public MapConfig Generate(MapGenRequest request) => Generate(request, false);
+
+    internal MapConfig Generate(MapGenRequest request, bool naturalCave)
     {
         _cols = Math.Clamp(request.Cols, 5, MapConfig.MaxSize);
         _rows = Math.Clamp(request.Rows, 5, MapConfig.MaxSize);
+        _caveRng = naturalCave ? new Random(unchecked((request.Seed ?? 0) ^ 0x372A91)) : null;
         try { return GenerateSized(request); }
-        finally { _cols = 0; _rows = 0; }
+        finally { _cols = 0; _rows = 0; _caveRng = null; }
     }
 
     private MapConfig GenerateSized(MapGenRequest request)
@@ -443,7 +447,7 @@ public class DungeonGenerator : IMapGenerator
         shape switch
         {
             CorridorShape.Straight => FindStraightPath(from, to, blocked),
-            CorridorShape.Winding  => FindWindingPath(from, to, blocked, rng),
+            CorridorShape.Winding  => _caveRng is null ? FindWindingPath(from, to, blocked, rng) : FindCavePath(from, to, blocked, _caveRng),
             _                      => FindBfsPath(from, to, blocked),
         };
 
@@ -507,6 +511,39 @@ public class DungeonGenerator : IMapGenerator
         return path;
     }
 
+    // A single bounded bend instead of a self-touching random walk. Keep both end approaches intact.
+    internal static List<Cell> FindCavePath(Cell from, Cell to, HashSet<Cell> blocked, Random rng)
+    {
+        if (from == to) return [];
+        var baseline = FindBfsPath(from, to, blocked);
+        var full = new List<Cell> { from };
+        full.AddRange(baseline); full.Add(to);
+        foreach (int i in Enumerable.Range(1, Math.Max(0, full.Count - 6)).OrderBy(_ => rng.Next()))
+        {
+            var a = full[i]; var b = full[i + 3];
+            int dc = Math.Sign(b.Col - a.Col), dr = Math.Sign(b.Row - a.Row);
+            if ((dc == 0) == (dr == 0) || !Enumerable.Range(0, 4).All(k => full[i + k] == new Cell(a.Col + k * dc, a.Row + k * dr))) continue;
+            foreach (int side in rng.Next(2) == 0 ? new[] { -1, 1 } : new[] { 1, -1 })
+            {
+                int nc = -dr * side, nr = dc * side;
+                for (int depth = 1; depth <= 3; depth++)
+                {
+                    var bend = new List<Cell>();
+                    for (int d = 1; d <= depth; d++) bend.Add(new(a.Col + nc * d, a.Row + nr * d));
+                    for (int k = 1; k <= 3; k++) bend.Add(new(a.Col + nc * depth + dc * k, a.Row + nr * depth + dr * k));
+                    for (int d = depth - 1; d >= 0; d--) bend.Add(new(b.Col + nc * d, b.Row + nr * d));
+                    if (bend.Any(c => c.Col <= 1 || c.Col >= MaxCols || c.Row <= 1 || c.Row >= MaxRows || blocked.Contains(c))) continue;
+                    var candidate = full.Take(i + 1).Concat(bend).Concat(full.Skip(i + 4)).ToList();
+                    bool simple = true;
+                    for (int x = 0; x < candidate.Count && simple; x++)
+                        for (int y = x + 2; y < candidate.Count; y++)
+                            if (candidate[x] == candidate[y] || AreAdjacent(candidate[x], candidate[y])) { simple = false; break; }
+                    if (simple) return candidate.Skip(1).SkipLast(1).ToList();
+                }
+            }
+        }
+        return baseline;
+    }
     // Random walk biased toward target; fall back to BFS if stuck
     private static List<Cell> FindWindingPath(Cell from, Cell to, HashSet<Cell> blocked, Random rng)
     {

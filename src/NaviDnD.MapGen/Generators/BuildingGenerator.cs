@@ -58,14 +58,16 @@ public static class BuildingGenerator
     // itself places a passage through the seam to the neighboring building of the same floor (the dungeon
     // neighbor places his own).
     public static Result Generate(MapChunk chunk, IReadOnlyList<ChunkExit> exits, int footprintSeed, bool ground,
-        IReadOnlyDictionary<ChunkSide, char> bands, IReadOnlyCollection<ChunkSide> seamDoorSides, bool moat = false)
+        IReadOnlyDictionary<ChunkSide, char> bands, IReadOnlyCollection<ChunkSide> seamDoorSides, bool moat = false,
+        (int c, int r) footprintOffset = default, OutdoorGenerator.RiverSpec? river = null, int noiseSeed = 0)
     {
         var rng = new Random(chunk.Seed);
         string? style = chunk.Style;
         bool basement = chunk.Z < 0;
         var b = new Builder(chunk, rng);
 
-        var parts = Footprint(new Random(footprintSeed), style);
+        var parts = Footprint(new Random(footprintSeed), style)
+            .Select(p => p with { C = p.C + footprintOffset.c, R = p.R + footprintOffset.r }).ToList();
         var inside = parts.SelectMany(p => p.Cells()).ToHashSet();
         var anchors = exits.Select(e => Local(e.AnchorCell(chunk), chunk)).ToList();
         (int c, int r) target = anchors.Count > 0 ? anchors[0] : (W / 2, 0);
@@ -76,10 +78,13 @@ public static class BuildingGenerator
 
         if (ground)
         {
-            b.Ground(bands);
+            b.Ground(bands, anchors);
+            if (river != null) OutdoorGenerator.StampRiver(b.G, chunk, bands, noiseSeed, river, '.');
+            var riverbed = river == null ? null : (char[,])b.G.Clone();
             var hall = regions.FirstOrDefault(r => r.Role == Role.Hall);
             var entrance = b.AddEntrance(inside, hall?.Cells, target, backDoor: !moat);
-            b.Streets(anchors, entrance, inside);
+            var street = b.Streets(anchors, entrance, inside, preserveWater: river != null);
+            if (riverbed != null) b.AddVillageBridge(riverbed, street, river!.Horizontal, entrance);
             b.ExternalExits(exits);
             b.Trees(inside, entrance);
             if (moat) b.Moat(inside, entrance, anchors);
@@ -93,18 +98,124 @@ public static class BuildingGenerator
         return b.Result();
     }
 
+    // Reserve the unchanged river before rooms are laid out. The caller reuses this offset on every floor.
+    public static bool TryRiverFootprintOffset(MapChunk ground, int footprintSeed,
+        IReadOnlyDictionary<ChunkSide, char> bands, OutdoorGenerator.RiverSpec river, int noiseSeed,
+        bool moat, out (int c, int r) offset, out string? error, IEnumerable<string?>? floorStyles = null)
+    {
+        offset = default;
+        error = null;
+        var bed = new char[W, H];
+        OutdoorGenerator.StampRiver(bed, ground, bands, noiseSeed, river, '.');
+        bool Water((int c, int r) p) => bed[p.c, p.r] is 'W' or '~';
+        if (!Enumerable.Range(0, W).Any(c => Enumerable.Range(0, H).Any(r => Water((c, r))))) return true;
+        string bankHint = river.Horizontal
+            ? " The river runs east-west; try a dry building block north or south of the outdoor river block."
+            : " The river runs north-south; try a dry building block east or west of the outdoor river block.";
+        if (moat)
+        {
+            error = "A building moat cannot overlap the site's river; remove the moat or move the building to a dry block." + bankHint;
+            return false;
+        }
+        var original = Footprint(new Random(footprintSeed), ground.Style).SelectMany(p => p.Cells()).ToList();
+        var allFloors = (floorStyles ?? []).Append(ground.Style).Distinct()
+            .SelectMany(style => Footprint(new Random(footprintSeed), style).SelectMany(p => p.Cells())).ToList();
+        var shifts = from dc in Enumerable.Range(-W + 1, W * 2 - 1)
+                     from dr in Enumerable.Range(-H + 1, H * 2 - 1)
+                     orderby Math.Abs(dc) + Math.Abs(dr), dr, dc
+                     select (c: dc, r: dr);
+        foreach (var shift in shifts)
+        {
+            var cells = original.Select(p => (c: p.c + shift.c, r: p.r + shift.r)).ToList();
+            if (allFloors.Any(p => p.c + shift.c < MinC || p.c + shift.c > MaxC
+                || p.r + shift.r < MinR || p.r + shift.r > MaxR)) continue;
+            // A dry one-cell apron keeps every potential entrance and window clear of the channel.
+            if (cells.Any(p => Water(p) || Around(p).Any(Water))) continue;
+            offset = shift;
+            return true;
+        }
+        error = "The whole building does not fit on a dry riverbank in this block; keep the river in an outdoor or village block and place the building beside it." + bankHint;
+        return false;
+    }
+
     // ── Settlement ────────────────────────────── ──────────────────────────────
-    public static Result GenerateVillage(MapChunk chunk, IReadOnlyList<ChunkExit> exits, IReadOnlyDictionary<ChunkSide, char> bands, string? layout = null)
+    public static Result GenerateVillage(MapChunk chunk, IReadOnlyList<ChunkExit> exits, IReadOnlyDictionary<ChunkSide, char> bands, string? layout = null,
+        OutdoorGenerator.RiverSpec? river = null, int noiseSeed = 0)
     {
         var rng = new Random(chunk.Seed);
         var b = new Builder(chunk, rng);
-        b.Ground(bands);
+        b.Ground(bands, exits.Select(e => Local(e.AnchorCell(chunk), chunk)).ToList());
+        if (river != null) OutdoorGenerator.StampRiver(b.G, chunk, bands, noiseSeed, river, '.');
 
-        // A square with a well in the center and streets from the block exits to it.
-        int hubC = layout == "road" ? W / 3 : W / 2, hubR = H / 2;
+        // Road settlements follow their actual approaches; the square may sit along the road,
+        // but the road must never invent an opening through a closed boundary.
+        int hubC = W / 2, hubR = H / 2;
+        bool roadHorizontal = false;
+        var squareRng = new Random(unchecked(chunk.Seed ^ 0x3A72C1));
+        bool squareVertical = layout != null && squareRng.Next(2) == 0;
+        if (layout != null && layout != "road")
+        {
+            // Leave room for houses on either side without forcing every settlement into a central cross.
+            hubC += squareRng.Next(-2, 3);
+            hubR += squareRng.Next(-1, 2);
+        }
+        if (layout == "road")
+        {
+            var horizontal = exits.Where(e => e.Side is ChunkSide.Left or ChunkSide.Right).ToList();
+            var vertical = exits.Where(e => e.Side is ChunkSide.Top or ChunkSide.Bottom).ToList();
+            roadHorizontal = horizontal.Count >= vertical.Count;
+            if (roadHorizontal)
+            {
+                hubC += rng.Next(-2, 3);
+                hubR = horizontal.Count == 0 ? H / 2 : Math.Clamp((int)Math.Round(horizontal.Average(e => e.Offset - 1)), 4, H - 5);
+            }
+            else
+            {
+                hubC = Math.Clamp((int)Math.Round(vertical.Average(e => e.Offset - 1)), 5, W - 6);
+                hubR += rng.Next(-2, 3);
+            }
+        }
+        if (river != null && b.G[hubC, hubR] is 'W' or '~')
+        {
+            var dry = (from c in Enumerable.Range(3, W - 6)
+                       from r in Enumerable.Range(3, H - 6)
+                       where b.G[c, r] is not ('W' or '~')
+                       orderby Math.Abs(c - hubC) + Math.Abs(r - hubR)
+                       select (c, r)).ToList();
+            if (dry.Count > 0) (hubC, hubR) = dry[0];
+        }
         var street = new HashSet<(int c, int r)>();
-        for (int c = hubC - 2; c <= hubC + 2; c++)
-            for (int r = hubR - 1; r <= hubR + 1; r++) street.Add((c, r));
+        // Connect both banks before placing houses; never open an unplanned boundary exit.
+        if (river != null && b.G.Cast<char>().Contains('W'))
+        {
+            if (river.Horizontal)
+                for (int r = 1; r < H - 1; r++) street.Add((hubC, r));
+            else
+                for (int c = 1; c < W - 1; c++) street.Add((c, hubR));
+        }
+        if (layout == "road") squareVertical = !roadHorizontal;
+        int squareC = squareVertical ? 1 : 2;
+        int squareR = squareVertical ? 2 : 1;
+        if (layout == null)
+        {
+            // Preserve the established default layout and its random sequence.
+            for (int c = hubC - squareC; c <= hubC + squareC; c++)
+                for (int r = hubR - squareR; r <= hubR + squareR; r++) street.Add((c, r));
+        }
+        else
+        {
+            // A small meeting place shapes the house setbacks, not just the texture of the street.
+            // Its own stream leaves approach/house randomness untouched; every shape keeps a ring around the well.
+            foreach (var (u, v) in VillagePlazaOffsets(chunk.Seed))
+            {
+                int c = hubC + (squareVertical ? v : u), r = hubR + (squareVertical ? u : v);
+                if (c <= 0 || c >= W - 1 || r <= 0 || r >= H - 1) continue;
+                // The rounded shoulders may extend beyond the old footprint, but never widen its ford.
+                if ((Math.Abs(c - hubC) > squareC || Math.Abs(r - hubR) > squareR)
+                    && b.G[c, r] is 'W' or '~') continue;
+                street.Add((c, r));
+            }
+        }
         foreach (var exit in exits)
         {
             var (c, r) = Local(exit.AnchorCell(chunk), chunk);
@@ -121,16 +232,16 @@ public static class BuildingGenerator
                 street.Add((c, r));
             }
         }
-        if (layout == "road")
-            for (int r = 0; r < H; r++) street.Add((hubC, r));
         if (layout == "palisade")
             for (int c = 0; c < W; c++)
                 for (int r = 0; r < H; r++)
-                    if (OnBorder((c, r))) b.G[c, r] = '#';
-        if (layout == "river")
+                    // The water boundary already protects this side; a fence must not erase the coast or river.
+                    if (OnBorder((c, r)) && b.G[c, r] != 'W') b.G[c, r] = '#';
+        if (layout == "river" && river == null)
             for (int c = 0; c < W; c++)
                 for (int r = H - 3; r < H - 1; r++) b.G[c, r] = 'W';
-        foreach (var (c, r) in street) b.G[c, r] = b.G[c, r] == 'W' ? '~' : '=';
+        var riverbed = layout == "river" ? (char[,])b.G.Clone() : null;
+        foreach (var (c, r) in street) b.G[c, r] = b.G[c, r] is 'W' or '~' ? '~' : '=';
         b.G[hubC, hubR] = 'V';
 
         // Houses: rectangle or L, not on the street and not close to other houses.
@@ -138,8 +249,16 @@ public static class BuildingGenerator
         var houses = new List<HashSet<(int c, int r)>>();
         for (int attempt = 0; attempt < 300 && houses.Count < (layout == "road" ? 6 : layout == "river" ? 3 : 5); attempt++)
         {
+            bool compactBankHouse = river != null && houses.Count == 0 && attempt >= 150;
             int w = layout is "road" or "river" ? rng.Next(3, 6) : rng.Next(4, 8), h = layout is "road" or "river" ? rng.Next(3, 5) : rng.Next(3, 6);
+            if (compactBankHouse) { w = 3; h = 3; }
             int c0 = rng.Next(2, W - 2 - w + 1), r0 = rng.Next(2, H - 2 - h + 1);
+            if (compactBankHouse)
+            {
+                int candidate = attempt - 150, columns = W - w - 3;
+                c0 = 2 + candidate % columns;
+                r0 = 2 + candidate / columns % (H - h - 3);
+            }
             var parts = new List<Rect> { new(c0, r0, w, h) };
             if (w >= 6 && h >= 4 && rng.Next(2) == 0)
             {
@@ -151,7 +270,11 @@ public static class BuildingGenerator
                     : [new(c0, r0 + nh, w, h - nh), new(right ? c0 : c0 + nw, r0, w - nw, nh)];
             }
             var cells = parts.SelectMany(p => p.Cells()).ToHashSet();
-            if (cells.Any(x => taken.Contains(x) || b.Blocked(x))) continue;
+            // A narrow riverbank may only fit a small house opening directly onto the street.
+            if (cells.Any(x => (compactBankHouse ? street.Contains(x) : taken.Contains(x))
+                || (b.Blocked(x) && !b.IsForestGrowth(x)) || b.G[x.c, x.r] is 'W' or '~')) continue;
+            if (compactBankHouse && !cells.Any(x => Around(x).Any(street.Contains))) continue;
+            b.ClearForestGrowth(cells.SelectMany(x => Around8(x).Append(x)));
             houses.Add(cells);
             foreach (var x in cells) foreach (var n in Around8(x).Append(x)) taken.Add(n);
 
@@ -160,16 +283,31 @@ public static class BuildingGenerator
             foreach (var part in parts) Split(part, rng, regions, hall: false, minArea: 10);
             var names = new[] { L.W("kitchen"), L.W("bedroom"), L.W("pantry"), L.W("workshop") };
             Role[] roles = [Role.Kitchen, Role.Bedroom, Role.Storage, Role.Workshop];
+            // Keep a dwelling, then mix everyday work and storage buildings into newly planned settlements.
+            // The role choice itself does not consume placement randomness.
+            Role singleRole = layout == null || number == 1 ? Role.Living
+                : (((uint)chunk.Seed + (uint)number) % 4) switch
+                {
+                    0 => Role.Workshop,
+                    1 => Role.Storage,
+                    _ => Role.Living,
+                };
             for (int i = 0; i < regions.Count; i++)
             {
-                regions[i].Role = regions.Count == 1 ? Role.Living : roles[i % roles.Length];
-                regions[i].Name = regions.Count == 1 ? L.WF("House {0}", number) : L.WF("House {0}", number) + ": " + names[i % names.Length];
+                regions[i].Role = regions.Count == 1 ? singleRole : roles[i % roles.Length];
+                regions[i].Name = regions.Count == 1 ? singleRole switch
+                {
+                    Role.Workshop => L.WF("Workshop {0}", number),
+                    Role.Storage => L.WF("Storehouse {0}", number),
+                    _ => L.WF("House {0}", number),
+                } : L.WF("House {0}", number) + ": " + names[i % names.Length];
             }
             b.AddRooms(regions, WoodFloor);
             b.ConnectRooms(regions, "house");
             var door = b.AddEntrance(cells, null, (hubC, hubR), backDoor: false, street);
             // Path from door to street.
-            foreach (var x in b.YardPath(door, street, cells) ?? []) if (b.G[x.c, x.r] != 'V') b.G[x.c, x.r] = '=';
+            foreach (var x in b.YardPath(door, street, cells) ?? [])
+                if (b.G[x.c, x.r] != 'V') b.G[x.c, x.r] = b.G[x.c, x.r] is 'W' or '~' ? '~' : '=';
             b.Floor(cells, basement: false);
             b.Windows(regions, cells);
             foreach (var region in regions) b.Furnish(region, basement: false);
@@ -194,7 +332,89 @@ public static class BuildingGenerator
         }
         b.ExternalExits(exits);
         b.Trees(houseCells, (hubC, hubR + 1));
+        if (riverbed != null) b.AddVillageBridge(riverbed, street, river?.Horizontal ?? true, (hubC, hubR));
+        // Validate the final furnished house and landscaped yard; adding a door consumes no layout randomness.
+        if (layout != null)
+        {
+            b.AddVillagePassage(houses, street, new Random(unchecked(chunk.Seed ^ 0x62B49D)));
+            b.SoftenForestEdge(houseCells);
+        }
         return b.Result();
+    }
+
+    // Add small wooded lobes only inside an existing forest boundary. Never split a dry yard component.
+    internal static List<(int c, int r)> SoftenVillageForestEdge(char[,] grid, HashSet<(int c, int r)> protectedCells, int seed)
+    {
+        var random = new Random(unchecked(seed ^ 0x4172B3));
+        bool Dry((int c, int r) p) => InBounds(p) && !protectedCells.Contains(p)
+            && grid[p.c, p.r] is not ('W' or '~' or ' ')
+            && TerrainCatalog.Get(grid[p.c, p.r]) is { BlocksMove: false };
+        HashSet<(int c, int r)> Flood((int c, int r) start)
+        {
+            var seen = new HashSet<(int c, int r)> { start };
+            var queue = new Queue<(int c, int r)>(seen);
+            while (queue.TryDequeue(out var p))
+                foreach (var n in Around(p)) if (Dry(n) && seen.Add(n)) queue.Enqueue(n);
+            return seen;
+        }
+        var remaining = Enumerable.Range(0, W).SelectMany(c => Enumerable.Range(0, H).Select(r => (c, r))).Where(Dry).ToHashSet();
+        var components = new List<HashSet<(int c, int r)>>();
+        while (remaining.Count > 0) { var part = Flood(remaining.First()); components.Add(part); remaining.ExceptWith(part); }
+        var candidates = new List<List<(int c, int r)>>();
+        foreach (var side in Enum.GetValues<ChunkSide>())
+        {
+            int length = side is ChunkSide.Left or ChunkSide.Right ? H : W;
+            (int c, int r) Cell(int along, int depth) => side switch
+            {
+                ChunkSide.Left => (depth, along), ChunkSide.Right => (W - 1 - depth, along),
+                ChunkSide.Bottom => (along, depth), _ => (along, H - 1 - depth),
+            };
+            for (int along = 2; along < length - 3; along++)
+            {
+                if (Enumerable.Range(along, 3).Any(i => grid[Cell(i, 0).c, Cell(i, 0).r] is not ('T' or 'F'))) continue;
+                var cells = Enumerable.Range(along, 3).Select(i => Cell(i, 1)).ToList();
+                cells.Add(Cell(along + 1, 2));
+                if (random.Next(2) == 0) cells.Add(Cell(along + random.Next(2) * 2, 2));
+                candidates.Add(cells);
+            }
+        }
+        var added = new List<(int c, int r)>();
+        int groups = 0, limit = random.Next(1, 3);
+        foreach (var cells in candidates.OrderBy(_ => random.Next()))
+        {
+            if (groups >= limit) break;
+            if (cells.Any(p => grid[p.c, p.r] is not ('.' or ',')
+                || added.Any(a => Math.Abs(a.c - p.c) + Math.Abs(a.r - p.r) <= 2)
+                || Around8(p).Append(p).Any(n => InBounds(n) && (protectedCells.Contains(n)
+                    || grid[n.c, n.r] is not ('.' or ',' or 'T' or 'F'))))) continue;
+            var previous = cells.Select(p => grid[p.c, p.r]).ToList();
+            foreach (var p in cells) grid[p.c, p.r] = 'T';
+            bool connected = components.All(part =>
+            {
+                var free = part.Where(Dry).ToList();
+                return free.Count == 0 || Flood(free[0]).Count == free.Count;
+            });
+            if (!connected) { for (int i = 0; i < cells.Count; i++) grid[cells[i].c, cells[i].r] = previous[i]; continue; }
+            added.AddRange(cells); groups++;
+        }
+        return added;
+    }
+
+    internal static IEnumerable<(int u, int v)> VillagePlazaOffsets(int seed)
+    {
+        var rng = new Random(unchecked(seed ^ 0x5D31B7));
+        int shape = rng.Next(3), mirror = rng.Next(2) == 0 ? -1 : 1;
+        for (int u = -2; u <= 2; u++)
+            for (int v = -2; v <= 2; v++)
+            {
+                bool inside = shape switch
+                {
+                    0 => Math.Abs(u) + Math.Abs(v) <= 2, // rounded square
+                    1 => Math.Abs(v) <= 1 && (Math.Abs(u) <= 1 || v * mirror >= 0), // street widening
+                    _ => Math.Abs(v) <= 1 && (Math.Abs(u) <= 1 || u * v * mirror >= 0), // staggered forecourt
+                };
+                if (inside) yield return (u, v);
+            }
     }
 
     // ── Circuit ─────────────────────────────── ──────────────────────────────── The main body + wings (G, T,
@@ -425,6 +645,52 @@ public static class BuildingGenerator
     }
 
     // ── Construction: rooms, doors, courtyard, windows, furniture ────────────────────────
+    internal static void GrowForestEdge(char[,] grid, IReadOnlyDictionary<ChunkSide, char> bands,
+        int seed, int originCol, int originRow, IReadOnlySet<(int c, int r)> reserved)
+    {
+        int width = grid.GetLength(0), height = grid.GetLength(1);
+        bool Forest(char code) => code is 'T' or 'F' or 'e' or NaturalBand;
+        int Hash(int coordinate, int axis)
+        {
+            uint value = unchecked((uint)seed ^ (uint)coordinate * 0x9E3779B9u ^ (uint)axis * 0x85EBCA6Bu);
+            value ^= value >> 16; value *= 0x7FEB352Du; value ^= value >> 15;
+            return (int)(value % 3);
+        }
+        foreach (var (side, code) in bands)
+        {
+            if (!Forest(code)) continue;
+            bool vertical = side is ChunkSide.Left or ChunkSide.Right;
+            int length = vertical ? height : width;
+            for (int i = 1; i < length - 1; i++)
+            {
+                // Broad connected lobes, with stepped transitions rather than independent noisy spikes.
+                int coordinate = i + (vertical ? originRow : originCol);
+                int a = Hash(coordinate / 4, (int)side), b = Hash(coordinate / 4 + 1, (int)side);
+                int depth = 1 + (int)Math.Round((a * (4 - coordinate % 4) + b * (coordinate % 4)) / 4.0);
+                for (int d = 1; d < depth; d++)
+                {
+                    var (c, r) = side switch
+                    {
+                        ChunkSide.Left => (d, i), ChunkSide.Right => (width - 1 - d, i),
+                        ChunkSide.Bottom => (i, d), _ => (i, height - 1 - d),
+                    };
+                    if (grid[c, r] is not ('.' or ',')) break;
+                    if (reserved.Any(p => Math.Abs(p.c - c) <= 1 && Math.Abs(p.r - r) <= 1)) break;
+                    // Keep shores and adjoining open/nonforest boundaries clear.
+                    if ((c < 3 && (!bands.TryGetValue(ChunkSide.Left, out var left) || !Forest(left)))
+                        || (c >= width - 3 && (!bands.TryGetValue(ChunkSide.Right, out var right) || !Forest(right)))
+                        || (r < 3 && (!bands.TryGetValue(ChunkSide.Bottom, out var bottom) || !Forest(bottom)))
+                        || (r >= height - 3 && (!bands.TryGetValue(ChunkSide.Top, out var top) || !Forest(top)))) break;
+                    bool wet = false;
+                    for (int dc = -1; dc <= 1; dc++) for (int dr = -1; dr <= 1; dr++)
+                        wet |= grid[c + dc, r + dr] is 'W' or '~';
+                    if (wet) break;
+                    grid[c, r] = code == NaturalBand ? (Hash(coordinate + d, (int)side) == 0 ? 'F' : 'T') : code;
+                }
+            }
+        }
+    }
+
     private sealed class Builder(MapChunk chunk, Random rng)
     {
         public readonly char[,] G = Init();
@@ -434,6 +700,17 @@ public static class BuildingGenerator
         private readonly HashSet<(int, int)> _windowCells = [];
         private readonly Dictionary<(int, int), Region> _regionOf = [];
         private (int c, int r)? _backDoorYard;
+        private readonly Dictionary<(int c, int r), char> _forestGrowth = [];
+        private IReadOnlyDictionary<ChunkSide, char> _forestBands = new Dictionary<ChunkSide, char>();
+        private HashSet<(int c, int r)> _approaches = [];
+
+        public bool IsForestGrowth((int c, int r) p) => _forestGrowth.ContainsKey(p) && G[p.c, p.r] is 'T' or 'F' or 'e';
+
+        public void ClearForestGrowth(IEnumerable<(int c, int r)> cells)
+        {
+            foreach (var p in cells)
+                if (IsForestGrowth(p)) { G[p.c, p.r] = _forestGrowth[p]; _forestGrowth.Remove(p); }
+        }
         // Furniture supplied: view (terrain code), cells (the first one is “head”), floor under them. While the
         // generation is in progress, the codes are in G (for connectivity checks), as a result - as separate
         // objects, and in the terrain - the floor.
@@ -448,6 +725,7 @@ public static class BuildingGenerator
 
         public Result Result()
         {
+            TrimOuterForest();
             var furniture = new List<Furniture>();
             foreach (var (code, cells, floor) in _pieces)
             {
@@ -464,6 +742,35 @@ public static class BuildingGenerator
                 rows.Add(new string(line));
             }
             return new Result(_rooms, _doors, rows, furniture);
+        }
+
+        private void TrimOuterForest()
+        {
+            bool Tree((int c, int r) p) => InBounds(p) && G[p.c, p.r] is 'T' or 'F' or 'e';
+            foreach (var (side, code) in _forestBands)
+            {
+                if (code is not ('T' or 'F' or 'e' or NaturalBand)) continue;
+                bool vertical = side is ChunkSide.Left or ChunkSide.Right;
+                int length = vertical ? H : W;
+                (int c, int r) Cell(int i, int d) => side switch
+                {
+                    ChunkSide.Left => (d, i), ChunkSide.Right => (W - 1 - d, i),
+                    ChunkSide.Bottom => (i, d), _ => (i, H - 1 - d),
+                };
+                for (int i = 2; i < length - 2; i++)
+                {
+                    int coordinate = i + (vertical ? chunk.OriginRow : chunk.OriginCol);
+                    uint hash = unchecked((uint)chunk.Seed * 747796405u + (uint)(coordinate / 3) * 2891336453u + (uint)side * 277803737u);
+                    if ((hash >> 8) % 3 == 0) continue;
+                    for (int d = 0; d < 2; d++)
+                    {
+                        var p = Cell(i, d);
+                        if (!Tree(p) || !Tree(Cell(i - 1, d + 1)) || !Tree(Cell(i, d + 1)) || !Tree(Cell(i + 1, d + 1))) break;
+                        if (_approaches.Concat(_doorCells).Concat(_windowCells).Any(q => Math.Abs(q.Item1 - p.c) <= 2 && Math.Abs(q.Item2 - p.r) <= 2)) break;
+                        G[p.c, p.r] = ' ';
+                    }
+                }
+            }
         }
 
         private List<int> Field((int c, int r) x) => [x.c + chunk.OriginCol + 1, x.r + chunk.OriginRow + 1];
@@ -548,8 +855,10 @@ public static class BuildingGenerator
         private bool Near((int c, int r) x) => _doorCells.Contains(x) || Around(x).Any(_doorCells.Contains);
 
         // Yard/street: grass, along the edges without a neighbor - trees and thicket, towards the dungeon - rock.
-        public void Ground(IReadOnlyDictionary<ChunkSide, char> bands)
+        public void Ground(IReadOnlyDictionary<ChunkSide, char> bands, IReadOnlyCollection<(int c, int r)> approaches)
         {
+            _forestBands = bands;
+            _approaches = approaches.ToHashSet();
             for (int c = 0; c < W; c++)
                 for (int r = 0; r < H; r++)
                     G[c, r] = rng.Next(10) < 3 ? ',' : '.';
@@ -565,6 +874,11 @@ public static class BuildingGenerator
                     G[c, r] = code != NaturalBand ? code : rng.Next(10) < 6 ? 'F' : 'T'; // there are no passable bushes on the edge - do not wall up the cell
                 }
             }
+            var reserved = _regionOf.Keys.Concat(approaches).ToHashSet();
+            var ground = (char[,])G.Clone();
+            GrowForestEdge(G, bands, chunk.Seed, chunk.OriginCol, chunk.OriginRow, reserved);
+            for (int c = 1; c < W - 1; c++) for (int r = 1; r < H - 1; r++)
+                if (G[c, r] != ground[c, r]) _forestGrowth[(c, r)] = ground[c, r];
         }
 
         public bool Blocked((int c, int r) x) => TerrainCatalog.Get(G[x.c, x.r]) is { BlocksMove: true } || OnBorder(x);
@@ -595,15 +909,90 @@ public static class BuildingGenerator
             return main.yard;
         }
 
+        public void AddVillageBridge(char[,] riverbed, HashSet<(int c, int r)> street,
+            bool horizontalRiver, (int c, int r) hub)
+        {
+            int lanes = horizontalRiver ? W : H, length = horizontalRiver ? H : W;
+            (int c, int r) Cell(int lane, int step) => horizontalRiver ? (lane, step) : (step, lane);
+            bool Water((int c, int r) p) => riverbed[p.c, p.r] is 'W' or '~';
+            bool DryApproach((int c, int r) p) => !OnBorder(p) && street.Contains(p) && !_regionOf.ContainsKey(p)
+                && !Water(p) && G[p.c, p.r] is not ('W' or '~') && TerrainCatalog.Get(G[p.c, p.r]) is { BlocksMove: false };
+            foreach (int lane in Enumerable.Range(1, lanes - 2).OrderBy(i => Math.Abs(i - (horizontalRiver ? hub.c : hub.r))))
+                for (int step = 1; step < length - 1; step++)
+                {
+                    if (!Water(Cell(lane, step))) continue;
+                    int first = step;
+                    while (step < length - 1 && Water(Cell(lane, step))) step++;
+                    if (step >= length - 1 || !DryApproach(Cell(lane, first - 1)) || !DryApproach(Cell(lane, step))) continue;
+                    var deck = Enumerable.Range(first, step - first).Select(i => Cell(lane, i)).ToList();
+                    if (!deck.Any(p => riverbed[p.c, p.r] == 'W')
+                        || deck.Any(p => !street.Contains(p) || G[p.c, p.r] != '~' || _regionOf.ContainsKey(p))) continue;
+                    // Result restores the original channel beneath the deck, so breaking/removing it exposes water again.
+                    _pieces.Add(('J', deck, deck.Select(p => riverbed[p.c, p.r]).ToList()));
+                    foreach (var p in deck) G[p.c, p.r] = 'J';
+                    return;
+                }
+        }
+
+        public void AddVillagePassage(IReadOnlyList<HashSet<(int c, int r)>> houses,
+            HashSet<(int c, int r)> street, Random passageRng)
+        {
+            // Only an already connected dry yard qualifies; no new clearing, ford, or boundary exit.
+            bool DryYard((int c, int r) p) => InBounds(p) && !OnBorder(p) && !_regionOf.ContainsKey(p)
+                && G[p.c, p.r] is not ('W' or '~' or ' ')
+                && TerrainCatalog.Get(G[p.c, p.r]) is { BlocksMove: false };
+            var reachableYard = street.Where(DryYard).ToHashSet();
+            var yardQueue = new Queue<(int c, int r)>(reachableYard);
+            while (yardQueue.TryDequeue(out var p))
+                foreach (var n in Around(p))
+                    if (DryYard(n) && reachableYard.Add(n)) yardQueue.Enqueue(n);
+
+            foreach (var inside in houses.Where(h => h.Count >= 12).OrderBy(_ => passageRng.Next()))
+            {
+                var entrances = _doors.Where(d => d.IsWindow != true
+                    && inside.Contains(Local((d.From[0], d.From[1]), chunk))
+                    && !inside.Contains(Local((d.To[0], d.To[1]), chunk))).ToList();
+                if (entrances.Count != 1) continue;
+                var front = entrances[0];
+                var frontRoom = Local((front.From[0], front.From[1]), chunk);
+                var frontYard = Local((front.To[0], front.To[1]), chunk);
+                var outward = (c: frontYard.c - frontRoom.c, r: frontYard.r - frontRoom.r);
+
+                // Furniture is already present. Check the indoor route with existing doors open,
+                // rather than creating an apparently useful door behind a bed or across a room wall.
+                var links = _doors.Where(d => d.IsWindow != true).Select(d => (
+                    a: Local((d.From[0], d.From[1]), chunk), b: Local((d.To[0], d.To[1]), chunk))).ToList();
+                var reachableInside = new HashSet<(int c, int r)> { frontRoom };
+                var indoorQueue = new Queue<(int c, int r)>([frontRoom]);
+                while (indoorQueue.TryDequeue(out var p))
+                    foreach (var n in Around(p))
+                        if (inside.Contains(n) && TerrainCatalog.Get(G[n.c, n.r]) is not { BlocksMove: true }
+                            && (ReferenceEquals(_regionOf.GetValueOrDefault(p), _regionOf.GetValueOrDefault(n))
+                                || links.Any(link => link.a == p && link.b == n || link.a == n && link.b == p))
+                            && reachableInside.Add(n)) indoorQueue.Enqueue(n);
+
+                var candidates = reachableInside.Where(p => !Near(p) && !_windowCells.Contains(p))
+                    .Select(p => (room: p, yard: (c: p.c - outward.c, r: p.r - outward.r)))
+                    .Where(p => !inside.Contains(p.yard) && reachableYard.Contains(p.yard)
+                        && Math.Abs(p.yard.c - frontYard.c) + Math.Abs(p.yard.r - frontYard.r) >= 4)
+                    .OrderBy(p => p.room.r).ThenBy(p => p.room.c).ToList();
+                if (candidates.Count == 0) continue;
+                var back = candidates[passageRng.Next(candidates.Count)];
+                AddDoor(back.room, back.yard, isDoor: true);
+                return;
+            }
+        }
+
         // Courtyard paths: from each block exit to the front door, and from the back door too.
-        public void Streets(List<(int c, int r)> anchors, (int c, int r) entrance, HashSet<(int c, int r)> inside)
+        public HashSet<(int c, int r)> Streets(List<(int c, int r)> anchors, (int c, int r) entrance, HashSet<(int c, int r)> inside, bool preserveWater = false)
         {
             var trail = new HashSet<(int, int)>();
             foreach (var a in anchors)
                 foreach (var x in YardPath(a, [entrance], inside) ?? []) trail.Add(x);
             if (_backDoorYard is { } back)
                 foreach (var x in YardPath(back, [entrance], inside) ?? []) trail.Add(x);
-            foreach (var (c, r) in trail) G[c, r] = '=';
+            foreach (var (c, r) in trail) G[c, r] = preserveWater && G[c, r] is 'W' or '~' ? '~' : '=';
+            return trail;
         }
 
         // Entrance from outside (where the hero came from) - passage beyond the edge of the block; LocationGrower.MarkWorldExit makes it the door of the world.
@@ -613,10 +1002,13 @@ public static class BuildingGenerator
             {
                 var a = Local(exit.AnchorCell(chunk), chunk);
                 var (dx, dy) = ChunkExit.Step(exit.Side);
-                G[a.c, a.r] = '=';
+                G[a.c, a.r] = G[a.c, a.r] is 'W' or '~' ? '~' : '=';
                 AddDoor(a, (a.c + dx, a.r + dy), isDoor: false, entry: true);
             }
         }
+
+        public void SoftenForestEdge(HashSet<(int c, int r)> houses) =>
+            SoftenVillageForestEdge(G, houses.Concat(_doorCells).ToHashSet(), chunk.Seed);
 
         // Trees and bushes are not on the path or near houses; the yard remains connected.
         public void Trees(HashSet<(int c, int r)> inside, (int c, int r) start)

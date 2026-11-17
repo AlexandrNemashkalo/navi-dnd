@@ -72,12 +72,12 @@ public sealed class GameActionTools(McpServerConfig config)
     }
 
     [McpServerTool]
-    [Description("Long rest. Call only after deciding it is allowed, with no active damaging onRound effect. Advances partOfDay by 2, increments day across night, sets totalRounds to 1, restores actions to maxValue and speedLeft to speedMax, and removes expiresAtRound and untilLongRest effects. Returns a time+hero patch; merge HP/resource recovery into the same hero. Do NOT call advance_round afterward; actions were already reset.")]
+    [Description("Long rest (8 hours). Call only after deciding it is allowed, with no damaging onRound effect or unresolved interruption during the interval. Advances the local clock, rebases all active deadlines across day parts, restores actions/speed, expires only due effects and hero untilLongRest effects. Future effects survive. Returns a complete time/hero/map/scheduledEvents patch; preserve it and merge HP/resource recovery. Due hero/NPC/object onExpire and events remain for RoundBundle; resolve due inventory item onExpire yourself. Do NOT call advance_round afterward.")]
     public string LongRest(
         [Description("Whole days already elapsed in this response before resting but not yet applied to saved time (for example a travel detour). Do not include days already charged by the engine.")] int elapsedDays = 0) => Rest(isLong: true, elapsedDays);
 
     [McpServerTool]
-    [Description("Short rest. Call only after deciding it is allowed. Advances partOfDay by 1, increments day across night, sets totalRounds to 1, restores actions to maxValue and speedLeft to speedMax, and removes expiresAtRound effects while retaining untilLongRest effects. Returns a time+hero patch; merge recovery into the same hero. Do NOT call advance_round afterward.")]
+    [Description("Short rest (1 hour). Call only after deciding it is allowed, with no damaging onRound effect or unresolved interruption during the interval. Advances the local clock, rebases all active deadlines across day parts, restores actions/speed and expires only due effects; future and untilLongRest effects survive. Returns a complete time/hero/map/scheduledEvents patch; preserve it and merge recovery. Due hero/NPC/object onExpire and events remain for RoundBundle; resolve due inventory item onExpire yourself. Do NOT call advance_round afterward.")]
     public string ShortRest(
         [Description("Whole days already elapsed in this response before resting but not yet applied to saved time. Do not include days already charged by the engine.")] int elapsedDays = 0) => Rest(isLong: false, elapsedDays);
 
@@ -91,25 +91,39 @@ public sealed class GameActionTools(McpServerConfig config)
             var ws = LoadWorldState();
             var hero = ws.Hero ?? throw new InvalidOperationException("hero missing");
 
-            int steps = isLong ? 2 : 1;
             int currentIndex = Array.IndexOf(_partsOfDay, PartsOfDay.Normalize(ws.Time.PartOfDay));
             if (currentIndex < 0) currentIndex = 0;
+            // The existing clock counts six-second rounds within a six-hour day part.
+            // Keep that format, moving deadlines into the same new local coordinate system.
+            int endRound = checked(ws.Time.TotalRounds + elapsedDays * 14400 + (isLong ? 4800 : 600));
+            int steps = (endRound - 1) / 3600;
+            int nextRound = (endRound - 1) % 3600 + 1;
+            int offset = checked(steps * 3600);
             int newIndex = (currentIndex + steps) % _partsOfDay.Length;
             int dayIncrement = (currentIndex + steps) / _partsOfDay.Length;
 
-            var effects = hero.Effects ?? [];
-            var deletions = new List<object>();
-            for (int i = 0; i < effects.Count; i++)
+            List<object> Effects(List<StatusEffect>? effects, bool restingOwner)
             {
-                var e = effects[i];
-                if (e.Deleted == true) continue;
-                bool remove = e.ExpiresAtRound.HasValue || (isLong && e.UntilLongRest == true);
-                if (remove) deletions.Add(new { id = i, deleted = true });
+                var patches = new List<object>();
+                for (int i = 0; i < (effects?.Count ?? 0); i++)
+                {
+                    var effect = effects![i];
+                    if (effect.Deleted == true) continue;
+                    bool due = effect.ExpiresAtRound is int deadline && deadline < endRound
+                        || restingOwner && isLong && effect.UntilLongRest == true;
+                    if (due)
+                    {
+                        if (effect.OnExpire == null) patches.Add(new { id = i, deleted = true });
+                        // Keep the callback and its owner until the normal expiry handler resolves it.
+                        else patches.Add(new { id = i, expiresAtRound = 0, onExpire = effect.OnExpire });
+                    }
+                    else if (effect.ExpiresAtRound is int expires && offset != 0)
+                        patches.Add(new { id = i, expiresAtRound = Math.Max(0, expires - offset) });
+                }
+                return patches;
             }
 
-            // Rest is actually a new round for the hero: we reset the actions/speed with the same patch, so
-            // that the AI does not have to separately call advance_round (and risk overwriting totalRounds:1,
-            // which is also calculated here, with a second, inconsistent value).
+            // Reset the hero's resources together with the clock; no second advance_round is needed.
             var actionPatches = new List<object>();
             var actions = hero.Actions ?? [];
             for (int i = 0; i < actions.Count; i++)
@@ -123,13 +137,31 @@ public sealed class GameActionTools(McpServerConfig config)
                 ["actions"] = actionPatches,
                 ["speedLeft"] = hero.SpeedMax,
             };
-            if (deletions.Count > 0) heroPatch["effects"] = deletions;
+            var heroEffects = Effects(hero.Effects, true);
+            if (heroEffects.Count > 0) heroPatch["effects"] = heroEffects;
+            var inventory = hero.Inventory.Select((item, id) => (item, id))
+                .Where(x => x.item.Deleted != true).Select(x => new { id = x.id, effects = Effects(x.item.Effects, true) })
+                .Where(x => x.effects.Count > 0).ToList();
+            if (inventory.Count > 0) heroPatch["inventory"] = inventory;
+
+            List<object> Owners<T>(List<T>? owners) where T : CellEntity => (owners ?? []).Select((owner, id) => (owner, id))
+                .Where(x => x.owner.Deleted != true).Select(x => new { id = x.id, effects = Effects(x.owner.Effects, false) })
+                .Where(x => x.effects.Count > 0).Cast<object>().ToList();
+            var mapPatch = new Dictionary<string, object>();
+            var entities = Owners(ws.Map.Entities);
+            var objects = Owners(ws.Map.Objects);
+            if (entities.Count > 0) mapPatch["entities"] = entities;
+            if (objects.Count > 0) mapPatch["objects"] = objects;
 
             var result = new Dictionary<string, object?>
             {
-                ["time"] = new { totalRounds = 1, partOfDay = _partsOfDay[newIndex], day = checked(ws.Time.Day + elapsedDays + dayIncrement) },
+                ["time"] = new { totalRounds = nextRound, partOfDay = _partsOfDay[newIndex], day = checked(ws.Time.Day + dayIncrement) },
                 ["hero"] = heroPatch,
             };
+            if (mapPatch.Count > 0) result["map"] = mapPatch;
+            if (offset != 0 && ws.ScheduledEvents is { Count: > 0 } events)
+                result["scheduledEvents"] = events.Select((ev, id) => (ev, id)).Where(x => x.ev.Deleted != true)
+                    .Select(x => new { id = x.id, fireAtRound = Math.Max(1, x.ev.FireAtRound - offset) }).ToList();
 
             string resultJson = JsonSerializer.Serialize(result, _writeOptions);
             Log($"{kind} ← ({resultJson.Length} chars): {resultJson}");
@@ -143,13 +175,14 @@ public sealed class GameActionTools(McpServerConfig config)
     }
 
     [McpServerTool]
-    [Description("Door action: open/close/break requires the hero to stand exactly on From or To; hide/reveal has no position requirement. Returns {success:true,patch:{...}} to merge, or {success:false,reason:\"...\"}. Narrate a refusal; do not bypass it by resolving the action yourself.")]
+    [Description("Door action: open/close/break requires the actor to stand exactly on From or To in saved state. entityId=-1 (default) acts as the hero; an original map.entities ID acts as that NPC. Select the actual actor, never substitute a nearby creature for the hero. hide/reveal has no position requirement. Returns {success:true,patch:{...}} to merge, or {success:false,reason:\"...\"}. Narrate a refusal; do not bypass it by resolving the action yourself.")]
     public string DoorAction(
         [Description("Door ID from map.doors.")] int doorId,
-        [Description("Action: open|close|break|hide|reveal.")] string action)
+        [Description("Action: open|close|break|hide|reveal.")] string action,
+        [Description("Acting NPC's original map.entities ID, or -1 for the hero.")] int entityId = -1)
     {
         string logName = $"door_action({action})";
-        Log($"{logName} → id:{doorId}");
+        Log($"{logName} → id:{doorId}, actor:{entityId}");
         try
         {
             var ws = LoadWorldState();
@@ -176,15 +209,32 @@ public sealed class GameActionTools(McpServerConfig config)
                 if (!isPhysicalDoor)
                     return Fail(logName, $"map.doors id:{doorId} is a passage, not a door; this action is unavailable.");
 
-                var hero = ws.Hero ?? throw new InvalidOperationException("hero missing");
-                var pos = hero.Position ?? throw new InvalidOperationException("hero.position missing");
-                // The door is the border BETWEEN From and To, not a separate cell: the hero must stand exactly
+                List<int>? pos;
+                string actor;
+                if (entityId == -1)
+                {
+                    pos = ws.Hero?.Position;
+                    actor = "hero";
+                }
+                else
+                {
+                    var entities = ws.Map.Entities;
+                    if (entityId < 0 || entities == null || entityId >= entities.Count || entities[entityId].Deleted == true)
+                        return Fail(logName, $"Actor map.entities id:{entityId} is unavailable.");
+                    var entity = entities[entityId];
+                    if (int.TryParse(entity.Hp.Split('/')[0], out int hp) && hp <= 0)
+                        return Fail(logName, $"Actor map.entities id:{entityId} has no HP and cannot act.");
+                    pos = entity.Position;
+                    actor = $"map.entities id:{entityId}";
+                }
+                if (pos is not { Count: >= 2 }) return Fail(logName, $"{actor} position missing.");
+                // The door is the border BETWEEN From and To, not a separate cell: the actor must stand exactly
                 // in one of them, and not next to it (Chebyshev ≤1 to From/To would pass the cell BEHIND the
-                // door - the hero is “one cell” away from it, and not right next to it).
+                // door - the actor is “one cell” away from it, and not right next to it).
                 int dist = Math.Min(ChebyshevDistance(pos, door.From), ChebyshevDistance(pos, door.To));
                 if (dist > 0)
                     return Fail(logName,
-                        $"Door id:{doorId} is too far away (hero at [{pos[0]},{pos[1]}], door between " +
+                        $"Door id:{doorId} is too far away ({actor} at [{pos[0]},{pos[1]}], door between " +
                         $"[{door.From[0]},{door.From[1]}] and [{door.To[0]},{door.To[1]}]); stand adjacent on From or To.");
             }
 

@@ -99,16 +99,20 @@ public static class WorldLibrary
         catch { return null; }
     }
 
-    public static void Save(WorldMap world)
+    public static bool Save(WorldMap world)
     {
+        GameWorld.Invalidate(world);
+        bool saved = false;
         try
         {
             Directory.CreateDirectory(Path.Combine(Dir, world.Id));
-            File.WriteAllText(WorldPath(world.Id), JsonSerializer.Serialize(world), Encoding.UTF8);
+            AtomicFile.WriteAllText(WorldPath(world.Id), JsonSerializer.Serialize(world));
+            saved = true;
         }
         catch { /*not saved - changes live until the end of the session*/ }
         _loaded[world.Id] = world;
         Changed?.Invoke();
+        return saved;
     }
 
     // A world generated in advance (new game questionnaire: preview before selection) - to the library and active.

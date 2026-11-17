@@ -8,6 +8,8 @@ namespace NaviDnD;
 
 public class DialogDisplay
 {
+    public bool ShowCreationHint { get; init; }
+
     private class DisplayLine
     {
         public string Prefix { get; set; }
@@ -331,6 +333,16 @@ public class DialogDisplay
             }
 
             messageSizes.Add(messageLineCount);
+        }
+
+        // UI guidance is not history: never save it or send it to the GM.
+        if (ShowCreationHint && !_isStreaming)
+        {
+            var hint = TextWrapper.WrapText(L.T("Your hero is ready. Press [F4] to continue to the adventure."), innerWidth);
+            allLines.Add(new DisplayLine { Text = "", IsSystem = true });
+            foreach (string line in hint)
+                allLines.Add(new DisplayLine { Text = line, IsSystem = true, PrefixColor = [235, 190, 80] });
+            messageSizes.Add(hint.Count + 1);
         }
 
         _cachedAllLines = allLines;

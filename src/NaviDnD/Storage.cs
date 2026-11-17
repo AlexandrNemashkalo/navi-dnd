@@ -11,6 +11,8 @@ namespace NaviDnD;
 public class Storage
 {
     public HashSet<(int X, int Y)> ExploredCells = [];
+    private readonly ExplorationMemory _exploration = new();
+    public void SelectExplorationLocation() => _exploration.Select(this);
 
     // Map items that the hero has already seen (“name@number,row”): in the fog they are remembered as a dim
     // symbol. null - after loading it is not yet seeded (the first frame considers objects on the studied cells
@@ -35,6 +37,18 @@ public class Storage
     public WorldState WorldState { get; private set; } = new WorldState();
     public int DiagonalUsed { get; private set; } = 0;
     public void ResetDiagonalCount() => DiagonalUsed = 0;
+
+    // Symbols and colors are local to a scene; another place may reuse them for different residents.
+    public void ResetLocationRuntime()
+    {
+        _entitiesSeeingHero.Clear();
+        _oaOnHeroLastRound.Clear();
+        _entityColors.Clear();
+        foreach (var entity in WorldState.Map.Entities ?? [])
+            if (entity.Deleted != true && entity.Color != null) _entityColors[entity.Name] = entity.Color;
+        _wasSpeedExhausted = false;
+        DiagonalUsed = 0;
+    }
 
     private Dictionary<string, List<int>> _entityColors = [];
     private bool _wasSpeedExhausted = false;
@@ -104,6 +118,7 @@ public class Storage
         WorldState.FormatVersion = StorageFormat.Current;
         WorldState.Hero = null;
         WorldState.Map = new MapConfig();
+        _exploration.Load(this, null);
         WorldState.Narrative = new Narrative();
         WorldState.History = [];
         WorldState.Time = new GameTime();
@@ -142,6 +157,17 @@ public class Storage
                 var entity = entities[i];
                 if (entity.Deleted == true) continue;
                 CollectEntityEffects("map.entities", i, entity, currentRound, expired, onRound);
+            }
+        }
+
+        var objects = WorldState.Map.Objects;
+        if (objects != null)
+        {
+            for (int i = 0; i < objects.Count; i++)
+            {
+                var obj = objects[i];
+                if (obj.Deleted == true) continue;
+                CollectEntityEffects("map.objects", i, obj, currentRound, expired, onRound);
             }
         }
 
@@ -275,6 +301,7 @@ public class Storage
     // (hero.level/xp), taken from the file. The wizard’s response does not change them - he awards experience
     // with the xpAward. patch
     private bool _fromSave;
+    private int _timerRebaseOffset;
 
     // Save or library hero card - like ApplyUpdateWorldState, but with engine fields.
     public void ApplySavedState(string json)
@@ -302,6 +329,15 @@ public class Storage
         // accept it as a list of one element, and do not drop the entire response.
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new LenientStringListConverter() } };
         var root = doc.RootElement;
+        _timerRebaseOffset = _fromSave ? 0 : TimerRebaseOffset(root);
+        if (_timerRebaseOffset > 0)
+        {
+            // A calendar advance starts a new tick, but already delivered expiry callbacks remain delivered.
+            foreach (var entry in _effectRuntime) entry.Value.LastRound = null;
+            _areaRuntime.Clear();
+            _entityRuntime.Clear();
+            _oaOnHeroLastRound.Clear();
+        }
         RebindChangedSymbols(root);
 
         foreach (var prop in root.EnumerateObject())
@@ -456,6 +492,8 @@ public class Storage
     private void NormalizeKeys()
     {
         WorldState.Time.PartOfDay = PartsOfDay.Normalize(WorldState.Time.PartOfDay);
+        foreach (var thread in WorldState.Narrative?.PlotThreads ?? [])
+            thread.Status = PlotThreadStatuses.Normalize(thread.Status);
         if (WorldState.Hero is not { } hero) return;
         foreach (var stat in hero.Stats ?? []) stat.Key ??= StatKeys.FromName(stat.Name);
         foreach (var resource in hero.Resources ?? []) resource.Category = ResourceCategories.Normalize(resource.Category);
@@ -967,7 +1005,7 @@ public class Storage
                     int nextRound = prop.Value.GetInt32();
                     if (nextRound < WorldState.Time.TotalRounds)
                     {
-                        _effectRuntime.Clear();
+                        if (_timerRebaseOffset == 0) _effectRuntime.Clear();
                         _areaRuntime.Clear();
                         _entityRuntime.Clear();
                         _oaOnHeroLastRound.Clear();
@@ -982,6 +1020,21 @@ public class Storage
                     break;
             }
         }
+    }
+
+    // Deadlines are explicitly rebased by the time-producing tool, never shifted again here.
+    // This detects only the coordinate change so MergeInto can preserve callback delivery state.
+    private int TimerRebaseOffset(JsonElement root)
+    {
+        if (!TryPatchProperty(root, "time", out var time) || time.ValueKind != JsonValueKind.Object
+            || !TryPatchProperty(time, "totalRounds", out _)) return 0;
+        int day = TryPatchProperty(time, "day", out var dayValue) ? dayValue.GetInt32() : WorldState.Time.Day;
+        string part = TryPatchProperty(time, "partOfDay", out var partValue) ? partValue.GetString()! : WorldState.Time.PartOfDay;
+        int oldIndex = Array.IndexOf(PartsOfDay.Cycle, PartsOfDay.Normalize(WorldState.Time.PartOfDay));
+        int newIndex = Array.IndexOf(PartsOfDay.Cycle, PartsOfDay.Normalize(part));
+        if (oldIndex < 0 || newIndex < 0) return 0;
+        long offset = (((long)day - WorldState.Time.Day) * 4 + newIndex - oldIndex) * 3600;
+        return offset > 0 && offset <= int.MaxValue ? (int)offset : 0;
     }
 
 
@@ -1077,7 +1130,7 @@ public class Storage
                     WorldState.Narrative.World = prop.Value.GetString()!;
                     break;
                 case "currentarc":
-                    WorldState.Narrative.CurrentArc = prop.Value.GetString()!;
+                    WorldState.Narrative.CurrentArc = prop.Value.GetString() ?? "";
                     break;
                 case "style":
                     WorldState.Narrative.Style = prop.Value.GetString() ?? "";
@@ -1141,16 +1194,24 @@ public class Storage
             }
         }
         var merged = baseNode.Deserialize<T>(options)!;
+        if (existing is PlotThread oldThread && merged is PlotThread newThread)
+            newThread.RuntimeId = oldThread.RuntimeId;
         // Serializing the owner must not discard the identities of its unmodified effects.
         if (merged is CellEntity cell) cell.Effects = effects;
         if (existing is StatusEffect oldEffect && merged is StatusEffect newEffect
             && _effectRuntime.TryGetValue(oldEffect, out var runtime))
         {
             _effectRuntime.Add(newEffect, new EffectRuntime { LastRound = runtime.LastRound,
-                ExpirationFired = runtime.ExpirationFired && oldEffect.ExpiresAtRound == newEffect.ExpiresAtRound });
+                ExpirationFired = runtime.ExpirationFired && (oldEffect.ExpiresAtRound == newEffect.ExpiresAtRound
+                    || _timerRebaseOffset > 0 && oldEffect.ExpiresAtRound is int oldDeadline
+                        && newEffect.ExpiresAtRound == Math.Max(0, oldDeadline - _timerRebaseOffset)
+                        && JsonSerializer.Serialize(oldEffect.OnExpire) == JsonSerializer.Serialize(newEffect.OnExpire)) });
         }
         if (existing is ScheduledEvent oldEvent && merged is ScheduledEvent newEvent
-            && oldEvent.FireAtRound == newEvent.FireAtRound && _eventRuntime.TryGetValue(oldEvent, out var eventRuntime))
+            && (oldEvent.FireAtRound == newEvent.FireAtRound
+                || _timerRebaseOffset > 0 && newEvent.FireAtRound == Math.Max(1, oldEvent.FireAtRound - _timerRebaseOffset)
+                    && oldEvent.Effect == newEvent.Effect)
+            && _eventRuntime.TryGetValue(oldEvent, out var eventRuntime))
             _eventRuntime.Add(newEvent, new EventRuntime { Fired = eventRuntime.Fired });
         if (existing is Area oldArea && merged is Area newArea && _areaRuntime.TryGetValue(oldArea, out var areaRuntime))
             _areaRuntime.Add(newArea, areaRuntime);
@@ -1245,7 +1306,27 @@ public class Storage
 
     public static int ActiveSlot { get; private set; } = 1;
 
-    public static string SavePath => TestMode ? LegacySavePath : SlotPath(ActiveSlot);
+    private static readonly AsyncLocal<string?> SavePathOverride = new();
+    public static string SavePath => SavePathOverride.Value ?? (TestMode ? LegacySavePath : SlotPath(ActiveSlot));
+
+    internal static IDisposable UseSavePath(string absolutePath)
+    {
+        if (!Path.IsPathFullyQualified(absolutePath)) throw new ArgumentException("An absolute save path is required.", nameof(absolutePath));
+        var scope = new SavePathScope(SavePathOverride.Value);
+        SavePathOverride.Value = absolutePath;
+        return scope;
+    }
+
+    private sealed class SavePathScope(string? previous) : IDisposable
+    {
+        private bool _disposed;
+        public void Dispose()
+        {
+            if (_disposed) return;
+            SavePathOverride.Value = previous;
+            _disposed = true;
+        }
+    }
     public static string SlotPath(int slot) => Path.Combine(StorageDir, $"game{slot}.json");
     public static bool SlotExists(int slot) => File.Exists(SlotPath(slot));
     // In UI tests, the game writes to its own file (SavePath), it does not take up the space of games - a new game is always possible.
@@ -1319,18 +1400,15 @@ public class Storage
     public static void DeleteDraft()
     {
         if (File.Exists(DraftSavePath)) File.Delete(DraftSavePath);
+        string explored = ExploredCellsPath(DraftSavePath);
+        if (File.Exists(explored)) File.Delete(explored);
     }
 
     private void SaveTo(string path)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         string json = JsonSerializer.Serialize(WorldState, _saveOptions);
-        RetryOnIo(() =>
-        {
-            using var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read);
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
-            writer.Write(json);
-        });
+        RetryOnIo(() => AtomicFile.WriteAllText(path, json));
 
         SaveExploredCellsTo(path);
     }
@@ -1342,6 +1420,7 @@ public class Storage
 
     private void SaveExploredCellsTo(string path)
     {
+        SelectExplorationLocation();
         string exploredPath = ExploredCellsPath(path);
         if (!SaveExploredCells)
         {
@@ -1349,25 +1428,20 @@ public class Storage
             return;
         }
 
-        var cells = ExploredCells.Select(c => new[] { c.X, c.Y }).ToList();
-        string exploredJson = JsonSerializer.Serialize(cells);
-        RetryOnIo(() => File.WriteAllText(exploredPath, exploredJson, Encoding.UTF8));
+        string exploredJson = _exploration.Serialize(this);
+        RetryOnIo(() => AtomicFile.WriteAllText(exploredPath, exploredJson));
     }
 
     private void LoadExploredCellsFrom(string path)
     {
-        ExploredCells.Clear();
-        SeenObjects = null;
+        _exploration.Load(this, null);
         if (!SaveExploredCells) return;
 
         string exploredPath = ExploredCellsPath(path);
         if (!File.Exists(exploredPath)) return;
         try
         {
-            var cells = JsonSerializer.Deserialize<List<int[]>>(File.ReadAllText(exploredPath, Encoding.UTF8));
-            if (cells == null) return;
-            foreach (var cell in cells)
-                if (cell.Length == 2) ExploredCells.Add((cell[0], cell[1]));
+            _exploration.Load(this, File.ReadAllText(exploredPath, Encoding.UTF8));
         }
         catch { /*damaged/incomplete - we start with an empty fog of war, do not drop the load*/ }
     }
@@ -1400,6 +1474,7 @@ public class Storage
         var hero = root.FirstOrDefault(kv => kv.Key.Equals("hero", StringComparison.OrdinalIgnoreCase)).Value as JsonObject;
         var pos = hero?.FirstOrDefault(kv => kv.Key.Equals("position", StringComparison.OrdinalIgnoreCase)).Value;
         if (map == null) return;
+        ResetLocationRuntime();
         GameWorld.ClearMap(WorldState.Map);
         var patch = new JsonObject { ["map"] = map.DeepClone() };
         if (pos != null) patch["hero"] = new JsonObject { ["position"] = pos.DeepClone() };
@@ -1410,6 +1485,7 @@ public class Storage
     public void LoadFrom(string path)
     {
         string json = File.ReadAllText(path, Encoding.UTF8);
+        ResetLocationRuntime();
         SetIconPack(null);   // a save without the field - game-icons, not the pack of the previous game
         WorldState.Hero = null;
         WorldState.Narrative = null;

@@ -1,4 +1,4 @@
-﻿using NaviDnD.Data;
+using NaviDnD.Data;
 using NaviDnD.Helpers;
 
 namespace NaviDnD.Display;
@@ -730,8 +730,7 @@ public class MapDisplay
                 if (!sameWorld)
                 {
                     // New world on the screen: there is a hero - the camera is on him, large (cell = pixel); no - the whole world.
-                    _display.WorldTarget = null;
-                    _display.WorldRoute = null;
+                    WorldTravelSelection.Clear(_display);
                     if (GameWorld.HeroTile(_settings) is { } h)
                     {
                         _display.WorldZoomStep = Math.Min(2, _worldView.MaxZoom);

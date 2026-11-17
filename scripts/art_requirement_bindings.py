@@ -19,6 +19,13 @@ def add_runtime_requirements(root, requirements):
         if (row['category'], row['name']) != (extra['category'], extra['names'][0]):
             raise ValueError('Extra requirement conflicts with catalog: ' + extra['id'])
         row.update(names=extra['names'], nameRu=extra['nameRu'], engineAliases=extra.get('engineAliases', []))
+        row['categories'] = extra.get('categories', [])
+        row['terrainAlias'] = extra.get('terrainAlias', True)
+        row.pop('palette', None)
+        if extra.get('palette'):
+            if extra['palette'] not in ('silver', 'copper', 'electrum', 'platinum'):
+                raise ValueError('Unsupported runtime palette: ' + extra['palette'])
+            row['palette'] = extra['palette']
 
 
 def apply_reviewed_usages(root, assets):

@@ -2,7 +2,7 @@ using NaviDnD.Data.Models;
 
 namespace NaviDnD;
 
-// OwnerPath: "hero" or "map.entities". EntityId: index in map.entities (null for hero). EffectId: index of the
+// OwnerPath: "hero", "map.entities" or "map.objects". EntityId: index in the owner collection (null for hero). EffectId: index of the
 // effect within the owner's list Effects - used for patching by id.
 public record EffectRef(string OwnerPath, int? EntityId, string OwnerName, int EffectId, StatusEffect Effect);
 

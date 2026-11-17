@@ -13,6 +13,8 @@ size = 10.0
 # Initial fallback. The game measures actual cells before revealing the window and
 # after font changes, then adjusts its session offset to an exact 1:2 cell ratio.
 offset = { x = 0, y = -1 }
+# Align font glyphs with the terminal's built-in lines without changing cell size.
+glyph_offset = { x = 0, y = 1 }
 
 [colors.primary]
 background = "#121216"

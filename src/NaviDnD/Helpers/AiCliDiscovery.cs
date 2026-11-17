@@ -6,12 +6,13 @@ namespace NaviDnD.Helpers;
 public static class AiCliDiscovery
 {
     public static string NormalizePath(string path) => OperatingSystem.IsWindows()
-        ? Environment.ExpandEnvironmentVariables(path.Trim().Trim('"'))
+        ? Environment.ExpandEnvironmentVariables(path.Trim().Trim('"', '\''))
         : UnixTools.ExpandHome(Environment.ExpandEnvironmentVariables(path.Trim().Trim('"', '\'')));
 
     public static bool IsAvailable(string name, string configuredPath)
     {
         string path = NormalizePath(configuredPath);
+        if (OperatingSystem.IsWindows() && name == "codex" && Directory.Exists(path)) return FindCodexInstallation(path) != null;
         if (name == "claude" && File.Exists(path) && IsDesktopApp(path)) return Find(name) != null;
         if (Path.IsPathRooted(path)) return File.Exists(path);
         return Find(name) != null;
@@ -20,6 +21,8 @@ public static class AiCliDiscovery
     public static string? Resolve(string name, string configuredPath)
     {
         string path = NormalizePath(configuredPath);
+        if (OperatingSystem.IsWindows() && name == "codex" && Directory.Exists(path)
+            && FindCodexInstallation(path) is { } installed) return installed;
         if (!OperatingSystem.IsWindows())
             return Path.IsPathRooted(path) && UnixTools.IsExecutable(path) && !(name == "claude" && IsDesktopApp(path)) ? path : Find(name);
         if (Path.IsPathRooted(path) && File.Exists(path))
@@ -46,19 +49,42 @@ public static class AiCliDiscovery
         }.SelectMany(p => (p ?? "").Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries));
         var directories = paths.Concat(new[] {
             Path.Combine(home, ".local", "bin"), Path.Combine(home, ".cargo", "bin"),
+            Path.Combine(home, ".codex", "bin"),
             Path.Combine(roaming, "npm"), Path.Combine(local, "Microsoft", "WinGet", "Links"),
             Environment.GetEnvironmentVariable("NVM_SYMLINK") ?? "",
             Environment.GetEnvironmentVariable("PNPM_HOME") ?? ""
-        });
+        }).Concat(NpmPrefixes(home));
         var extensions = new[] { ".vscode", ".vscode-insiders", ".cursor", ".windsurf" }
             .Select(editor => Path.Combine(home, editor, "extensions"))
             .Append(Environment.GetEnvironmentVariable("VSCODE_EXTENSIONS") ?? "");
         string? cli = Find(name, directories, extensions);
+        if (cli == null && name == "codex") return FindCodexInstallation(Path.Combine(local, "OpenAI", "Codex"));
         if (cli != null || name != "claude") return cli;
         return FindDesktopClaude([
             Path.Combine(roaming, "Claude", "claude-code"),
             Path.Combine(local, "Packages", "Claude_pzs8sxrjxfjjc", "LocalCache", "Roaming", "Claude", "claude-code")
         ]);
+    }
+
+    // Codex's Windows installation keeps the CLI in bin/<version-or-hash>/codex.exe.
+    // Inspect only that level, not runtimes or the rest of the user's profile.
+    public static string? FindCodexInstallation(string root)
+    {
+        try
+        {
+            if (!Path.IsPathRooted(root) || !Directory.Exists(root)) return null;
+            string bin = Path.GetFileName(root).Equals("bin",StringComparison.OrdinalIgnoreCase) ? root : Path.Combine(root,"bin");
+            var directories = new List<string> { bin, root };
+            if (Directory.Exists(bin)) directories.AddRange(Directory.EnumerateDirectories(bin)
+                .OrderByDescending(Directory.GetLastWriteTimeUtc).ThenBy(p=>p,StringComparer.Ordinal));
+            foreach (string directory in directories)
+            {
+                string exe=Path.Combine(directory,"codex.exe");
+                if(File.Exists(exe) && !IsDesktopApp(exe)) return Path.GetFullPath(exe);
+            }
+        }
+        catch(Exception e) when(e is IOException or UnauthorizedAccessException or ArgumentException or System.Security.SecurityException) { }
+        return null;
     }
 
     public static string? Find(string name, IEnumerable<string> directories, IEnumerable<string> extensionRoots)
@@ -258,18 +284,26 @@ public static class AiCliDiscovery
         directory.Replace('\\', '/').Contains("/.cmuxterm/", StringComparison.Ordinal);
 
     // Global prefix npm without starting npm: environment, then ~/.npmrc.
-    [UnsupportedOSPlatform("windows")]
-    private static IEnumerable<string> NpmPrefixes(string home)
+    public static IEnumerable<string> NpmPrefixes(string home)
     {
         foreach (string variable in new[] { "NPM_CONFIG_PREFIX", "npm_config_prefix" })
             if (Environment.GetEnvironmentVariable(variable) is { Length: > 0 } prefix) yield return prefix;
         string[] lines;
-        try { lines = File.Exists(Path.Combine(home, ".npmrc")) ? File.ReadAllLines(Path.Combine(home, ".npmrc")) : []; }
+        string config = Environment.GetEnvironmentVariable("NPM_CONFIG_USERCONFIG")
+            ?? Environment.GetEnvironmentVariable("npm_config_userconfig") ?? Path.Combine(home, ".npmrc");
+        config = NormalizePath(config);
+        try { lines = File.Exists(config) ? File.ReadAllLines(config) : []; }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { lines = []; }
         foreach (string line in lines)
         {
             string[] pair = line.Split('=', 2);
-            if (pair.Length == 2 && pair[0].Trim() == "prefix") yield return UnixTools.ExpandHome(pair[1].Trim().Trim('"'));
+            if (pair.Length != 2 || !pair[0].Trim().Equals("prefix", StringComparison.OrdinalIgnoreCase)) continue;
+            string prefix = System.Text.RegularExpressions.Regex.Replace(pair[1].Trim().Trim('"', '\''),
+                @"\$\{([^}]+)\}", match => Environment.GetEnvironmentVariable(match.Groups[1].Value) ?? match.Value);
+            if (prefix == "~") prefix = home;
+            else if (prefix.StartsWith("~/") || prefix.StartsWith("~\\")) prefix = Path.Combine(home, prefix[2..]);
+            prefix = NormalizePath(prefix);
+            yield return Path.IsPathRooted(prefix) ? Path.GetFullPath(prefix) : prefix;
         }
     }
 

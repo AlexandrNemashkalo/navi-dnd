@@ -1,11 +1,42 @@
 using System.Text.Json;
 using NaviDnD.Clients;
+using NaviDnD.Helpers;
 
 namespace NaviDnD.PromptTests;
 
 // No model calls: regression coverage for the real-scenario harness.
 public class PromptScenarioTests
 {
+    [Fact]
+    public void FinalResponseResolvesCatalogReferencesBeforeApplyingNestedPatches()
+    {
+        var storage = new Storage();
+        storage.ApplySavedState("""{"hero":{"symbol":"HRO","hp":"10/10"}}""");
+        PromptScenario.ApplyAndParse(storage, """
+            {"history":[{"text":"Found a sword","patch":{"hero":{"inventory":[{"name":"Temporary name","ref":"Longsword","quantity":1}]}}}],"map":{"entities":[{"name":"Raven","symbol":"RAV","position":[2,2],"monster":"Raven"}]}}
+            """);
+        var item = Assert.Single(storage.WorldState.Hero!.Inventory!);
+        Assert.Equal(EquipmentDatabase.Find("Longsword")!.LocalizedName, item.Name);
+        var creature = Assert.Single(storage.WorldState.Map.Entities!);
+        Assert.False(string.IsNullOrWhiteSpace(creature.MonsterKey));
+        Assert.False(string.IsNullOrWhiteSpace(creature.Hp));
+    }
+
+    [Fact]
+    public void RetainedFinalHistoryIsAvailableNextTurnWithoutReapplyingItsPatch()
+    {
+        var storage = new Storage();
+        storage.ApplySavedState("""{"hero":{"symbol":"HRO","hp":"10/10"}}""");
+        PromptScenario.ApplyAndParse(storage, """
+            {"history":[{"author":"Mira","text":"<speak>I repair the ferry.</speak>","patch":{"narrative":{"npcs":[{"name":"Mira","memory":["Mira repairs the ferry"]}]}}}]}
+            """, retainHistory: true);
+        var message = Assert.Single(storage.WorldState.History!);
+        Assert.Equal("Mira", message.Author);
+        Assert.Equal("I repair the ferry.", message.Text);
+        Assert.Single(storage.WorldState.Narrative!.Npcs);
+        Assert.Contains("I repair the ferry.", new AiContextBuilder(storage.WorldState).MinimalState("Continue"));
+    }
+
     [Fact]
     public void SelfCenteredCubeCanChooseHeroCell()
     {

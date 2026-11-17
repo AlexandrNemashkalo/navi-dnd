@@ -72,6 +72,7 @@ def prepare():
         names = requirement.get('names') or list(dict.fromkeys(n for n in [requirement.get('nameEn'), requirement['name'], requirement.get('nameRu')] if n))
         categories = {'item'} if usage == 'item' else {'creature'} if usage in ('map_actor', 'portrait') else {'feature'}
         categories.add(category)
+        categories.update(requirement.get('categories', []))
         source_ref = requirement.get('source', '')
         details = {}
         if '#' in source_ref:
@@ -91,6 +92,8 @@ def prepare():
                     categories.add(token)
         bindings.append(dict(key=requirement['id'], names=names, categories=sorted(categories),
                              usage=usage, imageId=digest, match=candidate['match']))
+        if requirement.get('palette'):
+            bindings[-1]['palette'] = requirement['palette']
         if category == 'furniture' and requirement['name'] in furniture_icons:
             engine_aliases[furniture_icons[requirement['name']]] = digest
         for alias in requirement.get('engineAliases', []):
@@ -122,8 +125,10 @@ def prepare():
     terrain_source = (ROOT/'src/NaviDnD.Data/Models/Terrain.cs').read_text(encoding='utf-8-sig')
     kinds = dict(re.findall(r"new TerrainKind\('([^']+)',\s*\"([^\"]+)\"", terrain_source))
     terrain_icons = dict(re.findall(r"\['([^']+)'\]\s*=\s*\"([^\"]+)\"", terrain_source))
+    no_terrain_alias = {r['id'] for r in requirements if r.get('terrainAlias') is False}
     for binding in bindings:
         if 'terrain' not in binding['categories']: continue
+        if binding['key'] in no_terrain_alias: continue
         for code, name in kinds.items():
             if name in binding['names'] and code in terrain_icons:
                 engine_aliases[terrain_icons[code]] = binding['imageId']

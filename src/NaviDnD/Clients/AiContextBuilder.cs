@@ -13,6 +13,31 @@ namespace NaviDnD.Clients;
 /// </summary>
 public class AiContextBuilder
 {
+    public static string WorldConcept(WorldMap world, string? wish, string? name = null, string? description = null)
+    {
+        var text = new System.Text.StringBuilder(NaviDnD.MapGen.Generators.WorldAtlas.TerrainSummary(world));
+        var chronicle = world.Chronicle;
+        if (chronicle.Kingdoms.Count > 0 || !string.IsNullOrWhiteSpace(chronicle.Name)
+            || !string.IsNullOrWhiteSpace(chronicle.Description) || !string.IsNullOrWhiteSpace(chronicle.DmNotes))
+        {
+            text.AppendLine("\nExisting concept: preserve established names, rules, history and motives except where the player requests a change. dmNotes are GM secrets, not public description.");
+            text.AppendLine(JsonSerializer.Serialize(new
+            {
+                name = chronicle.Name, description = chronicle.Description, dmNotes = chronicle.DmNotes,
+                kingdoms = chronicle.Kingdoms.Select(k => new
+                {
+                    id = k.Id, name = k.Name, description = k.Description, dmNotes = k.DmNotes,
+                    capital = k.Id >= 0 && k.Id < world.Kingdoms.Count
+                        ? chronicle.Places.FirstOrDefault(p => p.Slot == world.Kingdoms[k.Id].Capital && p.Type == WorldPlaceTypes.Capital)?.Name : null,
+                }),
+            }, _json));
+        }
+        if (!string.IsNullOrWhiteSpace(name)) text.AppendLine($"\nThe player chose the world name: «{name.Trim()}» — preserve it (name).");
+        if (!string.IsNullOrWhiteSpace(description)) text.AppendLine($"\nCurrent world description (from the player): revise as requested and preserve everything not requested to change:\n{description.Trim()}");
+        if (!string.IsNullOrWhiteSpace(wish)) text.AppendLine($"\nPlayer request: {wish}");
+        return text.ToString();
+    }
+
     private readonly WorldState _ws;
     private readonly HashSet<(int, int)>? _visibleCells;
 
@@ -147,10 +172,9 @@ public class AiContextBuilder
             if (physIds.Length > 0) sb.AppendLine($"map.doors (doors): {physIds}");
             if (passIds.Length > 0) sb.AppendLine($"map.doors (passages): {passIds}");
         }
-        if (_ws.Narrative?.PlotThreads is { Count: > 0 } threads)
-            sb.AppendLine($"narrative.plotThreads: {Join(threads.Where(x => x.Deleted != true).Select(x => x.Name))}");
-        if (_ws.Narrative?.Npcs is { Count: > 0 } npcs)
-            sb.AppendLine($"narrative.npcs: {Join(npcs.Where(x => x.Deleted != true).Select(x => x.Name))}");
+        var recall = NarrativeRecall.Rank(_ws, playerAction);
+        foreach (bool threads in new[] { true, false })
+            if (NarrativeRecall.Index(recall, threads) is { Length: > 0 } index) sb.AppendLine(index);
         if (_ws.ScheduledEvents is { Count: > 0 } sched)
             sb.AppendLine($"scheduledEvents: {Join(sched.Where(x => x.Deleted != true).Select(x => $"{x.Name} ({x.FireAtRound})"))}");
 
@@ -259,9 +283,26 @@ public class AiContextBuilder
                     && _visibleCells.Contains((x.o.Position[0], x.o.Position[1]))
                     && nearbyCells.Contains((x.o.Position[0], x.o.Position[1])))
                 .Select(x => new { id = x.i, x.o.Name, x.o.Symbol, x.o.Position, x.o.Hidden,
-                    x.o.AiInfo, x.o.Effects, x.o.Triggers, x.o.Light }).ToList();
+                    aiInfo = RecentNotes(x.o.AiInfo),
+                    aiInfoOmitted = Math.Max(0, (x.o.AiInfo?.Count ?? 0) - 4),
+                    x.o.Effects, x.o.Triggers, x.o.Light }).ToList();
             if (nearObj is { Count: > 0 })
+            {
+                nearSb.AppendLine("Object aiInfo is newest first; aiInfoOmitted counts older notes. Retrieve omitted/truncated facts with get_world_state map.objects:#ID when needed.");
                 nearSb.AppendLine($"map.objects: {JsonSerializer.Serialize(nearObj, _json)}");
+            }
+
+            var nearFurniture = _ws.Map.Furniture?.Select((f, i) => (f, i))
+                .Where(x => x.f.Deleted != true && x.f.Positions?.Any(p => p.Count >= 2
+                    && _visibleCells.Contains((p[0], p[1])) && nearbyCells.Contains((p[0], p[1]))) == true)
+                .Select(x => new { id = x.i, name = FurnitureCatalog.DisplayName(x.f), x.f.Kind,
+                    x.f.State, x.f.Positions, aiInfo = RecentNotes(x.f.AiInfo),
+                    aiInfoOmitted = Math.Max(0, (x.f.AiInfo?.Count ?? 0) - 4) }).ToList();
+            if (nearFurniture is { Count: > 0 })
+            {
+                nearSb.AppendLine("Furniture aiInfo is GM knowledge, newest first; aiInfoOmitted counts older notes. Retrieve omitted/truncated facts with get_world_state map.furniture:#ID when needed.");
+                nearSb.AppendLine($"map.furniture: {JsonSerializer.Serialize(nearFurniture, _json)}");
+            }
 
             var nearEnt = _ws.Map.Entities?
                 .Where(e => e.Deleted != true && e.Position is { Count: >= 2 } &&
@@ -271,6 +312,21 @@ public class AiContextBuilder
             if (nearEnt?.Any() == true)
                 nearSb.AppendLine($"map.entities: {Join(nearEnt)}");
 
+            var addressed = _ws.Map.Entities?.Select((e, i) => (e, i))
+                .Where(x => x.e.Deleted != true && x.e.Hidden != true && x.e.Position is { Count: >= 2 }
+                    && _visibleCells.Contains((x.e.Position[0], x.e.Position[1]))
+                    && nearbyCells.Contains((x.e.Position[0], x.e.Position[1]))
+                    && !string.IsNullOrWhiteSpace(x.e.Name)
+                    && Mentions(playerAction, x.e.Name)
+                    && x.e.AiInfo is { Count: > 0 })
+                .Take(3).Select(x => new { id = x.i, x.e.Name, aiInfo = RecentNotes(x.e.AiInfo),
+                    aiInfoOmitted = Math.Max(0, (x.e.AiInfo?.Count ?? 0) - 4) }).ToList();
+            if (addressed is { Count: > 0 })
+            {
+                nearSb.AppendLine("Addressed NPC aiInfo is GM knowledge, newest first; retrieve omitted/truncated facts with get_world_state map.entities:#ID when needed.");
+                nearSb.AppendLine($"Addressed NPC facts: {JsonSerializer.Serialize(addressed, _json)}");
+            }
+
             AppendDoorIds(nearSb, _ws.Map.Doors, isVisible: d =>
                 d.From is { Count: >= 2 } && d.To is { Count: >= 2 } &&
                 (_visibleCells.Contains((d.From[0], d.From[1])) || _visibleCells.Contains((d.To[0], d.To[1]))) &&
@@ -279,14 +335,78 @@ public class AiContextBuilder
 
         var visSection  = visSb.Length  > 0 ? $"\n## Visible\n{visSb}"  : "";
         var nearSection = nearSb.Length > 0 ? $"\n## Nearby\n{nearSb}"   : "";
-        return $"## Current state\n{sb}{visSection}{nearSection}{SceneMemory(playerAction)}\n## Player action\n{playerAction}";
+        return $"## Current state\n{sb}{visSection}{nearSection}{WorldMemory()}{SceneMemory(playerAction, recall)}\n## Player action\n{playerAction}";
+    }
+
+    private static bool Mentions(string? text, string? name)
+    {
+        if (string.IsNullOrWhiteSpace(text) || string.IsNullOrWhiteSpace(name)) return false;
+        name = name.Trim();
+        int offset = 0;
+        while (offset <= text.Length - name.Length)
+        {
+            int start = text.IndexOf(name, offset, StringComparison.OrdinalIgnoreCase);
+            if (start < 0) return false;
+            int end = start + name.Length;
+            if ((start == 0 || !char.IsLetterOrDigit(text[start - 1]))
+                && (end == text.Length || !char.IsLetterOrDigit(text[end]))) return true;
+            offset = start + 1;
+        }
+        return false;
+    }
+
+    private static List<string?>? RecentNotes(List<string>? notes) => notes?.TakeLast(4).Reverse()
+        .Select(note => note?.Length > 500 ? note[..500] + "… [truncated; retrieve full record]" : note).ToList();
+
+    // Keep the world's established rules and local consequences available without a lore query every turn.
+    private string WorldMemory()
+    {
+        if (GameWorld.ForMaster(_ws) is not { } world) return "";
+        var sb = new System.Text.StringBuilder();
+        void Add(string label, string? value, int limit, string? query = null)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return;
+            int available = Math.Min(limit, 1900 - sb.Length - label.Length - 4);
+            if (available <= 0) return;
+            string omitted = query == null ? "… [truncated; use world_query]" : $"… [truncated; world_query {query}]";
+            string excerpt = value.Length <= available ? value
+                : available >= omitted.Length ? value[..(available - omitted.Length)] + omitted
+                : "[truncated]";
+            if (excerpt.Length > available) return;
+            sb.Append(label).Append(": ").Append(excerpt).AppendLine();
+        }
+
+        Add("World premise", world.Description, 360, "world");
+        Add("World truth/rules (GM)", world.DmNotes, 420, "world");
+        var place = world.Places.FirstOrDefault(p => string.Equals(p.Name, _ws.World?.Place, StringComparison.OrdinalIgnoreCase));
+        // A shared chronicle may rename a capital before this hero's link is refreshed.
+        // Only an unambiguous known place can substitute; nearby secrets are never selected by coordinates.
+        if (place == null && _ws.World?.Place is { Length: > 0 } && GameWorld.HeroTile(_ws) is { } here)
+        {
+            var known = world.Places.Where(p => !p.Hidden && p.X == here.x && p.Y == here.y).Take(2).ToList();
+            if (known.Count == 1) place = known[0];
+        }
+        int owner = place?.Kingdom ?? (GameWorld.HeroTile(_ws) is { } tile ? world.OwnerAt(tile.x, tile.y) : -1);
+        if (owner >= 0 && owner < world.Kingdoms.Count)
+        {
+            Add("Local society", world.Kingdoms[owner].Description, 200);
+            Add("Local interests (GM)", world.Kingdoms[owner].DmNotes, 240);
+        }
+        if (place != null)
+        {
+            Add("Current place", place.Description, 240);
+            Add("Current place truth (GM)", place.DmNotes, 300);
+        }
+        return sb.Length == 0 ? "" : $"\n## World memory (GM only; not proof of hero knowledge; use world_query for omitted details)\n{sb}";
     }
 
     // Bounded scene recall without another model call. Full records remain available through MCP.
     // Place/name matching is deliberately conservative; it does not simulate events or change knowledge.
-    private string SceneMemory(string playerAction)
+    private string SceneMemory(string playerAction, IReadOnlyList<NarrativeRecall.Record> recall)
     {
         if (_ws.Narrative is not { } narrative) return "";
+        var placeNames = NarrativeRecall.CurrentPlaceNames(_ws);
+        var threadPriorities = recall.Where(r => r.Thread).ToDictionary(r => r.Id, r => r.Priority);
         var visibleNames = (_ws.Map.Entities ?? [])
             .Where(e => e.Deleted != true && e.Hidden != true && e.Position is { Count: >= 2 }
                         && _visibleCells?.Contains((e.Position[0], e.Position[1])) == true)
@@ -296,8 +416,9 @@ public class AiContextBuilder
         const int budget = 2400;
         static string Clip(string? value, int limit) => string.IsNullOrEmpty(value) ? "" :
             value.Length <= limit ? value : value[..limit] + "…";
-        static bool Mentions(string? text, string? name) => !string.IsNullOrWhiteSpace(name)
-            && text?.Contains(name, StringComparison.OrdinalIgnoreCase) == true;
+        var relevantNames = narrative.Npcs
+            .Where(n => n.Deleted != true && (visibleNames.Contains(n.Name) || Mentions(playerAction, n.Name)))
+            .Select(n => n.Name).Concat(visibleNames).ToHashSet(StringComparer.OrdinalIgnoreCase);
         void Add(string line)
         {
             if (sb.Length + line.Length + Environment.NewLine.Length <= budget) sb.AppendLine(line);
@@ -307,12 +428,19 @@ public class AiContextBuilder
                      .Where(x => x.npc.Deleted != true && (visibleNames.Contains(x.npc.Name) || Mentions(playerAction, x.npc.Name)))
                      .OrderByDescending(x => Mentions(playerAction, x.npc.Name))
                      .ThenByDescending(x => visibleNames.Contains(x.npc.Name)).Take(2))
-            Add($"NPC#{id} {Clip(npc.Name, 80)}: {Clip(npc.Attitude, 60)}; known: {Clip(npc.Notes, 140)}; GM: {Clip(npc.DmNotes, 220)}; memory: {Clip(string.Join(" | ", npc.Memory?.TakeLast(3) ?? []), 260)}");
+            Add($"NPC#{id} {Clip(npc.Name, 80)}: {Clip(npc.Attitude, 60)}; known: {Clip(npc.Notes, 140)}; GM: {Clip(npc.DmNotes, 220)}; memory (newest first): {Clip(string.Join(" | ", npc.Memory?.TakeLast(3).Reverse() ?? []), 260)}");
         foreach (var (thread, id) in narrative.PlotThreads.Select((thread, id) => (thread, id))
                      .Where(x => x.thread.Deleted != true && (Mentions(playerAction, x.thread.Name)
-                         || Mentions(x.thread.DmNotes, _ws.World?.Place) || Mentions(x.thread.Description, _ws.World?.Place)
-                         || visibleNames.Any(name => Mentions(x.thread.DmNotes, name))))
-                     .OrderByDescending(x => Mentions(playerAction, x.thread.Name)).Take(3))
+                         || placeNames.Any(name => Mentions(x.thread.Name, name) || Mentions(x.thread.DmNotes, name) || Mentions(x.thread.Description, name)
+                             || x.thread.Steps?.Any(step => Mentions(step, name)) == true)
+                         || (x.thread.Hidden != true && Mentions(narrative.CurrentArc, x.thread.Name))
+                         || (x.thread.Hidden != true && x.thread.Status == PlotThreadStatuses.Active)
+                         || relevantNames.Any(name => Mentions(x.thread.DmNotes, name) || Mentions(x.thread.Description, name))))
+                     .OrderByDescending(x => Mentions(playerAction, x.thread.Name))
+                     .ThenByDescending(x => x.thread.Hidden != true && Mentions(narrative.CurrentArc, x.thread.Name))
+                     .ThenByDescending(x => threadPriorities.GetValueOrDefault(x.id))
+                     .ThenByDescending(x => relevantNames.Any(name => Mentions(x.thread.DmNotes, name) || Mentions(x.thread.Description, name)))
+                     .Take(3))
             Add($"Thread#{id} {Clip(thread.Name, 80)} [{Clip(thread.Status, 40)}; hidden:{thread.Hidden == true}]: known: {Clip(thread.Description, 140)}; GM: {Clip(thread.DmNotes, 220)}; latest: {Clip(thread.Steps?.LastOrDefault(), 120)}");
         return sb.Length > 0 ? $"\n## Scene memory (GM only)\n{sb}" : "";
     }
@@ -373,7 +501,7 @@ public class AiContextBuilder
     // the block was filled in the way intended at the start (the “light and steel” puzzle turned into “water
     // and fire”). From the hero - level for the strength of enemies and passive Perception for stealth of
     // traps.
-    public string PopulationState()
+    public string PopulationState(MapChunk? chunk = null)
     {
         var sb = new System.Text.StringBuilder();
         sb.AppendLine($"round:{_ws.Time.TotalRounds} day:{_ws.Time.Day} timeOfDay:{_ws.Time.PartOfDay}");
@@ -387,15 +515,15 @@ public class AiContextBuilder
             sb.AppendLine($"hero: {hero.Name}{(who.Length > 0 ? $" ({who})" : "")} symbol:{hero.Symbol} position:{(hero.Position is { Count: >= 2 } hp ? $"[{hp[0]},{hp[1]}]" : "?")} passive Perception:{passive}");
         }
         if (WorldLine() is { } worldLine) sb.AppendLine(worldLine);
+        sb.Append(WorldMemory());
         if (_ws.Narrative is { } n)
         {
             if (n.Style is { Length: > 0 } style) sb.AppendLine($"style: {style}");
             if (n.CurrentArc is { Length: > 0 } arc) sb.AppendLine($"arc: {arc}");
             if (n.World is { Length: > 0 } world) sb.AppendLine($"world: {world}");
-            foreach (var t in n.PlotThreads?.Where(x => x.Deleted != true) ?? [])
-                sb.AppendLine($"thread «{t.Name}» ({t.Status}): {t.Description}{(t.DmNotes is { Length: > 0 } dm ? $" | GM: {dm}" : "")}");
-            foreach (var npc in n.Npcs?.Where(x => x.Deleted != true) ?? [])
-                sb.AppendLine($"npc «{npc.Name}» ({npc.Attitude}): {npc.Notes}{(npc.DmNotes is { Length: > 0 } dm ? $" | GM: {dm}" : "")}");
+            string focus = string.Join(" ", new[] { chunk?.Purpose, n.CurrentArc, _ws.World?.Place }
+                .Concat((_ws.Map.Chunks ?? []).Select(c => c.Purpose)));
+            sb.Append(NarrativeRecall.Population(NarrativeRecall.Rank(_ws, focus)));
         }
         // Unique things that are already on the map, so as not to repeat NPC and story items.
         if (_ws.Map.Entities is { Count: > 0 } ent)
@@ -420,6 +548,13 @@ public class AiContextBuilder
 
     public string ChunkState(MapChunk chunk)
     {
+        var unavailable = ChunkPopulationPatch.ReservedCells(_ws.Map, chunk);
+        foreach (var entity in (_ws.Map.Entities ?? []).Cast<CellEntity>().Concat(_ws.Map.Objects ?? []))
+            if (entity.Deleted != true && entity.Position is { Count: >= 2 } position)
+                unavailable.Add((position[0], position[1]));
+        if (_ws.Hero?.Position is { Count: >= 2 } heroPosition)
+            unavailable.Add((heroPosition[0], heroPosition[1]));
+        bool Available(int col, int row) => !unavailable.Contains((col, row)) && _ws.Map.TerrainAt(col, row) is not { BlocksMove: true };
         var sb = new System.Text.StringBuilder();
         sb.AppendLine($"## Location chunk ({ChunkLabel(chunk)}): cells {chunk.OriginCol + 1}–{chunk.OriginCol + MapChunk.Cols} × {chunk.OriginRow + 1}–{chunk.OriginRow + MapChunk.Rows}");
         if (!string.IsNullOrEmpty(chunk.Purpose)) sb.AppendLine($"Planned purpose: {chunk.Purpose}");
@@ -427,19 +562,35 @@ public class AiContextBuilder
         var neighbors = Neighbors(chunk).Select(n => $"{n.side} — {ChunkLabel(n.chunk)}: {n.chunk.Purpose ?? "—"}").ToList();
         if (neighbors.Count > 0) sb.AppendLine($"Neighboring chunks (account for these when populating): {string.Join("; ", neighbors)}");
 
+        void AppendTerrainReferences(Dictionary<string, List<(int col, int row)>> terrainCells, string label)
+        {
+            sb.AppendLine($"{label}Terrain (cells): {string.Join(", ", terrainCells.OrderByDescending(k => k.Value.Count).Select(k => $"{k.Key} {k.Value.Count}"))}");
+            sb.AppendLine("Terrain reference cells (samples only; do not infer continuous features between them):");
+            foreach (var (name, cells) in terrainCells)
+            {
+                double centerCol = cells.Average(p => p.col), centerRow = cells.Average(p => p.row);
+                var center = cells.MinBy(p => Math.Pow(p.col - centerCol, 2) + Math.Pow(p.row - centerRow, 2));
+                var samples = new[] { center, cells.MinBy(p => p.col), cells.MaxBy(p => p.col),
+                    cells.MinBy(p => p.row), cells.MaxBy(p => p.row) }.Distinct();
+                sb.AppendLine($"- {name}: {string.Join(", ", samples.Select(p => $"[{p.col},{p.row}]"))}");
+            }
+        }
+
         if (MapChunk.IsOutdoorTheme(chunk.Theme) && chunk.Terrain is { } terrain)
         {
             // Open area: there are no rooms, you can place it on any passable terrain square.
             var walkable = new List<List<int>>();
-            var kinds = new Dictionary<string, int>();
+            var terrainCells = new Dictionary<string, List<(int col, int row)>>();
             for (int r = 0; r < terrain.Count; r++)
                 for (int c = 0; c < terrain[r].Length; c++)
                 {
-                    if (TerrainCatalog.Get(terrain[r][c]) is not { } kind) continue;
-                    kinds[kind.Name] = kinds.GetValueOrDefault(kind.Name) + 1;
-                    if (!kind.BlocksMove) walkable.Add([chunk.OriginCol + c + 1, chunk.OriginRow + r + 1]);
+                    if ((_ws.Map.TerrainAt(chunk.OriginCol + c + 1, chunk.OriginRow + r + 1) ?? TerrainCatalog.Get(chunk.Terrain[r][c])) is not { } kind) continue;
+                    if (!terrainCells.TryGetValue(kind.Name, out var cells)) terrainCells[kind.Name] = cells = [];
+                    cells.Add((chunk.OriginCol + c + 1, chunk.OriginRow + r + 1));
+                    if (!kind.BlocksMove && Available(chunk.OriginCol + c + 1, chunk.OriginRow + r + 1))
+                        walkable.Add([chunk.OriginCol + c + 1, chunk.OriginRow + r + 1]);
                 }
-            sb.AppendLine($"Open terrain, no rooms. Terrain (cells): {string.Join(", ", kinds.OrderByDescending(k => k.Value).Select(k => $"{k.Key} {k.Value}"))}");
+            AppendTerrainReferences(terrainCells, "Open terrain, no rooms. ");
             sb.AppendLine($"Passable cells (creature/object positions must use these): {CompactCells(walkable)}");
         }
         else
@@ -451,7 +602,8 @@ public class AiContextBuilder
                 var room = rooms[i];
                 if (room.Deleted == true || room.Positions is not { Count: > 0 } || !chunk.Contains(room.Positions[0][0], room.Positions[0][1])) continue;
                 // Columns/blockages (floor topography) are occupied - we do not offer their cells.
-                var free = room.Positions.Where(p => _ws.Map.TerrainAt(p[0], p[1]) is not { BlocksMove: true }).ToList();
+                var free = room.Positions.Where(p => _ws.Map.TerrainAt(p[0], p[1]) is not { BlocksMove: true }
+                    && Available(p[0], p[1])).ToList();
                 var features = room.Positions.Select(p => _ws.Map.TerrainAt(p[0], p[1]))
                     .Where(k => k != null && TerrainCatalog.InLegend(k)).Select(k => k!.Name).Distinct().ToList();
                 string extra = features.Count > 0 ? $" [{string.Join(", ", features)}]" : "";
@@ -462,12 +614,17 @@ public class AiContextBuilder
             {
                 var roomCells = rooms.SelectMany(r => r.Positions ?? []).Where(p => p.Count >= 2).Select(p => (p[0], p[1])).ToHashSet();
                 var yard = new List<List<int>>();
+                var terrainCells = new Dictionary<string, List<(int col, int row)>>();
                 for (int r = 0; r < yardRows.Count; r++)
                     for (int c = 0; c < yardRows[r].Length; c++)
                     {
                         int col = chunk.OriginCol + c + 1, row = chunk.OriginRow + r + 1;
-                        if (!roomCells.Contains((col, row)) && TerrainCatalog.Get(yardRows[r][c]) is { BlocksMove: false }) yard.Add([col, row]);
+                        if (roomCells.Contains((col, row)) || (_ws.Map.TerrainAt(col, row) ?? TerrainCatalog.Get(chunk.Terrain[r][c])) is not { } kind) continue;
+                        if (!terrainCells.TryGetValue(kind.Name, out var cells)) terrainCells[kind.Name] = cells = [];
+                        cells.Add((col, row));
+                        if (!kind.BlocksMove && Available(col, row)) yard.Add([col, row]);
                     }
+                if (terrainCells.Count > 0) AppendTerrainReferences(terrainCells, "Outside rooms. ");
                 if (yard.Count > 0) sb.AppendLine($"{(chunk.Theme == MapChunk.Village ? "Streets and courtyards" : "Building courtyard")} ({yard.Count} cells): {CompactCells(yard)}");
             }
         }
@@ -478,10 +635,15 @@ public class AiContextBuilder
             {
                 var ps = x.f.Positions;
                 string cells = ps.Count == 1 ? $"[{ps[0][0]},{ps[0][1]}]" : $"[{ps[0][0]},{ps[0][1]}]–[{ps[^1][0]},{ps[^1][1]}]";
-                return $"id:{x.i} {FurnitureCatalog.DisplayName(x.f)} {cells}";
+                var roomIds = ps.Where(p => p.Count >= 2)
+                    .Select(p => _ws.Map.Rooms?.FindIndex(room => room.Deleted != true
+                        && room.Positions?.Any(cell => cell.Count >= 2 && cell[0] == p[0] && cell[1] == p[1]) == true) ?? -1)
+                    .Distinct().ToList();
+                string location = string.Join(", ", roomIds.Select(id => id < 0 ? "outside rooms" : $"room id:{id}"));
+                return $"id:{x.i} {FurnitureCatalog.DisplayName(x.f)} {cells} ({location}){(FurnitureCatalog.Terrain(x.f) is { BlocksMove: false } ? "; walkable" : "")}";
             }).ToList();
         if (pieces.Count > 0)
-            sb.AppendLine($"Furniture (map.furniture, already on the map; do not duplicate as objects, cells occupied): {string.Join("; ", pieces)}");
+            sb.AppendLine($"Furniture (map.furniture, already on the map; do not duplicate as objects; only marked walkable surfaces allow positions): {string.Join("; ", pieces)}");
 
         var external = chunk.Exits.Where(e => e.External).Select(e => e.AnchorCell(chunk)).ToHashSet();
         var doors = _ws.Map.Doors ?? [];
@@ -729,11 +891,11 @@ public class AiContextBuilder
     }
 
     private static string EffectPath(EffectRef r) =>
-        r.OwnerPath == "hero" ? "hero.effects" : $"map.entities[id:{r.EntityId}].effects";
+        r.OwnerPath == "hero" ? "hero.effects" : $"{r.OwnerPath}[id:{r.EntityId}].effects";
 
     private static string EffectDeletePatch(EffectRef r) => r.OwnerPath == "hero"
         ? $"{{\"hero\":{{\"effects\":[{{\"id\":{r.EffectId},\"deleted\":true}}]}}}}"
-        : $"{{\"map\":{{\"entities\":[{{\"id\":{r.EntityId},\"effects\":[{{\"id\":{r.EffectId},\"deleted\":true}}]}}]}}}}";
+        : $"{{\"map\":{{\"{(r.OwnerPath == "map.objects" ? "objects" : "entities")}\":[{{\"id\":{r.EntityId},\"effects\":[{{\"id\":{r.EffectId},\"deleted\":true}}]}}]}}}}";
 
     // Filters by index (id) when filterTerms are integers; returns all if no valid ids provided
     private static JsonArray WithIdsByIndex<T>(List<T>? list, string[]? filterTerms)
@@ -794,7 +956,7 @@ public class AiContextBuilder
 
     /// <summary>
     ///Collects JSON from the specified WorldState fields with optional filters by name.
-    ///filters: field key → array of substrings (OR-logic, case-insensitive).
+    ///filters: field key → array of name substrings or #originalId (OR-logic, case-insensitive names).
     ///For WithIds- arrays, the original id are preserved - patching remains correct.
     /// </summary>
     public string Serialize(string[] fields, Dictionary<string, string[]>? filters)
@@ -886,7 +1048,9 @@ public class AiContextBuilder
         if (list == null) return arr;
         for (int i = 0; i < list.Count; i++)
         {
-            if (filterTerms != null && !filterTerms.Any(t => getName(list[i])?.Contains(t, StringComparison.OrdinalIgnoreCase) == true))
+            if (filterTerms != null && !filterTerms.Any(t => t.StartsWith('#')
+                    ? int.TryParse(t.AsSpan(1), out int id) && id == i
+                    : getName(list[i])?.Contains(t, StringComparison.OrdinalIgnoreCase) == true))
                 continue;
             var node = JsonSerializer.SerializeToNode(list[i], _json)!.AsObject();
             node["id"] = i;

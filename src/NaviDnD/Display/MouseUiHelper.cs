@@ -728,12 +728,34 @@ internal static class MouseUiHelper
 
     internal static void SetSelectedImage(DisplayConfig display, string? imagePath, string? name, List<int>? color = null)
     {
-        name = FitPanelName(display, name);
-        display.SelectedImageLines = string.IsNullOrEmpty(imagePath)
-            ? BuildDefaultIconLines(name, display.MaxHistoryLines)
-            : SvgToBrailleConverter.Convert(imagePath, name ?? "") ?? BuildDefaultIconLines(name, display.MaxHistoryLines);
+        int height = Math.Max(3, display.MaxHistoryLines);
+        var captions = (name ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Take(Math.Min(3, height - 2)).Select(line => FitPanelName(display, line) ?? "").ToArray();
+        int imageRows = Math.Max(1, height - captions.Length - 1);
+        int width = Math.Max(2, Math.Min(36, Math.Min(display.DialogRightPanelWidth, imageRows * 2)));
+        bool worldCard = display.MapLevel == MapLevel.World;
+        var picture = string.IsNullOrEmpty(imagePath) ? null : SvgToBrailleConverter.Convert(imagePath, "", width,
+            applyPackMapping: !worldCard, forceBraille: worldCard);
+        display.SelectedImageLines = picture == null
+            ? BuildDefaultIconLines(string.Join('\n', captions), height)
+            : [.. picture, .. captions.Length > 0 ? new[] { "" }.Concat(captions) : []];
         display.SelectedImageColor = color;
         display.SelectedImageColorTitleOnly = false;
+    }
+
+    internal static void SetSelectedTerrainImage(DisplayConfig display, TerrainKind terrain, string label)
+    {
+        if (!TerrainCatalog.IsBackground(terrain.Code))
+        {
+            SetSelectedImage(display, ArtPictures.TerrainImage(terrain), label, terrain.LegendColor ?? terrain.Fg);
+            return;
+        }
+        // A nonempty, blank selection suppresses both the hero fallback and a stale hovered picture.
+        display.SelectedImageLines = [""];
+        display.SelectedImageColor = null;
+        display.SelectedImageColorTitleOnly = false;
+        display.NotePage = 0;
+        display.NotePageCount = 0;
     }
 
     internal static void SetDefaultImage(DisplayConfig display, string? imagePath, List<int>? color = null)
@@ -1131,7 +1153,8 @@ internal static class MouseUiHelper
         Action<DialogDisplay?>? setActiveDialog = null,
         Func<DialogDisplay, Action>? pollFactory = null,
         Func<string, bool>? onTextInput = null,
-        Action? onDelete = null)
+        Action? onDelete = null,
+        bool creationEditor = false)
     {
         var titleTabs = ComputeTitleTabs(title);
         int startTop = Term.CursorTop;
@@ -1140,7 +1163,7 @@ internal static class MouseUiHelper
             Term.CursorVisible = false;
             Term.SetCursorPosition(0, startTop);
             draw();
-            var history = new DialogDisplay(settings, display, storage);
+            var history = new DialogDisplay(settings, display, storage) { ShowCreationHint = creationEditor };
             if (pollFactory != null)
             {
                 // Your screen mouse poll (log): aka - during AI response (DialogDisplay.SwitchTab).

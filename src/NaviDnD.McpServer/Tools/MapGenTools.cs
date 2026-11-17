@@ -143,6 +143,8 @@ public sealed class MapGenTools(McpServerConfig config)
                 if (WorldLibrary.LoadFrom(Path.Combine(worlds, link.Id, "world.json")) is { } geo)
                 {
                     var all = GameWorld.Compose(geo, link, includeHidden: true);
+                    if (link.Place is { Length: > 0 } place && GameWorld.HasSavedLocation(geo, place))
+                        return "{\"error\":\"This place already has an archived location. Do not regenerate or replace it. If restoration failed, narrate the hero remaining outside; preserve the saved map.\"}";
                     (int x, int y)? tile = plan?.WorldX is int wx && plan.WorldY is int wy ? (wx, wy)
                         : link.X is int hx && link.Y is int hy ? (hx, hy)
                         : link.Place is { } pl && MapGen.Generators.WorldAtlas.FindPlace(all, pl) is { } p ? (p.X, p.Y) : null;

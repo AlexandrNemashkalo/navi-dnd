@@ -72,9 +72,16 @@ public static class ChunkGenerator
         }
         if (rooms.Count >= 4 && rng.Next(10) < 4)
         {
-            int a = rng.Next(rooms.Count), b = rng.Next(rooms.Count);
-            if (a != b && !passages.Any(p => (p.From == rooms[a].Name && p.To == rooms[b].Name) || (p.From == rooms[b].Name && p.To == rooms[a].Name)))
+            var candidates = (from a in Enumerable.Range(0, rooms.Count)
+                              from b in Enumerable.Range(a + 1, rooms.Count - a - 1)
+                              where !passages.Any(p => (p.From == rooms[a].Name && p.To == rooms[b].Name)
+                                  || (p.From == rooms[b].Name && p.To == rooms[a].Name))
+                              select (a, b)).ToList();
+            if (candidates.Count > 0)
+            {
+                var (a, b) = candidates[rng.Next(candidates.Count)];
                 passages.Add(Passage(rooms[a].Name, rooms[b].Name, rng, cave));
+            }
         }
 
         // Exit: corridor from the room closest to this side to the cell on the edge of the block.
@@ -98,7 +105,7 @@ public static class ChunkGenerator
             Rows = MapChunk.Rows,
             Seed = seed,
             Dungeon = new DungeonRequest { Rooms = rooms, Passages = passages, Transitions = transitions },
-        });
+        }, naturalCave: cave);
 
         map.Translate(chunk.OriginCol, chunk.OriginRow);
         foreach (var room in map.Rooms ?? [])

@@ -78,6 +78,53 @@ public class EncounterTriggerTests
     // ── spotted ──────────────────────────────────────────────────────────────
 
     [Fact]
+    public void NewLocationWithReusedSymbolGetsItsOwnDetectionAndReaction()
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Map.Entities = [MakeEnemy("GB1", 6, 2)];
+        Assert.Equal(["GB1"], Types(Move(storage, "MoveEast"), "spotted"));
+        Assert.True(storage.TryMarkOpportunityAttackOnHero("GB1", 5));
+        Assert.False(storage.TryMarkOpportunityAttackOnHero("GB1", 5));
+
+        storage.WorldState.Map.Entities = [MakeEnemy("GB1", 6, 4)];
+        storage.ResetLocationRuntime();
+
+        Assert.Equal(["GB1"], Types(Move(storage, "MoveNorth"), "spotted"));
+        Assert.Empty(Types(Move(storage, "MoveSouth"), "spotted"));
+        Assert.True(storage.TryMarkOpportunityAttackOnHero("GB1", 5));
+        Assert.False(storage.TryMarkOpportunityAttackOnHero("GB1", 5));
+    }
+
+    [Fact]
+    public void SceneRuntimeResetDropsOldColorsButKeepsCurrentResidentsColors()
+    {
+        var storage = new Storage();
+        storage.ApplyUpdateWorldState("""{"map":{"entities":[{"name":"Old resident","symbol":"OLD","color":[10,20,30]}]}}""");
+        storage.WorldState.Map.Entities = [new() { Name = "New resident", Symbol = "NEW", Color = [40,50,60] }];
+        storage.ResetLocationRuntime();
+        Assert.Null(storage.GetColorByName("Old resident"));
+        Assert.Equal(new[] { 40, 50, 60 }, storage.GetColorByName("New resident"));
+    }
+
+    [Fact]
+    public void ReloadingSaveResetsDetectionEvenForTheSameLocationAndRound()
+    {
+        var storage = MakeStorage();
+        storage.WorldState.Map.Entities = [MakeEnemy("GB1", 6, 2)];
+        string path = Path.Combine(Path.GetTempPath(), "navidnd-return-" + Guid.NewGuid().ToString("N") + ".json");
+        File.WriteAllText(path, System.Text.Json.JsonSerializer.Serialize(storage.WorldState));
+        try
+        {
+            Assert.True(storage.UpdateEntitySeesHero("GB1", true));
+            Assert.True(storage.TryMarkOpportunityAttackOnHero("GB1", 5));
+            storage.LoadFrom(path);
+            Assert.True(storage.UpdateEntitySeesHero("GB1", true));
+            Assert.True(storage.TryMarkOpportunityAttackOnHero("GB1", 5));
+        }
+        finally { File.Delete(path); }
+    }
+
+    [Fact]
     public void Spotted_NeutralNpcWithoutTrigger_NeverFires()
     {
         var storage = MakeStorage();

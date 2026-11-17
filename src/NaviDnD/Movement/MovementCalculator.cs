@@ -479,11 +479,16 @@ public static class MovementCalculator
     public static bool CanMoveTo(WorldState ws, int fromCol, int fromRow, int toCol, int toRow, int entityId)
     {
         if (toCol < 1 || toCol > ws.Map.Cols || toRow < 1 || toRow > ws.Map.Rows) return false;
-        if (ws.Map.TerrainAt(toCol, toRow) is { BlocksMove: true }) return false;
+        var terrain = ws.Map.TerrainAt(toCol, toRow);
+        if (terrain is { BlocksMove: true }) return false;
         if (ws.Map.FloorAt(fromCol, fromRow) != ws.Map.FloorAt(toCol, toRow)) return false;
 
         var fromRoom = GetRoom(ws, fromCol, fromRow);
         var toRoom   = GetRoom(ws, toCol, toRow);
+        // Generated locations occupy only part of the field; NPCs and path previews must obey
+        // the same empty-space boundary as the hero instead of walking around barriers through void.
+        if ((ws.Map.Rooms is { Count: > 0 } || ws.Map.Chunks is { Count: > 0 })
+            && terrain == null && toRoom == null && !ws.Map.AreasAt(toCol, toRow).Any(a => a.Deleted != true)) return false;
         bool crossingBoundary = fromRoom != toRoom && (fromRoom != null || toRoom != null);
         if (crossingBoundary && !HasPassableConnection(ws, fromCol, fromRow, toCol, toRow)) return false;
 

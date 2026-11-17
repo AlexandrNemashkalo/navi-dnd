@@ -40,7 +40,8 @@ public static class LocationGrower
         var rng = new Random();
         if (PlaceFloors(blocks, rng) is not { } place) return (null, "этажи не помещаются на поле — уменьшите план");
 
-        var map = ws.Map;
+        // Build off-state: an incompatible bank/footprint must not erase the current location or move the hero.
+        var map = new MapConfig { DefaultImage = ws.Map.DefaultImage, TriggerCells = ws.Map.TriggerCells };
         map.Rooms = [];
         map.Doors = [];
         map.Area = [];
@@ -79,7 +80,9 @@ public static class LocationGrower
         var exits = chunks.ToDictionary(c => c, _ => new List<ChunkExit>());
         var start = chunks[0];
         var freeSides = Enum.GetValues<ChunkSide>().Where(s => Neighbor(start, s) == null).ToList();
-        var startSide = freeSides[rng.Next(freeSides.Count)];
+        var landSides = freeSides.Where(side => site?.WaterSides.Contains(side) != true).ToList();
+        var arrivalSides = landSides.Count > 0 ? landSides : freeSides;
+        var startSide = arrivalSides[rng.Next(arrivalSides.Count)];
         exits[start].Add(new ChunkExit { Side = startSide, Offset = RandomOffset(startSide, rng), External = true });
 
         // Connections: spanning tree to the neighbors of its floor + occasionally an extra passage - a loop.
@@ -118,12 +121,14 @@ public static class LocationGrower
 
         // One contour for the entire building: floors of one cell of the plan (x, y) - with a common contour seed.
         var footprintSeeds = new Dictionary<(int, int), int>();
+        var footprintOffsets = new Dictionary<(int, int), (int c, int r)>();
         int noiseSeed = rng.Next();
         // The river from the world map is across the entire area (one line on the field, blocks are connected).
         OutdoorGenerator.RiverSpec? river = null;
-        if (site?.RiverHorizontal is bool rh && chunks.Any(c => MapChunk.IsOutdoorTheme(c.Theme) && c.Z == 0))
+        if (site?.RiverHorizontal is bool rh && chunks.Any(c => MapChunk.IsOpenGround(c.Theme) && c.Z == 0))
         {
-            var outdoor = chunks.Where(c => MapChunk.IsOutdoorTheme(c.Theme) && c.Z == 0).ToList();
+            var outdoor = chunks.Where(c => (MapChunk.IsOutdoorTheme(c.Theme) || c.Theme == MapChunk.Village) && c.Z == 0).ToList();
+            if (outdoor.Count == 0) outdoor = chunks.Where(c => c.Theme == MapChunk.Building && c.Z == 0).ToList();
             int center = rh ? (outdoor.Min(c => c.OriginRow) + outdoor.Max(c => c.OriginRow) + MapChunk.Rows) / 2 + rng.Next(-3, 4)
                             : (outdoor.Min(c => c.OriginCol) + outdoor.Max(c => c.OriginCol) + MapChunk.Cols) / 2 + rng.Next(-4, 5);
             river = new OutdoorGenerator.RiverSpec(rh, center, site.RiverWidth, rng.Next());
@@ -135,9 +140,22 @@ public static class LocationGrower
             {
                 var b = planOf[c];
                 if (!footprintSeeds.TryGetValue((b.X, b.Y), out int fs)) footprintSeeds[(b.X, b.Y)] = fs = rng.Next();
+                if (!footprintOffsets.TryGetValue((b.X, b.Y), out var offset))
+                {
+                    offset = default;
+                    if (river != null && byPlan.GetValueOrDefault((b.X, b.Y, 0)) is { Theme: MapChunk.Building } ground)
+                    {
+                        if (!BuildingGenerator.TryRiverFootprintOffset(ground, fs, GroundBands(ground), river, noiseSeed,
+                            planOf[ground].Moat, out offset, out var placementError,
+                            chunks.Where(f => f.Theme == MapChunk.Building && planOf[f].X == b.X && planOf[f].Y == b.Y).Select(f => f.Style)))
+                            return (null, placementError);
+                    }
+                    footprintOffsets[(b.X, b.Y)] = offset;
+                }
                 var seamDoors = Enum.GetValues<ChunkSide>()
                     .Where(side => Neighbor(c, side)?.Theme == MapChunk.Building && side is ChunkSide.Right or ChunkSide.Top).ToList();
-                var built = BuildingGenerator.Generate(c, exits[c], fs, ground: c.Z == 0, GroundBands(c), seamDoors, moat: b.Moat);
+                var built = BuildingGenerator.Generate(c, exits[c], fs, ground: c.Z == 0, GroundBands(c), seamDoors, moat: b.Moat,
+                    footprintOffset: offset, river: c.Z == 0 ? river : null, noiseSeed: noiseSeed);
                 c.Terrain = c.Z == 0 && site != null ? Reskin(built.Terrain, site.Theme) : built.Terrain;
                 map.Rooms.AddRange(built.Rooms);
                 map.Doors.AddRange(built.Doors);
@@ -147,7 +165,7 @@ public static class LocationGrower
             }
             if (c.Theme == MapChunk.Village)
             {
-                var village = BuildingGenerator.GenerateVillage(c, exits[c], GroundBands(c), planOf[c].Layout);
+                var village = BuildingGenerator.GenerateVillage(c, exits[c], GroundBands(c), planOf[c].Layout, c.Z == 0 ? river : null, noiseSeed);
                 c.Terrain = site != null ? Reskin(village.Terrain, site.Theme) : village.Terrain;
                 map.Rooms.AddRange(village.Rooms);
                 map.Doors.AddRange(village.Doors);
@@ -187,8 +205,9 @@ public static class LocationGrower
         var (startCol, startRow) = exits[start][0].AnchorCell(start);
         MarkWorldExit(map, startCol, startRow);
         EnsureBoundaryPathExits(map);
-        if (ws.Hero != null)
-            ws.Hero.Position = startInside && FirstRoomCell(map, start, startCol, startRow) is var (ic, ir) ? [ic, ir] : [startCol, startRow];
+        var spawn = startInside && FirstRoomCell(map, start, startCol, startRow) is var (ic, ir) ? new List<int> { ic, ir } : [startCol, startRow];
+        ws.Map = map;
+        if (ws.Hero != null) ws.Hero.Position = spawn;
         return (start, null);
 
         // Edges of the courtyard of a building/settlement: towards the open ground - open, towards the underground - rock, without a neighbor - trees and thicket.
@@ -198,7 +217,7 @@ public static class LocationGrower
             foreach (var side in Enum.GetValues<ChunkSide>())
             {
                 var n = Neighbor(c, side);
-                if (n == null) bands[side] = BuildingGenerator.NaturalBand;
+                if (n == null) bands[side] = c.Z == 0 && site?.WaterSides.Contains(side) == true ? 'W' : BuildingGenerator.NaturalBand;
                 else if (!MapChunk.IsOpenGround(n.Theme)) bands[side] = '^';
             }
             return bands;
