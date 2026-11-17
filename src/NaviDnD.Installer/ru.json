@@ -1,4 +1,5 @@
 {
+  "The download server is limiting requests (HTTP 429). Try again in {0} minutes.": "Сервер загрузки ограничил частоту запросов (HTTP 429). Повторите попытку через {0} мин.",
   "The install folder must not be a link.": "Папка установки не должна быть ссылкой.",
   "All NaviDnD-payload.* files must be next to the installer.": "Рядом с установщиком нужны все NaviDnD-payload.*.",
   "A part of the archive is missing.": "Отсутствует часть архива.",
