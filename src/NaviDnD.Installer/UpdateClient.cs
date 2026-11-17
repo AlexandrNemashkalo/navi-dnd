@@ -9,7 +9,7 @@ namespace NaviDnD.Installer;
 internal static class UpdateClient
 {
     private const string LatestRelease = "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd/releases/permalink/latest";
-    private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromMinutes(15) };
+    private static readonly HttpClient Client = new(new UpdateHttpHandler()) { Timeout = TimeSpan.FromMinutes(15) };
 
     internal static string InstalledVersion(string root)
     {

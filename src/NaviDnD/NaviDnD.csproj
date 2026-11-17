@@ -92,4 +92,7 @@
     </ItemGroup>
     <Copy SourceFiles="@(GameLauncherFiles)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
+  <ItemGroup>
+    <Compile Include="../NaviDnD.Installer/UpdateHttpHandler.cs" Link="Updates/UpdateHttpHandler.cs" />
+  </ItemGroup>
 </Project>

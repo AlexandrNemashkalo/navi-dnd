@@ -29,4 +29,7 @@
     <ProjectReference Include="..\NaviDnD.McpServer\NaviDnD.McpServer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="../NaviDnD.Installer/UpdateHttpHandler.cs" Link="Updates/UpdateHttpHandler.cs" />
+  </ItemGroup>
 </Project>

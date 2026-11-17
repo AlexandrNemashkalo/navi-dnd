@@ -12,7 +12,7 @@ namespace NaviDnD.Helpers;
 internal static class GameUpdates
 {
     private const string ProjectApi = "https://gitlab.com/api/v4/projects/navitalevich%2Fnavi-dnd";
-    private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromMinutes(15) };
+    private static readonly HttpClient Client = new(new UpdateHttpHandler()) { Timeout = TimeSpan.FromMinutes(15) };
     internal static string CurrentVersion => typeof(GameUpdates).Assembly.GetName().Version!.ToString(3);
     private static Task<Release?>? pending;
     internal sealed record Asset(string Name, string Url);
@@ -39,7 +39,7 @@ internal static class GameUpdates
         try
         {
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
-            timeout.CancelAfter(TimeSpan.FromSeconds(12));
+            timeout.CancelAfter(reportErrors ? TimeSpan.FromMinutes(6) : TimeSpan.FromSeconds(12));
             using var response = await Client.GetAsync(ProjectApi + "/releases/permalink/latest", timeout.Token);
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
             response.EnsureSuccessStatusCode();
