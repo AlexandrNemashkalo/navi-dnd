@@ -190,10 +190,9 @@ function BuildGame() {
 function BuildSpeech() {
     $wheels = Join-Path $work 'wheels'
     New-Item -ItemType Directory -Force -Path $wheels | Out-Null
-    & $Python -I -m pip download --disable-pip-version-check --quiet --no-deps --require-hashes --only-binary=:all: `
+    Native 'Downloading speech packages' $Python -I -m pip download --disable-pip-version-check --quiet --no-deps --require-hashes --only-binary=:all: `
         --platform macosx_11_0_arm64 --python-version 3.12 --implementation cp --abi cp312 `
         -r (Join-Path $root 'src/macos/silero-requirements.txt') -d $wheels
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot download speech packages.' }
     $silero = Join-Path $work 'silero'
     & $Python -I (Join-Path $root 'src/macos/package.py') silero (Cached 'python.tar.gz') $wheels (Cached 'v5_5_ru.pt') `
         (Join-Path $root 'src/NaviDnD/Speech/THIRD_PARTY_NOTICES.md') $silero
