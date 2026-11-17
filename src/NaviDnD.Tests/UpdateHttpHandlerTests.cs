@@ -31,8 +31,8 @@ public class UpdateHttpHandlerTests
         var server = new Server(_ => Limited(null));
         var waits = new List<TimeSpan>();
         using var client = new HttpClient(new UpdateHttpHandler(server, (wait, _) => { waits.Add(wait); return Task.CompletedTask; }));
-        using var response = await client.GetAsync("https://example.test/update");
-        Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
+        var error = await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync("https://example.test/update"));
+        Assert.Equal(HttpStatusCode.TooManyRequests, error.StatusCode);
         Assert.Equal(4, server.Calls);
         Assert.Equal(new[] { 30d, 60d, 120d }, waits.Select(w => w.TotalSeconds));
     }
@@ -56,8 +56,9 @@ public class UpdateHttpHandlerTests
     {
         var server = new Server(_ => Limited(TimeSpan.FromHours(1)));
         using var client = new HttpClient(new UpdateHttpHandler(server, (_, _) => throw new Exception("Unexpected retry")));
-        using var response = await client.GetAsync("https://example.test/update");
-        Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
+        var error = await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync("https://example.test/update"));
+        Assert.Equal(HttpStatusCode.TooManyRequests, error.StatusCode);
+        Assert.Contains("60", error.Message);
         Assert.Equal(1, server.Calls);
     }
 

@@ -1,4 +1,5 @@
 {
+  "The download server is limiting requests (HTTP 429). Try again in {0} minutes.": "Сервер загрузки ограничил частоту запросов (HTTP 429). Повторите попытку через {0} мин.",
   "Mentioned places": "Упомянутые места",
   "The travel response could not be fully applied. Some changes may already be recorded; the journey will not be repeated automatically.": "Ответ о путешествии не удалось применить полностью. Часть изменений могла сохраниться; поездка не будет повторена автоматически.",
   "No walking route from your current location.": "Из вашего текущего места нет пешего маршрута.",

@@ -16,14 +16,19 @@ internal sealed class UpdateHttpHandler : DelegatingHandler
         for (int attempt = 0; ; attempt++)
         {
             var response = await base.SendAsync(request, token);
-            if (request.Method != HttpMethod.Get || response.StatusCode != HttpStatusCode.TooManyRequests || attempt >= 3)
+            if (request.Method != HttpMethod.Get || response.StatusCode != HttpStatusCode.TooManyRequests)
                 return response;
 
             var retry = response.Headers.RetryAfter;
             TimeSpan wait = retry?.Delta ?? (retry?.Date is { } date
                 ? date - DateTimeOffset.UtcNow : TimeSpan.FromSeconds(30 * (1 << attempt)));
             // Do not retry earlier than the server permits, or hold an update indefinitely.
-            if (wait > TimeSpan.FromMinutes(5)) return response;
+            if (wait > TimeSpan.FromMinutes(5) || attempt >= 3)
+            {
+                response.Dispose();
+                throw new HttpRequestException(L.F("The download server is limiting requests (HTTP 429). Try again in {0} minutes.",
+                    Math.Max(1, (int)Math.Ceiling(wait.TotalMinutes))), null, HttpStatusCode.TooManyRequests);
+            }
             if (wait < TimeSpan.Zero) wait = TimeSpan.Zero;
             response.Dispose();
             await delay(wait, token);
