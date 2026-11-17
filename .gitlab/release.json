@@ -1,12 +1,12 @@
 {
-    "name":  "NaviDnD 2.2.10",
-    "tag_name":  "v2.2.10",
-    "description":  "# NaviDnD 2.2.10\n\n- Переработана тактическая карта: постоянные полублочные кроны деревьев, коричневые стволы, текстуры травы и пола, согласованные стены, окна, двери и мебель.\n- Сглажена граница видимости на улице и внутри зданий; изученные кроны сохраняют форму при затемнении.\n- Улучшены подбор предметных иллюстраций, портреты и карточки окружения. Картинки на вкладке «Мир» всегда отображаются Брайлем; заклинания сохраняют цветной Брайль.\n- Улучшены исследование мира, память о посещённых местах, маршруты и восстановление локаций, связанные игровые состояния и миграции сохранений.\n- Поиск Codex поддерживает установку в %LOCALAPPDATA%/OpenAI/Codex/bin/\u003cверсия\u003e, нестандартные папки npm, кириллицу и пробелы в путях.\n\nОбновления для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Работа и внешний вид на настоящем Mac в этом выпуске не проверялись.\n\n## English\n\n- Updated tactical maps with persistent block-based tree crowns, brown trunks, textured ground, and consistent walls, windows, doors and furniture.\n- Smoothed fog boundaries outdoors and indoors without changing remembered crown shapes.\n- Improved item artwork, portraits and environment cards. World-map cards always use Braille; spells retain colored Braille.\n- Improved exploration, visited-place memory, routes, location restoration and related save migrations.\n- Codex discovery supports the local OpenAI installation, custom npm prefixes, Cyrillic paths and spaces.\n\nWindows and macOS (Apple Silicon) updates retain saves and settings. Native macOS execution and appearance have not been verified for this release.",
+    "name":  "NaviDnD 2.2.11",
+    "tag_name":  "v2.2.11",
+    "description":  "# NaviDnD 2.2.11\n\n- При HTTP 429 игра и установщик повторяют запрос до трёх раз с ожиданием по Retry-After (до пяти минут за попытку); без заголовка — через 30, 60 и 120 секунд. Обновление можно отменить.\n- Исправлено применение патчей: изменённый или отсутствующий файл не требует скачивать полную игру, если патч содержит его полную замену или удаляет его.\n- Файлы, которые первый патч оставляет нетронутыми, по-прежнему проверяются. Новые файлы проверяются по SHA256 до установки; при ошибке возвращаются исходные локальные файлы.\n- Исправление включено в игру и установщик Windows, а также в обновление macOS.\n\nСохранения и настройки сохраняются. Уже установленный старый загрузчик продолжает использовать прежнюю проверку до обновления. Запуск на настоящем Mac не проверялся.\n\n## English\n\n- The game and installer retry HTTP 429 up to three times, respecting Retry-After (up to five minutes per attempt), or waiting 30, 60 and 120 seconds without it. Updates remain cancellable.\n- Patches can repair modified or missing files when a complete replacement is included, or the file is removed, without downloading the entire game.\n- Files retained by the first patch are still verified. New payloads are checked against SHA256 before installation; rollback restores the original local files.\n- Includes the Windows game and installer, and the macOS updater.\n\nSaves and settings are retained. Older installed updaters keep their previous validation until upgraded. Native macOS execution has not been verified.\n",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.10/navi-dnd-v2.2.10-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.11/navi-dnd-v2.2.11-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
@@ -16,19 +16,19 @@
                                  },
                                  {
                                      "name":  "NaviDnD-macOS-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases-macos/NaviDnD-macOS-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.11/releases-macos/NaviDnD-macOS-updates.json"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.11/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.11/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/NaviDnD-Setup-win-x64.exe"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.11/releases/NaviDnD-Setup-win-x64.exe"
                                  },
                                  {
                                      "name":  "NaviDnD-payload.001",
@@ -161,6 +161,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.2.9-2.2.10.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/patches/NaviDnD-patch-2.2.9-2.2.10.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.2.10-2.2.11.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.11/releases/patches/NaviDnD-patch-2.2.10-2.2.11.zip"
                                  }
                              ]
                }

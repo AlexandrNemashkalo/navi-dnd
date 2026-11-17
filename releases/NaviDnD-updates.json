@@ -1,6 +1,6 @@
 {
     "format":  1,
-    "version":  "2.2.10",
+    "version":  "2.2.11",
     "base":  {
                  "version":  "1.1.4",
                  "files":  [
@@ -68,10 +68,10 @@
              },
     "installer":  {
                       "name":  "NaviDnD-Setup-win-x64.exe",
-                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/NaviDnD-Setup-win-x64.exe",
-                      "sha256":  "0f511861efd222078edb93b8593f01e7735cd8e3172fdc79d0a7257da051bcfb",
-                      "size":  50441743,
-                      "source":  "1328b8298b97f91c9ae5d362bc5fca5cd1a820cb5eda34395c04c04b40ef0eb8"
+                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.11/releases/NaviDnD-Setup-win-x64.exe",
+                      "sha256":  "0208b4d66042a59119acabcb652388aee41f325204110f919a59a7dba63be7fa",
+                      "size":  50443316,
+                      "source":  "0f46c6b1c81a5cb1c94c20585acd66bea1b484015d8f8c80f14a167279a55aba"
                   },
     "patches":  [
                     {
@@ -257,6 +257,14 @@
                         "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/patches/NaviDnD-patch-2.2.9-2.2.10.zip",
                         "sha256":  "74a94e408e67b117ebc7a363881ad0e9adb12865e49b064aab990d52b1bedfe7",
                         "size":  19858716
+                    },
+                    {
+                        "from":  "2.2.10",
+                        "to":  "2.2.11",
+                        "name":  "NaviDnD-patch-2.2.10-2.2.11.zip",
+                        "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.11/releases/patches/NaviDnD-patch-2.2.10-2.2.11.zip",
+                        "sha256":  "47506cae98f8ec54c93b122a34c5272c9af9d79af5ddf8d82824e9849c302790",
+                        "size":  15013836
                     }
                 ]
 }
