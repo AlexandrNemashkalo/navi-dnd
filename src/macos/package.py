@@ -99,7 +99,10 @@ def make_dir_zip(source, output):
                 info.external_attr = (0o100000 | mode) << 16
                 info.compress_type = zipfile.ZIP_DEFLATED
                 with open(path, 'rb') as file:
-                    archive.writestr(info, file.read())
+                    data = file.read()
+                if entry == 'THIRD_PARTY_NOTICES.md':
+                    data = data.replace(b'\r\n', b'\n')
+                archive.writestr(info, data)
 
 
 if __name__ == '__main__':
