@@ -1,12 +1,12 @@
 {
-    "name":  "NaviDnD 2.2.9",
-    "tag_name":  "v2.2.9",
-    "description":  "# NaviDnD 2.2.9\r\n\r\n- На macOS высота ячейки терминала теперь ровно вдвое больше ширины: рисунки сохраняют пропорции при смене размера шрифта и масштаба экрана.\r\n- Точки рисунков отрисовывает сам терминал с равномерными промежутками внутри и между символами. Их геометрия больше не зависит от Menlo и подстановки шрифтов.\r\n- Автоматический размер шрифта учитывает новую высоту строки. Смена указателя сохранена; отображение Windows не меняется.\r\n\r\nПатчи для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Внешний вид на настоящем Mac требует проверки после обновления.\r\n\r\n## English\r\n\r\n- On macOS, terminal cells now have an exact 1:2 width-to-height ratio, preserving artwork proportions across font sizes and display scales.\r\n- Braille artwork uses built-in dots with uniform spacing within and between characters, independent of Menlo and font fallback.\r\n- Automatic font sizing accounts for the new line height. Mouse pointer support is retained; Windows rendering is unchanged.\r\n\r\nPatches for Windows and macOS (Apple Silicon). Saves and settings are retained. Appearance on a physical Mac still needs validation after updating.\r\n",
+    "name":  "NaviDnD 2.2.10",
+    "tag_name":  "v2.2.10",
+    "description":  "# NaviDnD 2.2.10\n\n- Переработана тактическая карта: постоянные полублочные кроны деревьев, коричневые стволы, текстуры травы и пола, согласованные стены, окна, двери и мебель.\n- Сглажена граница видимости на улице и внутри зданий; изученные кроны сохраняют форму при затемнении.\n- Улучшены подбор предметных иллюстраций, портреты и карточки окружения. Картинки на вкладке «Мир» всегда отображаются Брайлем; заклинания сохраняют цветной Брайль.\n- Улучшены исследование мира, память о посещённых местах, маршруты и восстановление локаций, связанные игровые состояния и миграции сохранений.\n- Поиск Codex поддерживает установку в %LOCALAPPDATA%/OpenAI/Codex/bin/\u003cверсия\u003e, нестандартные папки npm, кириллицу и пробелы в путях.\n\nОбновления для Windows и macOS (Apple Silicon). Сохранения и настройки сохраняются. Работа и внешний вид на настоящем Mac в этом выпуске не проверялись.\n\n## English\n\n- Updated tactical maps with persistent block-based tree crowns, brown trunks, textured ground, and consistent walls, windows, doors and furniture.\n- Smoothed fog boundaries outdoors and indoors without changing remembered crown shapes.\n- Improved item artwork, portraits and environment cards. World-map cards always use Braille; spells retain colored Braille.\n- Improved exploration, visited-place memory, routes, location restoration and related save migrations.\n- Codex discovery supports the local OpenAI installation, custom npm prefixes, Cyrillic paths and spaces.\n\nWindows and macOS (Apple Silicon) updates retain saves and settings. Native macOS execution and appearance have not been verified for this release.",
     "assets":  {
                    "links":  [
                                  {
                                      "name":  "📦 Скачать NaviDnD (все файлы установки)",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.9/navi-dnd-v2.2.9-releases.zip?path=releases",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/archive/v2.2.10/navi-dnd-v2.2.10-releases.zip?path=releases",
                                      "link_type":  "package"
                                  },
                                  {
@@ -16,19 +16,19 @@
                                  },
                                  {
                                      "name":  "NaviDnD-macOS-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.9/releases-macos/NaviDnD-macOS-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases-macos/NaviDnD-macOS-updates.json"
                                  },
                                  {
                                      "name":  "SHA256SUMS.txt",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.9/releases/SHA256SUMS.txt"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/SHA256SUMS.txt"
                                  },
                                  {
                                      "name":  "NaviDnD-updates.json",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.9/releases/NaviDnD-updates.json"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/NaviDnD-updates.json"
                                  },
                                  {
                                      "name":  "NaviDnD-Setup-win-x64.exe",
-                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.5/releases/NaviDnD-Setup-win-x64.exe"
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/NaviDnD-Setup-win-x64.exe"
                                  },
                                  {
                                      "name":  "NaviDnD-payload.001",
@@ -157,6 +157,10 @@
                                  {
                                      "name":  "NaviDnD-patch-2.2.8-2.2.9.zip",
                                      "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.9/releases/patches/NaviDnD-patch-2.2.8-2.2.9.zip"
+                                 },
+                                 {
+                                     "name":  "NaviDnD-patch-2.2.9-2.2.10.zip",
+                                     "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases/patches/NaviDnD-patch-2.2.9-2.2.10.zip"
                                  }
                              ]
                }

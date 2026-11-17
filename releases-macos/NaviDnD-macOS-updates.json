@@ -1,6 +1,6 @@
 {
     "format":  1,
-    "version":  "2.2.9",
+    "version":  "2.2.10",
     "base":  {
                  "version":  "2.2.4",
                  "files":  [
@@ -101,6 +101,14 @@
                         "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.9/releases-macos/patches/NaviDnD-macOS-patch-2.2.8-2.2.9.zip",
                         "sha256":  "c4bad207f6567cbb54ac786a0a3e538d5e61dbd680b2499467678e1e90427f3e",
                         "size":  69869766
+                    },
+                    {
+                        "from":  "2.2.9",
+                        "to":  "2.2.10",
+                        "name":  "NaviDnD-macOS-patch-2.2.9-2.2.10.zip",
+                        "url":  "https://gitlab.com/navitalevich/navi-dnd/-/raw/v2.2.10/releases-macos/patches/NaviDnD-macOS-patch-2.2.9-2.2.10.zip",
+                        "sha256":  "1b9597d1689d0b23737fab3b4c0ab827de3f6557d515dcd229187d5bedf7be9b",
+                        "size":  98624773
                     }
                 ]
 }
