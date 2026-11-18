@@ -26,19 +26,27 @@ public static class LocationGrower
     // Cell of the world map where the location is being built (GameWorld.SiteAt): terrain of open blocks (by
     // biome), river through the location (axis, width), sides with water (sea/lake - edge of the location with
     // water). No - as the GM intended.
-    public sealed record WorldSite(string Theme, bool? RiverHorizontal, int RiverWidth, HashSet<ChunkSide> WaterSides);
+    public sealed record WorldSite(string Theme, bool? RiverHorizontal, int RiverWidth, HashSet<ChunkSide> WaterSides,
+        double RiverOffset = 0, bool? RoadHorizontal = null, double RoadOffset = 0,
+        HashSet<ChunkSide>? RoadSides = null, string? PlaceType = null);
 
     // New location according to plan. The previous contents of the map (rooms, creatures...) are reset, the
     // hero is placed at the entrance outside (startInside - inside, in the first room behind the entrance).
     // Returns the starting block or plan error text (the map is then untouched).
     public static (MapChunk? start, string? error) CreatePlanned(WorldState ws, List<PlannedBlock> blocks, string theme = "dungeon", bool startInside = false,
-        WorldSite? site = null)
+        WorldSite? site = null, bool includeSurroundings = false)
     {
         if (Validate(blocks, theme) is { } error) return (null, error);
 
         // The floors lie on the field in different places on the grid of blocks: the ground is in the center, the rest are in free cells.
         var rng = new Random();
-        if (PlaceFloors(blocks, rng) is not { } place) return (null, "этажи не помещаются на поле — уменьшите план");
+        var originalBlocks = blocks;
+        var authored = blocks.ToHashSet(ReferenceEqualityComparer.Instance);
+        if (includeSurroundings && site != null && blocks.Any(b => b.Z == 0 && MapChunk.IsOpenGround(b.Terrain ?? theme)))
+            blocks = WithSurroundings(blocks, site.Theme, rng);
+        var place = PlaceFloors(blocks, rng);
+        if (place == null && !ReferenceEquals(blocks, originalBlocks)) { blocks = originalBlocks; place = PlaceFloors(blocks, rng); }
+        if (place == null) return (null, "этажи не помещаются на поле — уменьшите план");
 
         // Build off-state: an incompatible bank/footprint must not erase the current location or move the hero.
         var map = new MapConfig { DefaultImage = ws.Map.DefaultImage, TriggerCells = ws.Map.TriggerCells };
@@ -61,7 +69,7 @@ public static class LocationGrower
             string t = b.Terrain ?? theme;
             // Open area - like on the world map (there will be no desert in the mountains).
             if (site != null && MapChunk.IsOutdoorTheme(t)) t = site.Theme;
-            return new MapChunk { X = gx, Y = gy, Z = b.Z, Seed = rng.Next(), Theme = t, Purpose = b.Purpose, Style = t == MapChunk.Building ? b.Building ?? "house" : null };
+            return new MapChunk { X = gx, Y = gy, Z = b.Z, Seed = rng.Next(), Theme = t, Purpose = b.Purpose, Populated = !authored.Contains(b), Style = t == MapChunk.Building ? b.Building ?? "house" : null };
         }).ToList();
         // Neighborhood - according to plan (x, y, z): blocks of different floors that are adjacent to the field are not connected.
         var byPlan = blocks.Select((b, i) => (b, i)).ToDictionary(x => (x.b.X, x.b.Y, x.b.Z), x => chunks[x.i]);
@@ -80,10 +88,11 @@ public static class LocationGrower
         var exits = chunks.ToDictionary(c => c, _ => new List<ChunkExit>());
         var start = chunks[0];
         var freeSides = Enum.GetValues<ChunkSide>().Where(s => Neighbor(start, s) == null).ToList();
+        if (freeSides.Count == 0) freeSides = Enum.GetValues<ChunkSide>().Where(s => Neighbor(start, s) is { } n && MapChunk.IsOpenGround(n.Theme)).ToList();
         var landSides = freeSides.Where(side => site?.WaterSides.Contains(side) != true).ToList();
         var arrivalSides = landSides.Count > 0 ? landSides : freeSides;
         var startSide = arrivalSides[rng.Next(arrivalSides.Count)];
-        exits[start].Add(new ChunkExit { Side = startSide, Offset = RandomOffset(startSide, rng), External = true });
+        exits[start].Add(new ChunkExit { Side = startSide, Offset = RandomOffset(startSide, rng), External = Neighbor(start, startSide) == null });
 
         // Connections: spanning tree to the neighbors of its floor + occasionally an extra passage - a loop.
         // The floors are connected to each other only by stairs - each floor has its own tree.
@@ -91,9 +100,10 @@ public static class LocationGrower
         void Link(MapChunk a, ChunkSide side)
         {
             var b = Neighbor(a, side)!;
-            int offset = RandomOffset(side, rng);
-            exits[a].Add(new ChunkExit { Side = side, Offset = offset });
-            exits[b].Add(new ChunkExit { Side = ChunkExit.Opposite(side), Offset = offset });
+            int offset = exits[a].FirstOrDefault(e => e.Side == side)?.Offset
+                ?? exits[b].FirstOrDefault(e => e.Side == ChunkExit.Opposite(side))?.Offset ?? RandomOffset(side, rng);
+            if (!exits[a].Any(e => e.Side == side)) exits[a].Add(new ChunkExit { Side = side, Offset = offset });
+            if (!exits[b].Any(e => e.Side == ChunkExit.Opposite(side))) exits[b].Add(new ChunkExit { Side = ChunkExit.Opposite(side), Offset = offset });
             linked.Add((a, b));
             linked.Add((b, a));
         }
@@ -123,6 +133,46 @@ public static class LocationGrower
         var footprintSeeds = new Dictionary<(int, int), int>();
         var footprintOffsets = new Dictionary<(int, int), (int c, int r)>();
         int noiseSeed = rng.Next();
+        var atlasRoads = new Dictionary<MapChunk, List<ChunkExit>>();
+        var bridgeCells = new HashSet<(int col, int row)>();
+        (int col, int row) roadJunction = default;
+        if (site?.RoadHorizontal is bool horizontal)
+        {
+            var ground = chunks.Where(c => c.Z == 0 && MapChunk.IsOpenGround(c.Theme)).ToList();
+            if (ground.Count > 0)
+            {
+                int low = horizontal ? ground.Min(c => c.OriginRow) : ground.Min(c => c.OriginCol);
+                int high = horizontal ? ground.Max(c => c.OriginRow) + MapChunk.Rows : ground.Max(c => c.OriginCol) + MapChunk.Cols;
+                int axis = (low + high) / 2 + (int)Math.Round(Math.Clamp(site.RoadOffset, -0.85, 0.85) * (high - low) / 2);
+                int junctionCol = horizontal ? (ground.Min(c => c.OriginCol) + ground.Max(c => c.OriginCol) + MapChunk.Cols) / 2 : axis;
+                int junctionRow = horizontal ? axis : (ground.Min(c => c.OriginRow) + ground.Max(c => c.OriginRow) + MapChunk.Rows) / 2;
+                roadJunction = (junctionCol, junctionRow);
+                var approaches = site.RoadSides is { Count: > 0 } known ? known
+                    : horizontal ? new HashSet<ChunkSide> { ChunkSide.Left, ChunkSide.Right } : [ChunkSide.Bottom, ChunkSide.Top];
+                foreach (var c in ground)
+                {
+                    foreach (var side in Enum.GetValues<ChunkSide>())
+                    {
+                        bool eastWest = side is ChunkSide.Left or ChunkSide.Right;
+                        int offset = eastWest ? junctionRow - c.OriginRow : junctionCol - c.OriginCol;
+                        if (offset < 1 || offset > (eastWest ? MapChunk.Rows : MapChunk.Cols)) continue;
+                        int edge = side switch { ChunkSide.Left => c.OriginCol, ChunkSide.Right => c.OriginCol + MapChunk.Cols,
+                            ChunkSide.Bottom => c.OriginRow, _ => c.OriginRow + MapChunk.Rows };
+                        int junction = eastWest ? junctionCol : junctionRow;
+                        var direction = eastWest ? (edge < junction ? ChunkSide.Left : ChunkSide.Right)
+                            : (edge < junction ? ChunkSide.Bottom : ChunkSide.Top);
+                        if (!approaches.Contains(direction)) continue;
+                        var neighbor = Neighbor(c, side);
+                        if (neighbor != null && !MapChunk.IsOpenGround(neighbor.Theme)) continue;
+                        if (neighbor == null && !approaches.Contains(side)) continue;
+                        if (!exits[c].Any(e => e.Side == side && e.Offset == offset))
+                            exits[c].Add(new ChunkExit { Side = side, Offset = offset, External = neighbor == null });
+                        if (!atlasRoads.TryGetValue(c, out var roadExits)) atlasRoads[c] = roadExits = [];
+                        roadExits.Add(new ChunkExit { Side = side, Offset = offset });
+                    }
+                }
+            }
+        }
         // The river from the world map is across the entire area (one line on the field, blocks are connected).
         OutdoorGenerator.RiverSpec? river = null;
         if (site?.RiverHorizontal is bool rh && chunks.Any(c => MapChunk.IsOpenGround(c.Theme) && c.Z == 0))
@@ -131,6 +181,12 @@ public static class LocationGrower
             if (outdoor.Count == 0) outdoor = chunks.Where(c => c.Theme == MapChunk.Building && c.Z == 0).ToList();
             int center = rh ? (outdoor.Min(c => c.OriginRow) + outdoor.Max(c => c.OriginRow) + MapChunk.Rows) / 2 + rng.Next(-3, 4)
                             : (outdoor.Min(c => c.OriginCol) + outdoor.Max(c => c.OriginCol) + MapChunk.Cols) / 2 + rng.Next(-4, 5);
+            if (site.RiverOffset != 0)
+            {
+                int low = rh ? outdoor.Min(c => c.OriginRow) : outdoor.Min(c => c.OriginCol);
+                int high = rh ? outdoor.Max(c => c.OriginRow) + MapChunk.Rows : outdoor.Max(c => c.OriginCol) + MapChunk.Cols;
+                center = (low + high) / 2 + (int)Math.Round(Math.Clamp(site.RiverOffset, -0.85, 0.85) * (high - low) / 2);
+            }
             river = new OutdoorGenerator.RiverSpec(rh, center, site.RiverWidth, rng.Next());
         }
         foreach (var c in chunks)
@@ -185,13 +241,48 @@ public static class LocationGrower
                 {
                     if (!MapChunk.IsOpenGround(n.Theme)) outdoorBands[side] = '^';
                 }
-                else outdoorBands[side] = site?.WaterSides.Contains(side) == true ? 'W'
-                    : c.Theme switch { "hills" or "mountain" or "desert" => '^', "swamp" => 'W', "snow" or "taiga" => 'e', _ => 'F' };
+                else if (site?.WaterSides.Contains(side) == true) outdoorBands[side] = 'W';
             }
-            var result = OutdoorGenerator.Generate(c, exits[c], outdoorBands, noiseSeed, c.Z == 0 ? river : null);
+            var result = OutdoorGenerator.Generate(c, exits[c], outdoorBands, noiseSeed, c.Z == 0 ? river : null,
+                markedTrails: authored.Contains(planOf[c]),
+                settlementSides: Enum.GetValues<ChunkSide>().Where(s => Neighbor(c, s)?.Theme is MapChunk.Building or MapChunk.Village).ToArray());
             c.Terrain = result.Terrain;
+            if (atlasRoads.TryGetValue(c, out var approaches))
+            {
+                int hubCol = Math.Clamp(roadJunction.col - c.OriginCol - 1, 0, MapChunk.Cols - 1);
+                int hubRow = Math.Clamp(roadJunction.row - c.OriginRow - 1, 0, MapChunk.Rows - 1);
+                foreach (var approach in approaches)
+                {
+                    var anchor = approach.AnchorCell(c);
+                    int col = anchor.col - c.OriginCol - 1, row = anchor.row - c.OriginRow - 1;
+                    while (true)
+                    {
+                        if (TerrainChar(c, col, row) is 'W' or '~')
+                            bridgeCells.Add((c.OriginCol + col + 1, c.OriginRow + row + 1));
+                        else SetTerrain(c, col, row, '=');
+                        if (col == hubCol && row == hubRow) break;
+                        if (col != hubCol) col += Math.Sign(hubCol - col); else row += Math.Sign(hubRow - row);
+                    }
+                }
+            }
             map.Doors.AddRange(result.Doors);
             map.Chunks.Add(c);
+        }
+
+        // Keep the riverbed underneath a destructible bridge, including crossings over chunk seams.
+        while (bridgeCells.Count > 0)
+        {
+            var first = bridgeCells.First();
+            var pendingBridge = new Queue<(int col, int row)>();
+            pendingBridge.Enqueue(first); bridgeCells.Remove(first);
+            var positions = new List<List<int>>();
+            while (pendingBridge.TryDequeue(out var p))
+            {
+                positions.Add([p.col, p.row]);
+                foreach (var n in new[] { (p.col - 1, p.row), (p.col + 1, p.row), (p.col, p.row - 1), (p.col, p.row + 1) })
+                    if (bridgeCells.Remove(n)) pendingBridge.Enqueue(n);
+            }
+            map.Furniture.Add(new Furniture { Kind = "bridge", Positions = positions });
         }
 
         // Stairs between floors standing above each other in plan.
@@ -203,7 +294,12 @@ public static class LocationGrower
         }
 
         var (startCol, startRow) = exits[start][0].AnchorCell(start);
-        MarkWorldExit(map, startCol, startRow);
+        foreach (var c in chunks)
+            foreach (var exit in exits[c].Where(e => e.External))
+            {
+                var anchor = exit.AnchorCell(c);
+                MarkWorldExit(map, anchor.col, anchor.row);
+            }
         EnsureBoundaryPathExits(map);
         var spawn = startInside && FirstRoomCell(map, start, startCol, startRow) is var (ic, ir) ? new List<int> { ic, ir } : [startCol, startRow];
         ws.Map = map;
@@ -217,11 +313,32 @@ public static class LocationGrower
             foreach (var side in Enum.GetValues<ChunkSide>())
             {
                 var n = Neighbor(c, side);
-                if (n == null) bands[side] = c.Z == 0 && site?.WaterSides.Contains(side) == true ? 'W' : BuildingGenerator.NaturalBand;
+                if (n == null) { if (c.Z == 0 && site?.WaterSides.Contains(side) == true) bands[side] = 'W'; }
                 else if (!MapChunk.IsOpenGround(n.Theme)) bands[side] = '^';
             }
             return bands;
         }
+    }
+
+    // Quiet terrain expands the scene, without extra model calls or replacing authored districts/floors.
+    private static List<PlannedBlock> WithSurroundings(List<PlannedBlock> original, string terrain, Random rng)
+    {
+        var result = new List<PlannedBlock>(original);
+        var ground = original.Where(b => b.Z == 0).ToList();
+        int minX = ground.Min(b => b.X), maxX = ground.Max(b => b.X), minY = ground.Min(b => b.Y), maxY = ground.Max(b => b.Y);
+        var candidates = (from x in Enumerable.Range(minX - 1, maxX - minX + 3)
+                          from y in Enumerable.Range(minY - 1, maxY - minY + 3)
+                          where !ground.Any(b => b.X == x && b.Y == y)
+                          orderby ground.Min(b => Math.Abs(b.X - x) + Math.Abs(b.Y - y)), y, x
+                          select new PlannedBlock(x, y, null, terrain)).ToList();
+        foreach (var candidate in candidates)
+        {
+            var trial = result.Append(candidate).ToList();
+            if (trial.Where(b => b.Z == 0).Max(b => b.X) - trial.Where(b => b.Z == 0).Min(b => b.X) >= MapChunk.GridCols
+                || trial.Where(b => b.Z == 0).Max(b => b.Y) - trial.Where(b => b.Z == 0).Min(b => b.Y) >= MapChunk.GridRows) continue;
+            if (PlaceFloors(trial, rng) != null) result.Add(candidate);
+        }
+        return result;
     }
 
     // The first cell of the room on the way from the entrance outside (by the hero’s steps: inside the room -
@@ -512,12 +629,28 @@ public static class LocationGrower
     // Cell at the entrance outside (exit to the world map) - the hero who has returned to the saved location stands here.
     public static (int col, int row)? EntranceCell(MapConfig map)
     {
-        if (map.Chunks?.FirstOrDefault(c => c.Exits.Any(e => e.External)) is not { } start) return null;
-        return start.Exits.First(e => e.External).AnchorCell(start);
+        if (map.Chunks?.FirstOrDefault(c => c.Exits.Any(e => e.External)) is { } start)
+            return start.Exits.First(e => e.External).AnchorCell(start);
+        return map.Chunks?.FirstOrDefault(c => c.Exits.Count > 0) is { } fallback ? fallback.Exits[0].AnchorCell(fallback) : null;
     }
 
     // The color of the door exiting the location to the world map is different from regular doors.
     public static readonly List<int> WorldExitColor = [160, 90, 220];
+
+    // Natural ground ends at the local scale, not at an invisible forest wall.
+    // Explicit doors (including hidden ones), buildings and combat keep their own movement rules.
+    public static bool IsOpenWorldBoundary(MapConfig map, int col, int row, int nextCol, int nextRow)
+    {
+        if (Math.Abs(nextCol - col) + Math.Abs(nextRow - row) != 1) return false;
+        var chunk = map.Chunks?.FirstOrDefault(c => c.Z == 0 && c.Contains(col, row));
+        if (chunk?.Terrain == null || !MapChunk.IsOpenGround(chunk.Theme)) return false;
+        if (map.Chunks!.Any(c => c.Z == 0 && c.Contains(nextCol, nextRow))) return false;
+        if ((map.Rooms ?? []).Any(r => r.Positions.Any(p => p.Count >= 2 && p[0] == col && p[1] == row))) return false;
+        if ((map.Doors ?? []).Any(d => d.From is { Count: >= 2 } f && d.To is { Count: >= 2 } t
+            && ((f[0] == col && f[1] == row && t[0] == nextCol && t[1] == nextRow)
+                || (t[0] == col && t[1] == row && f[0] == nextCol && f[1] == nextRow)))) return false;
+        return TerrainCatalog.Get(TerrainChar(chunk, col - chunk.OriginCol - 1, row - chunk.OriginRow - 1)) is { BlocksMove: false };
+    }
 
     // Village streets may reach an unplanned edge. Make those actual exits, not invisible walls.
     // Append only: existing door indexes are referenced by saves and pending history patches.

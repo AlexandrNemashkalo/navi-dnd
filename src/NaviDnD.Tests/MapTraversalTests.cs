@@ -75,8 +75,24 @@ public class MapTraversalTests
         }
     }
 
+    [Theory]
+    [InlineData('^')]
+    [InlineData('F')]
+    public void CreatureCannotBypassSolidBarrierThroughUngeneratedField(char obstacle)
+    {
+        var chunk = new MapChunk { X = 1, Y = 1, Theme = "forest",
+            Terrain = Enumerable.Repeat("........." + new string(obstacle, 2) + ".........", MapChunk.Rows).ToList() };
+        var world = new WorldState { Hero = new() { Symbol = "HRO", Position = [38,23] },
+            Map = new() { Cols = 100, Rows = 100, Chunks = [chunk],
+                Entities = [new() { Symbol = "NPC", Position = [24,23], SpeedMax = 300 }] } };
+        var result = MovementCalculator.Calculate(world, new() { EntityId = 0,
+            Intents = [new() { Intent = "approach", Target = "hero" }] });
+        Assert.Equal("stay", result.UsedIntent);
+        Assert.Equal(new[] { 24,23 }, Assert.Single(result.Steps));
+    }
+
     [Fact]
-    public void CreatureCannotBypassRiverThroughUngeneratedField()
+    public void CreatureCrossesWaterWithinGeneratedTerrain()
     {
         var chunk = new MapChunk { X = 1, Y = 1, Theme = "forest",
             Terrain = Enumerable.Repeat(".........WW.........", MapChunk.Rows).ToList() };
@@ -85,8 +101,10 @@ public class MapTraversalTests
                 Entities = [new() { Symbol = "NPC", Position = [24,23], SpeedMax = 300 }] } };
         var result = MovementCalculator.Calculate(world, new() { EntityId = 0,
             Intents = [new() { Intent = "approach", Target = "hero" }] });
-        Assert.Equal("stay", result.UsedIntent);
-        Assert.Equal(new[] { 24,23 }, Assert.Single(result.Steps));
+        Assert.Equal("approach", result.UsedIntent);
+        Assert.All(result.Steps, p => Assert.True(chunk.Contains(p[0], p[1])));
+        Assert.Contains(result.Steps, p => p[0] == 30);
+        Assert.Contains(result.Steps, p => p[0] == 31);
     }
 
     [Theory]

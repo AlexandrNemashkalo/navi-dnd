@@ -6,6 +6,28 @@ namespace NaviDnD.Tests;
 public class WorldExitMovementTests
 {
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void OpenCountrysideDepartureKeepsHeroAndMapUntilConfirmed(bool combat)
+    {
+        var storage = new Storage();
+        var state = storage.WorldState;
+        state.World = new();
+        state.Hero = new() { Position = [1, 7], SpeedLeft = 30 };
+        state.Combat = new() { Active = combat };
+        state.Map = new() { Cols = 20, Rows = 15, Chunks = [new() { Theme = "plains",
+            Terrain = Enumerable.Repeat(new string('.', 20), 15).ToList() }] };
+        state.History = [new() { Text = L.T("The way is blocked.") }];
+        var handler = new MovementHandler(state, storage, new());
+        string before = JsonSerializer.Serialize(state.Map);
+        Assert.False(handler.TryMove("MoveWest", out _, out var entities, out var areas, out var doors));
+        Assert.Equal(!combat, handler.LeaveRequested);
+        Assert.Equal(new[] { 1, 7 }, state.Hero.Position);
+        Assert.Equal(30, state.Hero.SpeedLeft);
+        Assert.Equal(before, JsonSerializer.Serialize(state.Map));
+        Assert.Empty(entities); Assert.Empty(areas); Assert.Empty(doors);
+    }
+    [Theory]
     [InlineData(false,false,false,false,true)]
     [InlineData(false,false,true,false,true)]
     [InlineData(true,false,false,false,false)]

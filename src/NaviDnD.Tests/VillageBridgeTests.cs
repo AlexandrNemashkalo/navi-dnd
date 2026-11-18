@@ -31,7 +31,8 @@ public class VillageBridgeTests(Xunit.Abstractions.ITestOutputHelper output)
             map = new { furniture = new[] { new { id = bridgeId, deleted = true } } }
         }));
         Assert.Equal('W',map.TerrainAt(deep[0],deep[1])!.Code);
-        Assert.True(map.TerrainAt(deep[0],deep[1])!.BlocksMove);
+        Assert.False(map.TerrainAt(deep[0],deep[1])!.BlocksMove);
+        Assert.Equal(10,MovementCalculator.GetStepCost(storage.WorldState,deep[0],deep[1]));
         var reloaded = new Storage();
         reloaded.ApplySavedState(System.Text.Json.JsonSerializer.Serialize(storage.WorldState));
         Assert.Equal('W',reloaded.WorldState.Map.TerrainAt(deep[0],deep[1])!.Code);
@@ -79,7 +80,7 @@ public class VillageBridgeTests(Xunit.Abstractions.ITestOutputHelper output)
             var route=new[]{before}.Concat(cells.Select(p=>p.ToArray())).Append(after).ToList();
             for(int i=1;i<route.Count;i++) Assert.True(MovementCalculator.CanMoveTo(ws,route[i-1][0],route[i-1][1],route[i][0],route[i][1],-1));
             bridge.Deleted=true;
-            Assert.Contains(cells,p=>ws.Map.TerrainAt(p[0],p[1]) is {Code:'W',BlocksMove:true});
+            Assert.Contains(cells,p=>ws.Map.TerrainAt(p[0],p[1]) is {Code:'W',BlocksMove:false,StepCostFt:10});
         }
         Assert.True(found>0,$"No bridge found, horizontal={horizontal}");
     }
@@ -87,13 +88,13 @@ public class VillageBridgeTests(Xunit.Abstractions.ITestOutputHelper output)
     [Theory]
     [InlineData("village","Streets and courtyards")]
     [InlineData("forest","Passable cells")]
-    public void PopulationCanUseDeepWaterOnlyWhereDeckExists(string theme,string prefix)
+    public void PopulationCanUseWaterAndDeckWithDifferentMovementCosts(string theme,string prefix)
     {
         var chunk=new MapChunk {Theme=theme,Terrain=["WWW"]};
         var ws=new WorldState {Hero=new(){Position=[1,2]},Map=new(){Chunks=[chunk],Furniture=[new(){Kind="bridge",Positions=[[2,1]]}]}};
         string context=new AiContextBuilder(ws,[]).ChunkState(chunk);
         string available=Assert.Single(context.Split('\n'),line=>line.StartsWith(prefix,StringComparison.Ordinal));
-        Assert.EndsWith("row 1: 2",available.TrimEnd());
+        Assert.EndsWith("row 1: 1–3",available.TrimEnd());
         Assert.Contains("walkable",context);
         var patch=ChunkPopulationPatch.Prepare(ws,new(ws.Map,chunk,"""{"map":{"entities":[{"name":"Guard","symbol":"GRD","position":[2,1]}]}}"""))!;
         var storage=new Storage();storage.WorldState.Map=ws.Map;storage.WorldState.Hero=ws.Hero;

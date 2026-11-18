@@ -37,9 +37,11 @@ public class VillageRoadTests
             foreach (var door in result.Doors.Where(d => d.IsWindow != true))
                 foreach (var cell in new[] { door.From, door.To }.Where(p => chunk.Contains(p[0], p[1])))
                     Assert.True(reached.ContainsKey((cell[0], cell[1], false)) || reached.ContainsKey((cell[0], cell[1], true)), $"{first}/{second}, seed {seed}: door at {cell[0]},{cell[1]} unreachable");
+            // Swimming through the river mouth is allowed; every dry opening still needs a planned entrance.
             for (int c = 0; c < MapChunk.Cols; c++)
                 for (int r = 0; r < MapChunk.Rows; r++)
                     if ((c == 0 || r == 0 || c == MapChunk.Cols - 1 || r == MapChunk.Rows - 1)
+                        && result.Terrain[r][c] != 'W'
                         && TerrainCatalog.Get(result.Terrain[r][c]) is { BlocksMove: false })
                         Assert.Contains((chunk.OriginCol + c + 1, chunk.OriginRow + r + 1), anchors);
             Assert.NotEmpty(result.Rooms);

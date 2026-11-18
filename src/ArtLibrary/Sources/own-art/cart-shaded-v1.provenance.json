@@ -1,0 +1,23 @@
+{
+  "id": "own-art:cart-shaded-v1",
+  "file": "cart-shaded-v1.png",
+  "subject": "Wooden cart",
+  "nameRu": "Телега",
+  "width": 32,
+  "height": 32,
+  "sha256": "cb681316006a51a902cac8c137f779ad84ccd4b0493140113bb524c164038fd8",
+  "usage": "prop",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.prop.32",
+  "descriptionEn": "Complete oak cart in three-quarter view with low plank sideboards, two shafts and iron-rimmed wooden wheels; dark outline and warm shaded wood.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/cart-shaded-v1/original.png",
+  "sourceDimensions": [
+    1353,
+    1162
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_24_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "generationPrompt": "Complete wooden medieval two-wheeled cart with two projecting shafts, iron-rimmed spoked wheels, empty plank bed and low sideboards, three-quarter view. Richly shaded fantasy inventory sprite. Strict 32x32 logical pixel grid, dark outline, muted palette, upper-left lighting, transparent background, no text, no ground, no external cast shadows. Source generated with built-in image_gen; final nearest-neighbor 32x32 preparation separately recorded."
+}

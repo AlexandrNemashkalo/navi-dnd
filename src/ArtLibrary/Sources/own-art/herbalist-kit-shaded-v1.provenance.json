@@ -1,0 +1,23 @@
+{
+  "id": "own-art:herbalist-kit-shaded-v1",
+  "file": "herbalist-kit-shaded-v1.png",
+  "subject": "Herbalism kit",
+  "nameRu": "Набор травника",
+  "width": 32,
+  "height": 32,
+  "sha256": "4d0dc571b9c982b4e1115d5594128da6713df0c79af30a84154b812cad5093d4",
+  "usage": "item",
+  "framing": "isolated_object",
+  "styleId": "fantasy.pixel.item.32",
+  "descriptionEn": "Open brown leather tool roll holding two tied leafy herbs and an amber vial, with grey mortar and pestle in front; shaded colors and dark outline.",
+  "sourceKind": "ai_generated",
+  "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+  "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/herbalist-kit-shaded-v1/original.png",
+  "sourceDimensions": [
+    1278,
+    1230
+  ],
+  "transform": "nearest_neighbor_to_32; alpha_threshold_128; maxcoverage_palette_24_no_dither",
+  "promptTemplate": "src/ArtLibrary/Sources/own-art/pixel-generation-prompt.txt",
+  "generationPrompt": "Herbalist kit: open brown leather tool roll containing two tied leafy herb sprigs and an amber corked vial, with stone mortar and short pestle in front. Richly shaded fantasy inventory sprite. Strict 32x32 logical pixel grid, dark outline, muted palette, upper-left lighting, transparent background, no text, no ground, no external cast shadows. Source generated with built-in image_gen; final nearest-neighbor 32x32 preparation separately recorded."
+}

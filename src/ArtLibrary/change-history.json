@@ -86560,20 +86560,19 @@
       "name": "cart",
       "candidates": [
         {
-          "assetId": "village-market-32:handcart",
-          "sha256": "e9c2cec4a25cdc7e5e492959d67e13e1053fec5db462bd2897afaeb04f3406e7",
+          "assetId": "own-art:cart-shaded-v1",
+          "sha256": "cb681316006a51a902cac8c137f779ad84ccd4b0493140113bb524c164038fd8",
           "usage": "prop",
           "match": "visual_representation",
           "sourcePriority": 0,
-          "reason": "Complete wooden handcart with wheels and handles.",
-          "style": "fantasy.pixel.furniture.32",
-          "identityFamily": "village-market-32:handcart",
+          "reason": "Complete oak cart in three-quarter view with low plank sideboards, two shafts and iron-rimmed wooden wheels; dark outline and warm shaded wood.",
+          "style": "fantasy.pixel.prop.32",
+          "identityFamily": "own-art:cart-shaded-v1",
           "runtimeApproved": false
         }
       ],
       "selectionPolicy": {
         "mode": "balanced_variants",
-        "seedScope": "world_and_subject",
         "preserveAssignment": true,
         "requiredChecks": [
           "usage",
@@ -86581,7 +86580,7 @@
           "subject_facts"
         ]
       },
-      "note": "Reviewed object shape; magical powers and exact materials remain reference facts."
+      "note": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette."
     },
     "[\"prop_priority\", \"boat\"]": {
       "category": "prop_priority",
@@ -86659,9 +86658,134 @@
         ]
       },
       "note": "Original generated artwork, visually reviewed at 32x32 for the game and shared library."
+    },
+    "[\"equipment\", \"Herbalism kit\"]": {
+      "category": "equipment",
+      "name": "Herbalism kit",
+      "candidates": [
+        {
+          "assetId": "own-art:herbalist-kit-shaded-v1",
+          "sha256": "4d0dc571b9c982b4e1115d5594128da6713df0c79af30a84154b812cad5093d4",
+          "usage": "item",
+          "match": "visual_representation",
+          "sourcePriority": 0,
+          "reason": "Open brown leather tool roll holding two tied leafy herbs and an amber vial, with grey mortar and pestle in front; shaded colors and dark outline.",
+          "style": "fantasy.pixel.item.32",
+          "identityFamily": "own-art:herbalist-kit-shaded-v1",
+          "runtimeApproved": false
+        }
+      ],
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette."
+    },
+    "[\"equipment\", \"Travel satchel\"]": {
+      "category": "equipment",
+      "name": "Travel satchel",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-batch2-35-kobold-loot:icon-001",
+          "sha256": "e6f29add14cf81fd0de29d586b03c2b63797ead76a62e41c09977bf5cd6e052e",
+          "usage": "item",
+          "match": "visual_representation",
+          "sourcePriority": 0,
+          "reason": "Isolated object/material icon: tan shoulder bag.",
+          "style": "fantasy.pixel.item.32",
+          "identityFamily": "prepared-items-native-32-batch2-35-kobold-loot:icon-001",
+          "runtimeApproved": false
+        }
+      ],
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette."
+    },
+    "[\"prop_priority\", \"Legacy handcart\"]": {
+      "category": "prop_priority",
+      "name": "Legacy handcart",
+      "candidates": [
+        {
+          "assetId": "village-market-32:handcart",
+          "sha256": "e9c2cec4a25cdc7e5e492959d67e13e1053fec5db462bd2897afaeb04f3406e7",
+          "usage": "prop",
+          "match": "visual_representation",
+          "sourcePriority": 0,
+          "reason": "Complete wooden two-wheeled handcart with an upright handle.",
+          "style": "fantasy.pixel.furniture.32",
+          "identityFamily": "village-market-32:handcart",
+          "runtimeApproved": false
+        }
+      ],
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette."
     }
   },
   "batches": [
+    {
+      "id": "36",
+      "at": "2026-11-17T23:49:51.074200+00:00",
+      "events": [
+        {
+          "category": "equipment",
+          "name": "Herbalism kit",
+          "kind": "added",
+          "added": [
+            "own-art:herbalist-kit-shaded-v1"
+          ],
+          "removed": []
+        },
+        {
+          "category": "equipment",
+          "name": "Travel satchel",
+          "kind": "added",
+          "added": [
+            "prepared-items-native-32-batch2-35-kobold-loot:icon-001"
+          ],
+          "removed": []
+        },
+        {
+          "category": "prop_priority",
+          "name": "Legacy handcart",
+          "kind": "added",
+          "added": [
+            "village-market-32:handcart"
+          ],
+          "removed": []
+        },
+        {
+          "category": "prop_priority",
+          "name": "cart",
+          "kind": "updated",
+          "added": [
+            "own-art:cart-shaded-v1"
+          ],
+          "removed": [
+            "village-market-32:handcart"
+          ]
+        }
+      ]
+    },
     {
       "id": "35",
       "at": "2026-11-08T17:22:17.665945+00:00",

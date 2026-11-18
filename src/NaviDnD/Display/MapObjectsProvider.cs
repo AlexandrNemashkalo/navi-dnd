@@ -185,8 +185,13 @@ public class MapObjectsProvider
 
     public void WriteLine(double x, double y, bool isHorisonal)
     {
+        if (TryWriteBridgeRail(x, y, isHorisonal)) return;
+        if (TryWriteBoulderSeam(x,y,isHorisonal)) return;
+        if (TryWriteShoreEdge(x, y, isHorisonal)) return;
         if (TryWriteCrownEdge(x,y,isHorisonal)) return;
+        if (TryWritePathSeam(x,y,isHorisonal)) return;
         if (TryWriteGroundFogSeam(x,y,isHorisonal)) return;
+        if (TryWriteStonySeam(x,y,isHorisonal)) return;
         var (visible, explored) = GetWallState(x, y, isHorisonal);
         var delimetr = isHorisonal ? new string(_display.Delimetr, _display.CellWidth) : _display.Delimetr.ToString();
         if (!visible && !explored)
@@ -279,14 +284,20 @@ public class MapObjectsProvider
                 : (((int)(x - 0.5), (int)y), ((int)(x + 0.5), (int)y));
             if (provider == _gridProvider && _terrain.TryGetValue(c1, out var k1) && k1.Join is { } join && SamePiece(c1, c2))
             {
+                if (k1.Code == 'J')
+                {
+                    WriteBridgeSurface(new string(' ', isHorisonal ? _display.CellWidth : 1),
+                        isHorisonal ? 4 * (int)x - 3 : (int)(4 * x) - 2, (int)(2 * y), c1.Item1, c1.Item2);
+                    return;
+                }
                 var (jfg, jbg) = TerrainColors(k1, GetBackgroundForWall(x, y, isHorisonal));
                 if (!visible) { jfg = ColorHelper.Darker(jfg, 0.5); jbg = ColorHelper.Darker(jbg, 0.5); }
                 string jointText = !isHorisonal ? join[0].ToString()
                     : k1.Code != '#' && HasRowNeighbour(c1.Item1, c1.Item2) ? new string(join[0], _display.CellWidth) : $" {join[1]} ";
-                if (k1.Code == 'J' && isHorisonal) jointText = "\u2551 \u2551";
+                if (k1.Code == 'J') jointText = isHorisonal ? new string('─', _display.CellWidth) : "│";
                 if (k1.Code == 'L') jointText = isHorisonal ? "▐█▌" : "▀";
                 if (k1.Code == 'B') jointText = isHorisonal ? "║ ║" : "═";
-                if (k1.Code == 'N') jointText = isHorisonal ? "│ │" : "─";
+                if (k1.Code == 'N') jointText = isHorisonal ? " │ " : "─";
                 ColorHelper.WriteColored(jointText, fgColor: jfg, bgColor: jbg);
                 return;
             }
@@ -386,7 +397,9 @@ public class MapObjectsProvider
                 return;
             }
             if (fogKind != null && TryWriteSingleBed(fogKind, x, y, bg, fogBg, dim: true)) return;
+            if (fogKind?.Code == 'J') { WriteBridgeSurface(new string(' ', _display.CellWidth), 4*x-3, 2*y, x, y, highlightCell: true); return; }
             if (fogKind?.Code is 'T' or 'F') { WriteTreeCell(fogText, x, y, fogFg, fogBg); return; }
+            if (fogKind?.Code == 'o') { WriteBoulderCell(x,y,fogFg,fogBg); return; }
             if (IsTiledFloor(x, y)) WriteTiled(fogText, 4 * x - 3, 2 * y, fogFg, fogBg, TileKind(x, y));
             else ColorHelper.WriteColored(fogText, fgColor: fogFg, bgColor: fogBg);
             return;
@@ -417,11 +430,143 @@ public class MapObjectsProvider
                 cellBg = PieceBg(kind, x, y, bg, cellBg);
                 if (isHovered && !kind.Indoor) fg = ColorHelper.Pale(fg, 0.22);
                 if (TryWriteSingleBed(kind, x, y, bg, cellBg, dim: false)) return;
+                if (kind.Code == 'J') { WriteBridgeSurface(new string(' ', _display.CellWidth), 4*x-3, 2*y, x, y, highlightCell: true); return; }
                 if (kind.Code is 'T' or 'F') { WriteTreeCell(text, x, y, fg, cellBg); return; }
+                if (kind.Code == 'o') { WriteBoulderCell(x,y,fg,cellBg); return; }
             }
             if (IsTiledFloor(x, y)) WriteTiled(text, 4 * x - 3, 2 * y, fg, cellBg, TileKind(x, y));
             else ColorHelper.WriteColored(text, fgColor: fg, bgColor: cellBg);
         }
+    }
+
+    private bool KnownBoulder(int x,int y) => _terrain.GetValueOrDefault((x,y))?.Code=='o'
+        && (IsCellVisible(x,y)||IsCellExplored(x,y));
+
+    private bool BoulderConnection(int x,int y,int dx,int dy) => KnownBoulder(x+dx,y+dy)
+        && !IsWallPresent(x+dx*.5,y+dy*.5,dy!=0)
+        && GetDoorAtWall(x+dx*.5,y+dy*.5,dy!=0)==null;
+
+    private void WriteBoulderCell(int x,int y,List<int> fg,List<int> bg)
+    {
+        bool joined = BoulderConnection(x,y,-1,0)||BoulderConnection(x,y,1,0)
+            ||BoulderConnection(x,y,0,-1)||BoulderConnection(x,y,0,1);
+        var text = joined
+            ? (BoulderConnection(x,y,-1,0)?"█":"▟")+"█"+(BoulderConnection(x,y,1,0)?"█":"▙")
+            : TerrainCatalog.Glyph(_terrain[(x,y)],x,y);
+        WriteBoulderFaces(text,4*x-3,2*y,fg,bg);
+    }
+
+    private static void WriteBoulderFaces(string text,int x,int y,List<int> fg,List<int> bg)
+    {
+        for (int i=0; i<text.Length; i++)
+        {
+            // Jittered stone centres define facets, independent of the movement grid.
+            double px=x+i, py=y*2d, nearest=double.MaxValue, second=double.MaxValue, nx=0, ny=0;
+            int gx=(int)Math.Floor(px/7), gy=(int)Math.Floor(py/6);
+            for(int cy=gy-1;cy<=gy+1;cy++) for(int cx=gx-1;cx<=gx+1;cx++)
+            {
+                double dx=px-(cx*7+3+GroundNoise(cx,cy)*1.8);
+                double dy=py-(cy*6+3+GroundNoise(cx+43,cy-17)*1.3);
+                double distance=dx*dx+dy*dy;
+                if(distance<nearest) { second=nearest; nearest=distance; nx=dx; ny=dy; }
+                else if(distance<second) second=distance;
+            }
+            double light=Math.Clamp(.52-nx*.035+ny*.035+GroundNoise(x+i,y)*.035,.25,.75);
+            var face=ColorHelper.MixWith(bg,fg,light);
+            var ground=StonyTexture(bg,x+i,y);
+            bool crevice=second-nearest<3.5 && text[i]=='█';
+            // Narrow shaded cracks separate touching stones without exposing a square grid.
+            if(crevice && GroundNoise(x+i+71,y-29)>.35)
+                ColorHelper.WriteColored(nx*ny>0 ? "╱" : "╲",ColorHelper.Darker(face,.65),face);
+            else if(crevice) ColorHelper.WriteColored(text[i].ToString(),ColorHelper.Darker(face,.86),ground);
+            else ColorHelper.WriteColored(text[i].ToString(),face,ground);
+        }
+    }
+
+    private static List<int> StonyTexture(List<int> bg,int x,int y)
+    {
+        double shade=GroundPatch(x,y)*.13+GroundNoise(x,y)*.055;
+        return shade>0 ? ColorHelper.MixWith(bg,ColorHelper.Pale(bg,.18),shade*3)
+            : ColorHelper.Darker(bg,1+shade);
+    }
+
+    private bool TryWritePathSeam(double x,double y,bool? horizontal)
+    {
+        var cells=horizontal switch
+        {
+            true=>new[]{((int)x,(int)(y-.5)),((int)x,(int)(y+.5))},
+            false=>new[]{((int)(x-.5),(int)y),((int)(x+.5),(int)y)},
+            null=>new[]{((int)(x-.5),(int)(y-.5)),((int)(x+.5),(int)(y-.5)),
+                ((int)(x-.5),(int)(y+.5)),((int)(x+.5),(int)(y+.5))}
+        };
+        if(!cells.Any(p=>_terrain.GetValueOrDefault(p)?.Code=='=') || cells.Any(p=>
+            _roomPositions.Contains(p) || !(IsCellVisible(p.Item1,p.Item2)||IsCellExplored(p.Item1,p.Item2))
+            || _terrain.GetValueOrDefault(p)?.Code is not ('=' or '.' or ',' or 'g' or 's' or 'a' or 'n' or 't'))) return false;
+        var edges=horizontal.HasValue ? new[]{(x,y,horizontal.Value)}
+            : new[]{(x-.5,y,true),(x+.5,y,true),(x,y-.5,false),(x,y+.5,false)};
+        if(edges.Any(e=>IsWallPresent(e.Item1,e.Item2,e.Item3)||GetDoorAtWall(e.Item1,e.Item2,e.Item3)!=null)) return false;
+        // Blend only spare characters, preserving both the terrain cells and all structural lines.
+        var colors=cells.Select(p=>TerrainColors(_terrain[p],GetBackgroundColor(p.Item1,p.Item2)).bg)
+            .Select((color,i)=>IsCellVisible(cells[i].Item1,cells[i].Item2)?color:ColorHelper.Darker(color,.5)).ToArray();
+        var bg=Enumerable.Range(0,3).Select(i=>(int)Math.Round(colors.Average(c=>c[i]))).ToList();
+        var pathColors=colors.Where((_,i)=>_terrain[cells[i]].Code=='=').ToArray();
+        var path=Enumerable.Range(0,3).Select(i=>(int)Math.Round(pathColors.Average(c=>c[i]))).ToList();
+        bg=ColorHelper.MixWith(bg,path,.5);
+        bg=ApplyTargetTintBetween(bg,cells);
+        WriteTiled(new string(' ',horizontal==true?_display.CellWidth:1),
+            horizontal==true?4*(int)x-3:(int)(4*x)-2,(int)(2*y),bg,bg,4);
+        return true;
+    }
+
+    private bool TryWriteStonySeam(double x,double y,bool? horizontal)
+    {
+        var cells=horizontal switch
+        {
+            true=>new[]{((int)x,(int)(y-.5)),((int)x,(int)(y+.5))},
+            false=>new[]{((int)(x-.5),(int)y),((int)(x+.5),(int)y)},
+            null=>new[]{((int)(x-.5),(int)(y-.5)),((int)(x+.5),(int)(y-.5)),
+                ((int)(x-.5),(int)(y+.5)),((int)(x+.5),(int)(y+.5))}
+        };
+        bool Rocky((int,int) p)=>_terrain.GetValueOrDefault(p)?.Code is 'o' or 'g' or 's';
+        if(!cells.Any(Rocky)||cells.Any(p=>_roomPositions.Contains(p)
+            ||!(IsCellVisible(p.Item1,p.Item2)||IsCellExplored(p.Item1,p.Item2))
+            ||_terrain.GetValueOrDefault(p)?.Code is not ('o' or 'g' or 's' or '.' or ',' or '='))) return false;
+        var edges=horizontal.HasValue ? new[]{(x,y,horizontal.Value)}
+            : new[]{(x-.5,y,true),(x+.5,y,true),(x,y-.5,false),(x,y+.5,false)};
+        if(edges.Any(e=>IsWallPresent(e.Item1,e.Item2,e.Item3)||GetDoorAtWall(e.Item1,e.Item2,e.Item3)!=null)) return false;
+        var colors=cells.Select(p=>IsCellVisible(p.Item1,p.Item2)?GetBackgroundColor(p.Item1,p.Item2)
+            :ColorHelper.Darker(GetBackgroundColor(p.Item1,p.Item2),.5)).ToArray();
+        var bg=Enumerable.Range(0,3).Select(i=>(int)colors.Average(c=>c[i])).ToList();
+        bg=ApplyTargetTintBetween(bg,cells);
+        int length=horizontal==true?_display.CellWidth:1;
+        WriteTiled(new string(' ',length),horizontal==true?4*(int)x-3:(int)(4*x)-2,(int)(2*y),bg,bg,6);
+        return true;
+    }
+
+    private bool TryWriteBoulderSeam(double x,double y,bool? horizontal)
+    {
+        var cells = horizontal switch
+        {
+            true => new[]{((int)x,(int)(y-.5)),((int)x,(int)(y+.5))},
+            false => new[]{((int)(x-.5),(int)y),((int)(x+.5),(int)y)},
+            null => new[]{((int)(x-.5),(int)(y+.5)),((int)(x+.5),(int)(y+.5)),
+                ((int)(x-.5),(int)(y-.5)),((int)(x+.5),(int)(y-.5))}
+        };
+        int mask=0;
+        for(int i=0;i<cells.Length;i++) if(KnownBoulder(cells[i].Item1,cells[i].Item2)) mask|=1<<i;
+        if(horizontal.HasValue ? mask!=3 : System.Numerics.BitOperations.PopCount((uint)mask)<3) return false;
+        var edges=horizontal.HasValue ? new[]{(x,y,horizontal.Value)}
+            : new[]{(x-.5,y,true),(x+.5,y,true),(x,y-.5,false),(x,y+.5,false)};
+        if(edges.Any(e=>IsWallPresent(e.Item1,e.Item2,e.Item3)||GetDoorAtWall(e.Item1,e.Item2,e.Item3)!=null)) return false;
+        var owner=cells.First(p=>KnownBoulder(p.Item1,p.Item2));
+        var fg=TerrainCatalog.Kinds['o'].Fg;
+        var bg=GetBackgroundColor(owner.Item1,owner.Item2);
+        if(!cells.All(p=>IsCellVisible(p.Item1,p.Item2))) { fg=ColorHelper.Darker(fg,.5); bg=ColorHelper.Darker(bg,.5); }
+        bg=ApplyTargetTintBetween(bg,cells);
+        const string quadrants=" ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█";
+        string text=horizontal==true ? "███" : horizontal==false ? "█" : quadrants[mask].ToString();
+        WriteBoulderFaces(text,horizontal==true?4*(int)x-3:(int)(4*x)-2,(int)(2*y),fg,bg);
+        return true;
     }
 
     private void WriteWorldExit(Door door, double x, double y, bool horizontal, bool visible)
@@ -473,6 +618,10 @@ public class MapObjectsProvider
                 '.' or ',' => 3,
                 '=' => 4,
                 'T' or 'F' => 5,
+                's' or 'o' => 6,
+                'g' => 7,
+                '"' => 8,
+                'W' or '~' => 9,
                 _ => 0
             } : 0;
         return _settings.Map.ChunkAt(x, y)?.Theme switch
@@ -493,7 +642,11 @@ public class MapObjectsProvider
                 double patch = GroundPatch(x, y);
                 double grain = GroundNoise(x, y);
                 double naturalShade = (patch * .7 + grain * .3) * (kind == 3 ? .075 : .055);
-                var texture = kind == 5 ? CrownShade(bg,x,y) : naturalShade > 0 ? ColorHelper.MixWith(bg, [210, 210, 150], naturalShade)
+                // Preserve the bush palette: small multiplicative changes also stay dim in fog.
+                double bushShade = 1 + patch * .09 + grain * .055;
+                var texture = kind == 9 ? WaterTexture(bg,x,y)
+                    : kind == 8 ? bg.Select(c => Math.Clamp((int)Math.Round(c*bushShade),0,255)).ToList()
+                    : kind >= 6 ? StonyTexture(bg,x,y) : kind == 5 ? CrownShade(bg,x,y) : naturalShade > 0 ? ColorHelper.MixWith(bg, [210, 210, 150], naturalShade)
                     : ColorHelper.MixWith(bg, [0, 0, 0], -naturalShade * 1.6);
                 ColorHelper.WriteColored(text[i].ToString(), fgColor: fg, bgColor: texture);
             }
@@ -510,6 +663,15 @@ public class MapObjectsProvider
             ColorHelper.WriteColored(text[i..j], fgColor: fg, bgColor: tileBg);
             i = j;
         }
+    }
+
+    private static List<int> WaterTexture(List<int> bg,int x,int y)
+    {
+        // Broad depth patches and low-contrast ripples cross cell and seam boundaries.
+        double depth=GroundPatch(x+137,y-53);
+        double ripple=Math.Sin(x*.48+y*1.15+depth*2.4);
+        double shade=1+depth*.15+ripple*.045+GroundNoise(x+19,y+31)*.018;
+        return bg.Select(c=>Math.Clamp((int)Math.Round(c*shade),0,255)).ToList();
     }
 
     // World-coordinate noise stays fixed while panning and revealing the map; it changes no terrain physics.
@@ -678,12 +840,12 @@ public class MapObjectsProvider
         for(int i=0;i<length;i++)
         {
             // Corners and the end characters of horizontal seams get more shadow than the centre.
-            double light=horizontal==null ? Math.Max(0,(cells.Count(Seen)-1)/3d) : .5;
+            double light=BoundaryLight(cells.Count(Seen),horizontal==null);
             if(horizontal==true && (i==0||i==length-1))
             {
                 int dx=i==0?-1:1;
                 int lit=cells.Count(Seen)+cells.Count(p=>IsCellVisible(p.Item1+dx,p.Item2));
-                light=Math.Min(light,Math.Max(0,(lit-1)/3d));
+                light=Math.Min(light,BoundaryLight(lit,true));
             }
             var bg=ColorHelper.MixWith(dark,bright,light);
             bg=ApplyTargetTintBetween(bg,cells);
@@ -694,6 +856,127 @@ public class MapObjectsProvider
         return true;
     }
 
+    private bool ShoreKnown((int x, int y) p) => !_roomPositions.Contains(p)
+        && (IsCellVisible(p.x, p.y) || IsCellExplored(p.x, p.y))
+        && _terrain.GetValueOrDefault(p)?.Code is 'W' or '~' or '.' or ',' or '=' or 'a' or 'n' or 't' or 's';
+
+    private bool ShoreWater((int x, int y) p) => _terrain.GetValueOrDefault(p)?.Code is 'W' or '~';
+
+    private List<int> ShoreColor((int x, int y) p)
+    {
+        var color = TerrainColors(_terrain[p], GetBackgroundColor(p.x, p.y)).bg;
+        return IsCellVisible(p.x, p.y) ? color : ColorHelper.Darker(color, .5);
+    }
+
+    // Shared subcell profile: corners and seam endpoints gradually favour the filled side.
+    private static double BoundaryLight(int count, bool corner) => corner
+        ? Math.Max(0, (count - 1) / 3d) : .5;
+
+    private bool TryWriteShoreEdge(double x, double y, bool horizontal) => WriteShoreTransition(x,y,horizontal);
+    private bool TryWriteShoreCorner(double x, double y) => WriteShoreTransition(x,y,null);
+
+    private bool WriteShoreTransition(double x, double y, bool? horizontal)
+    {
+        var cells = horizontal switch
+        {
+            true => new[] { ((int)x,(int)(y-.5)), ((int)x,(int)(y+.5)) },
+            false => new[] { ((int)(x-.5),(int)y), ((int)(x+.5),(int)y) },
+            null => new[] { ((int)(x-.5),(int)(y-.5)), ((int)(x-.5),(int)(y+.5)),
+                ((int)(x+.5),(int)(y-.5)), ((int)(x+.5),(int)(y+.5)) }
+        };
+        if (!cells.All(ShoreKnown) || !cells.Any(ShoreWater)) return false;
+        var edges = horizontal.HasValue ? new[] { (x,y,horizontal.Value) }
+            : new[] { (x-.5,y,true), (x+.5,y,true), (x,y-.5,false), (x,y+.5,false) };
+        if (edges.Any(e => IsWallPresent(e.Item1,e.Item2,e.Item3)
+            || GetDoorAtWall(e.Item1,e.Item2,e.Item3)!=null)) return false;
+        var waterColors=cells.Where(ShoreWater).Select(ShoreColor).ToArray();
+        var water=Enumerable.Range(0,3).Select(i=>(int)Math.Round(waterColors.Average(c=>c[i]))).ToList();
+        bool allWater=cells.All(ShoreWater);
+        var land = allWater ? water : ShoreColor(cells.First(p => !ShoreWater(p)));
+        int dry = cells.Count(p => !ShoreWater(p));
+        int length = horizontal==true ? _display.CellWidth : 1;
+        for (int i=0;i<length;i++)
+        {
+            double light = allWater ? 0 : BoundaryLight(dry,horizontal==null);
+            if (!allWater && horizontal==true && (i==0 || i==length-1))
+            {
+                int dx = i==0 ? -1 : 1;
+                var side = cells.Select(p => (p.Item1+dx,p.Item2)).ToArray();
+                if (side.All(ShoreKnown) && cells.All(p =>
+                    !IsWallPresent(p.Item1+dx*.5,p.Item2,false)
+                    && GetDoorAtWall(p.Item1+dx*.5,p.Item2,false)==null))
+                    light = Math.Min(light,BoundaryLight(dry+side.Count(p => !ShoreWater(p)),true));
+            }
+            int screenX=horizontal==true?4*(int)x-3+i:(int)(4*x)-2;
+            var texturedWater=WaterTexture(water,screenX,(int)(2*y));
+            var bg = ApplyTargetTintBetween(ColorHelper.MixWith(texturedWater,land,light),cells);
+            ColorHelper.WriteColored(" ",bg,bg);
+        }
+        return true;
+    }
+
+    private bool BridgeHorizontal(int x, int y)
+    {
+        if (_furnitureOf.TryGetValue((x, y), out var piece) && piece.Positions is { Count: > 1 } cells)
+            return cells.Max(p => p[0]) - cells.Min(p => p[0]) >= cells.Max(p => p[1]) - cells.Min(p => p[1]);
+        return HasRowNeighbour(x, y) || _terrain.GetValueOrDefault((x - 1, y))?.Code == '='
+            || _terrain.GetValueOrDefault((x + 1, y))?.Code == '=';
+    }
+
+    private (int x, int y)? BridgeRailAt(double x, double y, bool horizontal)
+    {
+        if (GetDoorAtWall(x, y, horizontal) != null || IsWallPresent(x, y, horizontal)) return null;
+        var a = horizontal ? ((int)x, (int)(y - .5)) : ((int)(x - .5), (int)y);
+        var b = horizontal ? ((int)x, (int)(y + .5)) : ((int)(x + .5), (int)y);
+        foreach (var (cell, outside) in new[] { (a, b), (b, a) })
+        {
+            if (_terrain.GetValueOrDefault(cell)?.Code != 'J' || BridgeHorizontal(cell.Item1, cell.Item2) != horizontal) continue;
+            if (!IsCellVisible(cell.Item1, cell.Item2) && !IsCellExplored(cell.Item1, cell.Item2)) continue;
+            if (_terrain.GetValueOrDefault(outside) is { } other && (other.Code == 'J' || other.BlocksMove)) continue;
+            return cell;
+        }
+        return null;
+    }
+
+    private bool TryWriteBridgeRail(double x, double y, bool horizontal)
+    {
+        if (BridgeRailAt(x, y, horizontal) is not { } cell) return false;
+        WriteBridgeSurface(horizontal ? new string('─', _display.CellWidth) : "│",
+            horizontal ? 4*(int)x-3 : (int)(4*x)-2, (int)(2*y), cell.x, cell.y);
+        return true;
+    }
+
+    // Board seams are background shading, leaving the glyph layer for rails and occupants.
+    private void WriteBridgeSurface(string text, int screenCol, int screenRow, int cellCol, int cellRow, bool highlightCell = false)
+    {
+        bool horizontal = BridgeHorizontal(cellCol, cellRow);
+        bool dim = !IsCellVisible(cellCol, cellRow);
+        var kind = TerrainCatalog.Kinds['J'];
+        var fg = dim ? ColorHelper.Darker(kind.Fg, .5) : kind.Fg;
+        for (int i = 0; i < text.Length; i++)
+        {
+            bool seam = horizontal ? (screenCol + i) % 3 == 0 : screenRow % 2 == 0;
+            var bg = ColorHelper.Darker(kind.Bg, seam ? .78 : .96);
+            if (dim) bg = ColorHelper.Darker(bg, .5);
+            bg = ApplyTargetTint(cellCol, cellRow, bg);
+            if (highlightCell && _display.HoveredCell == (cellCol, cellRow)) bg = ColorHelper.Pale(bg, .22);
+            ColorHelper.WriteColored(text[i].ToString(), fg, bg);
+        }
+    }
+
+    private bool TryWriteBridgeRailCorner(double x, double y)
+    {
+        var edges = new[] { (x - .5, y, true), (x + .5, y, true), (x, y - .5, false), (x, y + .5, false) };
+        if (edges.Any(e => GetDoorAtWall(e.Item1, e.Item2, e.Item3) != null || IsWallPresent(e.Item1, e.Item2, e.Item3))) return false;
+        var rails = edges.Select(e => (e.Item3, cell: BridgeRailAt(e.Item1, e.Item2, e.Item3))).Where(e => e.cell != null).ToList();
+        if (rails.Count == 0) return false;
+        bool horizontal = rails[0].Item1;
+        string glyph = rails.Count == 1 ? "┼" : horizontal ? "─" : "│";
+        var cell = rails.Select(e => e.cell!.Value).OrderByDescending(c => IsCellVisible(c.x, c.y)).First();
+        WriteBridgeSurface(glyph, (int)(4*x)-2, (int)(2*y), cell.x, cell.y);
+        return true;
+    }
+
     private string? JoinedGlyph(TerrainKind kind, int x, int y)
     {
         if (kind.Code is 'B' or 'N')
@@ -701,8 +984,15 @@ public class MapObjectsProvider
             bool bench = kind.Code == 'N';
             bool left = SamePiece((x, y), (x - 1, y)), right = SamePiece((x, y), (x + 1, y));
             bool up = SamePiece((x, y), (x, y + 1)), down = SamePiece((x, y), (x, y - 1));
+            if (!bench && (left || right) && (up || down))
+            {
+                char center = up && down ? '╬' : up ? '╩' : '╦';
+                char end = up && down ? (left ? '╣' : '╠') : up ? (left ? '╝' : '╚') : (left ? '╗' : '╔');
+                return left && right ? $"═{center}═" : left ? $"{center}═{end}" : $"{end}═{center}";
+            }
+            if (bench && !left && !right && !up && !down) return "┬─┬";
             if (!left && !right && (up || down))
-                return bench ? (!up ? "┌─┐" : !down ? "└─┘" : "│ │")
+                return bench ? (!up ? " ┬ " : !down ? " ┴ " : " │ ")
                     : (!up ? "╓─╖" : !down ? "╙─╜" : "║ ║");
             char line = bench ? '─' : '═';
             return $"{(left ? line : bench ? '└' : '╘')}{line}{(right ? line : bench ? '┘' : '╛')}";
@@ -715,7 +1005,7 @@ public class MapObjectsProvider
             const char surface = '▀';
             return $"{(left ? surface : '▐')}{surface}{(right ? surface : '▌')}";
         }
-        if (kind.Code == 'J') return HasRowNeighbour(x, y) ? "\u256a\u2550\u2550" : "\u255f\u2500\u2562";
+        if (kind.Code == 'J') return BridgeHorizontal(x, y) ? " │ " : "───";
         if (kind.Code == '#')
         {
             bool l = SamePiece((x, y), (x - 1, y)), r = SamePiece((x, y), (x + 1, y));
@@ -946,8 +1236,13 @@ public class MapObjectsProvider
 
     public void WriteCorner(double x, double y, CornerType type)
     {
+        if (TryWriteBridgeRailCorner(x, y)) return;
+        if (TryWriteShoreCorner(x, y)) return;
+        if (TryWriteBoulderSeam(x,y,null)) return;
         if (TryWriteCrownCorner(x,y)) return;
+        if (TryWritePathSeam(x,y,null)) return;
         if (TryWriteGroundFogSeam(x,y,null)) return;
+        if (TryWriteStonySeam(x,y,null)) return;
         var (visible, explored) = GetCornerState(x, y);
 
         if (!visible && !explored)

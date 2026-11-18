@@ -581,16 +581,16 @@ internal class MapScreenLoop
                 // Same committed entity (or same "none") — cancel any pending
                 pendingHoverCell = null;
                 hoverSince = null;
-                if (oldCell.HasValue) _mapDisplay.RedrawCell(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
-                if (cell.HasValue)    _mapDisplay.RedrawCell(cell.Value.col, cell.Value.row, mapObjectsProvider);
+                if (oldCell.HasValue) _mapDisplay.RedrawCellFrame(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
+                if (cell.HasValue)    _mapDisplay.RedrawCellFrame(cell.Value.col, cell.Value.row, mapObjectsProvider);
             }
             else if (cell.HasValue && newEntityIdx >= 0)
             {
                 // Different entity — highlight cell immediately, start/restart 50ms timer
                 pendingHoverCell = cell;
                 hoverSince = DateTime.UtcNow;
-                if (oldCell.HasValue) _mapDisplay.RedrawCell(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
-                _mapDisplay.RedrawCell(cell.Value.col, cell.Value.row, mapObjectsProvider);
+                if (oldCell.HasValue) _mapDisplay.RedrawCellFrame(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
+                _mapDisplay.RedrawCellFrame(cell.Value.col, cell.Value.row, mapObjectsProvider);
             }
             else
             {
@@ -598,8 +598,8 @@ internal class MapScreenLoop
                 pendingHoverCell = null;
                 hoverSince = null;
                 RestorePinnedOrClear();
-                if (oldCell.HasValue) _mapDisplay.RedrawCell(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
-                if (cell.HasValue) _mapDisplay.RedrawCell(cell.Value.col, cell.Value.row, mapObjectsProvider);
+                if (oldCell.HasValue) _mapDisplay.RedrawCellFrame(oldCell.Value.col, oldCell.Value.row, mapObjectsProvider);
+                if (cell.HasValue) _mapDisplay.RedrawCellFrame(cell.Value.col, cell.Value.row, mapObjectsProvider);
                 activeDialog?.RerenderRightPanel();
             }
 

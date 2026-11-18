@@ -1,6 +1,4 @@
 using System.Text.Json;
-using System.Security.Cryptography;
-using System.Text;
 using NaviDnD.Data.Models;
 using NaviDnD.MapGen.Generators;
 
@@ -8,33 +6,48 @@ namespace NaviDnD.Tests;
 
 public class MapCompatibilityTests
 {
-    // Fingerprints verified against the generator at e366b68 before adding options.
-    private static readonly string[] Expected =
-    [
-        "19AB0F050796A18F3261F495F008674CE5EEE41630F108D1600D5B230EDC24AD",
-        "CD46B3F2DC234E66835575DAFB75760C35935520AAED6BF513F3C1C55A4E4A89",
-        "6F29CE5665BA632F741723165B92C6F2FB0533980E83E102C62C939B0B070C56",
-        "C934AEA8D71A18011562DE276415F2427881F4C6FE6BB53A268E9C61FB8107B9",
-        "612643AEDE768362343AE0F59D3D88136484978D89EE1F9D06389DA45FD61C9E",
-        "651749295ACCA094FD3A126E8F9CA939366EFCFFC442A5EE8561CB9632814377",
-        "B195DD2D9CF7E4A362A350AAB52947F18FC0C081AA1814D011611EEAF65D51D6",
-        "AE448FC50587C25C8CB3BD3D54B8469846C89E5F5F58735F3824A004BDD71A47",
-        "50FA4F77DEC8496F77574CA107270010C9C7D644A271B99180EEA8454F0AB856",
-        "9602989E28D2C5ED89099688ECD417A5B6F863D884107719CED3CB8B6093A46F",
-    ];
-
     [Fact]
-    public void ExistingSeedsKeepTheirGeometry()
+    public void SavedGeometryAndPlayerChangesSurviveSerializationWithoutRegeneration()
     {
+        // A saved layout is authoritative, not a recipe to rebuild from the current seed algorithm.
+        var saved = new MapConfig
+        {
+            Chunks = [new() { Theme = "village", Seed = 1, Populated = true,
+                Terrain = Enumerable.Repeat(new string('.', MapChunk.Cols), MapChunk.Rows).ToList() }],
+            Rooms = [new() { Name = "Player-renamed workshop", Positions = [[4, 5], [5, 5], [5, 6]], Color = [31, 42, 53] }],
+            Doors = [new() { From = [4, 5], To = [3, 5], IsDoor = true, IsDoorOpen = false }],
+            Furniture = [new() { Kind = "table", Name = "Moved table", Positions = [[5, 6]], State = "searched", Deleted = true }],
+        };
+        saved.Chunks[0].Terrain![0] = "=T..................";
+        string json = JsonSerializer.Serialize(saved);
+        var loaded = JsonSerializer.Deserialize<MapConfig>(json)!;
+        Assert.Equal(json, JsonSerializer.Serialize(loaded));
+        Assert.Equal("=T..................", loaded.Chunks![0].Terrain![0]);
+        Assert.True(loaded.Chunks[0].Populated);
+        Assert.Equal("Player-renamed workshop", Assert.Single(loaded.Rooms!).Name);
+        Assert.False(Assert.Single(loaded.Doors!).IsDoorOpen);
+        Assert.True(Assert.Single(loaded.Furniture!).Deleted);
+        Assert.Equal("searched", loaded.Furniture![0].State);
+        Assert.Null(loaded.FurnitureAt(5, 6));
+        Assert.Equal("Player-renamed workshop", loaded.RoomAt(5, 6)!.Name);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FreshGenerationRemainsDeterministic(bool village)
+    {
+        var distinct = new HashSet<string>();
         for (int seed = 1; seed <= 5; seed++)
-        foreach (bool village in new[] { false, true })
         {
             var chunk = new MapChunk { Seed = seed, Theme = village ? "village" : "building", Style = "tavern" };
             var bands = new Dictionary<ChunkSide, char>();
-            var current = village ? BuildingGenerator.GenerateVillage(chunk, MapSampleTests.Exits, bands)
+            BuildingGenerator.Result Generate() => village ? BuildingGenerator.GenerateVillage(chunk, MapSampleTests.Exits, bands)
                 : BuildingGenerator.Generate(chunk, MapSampleTests.Exits, seed, true, bands, []);
-            string actual = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(current))));
-            Assert.Equal(Expected[(seed - 1) * 2 + (village ? 1 : 0)], actual);
+            string first = JsonSerializer.Serialize(Generate());
+            Assert.Equal(first, JsonSerializer.Serialize(Generate()));
+            distinct.Add(first);
         }
+        Assert.Equal(5, distinct.Count);
     }
 }

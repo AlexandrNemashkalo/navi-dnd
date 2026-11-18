@@ -97,7 +97,7 @@ public class MapConnectivityTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void RiverReachesClosedEdgesAsDeepWater(bool horizontal)
+    public void RiverReachesForestEdgesAsDeepWaterWithoutDryShortcuts(bool horizontal)
     {
         for (int seed = 1; seed <= 20; seed++)
         {
@@ -109,7 +109,8 @@ public class MapConnectivityTests
             var last = horizontal ? result.Terrain.Select(row => row[^1]) : result.Terrain[^1];
             Assert.Contains('W', first);
             Assert.Contains('W', last);
-            Assert.All(first.Concat(last), code => Assert.True(TerrainCatalog.Get(code)!.BlocksMove));
+            // River mouths remain water, while the surrounding forest still blocks dry shortcuts.
+            Assert.All(first.Concat(last), code => Assert.True(code == 'W' || TerrainCatalog.Get(code)!.BlocksMove));
         }
     }
 

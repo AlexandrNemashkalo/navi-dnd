@@ -49,6 +49,13 @@ public class MovementHandler
         int newCol  = heroCol + dir.Value.dcol;
         int newRow  = heroRow + dir.Value.drow;
 
+        if (_world.Combat?.Active != true && _world.World != null
+            && LocationGrower.IsOpenWorldBoundary(_world.Map, heroCol, heroRow, newCol, newRow))
+        {
+            LeaveRequested = true;
+            return false;
+        }
+
         // World exits use a closed door glyph to seal the map edge; IsDoorOpen is not their traversal state.
         // Hidden/removed exits cannot be used to discover or leave the location. Combat keeps normal movement rules.
         if (_world.Combat?.Active != true && (_world.Map.Doors ?? []).Any(d => d.IsWorldExit == true && d.Hidden != true && d.From is { Count: >= 2 } f && d.To is { Count: >= 2 } t

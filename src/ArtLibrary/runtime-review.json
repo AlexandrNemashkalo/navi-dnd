@@ -3284,6 +3284,23 @@
       "sha256": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
       "sheet": "artifacts/art-fixes/bench-final-32px.png",
       "position": 1
+    },
+    {
+      "assetId": "own-art:herbalist-kit-shaded-v1",
+      "sha256": "4d0dc571b9c982b4e1115d5594128da6713df0c79af30a84154b812cad5093d4",
+      "method": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette.",
+      "sheet": "artifacts/travel-gear-reviewed.png"
+    },
+    {
+      "assetId": "own-art:cart-shaded-v1",
+      "sha256": "cb681316006a51a902cac8c137f779ad84ccd4b0493140113bb524c164038fd8",
+      "method": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette.",
+      "sheet": "artifacts/travel-gear-reviewed.png"
+    },
+    {
+      "assetId": "dcss/item/misc/misc_stone_old",
+      "sha256": "84d80ac19a6d1706a800b90a0d644d40f396af2b88dedc90a332184e670048e8",
+      "method": "Visually inspected angular grey boulder, light upper face and dark lower facets; transparent native 32px sprite."
     }
   ]
 }

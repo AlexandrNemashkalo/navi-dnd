@@ -331,9 +331,8 @@ public static class GameWorld
 
     // ── Tactical map on the world map ──
 
-    // World cell → location terrain: theme of open blocks according to the biome, river (if it flows through
-    // the cell - the axis is along the neighboring river cells, width in size), sides with the sea/lake (north
-    // of the world - top of the location).
+    // World north is decreasing y; local north is increasing row. Nearby routes keep their side
+    // of the settlement instead of being moved through its center or omitted entirely.
     public static LocationGrower.WorldSite SiteAt(WorldMap geo, int x, int y)
     {
         string theme = geo.BiomeAt(x, y) switch
@@ -347,20 +346,43 @@ public static class GameWorld
             WorldBiomes.Tundra or WorldBiomes.Snow => "snow",
             _ => "plains",
         };
-        bool? riverH = null;
-        int width = 0;
-        int level = geo.RiverAt(x, y);
-        if (level > 0)
+        var directions = new (int dx, int dy, ChunkSide side)[] { (0, -1, ChunkSide.Top), (0, 1, ChunkSide.Bottom),
+            (-1, 0, ChunkSide.Left), (1, 0, ChunkSide.Right) };
+        var trails = new HashSet<(int, int)>();
+        foreach (var place in geo.Chronicle.Places)
+            if (place.Trail is { } path)
+                for (int i = 0; i + 1 < path.Count; i += 2)
+                    trails.Add((path[i], path[i + 1]));
+        int Road(int cx, int cy) => geo.InBounds(cx, cy) ? Math.Max(geo.RoadAt(cx, cy), trails.Contains((cx, cy)) ? 1 : 0) : 0;
+
+        (bool? horizontal, double offset, int level, HashSet<ChunkSide> sides) Route(Func<int, int, int> at)
         {
-            int ew = (geo.RiverAt(x - 1, y) > 0 ? 1 : 0) + (geo.RiverAt(x + 1, y) > 0 ? 1 : 0);
-            int ns = (geo.RiverAt(x, y - 1) > 0 ? 1 : 0) + (geo.RiverAt(x, y + 1) > 0 ? 1 : 0);
-            riverH = ew >= ns;
-            width = level <= 3 ? 1 : level <= 6 ? 2 : 3;
+            var candidates = new[] { (dx: 0, dy: 0) }.Concat(directions.Select(d => (d.dx, d.dy)))
+                .Where(d => geo.InBounds(x + d.dx, y + d.dy) && at(x + d.dx, y + d.dy) > 0)
+                .OrderBy(d => Math.Abs(d.dx) + Math.Abs(d.dy))
+                .ThenByDescending(d => at(x + d.dx, y + d.dy))
+                .ToList();
+            if (candidates.Count == 0) return (null, 0, 0, []);
+            var nearest = candidates[0];
+            int cx = x + nearest.dx, cy = y + nearest.dy;
+            var sides = directions.Where(d => at(cx + d.dx, cy + d.dy) > 0).Select(d => d.side).ToHashSet();
+            int ew = (sides.Contains(ChunkSide.Left) ? 1 : 0) + (sides.Contains(ChunkSide.Right) ? 1 : 0);
+            int ns = (sides.Contains(ChunkSide.Top) ? 1 : 0) + (sides.Contains(ChunkSide.Bottom) ? 1 : 0);
+            bool horizontal = ew == ns ? nearest.dx == 0 : ew > ns;
+            return (horizontal, (horizontal ? -nearest.dy : nearest.dx) * 0.72, at(cx, cy), sides);
         }
+
+        var river = Route(geo.RiverAt);
+        var road = Route(Road);
+        if (road.sides.Count == 0) road.horizontal = null;
         var water = new HashSet<ChunkSide>();
-        foreach (var (dx, dy, side) in new[] { (0, -1, ChunkSide.Top), (0, 1, ChunkSide.Bottom), (-1, 0, ChunkSide.Left), (1, 0, ChunkSide.Right) })
+        foreach (var (dx, dy, side) in directions)
             if (geo.InBounds(x + dx, y + dy) && WorldBiomes.IsWater(geo.BiomeAt(x + dx, y + dy))) water.Add(side);
-        return new LocationGrower.WorldSite(theme, riverH, width, water);
+        string? placeType = geo.Chronicle.Places.FirstOrDefault(p => p.X == x && p.Y == y)?.Type
+            ?? geo.Places.FirstOrDefault(p => p.X == x && p.Y == y)?.Type;
+        int width = river.level == 0 ? 0 : river.level <= 3 ? 1 : river.level <= 6 ? 2 : 3;
+        return new LocationGrower.WorldSite(theme, river.horizontal, width, water,
+            river.offset, road.horizontal, road.offset, road.sides, placeType);
     }
 
     // ── Locations of places: “everything is as it was” when returning (common for games in the world) ──

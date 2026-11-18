@@ -4,7 +4,7 @@ namespace NaviDnD.MapGen.Generators;
 
 // Block of open terrain (forest, plain, hills/mountains, swamp): without rooms and walls, cells - terrain
 // (TerrainCatalog). Figure - based on noise from field coordinates (adjacent blocks are joined without a seam),
-// edges without a neighboring terrain are closed by a natural barrier (thicket, rocks, water), from each exit
+// Explicit geographical barriers form shores or cliffs; other edges continue the terrain, from each exit
 // to the center there is a path; unreachable pockets are connected by fords/clearings.
 public static class OutdoorGenerator
 {
@@ -17,9 +17,9 @@ public static class OutdoorGenerator
 
     private const int W = MapChunk.Cols, H = MapChunk.Rows;
 
-    // bands: side → code for an obstacle along the edge (no side - the edge is open: there is an adjacent terrain block).
+    // bands: side → actual geographical obstacle (no side means naturally open terrain).
     public static Result Generate(MapChunk chunk, IReadOnlyList<ChunkExit> exits, IReadOnlyDictionary<ChunkSide, char> bands, int noiseSeed,
-        RiverSpec? river = null)
+        RiverSpec? river = null, bool markedTrails = true, IReadOnlyCollection<ChunkSide>? settlementSides = null)
     {
         var rng = new Random(chunk.Seed);
         var g = new char[W, H];
@@ -50,11 +50,19 @@ public static class OutdoorGenerator
                     "taiga" => n > 0.57 ? 'e' : n > 0.48 && p < 0.35 ? 'e' : m > 0.65 ? '"' : 'n',
                     _ => ground,
                 };
+                // A worked clearing blends into woodland instead of ending on a rectangular chunk seam.
+                if (settlementSides is { Count: > 0 } && g[c, r] is 'T' or 'F' or 'e')
+                {
+                    int distance = settlementSides.Min(side => side switch
+                    { ChunkSide.Left => c, ChunkSide.Right => W - 1 - c, ChunkSide.Bottom => r, _ => H - 1 - r });
+                    if (distance < 5 && Fbm(fc, fr, noiseSeed + 401) < 0.8 - distance * 0.13)
+                        g[c, r] = ground;
+                }
             }
 
         AddOutcrop(g, chunk);
 
-        // Edges without a terrain neighbor: 1-3 tile obstruction strip.
+        // Explicit shores or cliffs: 1-3 tile obstruction strip.
         foreach (var (side, code) in bands)
         {
             int len = side is ChunkSide.Left or ChunkSide.Right ? H : W;
@@ -83,6 +91,7 @@ public static class OutdoorGenerator
         var (hubC, hubR) = hub;
         if (Kind(g[hubC, hubR]).BlocksMove) g[hubC, hubR] = g[hubC, hubR] == 'W' ? '~' : ground;
         char trail = theme is "mountain" or "hills" ? 's' : theme == "swamp" ? '.' : theme == "desert" ? 'a' : theme is "snow" or "taiga" ? 'n' : '=';
+        if (!markedTrails) trail = ground;
         var originalGround = (char[,])g.Clone();
         var trailCells = new HashSet<(int c, int r)>();
         var anchors = new HashSet<(int c, int r)>();
@@ -102,11 +111,11 @@ public static class OutdoorGenerator
         if (anchors.Count > 1) AddNaturalPass(g, trailCells, chunk.Theme, chunk.Seed);
 
         // Keep rocky route planning intact, but distinguish the worn trail from ordinary stony ground.
-        if (theme is "hills" or "mountain")
+        if (markedTrails && theme is "hills" or "mountain")
             foreach (var (c, r) in trailCells)
                 if (g[c, r] == 's') g[c, r] = '=';
         // Footprints distinguish the retained route without changing snow movement costs or fords.
-        if (theme is "snow" or "taiga")
+        if (markedTrails && theme is "snow" or "taiga")
             foreach (var (c, r) in trailCells)
                 if (g[c, r] == 'n') g[c, r] = 't';
 
@@ -168,7 +177,9 @@ public static class OutdoorGenerator
 
     }
 
-    private static TerrainKind Kind(char code) => TerrainCatalog.Get(code) ?? TerrainCatalog.Kinds['.'];
+    // Plan land routes independently of the hero's ability to swim.
+    private static TerrainKind Kind(char code) => code == 'W'
+        ? TerrainCatalog.Kinds['W'] with { BlocksMove = true } : TerrainCatalog.Get(code) ?? TerrainCatalog.Kinds['.'];
 
     // Occasional exposed rock gives a place a recognizable landmark and usable cover.
     // Keep it inside the chunk; boundary bands and the world river are applied afterwards.

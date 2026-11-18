@@ -295,6 +295,16 @@ public class GameAiClient
         if (_storage.NewGameData?.AdventureStyle is { Length: > 0 } style)
             worldBrief = $"\nAdventure parameters: {style}" + worldBrief;
         worldBrief += $"\nCurrent time: day {_settings.Time.Day}, {PartsOfDay.Normalize(_settings.Time.PartOfDay)} — describe this time of day or explicitly change time.";
+        string openingFocus = Random.Shared.Next(6) switch
+        {
+            0 => "a workplace in the middle of its daily routine",
+            1 => "a crossing or arrival point shaped by the local geography",
+            2 => "a public gathering with people pursuing different aims",
+            3 => "an inhabited landmark with traces of an older use",
+            4 => "the outskirts where settlement and wilderness meet",
+            _ => "a neighborhood whose livelihood creates a distinctive daily rhythm",
+        };
+        worldBrief += $"\nOptional opening inspiration: {openingFocus}; adapt to the chosen world and hero, and discard if it conflicts with player wishes. It does not imply a quest or combat.";
         // The starting location chosen by the player on the map (Adventure step).
         if (_storage.NewGameData?.StartPlace is { Length: > 0 } sp)
             worldBrief += $"\nThe player chose the starting place: «{sp}» — start there (world.place).";

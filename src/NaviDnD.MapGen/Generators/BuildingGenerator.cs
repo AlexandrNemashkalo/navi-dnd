@@ -14,6 +14,10 @@ namespace NaviDnD.MapGen.Generators;
 // vegetable gardens behind a fence.
 public static class BuildingGenerator
 {
+    // Buildings, furniture and dry access routes must not be planned in swimmable water.
+    private static TerrainKind? LandKind(char code) => code == 'W'
+        ? TerrainCatalog.Kinds['W'] with { BlocksMove = true } : TerrainCatalog.Get(code);
+
     public sealed record Result(List<Room> Rooms, List<Door> Doors, List<string> Terrain, List<Furniture> Furniture);
 
     private const int W = MapChunk.Cols, H = MapChunk.Rows;
@@ -142,6 +146,9 @@ public static class BuildingGenerator
     public static Result GenerateVillage(MapChunk chunk, IReadOnlyList<ChunkExit> exits, IReadOnlyDictionary<ChunkSide, char> bands, string? layout = null,
         OutdoorGenerator.RiverSpec? river = null, int noiseSeed = 0)
     {
+        // Unspecified plans still have a local identity; never invent a river or a defensive wall.
+        layout ??= exits.Any(e => exits.Any(other => other.Side == ChunkExit.Opposite(e.Side)))
+            || new Random(unchecked(chunk.Seed ^ 0x167B42)).Next(2) == 0 ? "road" : "square";
         var rng = new Random(chunk.Seed);
         var b = new Builder(chunk, rng);
         b.Ground(bands, exits.Select(e => Local(e.AnchorCell(chunk), chunk)).ToList());
@@ -348,7 +355,7 @@ public static class BuildingGenerator
         var random = new Random(unchecked(seed ^ 0x4172B3));
         bool Dry((int c, int r) p) => InBounds(p) && !protectedCells.Contains(p)
             && grid[p.c, p.r] is not ('W' or '~' or ' ')
-            && TerrainCatalog.Get(grid[p.c, p.r]) is { BlocksMove: false };
+            && LandKind(grid[p.c, p.r]) is { BlocksMove: false };
         HashSet<(int c, int r)> Flood((int c, int r) start)
         {
             var seen = new HashSet<(int c, int r)> { start };
@@ -881,7 +888,7 @@ public static class BuildingGenerator
                 if (G[c, r] != ground[c, r]) _forestGrowth[(c, r)] = ground[c, r];
         }
 
-        public bool Blocked((int c, int r) x) => TerrainCatalog.Get(G[x.c, x.r]) is { BlocksMove: true } || OnBorder(x);
+        public bool Blocked((int c, int r) x) => LandKind(G[x.c, x.r]) is { BlocksMove: true } || OnBorder(x);
 
         // Entrance door: outline cell (preferably hall) on the side closest to the target (or to the street);
         // there is sometimes a back door near the building.
@@ -916,7 +923,7 @@ public static class BuildingGenerator
             (int c, int r) Cell(int lane, int step) => horizontalRiver ? (lane, step) : (step, lane);
             bool Water((int c, int r) p) => riverbed[p.c, p.r] is 'W' or '~';
             bool DryApproach((int c, int r) p) => !OnBorder(p) && street.Contains(p) && !_regionOf.ContainsKey(p)
-                && !Water(p) && G[p.c, p.r] is not ('W' or '~') && TerrainCatalog.Get(G[p.c, p.r]) is { BlocksMove: false };
+                && !Water(p) && G[p.c, p.r] is not ('W' or '~') && LandKind(G[p.c, p.r]) is { BlocksMove: false };
             foreach (int lane in Enumerable.Range(1, lanes - 2).OrderBy(i => Math.Abs(i - (horizontalRiver ? hub.c : hub.r))))
                 for (int step = 1; step < length - 1; step++)
                 {
@@ -940,7 +947,7 @@ public static class BuildingGenerator
             // Only an already connected dry yard qualifies; no new clearing, ford, or boundary exit.
             bool DryYard((int c, int r) p) => InBounds(p) && !OnBorder(p) && !_regionOf.ContainsKey(p)
                 && G[p.c, p.r] is not ('W' or '~' or ' ')
-                && TerrainCatalog.Get(G[p.c, p.r]) is { BlocksMove: false };
+                && LandKind(G[p.c, p.r]) is { BlocksMove: false };
             var reachableYard = street.Where(DryYard).ToHashSet();
             var yardQueue = new Queue<(int c, int r)>(reachableYard);
             while (yardQueue.TryDequeue(out var p))
@@ -966,7 +973,7 @@ public static class BuildingGenerator
                 var indoorQueue = new Queue<(int c, int r)>([frontRoom]);
                 while (indoorQueue.TryDequeue(out var p))
                     foreach (var n in Around(p))
-                        if (inside.Contains(n) && TerrainCatalog.Get(G[n.c, n.r]) is not { BlocksMove: true }
+                        if (inside.Contains(n) && LandKind(G[n.c, n.r]) is not { BlocksMove: true }
                             && (ReferenceEquals(_regionOf.GetValueOrDefault(p), _regionOf.GetValueOrDefault(n))
                                 || links.Any(link => link.a == p && link.b == n || link.a == n && link.b == p))
                             && reachableInside.Add(n)) indoorQueue.Enqueue(n);
@@ -1013,6 +1020,11 @@ public static class BuildingGenerator
         // Trees and bushes are not on the path or near houses; the yard remains connected.
         public void Trees(HashSet<(int c, int r)> inside, (int c, int r) start)
         {
+            if (!_forestBands.Values.Any(code => code is 'T' or 'F' or 'e' or NaturalBand))
+            {
+                OpenYardVegetation(inside, start);
+                return;
+            }
             var yard = Enumerable.Range(1, W - 2).SelectMany(c => Enumerable.Range(1, H - 2).Select(r => (c, r)))
                 .Where(x => !inside.Contains(x) && G[x.c, x.r] is '.' or ',').ToList();
             int count = yard.Count / 16;
@@ -1023,6 +1035,31 @@ public static class BuildingGenerator
                 char was = G[x.c, x.r];
                 G[x.c, x.r] = rng.Next(3) == 0 ? '"' : 'T';
                 if (!OutsideConnected(inside, start)) G[x.c, x.r] = was;
+            }
+        }
+
+        // Open countryside continues through the map boundary. Sparse plants belong there too,
+        // but must not seal an approach, obscure a doorway, or isolate a piece of the yard.
+        private void OpenYardVegetation(HashSet<(int c, int r)> inside, (int c, int r) start)
+        {
+            var random = new Random(unchecked(chunk.Seed ^ 0x6192AD));
+            var yard = (from c in Enumerable.Range(0, W)
+                        from r in Enumerable.Range(0, H)
+                        let p = (c, r)
+                        where G[c, r] is '.' or ',' && !inside.Contains(p)
+                            && !Around8(p).Append(p).Any(n => inside.Contains(n) || _doorCells.Contains(n)
+                                || _windowCells.Contains(n) || _approaches.Contains(n)
+                                || (InBounds(n) && G[n.c, n.r] == '='))
+                        orderby random.Next()
+                        select p).ToList();
+            int remaining = yard.Count / 14;
+            foreach (var p in yard)
+            {
+                if (remaining == 0) break;
+                char before = G[p.c, p.r];
+                G[p.c, p.r] = random.Next(3) == 0 ? '"' : 'T';
+                if (!OutsideConnected(inside, start)) G[p.c, p.r] = before;
+                else remaining--;
             }
         }
 
@@ -1065,7 +1102,7 @@ public static class BuildingGenerator
         // All passable cells outside houses are connected (by 4 neighbors).
         public bool OutsideConnected(HashSet<(int c, int r)> inside, (int c, int r) start)
         {
-            bool Free((int c, int r) x) => !inside.Contains(x) && G[x.c, x.r] != ' ' && TerrainCatalog.Get(G[x.c, x.r]) is not { BlocksMove: true };
+            bool Free((int c, int r) x) => !inside.Contains(x) && G[x.c, x.r] != ' ' && LandKind(G[x.c, x.r]) is not { BlocksMove: true };
             if (!Free(start)) start = Enumerable.Range(0, W).SelectMany(c => Enumerable.Range(0, H).Select(r => (c, r))).FirstOrDefault(Free);
             int total = Enumerable.Range(0, W).Sum(c => Enumerable.Range(0, H).Count(r => Free((c, r))));
             var seen = new HashSet<(int, int)> { start };
@@ -1259,7 +1296,7 @@ public static class BuildingGenerator
         // All cells at once or none (solid rack).
         private bool TryAll(HashSet<(int c, int r)> cells, List<(int c, int r)> run, char code)
         {
-            if (run.Any(x => !cells.Contains(x) || TerrainCatalog.Get(G[x.c, x.r]) is { BlocksMove: true } || Near(x) || _windowCells.Contains(x)))
+            if (run.Any(x => !cells.Contains(x) || LandKind(G[x.c, x.r]) is { BlocksMove: true } || Near(x) || _windowCells.Contains(x)))
                 return false;
             var was = run.Select(x => G[x.c, x.r]).ToList();
             foreach (var x in run) G[x.c, x.r] = code;
@@ -1270,7 +1307,7 @@ public static class BuildingGenerator
 
         private bool Try(HashSet<(int c, int r)> cells, (int c, int r) x, char code)
         {
-            if (!cells.Contains(x) || TerrainCatalog.Get(G[x.c, x.r]) is { BlocksMove: true }) return false;
+            if (!cells.Contains(x) || LandKind(G[x.c, x.r]) is { BlocksMove: true }) return false;
             if (Near(x) || _windowCells.Contains(x)) return false;
             char was = G[x.c, x.r];
             G[x.c, x.r] = code;
@@ -1279,16 +1316,8 @@ public static class BuildingGenerator
             return false;
         }
 
-        // Bed 1x2: headboard (pillow) against the wall, foot part - deep into the room; it didn’t work out - one cell.
-        private bool TryBed(HashSet<(int c, int r)> cells, (int c, int r) x)
-        {
-            foreach (var n in Around(x).Where(n => !cells.Contains(n)))
-            {
-                var foot = (x.c + (x.c - n.c), x.r + (x.r - n.r));
-                if (TryAll(cells, [x, foot], 'E')) return true;
-            }
-            return Try(cells, x, 'E');
-        }
+        // A bed occupies one tactical cell; the pillow and blanket share that cell.
+        private bool TryBed(HashSet<(int c, int r)> cells, (int c, int r) x) => Try(cells, x, 'E');
 
         // Table with 2 squares in a row, otherwise one square.
         private bool TryTable(HashSet<(int c, int r)> cells, (int c, int r) x) =>
@@ -1296,7 +1325,7 @@ public static class BuildingGenerator
 
         private bool Connected(HashSet<(int c, int r)> cells)
         {
-            var free = cells.Where(x => TerrainCatalog.Get(G[x.c, x.r]) is not { BlocksMove: true }).ToHashSet();
+            var free = cells.Where(x => LandKind(G[x.c, x.r]) is not { BlocksMove: true }).ToHashSet();
             if (free.Count == 0) return false;
             var start = free.First();
             var seen = new HashSet<(int, int)> { start };

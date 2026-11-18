@@ -30,7 +30,13 @@ public class CoastalLocationTests
             };
             // Natural boundary strips can overlap at the corners; the coastline itself stays water.
             Assert.All(edge.Skip(3).SkipLast(3), code => Assert.Equal('W', code));
-            Assert.All(edge, code => Assert.True(TerrainCatalog.Get(code)!.BlocksMove));
+            // Coast cells remain water even though swimming is now permitted; a coast is not a dry exit.
+            Assert.All(edge, code => Assert.True(code == 'W' || TerrainCatalog.Get(code)!.BlocksMove));
+            Assert.All(edge.Where(code => code == 'W'), code =>
+            {
+                Assert.False(TerrainCatalog.Get(code)!.BlocksMove);
+                Assert.Equal(10, TerrainCatalog.Get(code)!.StepCostFt);
+            });
             Assert.True(state.Map.TerrainAt(state.Hero.Position[0], state.Hero.Position[1]) is { BlocksMove: false });
         }
     }

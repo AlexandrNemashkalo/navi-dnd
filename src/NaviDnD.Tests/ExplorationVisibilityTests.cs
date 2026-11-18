@@ -5,6 +5,21 @@ namespace NaviDnD.Tests;
 
 public class ExplorationVisibilityTests
 {
+    [Theory]
+    [InlineData('o', false)]
+    [InlineData('g', true)]
+    [InlineData('s', true)]
+    public void LargeBoulderHidesSpaceBehindItButLooseStoneDoesNot(char terrain, bool seesBehind)
+    {
+        var storage = new Storage();
+        storage.WorldState.Map.Chunks = [new() { Theme="plains",
+            Terrain=Enumerable.Repeat(new string('.',20),15).ToList() }];
+        storage.WorldState.Map.Chunks[0].Terrain[2] = ".."+terrain+new string('.',17);
+        Assert.True(MovementCalculator.HasLineOfSight(storage.WorldState,1,3,3,3));
+        Assert.Equal(seesBehind,MovementCalculator.HasLineOfSight(storage.WorldState,1,3,5,3));
+        Assert.Equal(seesBehind,MovementCalculator.HasLineOfSight(storage.WorldState,5,3,1,3));
+    }
+
     private static Room Room(int left, int right) => new()
     {
         Positions = Enumerable.Range(left, right - left + 1)

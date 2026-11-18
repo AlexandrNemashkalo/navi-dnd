@@ -311,14 +311,133 @@ public class MapFixturesRenderingTests
         Assert.Equal(joint, Plain(Capture(() => provider.WriteLine(3.5, 3, false))));
         storage.WorldState.Map.Furniture = [new() { Kind = kind, Positions = [[3, 3], [3, 4]] }];
         provider.Refresh();
-        Assert.Equal(kind == "counter" ? "╙─╜" : kind == "bench" ? "└─┘" : "▐█▌", Plain(Capture(() => provider.WriteCellEntity(3,3))));
-        Assert.Equal(kind == "counter" ? "║ ║" : kind == "bench" ? "│ │" : "▐█▌", Plain(Capture(() => provider.WriteLine(3,3.5,true))));
+        Assert.Equal(kind == "counter" ? "╙─╜" : kind == "bench" ? " ┴ " : "▐█▌", Plain(Capture(() => provider.WriteCellEntity(3,3))));
+        Assert.Equal(kind == "counter" ? "║ ║" : kind == "bench" ? " │ " : "▐█▌", Plain(Capture(() => provider.WriteLine(3,3.5,true))));
         if (kind == "counter") Assert.Equal("╓─╖", Plain(Capture(() => provider.WriteCellEntity(3,4))));
-        if (kind == "bench") Assert.Equal("┌─┐", Plain(Capture(() => provider.WriteCellEntity(3,4))));
+        if (kind == "bench") Assert.Equal(" ┬ ", Plain(Capture(() => provider.WriteCellEntity(3,4))));
         // Adjacent independent pieces retain their own ends and never acquire a shared beam.
         storage.WorldState.Map.Furniture = [new() { Kind = kind, Positions = [[3, 3]] }, new() { Kind = kind, Positions = [[4, 3]] }];
         provider.Refresh();
         Assert.NotEqual(joint, Plain(Capture(() => provider.WriteLine(3.5, 3, false))));
+    }
+
+    [Fact]
+    public void BridgeRailsSitBesideTheDeckAndYieldToDoors()
+    {
+        var storage = Fixture();
+        storage.WorldState.Map.Furniture = [new() { Kind = "bridge", Positions = [[3,3],[4,3],[5,3]] }];
+        var provider = Provider(storage);
+        Assert.Equal("   ", Plain(Capture(() => provider.WriteCellEntity(4,3))));
+        Assert.Equal("───", Plain(Capture(() => provider.WriteLine(4,3.5,true))));
+        Assert.Equal("───", Plain(Capture(() => provider.WriteLine(4,2.5,true))));
+        storage.WorldState.Map.Doors = [new() { From = [4,3], To = [4,4], IsDoor = true, IsDoorOpen = false }];
+        provider = Provider(storage);
+        Assert.Equal("═══", Plain(Capture(() => provider.WriteLine(4,3.5,true))));
+        storage.WorldState.Map.Doors.Clear();
+        storage.WorldState.Map.Furniture = [new() { Kind = "bridge", Positions = [[3,3],[3,4],[3,5]] }];
+        provider.Refresh();
+        Assert.Equal("   ", Plain(Capture(() => provider.WriteCellEntity(3,4))));
+        Assert.Equal("│", Plain(Capture(() => provider.WriteLine(2.5,4,false))));
+        Assert.Equal("│", Plain(Capture(() => provider.WriteLine(3.5,4,false))));
+    }
+
+    [Fact]
+    public void BridgeHoverHighlightsOnlyTheThreeDeckCharacters()
+    {
+        var storage = Fixture();
+        storage.WorldState.Map.Furniture = [new() { Kind = "bridge", Positions = [[3,3],[4,3],[5,3]] }];
+        var display = new DisplayConfig();
+        var provider = new MapObjectsProvider(storage.WorldState, display, storage, new AppConfig { RevealMap = true });
+        string deck = Capture(() => provider.WriteCellEntity(4,3));
+        string rail = Capture(() => provider.WriteLine(4,3.5,true));
+        Assert.Equal("   ", Plain(deck));
+        Assert.True(Regex.Matches(deck, "\\x1b\\[48;2;[0-9;]+m").Select(m => m.Value).Distinct().Count() > 1);
+        display.HoveredCell = (4,3);
+        Assert.NotEqual(deck, Capture(() => provider.WriteCellEntity(4,3)));
+        Assert.Equal(rail, Capture(() => provider.WriteLine(4,3.5,true)));
+        Assert.Equal("───", Plain(Capture(() => provider.WriteLine(4,3.5,true))));
+    }
+
+    [Fact]
+    public void ShoreSmoothingUsesSpareSeamsWithoutShrinkingWaterOrCoveringDoors()
+    {
+        var storage = Fixture();
+        var chunk = storage.WorldState.Map.Chunks![0];
+        chunk.Theme = "plains";
+        chunk.Terrain = Enumerable.Repeat(new string('.', 20), 15).ToList();
+        string[] Backgrounds(string ansi) => Regex.Matches(ansi, @"(48;2;\d+;\d+;\d+)m\x1b\[[0-9;]+m[^\x1b]")
+            .Select(m => m.Groups[1].Value).ToArray();
+        var dryGrass = Backgrounds(Capture(() => Provider(storage).WriteCellEntity(4,3)));
+        chunk.Terrain[2] = "..W.................";
+        var original = chunk.Terrain.ToArray();
+        var provider = Provider(storage);
+        var edge = Capture(() => provider.WriteLine(3,3.5,true));
+        Assert.Equal("   ", Plain(edge));
+        var shades = Regex.Matches(edge, @"(48;2;\d+;\d+;\d+)m\x1b\[[0-9;]+m ").Select(m => m.Groups[1].Value).ToArray();
+        Assert.Equal(3, shades.Length);
+        Assert.True(shades.Distinct().Count()>1);
+        Assert.Equal(edge,Capture(() => provider.WriteLine(3,3.5,true)));
+        Assert.Equal(" ", Plain(Capture(() => provider.WriteLine(3.5,3,false))));
+        Assert.Equal(" ", Plain(Capture(() => provider.WriteCorner(3.5,3.5,CornerType.Cross))));
+        Assert.NotEqual(Backgrounds(Capture(() => provider.WriteCellEntity(3,3)))[0],
+            Backgrounds(Capture(() => provider.WriteCorner(3.5,3.5,CornerType.Cross)))[0]);
+        var wetGrass = Backgrounds(Capture(() => provider.WriteCellEntity(4,3)));
+        Assert.Equal(dryGrass, wetGrass);
+        chunk.Terrain[3] = "..WW................";
+        provider = Provider(storage);
+        var bendRender = Capture(() => provider.WriteCellEntity(4,3));
+        Assert.DoesNotContain(Plain(bendRender), c => "▀▄▌▐".Contains(c));
+        var bendGrass = Backgrounds(bendRender);
+        Assert.Equal(dryGrass, bendGrass);
+        var bendEdge = Backgrounds(Capture(() => provider.WriteLine(4,3.5,true)));
+        Assert.NotEqual(bendEdge[0], bendEdge[1]);
+        Assert.Equal(3,bendEdge.Length);
+        chunk.Terrain[3] = original[3];
+        Assert.DoesNotContain(Plain(Capture(() => provider.WriteCellEntity(3,3))), c => "▀▄▌▐▖▗▘▝".Contains(c));
+        Assert.Equal(original, chunk.Terrain);
+        storage.WorldState.Map.Doors = [new() { From = [3,3], To = [3,4], IsDoor = true }];
+        provider = Provider(storage);
+        Assert.Equal("═══", Plain(Capture(() => provider.WriteLine(3,3.5,true))));
+    }
+
+    [Fact]
+    public void BoulderGroupsFillSeamsButRespectDoors()
+    {
+        var storage=Fixture();
+        var chunk=storage.WorldState.Map.Chunks![0];
+        chunk.Theme="plains";
+        chunk.Terrain=Enumerable.Repeat(new string('.',20),15).ToList();
+        chunk.Terrain[2]="..oo................";
+        chunk.Terrain[3]="..oo................";
+        var provider=Provider(storage);
+        Assert.Equal("█",Plain(Capture(()=>provider.WriteLine(3.5,3,false))));
+        Assert.Equal("███",Plain(Capture(()=>provider.WriteLine(3,3.5,true))));
+        Assert.Equal("█",Plain(Capture(()=>provider.WriteCorner(3.5,3.5,CornerType.Cross))));
+        Assert.EndsWith("██",Plain(Capture(()=>provider.WriteCellEntity(3,3))));
+        storage.WorldState.Map.Doors=[new(){From=[3,3],To=[3,4],IsDoor=true}];
+        provider=Provider(storage);
+        Assert.Equal("═══",Plain(Capture(()=>provider.WriteLine(3,3.5,true))));
+    }
+
+    [Fact]
+    public void PathBlendsIntoSpareCharactersButLeavesDoorsIntact()
+    {
+        var storage=Fixture();
+        var chunk=storage.WorldState.Map.Chunks![0];
+        chunk.Theme="plains";
+        chunk.Terrain=Enumerable.Repeat(new string('.',20),15).ToList();
+        var provider=Provider(storage);
+        var grass=Capture(()=>provider.WriteLine(3.5,3,false));
+        chunk.Terrain[2]="..=.................";
+        provider=Provider(storage);
+        var bank=Capture(()=>provider.WriteLine(3.5,3,false));
+        Assert.Equal(" ",Plain(bank));
+        Assert.NotEqual(grass,bank);
+        Assert.Equal("   ",Plain(Capture(()=>provider.WriteLine(3,3.5,true))));
+        Assert.Equal(" ",Plain(Capture(()=>provider.WriteCorner(3.5,3.5,CornerType.Cross))));
+        storage.WorldState.Map.Doors=[new(){From=[3,3],To=[3,4],IsDoor=true}];
+        provider=Provider(storage);
+        Assert.Equal("═══",Plain(Capture(()=>provider.WriteLine(3,3.5,true))));
     }
 
     private static Storage Fixture()

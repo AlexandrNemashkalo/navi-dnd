@@ -218,6 +218,19 @@ public sealed class ArtPicturesTests
         Assert.Contains(monster, CatalogSearch.Monsters(english));
     }
 
+    [Theory]
+    [InlineData("Herbalism kit", "Набор травника", "item")]
+    [InlineData("Travel satchel", "Дорожная сума", "item")]
+    [InlineData("cart", "Телега", "feature")]
+    public void TravelEquipmentNamesResolveToTheSameReviewedPicture(string english, string russian, string category)
+    {
+        var art = ArtPictures.Load("Dnd5e");
+        var expected = Assert.Single(art.Find(english, category));
+        Assert.StartsWith(ArtPictures.Prefix, expected);
+        Assert.Equal(expected, Assert.Single(art.Find(russian, category)));
+        Assert.True(File.Exists(art.ResolvePath(expected)));
+    }
+
     [Fact]
     public void EveryMonsterReferenceHasAnEnglishSearchName()
     {

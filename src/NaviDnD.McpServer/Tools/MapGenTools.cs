@@ -151,7 +151,7 @@ public sealed class MapGenTools(McpServerConfig config)
                     if (tile is { } t) site = GameWorld.SiteAt(geo, t.x, t.y);
                 }
             }
-            var (start, error) = LocationGrower.CreatePlanned(storage.WorldState, plan?.Blocks ?? [], plan?.Theme ?? "dungeon", plan?.StartInside == true, site);
+            var (start, error) = LocationGrower.CreatePlanned(storage.WorldState, plan?.Blocks ?? [], plan?.Theme ?? "dungeon", plan?.StartInside == true, site, includeSurroundings: true);
             if (start == null)
             {
                 Log($"← (plan error) {error}");

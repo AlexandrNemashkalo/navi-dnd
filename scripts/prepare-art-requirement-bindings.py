@@ -614,7 +614,7 @@ for name,paths,usage,reason in [
     ('Rocks',['gui/spells/components/stones'],'prop','Scattered grey stone fragments; transparent overlay requires an underlying ground tile.'),
     ('Scree',['gui/spells/components/stones'],'prop','Loose scattered grey stone fragments as a ground overlay.'),
     ('Rubble',['gui/spells/components/stones'],'prop','Scattered broken stones as a rubble overlay; no intact column or creature.'),
-    ('Boulders',['dungeon/boulder'],'prop','Visually inspected large rounded brown boulder; transparent background remains intact.'),
+    ('Boulders',['item/misc/misc_stone_old'],'prop','Visually inspected angular grey boulder with a light upper face and dark lower facets; transparent native 32px sprite.'),
     ('Moss',['dungeon/mold_large_1','dungeon/mold_large_2','dungeon/mold_large_3','dungeon/mold_large_4'],'prop','Scattered dark-green organic patches as moss-like ground cover; overlay, not a full ground texture.'),
     ('Column',['dungeon/statues/crumbled_column_2','dungeon/statues/crumbled_column_3'],'prop','Visually inspected grey column on a base, including damaged variants.'),
     ('Stairs up',['dungeon/gateways/stone_stairs_up'],'prop','Visually inspected stone steps rising diagonally.'),

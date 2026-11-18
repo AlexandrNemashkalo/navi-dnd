@@ -57,7 +57,7 @@ public class MapOutdoorTerrainTests
             Assert.Equal(MapChunk.Rows, result.Terrain.Count);
             Assert.All(result.Terrain, row => Assert.Equal(MapChunk.Cols, row.Length));
             var walkable = result.Terrain.SelectMany((row, r) => row.Select((code, c) => (code, c, r)))
-                .Where(cell => TerrainCatalog.Get(cell.code) is { BlocksMove: false })
+                .Where(cell => cell.code != 'W' && TerrainCatalog.Get(cell.code) is { BlocksMove: false })
                 .Select(cell => (cell.c, cell.r)).ToHashSet();
             Assert.NotEmpty(walkable);
             var start = walkable.First();

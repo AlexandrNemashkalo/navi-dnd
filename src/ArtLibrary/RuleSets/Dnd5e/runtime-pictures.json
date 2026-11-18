@@ -2784,6 +2784,21 @@
       }
     },
     {
+      "id": "4d0dc571b9c982b4e1115d5594128da6713df0c79af30a84154b812cad5093d4",
+      "path": "Runtime/Images/4d0dc571b9c982b4e1115d5594128da6713df0c79af30a84154b812cad5093d4.png",
+      "sha256": "4d0dc571b9c982b4e1115d5594128da6713df0c79af30a84154b812cad5093d4",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:herbalist-kit-shaded-v1",
+      "description": "Open brown leather tool roll holding two tied leafy herbs and an amber vial, with grey mortar and pestle in front; shaded colors and dark outline.",
+      "provenance": {
+        "member": "herbalist-kit-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/herbalist-kit-shaded-v1/original.png"
+      }
+    },
+    {
       "id": "4daf5fdc9dd50ae0875e17d8e7f26daa8486a7346c67069fc20a8411db91ebf8",
       "path": "Runtime/Images/4daf5fdc9dd50ae0875e17d8e7f26daa8486a7346c67069fc20a8411db91ebf8.png",
       "sha256": "4daf5fdc9dd50ae0875e17d8e7f26daa8486a7346c67069fc20a8411db91ebf8",
@@ -4674,6 +4689,16 @@
         "licenseStatus": "not_recorded_in_staged_collection",
         "originalPaletteRecovered": false
       }
+    },
+    {
+      "id": "84d80ac19a6d1706a800b90a0d644d40f396af2b88dedc90a332184e670048e8",
+      "path": "Runtime/Images/84d80ac19a6d1706a800b90a0d644d40f396af2b88dedc90a332184e670048e8.png",
+      "sha256": "84d80ac19a6d1706a800b90a0d644d40f396af2b88dedc90a332184e670048e8",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "dcss/item/misc/misc_stone_old",
+      "description": "Visually inspected angular grey boulder, light upper face and dark lower facets; transparent native 32px sprite.",
+      "provenance": {}
     },
     {
       "id": "850d60a729265bae07cb267c3849f362534d9bef2fa1e32692c82f30c793c61d",
@@ -7284,6 +7309,21 @@
       "sourceAssetId": "dcss/monster/ogre_new",
       "description": "Full creature or multipart creature layer: pale large humanoid with hands at waist.",
       "provenance": {}
+    },
+    {
+      "id": "cb681316006a51a902cac8c137f779ad84ccd4b0493140113bb524c164038fd8",
+      "path": "Runtime/Images/cb681316006a51a902cac8c137f779ad84ccd4b0493140113bb524c164038fd8.png",
+      "sha256": "cb681316006a51a902cac8c137f779ad84ccd4b0493140113bb524c164038fd8",
+      "width": 32,
+      "height": 32,
+      "sourceAssetId": "own-art:cart-shaded-v1",
+      "description": "Complete oak cart in three-quarter view with low plank sideboards, two shafts and iron-rimmed wooden wheels; dark outline and warm shaded wood.",
+      "provenance": {
+        "member": "cart-shaded-v1.png",
+        "sourceKind": "ai_generated",
+        "origin": "Built-in image_gen; explicitly prepared and visually reviewed for NaviDnD.",
+        "sourcePath": "src/ArtLibrary/Sources/own-art/generation-sources/cart-shaded-v1/original.png"
+      }
     },
     {
       "id": "cc3c8602784ee0a1008d6a634d09cab26d0a6074106c747fa6ffb9928cf4d6d4",
@@ -20634,7 +20674,7 @@
         "terrain"
       ],
       "usage": "prop",
-      "imageId": "12eaaf1a31e912811c07de885e12440ea143d75fe97db52fb8852d5fe15a9aab",
+      "imageId": "84d80ac19a6d1706a800b90a0d644d40f396af2b88dedc90a332184e670048e8",
       "match": "visual_representation"
     },
     {
@@ -21554,14 +21594,19 @@
       "key": "curated:prop_priority:cart",
       "names": [
         "cart",
-        "Телега"
+        "Wooden cart",
+        "Handcart",
+        "Телега",
+        "Деревянная телега",
+        "Ручная тележка",
+        "Тележка"
       ],
       "categories": [
         "feature",
         "prop_priority"
       ],
       "usage": "prop",
-      "imageId": "e9c2cec4a25cdc7e5e492959d67e13e1053fec5db462bd2897afaeb04f3406e7",
+      "imageId": "cb681316006a51a902cac8c137f779ad84ccd4b0493140113bb524c164038fd8",
       "match": "visual_representation"
     },
     {
@@ -21978,6 +22023,56 @@
       "usage": "prop",
       "imageId": "950ffa22ddba117970fdc0f4ee4e4ca4876d1088ffbdae7fa9293409f2a78e6a",
       "match": "visual_representation"
+    },
+    {
+      "key": "curated:item:herbalism-kit",
+      "names": [
+        "Herbalism kit",
+        "Herbalist kit",
+        "Herbalist's kit",
+        "Набор травника",
+        "Набор для травничества"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "4d0dc571b9c982b4e1115d5594128da6713df0c79af30a84154b812cad5093d4",
+      "match": "visual_representation"
+    },
+    {
+      "key": "curated:item:travel-satchel",
+      "names": [
+        "Travel satchel",
+        "Travel bag",
+        "Shoulder bag",
+        "Satchel",
+        "Дорожная сума",
+        "Дорожная сумка",
+        "Сума",
+        "Сумка через плечо"
+      ],
+      "categories": [
+        "equipment",
+        "item"
+      ],
+      "usage": "item",
+      "imageId": "e6f29add14cf81fd0de29d586b03c2b63797ead76a62e41c09977bf5cd6e052e",
+      "match": "visual_representation"
+    },
+    {
+      "key": "legacy:prop:handcart",
+      "names": [
+        "Legacy handcart"
+      ],
+      "categories": [
+        "feature",
+        "prop_priority"
+      ],
+      "usage": "prop",
+      "imageId": "e9c2cec4a25cdc7e5e492959d67e13e1053fec5db462bd2897afaeb04f3406e7",
+      "match": "visual_representation"
     }
   ],
   "engineAliases": {
@@ -21994,6 +22089,7 @@
     "delapouite/park-bench": "579ae057e016530045808a08d9f2683aaa1652d684cab8224bf12c437acb99b8",
     "delapouite/high-grass": "be1e4c819f901fcb5d7b11d57d7693755c31c81fb6768d31d021f0d8af2552a3",
     "delapouite/forest": "7904f9ec1411bc57bdb1eafd19873f94e51b4d7b3bb012cda575f2d4118bd644",
+    "delapouite/old-wagon": "cb681316006a51a902cac8c137f779ad84ccd4b0493140113bb524c164038fd8",
     "lorc/incense": "42fe5e050daa3e7e09a03b81bfd8b6698f3e43be601c7e7649211b0de856678f",
     "delapouite/two-coins": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
     "delapouite/coins": "1db5f3c9405021ec6b633294cef86a55a9cfc16a4cdba5676869bde7c6898d09",
@@ -22005,7 +22101,7 @@
     "delapouite/grass": "4abe6001cd9d13f96895c65d49a31b76603ead7211e8e6ded9d3334c284d2447",
     "lorc/oak": "a460cb1f9d355a91869f12cf87c867a05bef2e312aae13cb610dcb0715fbbf4b",
     "lorc/mountains": "a22e2b2e3beef040173ab52113f93577d998652a11dd355982558a7d01632399",
-    "delapouite/stone-stack": "12eaaf1a31e912811c07de885e12440ea143d75fe97db52fb8852d5fe15a9aab",
+    "delapouite/stone-stack": "84d80ac19a6d1706a800b90a0d644d40f396af2b88dedc90a332184e670048e8",
     "delapouite/stone-pile": "a22e2b2e3beef040173ab52113f93577d998652a11dd355982558a7d01632399",
     "lorc/waves": "5193f5526ddc6cfff42759efa2f1c48b3b1c85b8d0477dc6dd4215db35fcb6b6",
     "delapouite/trail": "3acfc826601c053b9792670d9b9dde709873ce20db95b6f45cb00957ec731a54",
@@ -23063,5 +23159,5 @@
     "dcss/player/base/halfling": "halfling",
     "dcss/player/base/draconian": "dragonborn"
   },
-  "revision": "4a1a3fdfaadf73d179f451d4352b60ba707627c2b0146363c2b921bcc2e6aa82"
+  "revision": "6a021b056578a7aaf247256d3764272358a232a3adafaf04a4809fd0788d21b1"
 }

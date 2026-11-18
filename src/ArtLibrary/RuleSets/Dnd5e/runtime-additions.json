@@ -580,6 +580,58 @@
       ],
       "nameRu": "Скамья",
       "engineAliases": []
+    },
+    {
+      "id": "curated:item:herbalism-kit",
+      "category": "equipment",
+      "nameRu": "Набор травника",
+      "names": [
+        "Herbalism kit",
+        "Herbalist kit",
+        "Herbalist's kit",
+        "Набор травника",
+        "Набор для травничества"
+      ]
+    },
+    {
+      "id": "curated:item:travel-satchel",
+      "category": "equipment",
+      "nameRu": "Дорожная сума",
+      "names": [
+        "Travel satchel",
+        "Travel bag",
+        "Shoulder bag",
+        "Satchel",
+        "Дорожная сума",
+        "Дорожная сумка",
+        "Сума",
+        "Сумка через плечо"
+      ]
+    },
+    {
+      "id": "curated:prop_priority:cart",
+      "category": "prop_priority",
+      "nameRu": "Телега",
+      "names": [
+        "cart",
+        "Wooden cart",
+        "Handcart",
+        "Телега",
+        "Деревянная телега",
+        "Ручная тележка",
+        "Тележка"
+      ],
+      "engineAliases": [
+        "delapouite/old-wagon"
+      ]
+    },
+    {
+      "id": "legacy:prop:handcart",
+      "category": "prop_priority",
+      "nameRu": "Прежняя ручная телега",
+      "names": [
+        "Legacy handcart"
+      ]
     }
   ]
 }

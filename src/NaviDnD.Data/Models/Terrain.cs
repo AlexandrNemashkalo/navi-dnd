@@ -36,11 +36,11 @@ public static class TerrainCatalog
         new TerrainKind('T', "Trees", [" ● "], "▟●▙", [112, 78, 55], [30, 43, 26], BlocksMove: true, BlocksSight: true, LegendColor: [146,164,116]),
         new TerrainKind('F', "Thicket", [" ● "], "▟●▙", [112, 78, 55], [30, 43, 26], BlocksMove: true, BlocksSight: true, LegendColor: [146,164,116]),
         new TerrainKind('^', "Rocks", [" ▲ ", "▲ ▲", "^▲^", "▲^ ", " ^▲"], "▲^▲", [134, 126, 116], [72, 68, 64], BlocksMove: true, BlocksSight: true),
-        new TerrainKind('o', "Boulders", [" ● ", " ● ", "●  "], " ● ", [150, 144, 134], [78, 76, 70], BlocksMove: true, Cover: "three-quarters"),
-        new TerrainKind('g', "Scree", [" ∙ ", "∙ ∙", "  ∙", "∙  "], "∙ ∙", [130, 124, 112], [84, 80, 72], StepCostFt: 10),
-        new TerrainKind('s', "Stony ground", ["   ", " · ", "   ", "·  "], " · ", [124, 118, 108], [78, 76, 70]),
+        new TerrainKind('o', "Boulders", ["▗█▙", "▟█▖", "▗▟▙"], "▗█▙", [133, 137, 127], [65, 68, 53], BlocksMove: true, BlocksSight: true, Cover: "three-quarters"),
+        new TerrainKind('g', "Scree", ["˙· ", "∙ ˙", " ·∙", "˙ ∙"], "˙·∙", [112, 113, 99], [65, 68, 53], StepCostFt: 10),
+        new TerrainKind('s', "Stony ground", ["   ", " · ", "   ", "˙  "], " · ", [94, 102, 80], [61, 68, 48]),
         new TerrainKind('~', "Shallow water", [" ~ ", "~ ~", "  ~", "~  "], "~ ~", [104, 146, 176], [48, 74, 96], StepCostFt: 10),
-        new TerrainKind('W', "Deep water", ["≈≈≈", "≈ ≈", " ≈≈", "≈≈ "], "≈≈≈", [82, 122, 162], [30, 50, 80], BlocksMove: true),
+        new TerrainKind('W', "Deep water", ["≈≈≈", "≈ ≈", " ≈≈", "≈≈ "], "≈≈≈", [82, 122, 162], [30, 50, 80], StepCostFt: 10),
         new TerrainKind(':', "Bog", [" ░ ", "░ ░", "  ░", "░  "], "░░░", [96, 104, 66], [52, 58, 40], StepCostFt: 10),
         new TerrainKind('#', "Fence", ["─┼─"], "─┼─", [168, 132, 90], [56, 72, 42], BlocksMove: true, Cover: "half", Join: "─│"),
         new TerrainKind('V', "Well", ["(◦)"], "(◦)", [150, 170, 196], [70, 66, 60], BlocksMove: true, Cover: "half"),
@@ -89,7 +89,7 @@ public static class TerrainCatalog
 
     // The dungeon floor itself (slabs, rough stone) is not included in the legend - it is a background, not a
     // detail. Anything with a noticeable symbol (moss, puddle, bones, cracks, columns...) is signed.
-    public static bool InLegend(TerrainKind kind) => kind.Code is not ('p' or 'q' or 'w');
+    public static bool InLegend(TerrainKind kind) => kind.Code is not ('p' or 'q' or 'w' or '.' or '=');
 
     public static bool IsStair(char code) => code is 'U' or 'D';
 

@@ -45826,12 +45826,12 @@
       "note": "Explicit terrain review. Preserve ground/overlay distinction, map state and style compatibility; not a place-view replacement.",
       "candidates": [
         {
-          "assetId": "dcss/dungeon/boulder",
-          "sha256": "12eaaf1a31e912811c07de885e12440ea143d75fe97db52fb8852d5fe15a9aab",
+          "assetId": "dcss/item/misc/misc_stone_old",
+          "sha256": "84d80ac19a6d1706a800b90a0d644d40f396af2b88dedc90a332184e670048e8",
           "usage": "prop",
-          "reason": "Visually inspected large rounded brown boulder; transparent background remains intact.",
+          "reason": "Visually inspected angular grey boulder, light upper face and dark lower facets; transparent native 32px sprite.",
           "match": "visual_representation",
-          "sourcePriority": 1
+          "sourcePriority": 0
         }
       ]
     },
@@ -65132,17 +65132,16 @@
       "name": "cart",
       "candidates": [
         {
-          "assetId": "village-market-32:handcart",
-          "sha256": "e9c2cec4a25cdc7e5e492959d67e13e1053fec5db462bd2897afaeb04f3406e7",
+          "assetId": "own-art:cart-shaded-v1",
+          "sha256": "cb681316006a51a902cac8c137f779ad84ccd4b0493140113bb524c164038fd8",
           "usage": "prop",
           "match": "visual_representation",
           "sourcePriority": 0,
-          "reason": "Complete wooden handcart with wheels and handles."
+          "reason": "Complete oak cart in three-quarter view with low plank sideboards, two shafts and iron-rimmed wooden wheels; dark outline and warm shaded wood."
         }
       ],
       "selectionPolicy": {
         "mode": "balanced_variants",
-        "seedScope": "world_and_subject",
         "preserveAssignment": true,
         "requiredChecks": [
           "usage",
@@ -65150,7 +65149,7 @@
           "subject_facts"
         ]
       },
-      "note": "Reviewed object shape; magical powers and exact materials remain reference facts."
+      "note": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette."
     },
     {
       "category": "prop_priority",
@@ -69080,6 +69079,78 @@
           "sourcePriority": 0
         }
       ]
+    },
+    {
+      "category": "equipment",
+      "name": "Herbalism kit",
+      "candidates": [
+        {
+          "assetId": "own-art:herbalist-kit-shaded-v1",
+          "sha256": "4d0dc571b9c982b4e1115d5594128da6713df0c79af30a84154b812cad5093d4",
+          "usage": "item",
+          "match": "visual_representation",
+          "sourcePriority": 0,
+          "reason": "Open brown leather tool roll holding two tied leafy herbs and an amber vial, with grey mortar and pestle in front; shaded colors and dark outline."
+        }
+      ],
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette."
+    },
+    {
+      "category": "equipment",
+      "name": "Travel satchel",
+      "candidates": [
+        {
+          "assetId": "prepared-items-native-32-batch2-35-kobold-loot:icon-001",
+          "sha256": "e6f29add14cf81fd0de29d586b03c2b63797ead76a62e41c09977bf5cd6e052e",
+          "usage": "item",
+          "match": "visual_representation",
+          "sourcePriority": 0,
+          "reason": "Isolated object/material icon: tan shoulder bag."
+        }
+      ],
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette."
+    },
+    {
+      "category": "prop_priority",
+      "name": "Legacy handcart",
+      "candidates": [
+        {
+          "assetId": "village-market-32:handcart",
+          "sha256": "e9c2cec4a25cdc7e5e492959d67e13e1053fec5db462bd2897afaeb04f3406e7",
+          "usage": "prop",
+          "match": "visual_representation",
+          "sourcePriority": 0,
+          "reason": "Complete wooden two-wheeled handcart with an upright handle."
+        }
+      ],
+      "selectionPolicy": {
+        "mode": "balanced_variants",
+        "preserveAssignment": true,
+        "requiredChecks": [
+          "usage",
+          "source_hash",
+          "subject_facts"
+        ]
+      },
+      "note": "Inspected at 32x32 and integer enlargement: complete subject, shaded palette and readable silhouette."
     }
   ]
 }

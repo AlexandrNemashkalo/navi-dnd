@@ -53,6 +53,22 @@ class InventoryArtBindingsTests(unittest.TestCase):
         self.assertIn(old, self.images)
         self.assertEqual(['incense-sticks-v3'], self.bindings['legacy:item:incense-sticks-v3']['names'])
 
+    def test_travel_equipment_has_specific_complete_images(self):
+        for key, name, asset in [
+            ('curated:item:herbalism-kit', 'Набор травника', 'own-art:herbalist-kit-shaded-v1'),
+            ('curated:item:travel-satchel', 'Дорожная сума', 'prepared-items-native-32-batch2-35-kobold-loot:icon-001'),
+            ('curated:prop_priority:cart', 'Телега', 'own-art:cart-shaded-v1'),
+        ]:
+            row = self.bindings[key]
+            image = self.images[row['imageId']]
+            self.assertIn(name, row['names'])
+            self.assertEqual(asset, image['sourceAssetId'])
+            self.assertEqual(row['imageId'], hashlib.sha256((LIB/image['path']).read_bytes()).hexdigest())
+        self.assertEqual(self.bindings['curated:prop_priority:cart']['imageId'],
+                         self.runtime['engineAliases']['delapouite/old-wagon'])
+        old = self.bindings['legacy:prop:handcart']['imageId']
+        self.assertEqual('village-market-32:handcart', self.images[old]['sourceAssetId'])
+
 
 if __name__ == '__main__':
     unittest.main()

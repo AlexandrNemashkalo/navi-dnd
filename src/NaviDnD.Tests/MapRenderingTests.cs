@@ -20,6 +20,8 @@ public class MapRenderingTests
     [InlineData("trees", true)]
     [InlineData("world-exits", true)]
     [InlineData("trees", false)]
+    [InlineData("stone-landscape", true)]
+    [InlineData("stone-landscape", false)]
     [InlineData("manor", true)]
     [InlineData("house", true, false, null, 17)]
     [InlineData("manor", true, false, null, 42)]
@@ -74,6 +76,18 @@ public class MapRenderingTests
                 new() { From = [10,1], To = [10,0], IsWorldExit = true, IsEntry = true, IsDoor = true },
                 new() { From = [10,15], To = [10,16], IsWorldExit = true, IsEntry = true, IsDoor = true }
             ];
+        }
+        else if (theme == "stone-landscape")
+        {
+            var cells=Enumerable.Range(0,MapChunk.Rows).Select(_=>new string('.',MapChunk.Cols).ToCharArray()).ToArray();
+            for(int y=3;y<12;y++) for(int x=3;x<17;x++)
+            {
+                double radius=Math.Pow((x-10)/7d,2)+Math.Pow((y-7)/4.5,2);
+                if(radius<1) cells[y][x]=radius>.65?'s':'g';
+            }
+            foreach(var (x,y) in new[]{(5,6),(6,6),(5,7),(6,7),(7,7),(6,8),(7,8),(8,8),
+                (12,6),(13,6),(12,7),(13,7),(14,7),(13,8),(15,5),(4,9)}) cells[y][x]='o';
+            chunk.Terrain=cells.Select(row=>new string(row)).ToList();
         }
         else if (theme == "trees")
         {

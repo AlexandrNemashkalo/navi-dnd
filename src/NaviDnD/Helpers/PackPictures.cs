@@ -13,7 +13,7 @@ public static class PackPictures
         ["lorc/oak"] = "dcss/dungeon/trees/mangrove_1",
         ["delapouite/forest"] = "dcss/dungeon/trees/tree_2_yellow",
         ["lorc/pine-tree"] = "dcss/dungeon/trees/tree_1_red",
-        ["delapouite/stone-stack"] = "dcss/dungeon/boulder",
+        ["delapouite/stone-stack"] = "dcss/item/misc/misc_stone_old",
         ["delapouite/falling-rocks"] = "dcss/dungeon/boulder",
         ["lorc/ribcage"] = "dcss/item/food/bone",
         ["delapouite/carrot"] = "dcss/monster/fungi_plants/plant",
